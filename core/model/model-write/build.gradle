@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Model Write'
+dependencies {
+  api project(':eldritch-horror-core:model:model-read')
+}

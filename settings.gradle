@@ -1,0 +1,127 @@
+rootProject.name = 'eldritch-horror'
+include ':desktop'
+include ':android'
+include ':eldritch-horror-core:view:view-impl'
+include ':eldritch-horror-core:view:view-interface'
+include ':eldritch-horror-core:view:view-provider:view-provider-interface'
+include ':eldritch-horror-core:view:view-provider:view-provider-impl'
+include ':eldritch-horror-core:view:view-provider'
+include ':eldritch-horror-core:view'
+include ':eldritch-horror-core:controller:controller-interface'
+include ':eldritch-horror-core:controller:controller-impl'
+include ':eldritch-horror-core:controller:controller-provider:controller-provider-interface'
+include ':eldritch-horror-core:controller:controller-provider:controller-provider-impl'
+include ':eldritch-horror-core:controller:controller-provider'
+include ':eldritch-horror-core:controller'
+include ':eldritch-horror-core:event-queue:event-queue-read'
+include ':eldritch-horror-core:event-queue:event-queue-write'
+include ':eldritch-horror-core:event-queue:event-queue-impl'
+include ':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-interface'
+include ':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-impl'
+include ':eldritch-horror-core:event-queue:event-queue-provider'
+include ':eldritch-horror-core:event-queue:event-type'
+include ':eldritch-horror-core:event-queue'
+include ':eldritch-horror-core:model:model-read'
+include ':eldritch-horror-core:model:model-write'
+include ':eldritch-horror-core:model:model-impl'
+include ':eldritch-horror-core:model:model-provider:model-provider-interface'
+include ':eldritch-horror-core:model:model-provider:model-provider-impl'
+include ':eldritch-horror-core:model:model-provider'
+include ':eldritch-horror-core:model'
+include ':eldritch-horror-core:event-listener:event-listener-impl'
+include ':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-interface'
+include ':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-impl'
+include ':eldritch-horror-core:event-listener:event-listener-provider'
+include ':eldritch-horror-core:event-listener'
+include ':eldritch-horror-core:service:service-interface'
+include ':eldritch-horror-core:service:service-impl'
+include ':eldritch-horror-core:service:service-provider:service-provider-interface'
+include ':eldritch-horror-core:service:service-provider:service-provider-impl'
+include ':eldritch-horror-core:service:service-provider'
+include ':eldritch-horror-core:service'
+include ':eldritch-horror-core:command-queue:command-queue-interface'
+include ':eldritch-horror-core:command-queue:command-queue-impl'
+include ':eldritch-horror-core:command-queue'
+include ':eldritch-horror-core:action:action-interface'
+include ':eldritch-horror-core:action:action-impl'
+include ':eldritch-horror-core:action:action-provider:action-provider-interface'
+include ':eldritch-horror-core:action:action-provider:action-provider-impl'
+include ':eldritch-horror-core:action:action-provider'
+include ':eldritch-horror-core:action'
+include ':eldritch-horror-core:binder:binder-view-controller'
+include ':eldritch-horror-core:binder:binder-controller-model'
+include ':eldritch-horror-core:binder:binder-event-listener'
+include ':eldritch-horror-core:binder:binder-service'
+include ':eldritch-horror-core:binder:binder-action'
+include ':eldritch-horror-core:binder'
+include ':eldritch-horror-core:initializer'
+include ':eldritch-horror-core:Entry'
+include ':eldritch-horror-core:test:test-service-queue'
+include ':eldritch-horror-core:test'
+include ':eldritch-horror-core:constants'
+include ':eldritch-horror-core:skin-composer'
+include ':eldritch-horror-core'
+include ':java8-features'
+
+project(':eldritch-horror-core:view:view-impl').projectDir = "$rootDir/core/view/view-impl" as File
+project(':eldritch-horror-core:view:view-interface').projectDir = "$rootDir/core/view/view-interface" as File
+project(':eldritch-horror-core:view:view-provider:view-provider-interface').projectDir = "$rootDir/core/view/view-provider/view-provider-interface" as File
+project(':eldritch-horror-core:view:view-provider:view-provider-impl').projectDir = "$rootDir/core/view/view-provider/view-provider-impl" as File
+project(':eldritch-horror-core:view:view-provider').projectDir = "$rootDir/core/view/view-provider" as File
+project(':eldritch-horror-core:view').projectDir = "$rootDir/core/view" as File
+project(':eldritch-horror-core:controller:controller-interface').projectDir = "$rootDir/core/controller/controller-interface" as File
+project(':eldritch-horror-core:controller:controller-impl').projectDir = "$rootDir/core/controller/controller-impl" as File
+project(':eldritch-horror-core:controller:controller-provider:controller-provider-interface').projectDir = "$rootDir/core/controller/controller-provider/controller-provider-interface" as File
+project(':eldritch-horror-core:controller:controller-provider:controller-provider-impl').projectDir = "$rootDir/core/controller/controller-provider/controller-provider-impl" as File
+project(':eldritch-horror-core:controller:controller-provider').projectDir = "$rootDir/core/controller/controller-provider" as File
+project(':eldritch-horror-core:controller').projectDir = "$rootDir/core/controller" as File
+project(':eldritch-horror-core:event-queue:event-queue-read').projectDir = "$rootDir/core/event-queue/event-queue-read" as File
+project(':eldritch-horror-core:event-queue:event-queue-write').projectDir = "$rootDir/core/event-queue/event-queue-write" as File
+project(':eldritch-horror-core:event-queue:event-queue-impl').projectDir = "$rootDir/core/event-queue/event-queue-impl" as File
+project(':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-interface').projectDir = "$rootDir/core/event-queue/event-queue-provider/event-queue-provider-interface" as File
+project(':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-impl').projectDir = "$rootDir/core/event-queue/event-queue-provider/event-queue-provider-impl" as File
+project(':eldritch-horror-core:event-queue:event-queue-provider').projectDir = "$rootDir/core/event-queue/event-queue-provider" as File
+project(':eldritch-horror-core:event-queue:event-type').projectDir = "$rootDir/core/event-type" as File
+project(':eldritch-horror-core:event-queue').projectDir = "$rootDir/core/event-queue" as File
+project(':eldritch-horror-core:model:model-read').projectDir = "$rootDir/core/model/model-read" as File
+project(':eldritch-horror-core:model:model-write').projectDir = "$rootDir/core/model/model-write" as File
+project(':eldritch-horror-core:model:model-impl').projectDir = "$rootDir/core/model/model-impl" as File
+project(':eldritch-horror-core:model:model-provider:model-provider-interface').projectDir = "$rootDir/core/model/model-provider/model-provider-interface" as File
+project(':eldritch-horror-core:model:model-provider:model-provider-impl').projectDir = "$rootDir/core/model/model-provider/model-provider-impl" as File
+project(':eldritch-horror-core:model:model-provider').projectDir = "$rootDir/core/model/model-provider" as File
+project(':eldritch-horror-core:model').projectDir = "$rootDir/core/model" as File
+project(':eldritch-horror-core:event-listener:event-listener-impl').projectDir = "$rootDir/core/event-listener/event-listener-impl" as File
+project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-interface').projectDir = "$rootDir/core/event-listener/event-listener-provider/event-listener-provider-interface" as File
+project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-impl').projectDir = "$rootDir/core/event-listener/event-listener-provider/event-listener-provider-impl" as File
+project(':eldritch-horror-core:event-listener:event-listener-provider').projectDir = "$rootDir/core/event-listener/event-listener-provider" as File
+project(':eldritch-horror-core:event-listener').projectDir = "$rootDir/core/event-listener" as File
+project(':eldritch-horror-core:service:service-interface').projectDir = "$rootDir/core/service/service-interface" as File
+project(':eldritch-horror-core:service:service-impl').projectDir = "$rootDir/core/service/service-impl" as File
+project(':eldritch-horror-core:service:service-provider:service-provider-interface').projectDir = "$rootDir/core/service/service-provider/service-provider-interface" as File
+project(':eldritch-horror-core:service:service-provider:service-provider-impl').projectDir = "$rootDir/core/service/service-provider/service-provider-impl" as File
+project(':eldritch-horror-core:service:service-provider').projectDir = "$rootDir/core/service/service-provider" as File
+project(':eldritch-horror-core:service').projectDir = "$rootDir/core/service" as File
+project(':eldritch-horror-core:command-queue:command-queue-interface').projectDir = "$rootDir/core/command-queue/command-queue-interface" as File
+project(':eldritch-horror-core:command-queue:command-queue-impl').projectDir = "$rootDir/core/command-queue/command-queue-impl" as File
+project(':eldritch-horror-core:command-queue').projectDir = "$rootDir/core/command-queue" as File
+project(':eldritch-horror-core:action:action-interface').projectDir = "$rootDir/core/action/action-interface" as File
+project(':eldritch-horror-core:action:action-impl').projectDir = "$rootDir/core/action/action-impl" as File
+project(':eldritch-horror-core:action:action-provider:action-provider-interface').projectDir = "$rootDir/core/action/action-provider/action-provider-interface" as File
+project(':eldritch-horror-core:action:action-provider:action-provider-impl').projectDir = "$rootDir/core/action/action-provider/action-provider-impl" as File
+project(':eldritch-horror-core:action:action-provider').projectDir = "$rootDir/core/action/action-provider" as File
+project(':eldritch-horror-core:action').projectDir = "$rootDir/core/action" as File
+project(':eldritch-horror-core:binder:binder-view-controller').projectDir = "$rootDir/core/binder/binder-view-controller" as File
+project(':eldritch-horror-core:binder:binder-controller-model').projectDir = "$rootDir/core/binder/binder-controller-model" as File
+project(':eldritch-horror-core:binder:binder-event-listener').projectDir = "$rootDir/core/binder/binder-event-listener" as File
+project(':eldritch-horror-core:binder:binder-service').projectDir = "$rootDir/core/binder/binder-service" as File
+project(':eldritch-horror-core:binder:binder-action').projectDir = "$rootDir/core/binder/binder-action" as File
+project(':eldritch-horror-core:binder').projectDir = "$rootDir/core/binder" as File
+project(':eldritch-horror-core:initializer').projectDir = "$rootDir/core/initializer" as File
+project(':eldritch-horror-core:Entry').projectDir = "$rootDir/core/entry" as File
+project(':eldritch-horror-core:test:test-service-queue').projectDir = "$rootDir/core/test/test-service-queue" as File
+project(':eldritch-horror-core:test').projectDir = "$rootDir/core/test" as File
+project(':eldritch-horror-core:constants').projectDir = "$rootDir/core/constants" as File
+project(':eldritch-horror-core:skin-composer').projectDir = "$rootDir/core/skin-composer" as File
+project(':eldritch-horror-core').projectDir = "$rootDir/core" as File
+project(':java8-features').projectDir = "$rootDir/java8-features" as File
+project(':desktop').projectDir = "$rootDir/desktop" as File

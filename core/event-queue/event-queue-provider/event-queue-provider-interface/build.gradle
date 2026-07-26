@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Event Queue Provider Interface'
+dependencies {
+  api project(':eldritch-horror-core:event-queue:event-queue-write')
+}

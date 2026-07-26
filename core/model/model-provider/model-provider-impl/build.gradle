@@ -1,0 +1,6 @@
+apply plugin: 'java-library'
+description = 'Model Provider Impl'
+dependencies {
+  api project(':eldritch-horror-core:model:model-provider:model-provider-interface')
+  api project(':eldritch-horror-core:model:model-impl')
+}

@@ -1,0 +1,22 @@
+- Zoom on Spy
+# welcome to game
+# Let's see who are we facing
+- Arrow on Ancient one button
+- wait for click on Ancient One
+- wait for closing Ancient One
+# Save world, we must solve 3 mysteries
+- Arrow on Mystery button
+- wait for click on mystery button
+- wait for closing mystery
+# We must to spend 2 Clues on Tunguska
+# Right now we don't have any Clue
+# Lets look at our investigator
+- Arrow on investigator
+- wait for click
+- Arrow on Action
+- wait for close
+# Our spy has special ability, when she doesn't have any clue, she gain one clue
+# Now we are in Action Phase, so we will pick this action
+- wait for gain clue
+# There is next clue, let's move a litte bit closer
+- arrow on travel

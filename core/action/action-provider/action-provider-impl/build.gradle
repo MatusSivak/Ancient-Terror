@@ -1,0 +1,6 @@
+apply plugin: 'java-library'
+description = 'Action Provider Impl'
+dependencies {
+  api project(':eldritch-horror-core:action:action-provider:action-provider-interface')
+  api project(':eldritch-horror-core:action:action-impl')
+}

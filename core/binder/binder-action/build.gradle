@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+description = 'Action Binder'
+dependencies {
+  api project(':eldritch-horror-core:action:action-provider:action-provider-impl')
+  api project(':eldritch-horror-core:service:service-provider:service-provider-interface')
+  api project(':eldritch-horror-core:controller:controller-provider:controller-provider-interface')
+  api project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-interface')
+  api project(':eldritch-horror-core:model:model-provider:model-provider-interface')
+  api project(':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-interface')
+}

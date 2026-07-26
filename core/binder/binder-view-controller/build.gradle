@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+description = 'View-Controller Binder'
+dependencies {
+  api project(':eldritch-horror-core:view:view-provider:view-provider-interface')
+  api project(':eldritch-horror-core:controller:controller-provider:controller-provider-interface')
+  api project(':eldritch-horror-core:model:model-provider:model-provider-interface')
+}

@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'View Interface'
+dependencies {
+  api project(':eldritch-horror-core:constants')
+}

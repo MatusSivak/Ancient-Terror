@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+description = 'Entry'
+dependencies {
+    api group: 'com.badlogicgames.gdx', name: 'gdx', version:'1.9.8'
+  api project(':eldritch-horror-core:initializer')
+  api project(':eldritch-horror-core:skin-composer')
+    api group: 'com.badlogicgames.gdx', name: 'gdx-ai', version:'1.8.1'
+    api 'javax.mail:mail:1.5.0-b01'
+}

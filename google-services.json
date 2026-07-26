@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "38928191662",
+    "firebase_url": "https://ancient-terror-hall-of-fame.firebaseio.com",
+    "project_id": "ancient-terror-hall-of-fame",
+    "storage_bucket": "ancient-terror-hall-of-fame.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38928191662:android:a78b8f697b3cd77b2d9d3f",
+        "android_client_info": {
+          "package_name": "sk.sivak.eldritchhorror.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtb7y_1h6Nly2ZpJE8cKk-LGAnf9bCAOg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

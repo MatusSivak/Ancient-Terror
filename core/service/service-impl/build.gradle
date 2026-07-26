@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+description = 'Service Impl'
+dependencies {
+  api project(':eldritch-horror-core:service:service-interface')
+  api project(':eldritch-horror-core:command-queue:command-queue-interface')
+  api project(':eldritch-horror-core:action:action-provider:action-provider-interface')
+  api 'ch.qos.reload4j:reload4j:1.2.26'
+    testImplementation group: 'junit', name: 'junit', version:'4.12'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version:'4.11.0'
+}

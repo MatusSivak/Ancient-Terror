@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+description = 'Initializer'
+dependencies {
+  api project(':eldritch-horror-core:binder:binder-controller-model')
+  api project(':eldritch-horror-core:binder:binder-view-controller')
+  api project(':eldritch-horror-core:binder:binder-event-listener')
+  api project(':eldritch-horror-core:binder:binder-action')
+  api project(':eldritch-horror-core:binder:binder-service')
+  api project(':eldritch-horror-core:controller:controller-provider:controller-provider-impl')
+  api project(':eldritch-horror-core:command-queue:command-queue-impl')
+  api project(':eldritch-horror-core:view:view-provider:view-provider-impl')
+  api project(':eldritch-horror-core:model:model-provider:model-provider-impl')
+  api project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-impl')
+  api project(':eldritch-horror-core:event-queue:event-queue-provider:event-queue-provider-impl')
+  api project(':eldritch-horror-core:service:service-provider:service-provider-impl')
+  api project(':eldritch-horror-core:action:action-provider:action-provider-impl')
+    testImplementation group: 'junit', name: 'junit', version:'4.12'
+}

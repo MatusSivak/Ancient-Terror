@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+description = 'Command Queue Impl'
+dependencies {
+  api project(':eldritch-horror-core:command-queue:command-queue-interface')
+    testImplementation group: 'junit', name: 'junit', version:'4.12'
+  api 'ch.qos.reload4j:reload4j:1.2.26'
+}

@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+description = 'Action Impl'
+dependencies {
+  api project(':eldritch-horror-core:action:action-interface')
+  api project(':eldritch-horror-core:event-queue:event-queue-write')
+  api project(':eldritch-horror-core:controller:controller-interface')
+  api project(':eldritch-horror-core:model:model-write')
+  api project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-interface')
+    api group: 'junit', name: 'junit', version:'4.12'
+}

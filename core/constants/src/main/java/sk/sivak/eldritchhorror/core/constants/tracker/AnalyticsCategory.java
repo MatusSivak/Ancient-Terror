@@ -1,0 +1,22 @@
+package sk.sivak.eldritchhorror.core.constants.tracker;
+
+public enum AnalyticsCategory {
+    SELECT_INVESTIGATORS,
+    REPLACE_INVESTIGATOR,
+    CARD_UNLOCKED,
+    GAME_ENDED,
+    HUD_BUTTON,
+    DOOM_CHANGED,
+    PLAY_TIME,
+    GAME_STARTED_TIMES,
+    PHASE_DURATION,
+    SOLVED_MYSTERY,
+    ENCOUNTER,
+    SELECT_ACTION,
+    NEW_ROUND,
+    AD_MOB,
+    EXCEPTION, TUTORIAL,
+    RATE_THIS_APP, LOCKED_COUNT,
+    RUMOR_ENDED,
+    GAME_STATE, IN_APP_PURCHASE, DIFFICULTY;
+}

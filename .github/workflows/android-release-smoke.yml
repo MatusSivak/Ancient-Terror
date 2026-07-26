@@ -1,0 +1,30 @@
+name: Android Release Smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  release-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Run release smoke on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          target: google_apis
+          script: |
+            bash android/scripts/release-smoke.sh

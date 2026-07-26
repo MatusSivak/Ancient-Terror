@@ -1,0 +1,8 @@
+.idea/
+.gradle/
+core/initializer/target/
+target/
+*.iml
+build/
+*-logcat.txt
+*-logcat-*.txt

@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Event Listener Provider Impl'
+dependencies {
+  api project(':eldritch-horror-core:event-listener:event-listener-provider:event-listener-provider-interface')
+}

@@ -1,0 +1,54 @@
+package sk.sivak.eldritchhorror.core.eventlistener.encounter.research.shub_niggurath;
+
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationType;
+import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
+import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
+import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
+
+import static sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils.getActiveInvestigatorId;
+
+public class ResearchCity14Encounter extends AbstractShubNiggurathResearchEncounter{
+
+    public ResearchCity14Encounter() {
+        super(14, LocationType.CITY);
+    }
+
+    @Override
+    protected void execute() {
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), this::onNo, this::onYes);
+
+    }
+
+    private void onYes() {
+        if (ServicePlatform.get().getConditionsDeck().canGetConditionId(getActiveInvestigatorId(), ConditionId.DARK_PACT)) {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            ServicePlatform.get().getGameService().gainCondition(ConditionId.DARK_PACT);
+            gainThisClue();
+            ServicePlatform.get().getService().release();
+        } else {
+            TypewriterUtils.confirmInfos("Can't get Dark Pact Condition").subscribe(this::onNo);
+        }
+    }
+
+    private void onNo() {
+        ServicePlatform.get().getEncounterService().typeFlavor(" \n"+getTextBuilder().withFail().withFlavor().build());
+        TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            ServicePlatform.get().getService().hideBackground();
+
+            for (MonsterInfo monster : ServicePlatform.get().getMonsterCup().getMonsters()) {
+                if (monster.getCurrentHealth() < monster.getToughness()) {
+                    ServicePlatform.get().getService().moveCameraToLocation(monster.getCurrentLocation());
+                    ServicePlatform.get().getMonsterService().restoreHealth(monster, monster.getToughness()-monster.getCurrentHealth(), false, false);
+                }
+            }
+
+            ServicePlatform.get().getService().release();
+        });
+    }
+}

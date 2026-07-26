@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'View Provider Interface'
+dependencies {
+  api project(':eldritch-horror-core:view:view-impl')
+}

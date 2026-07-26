@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Controller Provider Impl'
+dependencies {
+  api project(':eldritch-horror-core:controller:controller-provider:controller-provider-interface')
+}

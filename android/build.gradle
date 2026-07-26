@@ -1,0 +1,205 @@
+def propOrDefault = { String key, String defaultValue ->
+    if (project.hasProperty(key) && project.property(key) != null) {
+        def value = project.property(key).toString().trim()
+        if (!value.isEmpty()) {
+            return value
+        }
+    }
+    return defaultValue
+}
+
+def quoteString = { String value ->
+    return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+}
+
+def testAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
+def testInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"
+def testRewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"
+def useTestAdMobIds = propOrDefault("USE_TEST_ADMOB_IDS", "false").toBoolean()
+def resolvedAdMobAppId = useTestAdMobIds ? testAdMobAppId : propOrDefault("ADMOB_APP_ID", testAdMobAppId)
+def resolvedInterstitialAdUnitId = useTestAdMobIds ? testInterstitialAdUnitId : propOrDefault("ADMOB_INTERSTITIAL_AD_UNIT_ID", testInterstitialAdUnitId)
+def resolvedRewardedAdUnitId = useTestAdMobIds ? testRewardedAdUnitId : propOrDefault("ADMOB_REWARDED_AD_UNIT_ID", testRewardedAdUnitId)
+def resolvedFirebaseApiKey = propOrDefault("FIREBASE_API_KEY", "")
+def resolvedFirebaseAppId = propOrDefault("FIREBASE_APP_ID", "")
+def resolvedFirebaseProjectId = propOrDefault("FIREBASE_PROJECT_ID", "")
+def resolvedFirebaseGcmSenderId = propOrDefault("FIREBASE_GCM_SENDER_ID", "")
+
+tasks.register("verifyReleaseAdMobConfig") {
+    doLast {
+        if (useTestAdMobIds) {
+            throw new GradleException("Release build blocked: USE_TEST_ADMOB_IDS must be false.")
+        }
+
+        List<String> invalidProperties = []
+        if (resolvedAdMobAppId == testAdMobAppId) {
+            invalidProperties.add("ADMOB_APP_ID")
+        }
+        if (resolvedInterstitialAdUnitId == testInterstitialAdUnitId) {
+            invalidProperties.add("ADMOB_INTERSTITIAL_AD_UNIT_ID")
+        }
+        if (resolvedRewardedAdUnitId == testRewardedAdUnitId) {
+            invalidProperties.add("ADMOB_REWARDED_AD_UNIT_ID")
+        }
+
+        if (!invalidProperties.isEmpty()) {
+            throw new GradleException("Release build blocked: configure production AdMob IDs for " + invalidProperties.join(", ") + ".")
+        }
+    }
+}
+
+tasks.register("verifyReleaseFirebaseConfig") {
+    doLast {
+        List<String> missingProperties = []
+        if (resolvedFirebaseApiKey.isEmpty()) {
+            missingProperties.add("FIREBASE_API_KEY")
+        }
+        if (resolvedFirebaseAppId.isEmpty()) {
+            missingProperties.add("FIREBASE_APP_ID")
+        }
+        if (resolvedFirebaseProjectId.isEmpty()) {
+            missingProperties.add("FIREBASE_PROJECT_ID")
+        }
+        if (resolvedFirebaseGcmSenderId.isEmpty()) {
+            missingProperties.add("FIREBASE_GCM_SENDER_ID")
+        }
+        if (!missingProperties.isEmpty()) {
+            throw new GradleException("Release build blocked: configure Firebase values for " + missingProperties.join(", ") + ".")
+        }
+    }
+}
+
+android {
+    namespace "sk.sivak.eldritchhorror.android"
+    compileSdkVersion 35
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        abortOnError true
+        checkReleaseBuilds true
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['../assets']
+            jniLibs.srcDirs = ['libs']
+        }
+
+    }
+    packaging {
+        resources {
+            excludes += ['META-INF/robovm/ios/robovm.xml', 'META-INF/DEPENDENCIES']
+        }
+    }
+    defaultConfig {
+        applicationId "sk.sivak.eldritchhorror.android"
+        minSdkVersion 26
+        multiDexEnabled true
+        targetSdkVersion 35
+        versionCode 1717
+        versionName "1.7.17"
+        manifestPlaceholders = [
+                admobAppId: resolvedAdMobAppId
+        ]
+        buildConfigField "String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", quoteString(resolvedInterstitialAdUnitId)
+        buildConfigField "String", "ADMOB_REWARDED_AD_UNIT_ID", quoteString(resolvedRewardedAdUnitId)
+        buildConfigField "String", "FIREBASE_API_KEY", quoteString(resolvedFirebaseApiKey)
+        buildConfigField "String", "FIREBASE_APP_ID", quoteString(resolvedFirebaseAppId)
+        buildConfigField "String", "FIREBASE_PROJECT_ID", quoteString(resolvedFirebaseProjectId)
+        buildConfigField "String", "FIREBASE_GCM_SENDER_ID", quoteString(resolvedFirebaseGcmSenderId)
+        resValue "string", "google_app_id", resolvedFirebaseAppId
+        resValue "string", "google_api_key", resolvedFirebaseApiKey
+        resValue "string", "gcm_defaultSenderId", resolvedFirebaseGcmSenderId
+        resValue "string", "project_id", resolvedFirebaseProjectId
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders = [
+                    admobAppId: resolvedAdMobAppId
+            ]
+            buildConfigField "String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", quoteString(resolvedInterstitialAdUnitId)
+            buildConfigField "String", "ADMOB_REWARDED_AD_UNIT_ID", quoteString(resolvedRewardedAdUnitId)
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
+        }
+    }
+}
+
+
+// called every time gradle gets executed, takes the native dependencies of
+// the natives configuration, and extracts them to the proper libs/ folders
+// so they get packed with the APK.
+task copyAndroidNatives() { 
+    doLast {
+        file("libs/armeabi/").mkdirs();
+        file("libs/armeabi-v7a/").mkdirs();
+        file("libs/arm64-v8a/").mkdirs();
+        file("libs/x86_64/").mkdirs();
+        file("libs/x86/").mkdirs();
+
+        configurations.natives.files.each { jar ->
+            def outputDir = null
+            if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
+            if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
+            if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
+            if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
+            if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+            if(outputDir != null) {
+                copy {
+                    from zipTree(jar)
+                    into outputDir
+                    include "*.so"
+                }
+            }
+        }
+    }
+}
+
+task run(type: Exec) {
+    def path
+    def localProperties = project.file("../local.properties")
+    if (localProperties.exists()) {
+        Properties properties = new Properties()
+        localProperties.withInputStream { instr ->
+            properties.load(instr)
+        }
+        def sdkDir = properties.getProperty('sdk.dir')
+        if (sdkDir) {
+            path = sdkDir
+        } else {
+            path = "$System.env.ANDROID_HOME"
+        }
+    } else {
+        path = "$System.env.ANDROID_HOME"
+    }
+
+    def adb = path + "/platform-tools/adb"
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'sk.sivak.eldritchhorror.android/sk.sivak.eldritchhorror.android.GameActivity'
+}
+
+afterEvaluate {
+    ["assembleRelease", "bundleRelease"].each { taskName ->
+        def releaseTask = tasks.findByName(taskName)
+        if (releaseTask != null) {
+            tasks.named(taskName).configure {
+                dependsOn(tasks.named("verifyReleaseAdMobConfig"))
+                dependsOn(tasks.named("verifyReleaseFirebaseConfig"))
+            }
+        }
+    }
+}

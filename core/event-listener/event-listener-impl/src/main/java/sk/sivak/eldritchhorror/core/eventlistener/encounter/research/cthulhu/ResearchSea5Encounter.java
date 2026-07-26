@@ -1,0 +1,29 @@
+package sk.sivak.eldritchhorror.core.eventlistener.encounter.research.cthulhu;
+
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
+import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.location.LocationType;
+import sk.sivak.eldritchhorror.core.constants.monster.NonEpicMonsterId;
+import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
+
+public class ResearchSea5Encounter extends AbstractCthulhuResearchEncounter {
+
+    public ResearchSea5Encounter() {
+        super(5, LocationType.SEA);
+    }
+
+    @Override
+    protected void execute() {
+        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
+                this::gainThisClue,
+                () -> {
+                    ServicePlatform.get().getMonsterService().ambush(NonEpicMonsterId.STAR_SPAWN).subscribe(combatData -> {
+                        if (!combatData.getMonsterInfo().isAlive()) {
+                            ServicePlatform.get().getDoomOmenService().retreatDoom();
+                        }
+                    });
+                }
+        ).withResearchFlavor().execute();
+    }
+}

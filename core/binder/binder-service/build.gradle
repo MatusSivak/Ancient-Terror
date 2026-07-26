@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Service Binder'
+dependencies {
+  api project(':eldritch-horror-core:service:service-provider:service-provider-interface')
+}

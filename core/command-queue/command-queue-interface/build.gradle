@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+description = 'Command Queue Interface'
+
+dependencies {
+    api project(":java8-features")
+    api 'io.reactivex:rxjava:1.3.0'
+}

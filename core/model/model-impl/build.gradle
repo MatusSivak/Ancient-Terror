@@ -1,0 +1,6 @@
+apply plugin: 'java-library'
+description = 'Model Impl'
+dependencies {
+  api project(':eldritch-horror-core:model:model-write')
+  api 'ch.qos.reload4j:reload4j:1.2.26'
+}

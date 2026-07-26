@@ -1,0 +1,59 @@
+gwt {
+    gwtVersion='2.8.0' // Should match the gwt version used for building the gwt backend
+    maxHeapSize="1G" // Default 256m is not enough for gwt compiler. GWT is HUNGRY
+    minHeapSize="1G"
+
+    src = files(file("src/")) // Needs to be in front of "modules" below.
+    modules 'sk.sivak.christmaslights.controller.GdxDefinition'
+    devModules 'sk.sivak.christmaslights.controller.GdxDefinitionSuperdev'
+    project.webAppDirName = 'webapp'
+
+    compiler {
+        strict = true;
+        disableCastChecking = true;
+    }
+}
+
+import org.wisepersist.gradle.plugins.gwt.GwtSuperDev
+
+task superDev (type: GwtSuperDev) {
+    doFirst {
+        gwt.modules = gwt.devModules
+    }
+}
+
+
+task dist(dependsOn: [clean, compileGwt]) {
+    doLast {
+        file("build/dist").mkdirs()
+        copy {
+            from "build/gwt/out"
+            into "build/dist"
+        }
+        copy {
+            from "webapp"
+            into "build/dist"
+            }
+        copy {
+            from "war"
+            into "build/dist"
+        }
+    }
+}
+
+task addSource {
+    doLast {
+        sourceSets.main.compileClasspath += files(project(':eldritch-horror-core:Entry').sourceSets.main.allJava.srcDirs)
+    }
+}
+
+tasks.compileGwt.dependsOn(addSource)
+tasks.draftCompileGwt.dependsOn(addSource)
+
+sourceCompatibility = 1.8
+sourceSets.main.java.srcDirs = [ "src/" ]
+
+
+eclipse.project {
+    name = appName + "-html"
+}

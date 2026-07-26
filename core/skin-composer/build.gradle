@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Skin Composer'
+dependencies {
+    api group: 'com.badlogicgames.gdx', name: 'gdx', version:'1.9.8'
+}

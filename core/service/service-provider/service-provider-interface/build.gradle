@@ -1,0 +1,5 @@
+apply plugin: 'java-library'
+description = 'Service Provider Interface'
+dependencies {
+  api project(':eldritch-horror-core:service:service-impl')
+}

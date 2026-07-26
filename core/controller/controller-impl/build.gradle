@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+description = 'Controller Impl'
+dependencies {
+  api project(':eldritch-horror-core:controller:controller-interface')
+  api project(':eldritch-horror-core:view:view-interface')
+  api project(':eldritch-horror-core:model:model-read')
+}
