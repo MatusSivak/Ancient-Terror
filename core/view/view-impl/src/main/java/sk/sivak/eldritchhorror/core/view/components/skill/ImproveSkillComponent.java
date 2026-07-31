@@ -107,20 +107,38 @@ public class ImproveSkillComponent extends VisTable {
     }
 
     private class ImproveSkillTable extends StatsTable {
+        private int statIndex = 0;
 
         protected void addStatPair(Label label, Label value) {
             add(label).align(Align.right).padRight(5).padBottom(5);
             add(value).align(Align.left).width(65).padBottom(5);
 
-            String skillName = label.getText().toString().split(":")[0];
-            if (onlyAvailableSkill == null || onlyAvailableSkill.prettyString().equals(skillName)) {
-                ImageButton imageButton = createPlusButton(value, skillName);
+            Stat stat = resolveStatByIndex(statIndex++);
+            if (onlyAvailableSkill == null || onlyAvailableSkill == stat) {
+                ImageButton imageButton = createPlusButton(value, stat);
                 add(imageButton).align(Align.left).padLeft(5).width(50).height(50).padBottom(5);
                 labelImageButtonMap.put(value, imageButton);
             } else {
                 add().padLeft(5).size(50).padBottom(5);
             }
             row();
+        }
+
+        private Stat resolveStatByIndex(int index) {
+            switch (index) {
+                case 0:
+                    return Stat.LORE;
+                case 1:
+                    return Stat.INFLUENCE;
+                case 2:
+                    return Stat.OBSERVATION;
+                case 3:
+                    return Stat.STRENGTH;
+                case 4:
+                    return Stat.WILL;
+                default:
+                    throw new IllegalStateException("Unexpected stat index: " + index);
+            }
         }
 
         @Override
@@ -132,7 +150,7 @@ public class ImproveSkillComponent extends VisTable {
 
         }
 
-        private ImageButton createPlusButton(Label value, String skillName) {
+        private ImageButton createPlusButton(Label value, Stat stat) {
             ImageButton imageButton = new ImageButton(
                     CustomAssetManager.getTextureRegionDrawable("icon/plus_normal.png"),
                     CustomAssetManager.getTextureRegionDrawable("icon/plus_checked.png"),
@@ -159,7 +177,7 @@ public class ImproveSkillComponent extends VisTable {
                                         Actions.rotateTo(90, 0.25f),
                                         Actions.scaleTo(1, 1, 0.25f* remainingScale/0.1f)
                                 ),
-                                Actions.run(() -> showLight(buttonPosition, value, skillName)),
+                                Actions.run(() -> showLight(buttonPosition, value, stat)),
                                 Actions.scaleTo(0,0,0.25f),
                                 Actions.run(button::remove)
                         ));
@@ -176,7 +194,7 @@ public class ImproveSkillComponent extends VisTable {
         }
     }
 
-    private void showLight(Vector2 position, Label value, String skillName) {
+    private void showLight(Vector2 position, Label value, Stat stat) {
         Image image = new Image(CustomAssetManager.getTexture("icon/light.png"));
         image.setSize(280,280);
         image.setOrigin(140,140);
@@ -199,7 +217,7 @@ public class ImproveSkillComponent extends VisTable {
                 ),
                 Actions.run(() -> {
                     hide();
-                    onSub.onSuccess(Stat.valueOf(skillName.toUpperCase()));
+                    onSub.onSuccess(stat);
                 })
         )));
     }

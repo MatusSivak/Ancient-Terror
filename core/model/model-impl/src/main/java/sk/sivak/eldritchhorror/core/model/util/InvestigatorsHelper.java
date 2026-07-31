@@ -88,8 +88,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(6);
         investigatorInfo.setLocationId(LocationId.BUENOS_AIRES);
         investigatorInfo.setStats(2, 2, 3, 3, 3);
-        investigatorInfo.setActionText("Test Influence. If you pass, gain 1 Ally Asset of your choice from the reserve or the discard pile");
-        investigatorInfo.setAbilityText("If you are on a Wilderness space, investigators on your space roll 1 additional die when resolving tests.");
+        investigatorInfo.setActionText("investigator.special.the_expedition_leader.action");
+        investigatorInfo.setAbilityText("investigator.special.the_expedition_leader.ability");
         investigatorInfo.setQuote("Keep moving.\nYou can die on your own time.");
         return investigatorInfo;
     }
@@ -102,8 +102,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setLocationId(SPACE_6);
         investigatorInfo.setStats(3, 3, 2, 2, 3);
-        investigatorInfo.setActionText("Each investigator on your space recovers 1 sanity.");
-        investigatorInfo.setAbilityText("Investigators on your space roll 1 additional die when resolving tests during Combat Encounters.");
+        investigatorInfo.setActionText("investigator.special.the_musician.action");
+        investigatorInfo.setAbilityText("investigator.special.the_musician.ability");
         investigatorInfo.setQuote("No, not quiet at all.\nDead folks get downright rambunctious\nwhen I play my horn.");
         return investigatorInfo;
     }
@@ -116,8 +116,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(6);
         investigatorInfo.setLocationId(LocationId.SHANGHAI);
         investigatorInfo.setStats(2, 2, 2, 4, 3);
-        investigatorInfo.setActionText("Spend any number of Health or Sanity, then recover an equal number of Health or Sanity.");
-        investigatorInfo.setAbilityText("When you improve a skill, you may immediately improve that skill again.");
+        investigatorInfo.setActionText("investigator.special.the_martial_artist.action");
+        investigatorInfo.setAbilityText("investigator.special.the_martial_artist.ability");
         investigatorInfo.setQuote("I have been preparing to confront this evil\nfor my entire life.\nMy focus must be absolute.");
         return investigatorInfo;
     }
@@ -130,8 +130,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setLocationId(LocationId.SPACE_1);
         investigatorInfo.setStats(2, 3, 3, 3, 2);
-        investigatorInfo.setActionText("Move 1 Monster of your choice with toughness 3 or less from an adjacent space to your space.");
-        investigatorInfo.setAbilityText("During the Encounter Phase, other investigators on your space may choose an encounter as if there are no Monsters on your space.");
+        investigatorInfo.setActionText("investigator.special.the_rookie_cop.action");
+        investigatorInfo.setAbilityText("investigator.special.the_rookie_cop.ability");
         investigatorInfo.setQuote("I took an oath to enforce the law.\nThat's what I'm doing.");
         return investigatorInfo;
     }
@@ -144,8 +144,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(6);
         investigatorInfo.setLocationId(LocationId.SPACE_5);
         investigatorInfo.setStats(2, 3, 3, 2, 3);
-        investigatorInfo.setActionText("You and/or another investigator on your space\nmay move one space along a Ship or Train path.");
-        investigatorInfo.setAbilityText("Effects cannot cause you to discard your\nItem, Trinket, or Ally possessions unless you choose to.");
+        investigatorInfo.setActionText("investigator.special.the_bootlegger.action");
+        investigatorInfo.setAbilityText("investigator.special.the_bootlegger.ability");
         investigatorInfo.setQuote("Never lose track of the exit\nor the merchandise.");
         return investigatorInfo;
     }
@@ -158,9 +158,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(4);
         investigatorInfo.setLocationId(LocationId.ARKHAM);
         investigatorInfo.setStats(1, 3, 2, 4, 3);
-        investigatorInfo.setActionText("Gain one Asset of your choice with value 1 from the reserve.\n" +
-                "Or discard one card from the reserve and perform additional action.");
-        investigatorInfo.setAbilityText("If an investigator on your space spends a Focus to reroll a die,\nhe may reroll up to 2 dice instead.");
+        investigatorInfo.setActionText("investigator.special.the_handyman.action");
+        investigatorInfo.setAbilityText("investigator.special.the_handyman.ability");
         investigatorInfo.setQuote("It's nothing a good plan\nand some hard work can't fix.");
         return investigatorInfo;
     }
@@ -173,8 +172,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(7);
         investigatorInfo.setLocationId(LocationId.SYDNEY);
         investigatorInfo.setStats(3, 2, 3, 1, 4);
-        investigatorInfo.setActionText("You may spend one Clue and one Focus\nto improve one skill of your choice.");
-        investigatorInfo.setAbilityText("When you close a Gate during an Other World Encounter,\ngain one Clue and one Focus.");
+        investigatorInfo.setActionText("investigator.special.the_violinist.action");
+        investigatorInfo.setAbilityText("investigator.special.the_violinist.ability");
         investigatorInfo.setQuote("When I play the violin,\nthe music echoes in other worlds.");
         return investigatorInfo;
     }
@@ -187,9 +186,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setLocationId(LocationId.LONDON);
         investigatorInfo.setStats(4, 3, 2, 2, 2);
-        investigatorInfo.setActionText("Test Lore-1. If you pass, gain one Spell.");
-        investigatorInfo.setAbilityText("You may spend one Health to roll two additional dice\n" +
-                "when resolving a Lore test as part of a Spell effect.");
+        investigatorInfo.setActionText("investigator.special.the_waitress.action");
+        investigatorInfo.setAbilityText("investigator.special.the_waitress.ability");
         investigatorInfo.setQuote("I remember another life,\none of sorcery and conquest.");
         return investigatorInfo;
     }
@@ -202,9 +200,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setLocationId(LocationId.SPACE_7);
         investigatorInfo.setStats(4, 2, 3, 3, 1);
-        investigatorInfo.setActionText("If there is a Cultist Monster on your space, " +
-                "discard all Monsters on your space or move the Cultist Monster to any other space.");
-        investigatorInfo.setAbilityText("Reduce the horror of Monsters you encounter to 1.");
+        investigatorInfo.setActionText("investigator.special.the_redeemed_cultist.action");
+        investigatorInfo.setAbilityText("investigator.special.the_redeemed_cultist.ability");
         investigatorInfo.setQuote("The Lodge is not as innocent as they pretend.\n" +
                 "I have learned that nothing is ever as it seems,\nmyself included.");
         return investigatorInfo;
@@ -218,10 +215,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(7);
         investigatorInfo.setLocationId(LocationId.TOKYO);
         investigatorInfo.setStats(2, 4, 2, 2, 3);
-        investigatorInfo.setActionText("Spend any number of Skill Improvements. " +
-                "Then improve 1 Skill of your choice for each Improvement spent.");
-        investigatorInfo.setAbilityText("Once per round, an investigator on your space may " +
-                "roll 1 additional die when resolving a test.");
+        investigatorInfo.setActionText("investigator.special.the_actress.action");
+        investigatorInfo.setAbilityText("investigator.special.the_actress.ability");
         investigatorInfo.setQuote("I've played so many roles.\n" +
                 "Madness is to be expected.");
         return investigatorInfo;
@@ -235,10 +230,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(7);
         investigatorInfo.setLocationId(LocationId.SPACE_15);
         investigatorInfo.setStats(3, 2, 2, 2, 4);
-        investigatorInfo.setActionText("Look at the top 2 Gates in the Gate stack.\n" +
-                "Put 1 Gate on the top of the Gate stack, and the other on the bottom.");
-        investigatorInfo.setAbilityText("When you close a Gate during an Other World Encounter,\n" +
-                "you may move to any space containing a Clue or a Gate.");
+        investigatorInfo.setActionText("investigator.special.the_shaman.action");
+        investigatorInfo.setAbilityText("investigator.special.the_shaman.ability");
         investigatorInfo.setQuote("I will journey to the lands beyond.\nI do not fear them.");
         return investigatorInfo;
     }
@@ -251,8 +244,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setLocationId(SPACE_16);
         investigatorInfo.setStats(1, 3, 4, 3, 2);
-        investigatorInfo.setActionText("If you do not have any Clues, gain 1 Clue.");
-        investigatorInfo.setAbilityText("If an investigator on your space spends a Clue to reroll a die, he may reroll up to 2 dice instead.");
+        investigatorInfo.setActionText("investigator.special.the_spy.action");
+        investigatorInfo.setAbilityText("investigator.special.the_spy.ability");
         investigatorInfo.setQuote("We lie all the time.\nBut the truth is in there.\nYou just have to know how to decode people.");
         return investigatorInfo;
     }
@@ -265,8 +258,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(7);
         investigatorInfo.setLocationId(LocationId.ARKHAM);
         investigatorInfo.setStats(3, 1, 3, 2, 4);
-        investigatorInfo.setActionText("Spend 2 Clues to discard 1 Monster on a space containing a Gate.");
-        investigatorInfo.setAbilityText("Once per round, you may spend 1 Sanity in place of spending 1 Clue.");
+        investigatorInfo.setActionText("investigator.special.the_astronomer.action");
+        investigatorInfo.setAbilityText("investigator.special.the_astronomer.ability");
         investigatorInfo.setQuote("Let them call me a crackpot!\nSomething is happening to the stars,\nand I am not imagining it.");
         return investigatorInfo;
     }
@@ -279,8 +272,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(6);
         investigatorInfo.setLocationId(LocationId.SPACE_20);
         investigatorInfo.setStats(3, 4, 2, 2, 2);
-        investigatorInfo.setActionText("Perform an action you have already performed this round.");
-        investigatorInfo.setAbilityText("If you would spend or lose Sanity as part of a Spell effect, you may spend or lose 1 fewer Sanity as part of that effect.");
+        investigatorInfo.setActionText("investigator.special.the_entertainer.action");
+        investigatorInfo.setAbilityText("investigator.special.the_entertainer.ability");
         investigatorInfo.setQuote("I used to sing as grand-mere made\npotions and charms.");
         return investigatorInfo;
     }
@@ -293,8 +286,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(4);
         investigatorInfo.setLocationId(LocationId.SPACE_14);
         investigatorInfo.setStats(1, 2, 2, 4, 4);
-        investigatorInfo.setActionText("You and 1 Monster on your space each lose 1 Health.");
-        investigatorInfo.setAbilityText("You cannot become Delayed or gain a Detained Condition unless you choose to.");
+        investigatorInfo.setActionText("investigator.special.the_soldier.action");
+        investigatorInfo.setAbilityText("investigator.special.the_soldier.ability");
         investigatorInfo.setQuote("I'm walking out that door,\nand I'm taking this book.\nAnyone who wants to stop me\nis welcome to try.");
         return investigatorInfo;
     }
@@ -307,8 +300,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxSanity(4);
         investigatorInfo.setLocationId(LocationId.SYDNEY);
         investigatorInfo.setStats(1, 3, 3, 3, 3);
-        investigatorInfo.setActionText("Move 1 space along a Ship path, then perform 1 additional action.");
-        investigatorInfo.setAbilityText("If you are on a Sea space, investigators on your space roll 1 additional die when resolving tests.");
+        investigatorInfo.setActionText("investigator.special.the_sailor.action");
+        investigatorInfo.setAbilityText("investigator.special.the_sailor.ability");
         investigatorInfo.setQuote("Leave your fears on the docks, lads.\nI'll not carry that cargo.\nThe wind is up! Full sail!");
         return investigatorInfo;
     }
@@ -321,8 +314,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxHealth(4);
         investigatorInfo.setMaxSanity(8);
         investigatorInfo.setStats(2, 4, 3, 2, 2);
-        investigatorInfo.setActionText("Another investigator of your choice may immediately perform 1 additional action.");
-        investigatorInfo.setAbilityText("When you perform an Acquire Assets action, you may allow other investigators to gain any cards you purchase.");
+        investigatorInfo.setActionText("investigator.special.the_politician.action");
+        investigatorInfo.setAbilityText("investigator.special.the_politician.ability");
         investigatorInfo.setQuote("It can be arranged.\nIt's just a matter of acceptable terms.");
         return investigatorInfo;
     }
@@ -335,9 +328,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxHealth(4);
         investigatorInfo.setMaxSanity(8);
         investigatorInfo.setStats(4, 2, 3, 1, 3);
-        investigatorInfo.setActionText("You may trade any number of Clues with an investigator on any space.");
-        investigatorInfo.setAbilityText("Once per round, when another investigator gains a non-Common Condition, " +
-                "you may look at the back of that card and gain 1 Clue.");
+        investigatorInfo.setActionText("investigator.special.the_psychic.action");
+        investigatorInfo.setAbilityText("investigator.special.the_psychic.ability");
         investigatorInfo.setQuote("The visions are a warning.\nThe future can be rewritten.");
         return investigatorInfo;
     }
@@ -350,8 +342,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setMaxHealth(6);
         investigatorInfo.setMaxSanity(6);
         investigatorInfo.setStats(2, 1, 3, 4, 3);
-        investigatorInfo.setActionText("You may discard 1 Item or Trinket Asset to gain 1 Item or Trinket of your choice from the reserve with value up to +1 of the discarded Asset.");
-        investigatorInfo.setAbilityText("Whenever you roll a 1 during a test, you may reroll that die.");
+        investigatorInfo.setActionText("investigator.special.the_ex_convict.action");
+        investigatorInfo.setAbilityText("investigator.special.the_ex_convict.ability");
         investigatorInfo.setQuote("I didn't get out of the joint\njust to watch the world end.");
         return investigatorInfo;
     }
@@ -364,8 +356,8 @@ public class InvestigatorsHelper {
         investigatorInfo.setLocationId(LocationId.SPACE_7);
         investigatorInfo.setMaxSanity(5);
         investigatorInfo.setStats(2, 2, 4, 3, 2);
-        investigatorInfo.setActionText("Test Influence. If you pass, you may spend up to 2 Focus to gain 1 Clue for each Focus spent.");
-        investigatorInfo.setAbilityText("When you defeat a Monster during a Combat Encounter, gain 1 Focus.");
+        investigatorInfo.setActionText("investigator.special.the_bounty_hunter.action");
+        investigatorInfo.setAbilityText("investigator.special.the_bounty_hunter.ability");
         investigatorInfo.setQuote("When I find the beast,\nI'll trap it or put it down for good.");
         return investigatorInfo;
     }

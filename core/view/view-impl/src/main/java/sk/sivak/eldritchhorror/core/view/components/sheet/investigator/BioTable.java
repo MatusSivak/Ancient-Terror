@@ -10,8 +10,11 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 
+import java.util.Locale;
+
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class BioTable extends VisTable {
 
@@ -23,9 +26,9 @@ public class BioTable extends VisTable {
     public BioTable() {
         pad(5);
 
-        Label photoLabel = createLabel("Photo: ");
-        Label nameLabel = createLabel("Name: ");
-        Label professionLabel = createLabel("Profession: ");
+        Label photoLabel = createLabel(get("investigator.label.photo"));
+        Label nameLabel = createLabel(get("investigator.label.name"));
+        Label professionLabel = createLabel(get("investigator.label.profession"));
 
         photo = createPhoto();
         nameValue = createValue();
@@ -54,10 +57,22 @@ public class BioTable extends VisTable {
 
     public void init(BioTableData data) {
         nameValue.setText(data.getName());
-        professionValue.setText(data.getInvestigatorId().toString());
+        professionValue.setText(resolveLocalizedText(
+                "investigator.profession." + data.getInvestigatorId().name().toLowerCase(Locale.ENGLISH),
+                data.getInvestigatorId().toString()
+        ));
         photo.setDrawable(CustomAssetManager.getInvestigatorDrawable(data.getInvestigatorId()));
 
         pack();
+    }
+
+    private String resolveLocalizedText(String key, String fallback) {
+        String localized = get(key);
+        String missingKey = "!" + key + "!";
+        if (missingKey.equals(localized)) {
+            return fallback;
+        }
+        return localized;
     }
 
     private Label createLabel(String text) {

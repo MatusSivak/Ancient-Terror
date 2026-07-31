@@ -19,6 +19,8 @@ public class GameActivity extends AndroidApplication {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Prevent Log4j auto-property configuration on Android (requires java.beans).
+        System.setProperty("log4j.defaultInitOverride", "true");
         super.onCreate(savedInstanceState);
 
         game = new Game();

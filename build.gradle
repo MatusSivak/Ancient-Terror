@@ -41,6 +41,15 @@ allprojects  {
   }
 }
 
+subprojects {
+  plugins.withId('java') {
+    tasks.withType(JavaCompile).configureEach {
+      // Keep bytecode compatible with Android dexing even when using newer JDKs.
+      options.release = 8
+    }
+  }
+}
+
 
 
 project(":desktop") {

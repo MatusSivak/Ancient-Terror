@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SpecialTable extends VisTable {
 
@@ -17,8 +18,8 @@ public class SpecialTable extends VisTable {
     public SpecialTable() {
         pad(5);
 
-        Label actionLabel = createLabel("Action: ");
-        Label abilityLabel = createLabel("Ability: ");
+        Label actionLabel = createLabel(get("investigator.label.action"));
+        Label abilityLabel = createLabel(get("investigator.label.ability"));
 
         actionValue = createValue();
         abilityValue = createValue();
@@ -34,10 +35,25 @@ public class SpecialTable extends VisTable {
     }
 
     public void init(SpecialTableData data) {
-        actionValue.setText(data.getAction());
-        abilityValue.setText(data.getAbility());
+        actionValue.setText(resolveLocalizedText(data.getAction()));
+        abilityValue.setText(resolveLocalizedText(data.getAbility()));
         pack();
 //        setBackground(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND));
+    }
+
+    private String resolveLocalizedText(String textOrKey) {
+        if (textOrKey == null || textOrKey.isEmpty()) {
+            return "";
+        }
+        if (!textOrKey.startsWith("investigator.")) {
+            return textOrKey;
+        }
+        String localized = get(textOrKey);
+        String missingKey = "!" + textOrKey + "!";
+        if (missingKey.equals(localized)) {
+            return textOrKey;
+        }
+        return localized;
     }
 
     private Label createLabel(String text) {

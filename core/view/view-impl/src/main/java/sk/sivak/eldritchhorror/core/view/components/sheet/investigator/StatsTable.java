@@ -7,6 +7,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class StatsTable extends VisTable {
 
@@ -19,11 +20,11 @@ public class StatsTable extends VisTable {
     public StatsTable() {
         pad(5);
 
-        Label loreLabel = createLabel("Lore: ");
-        Label influenceLabel = createLabel("Influence: ");
-        Label observationLabel = createLabel("Observation: ");
-        Label strengthLabel = createLabel("Strength: ");
-        Label willLabel = createLabel("Will: ");
+        Label loreLabel = createLabel(get("investigator.label.lore"));
+        Label influenceLabel = createLabel(get("investigator.label.influence"));
+        Label observationLabel = createLabel(get("investigator.label.observation"));
+        Label strengthLabel = createLabel(get("investigator.label.strength"));
+        Label willLabel = createLabel(get("investigator.label.will"));
 
         loreValue = createValue();
         influenceValue = createValue();

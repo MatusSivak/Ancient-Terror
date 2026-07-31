@@ -7,6 +7,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class TokensTable extends VisTable {
 
@@ -24,14 +25,14 @@ public class TokensTable extends VisTable {
     public TokensTable() {
         pad(5);
 
-        Label healthLabel = createLabel("Health: ");
+        Label healthLabel = createLabel(get("investigator.label.health"));
         healthLabel.getStyle().fontColor = COLOR_HEALTH;
-        Label sanityLabel = createLabel("Sanity: ");
+        Label sanityLabel = createLabel(get("investigator.label.sanity"));
         sanityLabel.getStyle().fontColor = COLOR_SANITY;
-        Label clueLabel = createLabel("Clues: ");
-        Label focusLabel = createLabel("Focus: ");
-        Label shipLabel = createLabel("Ship tickets: ");
-        Label trainLabel = createLabel("Train tickets: ");
+        Label clueLabel = createLabel(get("investigator.label.clues"));
+        Label focusLabel = createLabel(get("investigator.label.focus"));
+        Label shipLabel = createLabel(get("investigator.label.shipTickets"));
+        Label trainLabel = createLabel(get("investigator.label.trainTickets"));
 
         healthValue = createValue();
         healthValue.getStyle().fontColor = COLOR_HEALTH;

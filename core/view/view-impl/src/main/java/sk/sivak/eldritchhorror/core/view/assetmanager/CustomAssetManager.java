@@ -17,6 +17,7 @@ import rx.Single;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
@@ -231,6 +232,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String RESERVE_LABEL = "reserve_label.png";
     public final static String DISCARD_LABEL = "discard_label.png";
     public final static String ANCIENT_ONE_LABEL = "ancient_one_label.png";
+    public final static String ANCIENT_ONE_LABEL_SK = "ancient_one_label_sk.png";
     public final static String VALUE_LABEL = "valuelabel.png";
     public final static String MONSTER_SHEET = "monster_sheet.png";
     public final static String ANCIENT_ONE_AZATHOTH = "ancient_one/AZATHOTH.png";
@@ -247,8 +249,11 @@ public class CustomAssetManager extends AssetManager {
     public final static String FAST_FORWARD_DOWN = "icon/fast_forward_down.png";
     public final static String MYSTERY_BACKGROUND = "mystery_background.png";
     public final static String PHASE_ACTION = "phase/action_phase.png";
+    public final static String PHASE_ACTION_SK = "phase/action_phase_sk.png";
     public final static String PHASE_ENCOUNTER = "phase/encounter_phase.png";
+    public final static String PHASE_ENCOUNTER_SK = "phase/encounter_phase_sk.png";
     public final static String PHASE_MYTHOS = "phase/mythos_phase.png";
+    public final static String PHASE_MYTHOS_SK = "phase/mythos_phase_sk.png";
     public final static String PHASE_NEW_ROUND = "phase/new_round.png";
     public final static String SPLASH = "background/splash.jpg";
     public final static String BLANK_MAP = "map/blank_map.png";
@@ -378,36 +383,57 @@ public class CustomAssetManager extends AssetManager {
     }
 
     public static Single<Texture> getTextureAsync(String id) {
+        String resolvedId = resolveLocalizedTextureId(id);
         Single<Texture> textureSingle = Single.create(onSub -> {
-            if (get().isLoaded(id)) {
-                completeTextureRequest(id, onSub);
+            if (get().isLoaded(resolvedId)) {
+                completeTextureRequest(resolvedId, onSub);
                 return;
             }
             synchronized (get()) {
-                if (!get().isLoaded(id)) {
-                    get().load(id, Texture.class);
+                if (!get().isLoaded(resolvedId)) {
+                    get().load(resolvedId, Texture.class);
                 }
             }
             if (Gdx.app == null) {
-                get().finishLoadingAsset(id);
-                completeTextureRequest(id, onSub);
+                get().finishLoadingAsset(resolvedId);
+                completeTextureRequest(resolvedId, onSub);
                 return;
             }
-            requestTextureAsyncOnRenderThread(id, onSub);
+            requestTextureAsyncOnRenderThread(resolvedId, onSub);
         });
-        return get().isLoaded(id) ? textureSingle : textureSingle.subscribeOn(Schedulers.io());
+        return get().isLoaded(resolvedId) ? textureSingle : textureSingle.subscribeOn(Schedulers.io());
     }
 
     public static Texture getTexture(String id) {
-        if (get().isLoaded(id)) {
-            return processTextureForUse(id, get().get(id));
+        String resolvedId = resolveLocalizedTextureId(id);
+        if (get().isLoaded(resolvedId)) {
+            return processTextureForUse(resolvedId, get().get(resolvedId));
         } else {
-            long start = System.currentTimeMillis();
-            get().load(id, Texture.class);
-            get().finishLoadingAsset(id);
-            Texture texture = getTexture(id);
+            get().load(resolvedId, Texture.class);
+            get().finishLoadingAsset(resolvedId);
+            Texture texture = getTexture(resolvedId);
             return texture;
         }
+    }
+
+    private static String resolveLocalizedTextureId(String id) {
+        if (!"sk".equalsIgnoreCase(UiText.getLanguage())) {
+            return id;
+        }
+        String localizedId = null;
+        if (ANCIENT_ONE_LABEL.equals(id)) {
+            localizedId = ANCIENT_ONE_LABEL_SK;
+        } else if (PHASE_ACTION.equals(id)) {
+            localizedId = PHASE_ACTION_SK;
+        } else if (PHASE_ENCOUNTER.equals(id)) {
+            localizedId = PHASE_ENCOUNTER_SK;
+        } else if (PHASE_MYTHOS.equals(id)) {
+            localizedId = PHASE_MYTHOS_SK;
+        }
+        if (localizedId != null && Gdx.files != null && Gdx.files.internal(localizedId).exists()) {
+            return localizedId;
+        }
+        return id;
     }
 
     private static void requestTextureAsyncOnRenderThread(String id, rx.SingleSubscriber<? super Texture> onSub) {

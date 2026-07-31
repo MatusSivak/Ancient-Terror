@@ -15,11 +15,11 @@ public class TypewriterHeaderTyper {
         return Completable.create(onSub -> {
             typewriterView.setFontColor(Color.BLACK);
             int length = header.length();
-            StringBuilder dashes = new StringBuilder();
+            StringBuilder underline = new StringBuilder();
             for (int i = 0; i < length; i++) {
-                dashes.append("_");
+                underline.append("-");
             }
-            String newHeader = header + "\n" + dashes.toString() + "\n \n";
+            String newHeader = header + "\n" + underline.toString() + "\n \n";
             typewriterView.prepareAndRepeatRuns(newHeader, onSub);
         });
     }

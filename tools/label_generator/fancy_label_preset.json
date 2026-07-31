@@ -1,0 +1,80 @@
+{
+  "name": "ancient-one-fancy-v4-textured-3d",
+  "canvas": {
+    "width": 1382,
+    "height": 287,
+    "background_rgba": [0, 0, 0, 0]
+  },
+  "font": {
+    "path": "C:\\Windows\\Fonts\\georgiaz.ttf",
+    "base_size": 240,
+    "min_size": 80,
+    "target_width_ratio": 0.86,
+    "y_offset": -8
+  },
+  "effects": {
+    "extrusion": {
+      "depth": 24,
+      "step": [1, 1],
+      "start_rgba": [8, 10, 14, 225],
+      "end_rgba": [86, 90, 102, 185],
+      "blur_radius": 0.4
+    },
+    "drop_shadow_primary": {
+      "offset": [22, 21],
+      "blur_radius": 2.2,
+      "fill_rgba": [0, 0, 0, 240]
+    },
+    "drop_shadow_secondary": {
+      "offset": [10, 11],
+      "blur_radius": 1.1,
+      "fill_rgba": [26, 30, 42, 185]
+    },
+    "outline_outer": {
+      "stroke_width": 9,
+      "stroke_rgba": [18, 20, 28, 255]
+    },
+    "outline_inner": {
+      "stroke_width": 5,
+      "stroke_rgba": [212, 216, 226, 210]
+    },
+    "metal_gradient": {
+      "stops": [
+        [0.0, [255, 255, 255, 255]],
+        [0.16, [229, 233, 242, 255]],
+        [0.38, [160, 165, 177, 255]],
+        [0.55, [110, 116, 128, 255]],
+        [0.78, [204, 208, 218, 255]],
+        [1.0, [245, 247, 252, 255]]
+      ]
+    },
+    "metal_texture": {
+      "seed": 7713,
+      "amount": 0.58,
+      "base": 205,
+      "grain": 15,
+      "horizontal_brush_strength": 20,
+      "diagonal_brush_strength": 14,
+      "blur_radius": 0.55,
+      "contrast": 1.18
+    },
+    "specular_bands": [
+      { "y_ratio": 0.24, "thickness": 6, "alpha": 88, "slant": 0.11 },
+      { "y_ratio": 0.39, "thickness": 4, "alpha": 56, "slant": 0.08 }
+    ],
+    "specular_blur": 2.2,
+    "top_gloss": {
+      "offset": [0, -4],
+      "blur_radius": 1.4,
+      "fill_rgba": [255, 255, 255, 136]
+    },
+    "bottom_inner_shadow": {
+      "offset": [1, 4],
+      "fill_rgba": [10, 12, 18, 112]
+    },
+    "edge_glow": {
+      "blur_radius": 4.8,
+      "fill_rgba": [238, 246, 255, 82]
+    }
+  }
+}

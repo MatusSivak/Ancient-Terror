@@ -12,13 +12,14 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class InvestigatorSheetButtons extends Group {
 
     void initButtons() {
-        Label basicInfoLabel = createLabel("Basic Info", Color.BLACK);
-        Label cardsLabel = createLabel("Cards", Color.BLACK);
-        Label miscLabel = createLabel("Background", Color.BLACK);
+        Label basicInfoLabel = createLabel(get("investigator.tab.basicInfo"), Color.BLACK);
+        Label cardsLabel = createLabel(get("investigator.tab.cards"), Color.BLACK);
+        Label miscLabel = createLabel(get("investigator.tab.background"), Color.BLACK);
 
         basicInfoLabel.setX(20);
         basicInfoLabel.setY(480);

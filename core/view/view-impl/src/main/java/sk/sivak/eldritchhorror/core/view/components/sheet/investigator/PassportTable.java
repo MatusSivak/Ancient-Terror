@@ -31,6 +31,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class PassportTable extends Table {
 
@@ -85,10 +86,10 @@ public class PassportTable extends Table {
         statsTable.init(statsTableData);
 
 
-        SectionWrapper bioSection = new SectionWrapper().init("Bio", bioTable);
-        SectionWrapper tokenSection = new SectionWrapper().init("Tokens", tokensTable);
-        SectionWrapper statsSection = new SectionWrapper().init("Skills", statsTable);
-        SectionWrapper specialSection = new SectionWrapper().init("Special", specialTable);
+        SectionWrapper bioSection = new SectionWrapper().init(get("investigator.section.bio"), bioTable);
+        SectionWrapper tokenSection = new SectionWrapper().init(get("investigator.section.tokens"), tokensTable);
+        SectionWrapper statsSection = new SectionWrapper().init(get("investigator.section.skills"), statsTable);
+        SectionWrapper specialSection = new SectionWrapper().init(get("investigator.section.special"), specialTable);
 
         add(bioSection).align(Align.topLeft).width(bioSection.getWidth()).height(bioSection.getHeight());
         add(statsSection).align(Align.topRight).width(statsSection.getWidth()).height(statsSection.getHeight());
@@ -139,7 +140,7 @@ public class PassportTable extends Table {
             assetsTable.init(assets, width);
             cardClickListeners.addAll(assetsTable.getCardClickListeners());
             cardTemplates.addAll(assetsTable.getCardTemplates());
-            SectionWrapper assetsSection = new SectionWrapper().init("Assets", assetsTable);
+            SectionWrapper assetsSection = new SectionWrapper().init(get("investigator.section.assets"), assetsTable);
             firstRow.addActor(new Container<>(assetsSection).width(assetsSection.getWidth()).height(assetsSection.getHeight()));
         }
         if (!uniqueAssets.isEmpty()) {
@@ -148,7 +149,7 @@ public class PassportTable extends Table {
             uniqueAssetsTable.init(uniqueAssets, width);
             cardClickListeners.addAll(uniqueAssetsTable.getCardClickListeners());
             cardTemplates.addAll(uniqueAssetsTable.getCardTemplates());
-            SectionWrapper uniqueAssetsSection = new SectionWrapper().init("Unique Assets", uniqueAssetsTable);
+            SectionWrapper uniqueAssetsSection = new SectionWrapper().init(get("investigator.section.uniqueAssets"), uniqueAssetsTable);
             firstRow.addActor(new Container<>(uniqueAssetsSection).width(uniqueAssetsSection.getWidth()).height(uniqueAssetsSection.getHeight()));
         }
         if (!artifacts.isEmpty()) {
@@ -157,7 +158,7 @@ public class PassportTable extends Table {
             artifactsTable.init(artifacts, width);
             cardClickListeners.addAll(artifactsTable.getCardClickListeners());
             cardTemplates.addAll(artifactsTable.getCardTemplates());
-            SectionWrapper artifactsSection = new SectionWrapper().init("Artifacts", artifactsTable);
+            SectionWrapper artifactsSection = new SectionWrapper().init(get("investigator.section.artifacts"), artifactsTable);
             firstRow.addActor(new Container<>(artifactsSection).width(artifactsSection.getWidth()).height(artifactsSection.getHeight()));
         }
         add(firstRow).width(726).align(Align.topLeft).row();
@@ -169,7 +170,7 @@ public class PassportTable extends Table {
             spellsTable.init(spells, width);
             cardClickListeners.addAll(spellsTable.getCardClickListeners());
             cardTemplates.addAll(spellsTable.getCardTemplates());
-            SectionWrapper spellsSection = new SectionWrapper().init("Spells", spellsTable);
+            SectionWrapper spellsSection = new SectionWrapper().init(get("investigator.section.spells"), spellsTable);
             secondRow.addActor(new Container<>(spellsSection).width(spellsSection.getWidth()).height(spellsSection.getHeight()));
         }
         if (!conditions.isEmpty()) {
@@ -178,7 +179,7 @@ public class PassportTable extends Table {
             conditionsTable.init(conditions, width);
             cardClickListeners.addAll(conditionsTable.getCardClickListeners());
             cardTemplates.addAll(conditionsTable.getCardTemplates());
-            SectionWrapper conditionsSection = new SectionWrapper().init("Conditions", conditionsTable);
+            SectionWrapper conditionsSection = new SectionWrapper().init(get("investigator.section.conditions"), conditionsTable);
             secondRow.addActor(new Container<>(conditionsSection).width(conditionsSection.getWidth()).height(conditionsSection.getHeight()));
         }
 
@@ -213,7 +214,7 @@ public class PassportTable extends Table {
 
         BackgroundBioTable backgroundBioTable = new BackgroundBioTable();
         backgroundBioTable.init(bioTableData.getBackgroundBio());
-        SectionWrapper backgroundSection = new SectionWrapper().init("Background", backgroundBioTable);
+        SectionWrapper backgroundSection = new SectionWrapper().init(get("investigator.section.background"), backgroundBioTable);
         add(backgroundSection).align(Align.topLeft)
                 .width(backgroundSection.getWidth())
                 .height(backgroundSection.getHeight())
