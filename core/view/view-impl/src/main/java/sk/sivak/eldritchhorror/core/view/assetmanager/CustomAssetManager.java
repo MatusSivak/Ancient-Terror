@@ -1,7 +1,9 @@
 package sk.sivak.eldritchhorror.core.view.assetmanager;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,12 +12,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.ObjectMap;
 import java8.features.function.Consumer;
 import rx.Single;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 
+import java.lang.reflect.Field;
+import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +37,9 @@ public class CustomAssetManager extends AssetManager {
     private Consumer<String> cardSpellLoadedCallback;
     private Consumer<String> cardArtifactLoadedCallback;
     private final Map<String, BitmapFont> runtimeFonts = new ConcurrentHashMap<>();
-    private static final String EXTRA_I18N_CHARS =
-            "ÁÄČĎÉĚÍĹĽŇÓÔŔŘŠŤÚŮÝŽ" +
-            "áäčďéěíĺľňóôŕřšťúůýž";
+    private boolean runtimeSkinFontsPatched;
+    private static final String REQUIRED_SK_GLYPHS = "ÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽáäčďéíĺľňóôŕšťúýž";
+    private static final String RUNTIME_FONT_CHARS = buildRuntimeFontChars();
 
     public CustomAssetManager() {
 
@@ -321,6 +326,9 @@ public class CustomAssetManager extends AssetManager {
     public final static String FONT_GOBLIN_ONE = "font/goblinOne/goblinOne.fnt"; // card cost, monster card, remaining cost, stat value, token value
     public final static String FONT_BLACK_CHANCERY = "font/BlackChancery/BlackChancery.fnt"; // ancient one alt name, card type, card traits, it's epic?, mystery flavor, quote
     public final static String FONT_MINYA = "font/minya/minya.fnt";
+    private static final String WINDOWS_FONT_COURIER = "internal:font/runtime/windows/cour.ttf";
+    private static final String WINDOWS_FONT_TIMES = "internal:font/runtime/windows/times.ttf";
+    private static final String WINDOWS_FONT_GEORGIA_ITALIC = "internal:font/runtime/windows/georgiai.ttf";
     private final static String SKIN = "skin/sgx/skin/sgx-ui.json";
 
     public final static String ACTION_BUTTON_ENABLED_NORMAL = "action_button/normal.png";
@@ -455,20 +463,31 @@ public class CustomAssetManager extends AssetManager {
     }
 
     public static Skin getSkin() {
-        return commonLoad(SKIN, Skin.class);
+        Skin skin = commonLoad(SKIN, Skin.class);
+        if (isRuntimeFontGenerationEnabled()) {
+            get().applyRuntimeSkinFonts(skin);
+        }
+        return skin;
     }
 
     public static BitmapFont getBitmapFont(String fontId) {
         if (isRuntimeFontGenerationEnabled() && isRuntimeEligibleFont(fontId)) {
             synchronized (get()) {
                 BitmapFont runtimeFont = get().runtimeFonts.get(fontId);
-                if (runtimeFont != null) {
+                if (runtimeFont != null && get().fontContainsRequiredGlyphs(runtimeFont)) {
                     return runtimeFont;
                 }
+                if (runtimeFont != null) {
+                    runtimeFont.dispose();
+                    get().runtimeFonts.remove(fontId);
+                }
                 BitmapFont generatedFont = get().tryGenerateRuntimeFont(fontId);
-                if (generatedFont != null) {
+                if (generatedFont != null && get().fontContainsRequiredGlyphs(generatedFont)) {
                     get().runtimeFonts.put(fontId, generatedFont);
                     return generatedFont;
+                }
+                if (generatedFont != null) {
+                    generatedFont.dispose();
                 }
             }
         }
@@ -477,6 +496,18 @@ public class CustomAssetManager extends AssetManager {
             bitmapFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
         return bitmapFont;
+    }
+
+    private boolean fontContainsRequiredGlyphs(BitmapFont font) {
+        if (font == null || font.getData() == null) {
+            return false;
+        }
+        for (int i = 0; i < REQUIRED_SK_GLYPHS.length(); i++) {
+            if (!font.getData().hasGlyph(REQUIRED_SK_GLYPHS.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isRuntimeEligibleFont(String fontId) {
@@ -493,34 +524,155 @@ public class CustomAssetManager extends AssetManager {
     private BitmapFont tryGenerateRuntimeFont(String fontId) {
         String[] preferredPaths = resolveFontPaths(fontId);
         for (String path : preferredPaths) {
-            if (path == null || path.trim().isEmpty()) {
-                continue;
-            }
-            try {
-                if (!Gdx.files.absolute(path).exists()) {
-                    continue;
-                }
-                FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.absolute(path));
-                try {
-                    FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-                    parameter.size = resolveFontSize(fontId);
-                    parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + EXTRA_I18N_CHARS;
-                    parameter.incremental = false;
-                    parameter.minFilter = Texture.TextureFilter.Linear;
-                    parameter.magFilter = Texture.TextureFilter.Linear;
-                    BitmapFont font = generator.generateFont(parameter);
-                    if (font.getRegion() != null && font.getRegion().getTexture() != null) {
-                        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-                    }
-                    return font;
-                } finally {
-                    generator.dispose();
-                }
-            } catch (Exception ignored) {
-                // fallback to next candidate
+            BitmapFont generated = tryGenerateRuntimeFontFromCandidate(path, resolveFontSize(fontId));
+            if (generated != null) {
+                return generated;
             }
         }
         return null;
+    }
+
+    private BitmapFont tryGenerateRuntimeFontFromCandidate(String path, int size) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            FileHandle fontFile = resolveFontFile(path);
+            if (fontFile == null || !fontFile.exists()) {
+                return null;
+            }
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+            try {
+                FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+                parameter.size = size;
+                parameter.characters = RUNTIME_FONT_CHARS;
+                parameter.incremental = false;
+                parameter.minFilter = Texture.TextureFilter.Linear;
+                parameter.magFilter = Texture.TextureFilter.Linear;
+                BitmapFont font = generator.generateFont(parameter);
+                if (font.getRegion() != null && font.getRegion().getTexture() != null) {
+                    font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                }
+                return font;
+            } finally {
+                generator.dispose();
+            }
+        } catch (Exception ignored) {
+            // fallback to next candidate
+        }
+        return null;
+    }
+
+    private void applyRuntimeSkinFonts(Skin skin) {
+        if (runtimeSkinFontsPatched || skin == null) {
+            return;
+        }
+        Map<BitmapFont, BitmapFont> fontReplacements = new IdentityHashMap<>();
+        replaceSkinFont(skin, "font", 24, false, fontReplacements);
+        replaceSkinFont(skin, "small", 18, false, fontReplacements);
+        replaceSkinFont(skin, "medium", 22, false, fontReplacements);
+        replaceSkinFont(skin, "title", 40, true, fontReplacements);
+        remapSkinResourceFonts(skin, fontReplacements);
+        runtimeSkinFontsPatched = true;
+    }
+
+    private void replaceSkinFont(Skin skin, String skinFontName, int size, boolean serif, Map<BitmapFont, BitmapFont> fontReplacements) {
+        BitmapFont original = skin.get(skinFontName, BitmapFont.class);
+        BitmapFont generated = tryGenerateRuntimeFontForSkin(size, serif);
+        if (generated == null || !fontContainsRequiredGlyphs(generated)) {
+            if (generated != null) {
+                generated.dispose();
+            }
+            return;
+        }
+        fontReplacements.put(original, generated);
+        skin.remove(skinFontName, BitmapFont.class);
+        skin.add(skinFontName, generated, BitmapFont.class);
+        runtimeFonts.put("skin:" + skinFontName, generated);
+    }
+
+    private void remapSkinResourceFonts(Skin skin, Map<BitmapFont, BitmapFont> fontReplacements) {
+        if (fontReplacements.isEmpty()) {
+            return;
+        }
+        try {
+            Field resourcesField = Skin.class.getDeclaredField("resources");
+            resourcesField.setAccessible(true);
+            ObjectMap<Class, ObjectMap<String, Object>> resources = (ObjectMap<Class, ObjectMap<String, Object>>) resourcesField.get(skin);
+            for (ObjectMap<String, Object> resourceMap : resources.values()) {
+                for (Object resource : resourceMap.values()) {
+                    replaceBitmapFontFields(resource, fontReplacements);
+                }
+            }
+        } catch (Exception ignored) {
+            // If reflection fails, Skin will still use replaced named fonts where resolved lazily.
+        }
+    }
+
+    private void replaceBitmapFontFields(Object resource, Map<BitmapFont, BitmapFont> fontReplacements) {
+        if (resource == null) {
+            return;
+        }
+        Class<?> type = resource.getClass();
+        while (type != null) {
+            for (Field field : type.getDeclaredFields()) {
+                if (!BitmapFont.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+                try {
+                    field.setAccessible(true);
+                    BitmapFont current = (BitmapFont) field.get(resource);
+                    BitmapFont replacement = fontReplacements.get(current);
+                    if (replacement != null && replacement != current) {
+                        field.set(resource, replacement);
+                    }
+                } catch (Exception ignored) {
+                    // keep existing font on inaccessible style fields
+                }
+            }
+            type = type.getSuperclass();
+        }
+    }
+
+    private BitmapFont tryGenerateRuntimeFontForSkin(int size, boolean serif) {
+        String[] candidates = serif ? resolveFontPaths(FONT_BLACK_CHANCERY) : resolveFontPaths(FONT_ADLER);
+        for (String candidate : candidates) {
+            BitmapFont generated = tryGenerateRuntimeFontFromCandidate(candidate, size);
+            if (generated != null) {
+                return generated;
+            }
+        }
+        return null;
+    }
+
+    private FileHandle resolveFontFile(String candidatePath) {
+        String path = candidatePath.trim();
+        if (path.startsWith("internal:")) {
+            String internalPath = path.substring("internal:".length());
+            FileHandle internal = Gdx.files.internal(internalPath);
+            return internal.exists() ? internal : null;
+        }
+        if (path.startsWith("absolute:")) {
+            String absolutePath = path.substring("absolute:".length());
+            FileHandle absolute = Gdx.files.absolute(absolutePath);
+            return absolute.exists() ? absolute : null;
+        }
+        FileHandle internal = Gdx.files.internal(path);
+        if (internal.exists()) {
+            return internal;
+        }
+        FileHandle absolute = Gdx.files.absolute(path);
+        if (absolute.exists()) {
+            return absolute;
+        }
+        return null;
+    }
+
+    private static String buildRuntimeFontChars() {
+        StringBuilder chars = new StringBuilder(FreeTypeFontGenerator.DEFAULT_CHARS)
+                .append(REQUIRED_SK_GLYPHS)
+                .append("ěĚřŘůŮ");
+        return chars.toString();
     }
 
     private static int resolveFontSize(String fontId) {
@@ -538,8 +690,50 @@ public class CustomAssetManager extends AssetManager {
         if (override != null && !override.trim().isEmpty()) {
             return new String[]{override.trim()};
         }
+        if (Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android) {
+            if (FONT_BLACK_CHANCERY.equals(fontId)) {
+                return new String[]{
+                        WINDOWS_FONT_GEORGIA_ITALIC,
+                        WINDOWS_FONT_TIMES,
+                        "/system/fonts/NotoSerif-Regular.ttf",
+                        "/system/fonts/Roboto-Regular.ttf",
+                        "/system/fonts/NotoSans-Regular.ttf",
+                        "/system/fonts/DroidSans.ttf"
+                };
+            }
+            if (FONT_ADLER.equals(fontId)) {
+                return new String[]{
+                        WINDOWS_FONT_COURIER,
+                        WINDOWS_FONT_TIMES,
+                        "/system/fonts/NotoSans-Regular.ttf",
+                        "/system/fonts/Roboto-Regular.ttf",
+                        "/system/fonts/NotoSerif-Regular.ttf",
+                        "/system/fonts/DroidSans.ttf"
+                };
+            }
+            if (FONT_MINYA.equals(fontId)) {
+                return new String[]{
+                        WINDOWS_FONT_TIMES,
+                        WINDOWS_FONT_COURIER,
+                        "/system/fonts/NotoSerif-Regular.ttf",
+                        "/system/fonts/NotoSans-Regular.ttf",
+                        "/system/fonts/Roboto-Regular.ttf",
+                        "/system/fonts/DroidSans.ttf"
+                };
+            }
+            return new String[]{
+                    WINDOWS_FONT_TIMES,
+                    WINDOWS_FONT_COURIER,
+                    "/system/fonts/NotoSans-Regular.ttf",
+                    "/system/fonts/Roboto-Regular.ttf",
+                    "/system/fonts/NotoSerif-Regular.ttf",
+                    "/system/fonts/DroidSans.ttf"
+            };
+        }
         if (FONT_ADLER.equals(fontId)) {
             return new String[]{
+                    WINDOWS_FONT_COURIER,
+                    WINDOWS_FONT_TIMES,
                     "C:\\Windows\\Fonts\\cour.ttf",
                     "C:\\Windows\\Fonts\\georgia.ttf",
                     "C:\\Windows\\Fonts\\times.ttf"
@@ -547,12 +741,16 @@ public class CustomAssetManager extends AssetManager {
         }
         if (FONT_BLACK_CHANCERY.equals(fontId)) {
             return new String[]{
+                    WINDOWS_FONT_GEORGIA_ITALIC,
+                    WINDOWS_FONT_TIMES,
                     "C:\\Windows\\Fonts\\georgiai.ttf",
                     "C:\\Windows\\Fonts\\timesi.ttf",
                     "C:\\Windows\\Fonts\\times.ttf"
             };
         }
         return new String[]{
+                WINDOWS_FONT_TIMES,
+                WINDOWS_FONT_COURIER,
                 "C:\\Windows\\Fonts\\times.ttf",
                 "C:\\Windows\\Fonts\\georgia.ttf",
                 "C:\\Windows\\Fonts\\arial.ttf"

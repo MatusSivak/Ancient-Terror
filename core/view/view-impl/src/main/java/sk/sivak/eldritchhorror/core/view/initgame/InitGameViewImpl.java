@@ -6,6 +6,8 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -18,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import java8.features.function.Supplier;
@@ -52,6 +55,7 @@ import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.MyMoveToAction;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import java.util.List;
 
@@ -93,6 +97,14 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private SingleSubscriber<? super Integer> numberOfPlayersSingleSubscriber;
     private Runnable removeOnRewardedAdLoadedListener = () -> {};
     private Runnable removeOnRewardedAdFailedToLoadListener = () -> {};
+    private Image englishLocaleFlag;
+    private Image slovakLocaleFlag;
+
+    private static final String FLAGS_TEXTURE = "flags/flags.png";
+    private static final int FLAGS_COLUMNS = 15;
+    private static final int FLAGS_ROWS = 13;
+    private static final String LANGUAGE_ENGLISH = "en";
+    private static final String LANGUAGE_SLOVAK = "sk";
 
     public void setDefaultSkin(Skin skin) {
         this.skin = skin;
@@ -207,9 +219,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
     @Override
     public void show() {
         if (screenInitialized) {
+            initLocaleFromPreferences();
+            refreshLocalizedTexts();
+            refreshLocaleFlagSelection();
             Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage));
             return;
         }
+        initLocaleFromPreferences();
         new InAppPurchaseManager().isProductPurchased("cthulhu").subscribe();
         new InAppPurchaseManager().isProductPurchased("shub_niggurath").subscribe();
         new InAppPurchaseManager().isProductPurchased("yog_sothoth").subscribe();
@@ -232,9 +248,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
         });
 
 
-        nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), skin);
-        nrPlayersDialog.setModal(false);
-        selectAncientOneDialog = new SelectAncientOneDialog(get("init.selectAncientOne"), skin);
+        rebuildLocalizedDialogs();
 
 
         Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage));
@@ -271,6 +285,9 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         noAdsButton = new NoAdsButton();
         noAdsButton.setPosition(VIEWPORT_WIDTH - noAdsButton.getWidth() - 5, 5);
+        initLocaleSelector();
+        stage.addActor(englishLocaleFlag);
+        stage.addActor(slovakLocaleFlag);
 
         if (GoogleServicesHolder.isTutorialPassed()) {
             stage.addActor(collectionButton);
@@ -362,6 +379,76 @@ public class InitGameViewImpl implements Screen, InitGameView {
             });
         }
 
+    }
+
+    private void rebuildLocalizedDialogs() {
+        nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), skin);
+        nrPlayersDialog.setModal(false);
+        selectAncientOneDialog = new SelectAncientOneDialog(get("init.selectAncientOne"), skin);
+    }
+
+    private void initLocaleFromPreferences() {
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        String preferredLanguage = preferences.getString("ui.language", LANGUAGE_ENGLISH);
+        UiText.setLanguage(preferredLanguage);
+    }
+
+    private void initLocaleSelector() {
+        englishLocaleFlag = createLocaleFlag(13, 5, LANGUAGE_ENGLISH);
+        slovakLocaleFlag = createLocaleFlag(11, 8, LANGUAGE_SLOVAK);
+
+        float margin = 8f;
+        englishLocaleFlag.setPosition(margin, margin);
+        slovakLocaleFlag.setPosition(margin + englishLocaleFlag.getWidth() + margin, margin);
+        refreshLocaleFlagSelection();
+    }
+
+    private Image createLocaleFlag(int row, int column, String languageTag) {
+        Texture flagsTexture = CustomAssetManager.getTexture(FLAGS_TEXTURE);
+        int regionWidth = flagsTexture.getWidth() / FLAGS_COLUMNS;
+        int regionHeight = flagsTexture.getHeight() / FLAGS_ROWS;
+        TextureRegion region = new TextureRegion(flagsTexture, (column - 1) * regionWidth, (row - 1) * regionHeight, regionWidth, regionHeight);
+        Image image = new Image(new TextureRegionDrawable(region));
+        image.setSize(regionWidth * 0.55f, regionHeight * 0.55f);
+        ButtonUtils.addClickListener(image, () -> applyLanguage(languageTag));
+        return image;
+    }
+
+    private void applyLanguage(String languageTag) {
+        if (languageTag.equals(UiText.getLanguage())) {
+            return;
+        }
+        UiText.setLanguage(languageTag);
+        rebuildLocalizedDialogs();
+        refreshLocalizedTexts();
+        refreshLocaleFlagSelection();
+    }
+
+    private void refreshLocaleFlagSelection() {
+        if (englishLocaleFlag == null || slovakLocaleFlag == null) {
+            return;
+        }
+        boolean englishSelected = LANGUAGE_ENGLISH.equals(UiText.getLanguage());
+        englishLocaleFlag.setColor(1f, 1f, 1f, englishSelected ? 1f : 0.45f);
+        slovakLocaleFlag.setColor(1f, 1f, 1f, englishSelected ? 0.45f : 1f);
+    }
+
+    private void refreshLocalizedTexts() {
+        if (collectionButton != null) {
+            collectionButton.setText(get("init.cardsCollection"));
+        }
+        if (hallOfFameButton != null) {
+            hallOfFameButton.setText(get("init.hallOfFame"));
+        }
+        if (replayTutorialButton != null) {
+            replayTutorialButton.setText(get("init.tutorial"));
+        }
+        if (loadGameButton != null) {
+            loadGameButton.setText(get("init.continue"));
+        }
+        if (newGameButton != null) {
+            newGameButton.setText(get("init.newGame"));
+        }
     }
 
     private void replayTutorial() {

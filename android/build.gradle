@@ -170,6 +170,10 @@ task copyAndroidNatives() {
     }
 }
 
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn copyAndroidNatives
+}
+
 task run(type: Exec) {
     def path
     def localProperties = project.file("../local.properties")
