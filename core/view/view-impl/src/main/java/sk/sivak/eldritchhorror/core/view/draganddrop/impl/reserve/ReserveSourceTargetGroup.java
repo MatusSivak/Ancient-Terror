@@ -7,6 +7,7 @@ import sk.sivak.eldritchhorror.core.view.draganddrop.impl.SourceTargetGroup;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -22,9 +23,9 @@ public class ReserveSourceTargetGroup extends SourceTargetGroup {
         remainingValueDisplay.setOrigin(remainingValueDisplay.getWidth() / 2,
                 remainingValueDisplay.getHeight() / 2);
         addActor(remainingValueDisplay);
-        reserveLabel = createLabel("Reserve", new Color(0.75f, 0f, 0f, 1f));
+        reserveLabel = createLabel(get("reserve.label"), new Color(0.75f, 0f, 0f, 1f));
         addActor(reserveLabel);
-        investigatorLabel = createLabel("Investigator", new Color(0f, 0.75f, 0f, 1f));
+        investigatorLabel = createLabel(get("reserve.investigatorLabel"), new Color(0f, 0.75f, 0f, 1f));
         addActor(investigatorLabel);
         upDownImage.remove();
 

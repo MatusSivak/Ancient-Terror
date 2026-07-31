@@ -17,6 +17,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class CombatOverviewTable extends VisTable {
 
@@ -93,9 +94,9 @@ public class CombatOverviewTable extends VisTable {
 
         monsterTable.add(monsterImageHealthNameTable).height(COLUMNS_WIDTH -8).width(COLUMNS_WIDTH-30).align(Align.top).row();
         monsterTable.addSeparator().width(COLUMNS_WIDTH);
-        monsterTable.add(createHorrorOrDamageTable("Horror: ", data.getHorror(), new Color(0.4f,0.4f,1f,1f), CustomAssetManager.HORROR))
+        monsterTable.add(createHorrorOrDamageTable(get("combat.horrorLabel"), data.getHorror(), new Color(0.4f,0.4f,1f,1f), CustomAssetManager.HORROR))
                 .height(STATS_ROW_HEIGHT).width(COLUMNS_WIDTH).row();
-        monsterTable.add(createHorrorOrDamageTable("Damage: ", data.getDamage(), new Color(1,0.4f,0.4f,1f), CustomAssetManager.DAMAGE))
+        monsterTable.add(createHorrorOrDamageTable(get("combat.damageLabel"), data.getDamage(), new Color(1,0.4f,0.4f,1f), CustomAssetManager.DAMAGE))
                 .height(STATS_ROW_HEIGHT).width(COLUMNS_WIDTH).row();
 
         monsterTable.setBackground(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND));

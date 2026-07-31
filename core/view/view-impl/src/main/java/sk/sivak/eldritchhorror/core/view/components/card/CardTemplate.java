@@ -43,6 +43,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
 import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.markupWithKeywords;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -258,7 +259,7 @@ public class CardTemplate extends WidgetGroup {
                 assetInfo.getCost(),
                 traits,
                 assetInfo.getDescription(),
-                "Asset",
+                get("card.type.asset"),
                 assetInfo.hasReckoning(),
                 ASSET_CARD_BACKGROUND,
                 Color.WHITE, assetInfo.isDisabled());
@@ -283,7 +284,7 @@ public class CardTemplate extends WidgetGroup {
                 null,
                 traits,
                 conditionInfo.getDescription(),
-                "Condition",
+                get("card.type.condition"),
                 conditionInfo.hasReckoning(),
                 CONDITION_CARD_BACKGROUND,
                 Color.DARK_GRAY, conditionInfo.isDisabled());
@@ -308,7 +309,7 @@ public class CardTemplate extends WidgetGroup {
                 null,
                 traits,
                 artifactInfo.getDescription(),
-                "Artifact",
+                get("card.type.artifact"),
                 artifactInfo.hasReckoning(),
                 ARTIFACT_CARD_BACKGROUND,
                 Color.YELLOW, artifactInfo.isDisabled());
@@ -333,7 +334,7 @@ public class CardTemplate extends WidgetGroup {
                 null,
                 traits,
                 spellInfo.getDescription(),
-                "Spell",
+                get("card.type.spell"),
                 spellInfo.hasReckoning(),
                 SPELL_CARD_BACKGROUND,
                 Color.PURPLE, spellInfo.isDisabled());
@@ -345,15 +346,15 @@ public class CardTemplate extends WidgetGroup {
     public static CardTemplate buildClueCard() {
 
         CardTemplate cardTemplate = new CardTemplate("card/special/clue.jpg",
-                "Clue",
+                get("card.clue.title"),
                 Color.valueOf("000cb3"),
                 Color.valueOf("2B7529"),
                 Color.WHITE,
                 "000000",
                 null,
                 null,
-                "Secrets and lore about the Ancient One.",
-                "Token",
+                get("card.clue.description"),
+                get("card.type.token"),
                 false,
                 TOKEN_CARD_BACKGROUND,
                 Color.GREEN,
@@ -366,15 +367,15 @@ public class CardTemplate extends WidgetGroup {
     public static CardTemplate buildTrainTicketCard() {
 
         CardTemplate cardTemplate = new CardTemplate("card/special/train.jpg",
-                "Train Ticket",
+                get("card.trainTicket.title"),
                 Color.valueOf("000cb3"),
                 Color.valueOf("2B7529"),
                 Color.WHITE,
                 "000000",
                 null,
                 null,
-                "Can be spend during Travel Action\nto move further along the Train path",
-                "Token",
+                get("card.trainTicket.description"),
+                get("card.type.token"),
                 false,
                 TOKEN_CARD_BACKGROUND,
                 Color.GREEN, false);
@@ -386,15 +387,15 @@ public class CardTemplate extends WidgetGroup {
     public static CardTemplate buildShipTicketCard() {
 
         CardTemplate cardTemplate = new CardTemplate("card/special/ship.jpg",
-                "Ship Ticket",
+                get("card.shipTicket.title"),
                 Color.valueOf("000cb3"),
                 Color.valueOf("2B7529"),
                 Color.WHITE,
                 "000000",
                 null,
                 null,
-                "Can be spend during Travel Action\nto move further along the Ship path",
-                "Token",
+                get("card.shipTicket.description"),
+                get("card.type.token"),
                 false,
                 TOKEN_CARD_BACKGROUND,
                 Color.GREEN, false);

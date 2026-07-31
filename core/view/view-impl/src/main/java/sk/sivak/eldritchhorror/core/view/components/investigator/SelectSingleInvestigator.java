@@ -10,6 +10,7 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectSingleInvestigator {
     private List<InvestigatorId> availableInvestigators;
@@ -43,7 +44,7 @@ public class SelectSingleInvestigator {
                 VIEWPORT_HEIGHT / 2 - selectInvestigatorComponent.getHeight() / 2);
         InfoStage.showActor(selectInvestigatorComponent);
 
-        hideOkButtons.init("Display investigators?", getOnConfirmAction(), selectInvestigatorComponent);
+        hideOkButtons.init(get("investigator.displayInvestigators"), getOnConfirmAction(), selectInvestigatorComponent);
         hideOkButtons.showButtons();
         hideOkButtons.disableOkButton();
     }

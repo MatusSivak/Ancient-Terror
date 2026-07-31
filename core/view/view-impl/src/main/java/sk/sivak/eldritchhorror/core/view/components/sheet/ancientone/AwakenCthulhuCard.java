@@ -37,6 +37,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
 
@@ -131,7 +132,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
         midnightValue.setWrap(true);
         midnightValue.setText("[BLACK]" + ancientOneInfo.getMidnightText() + "[]");
 
-        Label winLabel = createTextLabel("Victory:");
+        Label winLabel = createTextLabel(get("ancientOne.victory"));
 
         Label winValue = createValue(FONT_MINYA, 0.5f);
         winValue.setWrap(true);
@@ -218,7 +219,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
 
 
         powerTable = new VisTable();
-        Label powerLabel = createTextLabel("Power:");
+        Label powerLabel = createTextLabel(get("ancientOne.power"));
         powerTable.add(powerLabel).padLeft(5).height(60).padRight(5);
 
         for (int i = 0; i < 10; i++) {

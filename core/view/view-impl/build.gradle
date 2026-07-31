@@ -4,6 +4,7 @@ dependencies {
   api project(':eldritch-horror-core:view:view-interface')
   api project(':eldritch-horror-core:controller:controller-interface')
     api group: 'com.badlogicgames.gdx', name: 'gdx', version:'1.9.8'
+    api group: 'com.badlogicgames.gdx', name: 'gdx-freetype', version:'1.9.8'
   api project(':eldritch-horror-core:skin-composer')
     api group: 'com.kotcrab.vis', name: 'vis-ui', version:'1.3.0'
     api group: 'com.rafaskoberg.gdx', name: 'typing-label', version:'1.0.4'

@@ -33,6 +33,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class ShubNiggurathCard extends VisTable implements AncientOneCard{
 
@@ -90,7 +91,7 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
     private Table createPowerTable() {
         powerTable = new VisTable();
         powerTable.align(Align.left);
-        Label powerLabel = createTextLabel("Monsters:");
+        Label powerLabel = createTextLabel(get("ancientOne.monsters"));
         powerTable.add(powerLabel).padLeft(5).height(60).padRight(5);
 
         for (int i = 0; i < 10; i++) {
@@ -147,7 +148,7 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
         midnightValue.setWrap(true);
         midnightValue.setText("[BLACK]" + ancientOneInfo.getMidnightText() + "[]");
 
-        Label winLabel = createTextLabel("Victory:");
+        Label winLabel = createTextLabel(get("ancientOne.victory"));
 
         Label winValue = createValue(FONT_MINYA, 0.5f);
         winValue.setWrap(true);

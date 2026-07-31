@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -56,15 +57,15 @@ public class CompositeMap {
 
     private void initCityInfoLabels() {
         Map<LocationId, String> locationLabelMap = new HashMap<>();
-        locationLabelMap.put(LocationId.SAN_FRANCISCO, "Improve\nObservation");
-        locationLabelMap.put(LocationId.ARKHAM, "Gain\nIncantation\nSpells");
-        locationLabelMap.put(LocationId.BUENOS_AIRES, "Gain\nRitual Spells");
-        locationLabelMap.put(LocationId.LONDON, "Spawn\nClues");
-        locationLabelMap.put(LocationId.ROME, "Improve\nWill");
-        locationLabelMap.put(LocationId.ISTANBUL, "Improve\nInfluence");
-        locationLabelMap.put(LocationId.TOKYO, "Defeat\nMonsters");
-        locationLabelMap.put(LocationId.SHANGHAI, "Improve\nLore");
-        locationLabelMap.put(LocationId.SYDNEY, "Improve\nStrength");
+        locationLabelMap.put(LocationId.SAN_FRANCISCO, get("map.cityInfo.sanFrancisco"));
+        locationLabelMap.put(LocationId.ARKHAM, get("map.cityInfo.arkham"));
+        locationLabelMap.put(LocationId.BUENOS_AIRES, get("map.cityInfo.buenosAires"));
+        locationLabelMap.put(LocationId.LONDON, get("map.cityInfo.london"));
+        locationLabelMap.put(LocationId.ROME, get("map.cityInfo.rome"));
+        locationLabelMap.put(LocationId.ISTANBUL, get("map.cityInfo.istanbul"));
+        locationLabelMap.put(LocationId.TOKYO, get("map.cityInfo.tokyo"));
+        locationLabelMap.put(LocationId.SHANGHAI, get("map.cityInfo.shanghai"));
+        locationLabelMap.put(LocationId.SYDNEY, get("map.cityInfo.sydney"));
         IterableUtils.forEach(locationLabelMap.entrySet(), entry -> {
             LocationId location = entry.getKey();
             Vector2[] labelPositions = LocationPositionResolver.resolveAll(location);

@@ -36,6 +36,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class AzathothCard extends VisTable implements AncientOneCard{
 
@@ -124,7 +125,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
     private Table createRightPart(AncientOneInfo ancientOneInfo) {
         Table table = new Table();
 
-        Label setupLabel = createTextLabel("Setup:");
+        Label setupLabel = createTextLabel(get("ancientOne.setup"));
 
         Label setupValue = createValue(FONT_MINYA, 0.5f);
         setupValue.setWrap(true);
@@ -146,7 +147,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         specialValue.setWrap(true);
         specialValue.setText("[BLACK]" + ancientOneInfo.getSpecialText() + "[]");
 
-        Label winLabel = createTextLabel("Victory:");
+        Label winLabel = createTextLabel(get("ancientOne.victory"));
 
         Label winValue = createValue(FONT_MINYA, 0.5f);
         winValue.setWrap(true);

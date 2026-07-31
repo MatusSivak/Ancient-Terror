@@ -23,6 +23,7 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectMultipleInvestigators {
     private List<InvestigatorInfo> availableInvestigators;
@@ -77,7 +78,7 @@ public class SelectMultipleInvestigators {
                 this.lastSelectedInvestigator = selectedInvestigator;
             }
         };
-        selectInvestigatorComponent.setTitle("Select Lead Investigator");
+        selectInvestigatorComponent.setTitle(get("investigator.selectLead"));
 
         new InAppPurchaseManager().isProductPurchased("investigators_1").subscribe(isPurchased -> {
             if (!isPurchased) {
@@ -145,7 +146,7 @@ public class SelectMultipleInvestigators {
         InvestigatorInfo selectedInvestigatorInfo = investigatorIdToInfo(investigatorId);
         selectInvestigatorComponent.disable(investigatorId);
         selectedInvestigators.add(selectedInvestigatorInfo);
-        selectInvestigatorComponent.setTitle("Select investigator " + (selectedInvestigators.size() + 1) + "/" + totalToSelect);
+        selectInvestigatorComponent.setTitle(get("investigator.selectProgress", selectedInvestigators.size() + 1, totalToSelect));
         if (selectedInvestigators.size() == totalToSelect) {
             darkBackground1.remove();
             darkBackground2.remove();

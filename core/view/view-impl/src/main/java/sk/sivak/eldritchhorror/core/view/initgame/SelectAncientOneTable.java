@@ -32,6 +32,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectAncientOneTable extends VisTable {
 
@@ -71,8 +72,8 @@ public class SelectAncientOneTable extends VisTable {
         azathothScaleImageDownAction.setInterpolation(Interpolation.sine);
 
         azathothButtonCell.row();
-        azathothTable.add(createNameLabel("Azathoth")).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        azathothTable.add(createNiceLabel("The Daemon Sultan")).padBottom(5);
+        azathothTable.add(createNameLabel(get("ancientOne.azathoth.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
+        azathothTable.add(createNiceLabel(get("ancientOne.azathoth.alt"))).padBottom(5);
 
         // Cthulhu
         cthulhuTable = new Table();
@@ -98,16 +99,16 @@ public class SelectAncientOneTable extends VisTable {
 
         cthulhuButtonCell.row();
 
-        cthulhuTable.add(createNameLabel("Cthulhu")).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        cthulhuTable.add(createNiceLabel("The Great Dreamer")).padBottom(5).row();
+        cthulhuTable.add(createNameLabel(get("ancientOne.cthulhu.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
+        cthulhuTable.add(createNiceLabel(get("ancientOne.cthulhu.alt"))).padBottom(5).row();
         if (!isCthulhuPurchased) {
             cthulhuTable.add(createFeaturesSection(
-                    "-Six new Mysteries",
-                    "-Three new Epic Monsters",
-                    "-Eighty new Encounters",
-                    "-Explore the city of R'lyeh",
-                    "-Ending: Risen from the Sea",
-                    "-[GREEN]For a price of a coffee[]"
+                    get("ancientOne.features.sixMysteries"),
+                    get("ancientOne.features.threeEpicMonsters"),
+                    get("ancientOne.features.eightyEncounters"),
+                    get("ancientOne.features.exploreRlyeh"),
+                    get("ancientOne.features.endingRisenFromSea"),
+                    get("ancientOne.features.priceCoffee")
             )).padBottom(10).align(Align.left);
         }
 
@@ -135,16 +136,16 @@ public class SelectAncientOneTable extends VisTable {
 
         shubNiggurathButtonCell.row();
 
-        shubNiggurathTable.add(createNameLabel("Shub-Niggurath")).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        shubNiggurathTable.add(createNiceLabel("The Black Goat of the Woods")).padBottom(5).row();
+        shubNiggurathTable.add(createNameLabel(get("ancientOne.shubNiggurath.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
+        shubNiggurathTable.add(createNiceLabel(get("ancientOne.shubNiggurath.alt"))).padBottom(5).row();
         if (!isShubNiggurathPurchased) {
             shubNiggurathTable.add(createFeaturesSection(
-                    "-Six new Mysteries",
-                    "-Three new Epic Monsters",
-                    "-Seventy new Encounters",
-                    "-Combat oriented",
-                    "-Ending: Battle in the Woods",
-                    "-[GREEN]For a price of a coffee[]"
+                    get("ancientOne.features.sixMysteries"),
+                    get("ancientOne.features.threeEpicMonsters"),
+                    get("ancientOne.features.seventyEncounters"),
+                    get("ancientOne.features.combatOriented"),
+                    get("ancientOne.features.endingBattleInWoods"),
+                    get("ancientOne.features.priceCoffee")
             )).padBottom(10).align(Align.left);
         }
 
@@ -172,22 +173,22 @@ public class SelectAncientOneTable extends VisTable {
 
         yogSothothButtonCell.row();
 
-        yogSothothTable.add(createNameLabel("Yog Sothoth")).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        yogSothothTable.add(createNiceLabel("The Lurker at the Threshold")).padBottom(5).row();
+        yogSothothTable.add(createNameLabel(get("ancientOne.yogSothoth.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
+        yogSothothTable.add(createNiceLabel(get("ancientOne.yogSothoth.alt"))).padBottom(5).row();
         if (!isYogSothothPurchased) {
             yogSothothTable.add(createFeaturesSection(
-                    "-Six new Mysteries",
-                    "-Dunwich Horror",
-                    "-Eighty new Encounters",
-                    "-Visit Void Between Worlds",
-                    "-Ending: The Key and the Gate",
-                    "-[GREEN]For a price of a coffee[]"
+                    get("ancientOne.features.sixMysteries"),
+                    get("ancientOne.features.dunwichHorror"),
+                    get("ancientOne.features.eightyEncounters"),
+                    get("ancientOne.features.visitVoidBetweenWorlds"),
+                    get("ancientOne.features.endingKeyAndGate"),
+                    get("ancientOne.features.priceCoffee")
             )).padBottom(10).align(Align.left);
         }
 
         List<Table> ancientOneTables = new LinkedList<>(Arrays.asList(azathothTable, cthulhuTable, shubNiggurathTable, yogSothothTable));
         Collections.shuffle(ancientOneTables);
-        add(createTitleLabel("Select Ancient One")).colspan(7).row();
+        add(createTitleLabel(get("init.selectAncientOne"))).colspan(7).row();
         addSeparator().colspan(7).padBottom(0).row();
         add(ancientOneTables.get(0)).align(Align.top);
         addSeparator(true).padTop(0).padLeft(5).padRight(5);

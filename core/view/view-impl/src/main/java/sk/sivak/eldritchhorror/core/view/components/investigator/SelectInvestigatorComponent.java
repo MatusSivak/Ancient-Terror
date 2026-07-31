@@ -21,6 +21,7 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectInvestigatorComponent extends Table {
 
@@ -32,7 +33,7 @@ public class SelectInvestigatorComponent extends Table {
 
     SelectInvestigatorComponent(float widthPercentage) {
         sketches = new InvestigatorSketches();
-        titleLabel = createLabel("Select Investigator", Color.GREEN);
+        titleLabel = createLabel(get("investigator.select"), Color.GREEN);
         add(titleLabel).pad(5);
         row();
 
