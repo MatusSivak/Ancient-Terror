@@ -34,6 +34,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.components.sheet.mystery.ProgressTokenBar.ACTION_DURATION;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MysteryCard extends VisTable {
 
@@ -165,7 +166,7 @@ public class MysteryCard extends VisTable {
 
     private Label createProgressLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.DARK_GRAY);
-        Label label = new Label("Progress:", labelStyle);
+        Label label = new Label(get("mystery.progress"), labelStyle);
         label.setAlignment(Align.left);
         label.setFontScale(0.5f);
         return label;
@@ -194,7 +195,7 @@ public class MysteryCard extends VisTable {
         displayHide.setDisplayedY(VIEWPORT_HEIGHT / 2 - getHeight() / 2);
 
         displayHide.setBeforeDisplayAction(() -> {
-            InfoStage.displayTextDontHide("Current Mystery");
+            InfoStage.displayTextDontHide(get("mystery.current"));
             if (mysteryCardInfo.getPinLocations() != null && !mysteryCardInfo.getPinLocations().isEmpty() && moveCamera) {
                 int pinLocationIndex = MathUtils.random(0, mysteryCardInfo.getPinLocations().size() - 1);
                 MapUtils.moveCameraToLocation(mysteryCardInfo.getPinLocations().get(pinLocationIndex)).subscribe();
@@ -205,7 +206,7 @@ public class MysteryCard extends VisTable {
         });
 
 
-        displayHide.setBeforeHideAction(() -> InfoStage.hideLabel("Current Mystery"));
+        displayHide.setBeforeHideAction(() -> InfoStage.hideLabel(get("mystery.current")));
 
         if (advanceActiveMysteryAmount != null) {
             progressTokenBar.init(mysteryCardInfo.getMysteryComplexity(), mysteryCardInfo.getProgress() - advanceActiveMysteryAmount);

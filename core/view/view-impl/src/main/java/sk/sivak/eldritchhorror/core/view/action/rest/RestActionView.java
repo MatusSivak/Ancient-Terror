@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.view.action.GainTokenHelper.gainTokenAndUpdateHud;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -15,16 +16,16 @@ import static sk.sivak.eldritchhorror.core.view.action.GainTokenHelper.gainToken
 public class RestActionView {
 
     public Completable gainHealth(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, "Health Restored");
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, get("rest.healthRestored"));
     }
 
     public Completable gainSanity(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, "Sanity Restored");
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, get("rest.sanityRestored"));
     }
 
     public Completable justRest() {
         return Completable.create(onSub -> InfoStage.addActionToInfoStage(Actions.sequence(
-                Actions.run(() -> InfoStage.displayText("Resting...")),
+                Actions.run(() -> InfoStage.displayText(get("rest.resting"))),
                 new FastForwardAction<>(Actions.delay(ViewProperties.NORMAL_ACTION_DURATION * 2)),
                 Actions.run(onSub::onCompleted)
         )));

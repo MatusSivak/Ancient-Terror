@@ -64,6 +64,7 @@ import static sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRespon
 import static sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse.YES;
 import static sk.sivak.eldritchhorror.core.view.components.card.CardTemplate.CARD_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.components.card.CardTemplate.CARD_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -122,7 +123,7 @@ public class AssetView {
                         () -> buttonClickAction(subscriber, YES, hideType, assetOriginType));
                 break;
             case OK:
-                TextButton okButton = ButtonBuilder.buildButton("OK");
+                TextButton okButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
                 buttons = new Button[1];
                 buttons[0] = okButton;
@@ -139,7 +140,7 @@ public class AssetView {
                 if (DISCARD_ALWAYS != hideType && DISABLE_ALWAYS != hideType) {
                     return;
                 }
-                TextButton discardButton = ButtonBuilder.buildButton("OK");
+                TextButton discardButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
                 buttons = new Button[1];
                 buttons[0] = discardButton;
@@ -382,13 +383,13 @@ public class AssetView {
         return Completable.create(onSub -> {
             originalBottomHeight = InfoStage.getBottomHeight();
             displayGainButton(onSub);
-            displayTable("" + cardInfo.getName() + " gained", null);
+            displayTable(get("asset.gained", cardInfo.getName()), null);
             displayCard(cardInfo, CENTER);
         });
     }
 
     private void displayGainButton(CompletableSubscriber completableSubscriber) {
-        TextButton discardButton = ButtonBuilder.buildButton("OK");
+        TextButton discardButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
         buttons = new Button[1];
         buttons[0] = discardButton;

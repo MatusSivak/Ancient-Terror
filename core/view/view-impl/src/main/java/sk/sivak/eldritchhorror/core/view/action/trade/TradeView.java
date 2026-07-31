@@ -24,6 +24,7 @@ import java.util.List;
 import static java8.features.stream.Stream.collectToList;
 import static java8.features.stream.Stream.map;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class TradeView {
     private TradeDragAndDropBinder dragAndDrop;
@@ -34,13 +35,13 @@ public class TradeView {
     public Single<TradeData> init(TradeData input) {
         this.input = input;
         return Single.create(onSub -> {
-            InfoStage.displayText("Trade");
+            InfoStage.displayText(get("trade.title"));
             dragAndDrop = createDragAndDrop(input.getSourceCards(), input.getTargetCards(),
                     input.getSourceInvestigatorId(), input.getTargetInvestigatorId(),
                     input.getSourceTokenTrading(), input.getTargetTokenTrading());
             dragAndDrop.getSourceTargetGroup().setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.02f);
             hideOkButtons = new HideOkButtons();
-            hideOkButtons.init("Display possessions?", getOnConfirmAction(onSub), dragAndDrop.getSourceTargetGroup());
+            hideOkButtons.init(get("trade.displayPossessions"), getOnConfirmAction(onSub), dragAndDrop.getSourceTargetGroup());
             hideOkButtons.showButtons();
             table = new Table();
             table.setPosition((ViewProperties.VIEWPORT_WIDTH+75)/2,ViewProperties.VIEWPORT_HEIGHT/2 - 10);

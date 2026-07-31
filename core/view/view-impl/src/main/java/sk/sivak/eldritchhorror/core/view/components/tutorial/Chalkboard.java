@@ -27,6 +27,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class Chalkboard extends Group {
     private static final float BACKGROUND_SCALE = 0.35f;
@@ -115,7 +116,7 @@ public class Chalkboard extends Group {
 
         PublishSubject<Boolean> selectedValue = PublishSubject.create();
         Action0 showButtons = () -> {
-            TextButton noButton = createNiceButton("No");
+            TextButton noButton = createNiceButton(get("dialog.no"));
             noButton.getLabel().setColor(Color.RED);
             buttonsTable.add(noButton).padRight(10).size(140, 50);
             ButtonUtils.addClickListener(noButton, () -> {
@@ -129,7 +130,7 @@ public class Chalkboard extends Group {
             });
 
 
-            TextButton yesButton = createNiceButton("Yes");
+            TextButton yesButton = createNiceButton(get("dialog.yes"));
             buttonsTable.add(yesButton).size(140, 50);
             yesButton.getLabel().setColor(Color.GREEN);
             ButtonUtils.addClickListener(yesButton, () -> {

@@ -21,6 +21,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectActionComponent extends VisTable implements ActionButtonClickedListener {
     private ActionInfoTable actionInfoTable;
@@ -77,7 +78,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
         hideOkButtons = new HideOkButtons();
 
-        hideOkButtons.init("Display actions?", getOnConfirmAction(), this);
+        hideOkButtons.init(get("action.displayActions"), getOnConfirmAction(), this);
     }
 
     private void addHitImage() {
@@ -111,7 +112,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
     public void displayOrHide() {
         if (getParent() == null) {
-            InfoStage.displayTextDontHide("Select Action");
+            InfoStage.displayTextDontHide(get("action.select"));
             visible = true;
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
             InfoStage.addBigActor(null, this, null, null);
@@ -127,11 +128,11 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             return;
         }
         if (!visible) {
-            InfoStage.displayTextDontHide("Select Action");
+            InfoStage.displayTextDontHide(get("action.select"));
             hideOkButtons.alphaToValue(1f);
             visible = true;
         } else {
-            InfoStage.hideLabel("Select Action");
+            InfoStage.hideLabel(get("action.select"));
             hideOkButtons.alphaToValue(0f);
             visible = false;
         }
@@ -150,7 +151,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             ActionPhaseAction selectedActionPhaseAction = findSelectedActionPhaseAction(selectedActionButtonData);
             BigActorsManager.displayOrHideActionsTable();
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
-            InfoStage.hideLabel("Select Action");
+            InfoStage.hideLabel(get("action.select"));
             subscriber.onSuccess(selectedActionPhaseAction);
         };
     }
@@ -178,4 +179,3 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         actionInfoTable.init(findSelectedActionPhaseAction(actionButtonData));
     }
 }
-

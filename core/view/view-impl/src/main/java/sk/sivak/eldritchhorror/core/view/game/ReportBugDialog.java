@@ -14,6 +14,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class ReportBugDialog extends Dialog {
 
@@ -23,12 +24,12 @@ public class ReportBugDialog extends Dialog {
     private final TextButton closeButton;
 
     public ReportBugDialog(MenuButton menuButton, Skin skin) {
-        super(" Report a Bug", skin);
+        super(get("reportBug.title"), skin);
         this.menuButton = menuButton;
 
-        textArea = new TextArea("Describe your problem...", skin);
-        sendButton = createNiceButton("Send", skin);
-        closeButton = createNiceButton("Close", skin);
+        textArea = new TextArea(get("reportBug.placeholder"), skin);
+        sendButton = createNiceButton(get("reportBug.send"), skin);
+        closeButton = createNiceButton(get("reportBug.close"), skin);
 
 
         getContentTable().add(textArea).pad(5).size(ViewProperties.VIEWPORT_WIDTH * 0.5f, ViewProperties.VIEWPORT_HEIGHT * 0.5f);

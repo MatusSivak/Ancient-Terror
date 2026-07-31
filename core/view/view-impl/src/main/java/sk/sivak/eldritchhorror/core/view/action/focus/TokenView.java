@@ -13,6 +13,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.view.action.GainTokenHelper.gainTokenAndUpdateHud;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -20,7 +21,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class TokenView {
 
     public Completable gainClueFromPool() {
-        return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN, "Gaining Clue...");
+        return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN, get("focus.gainingClue"));
     }
 
     public Completable gainClueFromSpace(LocationId locationId) {
@@ -28,12 +29,12 @@ public class TokenView {
     }
 
     public Completable gainFocus(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getFocusBar(), CustomAssetManager.FOCUS_TOKEN, "Gaining Focus...");
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getFocusBar(), CustomAssetManager.FOCUS_TOKEN, get("focus.gainingFocus"));
     }
 
     public Completable justFocus() {
         return Completable.create(onSub -> InfoStage.addActionToInfoStage(Actions.sequence(
-                Actions.run(() -> InfoStage.displayText("Focusing...")),
+                Actions.run(() -> InfoStage.displayText(get("focus.focusing"))),
                 new FastForwardAction<>(Actions.delay(ViewProperties.NORMAL_ACTION_DURATION * 2)),
                 Actions.run(onSub::onCompleted)
         )));

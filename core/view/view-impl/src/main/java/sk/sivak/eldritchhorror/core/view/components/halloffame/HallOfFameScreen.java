@@ -46,6 +46,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class HallOfFameScreen implements Screen {
     private Stage stage;
@@ -88,7 +89,7 @@ public class HallOfFameScreen implements Screen {
         buttonsTable.pad(15);
         buttonsTable.setHeight(ViewProperties.VIEWPORT_HEIGHT);
 
-        TextButton backButton = buildButton("Back");
+        TextButton backButton = buildButton(get("hallOfFame.back"));
         backButton.setColor(Color.GRAY);
         ButtonUtils.addClickListener(backButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.INIT_GAME);
@@ -107,11 +108,11 @@ public class HallOfFameScreen implements Screen {
 
     private void initTable() {
         VisTable headerTable = new VisTable();
-        headerTable.add(createHeaderLabel(" Player", Color.YELLOW)).pad(0).width(220);
+        headerTable.add(createHeaderLabel(get("hallOfFame.header.player"), Color.YELLOW)).pad(0).width(220);
         headerTable.addSeparator(true).padTop(0).padBottom(0);
-        headerTable.add(createHeaderLabel(" Ancient One", Color.YELLOW)).pad(0).width(180);
+        headerTable.add(createHeaderLabel(get("hallOfFame.header.ancientOne"), Color.YELLOW)).pad(0).width(180);
         headerTable.addSeparator(true).padTop(0).padBottom(0);
-        headerTable.add(createHeaderLabel(" Difficulty", Color.YELLOW)).pad(0).width(120);
+        headerTable.add(createHeaderLabel(get("hallOfFame.header.difficulty"), Color.YELLOW)).pad(0).width(120);
         headerTable.pack();
         headerTable.setPosition(417, VIEWPORT_HEIGHT - 40);
         stage.addActor(new ActorFrame(headerTable,5));
@@ -132,7 +133,7 @@ public class HallOfFameScreen implements Screen {
                     Label ancientOneLabel = createNameLabel(" " + hallOfFameData.getAncientOneId().toPrettyString(), Color.LIGHT_GRAY, alpha);
                     table.add(ancientOneLabel).pad(0).width(180);
                     table.addSeparator(true).padTop(0).padBottom(0);
-                    String difficulty = hallOfFameData.getDifficulty().equals("EASY") ? "Easy" : "Normal";
+                    String difficulty = hallOfFameData.getDifficulty().equals("EASY") ? get("hallOfFame.difficulty.easy") : get("hallOfFame.difficulty.normal");
                     Label difficultyLabel = createNameLabel(" " + difficulty, Color.LIGHT_GRAY, alpha);
                     table.add(difficultyLabel).pad(0).width(120);
                     table.row();
@@ -183,23 +184,23 @@ public class HallOfFameScreen implements Screen {
         detailsTable = new VisTable();
         detailsTable.pad(5);
         if (hallOfFameData == null) {
-            detailsTable.add(createDetailsLabel("[#ffff00]Date & Time:[] [#bfbfbf]???[]", Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel("[#ffff00]Investigators:[] [#bfbfbf]???[]", Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel("[#ffff00]Doomsday Clock:[] [#bfbfbf]???[]", Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel("[#ffff00]Rounds:[] [#bfbfbf]???[]", Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel("[#ffff00]Solved Mysteries:[] [#bfbfbf]???[]", Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.datetime"), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.investigators"), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.doom"), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.rounds"), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.mysteries"), Color.WHITE)).width(375).row();
         } else {
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
             DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.DEFAULT, Locale.getDefault());
             String dateAsString = dateFormat.format(new Date(hallOfFameData.getTimestamp()));
             String timeAsString = timeFormat.format(new Date(hallOfFameData.getTimestamp()));
-            detailsTable.add(createDetailsLabel("[#ffff00]Date & Time:[] [#bfbfbf]"+dateAsString + " " + timeAsString+"[]", Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.datetime", dateAsString, timeAsString), Color.WHITE)).width(375).row();
 
             String investigatorsString = "";
             for (String investigator : hallOfFameData.getInvestigators()) {
                 investigatorsString += "\n - " + investigator;
             }
-            detailsTable.add(createDetailsLabel("[#ffff00]Investigators:[] [#bfbfbf]"+hallOfFameData.getInvestigatorsCount()+investigatorsString+"[]", Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.investigators", hallOfFameData.getInvestigatorsCount(), investigatorsString), Color.WHITE)).width(375).row();
 
             int minutes;
             int hours;
@@ -216,13 +217,13 @@ public class HallOfFameScreen implements Screen {
             }
 
 
-            detailsTable.add(createDetailsLabel("[#ffff00]Doomsday Clock:[] [#bfbfbf]"+String.format(Locale.getDefault(), "%02d",hours)+":"+String.format(Locale.getDefault(), "%02d",minutes)+"[]", Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel("[#ffff00]Rounds:[] [#bfbfbf]"+hallOfFameData.getRounds()+"[]", Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.doom", String.format(Locale.getDefault(), "%02d",hours), String.format(Locale.getDefault(), "%02d",minutes)), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.rounds", hallOfFameData.getRounds()), Color.WHITE)).width(375).row();
             String mysteriesString = "";
             for (String mystery : hallOfFameData.getSolvedMysteries()) {
                 mysteriesString += "\n - " + mystery;
             }
-            detailsTable.add(createDetailsLabel("[#ffff00]Solved Mysteries:[] [#bfbfbf]"+hallOfFameData.getSolvedMysteries().size()+mysteriesString, Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.mysteries", hallOfFameData.getSolvedMysteries().size(), mysteriesString), Color.WHITE)).width(375).row();
         }
 
         detailsTable.pack();

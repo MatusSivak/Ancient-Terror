@@ -31,6 +31,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class LoseImprovementComponent extends VisTable {
 
@@ -88,7 +89,7 @@ public class LoseImprovementComponent extends VisTable {
     private Label createLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.LIGHT_GRAY);
         labelStyle.background = CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND);
-        Label label = new Label("Lose Improvement", labelStyle);
+        Label label = new Label(get("skill.loseImprovement"), labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.35f);
         return label;
@@ -230,4 +231,3 @@ public class LoseImprovementComponent extends VisTable {
         displayHide.displayOrHide().subscribe();
     }
 }
-

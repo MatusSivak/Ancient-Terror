@@ -38,6 +38,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.LOCATION_BUTTON_UP;
 import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDistance;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -81,14 +82,14 @@ public class TravelHelper {
     }
 
     private void showCancelTravel(SingleSubscriber<? super LocationInfo.Connection> subscriber) {
-        stopButton = ButtonBuilder.buildButton("Stop");
+        stopButton = ButtonBuilder.buildButton(get("travel.stop"));
         addClickListener(stopButton, () -> {
             hideTableAndButtons();
             subscriber.onSuccess(null);
         });
         stopButton.getStyle().fontColor = new Color(0x800000ff);
         InfoStage.setBottomHeight(InfoStage.getBottomHeight() + stopButton.getHeight() + 5);
-        stopTravelingTable = LabelTable.createAndShowTable(0, "Stop traveling?");
+        stopTravelingTable = LabelTable.createAndShowTable(0, get("travel.stopPrompt"));
         InfoStage.showButton(stopButton);
     }
 

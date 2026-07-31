@@ -5,19 +5,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.kotcrab.vis.ui.widget.VisTable;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class TestResultTable extends VisTable {
 
     public static TestResultTable createPassedTable() {
-        return createTable("Passed", new Color(0x00ff00ff));
+        return createTable(get("test.passed"), new Color(0x00ff00ff));
     }
 
     public static TestResultTable createFailedTable() {
-        return createTable("Failed", new Color(0xff4040ff));
+        return createTable(get("test.failed"), new Color(0xff4040ff));
     }
 
     public static TestResultTable createScoreTable(int score) {
-        return createTable("Score: " + score, Color.YELLOW);
+        return createTable(get("test.score", score), Color.YELLOW);
     }
 
     private static TestResultTable createTable(String resultText, Color color) {
@@ -27,7 +28,7 @@ public class TestResultTable extends VisTable {
         headerLabelStyle.font = getBitmapFont(FONT_MINYA);
         headerLabelStyle.fontColor = Color.WHITE;
 
-        Label headerLabel = new Label("Test Outcome", headerLabelStyle);
+        Label headerLabel = new Label(get("test.outcome"), headerLabelStyle);
         headerLabel.setFontScale(0.5f);
 
         Label.LabelStyle resultLabelStyle = new Label.LabelStyle();

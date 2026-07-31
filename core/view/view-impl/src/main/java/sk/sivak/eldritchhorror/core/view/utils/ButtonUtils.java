@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class ButtonUtils {
 
@@ -27,8 +28,8 @@ public class ButtonUtils {
 
     public static Button[] buildNoYesButtons(float delay, Runnable noAction, Runnable yesAction) {
         Button[] buttons = new Button[2];
-        TextButton noButton = ButtonBuilder.buildButton("No");
-        TextButton yesButton = ButtonBuilder.buildButton("Yes");
+        TextButton noButton = ButtonBuilder.buildButton(get("dialog.no"));
+        TextButton yesButton = ButtonBuilder.buildButton(get("dialog.yes"));
 
         buttons[0] = noButton;
         buttons[1] = yesButton;

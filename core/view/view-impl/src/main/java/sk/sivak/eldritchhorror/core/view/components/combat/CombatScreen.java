@@ -46,6 +46,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WID
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class CombatScreen implements Screen {
     private Stage stage;
@@ -91,10 +92,10 @@ public class CombatScreen implements Screen {
         stage.addActor(background);
         new ThunderEffect(background).execute();
 
-        TextButton buttonAssets = buildButton("Assets");
-        TextButton buttonArtifacts = buildButton("Artifacts");
-        TextButton buttonSpells = buildButton("Spells");
-        TextButton buttonConditions = buildButton("Conditions");
+        TextButton buttonAssets = buildButton(get("combat.assets"));
+        TextButton buttonArtifacts = buildButton(get("combat.artifacts"));
+        TextButton buttonSpells = buildButton(get("combat.spells"));
+        TextButton buttonConditions = buildButton(get("combat.conditions"));
 
         Table buttonsTable = new Table();
         buttonsTable.pad(15);
@@ -247,7 +248,7 @@ public class CombatScreen implements Screen {
         buttonSpells.setColor(Color.GRAY);
         buttonConditions.setColor(Color.GRAY);
 
-        TextButton backButton = buildButton("Back");
+        TextButton backButton = buildButton(get("combat.back"));
         backButton.setColor(Color.GRAY);
         ButtonUtils.addClickListener(backButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.INIT_GAME);

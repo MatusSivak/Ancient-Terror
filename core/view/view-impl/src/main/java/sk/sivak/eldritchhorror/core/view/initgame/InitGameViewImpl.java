@@ -63,6 +63,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.loadTextures1;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -177,10 +178,10 @@ public class InitGameViewImpl implements Screen, InitGameView {
     public Single<DifficultyId> selectDifficulty() {
         return Single.create(sub -> {
 
-            Dialog dialog = new Dialog(" Select difficulty:", skin);
+            Dialog dialog = new Dialog(get("init.selectDifficulty"), skin);
 
-            TextButton difficultyEasyButton = createNiceButton("Easy");
-            TextButton difficultyNormalButton = createNiceButton("Normal");
+            TextButton difficultyEasyButton = createNiceButton(get("init.difficulty.easy"));
+            TextButton difficultyNormalButton = createNiceButton(get("init.difficulty.normal"));
 
             dialog.getContentTable().add(difficultyEasyButton).size(280,50);
             dialog.getContentTable().row();
@@ -231,16 +232,16 @@ public class InitGameViewImpl implements Screen, InitGameView {
         });
 
 
-        nrPlayersDialog = new NrPlayersDialog(" How many investigators?", skin);
+        nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), skin);
         nrPlayersDialog.setModal(false);
-        selectAncientOneDialog = new SelectAncientOneDialog("Select ancient one", skin);
+        selectAncientOneDialog = new SelectAncientOneDialog(get("init.selectAncientOne"), skin);
 
 
         Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage));
         NewMusicBox.getInstance().changeMusic(NewMusicBox.TRACK_HORROR_GAME_INTRO);
 
 
-        replayTutorialButton = createNiceButton("Tutorial");
+        replayTutorialButton = createNiceButton(get("init.tutorial"));
         replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, 245);
         addClickListener(replayTutorialButton, () -> {
             GoogleServicesHolder.setTutorialPassed(false);
@@ -254,13 +255,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         });
 
-        collectionButton = createNiceButton("Cards Collection");
+        collectionButton = createNiceButton(get("init.cardsCollection"));
         collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, 185);
         addClickListener(collectionButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.CARDS);
         });
 
-        hallOfFameButton = createNiceButton("Hall of Fame");
+        hallOfFameButton = createNiceButton(get("init.hallOfFame"));
         hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, 125);
         addClickListener(hallOfFameButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.HALL_OF_FAME);
@@ -280,12 +281,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         if (Gdx.files.local("save.json").exists()) {
 
-            loadGameButton = createNiceButton("Continue");
+            loadGameButton = createNiceButton(get("init.continue"));
             loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, 365);
             stage.addActor(loadGameButton);
             ButtonUtils.addClickListener(loadGameButton, continueGameAction);
 
-            newGameButton = createNiceButton("New Game");
+            newGameButton = createNiceButton(get("init.newGame"));
             newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, 305);
             stage.addActor(newGameButton);
 
@@ -316,7 +317,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
                 GoogleServicesHolder.getAdHandler().isRewardedVideoAdLoaded().subscribe(isLoaded -> {
                     Gdx.app.postRunnable(() -> {
                         if (isLoaded) {
-                            displayChalkboardWithNoYesButtons("[RED]Restart Game[]\n \nDo you want to restart the game?\n[#AAAAAA]Watch a short video ad.[]",
+                            displayChalkboardWithNoYesButtons(get("init.restartPrompt"),
                                     VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2).subscribe(answerIsTrue -> {
                                 if (!answerIsTrue) {
                                     return;

@@ -5,19 +5,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.kotcrab.vis.ui.widget.VisTable;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class RollResultTable extends VisTable {
 
     public static RollResultTable createSuccessfulTable() {
-        return createTable("Successful", new Color(0x00ff00ff));
+        return createTable(get("roll.successful"), new Color(0x00ff00ff));
     }
 
     public static RollResultTable createNotSuccessfulTable() {
-        return createTable("Not Successful", Color.YELLOW);
+        return createTable(get("roll.notSuccessful"), Color.YELLOW);
     }
 
     public static RollResultTable createFailedTable() {
-        return createTable("Failed", new Color(0xff0000ff));
+        return createTable(get("roll.failed"), new Color(0xff0000ff));
     }
 
     private static RollResultTable createTable(String resultText, Color color) {
@@ -27,7 +28,7 @@ public class RollResultTable extends VisTable {
         headerLabelStyle.font = getBitmapFont(FONT_MINYA);
         headerLabelStyle.fontColor = Color.WHITE;
 
-        Label headerLabel = new Label("Roll Outcome", headerLabelStyle);
+        Label headerLabel = new Label(get("roll.outcome"), headerLabelStyle);
         headerLabel.setFontScale(0.5f);
 
         Label.LabelStyle resultLabelStyle = new Label.LabelStyle();

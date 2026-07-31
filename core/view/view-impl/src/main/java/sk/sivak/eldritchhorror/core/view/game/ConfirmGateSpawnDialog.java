@@ -12,6 +12,8 @@ import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 
 import java.util.List;
 
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
+
 /**
  * @author msivak
  */
@@ -27,7 +29,7 @@ public class ConfirmGateSpawnDialog extends Dialog {
     public void init(LocationId locationId, List<MonsterInfo> monsters) {
         getContentTable().clear();
         Label gateLabel = new Label(locationId.name(), getSkin());
-        TextButton button = new TextButton("OK", getSkin());
+        TextButton button = new TextButton(get("dialog.ok"), getSkin());
         button.addListener(new ButtonListener());
         getContentTable().add(gateLabel).colspan(monsters.size()).row();
         for (MonsterInfo monster : monsters) {

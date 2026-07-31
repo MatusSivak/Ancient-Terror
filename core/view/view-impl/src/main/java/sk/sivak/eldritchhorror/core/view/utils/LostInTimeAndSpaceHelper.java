@@ -37,6 +37,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPACE;
 import static sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils.findInvestigatorsOffset;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class LostInTimeAndSpaceHelper {
 
@@ -55,7 +56,7 @@ public class LostInTimeAndSpaceHelper {
 
     public Completable showInvestigatorLostInTimeAndSpace(InvestigatorId investigatorId) {
         return Completable.create(onSub -> {
-            InfoStage.displayTextDontHide("Lost in Time and Space");
+            InfoStage.displayTextDontHide(get("lostInTimeAndSpace.title"));
             InfoStage.getInvestigatorHud().hide().subscribe();
             MoveCameraToLocationHelper.moveCameraToPosition(new Vector2(MAP_WIDTH/2f, MAP_HEIGHT/2f), onSub, 0.75f);
             backgroundUtils.toLostInTimeAndSpaceBackground();
@@ -134,7 +135,7 @@ public class LostInTimeAndSpaceHelper {
 
     public Completable hideInvestigatorLostInTimeAndSpace(InvestigatorId investigatorId) {
         return Completable.create(onSub -> {
-            InfoStage.hideLabel("Lost in Time and Space");
+            InfoStage.hideLabel(get("lostInTimeAndSpace.title"));
             backgroundUtils.hideBackground().subscribe();
 
             InvestigatorUtils.InvestigatorIdLayerResolver idLayerResolver = InvestigatorUtils.getIdLayerResolver(investigatorId, true);

@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import rx.CompletableSubscriber;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
+
 /**
  * @author msivak
  */
@@ -24,7 +26,7 @@ public class ShowCurrentMysteryCardDialog extends Dialog {
     public void init(MysteryCardInfo mysteryCardInfo) {
         getContentTable().clear();
         Label label = new Label(mysteryCardInfo.getName(), getSkin());
-        TextButton button = new TextButton("OK", getSkin());
+        TextButton button = new TextButton(get("dialog.ok"), getSkin());
         button.addListener(new ButtonListener());
         getContentTable().add(label).row();
         getContentTable().add(button).row();

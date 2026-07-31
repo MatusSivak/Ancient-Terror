@@ -17,6 +17,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class HideOkButtons {
     private TextButton hideButton;
@@ -44,8 +45,8 @@ public class HideOkButtons {
     }
 
     public void hideInstantly() {
-        hideButton = ButtonBuilder.buildButton("Hide");
-        okButton = ButtonBuilder.buildButton("OK");
+        hideButton = ButtonBuilder.buildButton(get("dialog.hide"));
+        okButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
         addedListener = addClickListener(hideButton, this::hide);
         addClickListener(okButton, () -> {
@@ -75,8 +76,8 @@ public class HideOkButtons {
     }
 
     public void showButtons() {
-        hideButton = ButtonBuilder.buildButton("Hide");
-        okButton = ButtonBuilder.buildButton("OK");
+        hideButton = ButtonBuilder.buildButton(get("dialog.hide"));
+        okButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
         addedListener = addClickListener(hideButton, this::hide);
         addClickListener(okButton, () -> {
@@ -145,7 +146,7 @@ public class HideOkButtons {
             displayed = false;
             actorToHide.setTouchable(Touchable.disabled);
             labelTable = LabelTable.createAndShowTable(0, displayLabelText);
-            button.setText("Yes");
+            button.setText(get("dialog.yes"));
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
             if (instant) {
@@ -182,7 +183,7 @@ public class HideOkButtons {
                     Actions.alpha(0, FAST_ACTION_DURATION),
                     Actions.run(() -> labelTable.remove())
             )));
-            button.setText("Hide");
+            button.setText(get("dialog.hide"));
             button.setTouchable(Touchable.disabled);
             actorToHide.addAction(new FastForwardAction<>(Actions.alpha(1, FAST_ACTION_DURATION)));
             okButton.addAction(new FastForwardAction<>(Actions.alpha(1, FAST_ACTION_DURATION)));

@@ -44,6 +44,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class RumorCard extends VisTable {
     private final DisplayHide displayHide;
@@ -89,9 +90,9 @@ public class RumorCard extends VisTable {
         Cell<Label> flavorLabelCell = add(flavorLabel).pad(5, padLeft, 0, padRight).width(width);
         row();
 
-        objectiveCell = createOneGenericRow("Objective:", rumorCardInfo.getObjectiveText());
+        objectiveCell = createOneGenericRow(get("rumor.objective"), rumorCardInfo.getObjectiveText());
         Cell<Table> requiresCluesRow = createRequiresCluesRow(rumorCardInfo.getCluesRequired());
-        failureCell = createOneGenericRow("Failure:", rumorCardInfo.getFailureText());
+        failureCell = createOneGenericRow(get("rumor.failure"), rumorCardInfo.getFailureText());
         reckoningCell = createReckoningRow(rumorCardInfo.getReckoningText());
         int countdownRowHeight = createCountdownRow(rumorCardInfo.getTimeRemaining());
 
@@ -128,7 +129,7 @@ public class RumorCard extends VisTable {
         if (cluesRequired == null) {
             return new Cell<>();
         }
-        Label resolveLabel = createJustLabel("Requires:");
+        Label resolveLabel = createJustLabel(get("rumor.requires"));
 
         Table resolveRow = new Table();
         resolveRow.add(resolveLabel).width(80).align(Align.right).padRight(5);
@@ -153,7 +154,7 @@ public class RumorCard extends VisTable {
             return 0;
         }
         CustomAssetManager.getTextureAsync("token/watch_2.png").subscribe(texture -> {
-            Label resolveLabel = createJustLabel("Time left:");
+            Label resolveLabel = createJustLabel(get("rumor.timeLeft"));
 
             Table resolveRow = new Table();
             resolveRow.add(resolveLabel).width(80).align(Align.right).padRight(5);
@@ -260,7 +261,7 @@ public class RumorCard extends VisTable {
 
     private Label createProgressLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.DARK_GRAY);
-        Label label = new Label("Progress:", labelStyle);
+        Label label = new Label(get("rumor.progress"), labelStyle);
         label.setAlignment(Align.left);
         label.setFontScale(0.5f);
         return label;
@@ -275,7 +276,7 @@ public class RumorCard extends VisTable {
         displayHide.setDisplayedY(VIEWPORT_HEIGHT / 2 - getHeight() / 2);
 
         displayHide.setBeforeDisplayAction(() -> {
-            InfoStage.displayTextDontHide("Ongoing Rumor");
+            InfoStage.displayTextDontHide(get("rumor.ongoing"));
             if (rumorCardInfo.getRumorLocation() != null) {
                 MapUtils.moveCameraToLocation(rumorCardInfo.getRumorLocation()).subscribe();
             }
@@ -285,7 +286,7 @@ public class RumorCard extends VisTable {
         });
 
 
-        displayHide.setBeforeHideAction(() -> InfoStage.hideLabel("Current Mystery"));
+        displayHide.setBeforeHideAction(() -> InfoStage.hideLabel(get("mystery.current")));
 
         displayHide.displayOrHide().subscribe(() -> {
 

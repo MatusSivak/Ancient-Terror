@@ -14,6 +14,7 @@ import sk.sivak.eldritchhorror.core.view.components.YellowButton;
 import sk.sivak.eldritchhorror.core.view.components.hud.TicketContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
@@ -35,7 +36,7 @@ public class TicketActionView {
 
     public Single<PathType> selectTravelTicket() {
         return Single.create(onSub -> {
-            InfoStage.displayTextForce("Select ticket");
+            InfoStage.displayTextForce(UiText.get("ticket.select"));
             trainButton = showTrainButton(onSub, 0.4f, () -> InfoStage.hideActor(shipButton));
             shipButton = showShipButton(onSub, 0.6f, () -> InfoStage.hideActor(trainButton));
             hideOtherButton(trainButton, shipButton);

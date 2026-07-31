@@ -93,6 +93,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.game.InfoStage.getStageSafe;
 import static sk.sivak.eldritchhorror.core.view.game.MapStage.getInvestigatorLayer;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -164,7 +165,7 @@ public class GameViewImpl implements Screen, GameView {
         backgroundUtils = new BackgroundUtils(backgroundStage, controller);
         MapUtils.resetCamera();
         Gdx.input.setInputProcessor(new InputMultiplexer(getStageSafe(), MapStage.getStage()));
-        showCurrentMysteryCardDialog = new ShowCurrentMysteryCardDialog("Current mystery card", skin);
+        showCurrentMysteryCardDialog = new ShowCurrentMysteryCardDialog(get("game.currentMysteryCard"), skin);
 
         initHudButtonsAndNoiseEffect();
         initOmenAndDoomTrack();
@@ -204,7 +205,7 @@ public class GameViewImpl implements Screen, GameView {
     private void checkIfTutorialWasPassed() {
         if (!GoogleServicesHolder.isTutorialPassed()) {
             MoveCameraToLocationHelper.setEnabled(false);
-            TextButton skipTutorial = createNiceButton("Skip\nTutorial");
+            TextButton skipTutorial = createNiceButton(get("game.skipTutorial"));
             addClickListener(skipTutorial, () -> {
                 GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.TUTORIAL, "Skip!");
                 GoogleServicesHolder.executeTutorialPassedAction();

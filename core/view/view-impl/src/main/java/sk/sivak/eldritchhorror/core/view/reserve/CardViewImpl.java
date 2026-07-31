@@ -34,6 +34,7 @@ import static java8.features.util.IterableUtils.forEach;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.*;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -99,8 +100,8 @@ public class CardViewImpl implements CardView {
     }
 
     private void showButtons(SingleSubscriber<? super ShowReserveDragAndDropOutput> onSub) {
-        hideButton = ButtonBuilder.buildButton("Hide");
-        okButton = ButtonBuilder.buildButton("OK");
+        hideButton = ButtonBuilder.buildButton(get("dialog.hide"));
+        okButton = ButtonBuilder.buildButton(get("dialog.ok"));
 
         addClickListener(hideButton, () -> {
             prepareShowReserveButton(hideButton).run();
@@ -137,8 +138,8 @@ public class CardViewImpl implements CardView {
                 return;
             }
             dragAndDropBinder.getSourceTargetGroup().setTouchable(Touchable.disabled);
-            displayReserveLabel = LabelTable.createAndShowTable(0, "Display Reserve?");
-            button.setText("Yes");
+            displayReserveLabel = LabelTable.createAndShowTable(0, get("reserve.displayPrompt"));
+            button.setText(get("dialog.yes"));
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
             SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();
@@ -166,7 +167,7 @@ public class CardViewImpl implements CardView {
                     Actions.alpha(0, FAST_ACTION_DURATION),
                     Actions.run(() -> displayReserveLabel.remove())
             ));
-            button.setText("Hide");
+            button.setText(get("dialog.hide"));
             button.setTouchable(Touchable.disabled);
             SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();
             sourceTargetGroup.addAction(Actions.alpha(1, FAST_ACTION_DURATION));

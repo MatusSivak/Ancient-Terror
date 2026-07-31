@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.view.map.redpin.RedPinUtils;
 import sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils;
 import sk.sivak.eldritchhorror.core.view.map.vortex.VortexImageUtils;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class PrepareBoardView {
 
     public Completable confirmExpeditionLocation(LocationId locationId) {
         return Completable.create(onSub -> {
-            InfoStage.displayText("Active Expedition");
+            InfoStage.displayText(UiText.get("prepare.activeExpedition"));
             MapUtils.moveCameraToLocation(locationId).subscribe(() -> {
                 ExpeditionUtils.spawnExpedition(locationId).subscribe(onSub::onCompleted);
             });
@@ -57,7 +58,7 @@ public class PrepareBoardView {
     public Completable confirmClueLocation(LocationId spawnLocationId, LocationId currentLocationId) {
         return backgroundUtils.hideBackground().andThen(
                 Completable.create(onSub -> {
-                    InfoStage.displayText("Spawning Clues");
+                    InfoStage.displayText(UiText.get("prepare.spawningClues"));
                     MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
                         ClueUtils.spawnClue(spawnLocationId, currentLocationId).subscribe(onSub::onCompleted);
                     });
@@ -71,7 +72,7 @@ public class PrepareBoardView {
 
     public Completable confirmGateSpawn(GateInfo gateInfo, OmenColor omenColor) {
         return Completable.create(onSub -> {
-            InfoStage.displayText("Spawning Gates");
+            InfoStage.displayText(UiText.get("prepare.spawningGates"));
             MapUtils.moveCameraToLocation(gateInfo.getLocationId()).subscribe(() -> {
                 GateUtils.spawnGate(gateInfo, omenColor).subscribe(onSub::onCompleted);
             });
@@ -96,7 +97,7 @@ public class PrepareBoardView {
 
     public Completable initInvestigator(InvestigatorBasics selectedInvestigators) {
         return Completable.create(onSub -> {
-            InfoStage.displayText("Spawning Investigators");
+            InfoStage.displayText(UiText.get("prepare.spawningInvestigators"));
             MapUtils.moveCameraToLocation(selectedInvestigators.getLocationId()).subscribe(() -> {
                 InvestigatorUtils.spawnInvestigator(selectedInvestigators.getLocationId(),
                         selectedInvestigators.getInvestigatorId(), gameController)
@@ -113,7 +114,7 @@ public class PrepareBoardView {
 
     public Completable discardClue(LocationId spawnLocationId, LocationId currentLocationId) {
         return Completable.create(onSub -> {
-            InfoStage.displayText("Discarding Clue");
+            InfoStage.displayText(UiText.get("prepare.discardingClue"));
             MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
                 ClueUtils.discardClue(spawnLocationId).subscribe(onSub::onCompleted);
             });
@@ -126,7 +127,7 @@ public class PrepareBoardView {
             return completable;
         }
 
-        InfoStage.displayTextForce("Mystery Location");
+        InfoStage.displayTextForce(UiText.get("prepare.mysteryLocation"));
         for (LocationId pinLocation : pinLocations) {
             completable = completable.andThen(MapUtils.moveCameraToLocation(pinLocation));
             completable = completable.andThen(RedPinUtils.spawnRedPin(pinLocation));
@@ -135,7 +136,7 @@ public class PrepareBoardView {
     }
 
     public Completable showStormLocation(String stormId, LocationId locationId) {
-        InfoStage.displayTextForce("Rumor Location");
+        InfoStage.displayTextForce(UiText.get("prepare.rumorLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
         completable = completable.andThen(StormImageUtils.spawnStorm(stormId, locationId));
         return completable;
@@ -185,7 +186,7 @@ public class PrepareBoardView {
     }
 
     public Completable spawnVortex(LocationId locationId) {
-        InfoStage.displayTextForce("Vortex Location");
+        InfoStage.displayTextForce(UiText.get("prepare.vortexLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
         completable = completable.andThen(VortexImageUtils.spawnVortex(locationId));
         return completable;

@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static com.badlogic.gdx.math.Interpolation.sine;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.HUD_HEIGHT_RATIO;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public final class GainClueFromSpaceHelper {
 
@@ -53,7 +54,7 @@ public final class GainClueFromSpaceHelper {
     }
 
     private static void withClue(Actor clueActor, rx.CompletableSubscriber onSub) {
-        InfoStage.displayText("Gaining Clue...");
+        InfoStage.displayText(get("focus.gainingClue"));
         clueActor.setOrigin(clueActor.getWidth() / 2, clueActor.getHeight() / 2);
         float normalActionDuration = ViewProperties.NORMAL_ACTION_DURATION;
 

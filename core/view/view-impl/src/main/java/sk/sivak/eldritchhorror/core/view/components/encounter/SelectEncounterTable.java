@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class SelectEncounterTable extends Table {
 
@@ -89,7 +90,7 @@ public class SelectEncounterTable extends Table {
         scrollPane.setScrollingDisabled(true,false);
         add(scrollPane).height(220).width(595).align(Align.topLeft).row();
 
-        TextButton hideButton = ButtonBuilder.buildButton("Hide");
+        TextButton hideButton = ButtonBuilder.buildButton(get("dialog.hide"));
         add(hideButton)
                 .height(hideButton.getHeight())
                 .width(hideButton.getWidth())
@@ -117,7 +118,7 @@ public class SelectEncounterTable extends Table {
     }
 
     private void beforeHide() {
-        showButton = ButtonBuilder.buildButton("Yes");
+        showButton = ButtonBuilder.buildButton(get("dialog.yes"));
         ButtonUtils.addClickListener(showButton, () -> {
             if (getParent() != null) {
                 return;
@@ -132,7 +133,7 @@ public class SelectEncounterTable extends Table {
         InfoStage.addSmallActorToInfoStage(showButton);
         showButton.addAction(Actions.alpha(1, 1f));
         InfoStage.setBottomHeight(InfoStage.getBottomHeight() + showButton.getHeight() + 5);
-        showLabel = LabelTable.createAndShowTable(1, "Display Encounters?");
+        showLabel = LabelTable.createAndShowTable(1, get("encounter.displayPrompt"));
     }
 
     public void onSelect(String uuid) {

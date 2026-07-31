@@ -36,6 +36,7 @@ import static java8.features.stream.Stream.collectToList;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils.findInvestigatorsOffset;
 import static sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils.setCurrentInvestigatorOffset;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -60,7 +61,7 @@ public class TravelActionView {
     public Single<LocationInfo.Connection> selectTravelLocation(
             LocationId currentLocationId, List<LocationInfo.Connection> connections, boolean optional) {
         return backgroundUtils.hideBackground().andThen(Single.create(onSub -> {
-            InfoStage.displayTextForce("Select destination");
+            InfoStage.displayTextForce(get("travel.selectDestination"));
             compositeMap.showCityInfoLabels();
             new TravelHelper().selectLocation(currentLocationId, connections, optional, onSub);
         }));
@@ -69,7 +70,7 @@ public class TravelActionView {
     public Single<LocationInfo.Connection> selectLocation(List<LocationId> locations) {
         return backgroundUtils.hideBackground().andThen(Single.create(onSub -> {
 
-            InfoStage.displayTextForce("Select location");
+            InfoStage.displayTextForce(get("travel.selectLocation"));
 
             HudButtons.getInstance().hide().subscribe();
             InfoStage.getInvestigatorHud().hide().subscribe();
@@ -162,7 +163,7 @@ public class TravelActionView {
                 onSub.onSuccess(null);
                 return;
             }
-            InfoStage.displayTextForce("Spend ticket?");
+            InfoStage.displayTextForce(get("travel.spendTicket"));
             new TravelHelper().selectLocation(currentLocationId, connections, true, onSub);
         });
     }

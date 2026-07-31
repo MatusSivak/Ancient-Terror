@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.DOOM_CHANGED;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.HUD_BUTTON;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class DoomOmenViewImpl implements DoomOmenView {
 
@@ -32,12 +33,12 @@ public class DoomOmenViewImpl implements DoomOmenView {
 
     @Override
     public Completable retreatDoom(int positiveAmount) {
-        return advanceOrRetreatDoom("Retreating Doom", positiveAmount);
+        return advanceOrRetreatDoom(get("doom.retreating"), positiveAmount);
     }
 
     @Override
     public Completable advanceDoom(int negativeAmount) {
-        return advanceOrRetreatDoom("Advancing Doom", negativeAmount);
+        return advanceOrRetreatDoom(get("doom.advancing"), negativeAmount);
     }
 
     private Completable advanceOrRetreatDoom(String text, int amount) {
@@ -63,7 +64,8 @@ public class DoomOmenViewImpl implements DoomOmenView {
     @Override
     public Completable addTokenToOmenTrack(OmenId omenId) {
         return Completable.create(onSub -> {
-            InfoStage.displayTextDontHide("Adding token to Omen");
+            String label = get("omen.addingToken");
+            InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
             ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
@@ -76,7 +78,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
                         new FastForwardAction(Actions.delay(hasTokens ? 2.0f : 1.5f)),
                         Actions.run(() -> {
                             clickZoomListener.setOnCompletedListener(() -> {
-                                InfoStage.hideLabel("Adding token to Omen");
+                                InfoStage.hideLabel(label);
                                 onSub.onCompleted();
                             });
                             clickZoomListener.minimize();
@@ -91,7 +93,8 @@ public class DoomOmenViewImpl implements DoomOmenView {
     @Override
     public Completable removeTokenFromOmenTrack(OmenId omenId) {
         return Completable.create(onSub -> {
-            InfoStage.displayTextDontHide("Removing token from Omen");
+            String label = get("omen.removingToken");
+            InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
             ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
@@ -103,7 +106,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
                         new FastForwardAction<>(Actions.delay(1.5f)),
                         Actions.run(() -> {
                             clickZoomListener.setOnCompletedListener(() -> {
-                                InfoStage.hideLabel("Removing token from Omen");
+                                InfoStage.hideLabel(label);
                                 onSub.onCompleted();
                             });
                             clickZoomListener.minimize();
@@ -118,7 +121,8 @@ public class DoomOmenViewImpl implements DoomOmenView {
     @Override
     public Completable advanceOmen(OmenId omenId) {
         return Completable.create(onSub -> {
-            InfoStage.displayTextDontHide("Advancing Omen");
+            String label = get("omen.advancing");
+            InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
             ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
@@ -130,7 +134,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
                         new FastForwardAction<>(Actions.delay(1)),
                         Actions.run(() -> {
                             clickZoomListener.setOnCompletedListener(() -> {
-                                InfoStage.hideLabel("Advancing Omen");
+                                InfoStage.hideLabel(label);
                                 onSub.onCompleted();
                             });
                             clickZoomListener.minimize();
@@ -145,7 +149,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
     @Override
     public Single<OmenId> selectNewOmen() {
         return Single.create(onSub -> {
-            InfoStage.displayTextDontHide("Select New Omen");
+            InfoStage.displayTextDontHide(get("omen.selectNew"));
             OmenTrack omenTrack = HudButtons.getOmenTrack();
             ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> selectNewOmen(onSub, omenTrack, clickZoomListener));

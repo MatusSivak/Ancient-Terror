@@ -35,6 +35,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDistance;
 import static sk.sivak.eldritchhorror.core.view.map.helper.MoveActorHelper.moveActor;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MonsterViewImpl implements MonsterView {
 
@@ -59,7 +60,7 @@ public class MonsterViewImpl implements MonsterView {
     @Override
     public Completable discardMonster(MonsterInfo input) {
         return Completable.create(onSub -> {
-            InfoStage.displayText("Discarding Monster");
+            InfoStage.displayText(get("monster.discarding"));
             MapUtils.moveCameraToLocation(input.getCurrentLocation()).subscribe(() -> {
                 MonsterUtils.discardMonster(input).subscribe(onSub::onCompleted);
             });

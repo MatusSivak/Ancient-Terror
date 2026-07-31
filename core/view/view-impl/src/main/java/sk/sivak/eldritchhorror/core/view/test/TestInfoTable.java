@@ -21,6 +21,7 @@ import static java8.features.stream.Stream.*;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -73,7 +74,7 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         diceBonusCellValue.row();
 
         if (modifier != 0) {
-            add(createLabel("Modifier: ", Color.WHITE)).align(Align.right);
+            add(createLabel(get("test.modifier"), Color.WHITE)).align(Align.right);
         }
         if (modifier < 0) {
             add(createLabel("" + modifier, Color.RED)).align(Align.right).colspan(2).row();
@@ -82,7 +83,7 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         }
 
         addSeparator().colspan(3);
-        add(createLabel("Dice Pool: ", Color.YELLOW)).align(Align.right);
+        add(createLabel(get("test.dicePool"), Color.YELLOW)).align(Align.right);
 
         int dicePool = calculateDicePool();
         dicePoolLabel = createLabel("" + dicePool, Color.YELLOW);
@@ -126,7 +127,7 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         if (statBonus > 0) {
             statBonusCellTitle.spaceBottom(8);
             statBonusCellTitle.height(24.5f);
-            ((Label) statBonusCellTitle.getActor()).setText("Stat Bonus: ");
+            ((Label) statBonusCellTitle.getActor()).setText(get("test.statBonus"));
 
             statBonusCellValue.spaceBottom(8);
             statBonusCellValue.height(24.5f);
@@ -147,7 +148,7 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         if (diceBonus + additionalDicesCount != 0) {
             diceBonusCellTitle.spaceBottom(8);
             diceBonusCellTitle.height(24.5f);
-            ((Label) diceBonusCellTitle.getActor()).setText("Dice Bonus: ");
+            ((Label) diceBonusCellTitle.getActor()).setText(get("test.diceBonus"));
 
             diceBonusCellValue.spaceBottom(8);
             diceBonusCellValue.height(24.5f);

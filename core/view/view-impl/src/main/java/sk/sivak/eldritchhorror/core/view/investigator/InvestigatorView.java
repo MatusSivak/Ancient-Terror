@@ -41,6 +41,7 @@ import static java8.features.stream.Stream.collectToList;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.game.MapStage.getInvestigatorLayer;
 import static sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils.findInvestigatorsOffset;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class InvestigatorView {
 
@@ -52,7 +53,7 @@ public class InvestigatorView {
 
     public Completable showActiveInvestigator(boolean displayTransition, boolean lostInTimeAndSpace) {
         InvestigatorBasics currentInvestigator = controller.getInvestigatorBasics();
-        InfoStage.displayText("The " + currentInvestigator.getInvestigatorId().toString());
+        InfoStage.displayText(get("investigator.activePrefix", currentInvestigator.getInvestigatorId().toString()));
         Completable updateHudCompletable = updateHud(currentInvestigator);
 
         Completable displayTransitionCompletable;
@@ -154,7 +155,7 @@ public class InvestigatorView {
 
         return Single.create(onSub -> {
             SelectSingleComponent<InvestigatorId> selectSingleComponent = new SelectSingleComponent<>(list, onSub);
-            selectSingleComponent.init("Display investigators?", title,
+            selectSingleComponent.init(get("investigator.displayInvestigators"), title,
                     alpha -> new Color(0.0f, 0.0f, 0.0f, 0.5f * alpha), PURE_WHITE_BACKGROUND);
             selectSingleComponent.show();
         });

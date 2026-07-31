@@ -25,6 +25,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MenuButton extends ImageButton {
 
@@ -56,22 +57,22 @@ public class MenuButton extends ImageButton {
         menuButtonClickable = false;
         MapStage.darkenWorld(0.85f);
 
-        Dialog dialog = new Dialog(" Menu", skin);
+        Dialog dialog = new Dialog(get("menu.title"), skin);
 
-        ImageTextButton restartGameButton = createNiceButton("icon/restart.png", "Restart Game");
-        ImageTextButton musicOnButton = createNiceButton("icon/volume_on.png", "Music ON");
-        ImageTextButton musicOffButton = createNiceButton("icon/volume_off.png", "Music OFF");
-        ImageTextButton vibrationOnButton = createNiceButton("icon/vibration_on.png", "Vibration ON");
-        ImageTextButton vibrationOffButton = createNiceButton("icon/vibration_off.png", "Vibration OFF");
-        ImageTextButton strobeOnButton = createNiceButton("icon/migraine_on.png", "Strobe ON");
-        ImageTextButton strobeOffButton = createNiceButton("icon/migraine_off.png", "Strobe OFF");
-        ImageTextButton saveAndExitButton = createNiceButton("icon/save.png", "Save & Exit");
+        ImageTextButton restartGameButton = createNiceButton("icon/restart.png", get("menu.restartGame"));
+        ImageTextButton musicOnButton = createNiceButton("icon/volume_on.png", get("menu.musicOn"));
+        ImageTextButton musicOffButton = createNiceButton("icon/volume_off.png", get("menu.musicOff"));
+        ImageTextButton vibrationOnButton = createNiceButton("icon/vibration_on.png", get("menu.vibrationOn"));
+        ImageTextButton vibrationOffButton = createNiceButton("icon/vibration_off.png", get("menu.vibrationOff"));
+        ImageTextButton strobeOnButton = createNiceButton("icon/migraine_on.png", get("menu.strobeOn"));
+        ImageTextButton strobeOffButton = createNiceButton("icon/migraine_off.png", get("menu.strobeOff"));
+        ImageTextButton saveAndExitButton = createNiceButton("icon/save.png", get("menu.saveAndExit"));
 
         byte[] bugButtonData = Base64Coder.decode(BUG_BUTTON_DATA);
         Pixmap pixmap = new Pixmap(bugButtonData , 0, bugButtonData .length);
-        ImageTextButton reportBugButton = createNiceButton(new TextureRegionDrawable(new TextureRegion(new Texture(pixmap))), "Report a Bug");
+        ImageTextButton reportBugButton = createNiceButton(new TextureRegionDrawable(new TextureRegion(new Texture(pixmap))), get("menu.reportBug"));
 
-        TextButton closeButton = createNiceButton("Return");
+        TextButton closeButton = createNiceButton(get("menu.return"));
 
         if (restartButtonDisplayed) {
             dialog.getContentTable().add(restartGameButton).size(280, 50);
@@ -228,7 +229,7 @@ public class MenuButton extends ImageButton {
     }
 
     private ImageTextButton createNiceButton(TextureRegionDrawable textureRegionDrawable, String text) {
-        TextButton.TextButtonStyle textButtonStyle = new TextButton("asd", skin).getStyle();
+        TextButton.TextButtonStyle textButtonStyle = new TextButton("", skin).getStyle();
         ImageTextButton.ImageTextButtonStyle imageTextButtonStyle = new ImageTextButton.ImageTextButtonStyle(textButtonStyle);
         imageTextButtonStyle.imageUp = textureRegionDrawable;
         ImageTextButton niceButton = new ImageTextButton(text, imageTextButtonStyle);

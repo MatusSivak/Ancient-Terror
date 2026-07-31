@@ -62,6 +62,7 @@ import static sk.sivak.eldritchhorror.core.view.test.RollResultTable.createSucce
 import static sk.sivak.eldritchhorror.core.view.test.TestResultTable.*;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
  * @author msivak
@@ -94,7 +95,7 @@ public class TestViewImpl implements TestView {
                 hideDicesAfterConfirm = false;
             } else {
                 hideDicesAfterConfirm = true;
-                InfoStage.displayText("Test " + stat.prettyString());
+                InfoStage.displayText(get("test.testPrefix", stat.prettyString()));
                 if (!monsterCombatTableStack.isEmpty()) {
                     monsterCombatTableStack.peek().moveRight().subscribe();
                     monsterCombatTableStack.peek().setLocked(true);
@@ -106,7 +107,7 @@ public class TestViewImpl implements TestView {
             }
             testInfoTable = new TestInfoTable(stat, modifier, baseStatValue, bonusStatValue, usableAssets, additionalDicesCount);
 
-            String buttonTitle = "Test";
+            String buttonTitle = get("test.button");
 
             testButton = buildButton(buttonTitle);
             testButton.addListener(new ConfirmTestListener(onSub));
@@ -194,7 +195,7 @@ public class TestViewImpl implements TestView {
     @Override
     public Completable confirmRollResult(int score) {
         return Completable.create(onSub -> {
-            TextButton button = buildButton("OK");
+            TextButton button = buildButton(get("dialog.ok"));
             hideDicesAfterConfirm = true;
             showButton(onSub, button);
 
@@ -223,7 +224,7 @@ public class TestViewImpl implements TestView {
     }
 
     private void confirmBinaryTestResult(boolean successful, CompletableSubscriber onSub) {
-        TextButton button = buildButton("OK");
+        TextButton button = buildButton(get("dialog.ok"));
         showButton(onSub, button);
 
         if (successful) {
@@ -238,7 +239,7 @@ public class TestViewImpl implements TestView {
     }
 
     private void confirmScoreTestResult(int score, CompletableSubscriber onSub) {
-        TextButton button = buildButton("OK");
+        TextButton button = buildButton(get("dialog.ok"));
         showButton(onSub, button);
 
         testTableStack.push(createScoreTable(score));
@@ -277,7 +278,7 @@ public class TestViewImpl implements TestView {
             };
             buttons = ButtonUtils.buildNoYesButtons(0, noAction, yesAction);
             if (question == null) {
-                labelTable = LabelTable.createAndShowTable(0, "Reroll with Focus?",
+                labelTable = LabelTable.createAndShowTable(0, get("test.rerollFocus"),
                         CustomAssetManager.getTexture(CustomAssetManager.FOCUS_TOKEN));
             } else {
                 List<Texture> textures = new LinkedList<>();
@@ -312,7 +313,7 @@ public class TestViewImpl implements TestView {
             };
             buttons = ButtonUtils.buildNoYesButtons(0, noAction, yesAction);
             if (question == null) {
-                labelTable = LabelTable.createAndShowTable(0, "Reroll with Clue?",
+                labelTable = LabelTable.createAndShowTable(0, get("test.rerollClue"),
                         CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
             } else {
                 List<Texture> textures = new LinkedList<>();
@@ -335,7 +336,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Single<Integer> addOneToDieResult(int minSuccess) {
-        LabelTable addOneTable = LabelTable.createAndShowTable(0f, "Add 1 to 1 die");
+        LabelTable addOneTable = LabelTable.createAndShowTable(0f, get("test.addOneToDie"));
         return diceRollerStack.peek().addAddOneClickListeners(minSuccess).map(input -> {
             InfoStage.hideActor(addOneTable);
             InfoStage.setBottomHeight(InfoStage.getBottomHeight() - addOneTable.getHeight() - 5);
@@ -373,8 +374,8 @@ public class TestViewImpl implements TestView {
     public Completable showCombatOverview(CombatOverviewTableData data) {
         return Completable.create(onSub -> {
             MapStage.darkenWorld();
-            InfoStage.displayTextDontHide("Combat");
-            String buttonTitle = "Fight";
+            InfoStage.displayTextDontHide(get("combat.title"));
+            String buttonTitle = get("combat.fight");
 
             CombatOverviewTable combatOverviewTable = new CombatOverviewTable();
             combatOverviewTable.init(data);
@@ -387,7 +388,7 @@ public class TestViewImpl implements TestView {
                 onSub.onCompleted();
                 InfoStage.hideActor(combatButton);
                 InfoStage.hideActor(combatOverviewTable);
-                InfoStage.hideLabel("Combat");
+                InfoStage.hideLabel(get("combat.title"));
             });
             InfoStage.showButton(combatButton);
             combatButton.setPosition(combatOverviewTable.getX() + combatOverviewTable.getWidth()/2 - combatButton.getWidth()/2f, 5);
