@@ -24,7 +24,6 @@ import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
 import sk.sivak.eldritchhorror.core.view.TypewriterView;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
-import sk.sivak.eldritchhorror.core.view.components.tutorial.SafeTypingLabel;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -59,7 +58,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     private final TypewriterQuestionTyper typewriterQuestionTyper;
     private final TypewriterEffect typewriterEffect;
 
-    private Color fontColor = Color.DARK_GRAY;
+    private Color fontColor = Color.BLACK;
 
     public TypewriterViewImpl() {
         typewriterHeaderTyper = new TypewriterHeaderTyper(this);
@@ -119,7 +118,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     }
 
     public Completable typeFlavor(String flavor) {
-        return typeTextInternal(flavor + "\n ", Color.DARK_GRAY);
+        return typeTextInternal(flavor + "\n ", Color.BLACK);
     }
 
     public Completable typeInfo(String regular) {
@@ -217,7 +216,7 @@ public class TypewriterViewImpl implements TypewriterView  {
 
     private TypingLabel createTypingLabel(String text) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.WHITE);
-        TypingLabel typingLabel = new SafeTypingLabel(text, labelStyle);
+        TypingLabel typingLabel = new BoldSafeTypingLabel(text, labelStyle);
         typingLabel.setWrap(true);
         typingLabel.setAlignment(Align.left, Align.center);
         typingLabel.setFontScale(FONT_SCALE);
@@ -230,8 +229,13 @@ public class TypewriterViewImpl implements TypewriterView  {
 
             @Override
             public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, batch.getColor().a * 0.75f);
+                float r = batch.getColor().r;
+                float g = batch.getColor().g;
+                float b = batch.getColor().b;
+                float a = batch.getColor().a;
+                batch.setColor(r, g, b, a * 0.92f);
                 super.draw(batch, x, y, width, height);
+                batch.setColor(r, g, b, a);
             }
         };
 
@@ -239,14 +243,20 @@ public class TypewriterViewImpl implements TypewriterView  {
 
             @Override
             public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, batch.getColor().a);
+                float r = batch.getColor().r;
+                float g = batch.getColor().g;
+                float b = batch.getColor().b;
+                float a = batch.getColor().a;
+                batch.setColor(r, g, b, a);
                 super.draw(batch, x, y, width, height);
+                batch.setColor(r, g, b, a);
             }
         };
 
         textButtonStyle.checked = textButtonStyle.down;
         textButtonStyle.font = getBitmapFont(FONT_ADLER);
         TextButton textButton = new TextButton(text, textButtonStyle);
+        textButton.getLabel().setColor(Color.WHITE);
         textButton.getLabel().setFontScale(FONT_SCALE);
         return textButton;
     }

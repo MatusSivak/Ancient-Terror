@@ -27,6 +27,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class TypewriterQuestionTyper {
+    private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.18f;
 
     private final TypewriterViewImpl typewriterView;
 
@@ -98,11 +99,8 @@ public class TypewriterQuestionTyper {
         LinkedList<TextButtonWithValue> buttons = new LinkedList<>();
         for (int i = 0; i < buttonDatas.size(); i++) {
             TextButton button = typewriterView.createTextButton(buttonDatas.get(i).buttonText);
-            if (buttonDatas.get(i).buttonColor.equals(Color.WHITE)) {
-                button.getLabel().setColor(Color.LIGHT_GRAY);
-            } else {
-                button.getLabel().setColor(buttonDatas.get(i).buttonColor);
-            }
+            button.getLabel().setColor(Color.WHITE);
+            button.getLabel().setFontScale(FONT_SCALE * BUTTON_FONT_SCALE_MULTIPLIER);
 
             TextButtonWithValue textButtonWithValue = new TextButtonWithValue(button);
             textButtonWithValue.setButtonId(i);
