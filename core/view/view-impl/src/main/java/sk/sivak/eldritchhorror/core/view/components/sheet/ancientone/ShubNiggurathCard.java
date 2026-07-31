@@ -129,7 +129,7 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
 
         Label reckoningValue = createValue(FONT_MINYA, 0.5f);
         reckoningValue.setWrap(true);
-        reckoningValue.setText("[BLACK]" + ancientOneInfo.getReckoningText() + "[]");
+        reckoningValue.setText("[BLACK]" + get(ancientOneInfo.getReckoningText()) + "[]");
 
         table.add(reckoningImage).padLeft(10).padRight(10).width(53).height(53).align(Align.left);
         table.add(reckoningValue).growX().padLeft(5);
@@ -146,13 +146,13 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
 
         Label midnightValue = createValue(FONT_MINYA, 0.5f);
         midnightValue.setWrap(true);
-        midnightValue.setText("[BLACK]" + ancientOneInfo.getMidnightText() + "[]");
+        midnightValue.setText("[BLACK]" + get(ancientOneInfo.getMidnightText()) + "[]");
 
         Label winLabel = createTextLabel(get("ancientOne.victory"));
 
         Label winValue = createValue(FONT_MINYA, 0.5f);
         winValue.setWrap(true);
-        winValue.setText("[BLACK]" + ancientOneInfo.getWinText() + "[]");
+        winValue.setText("[BLACK]" + get(ancientOneInfo.getWinText()) + "[]");
 
         table.add(midnightDoom).padLeft(10).padRight(10).width(53).height(53).align(Align.left);
         table.add(midnightValue).width(230).padLeft(5);
@@ -215,8 +215,8 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
     private Table createTopLeftPart(AncientOneInfo ancientOneInfo) {
         VisTable table = new VisTable();
 
-        Label nameLabel = createNameLabel(ancientOneInfo.getName());
-        Label altNameLabel = createNiceLabel("-"+ancientOneInfo.getAltName()+"-");
+        Label nameLabel = createNameLabel(get(ancientOneInfo.getName()));
+        Label altNameLabel = createNiceLabel("-"+get(ancientOneInfo.getAltName())+"-");
 
         Image ancientOneLabel = new Image(CustomAssetManager.getTexture(ANCIENT_ONE_LABEL));
         ancientOneLabel.setScaling(Scaling.fit);
@@ -232,7 +232,7 @@ public class ShubNiggurathCard extends VisTable implements AncientOneCard{
     }
 
     private Label createFlavorPart(AncientOneInfo ancientOneInfo) {
-        Label flavorLabel = createNiceLabel(ancientOneInfo.getFlavorText());
+        Label flavorLabel = createNiceLabel(get(ancientOneInfo.getFlavorText()));
         flavorLabel.setAlignment(Align.bottom);
         return flavorLabel;
     }

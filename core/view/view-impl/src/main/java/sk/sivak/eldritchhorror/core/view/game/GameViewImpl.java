@@ -269,6 +269,8 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     private void initHudButtonsAndNoiseEffect() {
+        InfoStage.getHudButtonsLayer().clear();
+        InfoStage.getNoiseEffectLayer().clear();
         HudButtons hudButtons = new HudButtons(controller);
         hudButtons.init();
 
@@ -673,6 +675,7 @@ public class GameViewImpl implements Screen, GameView {
     public void resize(int width, int height) {
         backgroundStage.getViewport().update(width, height, false);
         getStageSafe().getViewport().update(width, height, false);
+        MapStage.resize(width, height);
     }
 
     @Override
@@ -1047,8 +1050,9 @@ public class GameViewImpl implements Screen, GameView {
 
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, skin);
-        niceButton.getLabel().setFontScale(0.25f);
+        niceButton.getLabel().setFontScale(0.38f);
         niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        niceButton.getLabel().setColor(Color.WHITE);
         return niceButton;
     }
 }

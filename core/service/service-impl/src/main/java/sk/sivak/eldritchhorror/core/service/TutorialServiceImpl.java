@@ -4,6 +4,7 @@ import rx.Single;
 import sk.sivak.eldritchhorror.core.action.Action;
 import sk.sivak.eldritchhorror.core.action.provider.TutorialActionProvider;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
+import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
@@ -131,7 +132,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         hideChalkboard();
         displayWindowOnInfoStage(0,0,VIEWPORT_WIDTH, VIEWPORT_HEIGHT,false);
         displayWindowOnMapStage(-MAP_WIDTH,0,MAP_WIDTH*3, MAP_HEIGHT,false);
-        enableOnlyThisAction("Gain\nClue");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.INVESTIGATOR);
         gameService.justPerformAction();
         displayChalkboard("tutorial.actionPhase.needSecondClue", CENTER_X, CENTER_Y, true);
         hideChalkboard();
@@ -143,7 +144,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         displayChalkboard("tutorial.actionPhase.travelIstanbul", CENTER_X + 270, CENTER_Y, true);
         hideChalkboard();
         displayWindowOnMapStage(MAP_WIDTH + 1878 - 30, MAP_HEIGHT - 355 - 30, 60, 60, false);
-        enableOnlyThisAction("Travel");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.TRAVEL);
         gameService.justPerformAction();
         displayChalkboard("tutorial.actionPhase.noActionsLeft", CENTER_X, CENTER_Y, true);
         displayChalkboard("tutorial.actionPhase.encounterIncoming", CENTER_X, CENTER_Y, true);
@@ -179,13 +180,13 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         displayChalkboard("tutorial.actionPhase2.travelPyramids", CENTER_X + 270,CENTER_Y, true);
         hideChalkboard();
         displayWindowOnMapStage(MAP_WIDTH + 1765 - 30, MAP_HEIGHT - 509 - 30, 60, 60, false);
-        enableOnlyThisAction("Travel");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.TRAVEL);
         resetPerformedActions();
         gameService.justPerformAction();
         displayWindowOnMapStage(-MAP_WIDTH,0,MAP_WIDTH*3, MAP_HEIGHT,false);
         displayChalkboard("tutorial.actionPhase2.executeFocus", CENTER_X, CENTER_Y, true);
         hideChalkboard();
-        enableOnlyThisAction("Focus");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.FOCUS);
         gameService.justPerformAction();
         displayChalkboard("tutorial.actionPhase2.focusToken", CENTER_X, CENTER_Y, true);
         hideChalkboard();
@@ -211,7 +212,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         displayChalkboard("tutorial.actionPhase3.finishMystery", CENTER_X + 270,CENTER_Y, true);
         hideChalkboard();
         displayWindowOnMapStage(MAP_WIDTH + 1878 - 30, MAP_HEIGHT - 355 - 30, 60, 60, false);
-        enableOnlyThisAction("Travel");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.TRAVEL);
         resetPerformedActions();
         gameService.justPerformAction();
 
@@ -229,7 +230,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         displayChalkboard("tutorial.actionPhase3.obtainCharterFlight", CENTER_X, CENTER_Y, true);
         displayChalkboard("tutorial.actionPhase3.buyCharterFlight", CENTER_X, CENTER_Y, true);
         hideChalkboard();
-        enableOnlyThisAction("Acquire\nAssets");
+        enableOnlyThisAction(ActionButtonData.ActionButtonId.ACQUIRE_ASSETS);
         adjustRolledDicesInAcquireAssets();
         adjustCharterFlight();
         displayWindowOnMapStage(MAP_WIDTH + 2231 - 30, MAP_HEIGHT - 311 - 30, 113 + 60, 131 + 60, false);
@@ -309,8 +310,8 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         execute(new ActionCommand<>(tutorialActionProvider.adjustRolledDicesInAcquireAssets(), "ADJUST_ROLLED_DICES_IN_ACQUIRE_ASSETS"));
     }
 
-    private void enableOnlyThisAction(String actionName) {
-        execute(new ActionCommand<>(tutorialActionProvider.enableOnlyThisAction(actionName), "ENABLE_ONLY_THIS_ACTION"));
+    private void enableOnlyThisAction(ActionButtonData.ActionButtonId actionButtonId) {
+        execute(new ActionCommand<>(tutorialActionProvider.enableOnlyThisAction(actionButtonId), "ENABLE_ONLY_THIS_ACTION"));
     }
 
     private void highlightSpyAction() {

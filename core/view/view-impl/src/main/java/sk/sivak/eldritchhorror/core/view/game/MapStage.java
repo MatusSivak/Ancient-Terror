@@ -56,6 +56,7 @@ public class MapStage {
     private MapDragListener mapDragListener;
     private MapZoomListener mapZoomListener;
     private FrameBuffer frameBuffer;
+    private SpriteBatch frameBufferSpriteBatch;
     private Stage stage;
     private Stage curtainStage;
     private Group clueLayer;
@@ -77,15 +78,26 @@ public class MapStage {
     private Map<MapKey, List<Actor>> idActorMap = new HashMap<>();
 
     private MapStage() {
-        SpriteBatch spriteBatch = new SpriteBatch();
+        frameBufferSpriteBatch = new SpriteBatch();
         curtainStage = new Stage(new FitViewport(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT));
         stage = new Stage(new FitViewport(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT)) {
             @Override
             public void draw() {
-                if (frameBuffer == null) {
+                int viewportWidth = getViewport().getScreenWidth();
+                int viewportHeight = getViewport().getScreenHeight();
+                if (viewportWidth <= 0 || viewportHeight <= 0) {
+                    super.draw();
+                    return;
+                }
+                if (frameBuffer == null
+                        || frameBuffer.getWidth() != viewportWidth
+                        || frameBuffer.getHeight() != viewportHeight) {
+                    if (frameBuffer != null) {
+                        frameBuffer.dispose();
+                    }
                     frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
-                            getViewport().getScreenWidth(),
-                            getViewport().getScreenHeight(), true);
+                            viewportWidth,
+                            viewportHeight, true);
                 }
 
                 frameBuffer.begin();
@@ -110,13 +122,13 @@ public class MapStage {
                 );
                 getBatch().end();
 
-                spriteBatch.begin();
-                spriteBatch.setColor(Color.WHITE);
-                spriteBatch.draw(textureRegion,
+                frameBufferSpriteBatch.begin();
+                frameBufferSpriteBatch.setColor(Color.WHITE);
+                frameBufferSpriteBatch.draw(textureRegion,
                         0,
                         0,
                         Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-                spriteBatch.end();
+                frameBufferSpriteBatch.end();
             }
         };
         mapLayer = new Group() {
@@ -393,7 +405,15 @@ public class MapStage {
     }
 
     public static void nullifyInstance() {
+        if (instance != null) {
+            instance.dispose();
+        }
         instance = null;
+    }
+
+    public static void resize(int width, int height) {
+        get().stage.getViewport().update(width, height, false);
+        get().curtainStage.getViewport().update(width, height, false);
     }
 
     public static void render(float delta) {
@@ -494,6 +514,22 @@ public class MapStage {
 
     public static OrthographicCamera getCamera() {
         return ((OrthographicCamera) get().stage.getCamera());
+    }
+
+    private void dispose() {
+        clearIdActorMap();
+        stage.clear();
+        curtainStage.clear();
+        if (frameBuffer != null) {
+            frameBuffer.dispose();
+            frameBuffer = null;
+        }
+        if (frameBufferSpriteBatch != null) {
+            frameBufferSpriteBatch.dispose();
+            frameBufferSpriteBatch = null;
+        }
+        stage.dispose();
+        curtainStage.dispose();
     }
 
     public static <T> void addToLayer(Actor actor, IdLayerResolver<T> idLayerResolver) {

@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.action.provider;
 
 import sk.sivak.eldritchhorror.core.action.Action;
+import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.eventtype.data.tutorial.CompositeTouchBlockerData;
 
 public interface TutorialActionProvider {
@@ -26,7 +27,7 @@ public interface TutorialActionProvider {
 
     Action<Object, Object> waitForInvestigatorHide();
 
-    Action<Object, Object> enableOnlyThisAction(String actionName);
+    Action<Object, Object> enableOnlyThisAction(ActionButtonData.ActionButtonId actionButtonId);
 
     Action<Object, Object> adjustRolledDicesInCombat();
 

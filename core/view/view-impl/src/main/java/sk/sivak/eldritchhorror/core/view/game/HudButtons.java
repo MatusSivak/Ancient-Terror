@@ -20,6 +20,7 @@ import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -198,8 +199,18 @@ public class HudButtons {
             return Completable.complete();
         }
         return Completable.create(onSub -> {
+            if (background == null || hudButtons == null) {
+                onSub.onCompleted();
+                return;
+            }
             MoveToAction moveBackgroundAction = new MoveToAction();
             displayed = show;
+            AtomicInteger pendingAnimations = new AtomicInteger(hudButtons.getButtons().size + 1);
+            Runnable completeWhenDone = () -> {
+                if (pendingAnimations.decrementAndGet() == 0) {
+                    onSub.onCompleted();
+                }
+            };
             if (show) {
                 moveBackgroundAction.setPosition(0, background.getY()); // 0
             } else {
@@ -207,7 +218,8 @@ public class HudButtons {
             }
             moveBackgroundAction.setDuration(FAST_ACTION_DURATION);
             moveBackgroundAction.setTarget(background);
-            background.addAction(sequence(new FastForwardAction(moveBackgroundAction), run(onSub::onCompleted)));
+            background.clearActions();
+            background.addAction(sequence(new FastForwardAction(moveBackgroundAction), run(completeWhenDone)));
             for (HudButton hudButton : hudButtons.getButtons()) {
                 MoveToAction action = new MoveToAction();
                 if (show) {
@@ -217,7 +229,8 @@ public class HudButtons {
                 }
                 action.setDuration(FAST_ACTION_DURATION);
                 action.setTarget(hudButton);
-                hudButton.addAction(sequence(new FastForwardAction(action), run(onSub::onCompleted)));
+                hudButton.clearActions();
+                hudButton.addAction(sequence(new FastForwardAction(action), run(completeWhenDone)));
             }
         });
     }

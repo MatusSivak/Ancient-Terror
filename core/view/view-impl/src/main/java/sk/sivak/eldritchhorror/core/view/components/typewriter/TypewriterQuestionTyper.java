@@ -27,7 +27,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class TypewriterQuestionTyper {
-    private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.18f;
+    private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.24f;
 
     private final TypewriterViewImpl typewriterView;
 

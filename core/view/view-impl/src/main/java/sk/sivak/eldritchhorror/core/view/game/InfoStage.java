@@ -160,6 +160,9 @@ public class InfoStage {
     }
 
     public static void nullifyInstance() {
+        if (instance != null) {
+            instance.dispose();
+        }
         instance = null;
     }
 
@@ -442,7 +445,14 @@ public class InfoStage {
     }
 
     public static void reset() {
-        getStageSafe().clear();
+        if (instance != null) {
+            instance.dispose();
+        }
         instance = new InfoStage();
+    }
+
+    private void dispose() {
+        stage.clear();
+        stage.dispose();
     }
 }

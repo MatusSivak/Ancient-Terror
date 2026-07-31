@@ -347,8 +347,6 @@ public class InitGameViewImpl implements Screen, InitGameView {
                                 GoogleServicesHolder.getAdHandler().showRewardedAd(new AdHandler.AdCallbacks()
                                         .setOnAdStartedAction(() -> {
                                             GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AD_MOB, "rewarded_ad", "show_started");
-                                            loadGameButton.setDisabled(false);
-                                            loadGameButton.setTouchable(Touchable.enabled);
                                         })
                                         .setOnAdRewardedAction(() -> {
                                             rewarded[0] = true;

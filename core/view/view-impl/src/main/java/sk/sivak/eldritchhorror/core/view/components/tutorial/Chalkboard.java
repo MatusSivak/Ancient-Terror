@@ -32,6 +32,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class Chalkboard extends Group {
     private static final float BACKGROUND_SCALE = 0.35f;
     private static final float FONT_SCALE = 0.6f;
+    private static final float DIALOG_BUTTON_WIDTH = 176f;
+    private static final float DIALOG_BUTTON_HEIGHT = 64f;
     private static final float BORDER_SIZE = 70;
     private static final int TEXTURE_WIDTH = 1007;
     private static final int TEXTURE_HEIGHT = 650;
@@ -118,7 +120,7 @@ public class Chalkboard extends Group {
         Action0 showButtons = () -> {
             TextButton noButton = createNiceButton(get("dialog.no"));
             noButton.getLabel().setColor(Color.RED);
-            buttonsTable.add(noButton).padRight(10).size(140, 50);
+            buttonsTable.add(noButton).padRight(10).size(DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT);
             ButtonUtils.addClickListener(noButton, () -> {
                 hide(() -> {
                     resetChalkboard();
@@ -131,7 +133,7 @@ public class Chalkboard extends Group {
 
 
             TextButton yesButton = createNiceButton(get("dialog.yes"));
-            buttonsTable.add(yesButton).size(140, 50);
+            buttonsTable.add(yesButton).size(DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT);
             yesButton.getLabel().setColor(Color.GREEN);
             ButtonUtils.addClickListener(yesButton, () -> {
                 hide(() -> {
@@ -160,7 +162,7 @@ public class Chalkboard extends Group {
 
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, skin);
-        niceButton.getLabel().setFontScale(0.5f);
+        niceButton.getLabel().setFontScale(0.58f);
         niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
         return niceButton;
     }

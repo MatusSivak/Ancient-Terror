@@ -15,8 +15,8 @@ public class TypewriterConstants {
     static final String HEX_BAD = "e02323";
     static final String HEX_GOOD = "1F7F33";
     static final float TEXT_LINE_HEIGHT = 60 * FONT_SCALE;
-    static final float BUTTON_HEIGHT = TEXT_LINE_HEIGHT * 2.5f;
+    static final float BUTTON_HEIGHT = TEXT_LINE_HEIGHT * 2.9f;
     static final float BUTTON_BORDER = 10f / FONT_SCALE;
 
-    static final float MIN_BUTTON_WIDTH = 100f;
+    static final float MIN_BUTTON_WIDTH = 130f;
 }

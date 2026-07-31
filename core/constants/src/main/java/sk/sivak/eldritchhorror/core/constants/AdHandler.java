@@ -28,6 +28,9 @@ public interface AdHandler {
 
     Runnable addOnRewardedAdFailedToLoadAction(Consumer<Integer> onAdFailedToLoadAction);
 
+    default void dispose() {
+    }
+
     class AdCallbacks {
         private Runnable onAdOpenedAction = () -> {};
         private Runnable onAdStartedAction = () -> {};

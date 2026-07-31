@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.components.sheet.ancientone;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -103,10 +104,13 @@ public class AzathothCard extends VisTable implements AncientOneCard{
     private Table createLeftPart(AncientOneInfo ancientOneInfo) {
         VisTable table = new VisTable();
 
-        Label nameLabel = createNameLabel(ancientOneInfo.getName());
-        Label altNameLabel = createNiceLabel("-"+ancientOneInfo.getAltName()+"-");
-        Label flavorLabel = createNiceLabel(ancientOneInfo.getFlavorText());
-        flavorLabel.setAlignment(Align.bottom);
+        Label nameLabel = createNameLabel(get(ancientOneInfo.getName()));
+        Label altNameLabel = createNiceLabel("-"+get(ancientOneInfo.getAltName())+"-");
+        Label flavorLabel = createFlavorLabel(get(ancientOneInfo.getFlavorText()));
+        Container<Label> flavorContainer = new Container<>(flavorLabel);
+        flavorContainer.fill();
+        flavorContainer.top();
+        flavorContainer.setClip(true);
 
         Image ancientOneLabel = new Image(CustomAssetManager.getTexture(ANCIENT_ONE_LABEL));
         ancientOneLabel.setScaling(Scaling.fit);
@@ -117,8 +121,8 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         table.row();
         table.add(altNameLabel).width(490 * SCALE);
         table.row();
-        table.addSeparator();
-        table.add(flavorLabel).width(490 * SCALE).height(114); // to make both sides same height
+        table.addSeparator().padTop(10f).padBottom(10f).row();
+        table.add(flavorContainer).width(490 * SCALE).height(220f * SCALE).top();
         return table;
     }
 
@@ -129,7 +133,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
 
         Label setupValue = createValue(FONT_MINYA, 0.5f);
         setupValue.setWrap(true);
-        setupValue.setText("[BLACK]" + ancientOneInfo.getSetupText() + "[]");
+        setupValue.setText("[BLACK]" + get(ancientOneInfo.getSetupText()) + "[]");
 
         DoomTrackWidget midnightDoom = new DoomTrackWidget();
         midnightDoom.updateDoom(0);
@@ -137,7 +141,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
 
         Label midnightValue = createValue(FONT_MINYA, 0.5f);
         midnightValue.setWrap(true);
-        midnightValue.setText("[BLACK]" + ancientOneInfo.getMidnightText() + "[]");
+        midnightValue.setText("[BLACK]" + get(ancientOneInfo.getMidnightText()) + "[]");
 
         OmenTrack omenTrack = new OmenTrack();
         omenTrack.updateOmen(OmenId.NORTH);
@@ -145,13 +149,13 @@ public class AzathothCard extends VisTable implements AncientOneCard{
 
         Label specialValue = createValue(FONT_MINYA, 0.5f);
         specialValue.setWrap(true);
-        specialValue.setText("[BLACK]" + ancientOneInfo.getSpecialText() + "[]");
+        specialValue.setText("[BLACK]" + get(ancientOneInfo.getSpecialText()) + "[]");
 
         Label winLabel = createTextLabel(get("ancientOne.victory"));
 
         Label winValue = createValue(FONT_MINYA, 0.5f);
         winValue.setWrap(true);
-        winValue.setText("[BLACK]" + ancientOneInfo.getWinText() + "[]");
+        winValue.setText("[BLACK]" + get(ancientOneInfo.getWinText()) + "[]");
 
 
         table.add(setupLabel).width(73);
@@ -190,8 +194,8 @@ public class AzathothCard extends VisTable implements AncientOneCard{
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.DARK_GRAY);
-        Color color = new Color(1f, 1f, 1f, 0.25f);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Color color = new Color(1f, 1f, 1f, 0.58f);
         labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
             @Override
             public void draw(Batch batch, float x, float y, float width, float height) {
@@ -201,7 +205,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         };
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
-        label.setFontScale(0.35f);
+        label.setFontScale(0.52f);
         return label;
     }
 
@@ -211,6 +215,15 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         label.setAlignment(Align.center);
         label.setWrap(true);
         label.setFontScale(0.5f);
+        return label;
+    }
+
+    private Label createFlavorLabel(String text) {
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.DARK_GRAY);
+        Label label = new Label(text, labelStyle);
+        label.setAlignment(Align.top | Align.center);
+        label.setWrap(true);
+        label.setFontScale(0.33f, 0.40f);
         return label;
     }
 

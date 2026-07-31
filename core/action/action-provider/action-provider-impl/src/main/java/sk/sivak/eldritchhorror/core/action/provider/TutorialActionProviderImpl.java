@@ -26,6 +26,7 @@ import sk.sivak.eldritchhorror.core.action.impl.tutorial.WaitForInvestigatorHide
 import sk.sivak.eldritchhorror.core.action.impl.tutorial.WaitForMysteryClickAction;
 import sk.sivak.eldritchhorror.core.action.impl.tutorial.WaitForMysteryHideAction;
 import sk.sivak.eldritchhorror.core.action.impl.tutorial.WaitForReserveClickAction;
+import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.eventtype.data.tutorial.CompositeTouchBlockerData;
 
 public class TutorialActionProviderImpl implements TutorialActionProvider {
@@ -86,8 +87,8 @@ public class TutorialActionProviderImpl implements TutorialActionProvider {
     }
 
     @Override
-    public Action<Object, Object> enableOnlyThisAction(String actionName) {
-        return new EnableOnlyThisActionAction(actionName);
+    public Action<Object, Object> enableOnlyThisAction(ActionButtonData.ActionButtonId actionButtonId) {
+        return new EnableOnlyThisActionAction(actionButtonId);
     }
 
     @Override

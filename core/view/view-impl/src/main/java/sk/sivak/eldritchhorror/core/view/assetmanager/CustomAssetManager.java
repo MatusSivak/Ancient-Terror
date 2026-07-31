@@ -380,67 +380,27 @@ public class CustomAssetManager extends AssetManager {
     public static Single<Texture> getTextureAsync(String id) {
         Single<Texture> textureSingle = Single.create(onSub -> {
             if (get().isLoaded(id)) {
-                Runnable runnable = () -> {
-                    Texture texture = get().get(id);
-                    if (texture.getMinFilter() != Texture.TextureFilter.Linear && texture.getMagFilter() != Texture.TextureFilter.Linear) {
-                        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-                    }
-
-                    if (id.startsWith("card/asset/")) {
-                        get().cardAssetLoadedCallback.accept(id);
-                    } else if (id.startsWith("card/artifact/")) {
-                        get().cardArtifactLoadedCallback.accept(id);
-                    } else if (id.startsWith("card/spell/")) {
-                        get().cardSpellLoadedCallback.accept(id);
-                    } else if (id.startsWith("card/condition/")) {
-                        get().cardConditionLoadedCallback.accept(id);
-                    }
-                    onSub.onSuccess(texture);
-                };
-                if (Thread.currentThread().getName().contains("Scheduler")) {
-                    Gdx.app.postRunnable(runnable);
-                } else {
-                    runnable.run();
-                }
+                completeTextureRequest(id, onSub);
                 return;
             }
-            get().load(id, Texture.class);
-            while (!get().isLoaded(id)) {
-                Gdx.app.postRunnable(() -> {
-                    get().update();
-                });
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    //
+            synchronized (get()) {
+                if (!get().isLoaded(id)) {
+                    get().load(id, Texture.class);
                 }
             }
-            getTextureAsync(id).subscribe(onSub::onSuccess);
+            if (Gdx.app == null) {
+                get().finishLoadingAsset(id);
+                completeTextureRequest(id, onSub);
+                return;
+            }
+            requestTextureAsyncOnRenderThread(id, onSub);
         });
-        if (get().isLoaded(id)) {
-            return textureSingle;
-        } else {
-            return textureSingle.subscribeOn(Schedulers.io());
-        }
+        return get().isLoaded(id) ? textureSingle : textureSingle.subscribeOn(Schedulers.io());
     }
 
     public static Texture getTexture(String id) {
         if (get().isLoaded(id)) {
-            Texture texture = get().get(id);
-            if (texture.getMinFilter() != Texture.TextureFilter.Linear && texture.getMagFilter() != Texture.TextureFilter.Linear) {
-                texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            }
-
-            if (id.startsWith("card/asset/")) {
-                get().cardAssetLoadedCallback.accept(id);
-            } else if (id.startsWith("card/artifact/")) {
-                get().cardArtifactLoadedCallback.accept(id);
-            } else if (id.startsWith("card/spell/")) {
-                get().cardSpellLoadedCallback.accept(id);
-            } else if (id.startsWith("card/condition/")) {
-                get().cardConditionLoadedCallback.accept(id);
-            }
-            return texture;
+            return processTextureForUse(id, get().get(id));
         } else {
             long start = System.currentTimeMillis();
             get().load(id, Texture.class);
@@ -448,6 +408,48 @@ public class CustomAssetManager extends AssetManager {
             Texture texture = getTexture(id);
             return texture;
         }
+    }
+
+    private static void requestTextureAsyncOnRenderThread(String id, rx.SingleSubscriber<? super Texture> onSub) {
+        Gdx.app.postRunnable(() -> {
+            if (onSub.isUnsubscribed()) {
+                return;
+            }
+            if (get().isLoaded(id)) {
+                completeTextureRequest(id, onSub);
+                return;
+            }
+            get().update(20);
+            requestTextureAsyncOnRenderThread(id, onSub);
+        });
+    }
+
+    private static void completeTextureRequest(String id, rx.SingleSubscriber<? super Texture> onSub) {
+        if (onSub.isUnsubscribed()) {
+            return;
+        }
+        Texture texture = processTextureForUse(id, get().get(id));
+        onSub.onSuccess(texture);
+    }
+
+    private static Texture processTextureForUse(String id, Texture texture) {
+        if (texture.getMinFilter() != Texture.TextureFilter.Linear && texture.getMagFilter() != Texture.TextureFilter.Linear) {
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        }
+        Consumer<String> callback = null;
+        if (id.startsWith("card/asset/")) {
+            callback = get().cardAssetLoadedCallback;
+        } else if (id.startsWith("card/artifact/")) {
+            callback = get().cardArtifactLoadedCallback;
+        } else if (id.startsWith("card/spell/")) {
+            callback = get().cardSpellLoadedCallback;
+        } else if (id.startsWith("card/condition/")) {
+            callback = get().cardConditionLoadedCallback;
+        }
+        if (callback != null) {
+            callback.accept(id);
+        }
+        return texture;
     }
 
     @Override

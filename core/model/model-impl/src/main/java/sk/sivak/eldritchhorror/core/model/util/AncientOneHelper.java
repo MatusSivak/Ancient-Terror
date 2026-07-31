@@ -30,19 +30,15 @@ public class AncientOneHelper {
         AncientOneInfoImpl ancientOneInfo = new AncientOneInfoImpl();
         ancientOneInfo.setAncientOneId(AncientOneId.AZATHOTH);
         ancientOneInfo.setStartingDoom(15);
-        ancientOneInfo.setSetupText("Token is placed\non the Green Omen.");
-        ancientOneInfo.setName("Azathoth");
-        ancientOneInfo.setAltName("The Daemon Sultan");
-        ancientOneInfo.setSpecialText("Doom advances for each\nToken on Green Omen.");
-        ancientOneInfo.setMidnightText("The World is Devoured!");
-        ancientOneInfo.setWinText("Solve 3 Mysteries.");
+        ancientOneInfo.setSetupText("ancientOne.azathoth.setup");
+        ancientOneInfo.setName("ancientOne.azathoth.name");
+        ancientOneInfo.setAltName("ancientOne.azathoth.alt");
+        ancientOneInfo.setSpecialText("ancientOne.azathoth.special");
+        ancientOneInfo.setMidnightText("ancientOne.azathoth.midnight");
+        ancientOneInfo.setWinText("ancientOne.azathoth.win");
         ancientOneInfo.setMysteriesRequired(3);
-        ancientOneInfo.setFlavorText("Out in the mindless void the daemon bore me,\n" +
-                "Past the bright clusters of dimensioned space,\n" +
-                "Till neither time nor matter stretched before me,\n" +
-                "But only Chaos, without form or place.");
-        ancientOneInfo.setEndGameText("[RED]The World is Devoured![]\n \n" +
-                "Earthquakes and volcanic eruptions tear the Earth's crust apart.\nYou lost the game.");
+        ancientOneInfo.setFlavorText("ancientOne.azathoth.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.azathoth.endGame");
         ancientOneInfo.setMythosCardCount(16);
         return ancientOneInfo;
     }
@@ -51,18 +47,15 @@ public class AncientOneHelper {
         AncientOneInfoImpl ancientOneInfo = new AncientOneInfoImpl();
         ancientOneInfo.setAncientOneId(AncientOneId.CTHULHU);
         ancientOneInfo.setStartingDoom(12);
-        ancientOneInfo.setName("Cthulhu");
-        ancientOneInfo.setAltName("The Great Dreamer");
-        ancientOneInfo.setSpecialText("When an investigator moves into a vortex,\nhe becomes Delayed and loses one Sanity.");
-        ancientOneInfo.setMidnightText("Cthulhu awakens!");
-        ancientOneInfo.setWinText("Solve 3 Mysteries.");
+        ancientOneInfo.setName("ancientOne.cthulhu.name");
+        ancientOneInfo.setAltName("ancientOne.cthulhu.alt");
+        ancientOneInfo.setSpecialText("ancientOne.cthulhu.special");
+        ancientOneInfo.setMidnightText("ancientOne.cthulhu.midnight");
+        ancientOneInfo.setWinText("ancientOne.cthulhu.win");
         ancientOneInfo.setMysteriesRequired(3);
-        ancientOneInfo.setReckoningText("Vortex is spawned under each investigator on a Sea.");
-        ancientOneInfo.setFlavorText("In his house at R'lyeh\n" +
-                "dead Cthulhu waits dreaming.\n" +
-                "Not dead which eternal lie.\n" +
-                "Stranger eons death may die.");
-        ancientOneInfo.setEndGameText("[RED]The great priest Cthulhu rises and brings the earth beneath his sway.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.cthulhu.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.cthulhu.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.cthulhu.endGame");
         ancientOneInfo.setMythosCardCount(15);
         ancientOneInfo.setRemovedMonsters(Arrays.asList(NonEpicMonsterId.STAR_SPAWN, NonEpicMonsterId.DEEP_ONE));
         return ancientOneInfo;
@@ -73,16 +66,15 @@ public class AncientOneHelper {
         ancientOneInfo.setAncientOneId(AncientOneId.CTHULHU);
         ancientOneInfo.setAwaken(true);
         ancientOneInfo.setStartingDoom(0);
-        ancientOneInfo.setName("Cthulhu - Awaken");
-        ancientOneInfo.setAltName("High Priest of the Great Old Ones");
-        ancientOneInfo.setSpecialText("When an investigator moves into a vortex, he becomes\nDelayed and loses one Sanity. Cthulhu's power rises!");
-        ancientOneInfo.setMidnightText("Each time Doom would advance,\nCthulhu's power rises instead!");
-        ancientOneInfo.setWinText("Solve 3 Mysteries.\nDefeat Cthulhu.");
+        ancientOneInfo.setName("ancientOne.cthulhu.awaken.name");
+        ancientOneInfo.setAltName("ancientOne.cthulhu.awaken.alt");
+        ancientOneInfo.setSpecialText("ancientOne.cthulhu.awaken.special");
+        ancientOneInfo.setMidnightText("ancientOne.cthulhu.awaken.midnight");
+        ancientOneInfo.setWinText("ancientOne.cthulhu.awaken.win");
         ancientOneInfo.setMysteriesRequired(4);
-        ancientOneInfo.setReckoningText("Each investigator loses Sanity equal to Cthulhu's power.");
-        ancientOneInfo.setFlavorText("...morals thrown aside and all men shouting and killing and revelling in joy.\n" +
-                "...all the earth would flame with a holocaust of ecstasy and freedom.");
-        ancientOneInfo.setEndGameText("[RED]The great priest Cthulhu rises and brings the earth beneath his sway.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.cthulhu.awaken.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.cthulhu.awaken.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.cthulhu.endGame");
         ancientOneInfo.setMythosCardCount(15);
         ancientOneInfo.setRemovedMonsters(Arrays.asList(NonEpicMonsterId.STAR_SPAWN, NonEpicMonsterId.DEEP_ONE));
         return ancientOneInfo;
@@ -92,17 +84,14 @@ public class AncientOneHelper {
         AncientOneInfoImpl ancientOneInfo = new AncientOneInfoImpl();
         ancientOneInfo.setAncientOneId(AncientOneId.SHUB_NIGGURATH);
         ancientOneInfo.setStartingDoom(13);
-        ancientOneInfo.setName("Shub-Niggurath");
-        ancientOneInfo.setAltName("The Black Goat of the Woods");
-        ancientOneInfo.setMidnightText("Shub-Niggurath awakens!");
-        ancientOneInfo.setWinText("Solve 3 Mysteries.");
+        ancientOneInfo.setName("ancientOne.shubNiggurath.name");
+        ancientOneInfo.setAltName("ancientOne.shubNiggurath.alt");
+        ancientOneInfo.setMidnightText("ancientOne.shubNiggurath.midnight");
+        ancientOneInfo.setWinText("ancientOne.shubNiggurath.win");
         ancientOneInfo.setMysteriesRequired(3);
-        ancientOneInfo.setReckoningText("Monster is spawned on a random space.\nDoom advances twice if there are 10+ monsters.");
-        ancientOneInfo.setFlavorText(
-                "The hellish cloud-like entity Shub-Niggurath,\n" +
-                "in whose honor nameless cults hold the rite\n" +
-                "of the Goat with a Thousand Young.");
-        ancientOneInfo.setEndGameText("[RED]From the wildest corners of the earth, the dark young emerge to overwhelm humanity.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.shubNiggurath.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.shubNiggurath.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.shubNiggurath.endGame");
         ancientOneInfo.setMythosCardCount(16);
         ancientOneInfo.setRemovedMonsters(Arrays.asList(
                 NonEpicMonsterId.GHOUL, NonEpicMonsterId.GHOUL,
@@ -115,15 +104,14 @@ public class AncientOneHelper {
         ancientOneInfo.setAncientOneId(AncientOneId.SHUB_NIGGURATH);
         ancientOneInfo.setAwaken(true);
         ancientOneInfo.setStartingDoom(0);
-        ancientOneInfo.setName("Shub-Niggurath - Awaken");
-        ancientOneInfo.setAltName("The Black Goat of the Woods\nwith a Thousand Young");
-        ancientOneInfo.setMidnightText("Each time Doom would advance, Shub-Niggurath spawns one monster.\n" +
-                "If there are 5+ monsters with Shub-Niggurath, you lose the game.");
-        ancientOneInfo.setWinText("Solve 3 Mysteries. Defeat Shub-Niggurath.");
+        ancientOneInfo.setName("ancientOne.shubNiggurath.awaken.name");
+        ancientOneInfo.setAltName("ancientOne.shubNiggurath.awaken.alt");
+        ancientOneInfo.setMidnightText("ancientOne.shubNiggurath.awaken.midnight");
+        ancientOneInfo.setWinText("ancientOne.shubNiggurath.awaken.win");
         ancientOneInfo.setMysteriesRequired(4);
-        ancientOneInfo.setReckoningText("Each investigator on a same space as Shub-Niggurath encounters it.");
-        ancientOneInfo.setFlavorText("Ia! Shub-Niggurath! The Black Goat of the Woods with a Thousand Young!");
-        ancientOneInfo.setEndGameText("[RED]From the wildest corners of the earth, the dark young emerge to overwhelm humanity.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.shubNiggurath.awaken.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.shubNiggurath.awaken.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.shubNiggurath.endGame");
         ancientOneInfo.setMythosCardCount(16);
         ancientOneInfo.setRemovedMonsters(Arrays.asList(
                 NonEpicMonsterId.GHOUL, NonEpicMonsterId.GHOUL,
@@ -135,15 +123,14 @@ public class AncientOneHelper {
         AncientOneInfoImpl ancientOneInfo = new AncientOneInfoImpl();
         ancientOneInfo.setAncientOneId(AncientOneId.YOG_SOTHOTH);
         ancientOneInfo.setStartingDoom(14);
-        ancientOneInfo.setName("Yog-Sothoth");
-        ancientOneInfo.setAltName("The Lurker at the Threshold");
-        ancientOneInfo.setMidnightText("Yog-Sothoth awakens!");
-        ancientOneInfo.setWinText("Solve 3 Mysteries.");
+        ancientOneInfo.setName("ancientOne.yogSothoth.name");
+        ancientOneInfo.setAltName("ancientOne.yogSothoth.alt");
+        ancientOneInfo.setMidnightText("ancientOne.yogSothoth.midnight");
+        ancientOneInfo.setWinText("ancientOne.yogSothoth.win");
         ancientOneInfo.setMysteriesRequired(3);
-        ancientOneInfo.setReckoningText("Doom advances for each investigator on a Gate,\nunless he discards one Spell.");
-        ancientOneInfo.setFlavorText(
-                "Yog-Sothoth knows the gate.\nYog-Sothoth is the gate.\nYog-Sothoth is the key and guardian of the gate.\nPast, present, future, all are one in Yog-Sothoth.");
-        ancientOneInfo.setEndGameText("[RED]Yog-Sothoth sweeps away the sane mortal races, ushering in an age of darkness, madness, and utter, insane evil.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.yogSothoth.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.yogSothoth.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.yogSothoth.endGame");
         ancientOneInfo.setMythosCardCount(16);
         return ancientOneInfo;
     }
@@ -153,15 +140,14 @@ public class AncientOneHelper {
         ancientOneInfo.setAncientOneId(AncientOneId.YOG_SOTHOTH);
         ancientOneInfo.setAwaken(true);
         ancientOneInfo.setStartingDoom(0);
-        ancientOneInfo.setName("Yog-Sothoth - Awaken");
-        ancientOneInfo.setAltName("The Eater of Souls");
-        ancientOneInfo.setMidnightText("Each time Doom would advance, Yog-Sothoth's power rises instead!\nIn it's full power, you lose the game.");
-        ancientOneInfo.setWinText("Solve 4 Mysteries.");
+        ancientOneInfo.setName("ancientOne.yogSothoth.awaken.name");
+        ancientOneInfo.setAltName("ancientOne.yogSothoth.awaken.alt");
+        ancientOneInfo.setMidnightText("ancientOne.yogSothoth.awaken.midnight");
+        ancientOneInfo.setWinText("ancientOne.yogSothoth.awaken.win");
         ancientOneInfo.setMysteriesRequired(4);
-        ancientOneInfo.setReckoningText("Yog-Sothoth's power rises for each investigator on a Gate,\nunless he discards one Spell.");
-        ancientOneInfo.setFlavorText(
-                "The noxious Yog-Sothoth,\nwho froths as primal slime in nuclear chaos\nbeyond the nethermost outposts of space and time!");
-        ancientOneInfo.setEndGameText("[RED]Yog-Sothoth sweeps away the sane mortal races, ushering in an age of darkness, madness, and utter, insane evil.[]\n \nYou lost the game.");
+        ancientOneInfo.setReckoningText("ancientOne.yogSothoth.awaken.reckoning");
+        ancientOneInfo.setFlavorText("ancientOne.yogSothoth.awaken.flavor");
+        ancientOneInfo.setEndGameText("ancientOne.yogSothoth.endGame");
         ancientOneInfo.setMythosCardCount(16);
         return ancientOneInfo;
     }
