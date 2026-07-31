@@ -84,9 +84,9 @@ public class RumorCard extends VisTable {
         int padRight = 20;
         padTop(30);
         padBottom(40);
-        add(createNameLabel(rumorCardInfo.getTitleText())).pad(0, padLeft, 0, padRight).width(350);
+        add(createNameLabel(resolveLocalizedText(rumorCardInfo.getTitleText()))).pad(0, padLeft, 0, padRight).width(350);
         row();
-        Label flavorLabel = createFlavorLabel(rumorCardInfo.getFlavorText());
+        Label flavorLabel = createFlavorLabel(resolveLocalizedText(rumorCardInfo.getFlavorText()));
         Cell<Label> flavorLabelCell = add(flavorLabel).pad(5, padLeft, 0, padRight).width(width);
         row();
 
@@ -115,7 +115,7 @@ public class RumorCard extends VisTable {
             return new Cell<>();
         }
         Label resolveLabel = createJustLabel(labelText);
-        Label resolveTextLabel = createResolveLabel(replacePlaceholders(text));
+        Label resolveTextLabel = createResolveLabel(replacePlaceholders(resolveLocalizedText(text)));
 
         Table resolveRow = new Table();
         resolveRow.add(resolveLabel).width(80).align(Align.right).padRight(5);
@@ -176,7 +176,7 @@ public class RumorCard extends VisTable {
     }
 
     private Cell<Table> createReckoningRow(String text) {
-        Label resolveTextLabel = createResolveLabel(replacePlaceholders(text));
+        Label resolveTextLabel = createResolveLabel(replacePlaceholders(resolveLocalizedText(text)));
 
         Table resolveRow = new Table();
         Image actor = new Image(CustomAssetManager.getTexture(CustomAssetManager.RECKONING));
@@ -306,6 +306,18 @@ public class RumorCard extends VisTable {
         return text
                 .replaceAll("\\[#BAD]", "[#e02323]")
                 .replaceAll("\\[#GOOD]", "[#229B3C]");
+    }
+
+    private String resolveLocalizedText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        String localized = get(text);
+        String missingKey = "!" + text + "!";
+        if (missingKey.equals(localized)) {
+            return text;
+        }
+        return localized;
     }
 
     public Completable countdown(int amount) {

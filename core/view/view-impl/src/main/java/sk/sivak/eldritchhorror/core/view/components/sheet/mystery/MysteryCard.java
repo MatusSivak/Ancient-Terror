@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -71,32 +72,36 @@ public class MysteryCard extends VisTable {
         int width = 495;
         int padLeft = 40;
         int padRight = 20;
-        add(createNameLabel(mysteryCardInfo.getName())).pad(30, padLeft, 0, padRight).width(360);
+        padTop(8);
+        add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).pad(46, padLeft, 0, padRight).width(360);
         row();
-        Label flavorLabel = createFlavorLabel(mysteryCardInfo.getFlavorText());
-        Cell<Label> flavorLabelCell = add(flavorLabel).pad(5, padLeft, 0, padRight).width(width);
+        Label flavorLabel = createFlavorLabel(resolveLocalizedText(mysteryCardInfo.getFlavorText()));
+        Cell<Label> flavorLabelCell = add(flavorLabel).pad(12, padLeft - 8, 0, padRight - 8).width(width + 16);
         row();
         Label mysteryTextLabel = createMysteryText(getProcessedMysteryText(mysteryCardInfo));
-        Cell<Label> mysteryLabelCell = add(mysteryTextLabel).pad(5, padLeft, 0, padRight).width(width);
-        row();
-        add(createProgressLabel()).pad(5, padLeft, 0, padRight).width(width);
+        Cell<Label> mysteryLabelCell = add(mysteryTextLabel).pad(10, padLeft, 0, padRight).width(width);
         row();
         progressTokenBar = createProgressTokenBar(mysteryCardInfo.getMysteryComplexity(), Math.min(mysteryCardInfo.getProgress(), mysteryCardInfo.getMysteryComplexity()));
-        add(progressTokenBar).pad(10, padLeft, 40, padRight).width(width);
+        Table progressRow = new Table();
+        progressRow.align(Align.left);
+        progressRow.add(createProgressLabel()).padRight(10).align(Align.left);
+        progressRow.add(progressTokenBar).growX().align(Align.left);
+        Cell<Table> progressRowCell = add(progressRow).pad(14, padLeft, 58, padRight).width(width).align(Align.left);
 
 
         TextureRegionDrawable background = CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.MYSTERY_BACKGROUND);
         setBackground(background);
 
         setWidth(555);
-        setHeight(flavorLabelCell.getPrefHeight() + mysteryLabelCell.getPrefHeight() + progressTokenBar.getPrefHeight() + 145);
+        setHeight(flavorLabelCell.getPrefHeight() + mysteryLabelCell.getPrefHeight() + progressRowCell.getPrefHeight() + 188);
 
 
         addHitImage();
     }
 
     private String getProcessedMysteryText(MysteryCardInfo mysteryCardInfo) {
-        return mysteryCardInfo.getMysteryText().replaceAll("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString());
+        return resolveLocalizedText(mysteryCardInfo.getMysteryText())
+                .replaceAll("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString());
     }
 
     private ProgressTokenBar createProgressTokenBar(Integer mysteryComplexity, Integer progress) {
@@ -106,19 +111,19 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.DARK_GRAY);
-        Color color = new Color(1f, 1f, 1f, 0.25f);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Color color = new Color(1f, 1f, 1f, 0.42f);
         labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
             @Override
             public void draw(Batch batch, float x, float y, float width, float height) {
-                color.a = 0.25f * getColor().a;
+                color.a = 0.42f * getColor().a;
                 batch.setColor(color);
                 super.draw(batch, x, y, width, height);
             }
         };
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
-        label.setFontScale(0.35f);
+        label.setFontScale(0.48f);
         return label;
     }
 
@@ -127,7 +132,7 @@ public class MysteryCard extends VisTable {
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.35f);
         return label;
     }
 
@@ -160,7 +165,7 @@ public class MysteryCard extends VisTable {
         Label label = new Label(text, style);
         label.setWrap(true);
         label.setAlignment(Align.center);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.46f);
         return label;
     }
 
@@ -170,6 +175,18 @@ public class MysteryCard extends VisTable {
         label.setAlignment(Align.left);
         label.setFontScale(0.5f);
         return label;
+    }
+
+    private String resolveLocalizedText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        String localized = get(text);
+        String missingKey = "!" + text + "!";
+        if (missingKey.equals(localized)) {
+            return text;
+        }
+        return localized;
     }
 
     private Completable activate(Integer advanceActiveMysteryAmount) {

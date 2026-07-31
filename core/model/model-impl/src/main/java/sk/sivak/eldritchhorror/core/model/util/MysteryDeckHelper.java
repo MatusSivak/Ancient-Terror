@@ -80,15 +80,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildSeedOfTheDaemonSultanMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
         azathothCard.setMysteryCardId(SEED_OF_THE_DAEMON_SULTAN);
-        azathothCard.setName("Seed of the Daemon Sultan");
-        azathothCard.setFlavorText("A strange green comet has fallen from the sky.\n" +
-                "Even after the impact,\n" +
-                "the meteorite continues to slowly burrow itself deeper into the earth.");
-        azathothCard.setMysteryText("As an encounter, an investigator on Tunguska\n" +
-                "may attempt to search for signs of the impact\n" +
-                "in the dead forest (Test Observation).\n" +
-                "If he passes, he discovers the strange green meteorite;\n" +
-                "he may spend 2 Clues to advance the Active Mystery.");
+        azathothCard.setName("mystery.azathoth.seed.name");
+        azathothCard.setFlavorText("mystery.azathoth.seed.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.seed.text");
         azathothCard.setMysteryComplexity(Math.round(nrOfInvestigators / 2f));
         azathothCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.TUNGUSKA));
         return azathothCard;
@@ -97,9 +91,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildOmenOfDevestationMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
         azathothCard.setMysteryCardId(OMEN_OF_DEVASTATION);
-        azathothCard.setName("Omen of Devastation");
-        azathothCard.setFlavorText("The Nemesis Moon appears in the night sky,\nvisible to all and heralding an imminent doom.");
-        azathothCard.setMysteryText("When an investigator closes a Gate\nrepresenting current Omen,\nhe may spend 1 Clue to advance the Active Mystery.");
+        azathothCard.setName("mystery.azathoth.omen.name");
+        azathothCard.setFlavorText("mystery.azathoth.omen.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.omen.text");
         azathothCard.setMysteryComplexity(Math.round(nrOfInvestigators / 2f));
         return azathothCard;
     }
@@ -107,9 +101,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildOccultResearchMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
         azathothCard.setMysteryCardId(OCCULT_RESEARCH);
-        azathothCard.setName("Occult Research");
-        azathothCard.setFlavorText("The shan are controlling innocent victims everywhere,\nusing them to call forth Azathoth");
-        azathothCard.setMysteryText("After an investigator resolves a Research Encounter,\nhe may spend 1 Clue he gained from that encounter\nto advance the Active Mystery.");
+        azathothCard.setName("mystery.azathoth.occult.name");
+        azathothCard.setFlavorText("mystery.azathoth.occult.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.occult.text");
         azathothCard.setMysteryComplexity(nrOfInvestigators);
         return azathothCard;
     }
@@ -117,11 +111,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildTheTrueNameMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
         azathothCard.setMysteryCardId(THE_TRUE_NAME);
-        azathothCard.setName("The True Name");
-        azathothCard.setFlavorText("Fragments of Azathoth's true name exist in long forgotten tomes.\n" +
-                "It is said that if a person speaks his name aloud three times,\nthe blasphemous sound will grant the speaker great power.");
-        azathothCard.setMysteryText("As an encounter, an investigator on a Pin may attempt to find information about Azathoth's true name;\n" +
-                "he may spend 2 Clues to advance the Active Mystery.");
+        azathothCard.setName("mystery.azathoth.trueName.name");
+        azathothCard.setFlavorText("mystery.azathoth.trueName.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.trueName.text");
         int complexity = Math.round(nrOfInvestigators / 2f);
         azathothCard.setMysteryComplexity(complexity);
         List<LocationId> pinLocations = LocationId.getRandomLocations(complexity);
@@ -131,12 +123,10 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildTheGreenFlameMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
-        azathothCard.setName("The Green Flame");
+        azathothCard.setName("mystery.azathoth.greenFlame.name");
         azathothCard.setMysteryCardId(THE_GREEN_FLAME);
-        azathothCard.setFlavorText("In response to the cult's invocation,\n" +
-                "a jet of green flame emerged from the fissure,\n" +
-                "racing across the ceiling and walls as if a living thing.");
-        azathothCard.setMysteryText("At the end of the Mythos Phase, if the Tulzscha Epic Monster has been defeated, solve this Mystery.");
+        azathothCard.setFlavorText("mystery.azathoth.greenFlame.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.greenFlame.text");
         azathothCard.setMysteryComplexity(nrOfInvestigators + 2);
         List<LocationId> pinLocations = LocationId.getRandomLocations(1);
         azathothCard.setPinLocationsSupplier(() -> pinLocations);
@@ -145,16 +135,10 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildVoiceOfAzathothMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createAzathothCard();
-        azathothCard.setName("Voice of Azathoth");
+        azathothCard.setName("mystery.azathoth.voice.name");
         azathothCard.setMysteryCardId(VOICE_OF_AZATHOTH);
-        azathothCard.setFlavorText("Most musicians describe this 18th century Italian opera as unplayable.\n" +
-                "It comes as no surprise that the composer was executed for heresy.");
-        azathothCard.setMysteryText("When an investigator would gain an Artifact, he may gain\n" +
-                "the 'Requiem per Shuggay' Artifact instead.\n" +
-                "At the end of the Mythos Phase,\n" +
-                "an investigator may spend COMPLEXITY Clues\n" +
-                "and discard the 'Requiem per Shuggay' Artifact\n" +
-                "to solve this Mystery.");
+        azathothCard.setFlavorText("mystery.azathoth.voice.flavor");
+        azathothCard.setMysteryText("mystery.azathoth.voice.text");
         azathothCard.setMysteryComplexity(nrOfInvestigators);
         return azathothCard;
     }
@@ -179,15 +163,10 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildQueenOfTheDeepOnesMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
-        mysteryCard.setName("Queen of the Deep Ones");
+        mysteryCard.setName("mystery.cthulhu.queen.name");
         mysteryCard.setMysteryCardId(Cthulhu.QUEEN_OF_THE_DEEP_ONES);
-        mysteryCard.setFlavorText("Mother Hydra rises from her home in Y'ha-nthlei\n" +
-                "to oversee the teeming masses of her children.");
-        mysteryCard.setMysteryText("When an investigator would gain an Artifact, he may gain\n" +
-                "the 'Sword of Y'ha-Talla' Artifact instead.\n" +
-                "At the end of the Mythos Phase,\n" +
-                "if the Hydra Epic Monster has been defeated,\n" +
-                "solve this Mystery.");
+        mysteryCard.setFlavorText("mystery.cthulhu.queen.flavor");
+        mysteryCard.setMysteryText("mystery.cthulhu.queen.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 2);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_8));
         return mysteryCard;
@@ -195,16 +174,11 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildThreateningSeasMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
-        mysteryCard.setName("Threatening Seas");
+        mysteryCard.setName("mystery.cthulhu.threateningSeas.name");
         mysteryCard.setMysteryCardId(Cthulhu.THREATENING_SEAS);
-        mysteryCard.setFlavorText("All across the world, storms have formed\n" +
-                        "over the many submerged cities that deep ones call home,\n" +
-                        "such as Y'ha-nthlei and Ahu-Y'hloa.");
+        mysteryCard.setFlavorText("mystery.cthulhu.threateningSeas.flavor");
         mysteryCard.setMysteryComplexity(nrOfInvestigators);
-        mysteryCard.setMysteryText("As an encounter, an investigator on a space with a vortex\n" +
-                "may attempt to prolong Cthulhu's slumber (Test Lore-1).\n" +
-                "If he passes, he may spend 1 Clue and discard 1 Spell\n" +
-                "to close the vortex and advance the Active Mystery.");
+        mysteryCard.setMysteryText("mystery.cthulhu.threateningSeas.text");
         // this will be replaced by listener,
         // it is here just that load function knows that it should override locations
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_1));
@@ -213,15 +187,11 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildTheDeepOnesAttackMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
-        mysteryCard.setName("The Deep Ones Attack!");
+        mysteryCard.setName("mystery.cthulhu.deepOnesAttack.name");
         mysteryCard.setMysteryCardId(Cthulhu.THE_DEEP_ONES_ATTACK);
-        mysteryCard.setFlavorText("Terrible storms have battered fishing villages across the globe,\n" +
-                "but it's merely the prelude to an invading army of deep ones!");
+        mysteryCard.setFlavorText("mystery.cthulhu.deepOnesAttack.flavor");
         mysteryCard.setMysteryComplexity(nrOfInvestigators);
-        mysteryCard.setMysteryText("As an encounter, an investigator on a space with a vortex\n" +
-                "may attempt to fend off the deep one invasion.\n" +
-                "If he defeats ambushing Deep One, he may spend 1 Clue\n" +
-                "to close the vortex and advance the Active Mystery.");
+        mysteryCard.setMysteryText("mystery.cthulhu.deepOnesAttack.text");
         // this will be replaced by listener,
         // it is here just that load function knows that it should override locations
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_1));
@@ -231,23 +201,19 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildTheStarsAreRightMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
         mysteryCard.setMysteryCardId(Cthulhu.THE_STARS_ARE_RIGHT);
-        mysteryCard.setName("The Stars Are Right!");
-        mysteryCard.setFlavorText("All around the world, Cthulhu's worshipers and\n" +
-                "those sensitive to his dreams have been plagued by madness.\n" +
-                "They rush to the sea to witness the Ancient One's return.");
-        mysteryCard.setMysteryText("After an investigator resolves a Research Encounter,\nhe may spend 1 Clue he gained from that encounter\nto advance the Active Mystery.");
+        mysteryCard.setName("mystery.cthulhu.starsRight.name");
+        mysteryCard.setFlavorText("mystery.cthulhu.starsRight.flavor");
+        mysteryCard.setMysteryText("mystery.cthulhu.starsRight.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators);
         return mysteryCard;
     }
 
     private MysteryCardInfo buildWatchingTheStarsMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
-        mysteryCard.setName("Watching The Stars");
+        mysteryCard.setName("mystery.cthulhu.watchingStars.name");
         mysteryCard.setMysteryCardId(Cthulhu.WATCHING_THE_STARS);
-        mysteryCard.setFlavorText("From the sunken city of Yhe, Cthylla rises to fulfill her destiny.\n" +
-                "Daughter of Cthulhu, she will give birth to the reincarnation\n" +
-                "of her father should his body ever be destroyed.");
-        mysteryCard.setMysteryText("At the end of the Mythos Phase, if the Cthylla Epic Monster has been defeated, solve this Mystery.");
+        mysteryCard.setFlavorText("mystery.cthulhu.watchingStars.flavor");
+        mysteryCard.setMysteryText("mystery.cthulhu.watchingStars.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 2);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_12));
         return mysteryCard;
@@ -255,16 +221,10 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildRlyehRisenMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
-        mysteryCard.setName("R'lyeh Risen");
+        mysteryCard.setName("mystery.cthulhu.rlyehRisen.name");
         mysteryCard.setMysteryCardId(Cthulhu.RLYEH_RISEN);
-        mysteryCard.setFlavorText(
-                "Eons ago, the city of R'lyeh was plunged to the bottom of the ocean\n" +
-                "by some forgotten disaster. It has remained trapped there,\n" +
-                "waiting for the right time to resurface.\n" +
-                "Now, that moment has finally arrived.");
-        mysteryCard.setMysteryText("As an encounter, an investigator on a Pin\n" +
-                "may explore the island city of R'lyeh.\n" +
-                "Successful encounter advances the Active Mystery.");
+        mysteryCard.setFlavorText("mystery.cthulhu.rlyehRisen.flavor");
+        mysteryCard.setMysteryText("mystery.cthulhu.rlyehRisen.text");
         mysteryCard.setMysteryComplexity(Math.round(nrOfInvestigators /2f));
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_3));
         return mysteryCard;
@@ -275,14 +235,10 @@ public class MysteryDeckHelper {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
         mysteryCard.setMysteryCardId(Cthulhu.RISEN_FROM_THE_SEA);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_3));
-        mysteryCard.setMysteryText("When the Cthulhu Epic Monster has been defeated,\nsolve this Mystery.");
+        mysteryCard.setMysteryText("mystery.cthulhu.risenSea.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 3);
-        mysteryCard.setFlavorText("At last the time has come,\n" +
-                "the deep ones have broken the elder sign\n" +
-                "that kept their master asleep.\n" +
-                "Cthulhu rises again,\n" +
-                "and madness fills the dreams of every living thing.");
-        mysteryCard.setName("Risen From the Sea");
+        mysteryCard.setFlavorText("mystery.cthulhu.risenSea.flavor");
+        mysteryCard.setName("mystery.cthulhu.risenSea.name");
         return mysteryCard;
     }
 
@@ -306,15 +262,11 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildBlasphemyOfTheBlackGoatMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
-        mysteryCard.setName("Blasphemy of the Black Goat");
+        mysteryCard.setName("mystery.shub.blasphemy.name");
         mysteryCard.setMysteryCardId(BLASPHEMY_OF_THE_BLACK_GOAT);
-        mysteryCard.setFlavorText("The Black Litanies have been intoned\n" +
-                "and Yeb has been called forth from the Black Fire\n" +
-                "to purge the earth in preparation for Shub-Niggurath's arrival.");
+        mysteryCard.setFlavorText("mystery.shub.blasphemy.flavor");
 
-        mysteryCard.setMysteryText("At the end of the Mythos Phase,\n" +
-                "if the Yeb Epic Monster has been defeated,\n" +
-                "solve this Mystery.");
+        mysteryCard.setMysteryText("mystery.shub.blasphemy.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 2);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.SPACE_19));
         return mysteryCard;
@@ -323,17 +275,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildHourOfTheMoonLensMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
         mysteryCard.setMysteryCardId(HOUR_OF_THE_MOON_LENS);
-        mysteryCard.setName("Hour of the Moon Lens");
-        mysteryCard.setFlavorText("In the small village of Goatswood,\n" +
-                        "a series of peculiar mirrors are arranged on top of a pole\n" +
-                        "to focus moonlight through a lens.\n" +
-                        "It is said that the Cult of the Black Goat\n" +
-                        "uses this lens during their dark rites.");
-        mysteryCard.setMysteryText("As an encounter, an investigator on London\n" +
-                "may watch a ritual that transforms the worshipers\n" +
-                "of Shub-Niggurath into goat spawn.\n" +
-                "If he defeats ambushing Goat Spawn, he may spend 2 Clues\n" +
-                "to advance the Active Mystery.");
+        mysteryCard.setName("mystery.shub.hourLens.name");
+        mysteryCard.setFlavorText("mystery.shub.hourLens.flavor");
+        mysteryCard.setMysteryText("mystery.shub.hourLens.text");
         mysteryCard.setMysteryComplexity(Math.round(nrOfInvestigators / 2f));
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.LONDON));
         return mysteryCard;
@@ -341,17 +285,11 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildSpawnOfTheBlackGoatMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
-        mysteryCard.setName("Spawn of the Black Goat");
+        mysteryCard.setName("mystery.shub.spawn.name");
         mysteryCard.setMysteryCardId(SPAWN_OF_THE_BLACK_GOAT);
-        mysteryCard.setFlavorText(
-                        "Shub-Niggurath's twin blasphemies\n" +
-                        "will prepare the world for the Black Goat,\n" +
-                        "destroying any potential challenge to their mother's reign.\n" +
-                        "One of the pair, Nug, has begun its dreadful task.");
+        mysteryCard.setFlavorText("mystery.shub.spawn.flavor");
 
-        mysteryCard.setMysteryText("At the end of the Mythos Phase,\n" +
-                "if the Nug Epic Monster has been defeated,\n" +
-                "solve this Mystery.");
+        mysteryCard.setMysteryText("mystery.shub.spawn.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 2);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.THE_AMAZON));
         return mysteryCard;
@@ -360,11 +298,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildNatureOfTheAllMotherMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
         mysteryCard.setMysteryCardId(NATURE_OF_THE_ALL_MOTHER);
-        mysteryCard.setName("Nature of the All-Mother");
-        mysteryCard.setFlavorText("Shub-Niggurath naturally corrupts all life that encounters her.\n" +
-                "Everywhere her worshipers are found,\n" +
-                "all living things grow more vicious and feral.");
-        mysteryCard.setMysteryText("After an investigator resolves a Research Encounter,\nhe may spend 1 Clue he gained from that encounter\nto advance the Active Mystery.");
+        mysteryCard.setName("mystery.shub.nature.name");
+        mysteryCard.setFlavorText("mystery.shub.nature.flavor");
+        mysteryCard.setMysteryText("mystery.shub.nature.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators);
         return mysteryCard;
     }
@@ -372,29 +308,19 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildHuntingTheThousandMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
         mysteryCard.setMysteryCardId(HUNTING_THE_THOUSAND);
-        mysteryCard.setName("Hunting the Thousand");
-        mysteryCard.setFlavorText("Shub-Niggurath's spawn, the Thousand Young,\n" +
-                "infest the planet in greater and great numbers,\n" +
-                "threatening to overrun humanity.");
+        mysteryCard.setName("mystery.shub.hunting.name");
+        mysteryCard.setFlavorText("mystery.shub.hunting.flavor");
         mysteryCard.setMysteryComplexity(nrOfInvestigators * 2);
-        mysteryCard.setMysteryText("When a non Epic-Monster is defeated,\nthe active investigator may spend 2 Clues\nto advance the Active Mystery\nbased on monster's toughness.");
+        mysteryCard.setMysteryText("mystery.shub.hunting.text");
         return mysteryCard;
     }
 
     private MysteryCardInfo buildRitualsInTheWildMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createShubNiggurathCard();
         mysteryCard.setMysteryCardId(RITUALS_IN_THE_WILD);
-        mysteryCard.setName("Rituals in the Wild");
-        mysteryCard.setFlavorText(
-                        "Bonfires roar in the wildest corners of the planet\n" +
-                        "as the Cult of the Black Goat performs their bestial rituals.\n" +
-                        "The cultist howl to Shub-Niggurath\n" +
-                        "to let loose her children upon the Earth.");
-        mysteryCard.setMysteryText("As an encounter, an investigator on a Pin\n" +
-                "may attempt to determine\n" +
-                "the ritual's purpose (Test Observation).\n" +
-                "If he passes he may spend 2 Clues\n" +
-                "to advance the Active Mystery.");
+        mysteryCard.setName("mystery.shub.rituals.name");
+        mysteryCard.setFlavorText("mystery.shub.rituals.flavor");
+        mysteryCard.setMysteryText("mystery.shub.rituals.text");
         int complexity = Math.round(nrOfInvestigators / 2f);
         mysteryCard.setMysteryComplexity(complexity);
         List<LocationId> pinLocations = Arrays.asList(SPACE_4, SPACE_10, SPACE_21, TUNGUSKA);
@@ -407,16 +333,10 @@ public class MysteryDeckHelper {
         MysteryCardInfoImpl mysteryCard = createCthulhuCard();
         mysteryCard.setMysteryCardId(BATTLE_IN_THE_WOODS);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.THE_HEART_OF_AFRICA));
-        mysteryCard.setMysteryText("When the Shub-Niggurath Epic Monster\n has been defeated, solve this Mystery.");
+        mysteryCard.setMysteryText("mystery.shub.battleWoods.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 3);
-        mysteryCard.setFlavorText(
-                "The feral mother of all monstrosities has manifested!\n" +
-                "She is an enormous cloud\n" +
-                        "from which dozens of tentacles extend and retract.\n" +
-                "Wherever she goes, she leaves behind large hoof prints.\n" +
-                "To behold her true, terrifying form\n" +
-                "is to come face to face with true, primal horror.");
-        mysteryCard.setName("Battle in the Woods");
+        mysteryCard.setFlavorText("mystery.shub.battleWoods.flavor");
+        mysteryCard.setName("mystery.shub.battleWoods.name");
         return mysteryCard;
     }
 
@@ -440,13 +360,11 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildSpawnOfYogSothothMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createYogSothothCard();
-        mysteryCard.setName("Spawn of Yog-Sothoth");
+        mysteryCard.setName("mystery.yog.spawn.name");
         mysteryCard.setMysteryCardId(SPAWN_OF_YOG_SOTHOTH);
-        mysteryCard.setFlavorText("Lavinia Whateley has given birth to something horrible,\nand now the creature calls for its father...");
+        mysteryCard.setFlavorText("mystery.yog.spawn.flavor");
 
-        mysteryCard.setMysteryText("At the end of the Mythos Phase,\n" +
-                "if the Dunwich Horror Epic Monster has been defeated,\n" +
-                "solve this Mystery.");
+        mysteryCard.setMysteryText("mystery.yog.spawn.text");
         mysteryCard.setMysteryComplexity(nrOfInvestigators + 2);
         mysteryCard.setPinLocationsSupplier(() -> Collections.singletonList(LocationId.ARKHAM));
         return mysteryCard;
@@ -455,12 +373,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildWhereTheOldOnesBrokeThroughMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createYogSothothCard();
         azathothCard.setMysteryCardId(WHERE_THE_OLD_ONES_BROKE_THROUGH);
-        azathothCard.setName("Where the Old Ones Broke Through");
-        azathothCard.setFlavorText("Yog-Sothoth struggles to free itself\n" +
-                "from the space between dimensions,\n" +
-                "tearing holes in our reality in the process.");
-        azathothCard.setMysteryText("When an investigator closes a Gate\nhe may discard two Spells\n" +
-                "to seal the rift and advance the Active Mystery.");
+        azathothCard.setName("mystery.yog.whereBrokeThrough.name");
+        azathothCard.setFlavorText("mystery.yog.whereBrokeThrough.flavor");
+        azathothCard.setMysteryText("mystery.yog.whereBrokeThrough.text");
         azathothCard.setMysteryComplexity(Math.round(nrOfInvestigators / 2f));
         return azathothCard;
     }
@@ -468,12 +383,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildTheBeyondOneMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl azathothCard = createYogSothothCard();
         azathothCard.setMysteryCardId(THE_BEYOND_ONE);
-        azathothCard.setName("The Beyond One");
-        azathothCard.setFlavorText("Yog-Sothoth exists in all places at all times.\n" +
-                "To any soul foolish enough to seek it,\n" +
-                "the Ancient One can unlock limitless knowledge and power,\n" +
-                "but it always comes at a price.");
-        azathothCard.setMysteryText("After an investigator resolves a Research Encounter,\nhe may spend 1 Clue he gained from that encounter\nto advance the Active Mystery.");
+        azathothCard.setName("mystery.yog.beyondOne.name");
+        azathothCard.setFlavorText("mystery.yog.beyondOne.flavor");
+        azathothCard.setMysteryText("mystery.yog.beyondOne.text");
         azathothCard.setMysteryComplexity(nrOfInvestigators);
         return azathothCard;
     }
@@ -481,16 +393,9 @@ public class MysteryDeckHelper {
     private MysteryCardInfo buildTheStoneCirclesMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createYogSothothCard();
         mysteryCard.setMysteryCardId(THE_STONE_CIRCLES);
-        mysteryCard.setName("The Stone Circles");
-        mysteryCard.setFlavorText("Across the globe, Yog-Sothoth's worshipers\n" +
-                "gather at ancient places of power,\n" +
-                "each marked by a circle of massive stones,\n" +
-                "placed by unknown forces thousands of years ago.");
-        mysteryCard.setMysteryText("As an encounter, an investigator on a Pin\n" +
-                "may attempt to disrupt the ritual (Test Lore-1).\n" +
-                "If he passes, he may spend 2 Clues\n" +
-                "to advance the Active Mystery.\n" +
-                "If he fails, a Cultist Monster ambushes him!");
+        mysteryCard.setName("mystery.yog.stoneCircles.name");
+        mysteryCard.setFlavorText("mystery.yog.stoneCircles.flavor");
+        mysteryCard.setMysteryText("mystery.yog.stoneCircles.text");
         int complexity = Math.round(nrOfInvestigators / 2f);
         mysteryCard.setMysteryComplexity(complexity);
         List<LocationId> pinLocations = LocationId.getRandomLocations(complexity);
@@ -500,29 +405,19 @@ public class MysteryDeckHelper {
 
     private MysteryCardInfo buildVoidBetweenWorldsMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCard = createYogSothothCard();
-        mysteryCard.setName("Void Between Worlds");
+        mysteryCard.setName("mystery.yog.void.name");
         mysteryCard.setMysteryCardId(VOID_BETWEEN_WORLDS);
-        mysteryCard.setFlavorText("It is said that long ago,\n" +
-                        "Yog-Sothoth was imprisoned in a place utterly without existence,\n" +
-                        "a strange void that occupies the space between dimensions.");
-        mysteryCard.setMysteryText("As an encounter, an investigator on a Gate\n" +
-                "may travel to the void between worlds.\n" +
-                "Successful encounter advances the Active Mystery.");
+        mysteryCard.setFlavorText("mystery.yog.void.flavor");
+        mysteryCard.setMysteryText("mystery.yog.void.text");
         mysteryCard.setMysteryComplexity(Math.round(nrOfInvestigators /2f));
         return mysteryCard;
     }
 
     private MysteryCardInfo buildArcaneUnderstandingMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCardInfo = createYogSothothCard();
-        mysteryCardInfo.setFlavorText("Humanity must not tamper with arcane energies.\n" +
-                "Yog-Sothoth is the very essence of magic,\n" +
-                "and a person under the influence of sorcery\n" +
-                "will inescapably become the Ancient One's puppet.");
-        mysteryCardInfo.setMysteryText("When an investigator passes a Lore test\n" +
-                "while resolving a Spell effect,\n" +
-                "he may spend one Clue and discard that Spell\n" +
-                "to advance the Active Mystery.");
-        mysteryCardInfo.setName("Arcane Understanding");
+        mysteryCardInfo.setFlavorText("mystery.yog.arcane.flavor");
+        mysteryCardInfo.setMysteryText("mystery.yog.arcane.text");
+        mysteryCardInfo.setName("mystery.yog.arcane.name");
         mysteryCardInfo.setMysteryCardId(ARCANE_UNDERSTANDING);
         mysteryCardInfo.setMysteryComplexity(nrOfInvestigators);
         return mysteryCardInfo;
@@ -531,14 +426,11 @@ public class MysteryDeckHelper {
     // Final Mystery
     private MysteryCardInfo buildTheKeyAndTheGateMystery(Integer nrOfInvestigators) {
         MysteryCardInfoImpl mysteryCardInfo = createYogSothothCard();
-        mysteryCardInfo.setFlavorText("The ancient horror tears apart the walls between worlds\n" +
-                "pouring itself through the cracks in reality.");
-        mysteryCardInfo.setName("The Key and the Gate");
+        mysteryCardInfo.setFlavorText("mystery.yog.keyGate.flavor");
+        mysteryCardInfo.setName("mystery.yog.keyGate.name");
         mysteryCardInfo.setMysteryComplexity(Math.round(nrOfInvestigators /2f));
         mysteryCardInfo.setMysteryCardId(THE_KEY_AND_THE_GATE);
-        mysteryCardInfo.setMysteryText("As an encounter, an investigator on a Gate\n" +
-                "may confront Yog-Sothoth.\n" +
-                "Successful encounter advances the Active Mystery.");
+        mysteryCardInfo.setMysteryText("mystery.yog.keyGate.text");
         return mysteryCardInfo;
     }
 

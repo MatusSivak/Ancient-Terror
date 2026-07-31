@@ -16,7 +16,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.shader.GrayscaleShader;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 
 /**
@@ -36,10 +36,10 @@ public class ButtonBuilder {
                 drawableUp,
                 drawableDown,
                 null,
-                getBitmapFont(FONT_ADLER)
+                getBitmapFont(FONT_MINYA)
         );
         float buttonHeightRatio = 0.09f;
-        style.fontColor = Color.DARK_GRAY;
+        style.fontColor = new Color(0x102033ff);
 
         TextButton button = new TextButton(title, style) {
 
@@ -104,7 +104,8 @@ public class ButtonBuilder {
         if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("strobe_disabled")) {
             button.addAction(createRepeatScaleAction(button));
         }
-        button.getLabel().setFontScale(0.5f);
+        button.getLabel().setFontScale(0.62f);
+        button.getLabel().setColor(style.fontColor);
         return button;
     }
 

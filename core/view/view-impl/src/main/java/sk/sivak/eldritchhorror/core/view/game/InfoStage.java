@@ -305,7 +305,7 @@ public class InfoStage {
         label.getColor().a = 0f;
         label.setText(text);
         label.pack();
-        label.setPosition(VIEWPORT_WIDTH / 2 - label.getWidth() / 2, VIEWPORT_HEIGHT - label.getHeight() + 13);
+        label.setPosition(VIEWPORT_WIDTH / 2 - label.getWidth() / 2, VIEWPORT_HEIGHT - label.getHeight() - 8);
 
         AlphaAction alphaActionIn = new AlphaAction();
         alphaActionIn.setActor(label);

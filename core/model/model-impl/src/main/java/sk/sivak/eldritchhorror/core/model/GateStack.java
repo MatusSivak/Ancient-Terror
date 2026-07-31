@@ -67,8 +67,8 @@ public class GateStack implements GateStackWrite {
         new GateHelper().initGateStack(gateList);
 
         if (!GoogleServicesHolder.isTutorialPassed()) {
-            moveTutorialGateToTop(LocationId.ISTANBUL, GateColor.BLUE);
             moveTutorialGateToTop(LocationId.SYDNEY, GateColor.RED);
+            moveTutorialGateToTop(LocationId.ISTANBUL, GateColor.BLUE);
         }
     }
 
