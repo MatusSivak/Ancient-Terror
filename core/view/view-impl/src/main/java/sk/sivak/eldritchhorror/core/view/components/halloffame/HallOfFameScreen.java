@@ -31,6 +31,7 @@ import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.MyMoveToAction;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -60,14 +61,21 @@ public class HallOfFameScreen implements Screen {
     private Label selectedNameLabel;
     private Label selectedAncientOneLabel;
     private Label selectedDifficultyLabel;
+    private String initializedLanguage;
 
     @Override
     public void show() {
         if (screenInitialized) {
+            if (initializedLanguage != null && !initializedLanguage.equals(UiText.getLanguage())) {
+                rebuildForLanguageChange();
+                show();
+                return;
+            }
             Gdx.input.setInputProcessor(stage);
             return;
         }
         screenInitialized = true;
+        initializedLanguage = UiText.getLanguage();
         if (!VisUI.isLoaded()) {
             VisUI.load();
         }
@@ -282,6 +290,20 @@ public class HallOfFameScreen implements Screen {
 
     public void setChangeScreenHandler(ChangeScreenHandler changeScreenHandler) {
         this.changeScreenHandler = changeScreenHandler;
+    }
+
+    private void rebuildForLanguageChange() {
+        if (stage != null) {
+            stage.dispose();
+        }
+        screenInitialized = false;
+        stage = null;
+        scrollPane = null;
+        detailsTable = null;
+        detailsTableFrame = null;
+        selectedNameLabel = null;
+        selectedAncientOneLabel = null;
+        selectedDifficultyLabel = null;
     }
 
     private Label createNameLabel(String text, Color fontColor, float alpha) {

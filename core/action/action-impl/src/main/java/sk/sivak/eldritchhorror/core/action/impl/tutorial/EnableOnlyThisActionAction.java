@@ -61,7 +61,7 @@ public class EnableOnlyThisActionAction implements Action<Object, Object> {
                     continue;
                 }
                 ((AbstractActionPhaseAction)next).setDisabled(true);
-                ((AbstractActionPhaseAction)next).setDisabledReason("Not available in tutorial.");
+                ((AbstractActionPhaseAction)next).setDisabledReason("tutorial.disabled.notAvailable");
             }
             ServicePlatform.get().getEventQueue().unregisterListener(this);
         }

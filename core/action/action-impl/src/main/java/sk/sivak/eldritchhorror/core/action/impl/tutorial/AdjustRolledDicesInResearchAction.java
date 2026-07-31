@@ -85,7 +85,7 @@ public class AdjustRolledDicesInResearchAction implements Action<Object, Object>
         @Override
         public void onNotify(RerollUsingData eventData) {
             ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getTutorialService().displayChalkboard("You didn't roll any success. Use your Focus to reroll one die.",
+            ServicePlatform.get().getTutorialService().displayChalkboard("tutorial.research.noSuccessUseFocus",
                     ViewProperties.VIEWPORT_WIDTH/2, ViewProperties.VIEWPORT_HEIGHT/2, true);
             ServicePlatform.get().getTutorialService().hideChalkboard();
             ServicePlatform.get().getTokenService().loseFocus();

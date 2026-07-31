@@ -67,9 +67,15 @@ public class GateStack implements GateStackWrite {
         new GateHelper().initGateStack(gateList);
 
         if (!GoogleServicesHolder.isTutorialPassed()) {
-            gateList.add(0, new Gate(GateColor.BLUE, LocationId.ISTANBUL));
-            gateList.add(1, new Gate(GateColor.RED, LocationId.SYDNEY));
+            moveTutorialGateToTop(LocationId.ISTANBUL, GateColor.BLUE);
+            moveTutorialGateToTop(LocationId.SYDNEY, GateColor.RED);
         }
+    }
+
+    private void moveTutorialGateToTop(LocationId locationId, GateColor gateColor) {
+        Gate gate = Stream.findFirstOrException(gateList, x -> x.getLocationId() == locationId);
+        gateList.remove(gate);
+        gateList.add(0, new Gate(gateColor, locationId));
     }
 
     @Override

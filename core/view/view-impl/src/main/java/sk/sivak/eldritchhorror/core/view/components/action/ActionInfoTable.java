@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
@@ -64,7 +65,7 @@ public class ActionInfoTable extends VisTable {
     }
 
     private Label createDisabledLabel(String disabledReason) {
-        return createLabel(disabledReason, new Color(1f, 0.25f, 0.25f, 1f));
+        return createLabel(resolveLocalizedText(disabledReason), new Color(1f, 0.25f, 0.25f, 1f));
     }
 
     private Label createNotRecommendedLabel(String notRecommendedReason) {
@@ -80,6 +81,18 @@ public class ActionInfoTable extends VisTable {
         label.setAlignment(Align.right);
         label.setFontScale(0.5f);
         return label;
+    }
+
+    private String resolveLocalizedText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        String localized = UiText.get(text);
+        String missingKey = "!" + text + "!";
+        if (missingKey.equals(localized)) {
+            return text;
+        }
+        return localized;
     }
 
     @Override

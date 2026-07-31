@@ -20,6 +20,7 @@ import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.action.ActionButton;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
@@ -168,7 +169,7 @@ public class EncounterButton extends Table {
     }
 
     private Label createDisabledLabel(String text) {
-        return createLabel(text, new Color(1f, 0.25f, 0.25f, 1f));
+        return createLabel(resolveLocalizedText(text), new Color(1f, 0.25f, 0.25f, 1f));
     }
 
     private Label createLabel(String text, Color color) {
@@ -177,6 +178,18 @@ public class EncounterButton extends Table {
         label.setFontScale(0.5f);
         label.setAlignment(Align.left, Align.left);
         return label;
+    }
+
+    private String resolveLocalizedText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        String localized = UiText.get(text);
+        String missingKey = "!" + text + "!";
+        if (missingKey.equals(localized)) {
+            return text;
+        }
+        return localized;
     }
 
     @Override

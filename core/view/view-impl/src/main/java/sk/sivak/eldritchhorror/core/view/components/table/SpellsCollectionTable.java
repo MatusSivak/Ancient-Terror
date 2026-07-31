@@ -6,6 +6,8 @@ import sk.sivak.eldritchhorror.core.constants.spell.SpellId;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellTrait;
 
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
+
 public class SpellsCollectionTable extends CardsCollectionTable<SpellId, SpellInfo, SpellTrait> {
 
     public SpellsCollectionTable() {
@@ -34,7 +36,7 @@ public class SpellsCollectionTable extends CardsCollectionTable<SpellId, SpellIn
         });
         setPreviousInitValue(null);
         setValueProvider(spellInfo -> spellInfo.getTraits().iterator().next());
-        setLabelNameFunction(SpellTrait::asString);
+        setLabelNameFunction(spellTrait -> get("card.spellTrait." + spellTrait.name().toLowerCase()));
         setCardInfoToIdFunction(SpellInfo::getId);
     }
 }

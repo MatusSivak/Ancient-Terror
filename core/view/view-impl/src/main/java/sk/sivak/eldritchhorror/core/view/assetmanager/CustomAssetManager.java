@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.assetmanager;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
@@ -329,6 +328,9 @@ public class CustomAssetManager extends AssetManager {
     private static final String WINDOWS_FONT_COURIER = "internal:font/runtime/windows/cour.ttf";
     private static final String WINDOWS_FONT_TIMES = "internal:font/runtime/windows/times.ttf";
     private static final String WINDOWS_FONT_GEORGIA_ITALIC = "internal:font/runtime/windows/georgiai.ttf";
+    private static final String[] STRICT_FONT_PATHS_ADLER = new String[]{WINDOWS_FONT_COURIER};
+    private static final String[] STRICT_FONT_PATHS_MINYA = new String[]{WINDOWS_FONT_TIMES};
+    private static final String[] STRICT_FONT_PATHS_BLACK_CHANCERY = new String[]{WINDOWS_FONT_GEORGIA_ITALIC};
     private final static String SKIN = "skin/sgx/skin/sgx-ui.json";
 
     public final static String ACTION_BUTTON_ENABLED_NORMAL = "action_button/normal.png";
@@ -489,6 +491,7 @@ public class CustomAssetManager extends AssetManager {
                 if (generatedFont != null) {
                     generatedFont.dispose();
                 }
+                throw new GdxRuntimeException("Strict runtime font generation failed for fontId: " + fontId);
             }
         }
         BitmapFont bitmapFont = commonLoad(fontId, BitmapFont.class);
@@ -517,8 +520,7 @@ public class CustomAssetManager extends AssetManager {
     }
 
     private static boolean isRuntimeFontGenerationEnabled() {
-        String flag = System.getProperty("ui.runtimeFonts", "true");
-        return "true".equalsIgnoreCase(flag);
+        return true;
     }
 
     private BitmapFont tryGenerateRuntimeFont(String fontId) {
@@ -568,27 +570,31 @@ public class CustomAssetManager extends AssetManager {
             return;
         }
         Map<BitmapFont, BitmapFont> fontReplacements = new IdentityHashMap<>();
-        replaceSkinFont(skin, "font", 24, false, fontReplacements);
-        replaceSkinFont(skin, "small", 18, false, fontReplacements);
-        replaceSkinFont(skin, "medium", 22, false, fontReplacements);
-        replaceSkinFont(skin, "title", 40, true, fontReplacements);
+        boolean replacedMainFont = replaceSkinFont(skin, "font", 24, false, fontReplacements);
+        boolean replacedSmallFont = replaceSkinFont(skin, "small", 18, false, fontReplacements);
+        boolean replacedMediumFont = replaceSkinFont(skin, "medium", 22, false, fontReplacements);
+        boolean replacedTitleFont = replaceSkinFont(skin, "title", 40, true, fontReplacements);
+        if (!replacedMainFont || !replacedSmallFont || !replacedMediumFont || !replacedTitleFont) {
+            throw new GdxRuntimeException("Strict runtime skin font replacement failed.");
+        }
         remapSkinResourceFonts(skin, fontReplacements);
         runtimeSkinFontsPatched = true;
     }
 
-    private void replaceSkinFont(Skin skin, String skinFontName, int size, boolean serif, Map<BitmapFont, BitmapFont> fontReplacements) {
+    private boolean replaceSkinFont(Skin skin, String skinFontName, int size, boolean serif, Map<BitmapFont, BitmapFont> fontReplacements) {
         BitmapFont original = skin.get(skinFontName, BitmapFont.class);
         BitmapFont generated = tryGenerateRuntimeFontForSkin(size, serif);
         if (generated == null || !fontContainsRequiredGlyphs(generated)) {
             if (generated != null) {
                 generated.dispose();
             }
-            return;
+            return false;
         }
         fontReplacements.put(original, generated);
         skin.remove(skinFontName, BitmapFont.class);
         skin.add(skinFontName, generated, BitmapFont.class);
         runtimeFonts.put("skin:" + skinFontName, generated);
+        return true;
     }
 
     private void remapSkinResourceFonts(Skin skin, Map<BitmapFont, BitmapFont> fontReplacements) {
@@ -686,75 +692,16 @@ public class CustomAssetManager extends AssetManager {
     }
 
     private static String[] resolveFontPaths(String fontId) {
-        String override = System.getProperty("ui.font.path");
-        if (override != null && !override.trim().isEmpty()) {
-            return new String[]{override.trim()};
-        }
-        if (Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android) {
-            if (FONT_BLACK_CHANCERY.equals(fontId)) {
-                return new String[]{
-                        WINDOWS_FONT_GEORGIA_ITALIC,
-                        WINDOWS_FONT_TIMES,
-                        "/system/fonts/NotoSerif-Regular.ttf",
-                        "/system/fonts/Roboto-Regular.ttf",
-                        "/system/fonts/NotoSans-Regular.ttf",
-                        "/system/fonts/DroidSans.ttf"
-                };
-            }
-            if (FONT_ADLER.equals(fontId)) {
-                return new String[]{
-                        WINDOWS_FONT_COURIER,
-                        WINDOWS_FONT_TIMES,
-                        "/system/fonts/NotoSans-Regular.ttf",
-                        "/system/fonts/Roboto-Regular.ttf",
-                        "/system/fonts/NotoSerif-Regular.ttf",
-                        "/system/fonts/DroidSans.ttf"
-                };
-            }
-            if (FONT_MINYA.equals(fontId)) {
-                return new String[]{
-                        WINDOWS_FONT_TIMES,
-                        WINDOWS_FONT_COURIER,
-                        "/system/fonts/NotoSerif-Regular.ttf",
-                        "/system/fonts/NotoSans-Regular.ttf",
-                        "/system/fonts/Roboto-Regular.ttf",
-                        "/system/fonts/DroidSans.ttf"
-                };
-            }
-            return new String[]{
-                    WINDOWS_FONT_TIMES,
-                    WINDOWS_FONT_COURIER,
-                    "/system/fonts/NotoSans-Regular.ttf",
-                    "/system/fonts/Roboto-Regular.ttf",
-                    "/system/fonts/NotoSerif-Regular.ttf",
-                    "/system/fonts/DroidSans.ttf"
-            };
-        }
         if (FONT_ADLER.equals(fontId)) {
-            return new String[]{
-                    WINDOWS_FONT_COURIER,
-                    WINDOWS_FONT_TIMES,
-                    "C:\\Windows\\Fonts\\cour.ttf",
-                    "C:\\Windows\\Fonts\\georgia.ttf",
-                    "C:\\Windows\\Fonts\\times.ttf"
-            };
+            return STRICT_FONT_PATHS_ADLER;
         }
         if (FONT_BLACK_CHANCERY.equals(fontId)) {
-            return new String[]{
-                    WINDOWS_FONT_GEORGIA_ITALIC,
-                    WINDOWS_FONT_TIMES,
-                    "C:\\Windows\\Fonts\\georgiai.ttf",
-                    "C:\\Windows\\Fonts\\timesi.ttf",
-                    "C:\\Windows\\Fonts\\times.ttf"
-            };
+            return STRICT_FONT_PATHS_BLACK_CHANCERY;
         }
-        return new String[]{
-                WINDOWS_FONT_TIMES,
-                WINDOWS_FONT_COURIER,
-                "C:\\Windows\\Fonts\\times.ttf",
-                "C:\\Windows\\Fonts\\georgia.ttf",
-                "C:\\Windows\\Fonts\\arial.ttf"
-        };
+        if (FONT_MINYA.equals(fontId)) {
+            return STRICT_FONT_PATHS_MINYA;
+        }
+        return STRICT_FONT_PATHS_MINYA;
     }
 
     private void disposeRuntimeFonts() {

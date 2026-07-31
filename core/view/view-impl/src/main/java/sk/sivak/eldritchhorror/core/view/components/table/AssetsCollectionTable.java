@@ -5,6 +5,8 @@ import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 
 import java.util.List;
 
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
+
 public class AssetsCollectionTable extends CardsCollectionTable<AssetId, AssetInfo, Integer> {
 
     public AssetsCollectionTable() {
@@ -31,7 +33,7 @@ public class AssetsCollectionTable extends CardsCollectionTable<AssetId, AssetIn
         });
         setPreviousInitValue(-1);
         setValueProvider(AssetInfo::getCost);
-        setLabelNameFunction(cost -> "Cost: " + cost);
+        setLabelNameFunction(cost -> get("cardsCollection.costLabel", cost));
         setCardInfoToIdFunction(AssetInfo::getId);
     }
 }

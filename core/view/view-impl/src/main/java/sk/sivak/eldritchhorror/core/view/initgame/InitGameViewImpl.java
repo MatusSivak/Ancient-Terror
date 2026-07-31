@@ -434,6 +434,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
     }
 
     private void refreshLocalizedTexts() {
+        if (nrPlayersDialog != null) {
+            nrPlayersDialog.getTitleLabel().setText(get("init.numberOfInvestigators"));
+        }
+        if (selectAncientOneDialog != null) {
+            selectAncientOneDialog.getTitleLabel().setText(get("init.selectAncientOne"));
+        }
         if (collectionButton != null) {
             collectionButton.setText(get("init.cardsCollection"));
         }
@@ -534,7 +540,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
         }
         chalkboard.setPosition(positionX - chalkboard.getWidth()/2f, positionY - chalkboard.getHeight()/2f);
         InfoStage.getChalkboardLayer().addActor(chalkboard);
-        return chalkboard.display(text);
+        return chalkboard.display(resolveLocalizedText(text));
     }
 
     public Single<Boolean> displayChalkboardWithNoYesButtons(String text, int positionX, int positionY) {
@@ -543,7 +549,19 @@ public class InitGameViewImpl implements Screen, InitGameView {
         }
         chalkboard.setPosition(positionX - chalkboard.getWidth()/2f, positionY - chalkboard.getHeight()/2f);
         InfoStage.getChalkboardLayer().addActor(chalkboard);
-        return chalkboard.displayWithNoYesButtons(text);
+        return chalkboard.displayWithNoYesButtons(resolveLocalizedText(text));
+    }
+
+    private String resolveLocalizedText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        String localized = UiText.get(text);
+        String missingKey = "!" + text + "!";
+        if (missingKey.equals(localized)) {
+            return text;
+        }
+        return localized;
     }
 
     @Override

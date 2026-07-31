@@ -109,9 +109,9 @@ public class AdjustRolledDicesInMysteryEncounterAction implements Action<Object,
         public void onNotify(RerollUsingData eventData) {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getTutorialService().displayBlockerOnInfoStage();
-            ServicePlatform.get().getTutorialService().displayChalkboard("That was very unsuccessful roll!",
+            ServicePlatform.get().getTutorialService().displayChalkboard("tutorial.mysteryEncounter.veryUnsuccessfulRoll",
                     ViewProperties.VIEWPORT_WIDTH/2, ViewProperties.VIEWPORT_HEIGHT/2, true);
-            ServicePlatform.get().getTutorialService().displayChalkboard("Check your investigator one more time, to discover your passive ability.",
+            ServicePlatform.get().getTutorialService().displayChalkboard("tutorial.mysteryEncounter.checkInvestigatorPassive",
                     ViewProperties.VIEWPORT_WIDTH/2, ViewProperties.VIEWPORT_HEIGHT/2, false);
 
             ServicePlatform.get().getTutorialService().displayWindowOnInfoStage(5,60, 65,65,true);
@@ -123,7 +123,7 @@ public class AdjustRolledDicesInMysteryEncounterAction implements Action<Object,
             ServicePlatform.get().getTutorialService().highlightSpySpecial();
             ServicePlatform.get().getTutorialService().waitForInvestigatorHide();
             ServicePlatform.get().getTutorialService().displayBlockerOnInfoStage();
-            ServicePlatform.get().getTutorialService().displayChalkboard("You must sacrifice one Clue. Then you will be able to reroll two Dice.",
+            ServicePlatform.get().getTutorialService().displayChalkboard("tutorial.mysteryEncounter.sacrificeClueReroll",
                     ViewProperties.VIEWPORT_WIDTH/2, ViewProperties.VIEWPORT_HEIGHT/2, true);
             ServicePlatform.get().getTutorialService().hideChalkboard();
             ServicePlatform.get().getTutorialService().displayWindowOnInfoStage(480,63, 115,50,false);
