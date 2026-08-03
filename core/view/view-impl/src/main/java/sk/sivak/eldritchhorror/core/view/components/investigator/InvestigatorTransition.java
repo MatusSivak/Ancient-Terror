@@ -39,8 +39,7 @@ public class InvestigatorTransition extends Group {
     private InvestigatorTransition(Texture texture, InvestigatorId investigatorId) {
         this.investigatorId = investigatorId;
         image = new Image(texture);
-        image.setWidth(762);
-        image.setHeight(853);
+        image.setSize(texture.getWidth(), texture.getHeight());
         setWidth(image.getWidth());
         setHeight(image.getHeight());
         setScale(0f);
@@ -63,7 +62,7 @@ public class InvestigatorTransition extends Group {
             actionToRun = new FastForwardAction(Actions.delay(0.25f));
         }
         float targetScale = (ViewProperties.VIEWPORT_WIDTH * 0.30f) / getWidth();
-        float targetScale2 = (ViewProperties.VIEWPORT_WIDTH * 90/853f) / getWidth();
+        float targetScale2 = (ViewProperties.VIEWPORT_WIDTH * 90f / image.getHeight()) / getWidth();
         addAction(
                 sequence(
                         new FastForwardAction(parallel(

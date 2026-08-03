@@ -43,7 +43,9 @@ public class InvestigatorPuzzleEffect {
             SpriteBatch spriteBatch = new SpriteBatch();
             OrthographicCamera camera = new OrthographicCamera(investigatorImage.getWidth() * BACKGROUND_SCALE, investigatorImage.getHeight() * BACKGROUND_SCALE);
 
-            FrameBuffer frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) (762 * BACKGROUND_SCALE), (int) (853 * BACKGROUND_SCALE), false);
+            int frameBufferWidth = (int) (investigatorImage.getWidth() * BACKGROUND_SCALE);
+            int frameBufferHeight = (int) (investigatorImage.getHeight() * BACKGROUND_SCALE);
+            FrameBuffer frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, frameBufferWidth, frameBufferHeight, false);
 
             Observable.range(0, 49)
                     .concatMap(i -> Observable.create(x -> {
@@ -215,7 +217,9 @@ public class InvestigatorPuzzleEffect {
                 spriteBatch.end();
 
 
-                TextureRegion textureRegion = new TextureRegion(ScreenUtils.getFrameBufferTexture(0,0, (int) (762 * BACKGROUND_SCALE), (int) (853* BACKGROUND_SCALE)));
+                TextureRegion textureRegion = new TextureRegion(ScreenUtils.getFrameBufferTexture(0, 0,
+                        (int) (investigatorImageWidth * BACKGROUND_SCALE),
+                        (int) (investigatorImageHeight * BACKGROUND_SCALE)));
                 textureRegion.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
                 frameBuffer.end();
 

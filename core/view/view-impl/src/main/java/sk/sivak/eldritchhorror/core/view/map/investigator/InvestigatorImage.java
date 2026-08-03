@@ -41,8 +41,10 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 public class InvestigatorImage extends Image {
 
     public static final float BACKGROUND_SCALE = 1.07f;
-    private static final float IMAGE_WIDTH = 89;
-    private static final float IMAGE_HEIGHT = 100;
+    private static final float SOURCE_IMAGE_WIDTH = 1024f;
+    private static final float SOURCE_IMAGE_HEIGHT = 1536f;
+    private static final float IMAGE_HEIGHT = 100f;
+    private static final float IMAGE_WIDTH = IMAGE_HEIGHT * SOURCE_IMAGE_WIDTH / SOURCE_IMAGE_HEIGHT;
     private final InvestigatorId investigatorId;
     private final GameController gameController;
     private Image asteroid;
@@ -63,8 +65,7 @@ public class InvestigatorImage extends Image {
 
         this.gameController = gameController;
         this.investigatorId = investigatorId;
-        setWidth(IMAGE_WIDTH);
-        setHeight(IMAGE_HEIGHT);
+        setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
         createBorderImage();
         setOrigin(getWidth() / 2, 10);
 
