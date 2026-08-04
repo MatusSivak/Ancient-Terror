@@ -4,9 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -26,6 +27,7 @@ import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.hourglass.HourglassComponent;
 import sk.sivak.eldritchhorror.core.view.components.investigator.InvestigatorPuzzleEffect;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.Collections;
@@ -45,8 +47,14 @@ public class InvestigatorImage extends Image {
     private static final float SOURCE_IMAGE_HEIGHT = 1536f;
     private static final float IMAGE_HEIGHT = 100f;
     private static final float IMAGE_WIDTH = IMAGE_HEIGHT * SOURCE_IMAGE_WIDTH / SOURCE_IMAGE_HEIGHT;
+    private static final int ROLE_ICON_SCREEN_SIZE = 48;
+    private static final int ROLE_ICON_X_OFFSET = 0;
+    private static final int ROLE_ICON_Y_OFFSET = 0;
+    private static final float ROLE_ICON_HIGHLIGHT_GLOW_SIZE = 10f;
+    private static final float ROLE_ICON_HIGHLIGHT_GLOW_ALPHA = 0.8f;
     private final InvestigatorId investigatorId;
     private final GameController gameController;
+    private final TextureRegion roleIconTextureRegion;
     private Image asteroid;
     private Image borderImage;
     private float offsetX;
@@ -58,6 +66,7 @@ public class InvestigatorImage extends Image {
 
     private List<Image> puzzleImages = Collections.emptyList();
     private boolean defeatedByHealth;
+    private boolean highlighted;
 
 
     public InvestigatorImage(InvestigatorId investigatorId, GameController gameController) {
@@ -65,6 +74,7 @@ public class InvestigatorImage extends Image {
 
         this.gameController = gameController;
         this.investigatorId = investigatorId;
+        this.roleIconTextureRegion = createRoleIconTextureRegion(investigatorId);
         setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
         createBorderImage();
         setOrigin(getWidth() / 2, 10);
@@ -140,7 +150,7 @@ public class InvestigatorImage extends Image {
                 return color;
             }
         };
-        borderImage.setColor(0, 0, 0, 1);
+        borderImage.setColor(0, 0, 0, 0.78f);
         borderImage.setWidth(getWidth() * BACKGROUND_SCALE);
         borderImage.setHeight(getHeight() * BACKGROUND_SCALE);
         borderImage.setOrigin(borderImage.getWidth() / 2, 10);
@@ -180,9 +190,47 @@ public class InvestigatorImage extends Image {
         }
         borderImage.draw(batch, parentAlpha);
         super.draw(batch, parentAlpha);
+        drawRoleIcon(batch, parentAlpha);
         if (hourglassComponent != null) {
             hourglassComponent.draw(batch, parentAlpha);
         }
+    }
+
+    private void drawRoleIcon(Batch batch, float parentAlpha) {
+        if (roleIconTextureRegion == null) {
+            return;
+        }
+        OrthographicCamera camera = MapStage.getCamera();
+        float iconSize = ROLE_ICON_SCREEN_SIZE * camera.zoom;
+        float sourceWidth = roleIconTextureRegion.getRegionWidth();
+        float sourceHeight = roleIconTextureRegion.getRegionHeight();
+        float scale = Math.min(iconSize / sourceWidth, iconSize / sourceHeight);
+        float drawWidth = sourceWidth * scale;
+        float drawHeight = sourceHeight * scale;
+        Vector2 bottomCenter = localToStageCoordinates(new Vector2(getWidth() / 2f, 0f));
+        float x = bottomCenter.x - drawWidth / 2f + ROLE_ICON_X_OFFSET * camera.zoom;
+        float y = bottomCenter.y + ROLE_ICON_Y_OFFSET * camera.zoom;
+        Color previousColor = new Color(batch.getColor());
+        if (highlighted) {
+            float glowPadding = ROLE_ICON_HIGHLIGHT_GLOW_SIZE * camera.zoom;
+            Color borderColor = borderImage.getColor();
+            batch.setColor(
+                    borderColor.r,
+                    borderColor.g,
+                    borderColor.b,
+                    parentAlpha * getColor().a * ROLE_ICON_HIGHLIGHT_GLOW_ALPHA
+            );
+            batch.draw(
+                    roleIconTextureRegion,
+                    x - glowPadding / 2f,
+                    y - glowPadding / 2f,
+                    drawWidth + glowPadding,
+                    drawHeight + glowPadding
+            );
+        }
+        batch.setColor(1f, 1f, 1f, parentAlpha * getColor().a);
+        batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
+        batch.setColor(previousColor);
     }
 
     public void setAsteroidVisible(boolean asteroidVisible) {
@@ -193,6 +241,7 @@ public class InvestigatorImage extends Image {
     }
 
     void highlight(boolean active) {
+        this.highlighted = active;
         if (active) {
             Group parent = getParent();
             remove();
@@ -276,5 +325,10 @@ public class InvestigatorImage extends Image {
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeatedByHealth = defeatedByHealth;
+    }
+
+    private static TextureRegion createRoleIconTextureRegion(InvestigatorId investigatorId) {
+        Texture iconTexture = CustomAssetManager.getTexture("investigator/ICON_" + investigatorId.name() + ".png");
+        return new TextureRegion(iconTexture);
     }
 }

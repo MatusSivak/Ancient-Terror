@@ -59,6 +59,7 @@ public class CustomAssetManager extends AssetManager {
 
         for (InvestigatorId investigatorId : InvestigatorId.values()) {
             getTextureAsync("investigator/" + investigatorId.name() + ".png").subscribe();
+            getTextureAsync("investigator/ICON_" + investigatorId.name() + ".png").subscribe();
         }
     }
 
