@@ -50,8 +50,7 @@ public class InvestigatorImage extends Image {
     private static final int ROLE_ICON_SCREEN_SIZE = 48;
     private static final int ROLE_ICON_X_OFFSET = 0;
     private static final int ROLE_ICON_Y_OFFSET = 0;
-    private static final float ROLE_ICON_HIGHLIGHT_GLOW_SIZE = 10f;
-    private static final float ROLE_ICON_HIGHLIGHT_GLOW_ALPHA = 0.8f;
+    private static final float ROLE_ICON_HIGHLIGHT_OVERLAY_ALPHA = 0.45f;
     private final InvestigatorId investigatorId;
     private final GameController gameController;
     private final TextureRegion roleIconTextureRegion;
@@ -211,25 +210,18 @@ public class InvestigatorImage extends Image {
         float x = bottomCenter.x - drawWidth / 2f + ROLE_ICON_X_OFFSET * camera.zoom;
         float y = bottomCenter.y + ROLE_ICON_Y_OFFSET * camera.zoom;
         Color previousColor = new Color(batch.getColor());
+        batch.setColor(1f, 1f, 1f, parentAlpha * getColor().a);
+        batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
         if (highlighted) {
-            float glowPadding = ROLE_ICON_HIGHLIGHT_GLOW_SIZE * camera.zoom;
             Color borderColor = borderImage.getColor();
             batch.setColor(
                     borderColor.r,
                     borderColor.g,
                     borderColor.b,
-                    parentAlpha * getColor().a * ROLE_ICON_HIGHLIGHT_GLOW_ALPHA
+                    parentAlpha * getColor().a * ROLE_ICON_HIGHLIGHT_OVERLAY_ALPHA
             );
-            batch.draw(
-                    roleIconTextureRegion,
-                    x - glowPadding / 2f,
-                    y - glowPadding / 2f,
-                    drawWidth + glowPadding,
-                    drawHeight + glowPadding
-            );
+            batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
         }
-        batch.setColor(1f, 1f, 1f, parentAlpha * getColor().a);
-        batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
         batch.setColor(previousColor);
     }
 
