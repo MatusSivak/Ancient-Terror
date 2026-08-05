@@ -262,13 +262,13 @@ public class MapStage {
         stage.addActor(vortexLayer);
         stage.addActor(defeatedInvestigatorLayer);
         stage.addActor(investigatorLayer);
-        stage.addActor(epicMonsterLayer);
-        stage.addActor(monsterLayer);
-        stage.addActor(reckoningMonsterLayer);
         stage.addActor(clueLayer);
         stage.addActor(redPinLayer);
         stage.addActor(locationHighlightLayer);
         stage.addActor(cityInfoLayer);
+        stage.addActor(epicMonsterLayer);
+        stage.addActor(monsterLayer);
+        stage.addActor(reckoningMonsterLayer);
         stage.addActor(lostInTimeAndSpaceLayer);
         stage.addActor(mapShadowLayer);
         stage.addActor(touchBlockerLayer);

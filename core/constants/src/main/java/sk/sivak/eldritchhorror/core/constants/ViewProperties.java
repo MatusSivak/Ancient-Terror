@@ -15,7 +15,7 @@ public class ViewProperties {
     public static final float MAP_ALLOWED_OFFSET = 9 * MAP_WIDTH / 16f - MAP_HEIGHT;
     public static final int ZOOMED_MIN_VIEWPORT_HEIGHT = (int) (VIEWPORT_HEIGHT * 0.75f);
 
-    public static final int MONSTER_SIZE = 150;
+    public static final int MONSTER_SIZE = 120;
     public static final int EPIC_MONSTER_SIZE = (int) (MONSTER_SIZE * 1.25f);
     public static final float MONSTER_SPEED = 30;
     public static final float HUD_HEIGHT_RATIO = 0.10f;
