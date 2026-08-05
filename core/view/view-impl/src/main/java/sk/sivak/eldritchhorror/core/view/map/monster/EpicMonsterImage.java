@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -214,6 +215,19 @@ public class EpicMonsterImage extends Image {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
+        // Draw shadow (black scaled copy for border effect)
+        if (getDrawable() instanceof TransformDrawable) {
+            Color prevColor = batch.getColor().cpy();
+            batch.setColor(0f, 0f, 0f, 0.7f * getColor().a * parentAlpha);
+            ((TransformDrawable) getDrawable()).draw(batch,
+                    getX(), getY(),
+                    getOriginX(), getOriginY(),
+                    getWidth(), getHeight(),
+                    getScaleX() * 1.15f, getScaleY() * 1.15f,
+                    getRotation());
+            batch.setColor(prevColor);
+        }
+
         super.draw(batch, parentAlpha);
 
         if (drawReckoningImage) {
