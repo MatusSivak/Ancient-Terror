@@ -1,6 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,6 +17,7 @@ import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCardEffect;
+import sk.sivak.eldritchhorror.core.view.shader.BlurShadowShader;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MONSTER_SIZE;
@@ -115,17 +118,26 @@ public class MonsterImage extends Image {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        // Draw shadow (black scaled copy for border effect)
-        if (getDrawable() instanceof TransformDrawable) {
+        // Draw blurred shadow using Gaussian blur shader
+        if (getDrawable() instanceof TextureRegionDrawable) {
+            TextureRegionDrawable trd = (TextureRegionDrawable) getDrawable();
+            ShaderProgram prevShader = batch.getShader();
             Color prevColor = batch.getColor().cpy();
-            batch.setColor(0f, 0f, 0f, 0.7f * getColor().a * parentAlpha);
-            ((TransformDrawable) getDrawable()).draw(batch,
+
+            batch.setShader(BlurShadowShader.get());
+            BlurShadowShader.get().setUniformf("u_texelSize",
+                    1f / trd.getRegion().getTexture().getWidth(),
+                    1f / trd.getRegion().getTexture().getHeight());
+
+            batch.setColor(1f, 1f, 1f, 0.7f * getColor().a * parentAlpha);
+            ((TransformDrawable) trd).draw(batch,
                     getX(), getY(),
                     getOriginX(), getOriginY(),
                     getWidth(), getHeight(),
                     getScaleX() * 1.15f, getScaleY() * 1.15f,
                     getRotation());
             batch.setColor(prevColor);
+            batch.setShader(prevShader);
         }
 
         super.draw(batch, parentAlpha);
