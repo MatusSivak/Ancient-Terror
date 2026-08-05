@@ -26,7 +26,6 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.EPIC_MONSTER_SIZE;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_FILTER;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 /**
@@ -34,7 +33,6 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
  */
 public class EpicMonsterImage extends Image {
     private final Vector2 position;
-    private Texture monsterFilter;
     private MonsterInfo monsterInfo;
     private GameController gameController;
     private final boolean hasReckoning;
@@ -62,9 +60,6 @@ public class EpicMonsterImage extends Image {
         });
 
         addClickListener(this, this::displayMonsterCard);
-        CustomAssetManager.getTextureAsync(CustomAssetManager.MONSTER_FILTER).subscribe(monsterFilter -> {
-            this.monsterFilter = monsterFilter;
-        });
     }
 
     private void displayMonsterCard() {
@@ -225,14 +220,6 @@ public class EpicMonsterImage extends Image {
             reckoningImage.draw(batch, parentAlpha);
         }
 
-        batch.setColor(new Color(1f, 1f, 1f, 0.5f * getColor().a * parentAlpha));
-        if (monsterFilter != null) {
-            batch.draw(monsterFilter,
-                    getX() + (1 - getScaleX()) * getWidth() / 2,
-                    getY() + (1 - getScaleY()) * getHeight() / 2,
-                    getWidth() * getScaleX(),
-                    getHeight() * getScaleY());
-        }
         if (borderImage != null) {
             borderImage.draw(batch, parentAlpha);
         }

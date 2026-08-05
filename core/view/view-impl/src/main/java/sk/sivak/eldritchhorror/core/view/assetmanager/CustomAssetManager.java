@@ -278,7 +278,6 @@ public class CustomAssetManager extends AssetManager {
     public final static String COMPASS = "token/compass.png";
     public final static String GATE_GRADIENT = "gate/gradient.png";
     public final static String INVESTIGATOR_BORDER = "investigator/border.png";
-    public final static String MONSTER_FILTER = "monster/filter.png";
     public final static String MONSTER_BORDER = "monster/epic/epic_border.png";
     public final static String WHITE_BACKGROUND = "background/white.jpg";
     public final static String GRAY_BACKGROUND = "background/gray.jpg";

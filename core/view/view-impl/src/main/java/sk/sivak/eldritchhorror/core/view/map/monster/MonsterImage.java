@@ -17,7 +17,6 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCardEff
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MONSTER_SIZE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_FILTER;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 /**
@@ -27,7 +26,6 @@ public class MonsterImage extends Image {
 
     private final LocationId location;
     private final boolean hasReckoning;
-    private Texture monsterFilter;
     private MonsterInfo monsterInfo;
     private GameController gameController;
     private final boolean isCenter;
@@ -47,9 +45,6 @@ public class MonsterImage extends Image {
         setOrigin(getWidth() / 2, getHeight() / 2);
         reckoningImage = createReckoningImage();
         addClickListener(this, this::displayMonsterCard);
-        CustomAssetManager.getTextureAsync(CustomAssetManager.MONSTER_FILTER).subscribe(monsterFilter -> {
-            this.monsterFilter = monsterFilter;
-        });
     }
 
     private void displayMonsterCard() {
@@ -120,15 +115,6 @@ public class MonsterImage extends Image {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-
-        batch.setColor(new Color(1f, 1f, 1f, 0.5f * getColor().a * parentAlpha));
-        if (monsterFilter != null) {
-            batch.draw(monsterFilter,
-                    getX() + (1 - getScaleX()) * getWidth() / 2,
-                    getY() + (1 - getScaleY()) * getHeight() / 2,
-                    getWidth() * getScaleX(),
-                    getHeight() * getScaleY());
-        }
 
         if (drawReckoningImage) {
             reckoningImage.draw(batch, parentAlpha);
