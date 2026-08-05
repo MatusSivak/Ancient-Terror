@@ -162,7 +162,7 @@ public class BlueMythosCard5 implements MythosCardEventListener{
 
         @Override
         public void onNotify(RumorEncounter eventData) {
-            if (!eventData.getSecondLine().equals("Growing Madness")) {
+            if (!eventData.getSecondLine().equals("rumor.card.growingMadness.title")) {
                 return;
             }
             Question<Boolean> question = new Question<>();

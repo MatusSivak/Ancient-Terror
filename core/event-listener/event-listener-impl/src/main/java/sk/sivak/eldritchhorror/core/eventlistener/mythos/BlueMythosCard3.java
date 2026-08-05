@@ -109,7 +109,7 @@ public class BlueMythosCard3 implements MythosCardEventListener{
 
         @Override
         public void onNotify(RumorEncounter eventData) {
-            if (!eventData.getSecondLine().equals("Fractured Reality")) {
+            if (!eventData.getSecondLine().equals("rumor.card.fracturedReality.title")) {
                 return;
             }
             beforeCloseGateListener = new BeforeCloseGateListener();

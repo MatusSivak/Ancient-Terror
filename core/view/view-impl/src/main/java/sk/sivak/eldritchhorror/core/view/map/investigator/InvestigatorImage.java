@@ -49,7 +49,7 @@ public class InvestigatorImage extends Image {
     private static final float IMAGE_WIDTH = IMAGE_HEIGHT * SOURCE_IMAGE_WIDTH / SOURCE_IMAGE_HEIGHT;
     private static final int ROLE_ICON_SCREEN_SIZE = 48;
     private static final int ROLE_ICON_X_OFFSET = 0;
-    private static final int ROLE_ICON_Y_OFFSET = 0;
+    private static final int ROLE_ICON_Y_OFFSET = -15;
     private static final float ROLE_ICON_HIGHLIGHT_OVERLAY_ALPHA = 0.45f;
     private final InvestigatorId investigatorId;
     private final GameController gameController;
@@ -206,11 +206,12 @@ public class InvestigatorImage extends Image {
         float scale = Math.min(iconSize / sourceWidth, iconSize / sourceHeight);
         float drawWidth = sourceWidth * scale;
         float drawHeight = sourceHeight * scale;
-        Vector2 bottomCenter = localToStageCoordinates(new Vector2(getWidth() / 2f, 0f));
+        Vector2 bottomCenter = localToStageCoordinates(new Vector2(getWidth() / 2f, 20));
         float x = bottomCenter.x - drawWidth / 2f + ROLE_ICON_X_OFFSET * camera.zoom;
         float y = bottomCenter.y + ROLE_ICON_Y_OFFSET * camera.zoom;
         Color previousColor = new Color(batch.getColor());
-        batch.setColor(1f, 1f, 1f, parentAlpha * getColor().a);
+        Color actorColor = getColor();
+        batch.setColor(actorColor.r, actorColor.g, actorColor.b, parentAlpha * actorColor.a);
         batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
         if (highlighted) {
             Color borderColor = borderImage.getColor();

@@ -81,21 +81,21 @@ public class EncounterButton extends Table {
 
     private void initOneLiner() {
         addActionButton();
-        add(createEnabledLabel(encounterButtonData.getFirstLine())).width(LABEL_WIDTH).padLeft(5).padRight(5);
+        add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getFirstLine()))).width(LABEL_WIDTH).padLeft(5).padRight(5);
     }
 
     private void initTwoLiner() {
         addActionButton();
         Table lines = new Table();
-        lines.add(createEnabledLabel(encounterButtonData.getFirstLine())).left().width(LABEL_WIDTH).row();
-        lines.add(createEnabledLabel(encounterButtonData.getSecondLine())).left().width(LABEL_WIDTH).row();
+        lines.add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getFirstLine()))).left().width(LABEL_WIDTH).row();
+        lines.add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getSecondLine()))).left().width(LABEL_WIDTH).row();
         add(lines).padLeft(5).padRight(5);
     }
 
     private void initMonsterButton() {
         addActionButton();
         Table lines = new Table();
-        lines.add(createEnabledLabel(encounterButtonData.getFirstLine())).left().width(LABEL_WIDTH).row();
+        lines.add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getFirstLine()))).left().width(LABEL_WIDTH).row();
 
         CombatEncounterButtonData combatEncounterButtonData = ((CombatEncounterButtonData) encounterButtonData);
         Integer toughness = combatEncounterButtonData.getMonsterInfo().getToughness();

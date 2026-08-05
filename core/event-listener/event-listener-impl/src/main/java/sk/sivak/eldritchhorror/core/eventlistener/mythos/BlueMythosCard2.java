@@ -100,7 +100,7 @@ public class BlueMythosCard2 implements MythosCardEventListener{
 
         @Override
         public void onNotify(RumorEncounter eventData) {
-            if (!eventData.getSecondLine().equals("Stars Aligned")) {
+            if (!eventData.getSecondLine().equals("rumor.card.starsAligned.title")) {
                 return;
             }
             Question<Boolean> question = new Question<>();
