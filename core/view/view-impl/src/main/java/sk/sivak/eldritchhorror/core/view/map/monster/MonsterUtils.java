@@ -119,8 +119,8 @@ public class MonsterUtils {
         private void postSpawnConfig(Actor leftActor, Actor centerActor, Actor rightActor, float offsetX, float offsetY) {
             float movementDirection = MathUtils.random(360);
             float movementDistanceWeight = MathUtils.random(1f);
-            float diffX = MathUtils.cosDeg(movementDirection) * MONSTER_SIZE * 0.75f * movementDistanceWeight;
-            float diffY = MathUtils.sinDeg(movementDirection) * MONSTER_SIZE * 0.75f * movementDistanceWeight;
+            float diffX = MathUtils.cosDeg(movementDirection) * MONSTER_SIZE * 0.45f * movementDistanceWeight;
+            float diffY = MathUtils.sinDeg(movementDirection) * MONSTER_SIZE * 0.45f * movementDistanceWeight;
 
             float distance = (float) getDistance(new Vector2(offsetX, offsetY), new Vector2(diffX, diffY));
             float duration = distance / MONSTER_SPEED;

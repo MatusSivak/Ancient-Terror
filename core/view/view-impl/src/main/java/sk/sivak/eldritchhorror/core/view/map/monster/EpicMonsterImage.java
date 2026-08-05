@@ -229,9 +229,9 @@ public class EpicMonsterImage extends Image {
                     1f / trd.getRegion().getTexture().getWidth(),
                     1f / trd.getRegion().getTexture().getHeight());
 
-            batch.setColor(1f, 1f, 1f, 0.8f * getColor().a * parentAlpha);
+            batch.setColor(1f, 1f, 1f, 0.75f * getColor().a * parentAlpha);
             ((TransformDrawable) trd).draw(batch,
-                    getX(), getY(),
+                    getX(), getY() + getHeight() * 0.05f,
                     getOriginX(), getOriginY(),
                     getWidth(), getHeight(),
                     getScaleX() * 1.05f, getScaleY() * 1.05f,

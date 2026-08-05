@@ -34,7 +34,7 @@ public class BlurShadowShader {
             "uniform vec2 u_texelSize;\n" +
             "\n" +
             "void main() {\n" +
-            "    vec2 s = u_texelSize * 3.0;\n" +
+            "    vec2 s = u_texelSize * 5.0;\n" +
             "    float a = 0.0;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2(-2.0, -2.0) * s).a * 0.00391;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2(-1.0, -2.0) * s).a * 0.01563;\n" +
@@ -61,7 +61,7 @@ public class BlurShadowShader {
             "    a += texture2D(u_texture, v_texCoords + vec2( 0.0,  2.0) * s).a * 0.02344;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2( 1.0,  2.0) * s).a * 0.01563;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2( 2.0,  2.0) * s).a * 0.00391;\n" +
-            "    gl_FragColor = vec4(0.35, 0.0, 0.0, a * v_color.a);\n" +
+            "    gl_FragColor = vec4(0.0, 0.0, 0.0, a * v_color.a);\n" +
             "}";
 
     private static ShaderProgram instance;
