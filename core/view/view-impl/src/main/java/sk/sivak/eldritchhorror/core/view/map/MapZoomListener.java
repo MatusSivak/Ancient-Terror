@@ -52,6 +52,9 @@ public class MapZoomListener extends ActorGestureListener {
         if (newZoom * MapStage.getCamera().viewportHeight > (MAP_HEIGHT + MAP_ALLOWED_OFFSET)) {
             newZoom = (MAP_HEIGHT + MAP_ALLOWED_OFFSET) / MapStage.getCamera().viewportHeight;
         }
+        if (newZoom * MapStage.getCamera().viewportWidth > MAP_WIDTH) {
+            newZoom = MAP_WIDTH / MapStage.getCamera().viewportWidth;
+        }
         MapStage.getCamera().zoom = newZoom;
         moveCamera();
         MapUtils.fixInvalidCameraPosition();

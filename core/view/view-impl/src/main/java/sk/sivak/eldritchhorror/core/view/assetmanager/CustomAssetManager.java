@@ -259,7 +259,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPLASH = "background/splash.jpg";
     public final static String BLANK_MAP = "map/blank_map.png";
     public final static String ASTEROID = "map/asteroid.png";
-    public final static String MAP = "map/map_alternative.png";
+    public final static String MAP = "map/new_map.png";
     public final static String RED_PIN = "map/redpin.png";
     public final static String STORM = "map/storm.png";
     public final static String SPACE = "map/space_background.jpg";

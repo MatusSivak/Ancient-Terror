@@ -73,15 +73,15 @@ public class LocationPositionResolver {
             case SPACE_21:
                 return new Vector2(2586, 925);
             case SAN_FRANCISCO:
-                return new Vector2(475, 449);
+                return new Vector2(380, 669);
             case BUENOS_AIRES:
-                return new Vector2(1038, 1057);
+                return new Vector2(919, 1346);
             case ARKHAM:
-                return new Vector2(887, 390);
+                return new Vector2(842, 635);
             case LONDON:
-                return new Vector2(1457, 320);
+                return new Vector2(1428, 528);
             case ROME:
-                return new Vector2(1606, 394);
+                return new Vector2(1529, 642);
             case ISTANBUL:
                 return new Vector2(1878, 350);
             case SHANGHAI:

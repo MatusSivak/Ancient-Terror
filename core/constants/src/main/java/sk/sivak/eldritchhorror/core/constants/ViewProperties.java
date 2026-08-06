@@ -10,9 +10,9 @@ public class ViewProperties {
     public static final int VIEWPORT_WIDTH = 960;
     public static final int VIEWPORT_HEIGHT = 540;
 
-    public static final int MAP_WIDTH = 3000;
-    public static final int MAP_HEIGHT = 1500;
-    public static final float MAP_ALLOWED_OFFSET = 9 * MAP_WIDTH / 16f - MAP_HEIGHT;
+    public static final int MAP_WIDTH = 2955;
+    public static final int MAP_HEIGHT = 1774;
+    public static final float MAP_ALLOWED_OFFSET = Math.max(0, 9 * MAP_WIDTH / 16f - MAP_HEIGHT);
     public static final int ZOOMED_MIN_VIEWPORT_HEIGHT = (int) (VIEWPORT_HEIGHT * 0.75f);
 
     public static final int MONSTER_SIZE = 120;

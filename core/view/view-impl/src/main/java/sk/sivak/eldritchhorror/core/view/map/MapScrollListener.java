@@ -7,6 +7,7 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_ALLOWED_OFFSET;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_HEIGHT;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
 
 /**
  * @author msivak
@@ -24,6 +25,9 @@ public class MapScrollListener extends ClickListener {
         }
         if (newZoom * camera.viewportHeight > (MAP_HEIGHT + MAP_ALLOWED_OFFSET)) {
             newZoom = (MAP_HEIGHT + MAP_ALLOWED_OFFSET) / camera.viewportHeight;
+        }
+        if (newZoom * camera.viewportWidth > MAP_WIDTH) {
+            newZoom = MAP_WIDTH / camera.viewportWidth;
         }
         camera.zoom = newZoom;
 
