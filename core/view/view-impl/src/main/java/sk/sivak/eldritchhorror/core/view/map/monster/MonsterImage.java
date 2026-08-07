@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -17,6 +19,7 @@ import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCardEffect;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.shader.BlurShadowShader;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
@@ -27,6 +30,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
  * @author msivak
  */
 public class MonsterImage extends Image {
+
+    private static final float RECKONING_ICON_SIZE_MULTIPLIER = 0.35f;
 
     private final LocationId location;
     private final boolean hasReckoning;
@@ -143,8 +148,28 @@ public class MonsterImage extends Image {
         super.draw(batch, parentAlpha);
 
         if (drawReckoningImage) {
-            reckoningImage.draw(batch, parentAlpha);
+            drawReckoningImage(batch, parentAlpha);
         }
+    }
+
+    private void drawReckoningImage(Batch batch, float parentAlpha) {
+        if (!(reckoningImage.getDrawable() instanceof TextureRegionDrawable)) {
+            return;
+        }
+
+        OrthographicCamera camera = MapStage.getCamera();
+        float drawWidth = getWidth() * getScaleX() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
+        float drawHeight = getHeight() * getScaleY() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
+        Vector2 center = localToStageCoordinates(new Vector2(getWidth() / 2f, getHeight() / 2f));
+        float x = center.x - drawWidth / 2f;
+        float y = center.y - drawHeight / 2f;
+
+        TextureRegionDrawable drawable = (TextureRegionDrawable) reckoningImage.getDrawable();
+        Color previousColor = new Color(batch.getColor());
+        Color iconColor = reckoningImage.getColor();
+        batch.setColor(iconColor.r, iconColor.g, iconColor.b, parentAlpha * iconColor.a);
+        batch.draw(drawable.getRegion(), x, y, drawWidth, drawHeight);
+        batch.setColor(previousColor);
     }
 
     public void removeReckoningImage() {

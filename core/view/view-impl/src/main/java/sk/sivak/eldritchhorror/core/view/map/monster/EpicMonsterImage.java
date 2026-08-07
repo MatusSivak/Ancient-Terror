@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
@@ -22,6 +23,7 @@ import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.shader.BlurShadowShader;
 
@@ -36,6 +38,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
  * @author msivak
  */
 public class EpicMonsterImage extends Image {
+    private static final float RECKONING_ICON_SIZE_MULTIPLIER = 0.35f;
+
     private final Vector2 position;
     private MonsterInfo monsterInfo;
     private GameController gameController;
@@ -240,16 +244,38 @@ public class EpicMonsterImage extends Image {
             batch.setShader(prevShader);
         }
 
-        super.draw(batch, parentAlpha);
-
-        if (drawReckoningImage) {
-            reckoningImage.draw(batch, parentAlpha);
-        }
-
         if (borderImage != null) {
             borderImage.draw(batch, parentAlpha);
         }
 
+        super.draw(batch, parentAlpha);
+
+        if (drawReckoningImage) {
+            drawReckoningImage(batch, parentAlpha);
+        }
+
+
+
+    }
+
+    private void drawReckoningImage(Batch batch, float parentAlpha) {
+        if (!(reckoningImage.getDrawable() instanceof TextureRegionDrawable)) {
+            return;
+        }
+
+        OrthographicCamera camera = MapStage.getCamera();
+        float drawWidth = getWidth() * getScaleX() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
+        float drawHeight = getHeight() * getScaleY() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
+        Vector2 center = localToStageCoordinates(new Vector2(getWidth() / 2f, getHeight() / 2f));
+        float x = center.x - drawWidth / 2f;
+        float y = center.y - drawHeight / 2f;
+
+        TextureRegionDrawable drawable = (TextureRegionDrawable) reckoningImage.getDrawable();
+        Color previousColor = new Color(batch.getColor());
+        Color iconColor = reckoningImage.getColor();
+        batch.setColor(iconColor.r, iconColor.g, iconColor.b, parentAlpha * iconColor.a);
+        batch.draw(drawable.getRegion(), x, y, drawWidth, drawHeight);
+        batch.setColor(previousColor);
     }
 
     public void removeReckoningImage() {
