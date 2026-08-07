@@ -115,7 +115,7 @@ public class EpicMonsterImage extends Image {
             }
         }
 
-        float borderScale = 0.215f;
+        float borderScale = 0.4f;
         AnimatedImage animatedBorder = new AnimatedImage(
                 new Animation<>(0.04f, textureRegions.toArray(new TextureRegion[0]))) {
 
@@ -165,7 +165,7 @@ public class EpicMonsterImage extends Image {
             @Override
             public void draw(Batch batch, float parentAlpha) {
                 float alpha = getColor().a;
-                getColor().a *= EpicMonsterImage.this.getColor().a;
+                getColor().a *= EpicMonsterImage.this.getColor().a * 0.5f;
                 super.draw(batch, parentAlpha);
                 getColor().a = alpha;
             }

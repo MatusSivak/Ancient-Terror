@@ -31,77 +31,77 @@ public class LocationPositionResolver {
     private static Vector2 resolveInternal(LocationId locationId) {
         switch (locationId) {
             case SPACE_1:
-                return new Vector2(208, 267);
+                return new Vector2(130, 453);
             case SPACE_2:
-                return new Vector2(182, 579);
+                return new Vector2(94, 844);
             case SPACE_3:
-                return new Vector2(429, 1080);
+                return new Vector2(241, 1325);
             case SPACE_4:
-                return new Vector2(538, 220);
+                return new Vector2(420, 392);
             case SPACE_5:
-                return new Vector2(690, 374);
+                return new Vector2(620, 486);
             case SPACE_6:
-                return new Vector2(735, 498);
+                return new Vector2(593, 745);
             case SPACE_7:
-                return new Vector2(826, 672);
+                return new Vector2(757, 959);
             case SPACE_8:
-                return new Vector2(1022, 560);
+                return new Vector2(962, 814);
             case SPACE_9:
-                return new Vector2(1066, 129);
+                return new Vector2(1050, 353);
             case SPACE_10:
-                return new Vector2(1357, 618);
+                return new Vector2(1328, 905);
             case SPACE_11:
-                return new Vector2(1384, 1025);
+                return new Vector2(1320, 1240);
             case SPACE_12:
-                return new Vector2(1213, 1208);
+                return new Vector2(1387, 1496);
             case SPACE_13:
-                return new Vector2(1701, 75);
+                return new Vector2(1777, 184);
             case SPACE_14:
-                return new Vector2(1732, 199);
+                return new Vector2(1633, 394);
             case SPACE_15:
-                return new Vector2(1657, 1033);
+                return new Vector2(1587, 1322);
             case SPACE_16:
-                return new Vector2(2231, 180);
+                return new Vector2(1973, 403);
             case SPACE_17:
-                return new Vector2(2109, 578);
+                return new Vector2(2045, 890);
             case SPACE_18:
-                return new Vector2(2087, 1164);
+                return new Vector2(2105, 1334);
             case SPACE_19:
-                return new Vector2(2895, 245);
+                return new Vector2(2830, 369);
             case SPACE_20:
-                return new Vector2(2430, 786);
+                return new Vector2(2345, 1036);
             case SPACE_21:
-                return new Vector2(2586, 925);
+                return new Vector2(2431, 1223);
             case SAN_FRANCISCO:
                 return new Vector2(380, 669);
             case BUENOS_AIRES:
-                return new Vector2(919, 1346);
+                return new Vector2(815, 1436);
             case ARKHAM:
                 return new Vector2(842, 635);
             case LONDON:
-                return new Vector2(1428, 528);
+                return new Vector2(1281, 480);
             case ROME:
-                return new Vector2(1529, 642);
+                return new Vector2(1407, 715);
             case ISTANBUL:
-                return new Vector2(1878, 350);
+                return new Vector2(1759, 528);
             case SHANGHAI:
-                return new Vector2(2518, 498);
+                return new Vector2(2393, 737);
             case TOKYO:
-                return new Vector2(2664, 453);
+                return new Vector2(2689, 642);
             case SYDNEY:
-                return new Vector2(2748, 1034);
+                return new Vector2(2637, 1343);
             case THE_AMAZON:
-                return new Vector2(1015, 809);
+                return new Vector2(915, 1111);
             case THE_HEART_OF_AFRICA:
-                return new Vector2(1700, 741);
+                return new Vector2(1628, 1005);
             case THE_PYRAMIDS:
-                return new Vector2(1765, 509);
+                return new Vector2(1680, 755);
             case ANTARCTICA:
-                return new Vector2(1752, 1336);
+                return new Vector2(1995, 1595);
             case THE_HIMALAYAS:
-                return new Vector2(2257, 436);
+                return new Vector2(2137, 702);
             case TUNGUSKA:
-                return new Vector2(2344, 311);
+                return new Vector2(2253, 403);
         }
         throw new IllegalArgumentException("Invalid space: " + locationId);
     }
