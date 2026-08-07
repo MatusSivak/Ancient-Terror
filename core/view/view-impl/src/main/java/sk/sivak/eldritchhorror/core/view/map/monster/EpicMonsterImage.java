@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
@@ -10,10 +9,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.schedulers.Schedulers;
@@ -23,7 +21,6 @@ import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
-import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.shader.BlurShadowShader;
 
@@ -31,22 +28,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.EPIC_MONSTER_SIZE;
-import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 /**
  * @author msivak
  */
 public class EpicMonsterImage extends Image {
-    private static final float RECKONING_ICON_SIZE_MULTIPLIER = 0.35f;
+    private static final float RECKONING_PULSE_SPEED = 4f;
+    private static final float RECKONING_PULSE_MIN_ALPHA = 0.0f;
+    private static final float RECKONING_PULSE_MAX_ALPHA = 0.75f;
 
     private final Vector2 position;
     private MonsterInfo monsterInfo;
     private GameController gameController;
     private final boolean hasReckoning;
-    private Image reckoningImage;
     private Image borderImage;
-    private boolean drawReckoningImage = false;
+    private boolean drawReckoningPulse = false;
+    private float reckoningPulseTime = 0f;
 
     public EpicMonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
         this(monsterInfo, gameController, hasReckoning, LocationPositionResolver.resolve(location), texture);
@@ -61,7 +59,9 @@ public class EpicMonsterImage extends Image {
         setWidth(EPIC_MONSTER_SIZE);
         setHeight(EPIC_MONSTER_SIZE);
         setOrigin(getWidth() / 2, getHeight() / 2);
-        reckoningImage = createReckoningImage();
+        if (hasReckoning) {
+            drawReckoningPulse = true;
+        }
 
         CustomAssetManager.getTextureAsync("monster/epic/epic_monster_border_sheet.png").subscribe(xxx -> {
             borderImage = createBorderImage();
@@ -72,42 +72,6 @@ public class EpicMonsterImage extends Image {
 
     private void displayMonsterCard() {
         gameController.displayMonsterCard(monsterInfo, () -> gameController.hideMonsterCard(monsterInfo, null), null);
-    }
-
-    private Image createReckoningImage() {
-        Image image = new Image(CustomAssetManager.getTexture(CustomAssetManager.RECKONING)) {
-
-            @Override
-            public float getX() {
-                return EpicMonsterImage.this.getX();
-            }
-
-            @Override
-            public float getY() {
-                return EpicMonsterImage.this.getY();
-            }
-
-            @Override
-            public float getScaleX() {
-                return EpicMonsterImage.this.getScaleX();
-            }
-
-            @Override
-            public float getScaleY() {
-                return EpicMonsterImage.this.getScaleY();
-            }
-        };
-
-        image.setWidth(getWidth());
-        image.setHeight(getHeight());
-        image.getColor().a = 0f;
-        image.setOrigin(getWidth() / 2, getHeight() / 2);
-
-        if (hasReckoning) {
-            addFadeInOutActions(image);
-            drawReckoningImage = true;
-        }
-        return image;
     }
 
     private Image createBorderImage() {
@@ -193,28 +157,12 @@ public class EpicMonsterImage extends Image {
         return animatedBorder;
     }
 
-    private void addFadeInOutActions(Image image) {
-        AlphaAction fadeInAction = new AlphaAction();
-        fadeInAction.setAlpha(0.5f);
-        fadeInAction.setDuration(FADING_EFFECT_DURATION * 2);
-        fadeInAction.setActor(image);
-        fadeInAction.setInterpolation(Interpolation.sine);
-
-        AlphaAction fadeOutAction = new AlphaAction();
-        fadeOutAction.setAlpha(0.0f);
-        fadeOutAction.setDuration(FADING_EFFECT_DURATION * 2);
-        fadeOutAction.setActor(image);
-        fadeOutAction.setInterpolation(Interpolation.sine);
-
-        image.addAction(Actions.sequence(Actions.delay(1), fadeInAction, fadeOutAction, Actions.run(() -> {
-            addFadeInOutActions(image);
-        })));
-    }
-
     @Override
     public void act(float delta) {
         super.act(delta);
-        reckoningImage.act(delta);
+        if (drawReckoningPulse) {
+            reckoningPulseTime += delta;
+        }
         if (borderImage != null) {
             borderImage.act(delta);
         }
@@ -250,35 +198,36 @@ public class EpicMonsterImage extends Image {
 
         super.draw(batch, parentAlpha);
 
-        if (drawReckoningImage) {
-            drawReckoningImage(batch, parentAlpha);
+        if (drawReckoningPulse) {
+            drawReckoningPulse(batch, parentAlpha);
         }
 
 
 
     }
 
-    private void drawReckoningImage(Batch batch, float parentAlpha) {
-        if (!(reckoningImage.getDrawable() instanceof TextureRegionDrawable)) {
+    private void drawReckoningPulse(Batch batch, float parentAlpha) {
+        if (!(getDrawable() instanceof TextureRegionDrawable)) {
             return;
         }
 
-        OrthographicCamera camera = MapStage.getCamera();
-        float drawWidth = getWidth() * getScaleX() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
-        float drawHeight = getHeight() * getScaleY() * camera.zoom * RECKONING_ICON_SIZE_MULTIPLIER;
-        Vector2 center = localToStageCoordinates(new Vector2(getWidth() / 2f, getHeight() / 2f));
-        float x = center.x - drawWidth / 2f;
-        float y = center.y - drawHeight / 2f;
-
-        TextureRegionDrawable drawable = (TextureRegionDrawable) reckoningImage.getDrawable();
-        Color previousColor = new Color(batch.getColor());
-        Color iconColor = reckoningImage.getColor();
-        batch.setColor(iconColor.r, iconColor.g, iconColor.b, parentAlpha * iconColor.a);
-        batch.draw(drawable.getRegion(), x, y, drawWidth, drawHeight);
+        float pulseProgress = (MathUtils.sin(reckoningPulseTime * RECKONING_PULSE_SPEED) + 1f) / 2f;
+        float pulseAlpha = RECKONING_PULSE_MIN_ALPHA +
+                (RECKONING_PULSE_MAX_ALPHA - RECKONING_PULSE_MIN_ALPHA) * pulseProgress;
+        TextureRegionDrawable drawable = (TextureRegionDrawable) getDrawable();
+        TransformDrawable transformDrawable = (TransformDrawable) drawable;
+        Color previousColor = batch.getColor().cpy();
+        batch.setColor(1f, 0.15f, 0.15f, pulseAlpha * getColor().a * parentAlpha);
+        transformDrawable.draw(batch,
+                getX(), getY(),
+                getOriginX(), getOriginY(),
+                getWidth(), getHeight(),
+                getScaleX(), getScaleY(),
+                getRotation());
         batch.setColor(previousColor);
     }
 
     public void removeReckoningImage() {
-        drawReckoningImage = false;
+        drawReckoningPulse = false;
     }
 }
