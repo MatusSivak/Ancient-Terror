@@ -52,7 +52,7 @@ public class TheWaitressActionListener extends AbstractActionPhaseListener<TheWa
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_WAITRESS.png";
+        return "investigator/ICON_THE_WAITRESS.png";
     }
 
     @Override

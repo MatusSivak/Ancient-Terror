@@ -77,7 +77,7 @@ public class TheRedeemedCultistActionListener extends AbstractActionPhaseListene
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_REDEEMED_CULTIST.png";
+        return "investigator/ICON_THE_REDEEMED_CULTIST.png";
     }
 
     @Override

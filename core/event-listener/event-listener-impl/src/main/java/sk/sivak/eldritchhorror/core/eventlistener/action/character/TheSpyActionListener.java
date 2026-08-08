@@ -65,7 +65,7 @@ public class TheSpyActionListener extends AbstractActionPhaseListener<TheSpyActi
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_SPY.png";
+        return "investigator/ICON_THE_SPY.png";
     }
 
     @Override

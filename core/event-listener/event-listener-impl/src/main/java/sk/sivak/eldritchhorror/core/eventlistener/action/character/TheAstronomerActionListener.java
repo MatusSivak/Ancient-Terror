@@ -136,7 +136,7 @@ public class TheAstronomerActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_ASTRONOMER.png";
+        return "investigator/ICON_THE_ASTRONOMER.png";
     }
 
     @Override

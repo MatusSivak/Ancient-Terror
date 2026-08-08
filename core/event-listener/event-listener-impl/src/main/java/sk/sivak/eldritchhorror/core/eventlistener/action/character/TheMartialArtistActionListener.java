@@ -52,7 +52,7 @@ public class TheMartialArtistActionListener extends AbstractActionPhaseListener<
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_MARTIAL_ARTIST.png";
+        return "investigator/ICON_THE_MARTIAL_ARTIST.png";
     }
 
     @Override

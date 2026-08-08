@@ -68,7 +68,7 @@ public class TheShamanActionListener extends AbstractActionPhaseListener<TheSham
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_SHAMAN.png";
+        return "investigator/ICON_THE_SHAMAN.png";
     }
 
     @Override

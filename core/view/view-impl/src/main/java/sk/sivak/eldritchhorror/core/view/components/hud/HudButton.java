@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.hud;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -14,12 +15,14 @@ public class HudButton extends ImageButton {
     private Image icon;
     private boolean disabled;
 
-    private float scaleMax = 1f;
-    private float scaleMin = 0.85f;
+    private float scalePressedOrChecked = 0.7f;
+    private float scaleDefault = 0.85f;
 
     private HudButton(Drawable imageUp, Drawable imageDown, Drawable imageChecked, String texturePath) {
         super(imageUp, imageDown, imageChecked);
         icon = new Image(getTextureRegion(texturePath));
+        icon.setOrigin(200,200);
+        icon.setAlign(Align.center);
     }
 
     public static HudButton buildEnabled(String texturePath) {
@@ -63,7 +66,7 @@ public class HudButton extends ImageButton {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
+        //super.draw(batch, parentAlpha);
         drawIcon(batch, parentAlpha);
     }
 
@@ -84,19 +87,25 @@ public class HudButton extends ImageButton {
                     getY() + (getHeight() - (1 / widthHeightRatio) * getHeight()) / 2);
         }
 
-        icon.setSize(getWidth() * 1.35f, getHeight() * 1.35f);
-        icon.setPosition(icon.getX() - 7, icon.getY() - 19);
+        icon.setSize(getWidth() * 1.5f, getHeight() * 1.5f);
+        icon.setPosition(icon.getX()-5, icon.getY() - 24);
         if (!disabled) {
-            if (!isPressed() && !isChecked()) {
-                icon.setOrigin(Align.center);
-                icon.setScale(scaleMin);
+            if (isPressed()) {
+                icon.setColor(Color.GREEN);
+                icon.setScale(scalePressedOrChecked);
+            } else if (isChecked()) {
+                icon.setColor(Color.GREEN);
+                icon.setScale(scaleDefault);
             } else {
-                icon.setScale(scaleMax);
+                icon.setColor(Color.WHITE);
+                icon.setOrigin(Align.center);
+                icon.setScale(scaleDefault);
             }
         } else {
+            icon.setColor(Color.WHITE);
             batch.setShader(GrayscaleShader.get());
             icon.setOrigin(Align.center);
-            icon.setScale(scaleMin);
+            icon.setScale(scaleDefault);
         }
         icon.draw(batch, parentAlpha);
         batch.setShader(null);

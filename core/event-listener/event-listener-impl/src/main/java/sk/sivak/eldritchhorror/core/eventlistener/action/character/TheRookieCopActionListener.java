@@ -82,7 +82,7 @@ public class TheRookieCopActionListener extends AbstractActionPhaseListener<TheR
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_ROOKIE_COP.png";
+        return "investigator/ICON_THE_ROOKIE_COP.png";
     }
 
     @Override

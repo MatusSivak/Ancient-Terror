@@ -68,7 +68,7 @@ public class TheBountyHunterActionListener extends AbstractActionPhaseListener<T
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_BOUNTY_HUNTER.png";
+        return "investigator/ICON_THE_BOUNTY_HUNTER.png";
     }
 
     @Override

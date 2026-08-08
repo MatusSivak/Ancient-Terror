@@ -77,7 +77,7 @@ public class TheHandymanActionListener extends AbstractActionPhaseListener<TheHa
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_HANDYMAN.png";
+        return "investigator/ICON_THE_HANDYMAN.png";
     }
 
     @Override

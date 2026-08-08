@@ -46,7 +46,7 @@ public class ThePoliticianActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_POLITICIAN.png";
+        return "investigator/ICON_THE_POLITICIAN.png";
     }
 
     @Override

@@ -70,7 +70,7 @@ public class TheMusicianActionListener extends AbstractActionPhaseListener<TheMu
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_MUSICIAN.png";
+        return "investigator/ICON_THE_MUSICIAN.png";
     }
 
     @Override

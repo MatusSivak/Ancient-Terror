@@ -41,11 +41,18 @@ public class TrackHud extends Group {
         doomTrackWidget.setPosition(omenTrack.getX() + omenTrack.getWidth() + 5, 5);
 
         ClickListener omenTrackClickListener = addClickListener(omenTrack, () -> {
-            GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.HUD_BUTTON, "Doom/Omen");
+            GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.HUD_BUTTON, "Omen");
             BigActorsManager.displayOrHideOmenTrack();
         });
 
         omenTrack.setShowHideClickListener(omenTrackClickListener);
+
+
+        addClickListener(doomTrackWidget, () -> {
+            GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.HUD_BUTTON, "Doom");
+            BigActorsManager.displayOrHideDoomTrack();
+        });
+
 
         addActor(doomTrackWidget);
         addActor(omenTrack);

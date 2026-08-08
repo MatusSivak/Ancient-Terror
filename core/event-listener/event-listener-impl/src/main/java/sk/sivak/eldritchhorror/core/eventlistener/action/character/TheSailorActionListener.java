@@ -47,7 +47,7 @@ public class TheSailorActionListener extends AbstractActionPhaseListener<TheSail
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_SAILOR.png";
+        return "investigator/ICON_THE_SAILOR.png";
     }
 
     @Override

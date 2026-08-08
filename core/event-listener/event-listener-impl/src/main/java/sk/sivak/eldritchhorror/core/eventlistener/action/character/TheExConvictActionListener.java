@@ -105,7 +105,7 @@ public class TheExConvictActionListener extends AbstractActionPhaseListener<TheE
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_EX_CONVICT.png";
+        return "investigator/ICON_THE_EX_CONVICT.png";
     }
 
     @Override

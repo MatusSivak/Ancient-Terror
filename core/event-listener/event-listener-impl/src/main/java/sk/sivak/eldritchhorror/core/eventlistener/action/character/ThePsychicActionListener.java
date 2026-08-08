@@ -88,7 +88,7 @@ public class ThePsychicActionListener extends AbstractActionPhaseListener<ThePsy
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_PSYCHIC.png";
+        return "investigator/ICON_THE_PSYCHIC.png";
     }
 
     @Override

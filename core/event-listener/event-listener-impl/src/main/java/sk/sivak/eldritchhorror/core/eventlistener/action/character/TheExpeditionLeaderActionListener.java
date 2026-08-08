@@ -102,7 +102,7 @@ public class TheExpeditionLeaderActionListener extends AbstractActionPhaseListen
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_EXPEDITION_LEADER.png";
+        return "investigator/ICON_THE_EXPEDITION_LEADER.png";
     }
 
     @Override

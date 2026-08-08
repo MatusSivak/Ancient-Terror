@@ -87,7 +87,7 @@ public class HudButtons {
         background = new Image(CustomAssetManager.getTexture(PURE_WHITE_BACKGROUND));
         background.setColor(new Color(0f, 0f, 0f, 0.5f));
         background.setBounds(0, InfoStage.getInvestigatorHud().getHeight() + BOTTOM_BONUS_PADDING,
-                availableSpace / 6f + PADDING * 2,
+                availableSpace / 6f + 8,
                 availableSpace + PADDING * 2);
         background.setX(background.getX() - background.getWidth());
         InfoStage.getHudButtonsLayer().addActor(background);
@@ -181,7 +181,7 @@ public class HudButtons {
         }
         button.setBounds(PADDING, InfoStage.getInvestigatorHud().getHeight() + BOTTOM_BONUS_PADDING + PADDING + position * size,
                 size, size);
-//        button.setX(button.getX() - button.getWidth());
+        button.setX(button.getX() - button.getWidth());
         hudButtons.add(button);
         InfoStage.getHudButtonsLayer().addActor(button);
     }

@@ -76,7 +76,7 @@ public class TheBootleggerActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getTexturePath() {
-        return "investigator/THE_BOOTLEGGER.png";
+        return "investigator/ICON_THE_BOOTLEGGER.png";
     }
 
     @Override
