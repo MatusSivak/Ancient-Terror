@@ -84,6 +84,8 @@ public class HudButton extends ImageButton {
                     getY() + (getHeight() - (1 / widthHeightRatio) * getHeight()) / 2);
         }
 
+        icon.setSize(getWidth() * 1.35f, getHeight() * 1.35f);
+        icon.setPosition(icon.getX() - 7, icon.getY() - 19);
         if (!disabled) {
             if (!isPressed() && !isChecked()) {
                 icon.setOrigin(Align.center);

@@ -39,7 +39,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 
 public class HudButtons {
     public static final float BOTTOM_BONUS_PADDING = 3;
-    public static final float PADDING = 3;
+    public static final float PADDING = 0;
     private static HudButtons instance;
     private GameController controller;
     private ButtonGroup<HudButton> hudButtons;
@@ -181,7 +181,7 @@ public class HudButtons {
         }
         button.setBounds(PADDING, InfoStage.getInvestigatorHud().getHeight() + BOTTOM_BONUS_PADDING + PADDING + position * size,
                 size, size);
-        button.setX(button.getX() - button.getWidth());
+//        button.setX(button.getX() - button.getWidth());
         hudButtons.add(button);
         InfoStage.getHudButtonsLayer().addActor(button);
     }
@@ -223,7 +223,7 @@ public class HudButtons {
             for (HudButton hudButton : hudButtons.getButtons()) {
                 MoveToAction action = new MoveToAction();
                 if (show) {
-                    action.setPosition(3, hudButton.getY()); // 3
+                    action.setPosition(0, hudButton.getY()); // 3
                 } else {
                     action.setPosition(-64, hudButton.getY()); // -64
                 }

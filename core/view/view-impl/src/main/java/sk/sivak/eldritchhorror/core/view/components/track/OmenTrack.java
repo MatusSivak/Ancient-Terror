@@ -25,7 +25,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 
 public class OmenTrack extends Group {
 
-    public static final float MIN_SCALE = 0.65f;
+    public static final float MIN_SCALE = 0.5f;
     private Map<OmenId, OmenIdComponent> omenIdComponentMap = new HashMap<>();
     private OmenId omenId;
     private ClickListener showHideClickListener;
@@ -33,22 +33,22 @@ public class OmenTrack extends Group {
     public OmenTrack() {
         omenIdComponentMap.put(OmenId.NORTH, new OmenIdComponent(
                 new Image(getTextureRegionDrawable(OMEN_GREEN)),
-                new Image(getTextureRegionDrawable(OMEN_GREEN_DISABLED))
+                new Image(getTextureRegionDrawable(OMEN_GREEN))
         ));
 
         omenIdComponentMap.put(OmenId.EAST, new OmenIdComponent(
                 new Image(getTextureRegionDrawable(OMEN_BLUE)),
-                new Image(getTextureRegionDrawable(OMEN_BLUE_DISABLED))
+                new Image(getTextureRegionDrawable(OMEN_BLUE))
         ));
 
         omenIdComponentMap.put(OmenId.WEST, new OmenIdComponent(
                 new Image(getTextureRegionDrawable(OMEN_BLUE)),
-                new Image(getTextureRegionDrawable(OMEN_BLUE_DISABLED))
+                new Image(getTextureRegionDrawable(OMEN_BLUE))
         ));
 
         omenIdComponentMap.put(OmenId.SOUTH, new OmenIdComponent(
                 new Image(getTextureRegionDrawable(OMEN_RED)),
-                new Image(getTextureRegionDrawable(OMEN_RED_DISABLED))
+                new Image(getTextureRegionDrawable(OMEN_RED))
         ));
 
         OmenIdComponent northComponent = omenIdComponentMap.get(OmenId.NORTH);
@@ -159,7 +159,9 @@ public class OmenTrack extends Group {
 
         public OmenIdComponent(Image colorImage, Image colorImageDisabled) {
             this.colorImage = colorImage;
+            this.colorImage.setSize(200,200);
             this.colorImageDisabled = colorImageDisabled;
+            this.colorImageDisabled.setSize(200,200);
             this.circle = new Image(getTextureRegionDrawable(OMEN_CIRCLE));
             this.circleDisabled = new Image(getTextureRegionDrawable(OMEN_CIRCLE_DISABLED));
 
@@ -206,7 +208,7 @@ public class OmenTrack extends Group {
 
             colorImage.setPosition(50, 50);
 
-            addAction(Actions.scaleTo(1.0f, 1.0f, 1f, Interpolation.sine));
+            addAction(Actions.scaleTo(1.2f, 1.2f, 1f, Interpolation.sine));
         }
 
         public void deActivate() {

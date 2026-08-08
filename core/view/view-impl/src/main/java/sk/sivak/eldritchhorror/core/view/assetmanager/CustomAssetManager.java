@@ -103,7 +103,6 @@ public class CustomAssetManager extends AssetManager {
         load("ancient_one/lock.png", Texture.class);
         load("map/blank_map.png", Texture.class);
         load("omen/green.png", Texture.class);
-        load("omen/green_disabled.png", Texture.class);
         load("omen/omen_background.png", Texture.class);
         load(ACTION_BUTTON_ENABLED_NORMAL, Texture.class);
         load(ACTION_BUTTON_ENABLED_PRESSED, Texture.class);
@@ -116,9 +115,7 @@ public class CustomAssetManager extends AssetManager {
         load("omen/circle.png", Texture.class);
         load("omen/circle_disabled.png", Texture.class);
         load("omen/blue.png", Texture.class);
-        load("omen/blue_disabled.png", Texture.class);
         load("omen/red.png", Texture.class);
-        load("omen/red_disabled.png", Texture.class);
         load("clock/clock.png", Texture.class);
         load("clock/minute_hand.png", Texture.class);
         load("clock/knob.png", Texture.class);
@@ -289,11 +286,8 @@ public class CustomAssetManager extends AssetManager {
     public final static String OMEN_CIRCLE = "omen/circle.png";
     public final static String OMEN_CIRCLE_DISABLED = "omen/circle_disabled.png";
     public final static String OMEN_BLUE = "omen/blue.png";
-    public final static String OMEN_BLUE_DISABLED = "omen/blue_disabled.png";
     public final static String OMEN_RED = "omen/red.png";
-    public final static String OMEN_RED_DISABLED = "omen/red_disabled.png";
     public final static String OMEN_GREEN = "omen/green.png";
-    public final static String OMEN_GREEN_DISABLED = "omen/green_disabled.png";
     public final static String OMEN_BACKGROUND = "omen/omen_background.png";
     public final static String TICKET_BLANK = "token/ticket_blank.png";
     public final static String TICKET_TRAIN_UP = "token/train_ticket_up.png";
