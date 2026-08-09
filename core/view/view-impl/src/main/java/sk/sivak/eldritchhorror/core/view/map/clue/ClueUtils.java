@@ -17,7 +17,7 @@ import sk.sivak.eldritchhorror.core.view.map.helper.Spawner;
  */
 public class ClueUtils {
 
-    private final static float CLUE_TEXTURE_SCALE = 3;
+    private final static float CLUE_TEXTURE_SCALE = 7;
 
     public static Completable spawnClue(LocationId spawnLocationId, LocationId currentLocationId) {
 

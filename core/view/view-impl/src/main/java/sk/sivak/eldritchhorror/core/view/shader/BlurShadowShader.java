@@ -22,7 +22,7 @@ public class BlurShadowShader {
 
     // 5x5 Gaussian blur kernel — accumulates only alpha, outputs black shadow.
     // u_texelSize: (1/textureWidth, 1/textureHeight)
-    // Kernel step is 3 texels so the blur is visually noticeable.
+    // Larger sample step makes the shadow softer and more spread out.
     private static final String FRAGMENT_SHADER =
             "#ifdef GL_ES\n" +
             "    precision mediump float;\n" +
@@ -34,7 +34,7 @@ public class BlurShadowShader {
             "uniform vec2 u_texelSize;\n" +
             "\n" +
             "void main() {\n" +
-            "    vec2 s = u_texelSize * 5.0;\n" +
+            "    vec2 s = u_texelSize * 8.0;\n" +
             "    float a = 0.0;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2(-2.0, -2.0) * s).a * 0.00391;\n" +
             "    a += texture2D(u_texture, v_texCoords + vec2(-1.0, -2.0) * s).a * 0.01563;\n" +
