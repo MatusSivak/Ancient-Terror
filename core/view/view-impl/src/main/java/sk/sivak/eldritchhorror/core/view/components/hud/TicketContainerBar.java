@@ -23,7 +23,7 @@ public class TicketContainerBar extends ContainerBar {
     public void addTicket(PathType pathType) {
         Cell cell = getCells().get(currentValue);
         Texture texture = CustomAssetManager.getTexture(
-                pathType == PathType.SHIP ? CustomAssetManager.TICKET_SHIP_UP : CustomAssetManager.TICKET_TRAIN_UP);
+                pathType == PathType.SHIP ? CustomAssetManager.TICKET_SHIP_DOWN : CustomAssetManager.TICKET_TRAIN_DOWN);
         cell.setActor(new Image(texture));
         slots[currentValue] = pathType;
         currentValue++;

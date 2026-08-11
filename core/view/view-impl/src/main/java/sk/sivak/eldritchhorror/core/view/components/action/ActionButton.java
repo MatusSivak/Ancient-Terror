@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.action;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -42,20 +43,20 @@ public class ActionButton extends ImageButton {
 
         actionButton.disabled = false;
         actionButton.actionButtonData = actionButtonData;
-        init(actionButtonData.needsScaleDown(), actionButton);
+        init(actionButtonData.getScaleDownPercentage(), actionButton);
         return actionButton;
     }
 
     private static ActionButton buildDisabled(ActionButtonData actionButtonData) {
         ActionButton actionButton = new ActionButton(
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_NORMAL),
-                getTextureRegionDrawable(ACTION_BUTTON_DISABLED_NORMAL),
+                getTextureRegionDrawable(ACTION_BUTTON_DISABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_CHECKED));
         actionButton.initIcon(actionButtonData.getTexturePath(), actionButtonData.needsMask());
 
         actionButton.disabled = true;
         actionButton.actionButtonData = actionButtonData;
-        init(actionButtonData.needsScaleDown(), actionButton);
+        init(actionButtonData.getScaleDownPercentage(), actionButton);
         return actionButton;
     }
 
@@ -63,11 +64,9 @@ public class ActionButton extends ImageButton {
         return actionButtonData;
     }
 
-    protected static void init(boolean needsScaleDown, ActionButton actionButton) {
-        if (needsScaleDown) {
-            actionButton.scaleMax *= 0.9f;
-            actionButton.scaleMin *= 0.9f;
-        }
+    protected static void init(float scaleDownPercentage, ActionButton actionButton) {
+        actionButton.scaleMax *= scaleDownPercentage;
+        actionButton.scaleMin *= scaleDownPercentage;
     }
 
     protected ActionButton(Drawable imageUp, Drawable imageDown, Drawable imageChecked) {
@@ -112,17 +111,34 @@ public class ActionButton extends ImageButton {
         }
 
         if (!disabled) {
-            if (!isPressed() && !isChecked()) {
-                icon.setOrigin(Align.center);
+            if (isPressed()) {
+                icon.setColor(Color.GREEN);
+                icon.setScale(scaleMin * 0.8f);
+            } else if (isChecked()) {
+                icon.setColor(Color.GREEN);
                 icon.setScale(scaleMin);
             } else {
-                icon.setScale(scaleMax);
+                icon.setColor(Color.WHITE);
+                icon.setOrigin(Align.center);
+                icon.setScale(scaleMin);
             }
         } else {
-            batch.setShader(GrayscaleShader.get());
-            icon.setOrigin(Align.center);
-            icon.setScale(scaleMin);
+            if (isPressed()) {
+                batch.setShader(null);
+                icon.setColor(Color.RED);
+                icon.setScale(scaleMin * 0.8f);
+            } else if (isChecked()) {
+                batch.setShader(null);
+                icon.setColor(Color.RED);
+                icon.setScale(scaleMin);
+            } else {
+                icon.setColor(Color.WHITE);
+                batch.setShader(GrayscaleShader.get());
+                icon.setOrigin(Align.center);
+                icon.setScale(scaleMin);
+            }
         }
+
         icon.draw(batch, parentAlpha);
         batch.setShader(null);
     }

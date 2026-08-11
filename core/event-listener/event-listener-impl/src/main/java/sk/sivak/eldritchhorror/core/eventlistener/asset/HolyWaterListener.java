@@ -169,9 +169,9 @@ public class HolyWaterListener extends AbstractAssetListener<HolyWaterAsset> {
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected HolyWaterAction createAction() {

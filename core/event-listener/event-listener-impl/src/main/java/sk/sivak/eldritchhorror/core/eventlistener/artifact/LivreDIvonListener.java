@@ -106,9 +106,9 @@ public class LivreDIvonListener extends AbstractArtifactListener<LivreDIvonArtif
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {

@@ -6,7 +6,7 @@ public class ActionButtonDataImpl implements ActionButtonData {
     private ActionButtonId actionButtonId;
     private String texturePath;
     private String actionName;
-    private boolean needsScaleDown;
+    private float scaleDownPercentage;
     private boolean enabled;
     private boolean needsMask;
 
@@ -37,12 +37,12 @@ public class ActionButtonDataImpl implements ActionButtonData {
         this.actionName = actionName;
     }
 
-    public boolean needsScaleDown() {
-        return needsScaleDown;
+    public float getScaleDownPercentage() {
+        return scaleDownPercentage;
     }
 
-    public void setNeedsScaleDown(boolean needsScaleDown) {
-        this.needsScaleDown = needsScaleDown;
+    public void setScaleDownPercentage(float scaleDownPercentage) {
+        this.scaleDownPercentage = scaleDownPercentage;
     }
 
     @Override

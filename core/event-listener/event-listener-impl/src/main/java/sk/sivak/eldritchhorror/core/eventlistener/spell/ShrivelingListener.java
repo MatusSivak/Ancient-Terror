@@ -87,9 +87,9 @@ public class ShrivelingListener extends AbstractSpellListener<ShrivelingSpell> {
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {

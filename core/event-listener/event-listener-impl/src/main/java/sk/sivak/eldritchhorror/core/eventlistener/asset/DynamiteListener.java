@@ -77,8 +77,8 @@ public class DynamiteListener extends AbstractAssetListener<DynamiteAsset> {
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
+        protected float getScaleDownPercentage() {
+            return 0.5f;
         }
 
         @Override

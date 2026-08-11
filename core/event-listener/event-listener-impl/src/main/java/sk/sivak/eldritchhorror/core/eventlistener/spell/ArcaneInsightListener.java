@@ -91,9 +91,9 @@ public class ArcaneInsightListener extends AbstractSpellListener<ArcaneInsightSp
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {

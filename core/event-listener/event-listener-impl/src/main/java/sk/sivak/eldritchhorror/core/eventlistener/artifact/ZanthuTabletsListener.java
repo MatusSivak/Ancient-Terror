@@ -120,9 +120,9 @@ public class ZanthuTabletsListener extends AbstractArtifactListener<ZanthuTablet
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {

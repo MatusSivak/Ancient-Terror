@@ -4,7 +4,7 @@ public interface ActionButtonData {
     ActionButtonId getActionButtonId();
     String getTexturePath();
     String getActionName();
-    boolean needsScaleDown();
+    float getScaleDownPercentage();
     boolean isEnabled();
     boolean needsMask();
 

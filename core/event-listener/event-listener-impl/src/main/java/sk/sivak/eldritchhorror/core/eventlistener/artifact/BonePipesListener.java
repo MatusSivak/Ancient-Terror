@@ -131,8 +131,8 @@ public class BonePipesListener extends AbstractArtifactListener<BonePipesArtifac
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
+        protected float getScaleDownPercentage() {
+            return 0.5f;
         }
 
         @Override

@@ -30,8 +30,8 @@ public class EncounterButtonDataAdapter {
             }
 
             @Override
-            public boolean needsScaleDown() {
-                return true;
+            public float getScaleDownPercentage() {
+                return 0.5f;
             }
 
             @Override

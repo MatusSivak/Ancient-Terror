@@ -95,7 +95,7 @@ public class YellowButton extends CustomButton {
     public static class TrainButton extends YellowButton {
 
         public TrainButton() {
-            super(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_TRAIN_UP),
+            super(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_TRAIN_DOWN),
                     CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_TRAIN_DOWN));
         }
 
@@ -113,7 +113,7 @@ public class YellowButton extends CustomButton {
     public static class ShipButton extends YellowButton {
 
         public ShipButton() {
-            super(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_SHIP_UP),
+            super(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_SHIP_DOWN),
                     CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.TICKET_SHIP_DOWN));
         }
 

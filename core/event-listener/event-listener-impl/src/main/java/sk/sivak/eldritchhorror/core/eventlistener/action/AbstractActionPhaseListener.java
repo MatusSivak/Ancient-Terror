@@ -41,7 +41,7 @@ public abstract class AbstractActionPhaseListener<T extends AbstractActionPhaseA
         action.setGeneralDescription(getGeneralDescription());
         action.setActionButtonId(getActionButtonId());
         action.setTexturePath(getTexturePath());
-        action.setNeedsScaleDown(getNeedsScaleDown());
+        action.setScaleDownPercentage(getScaleDownPercentage());
         action.setNeedsMask(getNeedsMask());
 
         if (isDisabled()) {
@@ -78,8 +78,8 @@ public abstract class AbstractActionPhaseListener<T extends AbstractActionPhaseA
 
     protected abstract String getTexturePath();
 
-    protected boolean getNeedsScaleDown() {
-        return false;
+    protected float getScaleDownPercentage() {
+        return 1.0f;
     }
 
     protected boolean getNeedsMask() {

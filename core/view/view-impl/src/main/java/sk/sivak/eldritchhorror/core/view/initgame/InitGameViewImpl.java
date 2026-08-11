@@ -64,6 +64,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WID
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.AD_MOB;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH_TITLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.loadTextures1;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
@@ -105,6 +106,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private static final int FLAGS_ROWS = 13;
     private static final String LANGUAGE_ENGLISH = "en";
     private static final String LANGUAGE_SLOVAK = "sk";
+    private static final float MENU_VERTICAL_OFFSET = -45f;
+    private static final float SPLASH_TITLE_SCALE = 0.6f;
 
     public void setDefaultSkin(Skin skin) {
         this.skin = skin;
@@ -246,6 +249,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
             stage.getRoot().addActorAt(0, background);
             new ThunderEffect(background).execute();
         });
+        CustomAssetManager.getTextureAsync(SPLASH_TITLE).subscribe(texture -> {
+            Image splashTitle = new Image(texture);
+            splashTitle.setSize(texture.getWidth() * SPLASH_TITLE_SCALE, texture.getHeight() * SPLASH_TITLE_SCALE);
+            splashTitle.setPosition(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT - 20f, Align.top);
+            stage.addActor(splashTitle);
+        });
 
 
         rebuildLocalizedDialogs();
@@ -256,7 +265,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
 
         replayTutorialButton = createNiceButton(get("init.tutorial"));
-        replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, 245);
+        replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, 245 + MENU_VERTICAL_OFFSET);
         addClickListener(replayTutorialButton, () -> {
             GoogleServicesHolder.setTutorialPassed(false);
             replayTutorialButton.setTouchable(Touchable.disabled);
@@ -270,13 +279,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
         });
 
         collectionButton = createNiceButton(get("init.cardsCollection"));
-        collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, 185);
+        collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, 185 + MENU_VERTICAL_OFFSET);
         addClickListener(collectionButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.CARDS);
         });
 
         hallOfFameButton = createNiceButton(get("init.hallOfFame"));
-        hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, 125);
+        hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, 125 + MENU_VERTICAL_OFFSET);
         addClickListener(hallOfFameButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.HALL_OF_FAME);
         });
@@ -299,12 +308,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
         if (Gdx.files.local("save.json").exists()) {
 
             loadGameButton = createNiceButton(get("init.continue"));
-            loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, 365);
+            loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, 365 + MENU_VERTICAL_OFFSET);
             stage.addActor(loadGameButton);
             ButtonUtils.addClickListener(loadGameButton, continueGameAction);
 
             newGameButton = createNiceButton(get("init.newGame"));
-            newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, 305);
+            newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, 305 + MENU_VERTICAL_OFFSET);
             stage.addActor(newGameButton);
 
             if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {

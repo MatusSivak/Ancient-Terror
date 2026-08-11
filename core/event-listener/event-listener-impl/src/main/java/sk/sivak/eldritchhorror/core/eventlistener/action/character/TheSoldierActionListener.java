@@ -78,8 +78,8 @@ public class TheSoldierActionListener extends AbstractActionPhaseListener<TheSol
     }
 
     @Override
-    protected boolean getNeedsScaleDown() {
-        return true;
+    protected float getScaleDownPercentage() {
+        return 0.75f;
     }
 
     @Override

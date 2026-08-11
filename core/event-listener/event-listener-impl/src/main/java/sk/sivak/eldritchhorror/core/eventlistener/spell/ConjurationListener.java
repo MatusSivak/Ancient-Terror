@@ -92,9 +92,9 @@ public class ConjurationListener extends AbstractSpellListener<ConjurationSpell>
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {

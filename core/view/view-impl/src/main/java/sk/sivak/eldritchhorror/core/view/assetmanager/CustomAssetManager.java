@@ -254,6 +254,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String PHASE_MYTHOS_SK = "phase/mythos_phase_sk.png";
     public final static String PHASE_NEW_ROUND = "phase/new_round.png";
     public final static String SPLASH = "background/splash.jpg";
+    public final static String SPLASH_TITLE = "background/title.png";
     public final static String BLANK_MAP = "map/blank_map.png";
     public final static String ASTEROID = "map/asteroid.png";
     public final static String MAP = "map/new_map.png";
@@ -290,9 +291,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String OMEN_GREEN = "omen/green.png";
     public final static String OMEN_BACKGROUND = "omen/omen_background.png";
     public final static String TICKET_BLANK = "token/ticket_blank.png";
-    public final static String TICKET_TRAIN_UP = "token/train_ticket_up.png";
     public final static String TICKET_TRAIN_DOWN = "token/train_ticket_down.png";
-    public final static String TICKET_SHIP_UP = "token/ship_ticket_up.png";
     public final static String TICKET_SHIP_DOWN = "token/ship_ticket_down.png";
     public final static String TICKET_TRAIN_LEFT = "token/train_ticket_left.png";
     public final static String TICKET_TRAIN_RIGHT = "token/train_ticket_right.png";
@@ -337,6 +336,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String ACTION_BUTTON_ENABLED_CHECKED = "action_button/checked.png";
 
     public final static String ACTION_BUTTON_DISABLED_NORMAL = "action_button/disabled.png";
+    public final static String ACTION_BUTTON_DISABLED_PRESSED = "action_button/disabled_pressed.png";
     public final static String ACTION_BUTTON_DISABLED_CHECKED = "action_button/disabled_checked.png";
 
     public final static String ACTION_BUTTON_CARD_MASK_SHADOW = "action_button/card_mask_shadow.png";

@@ -80,8 +80,8 @@ public class TheBootleggerActionListener extends AbstractActionPhaseListener<The
     }
 
     @Override
-    protected boolean getNeedsScaleDown() {
-        return true;
+    protected float getScaleDownPercentage() {
+        return 0.75f;
     }
 
     @Override

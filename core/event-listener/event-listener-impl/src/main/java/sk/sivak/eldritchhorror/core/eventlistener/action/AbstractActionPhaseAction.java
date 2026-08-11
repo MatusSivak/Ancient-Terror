@@ -23,8 +23,8 @@ public abstract class AbstractActionPhaseAction implements ActionPhaseAction {
         actionButtonData.setTexturePath(texturePath);
     }
 
-    void setNeedsScaleDown(boolean needsScaleDown) {
-        actionButtonData.setNeedsScaleDown(needsScaleDown);
+    void setScaleDownPercentage(float scaleDownPercentage) {
+        actionButtonData.setScaleDownPercentage(scaleDownPercentage);
     }
 
     void setNeedsMask(boolean needsMask) {

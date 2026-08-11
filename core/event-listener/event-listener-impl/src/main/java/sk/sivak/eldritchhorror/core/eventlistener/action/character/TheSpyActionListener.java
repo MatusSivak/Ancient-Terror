@@ -69,8 +69,8 @@ public class TheSpyActionListener extends AbstractActionPhaseListener<TheSpyActi
     }
 
     @Override
-    protected boolean getNeedsScaleDown() {
-        return true;
+    protected float getScaleDownPercentage() {
+        return 0.75f;
     }
 
     @Override

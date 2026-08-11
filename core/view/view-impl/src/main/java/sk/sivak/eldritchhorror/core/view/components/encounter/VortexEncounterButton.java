@@ -39,7 +39,7 @@ public class VortexEncounterButton extends ActionButton{
 
         actionButton.disabled = false;
         actionButton.actionButtonData = actionButtonData;
-        init(actionButtonData.needsScaleDown(), actionButton);
+        init(actionButtonData.getScaleDownPercentage(), actionButton);
         return actionButton;
     }
 
@@ -52,7 +52,7 @@ public class VortexEncounterButton extends ActionButton{
 
         actionButton.disabled = true;
         actionButton.actionButtonData = actionButtonData;
-        init(actionButtonData.needsScaleDown(), actionButton);
+        init(actionButtonData.getScaleDownPercentage(), actionButton);
         return actionButton;
     }
 

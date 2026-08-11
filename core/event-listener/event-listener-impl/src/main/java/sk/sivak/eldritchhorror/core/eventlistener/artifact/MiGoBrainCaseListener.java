@@ -79,9 +79,9 @@ public class MiGoBrainCaseListener extends AbstractArtifactListener<KhopeshOfThe
         }
 
         @Override
-        protected boolean getNeedsScaleDown() {
-            return true;
-        }
+        protected float getScaleDownPercentage() {
+        return 0.5f;
+    }
 
         @Override
         protected boolean getNeedsMask() {
