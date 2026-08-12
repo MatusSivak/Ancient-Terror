@@ -23,12 +23,12 @@ public class GateUtils {
         Spawner.SpawnConfigImpl spawnConfig = new Spawner.SpawnConfigImpl() {
             @Override
             public void preSpawnConfig(Actor leftActor, Actor centerActor, Actor rigthActor) {
-                leftActor.addAction(Actions.moveBy(0, leftActor.getHeight()/5f, NORMAL_ACTION_DURATION));
-                centerActor.addAction(Actions.moveBy(0, centerActor.getHeight()/5f, NORMAL_ACTION_DURATION));
-                rigthActor.addAction(Actions.moveBy(0, rigthActor.getHeight()/5f, NORMAL_ACTION_DURATION));
+                leftActor.addAction(Actions.moveBy(0, 0, NORMAL_ACTION_DURATION));
+                centerActor.addAction(Actions.moveBy(0, 0, NORMAL_ACTION_DURATION));
+                rigthActor.addAction(Actions.moveBy(0, 0, NORMAL_ACTION_DURATION));
             }
         };
-        spawnConfig.setFinalAlpha(0.75f);
+        spawnConfig.setFinalAlpha(1.0f);
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
             NewGateAnimatedImage gateAnimatedImage = new NewGateAnimatedImage(gateInfo.getGateColor(), omenColor);

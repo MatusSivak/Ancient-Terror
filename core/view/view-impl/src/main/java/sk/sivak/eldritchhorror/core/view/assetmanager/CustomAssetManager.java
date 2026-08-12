@@ -133,11 +133,10 @@ public class CustomAssetManager extends AssetManager {
         load("map/space_background.jpg", Texture.class);
         load("hud_button/ancient_one.png", Texture.class);
         load("investigator/border.png", Texture.class);
-        get().load("gate/close_gradient.png", Texture.class);
-        for (int i = 0; i < 32; i++) {
-            load("gate/animation/frame_" + i + "_delay-0.04s.png", Texture.class);
+        load("gate/gate_border.png", Texture.class);
+        for (int i = 201; i <= 264; i++) {
+            load("gate/portal_7/portal_" + i + ".png", Texture.class);
         }
-        load("gate/gradient.png", Texture.class);
         load("token/compass.png", Texture.class);
         load("reserve_label.png", Texture.class);
         // load("ancient_one/AZATHOTH.png", Texture.class);
@@ -145,7 +144,6 @@ public class CustomAssetManager extends AssetManager {
         load("valuelabel.png", Texture.class);
 //        load("monster_sheet.png", Texture.class);
         load("discard_label.png", Texture.class);
-        load("gate/gate.png", Texture.class);
         load("mystery_background.png", Texture.class);
         load("map/redpin.png", Texture.class);
         load("phase/action_phase.png", Texture.class);
@@ -274,7 +272,6 @@ public class CustomAssetManager extends AssetManager {
     public final static String FOCUS_TOKEN_LEFT = "token/focus_left.png";
     public final static String FOCUS_TOKEN_RIGHT = "token/focus_right.png";
     public final static String COMPASS = "token/compass.png";
-    public final static String GATE_GRADIENT = "gate/gradient.png";
     public final static String INVESTIGATOR_BORDER = "investigator/border.png";
     public final static String MONSTER_BORDER = "monster/epic/epic_border.png";
     public final static String WHITE_BACKGROUND = "background/white.jpg";
@@ -766,8 +763,8 @@ public class CustomAssetManager extends AssetManager {
 
     public static Array<TextureRegion> getGateAnimation() {
         Array<TextureRegion> frames = new Array<>();
-        for (int i = 31; i >= 0; i--) {
-            Texture texture = getTexture("gate/animation/frame_" + i + "_delay-0.04s.png");
+        for (int i = 264; i >= 201; i--) {
+            Texture texture = getTexture("gate/portal_7/portal_" + i + ".png");
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
             frames.add(new TextureRegion(texture));
         }
