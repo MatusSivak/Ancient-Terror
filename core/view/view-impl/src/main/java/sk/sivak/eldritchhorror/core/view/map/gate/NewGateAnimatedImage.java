@@ -42,7 +42,10 @@ public class NewGateAnimatedImage extends Group {
                         Actions.alpha(0.8f, 1.2f, Interpolation.sineOut)
                 ))
         ));
-        gateAnimatedImage.addAction(createPulseAction(1.3f, 1.45f));
+        gateAnimatedImage.addAction(Actions.parallel(
+                createPulseAction(1.3f, 1.45f),
+                Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(360f, 8f))
+        ));
 
         addActor(backgroundImage);
         addActor(gateAnimatedImage);

@@ -37,6 +37,9 @@ public class EpicMonsterImage extends Image {
     private static final float RECKONING_PULSE_SPEED = 4f;
     private static final float RECKONING_PULSE_MIN_ALPHA = 0.0f;
     private static final float RECKONING_PULSE_MAX_ALPHA = 0.75f;
+    private static final float EPIC_MONSTER_SCALE_FACTOR = 0.9f;
+    private static final float SQUISH_STRETCH_DURATION = 0.9f;
+    private static final float SQUISH_STRETCH_SCALE_DELTA = 0.08f;
 
     private final Vector2 position;
     private MonsterInfo monsterInfo;
@@ -56,105 +59,19 @@ public class EpicMonsterImage extends Image {
         this.gameController = gameController;
         this.hasReckoning = hasReckoning;
         this.position = position;
-        setWidth(EPIC_MONSTER_SIZE);
-        setHeight(EPIC_MONSTER_SIZE);
+        setWidth(EPIC_MONSTER_SIZE * EPIC_MONSTER_SCALE_FACTOR);
+        setHeight(EPIC_MONSTER_SIZE * EPIC_MONSTER_SCALE_FACTOR);
         setOrigin(getWidth() / 2, getHeight() / 2);
         if (hasReckoning) {
             drawReckoningPulse = true;
         }
 
-        CustomAssetManager.getTextureAsync("monster/epic/epic_monster_border_sheet.png").subscribe(xxx -> {
-            borderImage = createBorderImage();
-        });
-
         addClickListener(this, this::displayMonsterCard);
+        addSquishStretchAnimation();
     }
 
     private void displayMonsterCard() {
         gameController.displayMonsterCard(monsterInfo, () -> gameController.hideMonsterCard(monsterInfo, null), null);
-    }
-
-    private Image createBorderImage() {
-        Texture texture = CustomAssetManager.getTexture("monster/epic/epic_monster_border_sheet.png");
-        List<TextureRegion> textureRegions = new LinkedList<>();
-        for (int y = 0; y < 9; y++) {
-            for (int x = 0; x < 10; x++) {
-                textureRegions.add(new TextureRegion(texture, 800 * x, 600*y, 800, 600));
-            }
-        }
-
-        float borderScale = 0.4f;
-        AnimatedImage animatedBorder = new AnimatedImage(
-                new Animation<>(0.04f, textureRegions.toArray(new TextureRegion[0]))) {
-
-            @Override
-            public float getX() {
-                return EpicMonsterImage.this.getX() + EpicMonsterImage.this.getWidth()/2f
-                        - (EpicMonsterImage.this.getWidth()/EPIC_MONSTER_SIZE * 800 * borderScale)/2;
-
-            }
-
-            @Override
-            public float getY() {
-                return EpicMonsterImage.this.getY() + EpicMonsterImage.this.getHeight()/2f
-                        - (EpicMonsterImage.this.getHeight()/EPIC_MONSTER_SIZE * 600 * borderScale) /2;
-            }
-
-            @Override
-            public float getScaleX() {
-                return EpicMonsterImage.this.getScaleX();
-            }
-
-            @Override
-            public float getScaleY() {
-                return EpicMonsterImage.this.getScaleY();
-            }
-
-            @Override
-            public float getWidth() {
-                return 800 * borderScale * EpicMonsterImage.this.getWidth()/EPIC_MONSTER_SIZE;
-            }
-
-            @Override
-            public float getHeight() {
-                return 600 * borderScale * EpicMonsterImage.this.getHeight()/EPIC_MONSTER_SIZE;
-            }
-
-            @Override
-            public float getOriginX() {
-                return getWidth() / 2;
-            }
-
-            @Override
-            public float getOriginY() {
-                return getHeight() / 2;
-            }
-
-            @Override
-            public void draw(Batch batch, float parentAlpha) {
-                float alpha = getColor().a;
-                getColor().a *= EpicMonsterImage.this.getColor().a * 0.5f;
-                super.draw(batch, parentAlpha);
-                getColor().a = alpha;
-            }
-        };
-
-        animatedBorder.addAction(Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(-1f)));
-        if (monsterInfo.getName().equals("Cthulhu") || monsterInfo.getName().equals("Shub-Niggurath")) {
-            animatedBorder.addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                    Actions.color(new Color(0x9b0629ff), 2f),
-                    Actions.color(new Color(0x430b66ff), 2f)
-            )));
-            animatedBorder.setColor(new Color(0x430b66ff));
-        } else {
-            animatedBorder.addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                    Actions.color(new Color(0x2f9ac4ff), 2f),
-                    Actions.color(new Color(0x1d3784ff), 2f)
-            )));
-            animatedBorder.setColor(new Color(0x1d3784ff));
-        }
-
-        return animatedBorder;
     }
 
     @Override
@@ -192,10 +109,6 @@ public class EpicMonsterImage extends Image {
             batch.setShader(prevShader);
         }
 
-        if (borderImage != null) {
-            borderImage.draw(batch, parentAlpha);
-        }
-
         super.draw(batch, parentAlpha);
 
         if (drawReckoningPulse) {
@@ -229,5 +142,16 @@ public class EpicMonsterImage extends Image {
 
     public void removeReckoningImage() {
         drawReckoningPulse = false;
+    }
+
+    private void addSquishStretchAnimation() {
+        float baseScaleX = getScaleX();
+        float baseScaleY = getScaleY();
+        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
+                Actions.scaleTo(baseScaleX + SQUISH_STRETCH_SCALE_DELTA, baseScaleY - SQUISH_STRETCH_SCALE_DELTA,
+                        SQUISH_STRETCH_DURATION),
+                Actions.scaleTo(baseScaleX - SQUISH_STRETCH_SCALE_DELTA, baseScaleY + SQUISH_STRETCH_SCALE_DELTA,
+                        SQUISH_STRETCH_DURATION)
+        )));
     }
 }

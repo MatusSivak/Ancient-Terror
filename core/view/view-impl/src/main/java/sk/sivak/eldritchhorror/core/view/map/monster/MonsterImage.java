@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
@@ -28,6 +29,9 @@ public class MonsterImage extends Image {
     private static final float RECKONING_PULSE_SPEED = 4f;
     private static final float RECKONING_PULSE_MIN_ALPHA = 0.0f;
     private static final float RECKONING_PULSE_MAX_ALPHA = 0.75f;
+    private static final float MONSTER_SCALE_FACTOR = 0.9f;
+    private static final float SQUISH_STRETCH_DURATION = 0.9f;
+    private static final float SQUISH_STRETCH_SCALE_DELTA = 0.05f;
 
     private final LocationId location;
     private final boolean hasReckoning;
@@ -44,13 +48,14 @@ public class MonsterImage extends Image {
         this.isCenter = isCenter;
         this.hasReckoning = hasReckoning;
         this.location = location;
-        setWidth(MONSTER_SIZE);
-        setHeight(MONSTER_SIZE);
+        setWidth(MONSTER_SIZE * MONSTER_SCALE_FACTOR);
+        setHeight(MONSTER_SIZE * MONSTER_SCALE_FACTOR);
         setOrigin(getWidth() / 2, getHeight() / 2);
         if (hasReckoning) {
             drawReckoningPulse = true;
         }
         addClickListener(this, this::displayMonsterCard);
+        addSquishStretchAnimation();
     }
 
     private void displayMonsterCard() {
@@ -118,5 +123,16 @@ public class MonsterImage extends Image {
 
     public void removeReckoningImage() {
         drawReckoningPulse = false;
+    }
+
+    private void addSquishStretchAnimation() {
+        float baseScaleX = getScaleX();
+        float baseScaleY = getScaleY();
+        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
+                Actions.scaleTo(baseScaleX + SQUISH_STRETCH_SCALE_DELTA, baseScaleY - SQUISH_STRETCH_SCALE_DELTA,
+                        SQUISH_STRETCH_DURATION),
+                Actions.scaleTo(baseScaleX - SQUISH_STRETCH_SCALE_DELTA, baseScaleY + SQUISH_STRETCH_SCALE_DELTA,
+                        SQUISH_STRETCH_DURATION)
+        )));
     }
 }
