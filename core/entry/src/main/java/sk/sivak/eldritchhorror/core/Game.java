@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
+import sk.sivak.eldritchhorror.core.view.components.skilltestgrid.GridSkillTestPrototypeScreen;
 
 public class Game extends com.badlogic.gdx.Game {
 
@@ -35,6 +36,11 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void start() {
+        if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
+            int moves = Integer.getInteger("ancientterror.gridtest.moves", 4);
+            setScreen(new GridSkillTestPrototypeScreen(moves));
+            return;
+        }
         ServiceLocator.setGame(this);
         checkIfTutorialWasPassed();
 

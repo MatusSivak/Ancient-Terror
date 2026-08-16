@@ -8,6 +8,13 @@ import sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager;
 public class GameDesktop {
 
     public static void main(String[] args) {
+        for (String arg : args) {
+            if ("--grid-test-prototype".equals(arg)) {
+                System.setProperty("ancientterror.gridtest.prototype", "true");
+            } else if (arg.startsWith("--grid-test-moves=")) {
+                System.setProperty("ancientterror.gridtest.moves", arg.substring("--grid-test-moves=".length()));
+            }
+        }
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         // Simulate mobile screen on external monitor
 //        config.width = 480;
