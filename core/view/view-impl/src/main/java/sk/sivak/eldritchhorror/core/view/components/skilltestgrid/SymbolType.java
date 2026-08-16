@@ -6,6 +6,7 @@ public enum SymbolType {
     ONE(false),
     TWO(false),
     THREE(false),
+    FOUR(false),
     FIVE(true),
     SIX(true);
 

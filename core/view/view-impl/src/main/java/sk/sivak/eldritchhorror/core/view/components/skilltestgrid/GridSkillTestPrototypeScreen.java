@@ -226,7 +226,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boolean playedGoodTokenImplosion = false;
         for (GridMatch match : matches) {
             SymbolType symbol = match.getSymbol();
-            if (!playedTokenExplosion && (symbol == SymbolType.ONE || symbol == SymbolType.TWO || symbol == SymbolType.THREE)) {
+            if (!playedTokenExplosion && (symbol == SymbolType.ONE || symbol == SymbolType.TWO || symbol == SymbolType.THREE || symbol == SymbolType.FOUR)) {
                 Sound sound = getRandomTokenExplosionSound();
                 if (sound != null) {
                     sound.play();

@@ -13,6 +13,7 @@ public class GridTestAssets {
     private static final String SLOT_SYMBOL_ONE = "slot/symbol/1.png";
     private static final String SLOT_SYMBOL_TWO = "slot/symbol/2.png";
     private static final String SLOT_SYMBOL_THREE = "slot/symbol/3.png";
+    private static final String SLOT_SYMBOL_FOUR = "slot/symbol/4.png";
     private static final String SLOT_SYMBOL_FIVE = "slot/symbol/5.png";
     private static final String SLOT_SYMBOL_SIX = "slot/symbol/6.png";
     private static final String SLOT_GRID_BOTTOM = "slot/decorative/bottom.png";
@@ -40,6 +41,7 @@ public class GridTestAssets {
         symbolRegions.put(SymbolType.ONE, resolveSymbolRegion(SLOT_SYMBOL_ONE, 0, 4));
         symbolRegions.put(SymbolType.TWO, resolveSymbolRegion(SLOT_SYMBOL_TWO, 4, 4));
         symbolRegions.put(SymbolType.THREE, resolveSymbolRegion(SLOT_SYMBOL_THREE, 0, 8));
+        symbolRegions.put(SymbolType.FOUR, resolveSymbolRegion(SLOT_SYMBOL_FOUR, 4, 8));
         symbolRegions.put(SymbolType.FIVE, resolveSymbolRegion(SLOT_SYMBOL_FIVE, 12, 4));
         symbolRegions.put(SymbolType.SIX, resolveSymbolRegion(SLOT_SYMBOL_SIX, 8, 4));
 
@@ -47,6 +49,7 @@ public class GridTestAssets {
         implosionFramesPerSymbol.put(SymbolType.ONE,   loadImplosionSheet("slot/animation/1.png"));
         implosionFramesPerSymbol.put(SymbolType.TWO,   loadImplosionSheet("slot/animation/2.png"));
         implosionFramesPerSymbol.put(SymbolType.THREE, loadImplosionSheet("slot/animation/3.png"));
+        implosionFramesPerSymbol.put(SymbolType.FOUR,  loadImplosionSheet("slot/animation/4.png"));
         implosionFramesPerSymbol.put(SymbolType.FIVE,  loadImplosionSheet("slot/animation/5.png"));
         implosionFramesPerSymbol.put(SymbolType.SIX,   loadImplosionSheet("slot/animation/6.png"));
 

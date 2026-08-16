@@ -237,7 +237,7 @@ public class GridBoardActor extends Group {
             SymbolType symbol = cellSymbols.get(position);
             ImplosionActor implosionActor = new ImplosionActor(
                     assets.getImplosionFrames(symbol), overlayFrames(symbol), centerX, centerY, layout.width,
-                    implosionEndScale(symbol), 1f, 1f, overlayStartAlpha(symbol), overlayEndAlpha(symbol),
+                    implosionEndScale(symbol), destroyAnimationStartAlpha(symbol), destroyAnimationEndAlpha(symbol), overlayStartAlpha(symbol), overlayEndAlpha(symbol),
                     null,
                     () -> {
                         finishedCount[0]++;
@@ -548,6 +548,7 @@ public class GridBoardActor extends Group {
             case ONE:
             case TWO:
             case THREE:
+            case FOUR:
                 return TOKEN_1_TO_3_IMPLOSION_END_SCALE;
             case FIVE:
             case SIX:
@@ -562,6 +563,7 @@ public class GridBoardActor extends Group {
             case ONE:
             case TWO:
             case THREE:
+            case FOUR:
                 return assets.getExplosionOverlayFrames();
             case FIVE:
             case SIX:
@@ -588,6 +590,30 @@ public class GridBoardActor extends Group {
                 return 1f;
             default:
                 return ImplosionAnimation.DEFAULT_OVERLAY_END_ALPHA;
+        }
+    }
+
+    private static float destroyAnimationStartAlpha(SymbolType symbol) {
+        switch (symbol) {
+            case ONE:
+            case TWO:
+            case THREE:
+            case FOUR:
+                return 1f;
+            default:
+                return 1f;
+        }
+    }
+
+    private static float destroyAnimationEndAlpha(SymbolType symbol) {
+        switch (symbol) {
+            case ONE:
+            case TWO:
+            case THREE:
+            case FOUR:
+                return 0f;
+            default:
+                return 1f;
         }
     }
 
