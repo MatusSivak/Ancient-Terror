@@ -28,6 +28,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final int DEFAULT_MOVES = 4;
     private static final float BOARD_WIDTH_RATIO = 0.50f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
+    private static final float UI_LABEL_SCALE = 0.85f;
     private static final String SOUND_VARIANTS_DIR = "sounds";
     private static final String SOUND_VARIANT_SUFFIX = ".wav";
     private static final String TOKEN_EXPLOSION_SOUND_PREFIX = "token_explosion_";
@@ -91,6 +92,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(successesValueLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
+        movesLabel.setFontScale(UI_LABEL_SCALE);
+        movesValueLabel.setFontScale(UI_LABEL_SCALE);
+        successesLabel.setFontScale(UI_LABEL_SCALE);
+        successesValueLabel.setFontScale(UI_LABEL_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
@@ -338,15 +343,21 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float nextPreviewSize = height * 0.12f;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
-        movesLabel.setPosition(width * 0.17f - movesLabel.getWidth() / 2f, height * 0.73f);
-        movesValueLabel.setPosition(width * 0.17f - movesValueLabel.getWidth() / 2f, height * 0.64f);
+        float leftColumnX = width * 0.12f;
+        float topY = height * 0.36f;
+        float lineGap = height * 0.07f;
+        float valueGap = height * 0.045f;
+
+        movesLabel.setPosition(leftColumnX - movesLabel.getWidth() / 2f, topY);
+        movesValueLabel.setPosition(leftColumnX - movesValueLabel.getWidth() / 2f, topY - valueGap);
+
+        successesLabel.setPosition(leftColumnX - successesLabel.getWidth() / 2f, topY - lineGap);
+        successesValueLabel.setPosition(leftColumnX - successesValueLabel.getWidth() / 2f, topY - lineGap - valueGap);
+
+        float restartY = topY - lineGap - valueGap - height * 0.10f;
+        restartButton.setPosition(leftColumnX - restartButton.getWidth() / 2f, restartY);
 
         nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.07f);
-
-        successesLabel.setPosition(width * 0.83f - successesLabel.getWidth() / 2f, height * 0.73f);
-        successesValueLabel.setPosition(width * 0.83f - successesValueLabel.getWidth() / 2f, height * 0.64f);
-        float restartMargin = 10f;
-        restartButton.setPosition(width - restartButton.getWidth() - restartMargin, restartMargin);
     }
 
     private void setInputEnabled(boolean enabled) {
