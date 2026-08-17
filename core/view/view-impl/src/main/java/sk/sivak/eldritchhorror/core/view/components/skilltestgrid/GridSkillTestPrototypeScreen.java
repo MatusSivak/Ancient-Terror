@@ -347,7 +347,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float restartY = topY - lineGap - height * 0.12f;
         restartButton.setPosition(leftColumnX, restartY);
 
-        nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.07f);
+        nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.027f);
     }
 
     private void setInputEnabled(boolean enabled) {

@@ -39,7 +39,7 @@ public class GridBoardActor extends Group {
     private static final float SWIPE_MIN_CELL_RATIO = 0.33f;
     private static final float BACKGROUND_SCALE = 1.3f;
     private static final float BACKGROUND_Y_OFFSET_PX = 0;
-    private static final float OVERLAY_SCALE = 1.85f;
+    private static final float OVERLAY_SCALE = 1.9f;
     private static final boolean SHOW_DEBUG_CLIP_BOUNDS = false;
     private static final float DEBUG_CLIP_BOUNDS_THICKNESS_PX = 3f;
     private static final float SYMBOL_GAP_PX = 45f;
@@ -159,7 +159,7 @@ public class GridBoardActor extends Group {
             }
             overlayImage.setBounds(
                     (boardSize - overlayWidth) / 2f,
-                    (boardSize - overlayHeight) / 2f,
+                    (boardSize - overlayHeight) / 2f - 20,
                     overlayWidth,
                     overlayHeight
             );
