@@ -33,6 +33,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 public class GridBoardActor extends Group {
     private static final float SHIFT_DURATION = 0.24f;
     private static final float REFILL_DURATION = 0.64f;
+    private static final float MATCH_EFFECT_STAGGER_DELAY = 0.10f;
     private static final float TOKEN_1_TO_3_IMPLOSION_END_SCALE = 1.5f;
     private static final float TOKEN_5_TO_6_IMPLOSION_END_SCALE = 0.65f;
     private static final float SWIPE_MIN_CELL_RATIO = 0.33f;
@@ -230,6 +231,7 @@ public class GridBoardActor extends Group {
         }
 
         final int[] finishedCount = {0};
+        int effectIndex = 0;
         for (GridPosition position : uniqueCells) {
             TokenLayout layout = tokenLayout(position.getRow(), position.getColumn());
             float centerX = symbolClipContainer.getX() + layout.x + layout.width / 2f;
@@ -239,6 +241,7 @@ public class GridBoardActor extends Group {
                     assets.getImplosionFrames(symbol), overlayFrames(symbol), centerX, centerY, layout.width,
                     implosionEndScale(symbol), destroyAnimationStartAlpha(symbol), destroyAnimationEndAlpha(symbol), overlayStartAlpha(symbol), overlayEndAlpha(symbol),
                     null,
+                    effectIndex * MATCH_EFFECT_STAGGER_DELAY,
                     () -> {
                         finishedCount[0]++;
                         if (finishedCount[0] == uniqueCells.size()) {
@@ -247,6 +250,7 @@ public class GridBoardActor extends Group {
                     }
             );
             implosionLayer.addActor(implosionActor);
+            effectIndex++;
         }
     }
 
@@ -282,6 +286,7 @@ public class GridBoardActor extends Group {
                     ImplosionAnimation.DEFAULT_OVERLAY_START_ALPHA,
                     ImplosionAnimation.DEFAULT_OVERLAY_END_ALPHA,
                     null,
+                    0f,
                     effectFinished
             );
             spawnLayer.addActor(spawnActor);
@@ -665,6 +670,7 @@ public class GridBoardActor extends Group {
     private static class ImplosionActor extends Actor {
         private final ImplosionAnimation animation;
         private final Runnable onFinished;
+        private float startDelay;
         private boolean completionFired = false;
 
         ImplosionActor(com.badlogic.gdx.utils.Array<com.badlogic.gdx.graphics.g2d.TextureRegion> frames,
@@ -672,9 +678,10 @@ public class GridBoardActor extends Group {
                        float centerX, float centerY, float size, float endScale,
                        float startAlpha, float endAlpha,
                        float overlayStartAlpha, float overlayEndAlpha,
-                       Interpolation scaleInterpolation, Runnable onFinished) {
+                       Interpolation scaleInterpolation, float startDelay, Runnable onFinished) {
             this.animation = new ImplosionAnimation(
                     frames, overlayFrames, centerX, centerY, size, endScale, startAlpha, endAlpha, overlayStartAlpha, overlayEndAlpha, scaleInterpolation);
+            this.startDelay = startDelay;
             this.onFinished = onFinished;
             setTouchable(Touchable.disabled);
         }
@@ -682,6 +689,14 @@ public class GridBoardActor extends Group {
         @Override
         public void act(float delta) {
             super.act(delta);
+            if (startDelay > 0f) {
+                startDelay -= delta;
+                if (startDelay > 0f) {
+                    return;
+                }
+                delta = -startDelay;
+                startDelay = 0f;
+            }
             animation.update(delta);
             if (animation.isFinished() && !completionFired) {
                 completionFired = true;
@@ -692,6 +707,9 @@ public class GridBoardActor extends Group {
 
         @Override
         public void draw(Batch batch, float parentAlpha) {
+            if (startDelay > 0f) {
+                return;
+            }
             // Matched symbol actors have alpha=0, which leaks into the SpriteBatch color.
             // Reset to white before drawing so the implosion is fully visible.
             batch.setColor(1f, 1f, 1f, parentAlpha);
