@@ -99,7 +99,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(restartButton, () -> startTest(configuredMoves));
 
         updateCounters();
-        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(false);
         layoutUi(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
         setInputEnabled(true);
         startResolutionLoop(false);
@@ -112,7 +112,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.startTest(moves);
         boardActor.resetAnimations();
         boardActor.syncBoardToActors();
-        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(false);
         boardActor.setInteractionEnabled(false);
         restartButton.setDisabled(false);
         updateCounters();
@@ -126,7 +126,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     public void setBoard(SymbolType... symbols) {
         controller.setDebugBoard(symbols);
         boardActor.syncBoardToActors();
-        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(false);
         startResolutionLoop(false);
     }
 
@@ -140,7 +140,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
         boardActor.setInteractionEnabled(false);
         GridShiftOutcome shiftOutcome = controller.applyMove(move);
-        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(false);
         updateCounters();
         soundHooks.onShift();
         playTokenMoveSound();
@@ -162,7 +162,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             soundHooks.onCascade();
         }
         GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
-        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(false);
         controller.setState(GridTestState.MATCH_ANIMATION);
         boardActor.setInteractionEnabled(false);
         int successesGained = resolution.getSuccessesGained();
@@ -183,6 +183,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             finishTest();
             return;
         }
+        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(true);
         controller.setState(GridTestState.WAITING_FOR_INPUT);
         boardActor.setInteractionEnabled(true);
     }
@@ -190,6 +192,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void finishTest() {
         result = controller.finish();
         boardActor.setInteractionEnabled(false);
+        setNextTokenPreviewVisible(false);
         restartButton.setDisabled(false);
         endLabel.setText("TEST COMPLETE");
         endLabel.pack();
@@ -226,6 +229,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     private void refreshNextTokenPreview() {
         nextSymbolActor.setSymbolType(assets, randomProvider.peekNext());
+    }
+
+    private void setNextTokenPreviewVisible(boolean visible) {
+        nextSymbolActor.setVisible(visible);
     }
 
     private void playMatchSoundsIfNeeded(List<GridMatch> matches) {
