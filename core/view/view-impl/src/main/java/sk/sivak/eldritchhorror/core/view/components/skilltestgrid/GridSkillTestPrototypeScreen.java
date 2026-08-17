@@ -41,7 +41,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestSoundHooks soundHooks;
     private final Random random;
     private final GridTestAssets assets;
-    private final Label nextLabel;
     private final GridSymbolActor nextSymbolActor;
     private final Label movesLabel;
     private final Label movesValueLabel;
@@ -81,7 +80,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesValueLabel = new Label("0", valueStyle);
         successesLabel = new Label("SUCCESSES", titleStyle);
         successesValueLabel = new Label("0", valueStyle);
-        nextLabel = new Label("NEXT", titleStyle);
         nextSymbolActor = new GridSymbolActor(assets, SymbolType.ONE);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
@@ -91,12 +89,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(movesValueLabel, Align.center);
         configureLabel(successesLabel, Align.center);
         configureLabel(successesValueLabel, Align.center);
-        configureLabel(nextLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
 
         stage.addActor(boardActor);
-        stage.addActor(nextLabel);
         stage.addActor(nextSymbolActor);
         stage.addActor(movesLabel);
         stage.addActor(movesValueLabel);
@@ -337,7 +333,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         movesLabel.pack();
         movesValueLabel.pack();
-        nextLabel.pack();
         successesLabel.pack();
         successesValueLabel.pack();
         float nextPreviewSize = height * 0.12f;
@@ -346,7 +341,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setPosition(width * 0.17f - movesLabel.getWidth() / 2f, height * 0.73f);
         movesValueLabel.setPosition(width * 0.17f - movesValueLabel.getWidth() / 2f, height * 0.64f);
 
-        nextLabel.setPosition(width * 0.5f - nextLabel.getWidth() / 2f, height * 0.18f);
         nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.07f);
 
         successesLabel.setPosition(width * 0.83f - successesLabel.getWidth() / 2f, height * 0.73f);
