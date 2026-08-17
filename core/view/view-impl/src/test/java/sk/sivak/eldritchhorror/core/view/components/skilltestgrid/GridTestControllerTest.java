@@ -285,6 +285,14 @@ public class GridTestControllerTest {
         }
 
         @Override
+        public SymbolType peekNext() {
+            if (!queue.isEmpty()) {
+                return queue.peekFirst();
+            }
+            return fallback[fallbackIndex % fallback.length];
+        }
+
+        @Override
         public SymbolType next() {
             if (queue.isEmpty()) {
                 SymbolType symbol = fallback[fallbackIndex % fallback.length];

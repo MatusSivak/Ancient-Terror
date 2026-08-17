@@ -40,6 +40,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridBoardActor boardActor;
     private final GridTestSoundHooks soundHooks;
     private final Random random;
+    private final GridTestAssets assets;
+    private final Label nextLabel;
+    private final GridSymbolActor nextSymbolActor;
     private final Label movesLabel;
     private final Label movesValueLabel;
     private final Label successesLabel;
@@ -65,7 +68,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         randomProvider = new RandomSymbolProvider(this.random);
         controller = new GridTestController(new GridBoard(randomProvider));
         controller.startTest(moves);
-        GridTestAssets assets = new GridTestAssets();
+        assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
         boardActor.setMoveSelectedListener(this::onMoveSelected);
         boardActor.setInteractionEnabled(false);
@@ -78,6 +81,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesValueLabel = new Label("0", valueStyle);
         successesLabel = new Label("SUCCESSES", titleStyle);
         successesValueLabel = new Label("0", valueStyle);
+        nextLabel = new Label("NEXT", titleStyle);
+        nextSymbolActor = new GridSymbolActor(assets, SymbolType.ONE);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
@@ -86,10 +91,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(movesValueLabel, Align.center);
         configureLabel(successesLabel, Align.center);
         configureLabel(successesValueLabel, Align.center);
+        configureLabel(nextLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
 
         stage.addActor(boardActor);
+        stage.addActor(nextLabel);
+        stage.addActor(nextSymbolActor);
         stage.addActor(movesLabel);
         stage.addActor(movesValueLabel);
         stage.addActor(successesLabel);
@@ -101,6 +109,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(restartButton, () -> startTest(configuredMoves));
 
         updateCounters();
+        refreshNextTokenPreview();
         layoutUi(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
         setInputEnabled(true);
         startResolutionLoop(false);
@@ -113,6 +122,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.startTest(moves);
         boardActor.resetAnimations();
         boardActor.syncBoardToActors();
+        refreshNextTokenPreview();
         boardActor.setInteractionEnabled(false);
         restartButton.setDisabled(false);
         updateCounters();
@@ -126,6 +136,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     public void setBoard(SymbolType... symbols) {
         controller.setDebugBoard(symbols);
         boardActor.syncBoardToActors();
+        refreshNextTokenPreview();
         startResolutionLoop(false);
     }
 
@@ -139,6 +150,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
         boardActor.setInteractionEnabled(false);
         GridShiftOutcome shiftOutcome = controller.applyMove(move);
+        refreshNextTokenPreview();
         updateCounters();
         soundHooks.onShift();
         playTokenMoveSound();
@@ -160,6 +172,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             soundHooks.onCascade();
         }
         GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
+        refreshNextTokenPreview();
         controller.setState(GridTestState.MATCH_ANIMATION);
         boardActor.setInteractionEnabled(false);
         int successesGained = resolution.getSuccessesGained();
@@ -219,6 +232,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateCounters() {
         movesValueLabel.setText(String.valueOf(controller.getMovesRemaining()));
         successesValueLabel.setText(String.valueOf(controller.getSuccesses()));
+    }
+
+    private void refreshNextTokenPreview() {
+        nextSymbolActor.setSymbolType(assets, randomProvider.peekNext());
     }
 
     private void playMatchSoundsIfNeeded(List<GridMatch> matches) {
@@ -320,11 +337,17 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         movesLabel.pack();
         movesValueLabel.pack();
+        nextLabel.pack();
         successesLabel.pack();
         successesValueLabel.pack();
+        float nextPreviewSize = height * 0.12f;
+        nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
         movesLabel.setPosition(width * 0.17f - movesLabel.getWidth() / 2f, height * 0.73f);
         movesValueLabel.setPosition(width * 0.17f - movesValueLabel.getWidth() / 2f, height * 0.64f);
+
+        nextLabel.setPosition(width * 0.5f - nextLabel.getWidth() / 2f, height * 0.18f);
+        nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.07f);
 
         successesLabel.setPosition(width * 0.83f - successesLabel.getWidth() / 2f, height * 0.73f);
         successesValueLabel.setPosition(width * 0.83f - successesValueLabel.getWidth() / 2f, height * 0.64f);

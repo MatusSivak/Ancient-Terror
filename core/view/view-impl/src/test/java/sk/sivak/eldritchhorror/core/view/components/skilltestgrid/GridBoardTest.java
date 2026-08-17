@@ -146,6 +146,15 @@ public class GridBoardTest {
         assertColumn(board, 1, SymbolType.ONE, SymbolType.TWO, SymbolType.FIVE);
     }
 
+    @Test
+    public void peekNextDoesNotConsumeRandomSequence() {
+        QueueSymbolProvider provider = new QueueSymbolProvider(SymbolType.FIVE, SymbolType.SIX);
+        assertEquals(SymbolType.FIVE, provider.peekNext());
+        assertEquals(SymbolType.FIVE, provider.peekNext());
+        assertEquals(SymbolType.FIVE, provider.next());
+        assertEquals(SymbolType.SIX, provider.peekNext());
+    }
+
     private void assertRow(GridBoard board, int row, SymbolType a, SymbolType b, SymbolType c) {
         List<SymbolType> expected = Arrays.asList(a, b, c);
         List<SymbolType> actual = Arrays.asList(
@@ -175,6 +184,14 @@ public class GridBoardTest {
 
         QueueSymbolProvider(SymbolType... symbols) {
             queue.addAll(Arrays.asList(symbols));
+        }
+
+        @Override
+        public SymbolType peekNext() {
+            if (!queue.isEmpty()) {
+                return queue.peekFirst();
+            }
+            return fallback[fallbackIndex % fallback.length];
         }
 
         @Override
