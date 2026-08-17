@@ -25,7 +25,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class GridSkillTestPrototypeScreen extends ScreenAdapter {
-    private static final int DEFAULT_MOVES = 4;
+    private static final int DEFAULT_MOVES = 60;
     private static final float PLAY_AREA_SCALE = 0.80f;
     private static final float LEFT_HUD_SCALE = 0.85f;
     private static final float BOARD_WIDTH_RATIO = 0.50f;

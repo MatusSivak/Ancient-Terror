@@ -37,7 +37,7 @@ public class Game extends com.badlogic.gdx.Game {
 
     public void start() {
         if (Boolean.getBoolean("ancientterror.gridtest.prototype") || Gdx.app.getType() == Application.ApplicationType.Android) {
-            int moves = Integer.getInteger("ancientterror.gridtest.moves", 4);
+            int moves = Integer.getInteger("ancientterror.gridtest.moves", 60);
             setScreen(new GridSkillTestPrototypeScreen(moves));
             return;
         }
