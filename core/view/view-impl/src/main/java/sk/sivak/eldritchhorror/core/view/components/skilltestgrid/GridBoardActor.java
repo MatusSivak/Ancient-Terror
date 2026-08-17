@@ -32,6 +32,8 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 public class GridBoardActor extends Group {
     private static final float SHIFT_DURATION = 0.24f;
+    private static final float SHIFT_SETTLE_DURATION = 0.05f;
+    private static final float SHIFT_SETTLE_PX = 2f;
     private static final float REFILL_DURATION = 0.64f;
     private static final float TOKEN_1_TO_3_IMPLOSION_END_SCALE = 1.5f;
     private static final float TOKEN_5_TO_6_IMPLOSION_END_SCALE = 0.65f;
@@ -337,6 +339,8 @@ public class GridBoardActor extends Group {
         animateLineMove(
                 new GridSymbolActor[] {outgoing, second, third, incomingActor},
                 new TokenLayout[] {outgoingLayout, layout0, layout1, layout2},
+                -SHIFT_SETTLE_PX,
+                0f,
                 () -> finishShiftAnimation(outgoing, onComplete)
         );
     }
@@ -360,6 +364,8 @@ public class GridBoardActor extends Group {
         animateLineMove(
                 new GridSymbolActor[] {outgoing, first, second, incomingActor},
                 new TokenLayout[] {outgoingLayout, layout1, layout2, layout0},
+                SHIFT_SETTLE_PX,
+                0f,
                 () -> finishShiftAnimation(outgoing, onComplete)
         );
     }
@@ -384,6 +390,8 @@ public class GridBoardActor extends Group {
         animateLineMove(
                 new GridSymbolActor[] {outgoing, middle, bottom, incomingActor},
                 new TokenLayout[] {outgoingLayout, layout0, layout1, layout2},
+                0f,
+                SHIFT_SETTLE_PX,
                 () -> finishShiftAnimation(outgoing, onComplete)
         );
     }
@@ -408,11 +416,13 @@ public class GridBoardActor extends Group {
         animateLineMove(
                 new GridSymbolActor[] {outgoing, top, middle, incomingActor},
                 new TokenLayout[] {outgoingLayout, layout1, layout2, layout0},
+                0f,
+                -SHIFT_SETTLE_PX,
                 () -> finishShiftAnimation(outgoing, onComplete)
         );
     }
 
-    private void animateLineMove(GridSymbolActor[] actors, TokenLayout[] targets, Runnable onComplete) {
+    private void animateLineMove(GridSymbolActor[] actors, TokenLayout[] targets, float settleX, float settleY, Runnable onComplete) {
         final int[] completed = {0};
         for (int i = 0; i < actors.length; i++) {
             GridSymbolActor actor = actors[i];
@@ -420,8 +430,16 @@ public class GridBoardActor extends Group {
             actor.clearActions();
             actor.addAction(new FastForwardAction<>(sequence(
                     parallel(
-                            Actions.moveTo(target.x, target.y, SHIFT_DURATION, Interpolation.sine),
-                            Actions.sizeTo(target.width, target.height, SHIFT_DURATION, Interpolation.sine)
+                            Actions.moveTo(target.x, target.y, SHIFT_DURATION, Interpolation.pow3Out),
+                            Actions.sizeTo(target.width, target.height, SHIFT_DURATION, Interpolation.pow3Out)
+                    ),
+                    parallel(
+                            Actions.moveBy(settleX, settleY, SHIFT_SETTLE_DURATION, Interpolation.sineOut),
+                            scaleTo(1.02f, 1.02f, SHIFT_SETTLE_DURATION, Interpolation.sineOut)
+                    ),
+                    parallel(
+                            Actions.moveBy(-settleX, -settleY, SHIFT_SETTLE_DURATION, Interpolation.sineIn),
+                            scaleTo(1f, 1f, SHIFT_SETTLE_DURATION, Interpolation.sineIn)
                     ),
                     run(() -> {
                         completed[0]++;
