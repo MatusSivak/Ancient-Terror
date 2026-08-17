@@ -28,7 +28,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final int DEFAULT_MOVES = 4;
     private static final float BOARD_WIDTH_RATIO = 0.50f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
-    private static final float UI_LABEL_SCALE = 0.85f;
+    private static final float UI_LABEL_SCALE = 0.70f;
     private static final String SOUND_VARIANTS_DIR = "sounds";
     private static final String SOUND_VARIANT_SUFFIX = ".wav";
     private static final String TOKEN_EXPLOSION_SOUND_PREFIX = "token_explosion_";
@@ -44,9 +44,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestAssets assets;
     private final GridSymbolActor nextSymbolActor;
     private final Label movesLabel;
-    private final Label movesValueLabel;
     private final Label successesLabel;
-    private final Label successesValueLabel;
     private final Label gainLabel;
     private final Label endLabel;
     private final TextButton restartButton;
@@ -74,35 +72,26 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInteractionEnabled(false);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY), Color.WHITE);
-        Label.LabelStyle valueStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_ADLER), new Color(0xf5efe2ff));
         Label.LabelStyle gainStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_ADLER), new Color(0x6fff6fff));
 
-        movesLabel = new Label("MOVES", titleStyle);
-        movesValueLabel = new Label("0", valueStyle);
-        successesLabel = new Label("SUCCESSES", titleStyle);
-        successesValueLabel = new Label("0", valueStyle);
+        movesLabel = new Label("moves: 0", titleStyle);
+        successesLabel = new Label("successes: 0", titleStyle);
         nextSymbolActor = new GridSymbolActor(assets, SymbolType.ONE);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
 
         configureLabel(movesLabel, Align.center);
-        configureLabel(movesValueLabel, Align.center);
         configureLabel(successesLabel, Align.center);
-        configureLabel(successesValueLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE);
-        movesValueLabel.setFontScale(UI_LABEL_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE);
-        successesValueLabel.setFontScale(UI_LABEL_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
         stage.addActor(movesLabel);
-        stage.addActor(movesValueLabel);
         stage.addActor(successesLabel);
-        stage.addActor(successesValueLabel);
         stage.addActor(gainLabel);
         stage.addActor(endLabel);
         stage.addActor(restartButton);
@@ -211,15 +200,15 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void pulseSuccessCounter(int gained) {
-        successesValueLabel.clearActions();
-        successesValueLabel.addAction(new FastForwardAction<>(Actions.sequence(
+        successesLabel.clearActions();
+        successesLabel.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.scaleTo(1.3f, 1.3f, 0.12f, Interpolation.sineOut),
                 Actions.scaleTo(1f, 1f, 0.12f, Interpolation.sineIn)
         )));
         gainLabel.clearActions();
         gainLabel.setText("+" + gained);
         gainLabel.pack();
-        gainLabel.setPosition(successesValueLabel.getX() + successesValueLabel.getWidth() + 8f, successesValueLabel.getY());
+        gainLabel.setPosition(successesLabel.getX() + successesLabel.getWidth() + 8f, successesLabel.getY());
         gainLabel.getColor().a = 1f;
         gainLabel.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.parallel(
@@ -231,8 +220,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void updateCounters() {
-        movesValueLabel.setText(String.valueOf(controller.getMovesRemaining()));
-        successesValueLabel.setText(String.valueOf(controller.getSuccesses()));
+        movesLabel.setText("moves: " + controller.getMovesRemaining());
+        successesLabel.setText("successes: " + controller.getSuccesses());
     }
 
     private void refreshNextTokenPreview() {
@@ -337,25 +326,19 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.layout(width * 0.5f, height * 0.50f, boardSize);
 
         movesLabel.pack();
-        movesValueLabel.pack();
         successesLabel.pack();
-        successesValueLabel.pack();
         float nextPreviewSize = height * 0.12f;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
-        float leftColumnX = width * 0.12f;
-        float topY = height * 0.36f;
-        float lineGap = height * 0.07f;
-        float valueGap = height * 0.045f;
+        float leftColumnX = width * 0.08f;
+        float topY = height * 0.34f;
+        float lineGap = height * 0.085f;
 
-        movesLabel.setPosition(leftColumnX - movesLabel.getWidth() / 2f, topY);
-        movesValueLabel.setPosition(leftColumnX - movesValueLabel.getWidth() / 2f, topY - valueGap);
+        movesLabel.setPosition(leftColumnX, topY);
+        successesLabel.setPosition(leftColumnX, topY - lineGap);
 
-        successesLabel.setPosition(leftColumnX - successesLabel.getWidth() / 2f, topY - lineGap);
-        successesValueLabel.setPosition(leftColumnX - successesValueLabel.getWidth() / 2f, topY - lineGap - valueGap);
-
-        float restartY = topY - lineGap - valueGap - height * 0.10f;
-        restartButton.setPosition(leftColumnX - restartButton.getWidth() / 2f, restartY);
+        float restartY = topY - lineGap - height * 0.12f;
+        restartButton.setPosition(leftColumnX, restartY);
 
         nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.07f);
     }
