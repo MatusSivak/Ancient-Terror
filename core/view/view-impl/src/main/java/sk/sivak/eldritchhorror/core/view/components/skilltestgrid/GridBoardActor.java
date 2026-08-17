@@ -39,7 +39,7 @@ public class GridBoardActor extends Group {
     private static final float SWIPE_MIN_CELL_RATIO = 0.33f;
     private static final float BACKGROUND_SCALE = 1.3f;
     private static final float BACKGROUND_Y_OFFSET_PX = 0;
-    private static final float OVERLAY_SCALE = 1.4f;
+    private static final float OVERLAY_SCALE = 1.85f;
     private static final boolean SHOW_DEBUG_CLIP_BOUNDS = false;
     private static final float DEBUG_CLIP_BOUNDS_THICKNESS_PX = 3f;
     private static final float SYMBOL_GAP_PX = 45f;
@@ -147,8 +147,22 @@ public class GridBoardActor extends Group {
             );
         }
         if (overlayImage != null) {
-            float overlaySize = boardSize * OVERLAY_SCALE;
-            overlayImage.setBounds((boardSize - overlaySize) / 2f, (boardSize - overlaySize) / 2f, overlaySize, overlaySize);
+            float overlayMaxSize = boardSize * OVERLAY_SCALE;
+            float overlaySourceWidth = overlayImage.getDrawable().getMinWidth();
+            float overlaySourceHeight = overlayImage.getDrawable().getMinHeight();
+            float overlayWidth = overlayMaxSize;
+            float overlayHeight = overlayMaxSize;
+            if (overlaySourceWidth > 0f && overlaySourceHeight > 0f) {
+                float overlayScale = Math.min(overlayMaxSize / overlaySourceWidth, overlayMaxSize / overlaySourceHeight);
+                overlayWidth = overlaySourceWidth * overlayScale;
+                overlayHeight = overlaySourceHeight * overlayScale;
+            }
+            overlayImage.setBounds(
+                    (boardSize - overlayWidth) / 2f,
+                    (boardSize - overlayHeight) / 2f,
+                    overlayWidth,
+                    overlayHeight
+            );
         }
 
         layoutSymbolActors();
