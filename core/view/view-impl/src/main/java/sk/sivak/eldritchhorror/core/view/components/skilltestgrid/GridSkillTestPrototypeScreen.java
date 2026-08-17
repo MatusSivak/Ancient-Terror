@@ -26,6 +26,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 
 public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final int DEFAULT_MOVES = 4;
+    private static final float PLAY_AREA_SCALE = 0.80f;
+    private static final float LEFT_HUD_SCALE = 0.85f;
     private static final float BOARD_WIDTH_RATIO = 0.50f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
     private static final float UI_LABEL_SCALE = 0.70f;
@@ -68,6 +70,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.startTest(moves);
         assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
+        boardActor.setLayoutScale(PLAY_AREA_SCALE);
         boardActor.setMoveSelectedListener(this::onMoveSelected);
         boardActor.setInteractionEnabled(false);
 
@@ -85,8 +88,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
-        movesLabel.setFontScale(UI_LABEL_SCALE);
-        successesLabel.setFontScale(UI_LABEL_SCALE);
+        movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        restartButton.setTransform(true);
+        restartButton.setOrigin(0f, 0f);
+        restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
@@ -329,25 +335,34 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void layoutUi(float width, float height) {
-        float boardSize = Math.min(width * BOARD_WIDTH_RATIO, height * BOARD_HEIGHT_RATIO);
-        boardActor.layout(width * 0.5f, height * 0.50f, boardSize);
+        float centerX = width * 0.5f;
+        float centerY = height * 0.5f;
+        float boardSize = Math.min(width * BOARD_WIDTH_RATIO, height * BOARD_HEIGHT_RATIO) * PLAY_AREA_SCALE;
+        boardActor.layout(centerX, centerY, boardSize);
+        float boardBottom = centerY - boardSize / 2f;
 
         movesLabel.pack();
         successesLabel.pack();
-        float nextPreviewSize = height * 0.12f;
+        float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
-        float leftColumnX = width * 0.08f;
-        float topY = height * 0.34f;
-        float lineGap = height * 0.085f;
+        float leftColumnX = scaleAround(centerX, width * 0.05f, PLAY_AREA_SCALE);
+        float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
+        float lineGap = height * 0.085f * PLAY_AREA_SCALE;
 
         movesLabel.setPosition(leftColumnX, topY);
         successesLabel.setPosition(leftColumnX, topY - lineGap);
 
-        float restartY = topY - lineGap - height * 0.12f;
+        float restartY = topY - lineGap - height * 0.10f * PLAY_AREA_SCALE;
         restartButton.setPosition(leftColumnX, restartY);
 
-        nextSymbolActor.setPosition(width * 0.5f - nextSymbolActor.getWidth() / 2f, height * 0.027f);
+        float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
+        float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
+        nextSymbolActor.setPosition(centerX - nextSymbolActor.getWidth() / 2f, nextTokenY);
+    }
+
+    private static float scaleAround(float anchor, float value, float scale) {
+        return anchor + (value - anchor) * scale;
     }
 
     private void setInputEnabled(boolean enabled) {
