@@ -23,7 +23,7 @@ public class GridTestModePreferencesTest {
         assertEquals(TestMode.BLESSED, new GridTestModePreferences(preferences).load());
     }
 
-    private static class MapPreferences implements Preferences {
+    static class MapPreferences implements Preferences {
         private final Map<String, Object> values = new HashMap<>();
         private boolean flushed;
 

@@ -13,6 +13,8 @@ public class GridTestController {
     private boolean isPlayerMoveInResolution;
     private TestMode selectedMode = TestMode.NORMAL;
     private TestMode activeMode = TestMode.NORMAL;
+    private boolean configuredMomentum;
+    private boolean activeMomentum;
     private static final int INITIAL_FOCUS_COUNT = 1;
     private int initialFocusCount = INITIAL_FOCUS_COUNT;
     private int focusRemaining;
@@ -37,6 +39,7 @@ public class GridTestController {
         isPlayerMoveInResolution = false;
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
+        activeMomentum = configuredMomentum;
         focusRemaining = initialFocusCount;
         swapRemaining = initialSwapCount;
         board.generateRandomBoard(activeMode);
@@ -72,6 +75,9 @@ public class GridTestController {
         for (GridMatch match : matches) {
             if (match.isScoringMatch()) {
                 scoringLines++;
+                if (activeMomentum) {
+                    bonusMovesGained++;
+                }
             } else if (isPlayerMoveInResolution) {
                 bonusMovesGained++;
             }
@@ -122,6 +128,18 @@ public class GridTestController {
 
     public TestMode getActiveMode() {
         return activeMode;
+    }
+
+    public void setConfiguredMomentum(boolean configuredMomentum) {
+        this.configuredMomentum = configuredMomentum;
+    }
+
+    public boolean isConfiguredMomentum() {
+        return configuredMomentum;
+    }
+
+    public boolean isActiveMomentum() {
+        return activeMomentum;
     }
 
     public int getFocusRemaining() {

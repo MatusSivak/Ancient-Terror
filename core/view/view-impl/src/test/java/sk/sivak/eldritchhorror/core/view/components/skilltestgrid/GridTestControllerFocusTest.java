@@ -18,12 +18,13 @@ public class GridTestControllerFocusTest {
     public void startInitializesFocusToDefaultCount() {
         GridTestController controller = createController(new QueueSymbolProvider());
         controller.startTest(10);
-        assertEquals(3, controller.getFocusRemaining());
+        assertEquals(controller.getInitialFocusCount(), controller.getFocusRemaining());
     }
 
     @Test
     public void restartResetsFocusToDefaultCount() {
         GridTestController controller = createController(new QueueSymbolProvider());
+        controller.setInitialFocusCount(3);
         controller.startTest(10);
         controller.useFocus();
         controller.useFocus();
@@ -36,6 +37,7 @@ public class GridTestControllerFocusTest {
     @Test
     public void useFocusDecrementsRemainingByOne() {
         GridTestController controller = createController(new QueueSymbolProvider());
+        controller.setInitialFocusCount(3);
         controller.startTest(10);
         assertTrue(controller.useFocus());
         assertEquals(2, controller.getFocusRemaining());
@@ -76,6 +78,7 @@ public class GridTestControllerFocusTest {
                 SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
                 SymbolType.THREE, SymbolType.ONE, SymbolType.TWO
         ));
+        controller.setInitialFocusCount(3);
         controller.startTest(10);
         controller.setDebugBoard(
                 SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
@@ -98,6 +101,7 @@ public class GridTestControllerFocusTest {
                 SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
                 SymbolType.THREE, SymbolType.ONE, SymbolType.TWO
         ));
+        controller.setInitialFocusCount(3);
         controller.startTest(10);
         controller.useFocus();
         controller.useFocus();
@@ -118,6 +122,7 @@ public class GridTestControllerFocusTest {
                 SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
                 SymbolType.THREE, SymbolType.ONE, SymbolType.TWO
         ));
+        controller.setInitialFocusCount(3);
         controller.startTest(10);
         assertEquals(TestMode.NORMAL, controller.getActiveMode());
         controller.useFocus();
@@ -137,9 +142,10 @@ public class GridTestControllerFocusTest {
             GridTestController controller = createController(new QueueSymbolProvider());
             controller.setSelectedMode(mode);
             controller.startTest(10);
-            assertEquals(3, controller.getFocusRemaining());
+            int initialFocusCount = controller.getInitialFocusCount();
+            assertEquals(initialFocusCount, controller.getFocusRemaining());
             assertTrue(controller.useFocus());
-            assertEquals(2, controller.getFocusRemaining());
+            assertEquals(initialFocusCount - 1, controller.getFocusRemaining());
         }
     }
 

@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -60,8 +61,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label swapLabel;
     private final TextButton swapButton;
     private final SelectBox<TestMode> modeSelectBox;
+    private final CheckBox momentumCheckBox;
     private final Table controlPanel;
     private final GridTestModePreferences modePreferences;
+    private final GridTestMomentumPreferences momentumPreferences;
     private final FocusReroller focusReroller;
     private List<Sound> chessPieceMoveSounds;
     private List<Sound> tokenExplosionSounds;
@@ -82,7 +85,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller = new GridTestController(new GridBoard(randomProvider));
         Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
         modePreferences = new GridTestModePreferences(preferences);
+        momentumPreferences = new GridTestMomentumPreferences(preferences);
         controller.setSelectedMode(modePreferences.load());
+        controller.setConfiguredMomentum(momentumPreferences.load());
         focusReroller = new FocusReroller(this.random);
         controller.startTest(moves);
         assets = new GridTestAssets();
@@ -113,6 +118,16 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 TestMode selectedMode = modeSelectBox.getSelected();
                 controller.setSelectedMode(selectedMode);
                 modePreferences.save(selectedMode);
+            }
+        });
+        momentumCheckBox = new CheckBox("Momentum", CustomAssetManager.getSkin());
+        momentumCheckBox.setChecked(controller.isConfiguredMomentum());
+        momentumCheckBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                boolean configuredMomentum = momentumCheckBox.isChecked();
+                controller.setConfiguredMomentum(configuredMomentum);
+                momentumPreferences.save(configuredMomentum);
             }
         });
 
@@ -517,6 +532,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         // Mode select box
         modeSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
         panel.add(modeSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+
+        // Momentum applies to the next started or restarted test.
+        momentumCheckBox.getLabel().setFontScale(statsFontScale);
+        panel.add(momentumCheckBox).left().padBottom(8f).row();
         
         // Focus button
         focusButton.setTransform(true);
