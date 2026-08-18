@@ -318,7 +318,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (!canUseSwap()) {
             return;
         }
-        boardActor.setInteractionEnabled(false);
         controller.setState(GridTestState.SWAP_SELECTING);
         boardActor.enterSwapSelectionMode(this::onSwapComplete);
         updateSwapButtonState();
@@ -369,6 +368,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 }
             });
         } else {
+            // Cancelled swap - re-enable normal interaction
             controller.setState(GridTestState.WAITING_FOR_INPUT);
             boardActor.setInteractionEnabled(true);
             updateSwapButtonState();
