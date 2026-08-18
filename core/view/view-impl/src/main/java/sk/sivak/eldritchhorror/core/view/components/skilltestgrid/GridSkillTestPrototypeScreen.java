@@ -510,31 +510,31 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
         float lineGap = height * 0.085f * PLAY_AREA_SCALE;
 
-        // Test state labels (vertical stack on left side)
+        // Test state labels (vertical stack on left side - tighter spacing)
         movesLabel.setPosition(leftColumnX, topY);
-        successesLabel.setPosition(leftColumnX, topY - lineGap * 0.5f);
-        focusLabel.setPosition(leftColumnX, topY - lineGap * 1.5f);
-        swapLabel.setPosition(leftColumnX, topY - lineGap * 2.5f);
+        successesLabel.setPosition(leftColumnX, topY - lineGap * 0.4f);
+        focusLabel.setPosition(leftColumnX, topY - lineGap * 0.8f);
+        swapLabel.setPosition(leftColumnX, topY - lineGap * 1.2f);
 
-        // Separator gap before controls
-        float controlsTopY = topY - lineGap * 3.5f - height * 0.05f * PLAY_AREA_SCALE;
+        // Separator gap before controls (reduced from 3.5 to 2.0)
+        float controlsTopY = topY - lineGap * 2.0f - height * 0.03f * PLAY_AREA_SCALE;
         
         // Restart button
         float restartY = controlsTopY;
         restartButton.setPosition(leftColumnX, restartY);
         
-        // Mode select box
+        // Mode select box (reduced gap)
         modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.03f * PLAY_AREA_SCALE);
+        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.02f * PLAY_AREA_SCALE);
         
-        // Focus button
+        // Focus button (reduced gap)
         focusButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.03f * PLAY_AREA_SCALE;
+        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.02f * PLAY_AREA_SCALE;
         focusButton.setPosition(leftColumnX, focusButtonY);
         
-        // Swap button
+        // Swap button (reduced gap)
         swapButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        float swapButtonY = focusButtonY - swapButton.getHeight() - height * 0.03f * PLAY_AREA_SCALE;
+        float swapButtonY = focusButtonY - swapButton.getHeight() - height * 0.02f * PLAY_AREA_SCALE;
         swapButton.setPosition(leftColumnX, swapButtonY);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
