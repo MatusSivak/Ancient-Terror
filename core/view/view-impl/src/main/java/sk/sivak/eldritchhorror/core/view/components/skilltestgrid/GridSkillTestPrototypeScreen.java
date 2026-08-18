@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
@@ -59,6 +60,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label swapLabel;
     private final TextButton swapButton;
     private final SelectBox<TestMode> modeSelectBox;
+    private final Table controlPanel;
     private final GridTestModePreferences modePreferences;
     private final FocusReroller focusReroller;
     private List<Sound> chessPieceMoveSounds;
@@ -136,16 +138,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
-        stage.addActor(movesLabel);
-        stage.addActor(successesLabel);
         stage.addActor(gainLabel);
         stage.addActor(endLabel);
-        stage.addActor(restartButton);
-        stage.addActor(focusLabel);
-        stage.addActor(focusButton);
-        stage.addActor(swapLabel);
-        stage.addActor(swapButton);
-        stage.addActor(modeSelectBox);
+        
+        // Build control panel as a responsive table
+        controlPanel = buildControlPanel();
+        stage.addActor(controlPanel);
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
         addClickListener(focusButton, this::onFocusPressed);
@@ -312,15 +310,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateFocusButtonState() {
         boolean canUse = canUseFocus();
         focusButton.setDisabled(!canUse);
-        int remaining = controller.getFocusRemaining();
-        
-        if (remaining <= 0) {
-            focusButton.setText("FOCUS (×" + remaining + ")");
-        } else if (canUse) {
-            focusButton.setText("FOCUS (×" + remaining + ")");
-        } else {
-            focusButton.setText("FOCUS (waiting)");
-        }
+        // Keep button text simple - count is shown in the "focus: N" label
+        focusButton.setText("FOCUS");
     }
 
     private void onSwapPressed() {
@@ -346,15 +337,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateSwapButtonState() {
         boolean canUse = canUseSwap();
         swapButton.setDisabled(!canUse);
-        int remaining = controller.getSwapRemaining();
-        
-        if (remaining <= 0) {
-            swapButton.setText("SWAP (×" + remaining + ")");
-        } else if (canUse) {
-            swapButton.setText("SWAP (×" + remaining + ")");
-        } else {
-            swapButton.setText("SWAP (waiting)");
-        }
+        // Keep button text simple - count is shown in the "swap: N" label
+        swapButton.setText("SWAP");
     }
 
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
@@ -492,6 +476,63 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         return sounds;
     }
 
+    private Table buildControlPanel() {
+        Table panel = new Table();
+        panel.pad(8f);
+        
+        float controlScale = PLAY_AREA_SCALE * LEFT_HUD_SCALE;
+        float panelWidth = ViewProperties.VIEWPORT_WIDTH * 0.25f * controlScale;
+        float buttonHeight = ViewProperties.VIEWPORT_HEIGHT * 0.06f * controlScale;
+        float statsFontScale = UI_LABEL_SCALE * controlScale;
+        
+        // Stats block (moves, successes, focus, swap)
+        Table statsTable = new Table();
+        statsTable.align(Align.left);
+        
+        movesLabel.setFontScale(statsFontScale);
+        successesLabel.setFontScale(statsFontScale);
+        focusLabel.setFontScale(statsFontScale);
+        swapLabel.setFontScale(statsFontScale);
+        
+        statsTable.add(movesLabel).left().padBottom(2f).row();
+        statsTable.add(successesLabel).left().padBottom(2f).row();
+        statsTable.add(focusLabel).left().padBottom(2f).row();
+        statsTable.add(swapLabel).left().row();
+        
+        panel.add(statsTable).left().padBottom(12f).row();
+        
+        // Restart button
+        restartButton.setTransform(true);
+        restartButton.setOrigin(0f, 0f);
+        restartButton.setScale(controlScale);
+        panel.add(restartButton).width(panelWidth).height(buttonHeight * 1.2f).padBottom(8f).center().row();
+        
+        // Mode select box
+        modeSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
+        panel.add(modeSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+        
+        // Focus button
+        focusButton.setTransform(true);
+        focusButton.setOrigin(0f, 0f);
+        focusButton.setScale(controlScale);
+        panel.add(focusButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+        
+        // Swap button
+        swapButton.setTransform(true);
+        swapButton.setOrigin(0f, 0f);
+        swapButton.setScale(controlScale);
+        panel.add(swapButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
+        
+        // Position the panel
+        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.5f);
+        panel.setPosition(
+            ViewProperties.VIEWPORT_WIDTH * 0.02f, 
+            ViewProperties.VIEWPORT_HEIGHT * 0.5f - panel.getHeight() / 2f
+        );
+        
+        return panel;
+    }
+
     private void layoutUi(float width, float height) {
         float centerX = width * 0.5f;
         float centerY = height * 0.5f;
@@ -499,43 +540,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.layout(centerX, centerY, boardSize);
         float boardBottom = centerY - boardSize / 2f;
 
-        movesLabel.pack();
-        successesLabel.pack();
-        focusLabel.pack();
-        swapLabel.pack();
         float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
-
-        float leftColumnX = scaleAround(centerX, width * 0.05f, PLAY_AREA_SCALE);
-        float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
-        float lineGap = height * 0.085f * PLAY_AREA_SCALE;
-
-        // Test state labels (vertical stack on left side - tighter spacing)
-        movesLabel.setPosition(leftColumnX, topY);
-        successesLabel.setPosition(leftColumnX, topY - lineGap * 0.4f);
-        focusLabel.setPosition(leftColumnX, topY - lineGap * 0.8f);
-        swapLabel.setPosition(leftColumnX, topY - lineGap * 1.2f);
-
-        // Separator gap before controls (reduced from 3.5 to 2.0)
-        float controlsTopY = topY - lineGap * 2.0f - height * 0.03f * PLAY_AREA_SCALE;
-        
-        // Restart button
-        float restartY = controlsTopY;
-        restartButton.setPosition(leftColumnX, restartY);
-        
-        // Mode select box (reduced gap)
-        modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.02f * PLAY_AREA_SCALE);
-        
-        // Focus button (reduced gap)
-        focusButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.02f * PLAY_AREA_SCALE;
-        focusButton.setPosition(leftColumnX, focusButtonY);
-        
-        // Swap button (reduced gap)
-        swapButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        float swapButtonY = focusButtonY - swapButton.getHeight() - height * 0.02f * PLAY_AREA_SCALE;
-        swapButton.setPosition(leftColumnX, swapButtonY);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
