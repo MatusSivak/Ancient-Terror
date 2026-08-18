@@ -496,7 +496,9 @@ public class GridBoardActor extends Group {
             completed[0]++;
             System.out.println("SWAP_ANIM: Actor animation complete: " + completed[0] + "/2");
             if (completed[0] == 2) {
-                System.out.println("SWAP_ANIM: Both animations complete, calling onComplete");
+                System.out.println("SWAP_ANIM: Both animations complete, snapping to grid");
+                snapActorsToGrid();
+                System.out.println("SWAP_ANIM: Calling onComplete");
                 onComplete.run();
             }
         };
