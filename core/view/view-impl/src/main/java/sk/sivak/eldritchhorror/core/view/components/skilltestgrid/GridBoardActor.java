@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -534,15 +535,18 @@ public class GridBoardActor extends Group {
                         swapFirstSelection = currentPos;
                         swapFirstSelectionActor = currentActor;
                         highlightToken(currentActor);
+                        Gdx.app.log("SWAP", "First token selected at (" + row + ", " + col + ")");
                         return true;
                     } else if (swapFirstSelection.equals(currentPos)) {
                         // Deselect
+                        Gdx.app.log("SWAP", "First token deselected at (" + row + ", " + col + ")");
                         unhighlightToken(swapFirstSelectionActor);
                         swapFirstSelection = null;
                         swapFirstSelectionActor = null;
                         return true;
                     } else if (isOrthogonallyAdjacent(swapFirstSelection, currentPos)) {
                         // Valid swap
+                        Gdx.app.log("SWAP", "Second token selected at (" + row + ", " + col + ") - valid adjacent pair");
                         unhighlightToken(swapFirstSelectionActor);
                         GridPosition pos2 = currentPos;
                         exitSwapSelectionMode();
@@ -552,6 +556,7 @@ public class GridBoardActor extends Group {
                         return true;
                     } else {
                         // Invalid selection, try new first selection
+                        Gdx.app.log("SWAP", "Non-adjacent token at (" + row + ", " + col + ") - changing first selection");
                         unhighlightToken(swapFirstSelectionActor);
                         swapFirstSelection = currentPos;
                         swapFirstSelectionActor = currentActor;

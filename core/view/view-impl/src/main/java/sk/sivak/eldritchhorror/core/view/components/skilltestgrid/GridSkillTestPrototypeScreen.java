@@ -318,6 +318,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (!canUseSwap()) {
             return;
         }
+        Gdx.app.log("SWAP", "Swap button clicked");
         controller.setState(GridTestState.SWAP_SELECTING);
         boardActor.enterSwapSelectionMode(this::onSwapComplete);
         updateSwapButtonState();
