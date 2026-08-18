@@ -552,13 +552,14 @@ public class GridBoardActor extends Group {
                         swapFirstSelectionActor = null;
                         return true;
                     } else if (isOrthogonallyAdjacent(swapFirstSelection, currentPos)) {
-                        // Valid swap
+                        // Valid swap - save positions BEFORE clearing selection
                         Gdx.app.log("SWAP", "Second token selected at (" + row + ", " + col + ") - valid adjacent pair");
                         unhighlightToken(swapFirstSelectionActor);
+                        GridPosition pos1 = swapFirstSelection;
                         GridPosition pos2 = currentPos;
                         exitSwapSelectionMode();
                         if (swapCompleteListener != null) {
-                            swapCompleteListener.onSwapComplete(swapFirstSelection, pos2);
+                            swapCompleteListener.onSwapComplete(pos1, pos2);
                         }
                         return true;
                     } else {
