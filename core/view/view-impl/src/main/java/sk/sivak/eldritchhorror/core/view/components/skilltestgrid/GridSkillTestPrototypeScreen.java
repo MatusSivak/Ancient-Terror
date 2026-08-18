@@ -267,6 +267,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
         focusLabel.setText("focus: " + controller.getFocusRemaining());
+        updateFocusButtonState();
     }
 
     private void onFocusPressed() {
@@ -279,6 +280,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             randomProvider.overrideNext(rerolled);
             refreshNextTokenPreview();
             updateCounters();
+            updateFocusButtonState();
         }
     }
 
@@ -291,6 +293,18 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
         SymbolType currentNext = randomProvider.peekNext();
         return currentNext != null;
+    }
+
+    private void updateFocusButtonState() {
+        boolean canUse = canUseFocus();
+        focusButton.setDisabled(!canUse);
+        if (canUse) {
+            focusButton.setText("FOCUS");
+        } else if (controller.getFocusRemaining() <= 0) {
+            focusButton.setText("FOCUS (spent)");
+        } else {
+            focusButton.setText("FOCUS (waiting)");
+        }
     }
 
     private void refreshNextTokenPreview() {
@@ -403,6 +417,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         movesLabel.pack();
         successesLabel.pack();
+        focusLabel.pack();
         float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
@@ -410,19 +425,26 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
         float lineGap = height * 0.085f * PLAY_AREA_SCALE;
 
+        // Test state labels (stacked together at top)
         movesLabel.setPosition(leftColumnX, topY);
         successesLabel.setPosition(leftColumnX, topY - lineGap);
+        focusLabel.setPosition(leftColumnX, topY - lineGap * 2);
 
-        float restartY = topY - lineGap - height * 0.10f * PLAY_AREA_SCALE;
-        restartButton.setPosition(leftColumnX, restartY);
-        modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.025f * PLAY_AREA_SCALE);
+        // Separator gap before controls
+        float controlsTopY = topY - lineGap * 2.5f - height * 0.05f * PLAY_AREA_SCALE;
         
-        focusLabel.pack();
+        // Restart button
+        float restartY = controlsTopY;
+        restartButton.setPosition(leftColumnX, restartY);
+        
+        // Mode select box
+        modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
+        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.03f * PLAY_AREA_SCALE);
+        
+        // Focus button
         focusButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
-        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.025f * PLAY_AREA_SCALE;
+        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.03f * PLAY_AREA_SCALE;
         focusButton.setPosition(leftColumnX, focusButtonY);
-        focusLabel.setPosition(leftColumnX, focusButtonY + focusButton.getHeight() + height * 0.01f * PLAY_AREA_SCALE);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
