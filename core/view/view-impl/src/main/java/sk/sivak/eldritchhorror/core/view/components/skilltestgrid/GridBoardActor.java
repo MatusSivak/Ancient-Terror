@@ -478,19 +478,6 @@ public class GridBoardActor extends Group {
         TokenLayout layout1 = tokenLayout(pos1.getRow(), pos1.getColumn());
         TokenLayout layout2 = tokenLayout(pos2.getRow(), pos2.getColumn());
 
-        float endX1 = symbolClipContainer.getX() + layout2.x + layout2.width / 2f;
-        float endY1 = symbolClipContainer.getY() + layout2.y + layout2.height / 2f;
-        float endX2 = symbolClipContainer.getX() + layout1.x + layout1.width / 2f;
-        float endY2 = symbolClipContainer.getY() + layout1.y + layout1.height / 2f;
-
-        float startX1 = actor1.getX() + actor1.getWidth() / 2f;
-        float startY1 = actor1.getY() + actor1.getHeight() / 2f;
-        float startX2 = actor2.getX() + actor2.getWidth() / 2f;
-        float startY2 = actor2.getY() + actor2.getHeight() / 2f;
-
-        System.out.println("SWAP_ANIM: actor1 moving from (" + startX1 + "," + startY1 + ") to (" + endX1 + "," + endY1 + ")");
-        System.out.println("SWAP_ANIM: actor2 moving from (" + startX2 + "," + startY2 + ") to (" + endX2 + "," + endY2 + ")");
-
         final int[] completed = {0};
         Runnable swapFinished = () -> {
             completed[0]++;
@@ -506,7 +493,7 @@ public class GridBoardActor extends Group {
         actor1.clearActions();
         actor1.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.parallel(
-                        Actions.moveTo(endX1 - actor1.getWidth() / 2f, endY1 - actor1.getHeight() / 2f, SHIFT_DURATION, Interpolation.sineOut)
+                        Actions.moveTo(layout2.x, layout2.y, SHIFT_DURATION, Interpolation.sineOut)
                 ),
                 Actions.run(swapFinished)
         )));
@@ -514,7 +501,7 @@ public class GridBoardActor extends Group {
         actor2.clearActions();
         actor2.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.parallel(
-                        Actions.moveTo(endX2 - actor2.getWidth() / 2f, endY2 - actor2.getHeight() / 2f, SHIFT_DURATION, Interpolation.sineOut)
+                        Actions.moveTo(layout1.x, layout1.y, SHIFT_DURATION, Interpolation.sineOut)
                 ),
                 Actions.run(swapFinished)
         )));
