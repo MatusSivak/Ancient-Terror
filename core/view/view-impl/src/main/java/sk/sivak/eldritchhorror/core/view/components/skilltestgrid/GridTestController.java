@@ -13,10 +13,10 @@ public class GridTestController {
     private boolean isPlayerMoveInResolution;
     private TestMode selectedMode = TestMode.NORMAL;
     private TestMode activeMode = TestMode.NORMAL;
-    private static final int INITIAL_FOCUS_COUNT = 3;
+    private static final int INITIAL_FOCUS_COUNT = 5;
     private int initialFocusCount = INITIAL_FOCUS_COUNT;
     private int focusRemaining;
-    private static final int INITIAL_SWAP_COUNT = 2;
+    private static final int INITIAL_SWAP_COUNT = 5;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
 
