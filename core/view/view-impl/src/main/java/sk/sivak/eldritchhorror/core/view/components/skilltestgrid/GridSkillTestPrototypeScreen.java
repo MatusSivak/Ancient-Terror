@@ -56,6 +56,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label focusLabel;
     private final TextButton restartButton;
     private final TextButton focusButton;
+    private final Label swapLabel;
+    private final TextButton swapButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final GridTestModePreferences modePreferences;
     private final FocusReroller focusReroller;
@@ -98,6 +100,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
         focusButton = buildButton("FOCUS");
+        swapLabel = new Label("", titleStyle);
+        swapButton = buildButton("SWAP");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
         modeSelectBox.setSelected(controller.getSelectedMode());
@@ -115,15 +119,20 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
         configureLabel(focusLabel, Align.center);
+        configureLabel(swapLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         focusLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        swapLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
         restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         focusButton.setTransform(true);
         focusButton.setOrigin(0f, 0f);
         focusButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        swapButton.setTransform(true);
+        swapButton.setOrigin(0f, 0f);
+        swapButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
@@ -134,10 +143,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         stage.addActor(restartButton);
         stage.addActor(focusLabel);
         stage.addActor(focusButton);
+        stage.addActor(swapLabel);
+        stage.addActor(swapButton);
         stage.addActor(modeSelectBox);
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
         addClickListener(focusButton, this::onFocusPressed);
+        addClickListener(swapButton, this::onSwapPressed);
 
         updateCounters();
         setNextTokenPreviewVisible(false);
@@ -267,7 +279,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
         focusLabel.setText("focus: " + controller.getFocusRemaining());
+        swapLabel.setText("swap: " + controller.getSwapRemaining());
         updateFocusButtonState();
+        updateSwapButtonState();
     }
 
     private void onFocusPressed() {
@@ -306,6 +320,74 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             focusButton.setText("FOCUS (×" + remaining + ")");
         } else {
             focusButton.setText("FOCUS (waiting)");
+        }
+    }
+
+    private void onSwapPressed() {
+        if (!canUseSwap()) {
+            return;
+        }
+        boardActor.setInteractionEnabled(false);
+        controller.setState(GridTestState.SWAP_SELECTING);
+        boardActor.enterSwapSelectionMode(this::onSwapComplete);
+        updateSwapButtonState();
+    }
+
+    private boolean canUseSwap() {
+        if (controller.getSwapRemaining() <= 0) {
+            return false;
+        }
+        if (controller.getState() != GridTestState.WAITING_FOR_INPUT) {
+            return false;
+        }
+        return true;
+    }
+
+    private void updateSwapButtonState() {
+        boolean canUse = canUseSwap();
+        swapButton.setDisabled(!canUse);
+        int remaining = controller.getSwapRemaining();
+        
+        if (remaining <= 0) {
+            swapButton.setText("SWAP (×" + remaining + ")");
+        } else if (canUse) {
+            swapButton.setText("SWAP (×" + remaining + ")");
+        } else {
+            swapButton.setText("SWAP (waiting)");
+        }
+    }
+
+    public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
+        if (pos1 != null && pos2 != null) {
+            boardActor.setInteractionEnabled(false);
+            controller.useSwap();
+            MatchResolution resolution = controller.performSwap(pos1, pos2);
+            
+            boardActor.animateSwap(pos1, pos2, () -> {
+                updateCounters();
+                
+                if (resolution.getSuccessesGained() > 0) {
+                    pulseSuccessCounter(resolution.getSuccessesGained());
+                }
+                
+                soundHooks.onMatch(resolution.getSuccessesGained(), false);
+                playMatchSoundsIfNeeded(resolution.getMatches());
+                
+                if (!resolution.getReplacements().isEmpty()) {
+                    controller.setState(GridTestState.MATCH_ANIMATION);
+                    boardActor.animateMatchWave(resolution.getMatches(), resolution.getReplacements(), () -> {
+                        updateCounters();
+                        controller.setState(GridTestState.CASCADE_CHECK);
+                        startResolutionLoop(true);
+                    });
+                } else {
+                    onBoardStable();
+                }
+            });
+        } else {
+            controller.setState(GridTestState.WAITING_FOR_INPUT);
+            boardActor.setInteractionEnabled(true);
+            updateSwapButtonState();
         }
     }
 
@@ -420,6 +502,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.pack();
         successesLabel.pack();
         focusLabel.pack();
+        swapLabel.pack();
         float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
         nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
 
@@ -431,9 +514,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setPosition(leftColumnX, topY);
         successesLabel.setPosition(leftColumnX, topY - lineGap * 0.5f);
         focusLabel.setPosition(leftColumnX, topY - lineGap * 1.5f);
+        swapLabel.setPosition(leftColumnX, topY - lineGap * 2.5f);
 
         // Separator gap before controls
-        float controlsTopY = topY - lineGap * 2.5f - height * 0.05f * PLAY_AREA_SCALE;
+        float controlsTopY = topY - lineGap * 3.5f - height * 0.05f * PLAY_AREA_SCALE;
         
         // Restart button
         float restartY = controlsTopY;
@@ -447,6 +531,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
         float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.03f * PLAY_AREA_SCALE;
         focusButton.setPosition(leftColumnX, focusButtonY);
+        
+        // Swap button
+        swapButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
+        float swapButtonY = focusButtonY - swapButton.getHeight() - height * 0.03f * PLAY_AREA_SCALE;
+        swapButton.setPosition(leftColumnX, swapButtonY);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;

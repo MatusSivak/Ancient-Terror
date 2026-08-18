@@ -16,6 +16,9 @@ public class GridTestController {
     private static final int INITIAL_FOCUS_COUNT = 3;
     private int initialFocusCount = INITIAL_FOCUS_COUNT;
     private int focusRemaining;
+    private static final int INITIAL_SWAP_COUNT = 2;
+    private int initialSwapCount = INITIAL_SWAP_COUNT;
+    private int swapRemaining;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -35,6 +38,7 @@ public class GridTestController {
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
         focusRemaining = initialFocusCount;
+        swapRemaining = initialSwapCount;
         board.generateRandomBoard(activeMode);
     }
 
@@ -61,7 +65,7 @@ public class GridTestController {
 
     public MatchResolution resolveMatches(List<GridMatch> matches) {
         if (matches == null || matches.isEmpty()) {
-            return new MatchResolution(Collections.emptyMap(), 0, 0);
+            return new MatchResolution(Collections.emptyMap(), 0, 0, Collections.emptyList());
         }
         int scoringLines = 0;
         int bonusMovesGained = 0;
@@ -75,7 +79,7 @@ public class GridTestController {
         movesRemaining += bonusMovesGained;
         successes += scoringLines;
         Map<GridPosition, SymbolType> replacements = board.replaceCells(board.collectMatchedCells(matches));
-        return new MatchResolution(replacements, scoringLines, matches.size());
+        return new MatchResolution(replacements, scoringLines, matches.size(), matches);
     }
 
     public boolean canAcceptInput() {
@@ -141,6 +145,44 @@ public class GridTestController {
             throw new IllegalArgumentException("initialFocusCount must be >= 0");
         }
         this.initialFocusCount = count;
+    }
+
+    public int getSwapRemaining() {
+        return swapRemaining;
+    }
+
+    public boolean useSwap() {
+        if (swapRemaining <= 0) {
+            return false;
+        }
+        swapRemaining--;
+        return true;
+    }
+
+    public int getInitialSwapCount() {
+        return initialSwapCount;
+    }
+
+    public void setInitialSwapCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("initialSwapCount must be >= 0");
+        }
+        this.initialSwapCount = count;
+    }
+
+    public MatchResolution performSwap(GridPosition pos1, GridPosition pos2) {
+        if (!isValidAdjacentPair(pos1, pos2)) {
+            throw new IllegalArgumentException("Positions must be orthogonally adjacent");
+        }
+        board.swap(pos1, pos2);
+        List<GridMatch> matches = findMatches();
+        return resolveMatches(matches);
+    }
+
+    private boolean isValidAdjacentPair(GridPosition pos1, GridPosition pos2) {
+        int rowDiff = Math.abs(pos1.getRow() - pos2.getRow());
+        int colDiff = Math.abs(pos1.getColumn() - pos2.getColumn());
+        return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
     }
 
     public boolean shouldFinishWhenStable() {

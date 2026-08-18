@@ -140,6 +140,20 @@ public class GridBoard {
         array[0] = incoming;
     }
 
+    public void swap(GridPosition pos1, GridPosition pos2) {
+        if (pos1 == null || pos2 == null) {
+            throw new IllegalArgumentException("Positions must not be null");
+        }
+        validateRow(pos1.getRow());
+        validateColumn(pos1.getColumn());
+        validateRow(pos2.getRow());
+        validateColumn(pos2.getColumn());
+        
+        SymbolType temp = board[pos1.getRow()][pos1.getColumn()];
+        board[pos1.getRow()][pos1.getColumn()] = board[pos2.getRow()][pos2.getColumn()];
+        board[pos2.getRow()][pos2.getColumn()] = temp;
+    }
+
     public List<GridMatch> findMatches() {
         return findMatches(TestMode.NORMAL);
     }

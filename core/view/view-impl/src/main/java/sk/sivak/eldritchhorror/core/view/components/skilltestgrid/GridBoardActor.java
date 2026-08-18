@@ -48,6 +48,10 @@ public class GridBoardActor extends Group {
         void onMoveSelected(GridMove move);
     }
 
+    public interface SwapCompleteListener {
+        void onSwapComplete(GridPosition pos1, GridPosition pos2);
+    }
+
     private final GridTestController controller;
     private final GridTestAssets assets;
     private final Group boardLayer;
@@ -60,7 +64,10 @@ public class GridBoardActor extends Group {
     private final Actor debugClipBoundsActor;
     private final GridSymbolActor[][] symbolActors;
     private MoveSelectedListener moveSelectedListener;
+    private SwapCompleteListener swapCompleteListener;
     private boolean interactionEnabled = true;
+    private boolean swapSelectionMode = false;
+    private GridPosition swapFirstSelection = null;
     private float layoutScale = 1f;
     private float boardSize;
     private float cellSize;
@@ -444,6 +451,64 @@ public class GridBoardActor extends Group {
         rebuildSymbolLayerChildren();
     }
 
+    public void enterSwapSelectionMode(SwapCompleteListener listener) {
+        this.swapCompleteListener = listener;
+        swapSelectionMode = true;
+        swapFirstSelection = null;
+        clearSwipeState();
+    }
+
+    public void exitSwapSelectionMode() {
+        swapSelectionMode = false;
+        swapFirstSelection = null;
+        clearSwipeState();
+    }
+
+    public void animateSwap(GridPosition pos1, GridPosition pos2, Runnable onComplete) {
+        GridSymbolActor actor1 = symbolActors[pos1.getRow()][pos1.getColumn()];
+        GridSymbolActor actor2 = symbolActors[pos2.getRow()][pos2.getColumn()];
+
+        TokenLayout layout1 = tokenLayout(pos1.getRow(), pos1.getColumn());
+        TokenLayout layout2 = tokenLayout(pos2.getRow(), pos2.getColumn());
+
+        float endX1 = symbolClipContainer.getX() + layout2.x + layout2.width / 2f;
+        float endY1 = symbolClipContainer.getY() + layout2.y + layout2.height / 2f;
+        float endX2 = symbolClipContainer.getX() + layout1.x + layout1.width / 2f;
+        float endY2 = symbolClipContainer.getY() + layout1.y + layout1.height / 2f;
+
+        float startX1 = actor1.getX() + actor1.getWidth() / 2f;
+        float startY1 = actor1.getY() + actor1.getHeight() / 2f;
+        float startX2 = actor2.getX() + actor2.getWidth() / 2f;
+        float startY2 = actor2.getY() + actor2.getHeight() / 2f;
+
+        final int[] completed = {0};
+        Runnable swapFinished = () -> {
+            completed[0]++;
+            if (completed[0] == 2) {
+                onComplete.run();
+            }
+        };
+
+        actor1.clearActions();
+        actor1.addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.parallel(
+                        Actions.moveTo(endX1 - actor1.getWidth() / 2f, endY1 - actor1.getHeight() / 2f, SHIFT_DURATION, Interpolation.sineOut)
+                ),
+                Actions.run(swapFinished)
+        )));
+
+        actor2.clearActions();
+        actor2.addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.parallel(
+                        Actions.moveTo(endX2 - actor2.getWidth() / 2f, endY2 - actor2.getHeight() / 2f, SHIFT_DURATION, Interpolation.sineOut)
+                ),
+                Actions.run(swapFinished)
+        )));
+
+        symbolActors[pos1.getRow()][pos1.getColumn()] = actor2;
+        symbolActors[pos2.getRow()][pos2.getColumn()] = actor1;
+    }
+
     private void addSwipeInput() {
         boardLayer.addListener(new InputListener() {
             @Override
@@ -451,11 +516,38 @@ public class GridBoardActor extends Group {
                 if (!interactionEnabled || cellSize <= 0f || !isInsideBoard(x, y)) {
                     return false;
                 }
+                
+                int row = toRow(y);
+                int col = toColumn(x);
+                
+                if (swapSelectionMode) {
+                    if (swapFirstSelection == null) {
+                        swapFirstSelection = new GridPosition(row, col);
+                        return true;
+                    } else if (swapFirstSelection.equals(new GridPosition(row, col))) {
+                        // Deselect
+                        swapFirstSelection = null;
+                        return true;
+                    } else if (isOrthogonallyAdjacent(swapFirstSelection, new GridPosition(row, col))) {
+                        // Valid swap
+                        GridPosition pos2 = new GridPosition(row, col);
+                        exitSwapSelectionMode();
+                        if (swapCompleteListener != null) {
+                            swapCompleteListener.onSwapComplete(swapFirstSelection, pos2);
+                        }
+                        return true;
+                    } else {
+                        // Invalid selection, try new first selection
+                        swapFirstSelection = new GridPosition(row, col);
+                        return true;
+                    }
+                }
+                
                 swipePointer = pointer;
                 swipeStartX = x;
                 swipeStartY = y;
-                swipeStartColumn = toColumn(x);
-                swipeStartRow = toRow(y);
+                swipeStartColumn = col;
+                swipeStartRow = row;
                 return true;
             }
 
@@ -464,6 +556,11 @@ public class GridBoardActor extends Group {
                 if (!interactionEnabled || pointer != swipePointer) {
                     return;
                 }
+                
+                if (swapSelectionMode) {
+                    return;
+                }
+                
                 swipePointer = -1;
 
                 float dx = x - swipeStartX;
@@ -508,6 +605,12 @@ public class GridBoardActor extends Group {
         int fromBottom = (int) (y / cellSize);
         int row = GridBoard.SIZE - 1 - fromBottom;
         return Math.max(0, Math.min(GridBoard.SIZE - 1, row));
+    }
+
+    private boolean isOrthogonallyAdjacent(GridPosition pos1, GridPosition pos2) {
+        int rowDiff = Math.abs(pos1.getRow() - pos2.getRow());
+        int colDiff = Math.abs(pos1.getColumn() - pos2.getColumn());
+        return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
     }
 
     private Vector2 cellPosition(int row, int column) {
