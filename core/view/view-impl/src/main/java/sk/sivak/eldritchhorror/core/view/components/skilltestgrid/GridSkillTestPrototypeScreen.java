@@ -298,10 +298,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateFocusButtonState() {
         boolean canUse = canUseFocus();
         focusButton.setDisabled(!canUse);
-        if (canUse) {
-            focusButton.setText("FOCUS");
-        } else if (controller.getFocusRemaining() <= 0) {
-            focusButton.setText("FOCUS (spent)");
+        int remaining = controller.getFocusRemaining();
+        
+        if (remaining <= 0) {
+            focusButton.setText("FOCUS (×" + remaining + ")");
+        } else if (canUse) {
+            focusButton.setText("FOCUS (×" + remaining + ")");
         } else {
             focusButton.setText("FOCUS (waiting)");
         }
@@ -425,13 +427,18 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
         float lineGap = height * 0.085f * PLAY_AREA_SCALE;
 
-        // Test state labels (stacked together at top)
+        // Test state labels (horizontal layout for better visibility)
         movesLabel.setPosition(leftColumnX, topY);
-        successesLabel.setPosition(leftColumnX, topY - lineGap);
-        focusLabel.setPosition(leftColumnX, topY - lineGap * 2);
+        
+        // Position successes to the right of moves (on same line if space allows)
+        float successesX = leftColumnX + movesLabel.getWidth() + width * 0.08f * PLAY_AREA_SCALE;
+        successesLabel.setPosition(successesX, topY);
+        
+        // Focus label on its own line below moves
+        focusLabel.setPosition(leftColumnX, topY - lineGap);
 
         // Separator gap before controls
-        float controlsTopY = topY - lineGap * 2.5f - height * 0.05f * PLAY_AREA_SCALE;
+        float controlsTopY = topY - lineGap * 1.8f - height * 0.05f * PLAY_AREA_SCALE;
         
         // Restart button
         float restartY = controlsTopY;
