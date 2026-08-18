@@ -53,9 +53,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label successesLabel;
     private final Label gainLabel;
     private final Label endLabel;
+    private final Label focusLabel;
     private final TextButton restartButton;
+    private final TextButton focusButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final GridTestModePreferences modePreferences;
+    private final FocusReroller focusReroller;
     private List<Sound> chessPieceMoveSounds;
     private List<Sound> tokenExplosionSounds;
     private List<Sound> goodTokenImplosionSounds;
@@ -76,6 +79,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
         modePreferences = new GridTestModePreferences(preferences);
         controller.setSelectedMode(modePreferences.load());
+        focusReroller = new FocusReroller(this.random);
         controller.startTest(moves);
         assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
@@ -91,7 +95,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         nextSymbolActor = new GridSymbolActor(assets, SymbolType.ONE);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
+        focusLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
+        focusButton = buildButton("FOCUS");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
         modeSelectBox.setSelected(controller.getSelectedMode());
@@ -108,11 +114,16 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
+        configureLabel(focusLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        focusLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
         restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        focusButton.setTransform(true);
+        focusButton.setOrigin(0f, 0f);
+        focusButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextSymbolActor);
@@ -121,9 +132,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         stage.addActor(gainLabel);
         stage.addActor(endLabel);
         stage.addActor(restartButton);
+        stage.addActor(focusLabel);
+        stage.addActor(focusButton);
         stage.addActor(modeSelectBox);
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
+        addClickListener(focusButton, this::onFocusPressed);
 
         updateCounters();
         setNextTokenPreviewVisible(false);
@@ -252,6 +266,31 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateCounters() {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
+        focusLabel.setText("focus: " + controller.getFocusRemaining());
+    }
+
+    private void onFocusPressed() {
+        if (!canUseFocus()) {
+            return;
+        }
+        SymbolType currentNext = randomProvider.peekNext();
+        if (controller.useFocus()) {
+            SymbolType rerolled = focusReroller.reroll(currentNext);
+            randomProvider.overrideNext(rerolled);
+            refreshNextTokenPreview();
+            updateCounters();
+        }
+    }
+
+    private boolean canUseFocus() {
+        if (controller.getFocusRemaining() <= 0) {
+            return false;
+        }
+        if (controller.getState() != GridTestState.WAITING_FOR_INPUT) {
+            return false;
+        }
+        SymbolType currentNext = randomProvider.peekNext();
+        return currentNext != null;
     }
 
     private void refreshNextTokenPreview() {
@@ -378,6 +417,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         restartButton.setPosition(leftColumnX, restartY);
         modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
         modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.025f * PLAY_AREA_SCALE);
+        
+        focusLabel.pack();
+        focusButton.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
+        float focusButtonY = modeSelectBox.getY() - focusButton.getHeight() - height * 0.025f * PLAY_AREA_SCALE;
+        focusButton.setPosition(leftColumnX, focusButtonY);
+        focusLabel.setPosition(leftColumnX, focusButtonY + focusButton.getHeight() + height * 0.01f * PLAY_AREA_SCALE);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;

@@ -32,4 +32,11 @@ public class RandomSymbolProvider implements SymbolRandomProvider {
         nextSymbol = null;
         return symbol;
     }
+
+    public void overrideNext(SymbolType symbol) {
+        if (symbol == null) {
+            throw new IllegalArgumentException("symbol must not be null");
+        }
+        this.nextSymbol = symbol;
+    }
 }

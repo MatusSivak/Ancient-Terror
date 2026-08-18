@@ -13,6 +13,9 @@ public class GridTestController {
     private boolean isPlayerMoveInResolution;
     private TestMode selectedMode = TestMode.NORMAL;
     private TestMode activeMode = TestMode.NORMAL;
+    private static final int INITIAL_FOCUS_COUNT = 3;
+    private int initialFocusCount = INITIAL_FOCUS_COUNT;
+    private int focusRemaining;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -31,6 +34,7 @@ public class GridTestController {
         isPlayerMoveInResolution = false;
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
+        focusRemaining = initialFocusCount;
         board.generateRandomBoard(activeMode);
     }
 
@@ -114,6 +118,29 @@ public class GridTestController {
 
     public TestMode getActiveMode() {
         return activeMode;
+    }
+
+    public int getFocusRemaining() {
+        return focusRemaining;
+    }
+
+    public boolean useFocus() {
+        if (focusRemaining <= 0) {
+            return false;
+        }
+        focusRemaining--;
+        return true;
+    }
+
+    public int getInitialFocusCount() {
+        return initialFocusCount;
+    }
+
+    public void setInitialFocusCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("initialFocusCount must be >= 0");
+        }
+        this.initialFocusCount = count;
     }
 
     public boolean shouldFinishWhenStable() {
