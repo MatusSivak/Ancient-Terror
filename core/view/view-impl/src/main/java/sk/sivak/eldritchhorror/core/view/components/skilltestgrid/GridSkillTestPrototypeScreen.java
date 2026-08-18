@@ -433,7 +433,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusLabel.setPosition(leftColumnX, topY - lineGap * 1.5f);
 
         // Separator gap before controls
-        float controlsTopY = topY - lineGap * 1.8f - height * 0.05f * PLAY_AREA_SCALE;
+        float controlsTopY = topY - lineGap * 2.5f - height * 0.05f * PLAY_AREA_SCALE;
         
         // Restart button
         float restartY = controlsTopY;
