@@ -89,55 +89,82 @@ public class GridBoard {
 
     private void shiftRowLeft(int row, SymbolType incoming) {
         validateRow(row);
-        board[row][0] = board[row][1];
-        board[row][1] = board[row][2];
-        board[row][2] = incoming;
+        shiftArrayLeft(board[row], incoming);
     }
 
     private void shiftRowRight(int row, SymbolType incoming) {
         validateRow(row);
-        board[row][2] = board[row][1];
-        board[row][1] = board[row][0];
-        board[row][0] = incoming;
+        shiftArrayRight(board[row], incoming);
     }
 
     private void shiftColumnUp(int column, SymbolType incoming) {
         validateColumn(column);
-        board[0][column] = board[1][column];
-        board[1][column] = board[2][column];
-        board[2][column] = incoming;
+        SymbolType[] column_array = new SymbolType[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            column_array[i] = board[i][column];
+        }
+        shiftArrayLeft(column_array, incoming);
+        for (int i = 0; i < SIZE; i++) {
+            board[i][column] = column_array[i];
+        }
     }
 
     private void shiftColumnDown(int column, SymbolType incoming) {
         validateColumn(column);
-        board[2][column] = board[1][column];
-        board[1][column] = board[0][column];
-        board[0][column] = incoming;
+        SymbolType[] column_array = new SymbolType[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            column_array[i] = board[i][column];
+        }
+        shiftArrayRight(column_array, incoming);
+        for (int i = 0; i < SIZE; i++) {
+            board[i][column] = column_array[i];
+        }
+    }
+
+    private void shiftArrayLeft(SymbolType[] array, SymbolType incoming) {
+        for (int i = 0; i < array.length - 1; i++) {
+            array[i] = array[i + 1];
+        }
+        array[array.length - 1] = incoming;
+    }
+
+    private void shiftArrayRight(SymbolType[] array, SymbolType incoming) {
+        for (int i = array.length - 1; i > 0; i--) {
+            array[i] = array[i - 1];
+        }
+        array[0] = incoming;
     }
 
     public List<GridMatch> findMatches() {
         List<GridMatch> matches = new ArrayList<>();
+        
+        // Check rows for matches
         for (int row = 0; row < SIZE; row++) {
-            SymbolType first = board[row][0];
-            if (first == board[row][1] && first == board[row][2]) {
+            if (isThreeOfAKind(board[row][0], board[row][1], board[row][2])) {
                 List<GridPosition> cells = new ArrayList<>(SIZE);
-                cells.add(new GridPosition(row, 0));
-                cells.add(new GridPosition(row, 1));
-                cells.add(new GridPosition(row, 2));
-                matches.add(new GridMatch(first, cells));
+                for (int col = 0; col < SIZE; col++) {
+                    cells.add(new GridPosition(row, col));
+                }
+                matches.add(new GridMatch(board[row][0], cells));
             }
         }
+        
+        // Check columns for matches
         for (int column = 0; column < SIZE; column++) {
-            SymbolType first = board[0][column];
-            if (first == board[1][column] && first == board[2][column]) {
+            if (isThreeOfAKind(board[0][column], board[1][column], board[2][column])) {
                 List<GridPosition> cells = new ArrayList<>(SIZE);
-                cells.add(new GridPosition(0, column));
-                cells.add(new GridPosition(1, column));
-                cells.add(new GridPosition(2, column));
-                matches.add(new GridMatch(first, cells));
+                for (int row = 0; row < SIZE; row++) {
+                    cells.add(new GridPosition(row, column));
+                }
+                matches.add(new GridMatch(board[0][column], cells));
             }
         }
+        
         return matches;
+    }
+
+    private boolean isThreeOfAKind(SymbolType first, SymbolType second, SymbolType third) {
+        return first == second && first == third;
     }
 
     public boolean hasMatches() {

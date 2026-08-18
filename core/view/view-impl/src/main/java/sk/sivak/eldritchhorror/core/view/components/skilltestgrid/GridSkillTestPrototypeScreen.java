@@ -167,7 +167,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (cascade) {
             soundHooks.onCascade();
         }
-        GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
+        MatchResolution resolution = controller.resolveMatches(matches);
         setNextTokenPreviewVisible(false);
         controller.setState(GridTestState.MATCH_ANIMATION);
         boardActor.setInteractionEnabled(false);

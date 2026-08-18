@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +10,7 @@ public class GridTestController {
     private int startingMoves;
     private int movesRemaining;
     private int successes;
-    private boolean playerMoveResolutionActive;
+    private boolean isPlayerMoveInResolution;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -27,7 +26,7 @@ public class GridTestController {
         startingMoves = moves;
         movesRemaining = moves;
         successes = 0;
-        playerMoveResolutionActive = false;
+        isPlayerMoveInResolution = false;
         state = GridTestState.INITIALIZING;
         board.generateRandomBoard();
     }
@@ -44,7 +43,7 @@ public class GridTestController {
             throw new IllegalStateException("No moves remaining");
         }
         movesRemaining--;
-        playerMoveResolutionActive = true;
+        isPlayerMoveInResolution = true;
         state = GridTestState.SHIFTING;
         return board.shift(move);
     }
@@ -62,7 +61,7 @@ public class GridTestController {
         for (GridMatch match : matches) {
             if (match.isScoringMatch()) {
                 scoringLines++;
-            } else if (playerMoveResolutionActive) {
+            } else if (isPlayerMoveInResolution) {
                 bonusMovesGained++;
             }
         }
@@ -79,7 +78,7 @@ public class GridTestController {
     public void setState(GridTestState state) {
         this.state = state;
         if (state == GridTestState.WAITING_FOR_INPUT || state == GridTestState.FINISHED) {
-            playerMoveResolutionActive = false;
+            isPlayerMoveInResolution = false;
         }
     }
 
@@ -106,29 +105,5 @@ public class GridTestController {
     public GridTestResult finish() {
         state = GridTestState.FINISHED;
         return new GridTestResult(successes, startingMoves - movesRemaining);
-    }
-
-    public static class MatchResolution {
-        private final Map<GridPosition, SymbolType> replacements;
-        private final int successesGained;
-        private final int matchedLines;
-
-        public MatchResolution(Map<GridPosition, SymbolType> replacements, int successesGained, int matchedLines) {
-            this.replacements = Collections.unmodifiableMap(new LinkedHashMap<>(replacements));
-            this.successesGained = successesGained;
-            this.matchedLines = matchedLines;
-        }
-
-        public Map<GridPosition, SymbolType> getReplacements() {
-            return replacements;
-        }
-
-        public int getSuccessesGained() {
-            return successesGained;
-        }
-
-        public int getMatchedLines() {
-            return matchedLines;
-        }
     }
 }

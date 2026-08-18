@@ -25,7 +25,7 @@ public class GridTestControllerTest {
         List<GridMatch> matches = controller.findMatches();
         assertEquals(1, matches.size());
 
-        GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
+        MatchResolution resolution = controller.resolveMatches(matches);
         assertEquals(0, resolution.getSuccessesGained());
         assertEquals(1, resolution.getMatchedLines());
         assertEquals(0, controller.getSuccesses());
@@ -41,7 +41,7 @@ public class GridTestControllerTest {
                 SymbolType.ONE, SymbolType.FIVE, SymbolType.THREE,
                 SymbolType.THREE, SymbolType.SIX, SymbolType.ONE
         );
-        GridTestController.MatchResolution resolution = controller.resolveMatches(controller.findMatches());
+        MatchResolution resolution = controller.resolveMatches(controller.findMatches());
         assertEquals(0, resolution.getSuccessesGained());
         assertEquals(1, resolution.getMatchedLines());
         assertEquals(0, controller.getSuccesses());
@@ -57,7 +57,7 @@ public class GridTestControllerTest {
                 SymbolType.ONE, SymbolType.FIVE, SymbolType.TWO,
                 SymbolType.TWO, SymbolType.SIX, SymbolType.ONE
         );
-        GridTestController.MatchResolution resolution = controller.resolveMatches(controller.findMatches());
+        MatchResolution resolution = controller.resolveMatches(controller.findMatches());
         assertEquals(0, resolution.getSuccessesGained());
         assertEquals(1, resolution.getMatchedLines());
         assertEquals(0, controller.getSuccesses());
@@ -73,7 +73,7 @@ public class GridTestControllerTest {
                 SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
                 SymbolType.TWO, SymbolType.THREE, SymbolType.ONE
         );
-        GridTestController.MatchResolution resolution555 = controller555.resolveMatches(controller555.findMatches());
+        MatchResolution resolution555 = controller555.resolveMatches(controller555.findMatches());
         assertEquals(1, resolution555.getSuccessesGained());
 
         GridTestController controller666 = createController(new QueueSymbolProvider(
@@ -84,7 +84,7 @@ public class GridTestControllerTest {
                 SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
                 SymbolType.TWO, SymbolType.THREE, SymbolType.ONE
         );
-        GridTestController.MatchResolution resolution666 = controller666.resolveMatches(controller666.findMatches());
+        MatchResolution resolution666 = controller666.resolveMatches(controller666.findMatches());
         assertEquals(1, resolution666.getSuccessesGained());
     }
 
@@ -101,7 +101,7 @@ public class GridTestControllerTest {
         List<GridMatch> matches = controller.findMatches();
         assertEquals(2, matches.size());
 
-        GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
+        MatchResolution resolution = controller.resolveMatches(matches);
         assertEquals(2, resolution.getMatchedLines());
         assertEquals(1, resolution.getSuccessesGained());
         assertEquals(1, controller.getSuccesses());
@@ -121,7 +121,7 @@ public class GridTestControllerTest {
 
         List<GridMatch> matches = controller.findMatches();
         assertEquals(2, matches.size());
-        GridTestController.MatchResolution resolution = controller.resolveMatches(matches);
+        MatchResolution resolution = controller.resolveMatches(matches);
         assertEquals(2, resolution.getSuccessesGained());
         assertEquals(5, resolution.getReplacements().size());
         assertEquals(5, randomProvider.consumed);
@@ -142,9 +142,9 @@ public class GridTestControllerTest {
                 SymbolType.TWO, SymbolType.THREE, SymbolType.TWO,
                 SymbolType.THREE, SymbolType.TWO, SymbolType.THREE
         );
-        GridTestController.MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
+        MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
         assertEquals(0, firstWave.getSuccessesGained());
-        GridTestController.MatchResolution secondWave = controller.resolveMatches(controller.findMatches());
+        MatchResolution secondWave = controller.resolveMatches(controller.findMatches());
         assertEquals(1, secondWave.getSuccessesGained());
 
         assertEquals(1, controller.getSuccesses());
@@ -192,7 +192,7 @@ public class GridTestControllerTest {
         controller.applyMove(new GridMove(GridMoveType.ROW_LEFT, 0));
 
         assertEquals(0, controller.getMovesRemaining());
-        GridTestController.MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
+        MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
 
         assertEquals(0, firstWave.getSuccessesGained());
         assertEquals(1, controller.getMovesRemaining());
@@ -219,11 +219,11 @@ public class GridTestControllerTest {
 
         assertEquals(0, controller.getMovesRemaining());
 
-        GridTestController.MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
+        MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
         assertEquals(0, firstWave.getSuccessesGained());
         assertEquals(1, controller.getMovesRemaining());
 
-        GridTestController.MatchResolution secondWave = controller.resolveMatches(controller.findMatches());
+        MatchResolution secondWave = controller.resolveMatches(controller.findMatches());
         assertEquals(0, secondWave.getSuccessesGained());
         assertEquals(2, controller.getMovesRemaining());
 
