@@ -32,7 +32,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 
 public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final int DEFAULT_MOVES = 60;
-    private static final float PLAY_AREA_SCALE = 0.80f;
+    private static final float PLAY_AREA_SCALE = 0.80f * 1.2f;
     private static final float LEFT_HUD_SCALE = 0.85f;
     private static final float BOARD_WIDTH_RATIO = 0.50f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
@@ -50,7 +50,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestSoundHooks soundHooks;
     private final Random random;
     private final GridTestAssets assets;
-    private final GridSymbolActor nextSymbolActor;
+    private final NextTokenPreview nextTokenPreview;
     private final Label movesLabel;
     private final Label successesLabel;
     private final Label gainLabel;
@@ -101,7 +101,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         movesLabel = new Label("moves: 0", titleStyle);
         successesLabel = new Label("successes: 0", titleStyle);
-        nextSymbolActor = new GridSymbolActor(assets, SymbolType.ONE);
+        nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
         focusLabel = new Label("", titleStyle);
@@ -152,7 +152,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         swapButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
-        stage.addActor(nextSymbolActor);
+        stage.addActor(nextTokenPreview);
         stage.addActor(gainLabel);
         stage.addActor(endLabel);
         
@@ -178,6 +178,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.startTest(moves);
         boardActor.resetAnimations();
         boardActor.syncBoardToActors();
+        nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
         boardActor.setInteractionEnabled(false);
         restartButton.setDisabled(false);
@@ -192,6 +193,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     public void setBoard(SymbolType... symbols) {
         controller.setDebugBoard(symbols);
         boardActor.syncBoardToActors();
+        nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
         startResolutionLoop(false);
     }
@@ -206,6 +208,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
         boardActor.setInteractionEnabled(false);
         GridShiftOutcome shiftOutcome = controller.applyMove(move);
+        nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
         updateCounters();
         soundHooks.onShift();
@@ -398,11 +401,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void refreshNextTokenPreview() {
-        nextSymbolActor.setSymbolType(assets, randomProvider.peekNext());
+        nextTokenPreview.setNextToken(randomProvider.peekNext());
     }
 
     private void setNextTokenPreviewVisible(boolean visible) {
-        nextSymbolActor.setVisible(visible);
+        nextTokenPreview.setVisible(visible);
     }
 
     private void playMatchSoundsIfNeeded(List<GridMatch> matches) {
@@ -567,11 +570,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float boardBottom = centerY - boardSize / 2f;
 
         float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
-        nextSymbolActor.setSize(nextPreviewSize, nextPreviewSize);
+        nextTokenPreview.setSize(nextPreviewSize, nextPreviewSize);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
-        nextSymbolActor.setPosition(centerX - nextSymbolActor.getWidth() / 2f, nextTokenY);
+        nextTokenPreview.setPosition(centerX - nextTokenPreview.getWidth() / 2f, nextTokenY);
     }
 
     private static float scaleAround(float anchor, float value, float scale) {
