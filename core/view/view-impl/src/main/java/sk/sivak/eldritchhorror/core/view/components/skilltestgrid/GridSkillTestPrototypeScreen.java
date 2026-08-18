@@ -430,8 +430,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         // Test state labels (horizontal layout for better visibility)
         movesLabel.setPosition(leftColumnX, topY);
         
-        // Position successes to the right of moves (on same line if space allows)
-        float successesX = leftColumnX + movesLabel.getWidth() + width * 0.08f * PLAY_AREA_SCALE;
+        // Position successes to the right with bounded spacing (avoid board overlap)
+        float labelSpacing = Math.min(width * 0.05f, movesLabel.getWidth() * 0.5f);
+        float successesX = Math.min(leftColumnX + movesLabel.getWidth() + labelSpacing, centerX - width * 0.15f);
         successesLabel.setPosition(successesX, topY);
         
         // Focus label on its own line below moves
