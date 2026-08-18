@@ -20,6 +20,11 @@ public class GridBoard {
     }
 
     public void generateRandomBoard() {
+        generateRandomBoard(TestMode.NORMAL);
+    }
+
+    public void generateRandomBoard(TestMode mode) {
+        validateMode(mode);
         boolean hasMatches = true;
         while (hasMatches) {
             for (int row = 0; row < SIZE; row++) {
@@ -27,7 +32,7 @@ public class GridBoard {
                     board[row][col] = randomProvider.next();
                 }
             }
-            hasMatches = !findMatches().isEmpty();
+            hasMatches = !findMatches(mode).isEmpty();
         }
     }
 
@@ -136,31 +141,55 @@ public class GridBoard {
     }
 
     public List<GridMatch> findMatches() {
+        return findMatches(TestMode.NORMAL);
+    }
+
+    public List<GridMatch> findMatches(TestMode mode) {
+        validateMode(mode);
         List<GridMatch> matches = new ArrayList<>();
-        
-        // Check rows for matches
-        for (int row = 0; row < SIZE; row++) {
-            if (isThreeOfAKind(board[row][0], board[row][1], board[row][2])) {
-                List<GridPosition> cells = new ArrayList<>(SIZE);
-                for (int col = 0; col < SIZE; col++) {
-                    cells.add(new GridPosition(row, col));
+
+        if (mode.allows(GridMatchOrientation.HORIZONTAL)) {
+            for (int row = 0; row < SIZE; row++) {
+                if (isThreeOfAKind(board[row][0], board[row][1], board[row][2])) {
+                    List<GridPosition> cells = new ArrayList<>(SIZE);
+                    for (int col = 0; col < SIZE; col++) {
+                        cells.add(new GridPosition(row, col));
+                    }
+                    matches.add(new GridMatch(board[row][0], cells));
                 }
-                matches.add(new GridMatch(board[row][0], cells));
             }
         }
-        
-        // Check columns for matches
-        for (int column = 0; column < SIZE; column++) {
-            if (isThreeOfAKind(board[0][column], board[1][column], board[2][column])) {
-                List<GridPosition> cells = new ArrayList<>(SIZE);
-                for (int row = 0; row < SIZE; row++) {
-                    cells.add(new GridPosition(row, column));
+
+        if (mode.allows(GridMatchOrientation.VERTICAL)) {
+            for (int column = 0; column < SIZE; column++) {
+                if (isThreeOfAKind(board[0][column], board[1][column], board[2][column])) {
+                    List<GridPosition> cells = new ArrayList<>(SIZE);
+                    for (int row = 0; row < SIZE; row++) {
+                        cells.add(new GridPosition(row, column));
+                    }
+                    matches.add(new GridMatch(board[0][column], cells));
                 }
-                matches.add(new GridMatch(board[0][column], cells));
             }
         }
-        
+
+        if (mode.allows(GridMatchOrientation.DIAGONAL)) {
+            addDiagonalMatch(matches, 0, SIZE - 1);
+            addDiagonalMatch(matches, SIZE - 1, 0);
+        }
+
         return matches;
+    }
+
+    private void addDiagonalMatch(List<GridMatch> matches, int startColumn, int endColumn) {
+        int middleColumn = SIZE / 2;
+        if (!isThreeOfAKind(board[0][startColumn], board[1][middleColumn], board[2][endColumn])) {
+            return;
+        }
+        List<GridPosition> cells = new ArrayList<>(SIZE);
+        cells.add(new GridPosition(0, startColumn));
+        cells.add(new GridPosition(1, middleColumn));
+        cells.add(new GridPosition(2, endColumn));
+        matches.add(new GridMatch(board[0][startColumn], cells));
     }
 
     private boolean isThreeOfAKind(SymbolType first, SymbolType second, SymbolType third) {
@@ -169,6 +198,10 @@ public class GridBoard {
 
     public boolean hasMatches() {
         return !findMatches().isEmpty();
+    }
+
+    public boolean hasMatches(TestMode mode) {
+        return !findMatches(mode).isEmpty();
     }
 
     public Set<GridPosition> collectMatchedCells(List<GridMatch> matches) {
@@ -198,6 +231,12 @@ public class GridBoard {
     private void validateColumn(int column) {
         if (column < 0 || column >= SIZE) {
             throw new IllegalArgumentException("Column out of range: " + column);
+        }
+    }
+
+    private void validateMode(TestMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("mode must not be null");
         }
     }
 }

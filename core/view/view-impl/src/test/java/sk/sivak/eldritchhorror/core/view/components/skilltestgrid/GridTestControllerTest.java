@@ -254,6 +254,73 @@ public class GridTestControllerTest {
         assertEquals(1, result.getMovesUsed());
     }
 
+    @Test
+    public void selectedModeDoesNotChangeActiveModeUntilRestart() {
+        GridTestController controller = createController(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.THREE, SymbolType.ONE, SymbolType.TWO,
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.TWO
+        ));
+        controller.startTest(3);
+        assertEquals(TestMode.NORMAL, controller.getActiveMode());
+
+        controller.setSelectedMode(TestMode.CURSED);
+        assertEquals(TestMode.CURSED, controller.getSelectedMode());
+        assertEquals(TestMode.NORMAL, controller.getActiveMode());
+
+        controller.startTest(3);
+        assertEquals(TestMode.CURSED, controller.getActiveMode());
+        assertTrue(controller.findMatches().isEmpty());
+        assertEquals(1, controller.getBoard().findMatches(TestMode.NORMAL).size());
+    }
+
+    @Test
+    public void cascadesUseActiveMode() {
+        GridTestController controller = createController(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.THREE, SymbolType.ONE, SymbolType.TWO,
+                SymbolType.FIVE, SymbolType.FIVE, SymbolType.FIVE
+        ));
+        controller.setSelectedMode(TestMode.CURSED);
+        controller.startTest(3);
+        controller.setDebugBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.ONE
+        );
+
+        MatchResolution firstWave = controller.resolveMatches(controller.findMatches());
+        assertEquals(1, firstWave.getMatchedLines());
+        List<GridMatch> cascadeMatches = controller.findMatches();
+        assertEquals(1, cascadeMatches.size());
+        assertEquals(SymbolType.FIVE, cascadeMatches.get(0).getSymbol());
+    }
+
+    @Test
+    public void fourFourFourStillAwardsBonusMove() {
+        GridTestController controller = createController(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.THREE, SymbolType.ONE, SymbolType.TWO,
+                SymbolType.FOUR,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE
+        ));
+        controller.startTest(1);
+        controller.setDebugBoard(
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.FOUR,
+                SymbolType.ONE, SymbolType.THREE, SymbolType.ONE,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE
+        );
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+        controller.applyMove(new GridMove(GridMoveType.ROW_LEFT, 0));
+        controller.resolveMatches(controller.findMatches());
+        assertEquals(1, controller.getMovesRemaining());
+    }
+
     private GridTestController createController(SymbolRandomProvider provider) {
         return new GridTestController(new GridBoard(provider));
     }

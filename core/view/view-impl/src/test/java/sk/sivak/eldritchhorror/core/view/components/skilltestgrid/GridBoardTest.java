@@ -8,6 +8,8 @@ import java.util.Deque;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class GridBoardTest {
 
@@ -107,6 +109,132 @@ public class GridBoardTest {
                 SymbolType.FIVE, SymbolType.TWO, SymbolType.THREE
         );
         assertEquals(2, board.findMatches().size());
+    }
+
+    @Test
+    public void normalDetectsHorizontalAndVerticalButIgnoresDiagonals() {
+        GridBoard board = new GridBoard(new QueueSymbolProvider());
+        board.setBoard(
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.THREE
+        );
+        assertEquals(1, board.findMatches(TestMode.NORMAL).size());
+
+        board.setBoard(
+                SymbolType.TWO, SymbolType.ONE, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.NORMAL).size());
+
+        board.setBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FIVE,
+                SymbolType.THREE, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertTrue(board.findMatches(TestMode.NORMAL).isEmpty());
+    }
+
+    @Test
+    public void blessedDetectsHorizontalVerticalAndBothDiagonals() {
+        GridBoard board = new GridBoard(new QueueSymbolProvider());
+        board.setBoard(
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.THREE
+        );
+        assertEquals(1, board.findMatches(TestMode.BLESSED).size());
+
+        board.setBoard(
+                SymbolType.TWO, SymbolType.ONE, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.BLESSED).size());
+
+        board.setBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FIVE,
+                SymbolType.THREE, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.BLESSED).size());
+
+        board.setBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.THREE, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.BLESSED).size());
+    }
+
+    @Test
+    public void cursedDetectsBothDiagonalsButIgnoresHorizontalAndVertical() {
+        GridBoard board = new GridBoard(new QueueSymbolProvider());
+        board.setBoard(
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.THREE
+        );
+        assertTrue(board.findMatches(TestMode.CURSED).isEmpty());
+
+        board.setBoard(
+                SymbolType.TWO, SymbolType.ONE, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.TWO, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertTrue(board.findMatches(TestMode.CURSED).isEmpty());
+
+        board.setBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FIVE,
+                SymbolType.THREE, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.CURSED).size());
+
+        board.setBoard(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FIVE,
+                SymbolType.THREE, SymbolType.FIVE, SymbolType.ONE
+        );
+        assertEquals(1, board.findMatches(TestMode.CURSED).size());
+    }
+
+    @Test
+    public void generatedBoardsExcludeOnlyMatchesAllowedByMode() {
+        GridBoard normalBoard = new GridBoard(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.TWO,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.THREE, SymbolType.ONE, SymbolType.TWO
+        ));
+        normalBoard.generateRandomBoard(TestMode.NORMAL);
+        assertFalse(normalBoard.hasMatches(TestMode.NORMAL));
+
+        GridBoard blessedBoard = new GridBoard(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.THREE, SymbolType.ONE, SymbolType.TWO
+        ));
+        blessedBoard.generateRandomBoard(TestMode.BLESSED);
+        assertFalse(blessedBoard.hasMatches(TestMode.BLESSED));
+
+        GridBoard cursedBoard = new GridBoard(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.ONE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.ONE,
+                SymbolType.ONE, SymbolType.ONE, SymbolType.ONE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.TWO
+        ));
+        cursedBoard.generateRandomBoard(TestMode.CURSED);
+        assertFalse(cursedBoard.hasMatches(TestMode.CURSED));
+        assertTrue(cursedBoard.hasMatches(TestMode.NORMAL));
     }
 
     @Test

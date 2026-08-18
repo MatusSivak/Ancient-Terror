@@ -11,6 +11,8 @@ public class GridTestController {
     private int movesRemaining;
     private int successes;
     private boolean isPlayerMoveInResolution;
+    private TestMode selectedMode = TestMode.NORMAL;
+    private TestMode activeMode = TestMode.NORMAL;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -28,7 +30,8 @@ public class GridTestController {
         successes = 0;
         isPlayerMoveInResolution = false;
         state = GridTestState.INITIALIZING;
-        board.generateRandomBoard();
+        activeMode = selectedMode;
+        board.generateRandomBoard(activeMode);
     }
 
     public void setDebugBoard(SymbolType... cells) {
@@ -49,7 +52,7 @@ public class GridTestController {
     }
 
     public List<GridMatch> findMatches() {
-        return board.findMatches();
+        return board.findMatches(activeMode);
     }
 
     public MatchResolution resolveMatches(List<GridMatch> matches) {
@@ -96,6 +99,21 @@ public class GridTestController {
 
     public GridBoard getBoard() {
         return board;
+    }
+
+    public void setSelectedMode(TestMode selectedMode) {
+        if (selectedMode == null) {
+            throw new IllegalArgumentException("selectedMode must not be null");
+        }
+        this.selectedMode = selectedMode;
+    }
+
+    public TestMode getSelectedMode() {
+        return selectedMode;
+    }
+
+    public TestMode getActiveMode() {
+        return activeMode;
     }
 
     public boolean shouldFinishWhenStable() {

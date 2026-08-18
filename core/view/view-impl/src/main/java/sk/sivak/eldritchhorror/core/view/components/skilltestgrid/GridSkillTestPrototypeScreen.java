@@ -1,15 +1,19 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
@@ -50,6 +54,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label gainLabel;
     private final Label endLabel;
     private final TextButton restartButton;
+    private final SelectBox<TestMode> modeSelectBox;
+    private final GridTestModePreferences modePreferences;
     private List<Sound> chessPieceMoveSounds;
     private List<Sound> tokenExplosionSounds;
     private List<Sound> goodTokenImplosionSounds;
@@ -67,6 +73,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         stage = new Stage(new FitViewport(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT));
         randomProvider = new RandomSymbolProvider(this.random);
         controller = new GridTestController(new GridBoard(randomProvider));
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        modePreferences = new GridTestModePreferences(preferences);
+        controller.setSelectedMode(modePreferences.load());
         controller.startTest(moves);
         assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
@@ -83,6 +92,17 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
+        modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
+        modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
+        modeSelectBox.setSelected(controller.getSelectedMode());
+        modeSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                TestMode selectedMode = modeSelectBox.getSelected();
+                controller.setSelectedMode(selectedMode);
+                modePreferences.save(selectedMode);
+            }
+        });
 
         configureLabel(movesLabel, Align.center);
         configureLabel(successesLabel, Align.center);
@@ -101,6 +121,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         stage.addActor(gainLabel);
         stage.addActor(endLabel);
         stage.addActor(restartButton);
+        stage.addActor(modeSelectBox);
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
 
@@ -355,6 +376,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         float restartY = topY - lineGap - height * 0.10f * PLAY_AREA_SCALE;
         restartButton.setPosition(leftColumnX, restartY);
+        modeSelectBox.setSize(restartButton.getWidth(), height * 0.06f * PLAY_AREA_SCALE);
+        modeSelectBox.setPosition(leftColumnX, restartY - modeSelectBox.getHeight() - height * 0.025f * PLAY_AREA_SCALE);
 
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
