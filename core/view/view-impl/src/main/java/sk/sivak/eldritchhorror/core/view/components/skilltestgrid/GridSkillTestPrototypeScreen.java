@@ -343,11 +343,14 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
         if (pos1 != null && pos2 != null) {
+            Gdx.app.log("SWAP", "onSwapComplete called with pos1=(" + pos1.getRow() + "," + pos1.getColumn() + ") pos2=(" + pos2.getRow() + "," + pos2.getColumn() + ")");
             boardActor.setInteractionEnabled(false);
             controller.useSwap();
             MatchResolution resolution = controller.performSwap(pos1, pos2);
+            Gdx.app.log("SWAP", "performSwap completed, matches found: " + resolution.getMatches().size());
             
             boardActor.animateSwap(pos1, pos2, () -> {
+                Gdx.app.log("SWAP", "animateSwap animation complete");
                 updateCounters();
                 
                 if (resolution.getSuccessesGained() > 0) {
@@ -358,6 +361,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 playMatchSoundsIfNeeded(resolution.getMatches());
                 
                 if (!resolution.getReplacements().isEmpty()) {
+                    Gdx.app.log("SWAP", "Matches detected, animating match wave");
                     controller.setState(GridTestState.MATCH_ANIMATION);
                     boardActor.animateMatchWave(resolution.getMatches(), resolution.getReplacements(), () -> {
                         updateCounters();
@@ -365,10 +369,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                         startResolutionLoop(true);
                     });
                 } else {
+                    Gdx.app.log("SWAP", "No matches, returning to stable board");
                     onBoardStable();
                 }
             });
         } else {
+            Gdx.app.log("SWAP", "onSwapComplete cancelled - pos1 or pos2 is null");
             // Cancelled swap - re-enable normal interaction
             controller.setState(GridTestState.WAITING_FOR_INPUT);
             boardActor.setInteractionEnabled(true);

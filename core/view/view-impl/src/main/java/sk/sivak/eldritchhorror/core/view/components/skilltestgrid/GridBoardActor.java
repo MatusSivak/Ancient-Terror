@@ -471,6 +471,7 @@ public class GridBoardActor extends Group {
     }
 
     public void animateSwap(GridPosition pos1, GridPosition pos2, Runnable onComplete) {
+        System.out.println("SWAP_ANIM: animateSwap starting: (" + pos1.getRow() + "," + pos1.getColumn() + ") <-> (" + pos2.getRow() + "," + pos2.getColumn() + ")");
         GridSymbolActor actor1 = symbolActors[pos1.getRow()][pos1.getColumn()];
         GridSymbolActor actor2 = symbolActors[pos2.getRow()][pos2.getColumn()];
 
@@ -487,10 +488,15 @@ public class GridBoardActor extends Group {
         float startX2 = actor2.getX() + actor2.getWidth() / 2f;
         float startY2 = actor2.getY() + actor2.getHeight() / 2f;
 
+        System.out.println("SWAP_ANIM: actor1 moving from (" + startX1 + "," + startY1 + ") to (" + endX1 + "," + endY1 + ")");
+        System.out.println("SWAP_ANIM: actor2 moving from (" + startX2 + "," + startY2 + ") to (" + endX2 + "," + endY2 + ")");
+
         final int[] completed = {0};
         Runnable swapFinished = () -> {
             completed[0]++;
+            System.out.println("SWAP_ANIM: Actor animation complete: " + completed[0] + "/2");
             if (completed[0] == 2) {
+                System.out.println("SWAP_ANIM: Both animations complete, calling onComplete");
                 onComplete.run();
             }
         };
@@ -513,6 +519,7 @@ public class GridBoardActor extends Group {
 
         symbolActors[pos1.getRow()][pos1.getColumn()] = actor2;
         symbolActors[pos2.getRow()][pos2.getColumn()] = actor1;
+        System.out.println("SWAP_ANIM: symbolActors array updated");
     }
 
     private void addSwipeInput() {
