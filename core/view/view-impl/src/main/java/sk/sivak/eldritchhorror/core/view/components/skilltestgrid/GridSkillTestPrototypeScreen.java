@@ -427,15 +427,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float topY = scaleAround(centerY, height * 0.34f, PLAY_AREA_SCALE);
         float lineGap = height * 0.085f * PLAY_AREA_SCALE;
 
-        // Test state labels (horizontal layout for better visibility)
+        // Test state labels (vertical stack on left side)
         movesLabel.setPosition(leftColumnX, topY);
-        
-        // Position successes in right-side area with safe margin from board
-        float rightLabelX = centerX + width * 0.08f * PLAY_AREA_SCALE;
-        successesLabel.setPosition(rightLabelX, topY);
-        
-        // Focus label on its own line below moves
-        focusLabel.setPosition(leftColumnX, topY - lineGap);
+        successesLabel.setPosition(leftColumnX, topY - lineGap * 0.5f);
+        focusLabel.setPosition(leftColumnX, topY - lineGap * 1.5f);
 
         // Separator gap before controls
         float controlsTopY = topY - lineGap * 1.8f - height * 0.05f * PLAY_AREA_SCALE;
