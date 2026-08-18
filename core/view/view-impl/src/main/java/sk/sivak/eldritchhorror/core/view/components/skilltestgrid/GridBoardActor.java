@@ -68,6 +68,7 @@ public class GridBoardActor extends Group {
     private boolean interactionEnabled = true;
     private boolean swapSelectionMode = false;
     private GridPosition swapFirstSelection = null;
+    private GridSymbolActor swapFirstSelectionActor = null;
     private float layoutScale = 1f;
     private float boardSize;
     private float cellSize;
@@ -459,8 +460,12 @@ public class GridBoardActor extends Group {
     }
 
     public void exitSwapSelectionMode() {
+        if (swapFirstSelectionActor != null) {
+            unhighlightToken(swapFirstSelectionActor);
+        }
         swapSelectionMode = false;
         swapFirstSelection = null;
+        swapFirstSelectionActor = null;
         clearSwipeState();
     }
 
@@ -521,16 +526,25 @@ public class GridBoardActor extends Group {
                 int col = toColumn(x);
                 
                 if (swapSelectionMode) {
+                    swipePointer = pointer;  // Track pointer during swap selection
+                    GridPosition currentPos = new GridPosition(row, col);
+                    GridSymbolActor currentActor = symbolActors[row][col];
+                    
                     if (swapFirstSelection == null) {
-                        swapFirstSelection = new GridPosition(row, col);
+                        swapFirstSelection = currentPos;
+                        swapFirstSelectionActor = currentActor;
+                        highlightToken(currentActor);
                         return true;
-                    } else if (swapFirstSelection.equals(new GridPosition(row, col))) {
+                    } else if (swapFirstSelection.equals(currentPos)) {
                         // Deselect
+                        unhighlightToken(swapFirstSelectionActor);
                         swapFirstSelection = null;
+                        swapFirstSelectionActor = null;
                         return true;
-                    } else if (isOrthogonallyAdjacent(swapFirstSelection, new GridPosition(row, col))) {
+                    } else if (isOrthogonallyAdjacent(swapFirstSelection, currentPos)) {
                         // Valid swap
-                        GridPosition pos2 = new GridPosition(row, col);
+                        unhighlightToken(swapFirstSelectionActor);
+                        GridPosition pos2 = currentPos;
                         exitSwapSelectionMode();
                         if (swapCompleteListener != null) {
                             swapCompleteListener.onSwapComplete(swapFirstSelection, pos2);
@@ -538,7 +552,10 @@ public class GridBoardActor extends Group {
                         return true;
                     } else {
                         // Invalid selection, try new first selection
-                        swapFirstSelection = new GridPosition(row, col);
+                        unhighlightToken(swapFirstSelectionActor);
+                        swapFirstSelection = currentPos;
+                        swapFirstSelectionActor = currentActor;
+                        highlightToken(currentActor);
                         return true;
                     }
                 }
@@ -553,11 +570,19 @@ public class GridBoardActor extends Group {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!interactionEnabled || pointer != swipePointer) {
+                if (!interactionEnabled) {
                     return;
                 }
                 
                 if (swapSelectionMode) {
+                    // Don't process swipe during swap selection
+                    if (pointer == swipePointer) {
+                        swipePointer = -1;
+                    }
+                    return;
+                }
+                
+                if (pointer != swipePointer) {
                     return;
                 }
                 
@@ -853,5 +878,17 @@ public class GridBoardActor extends Group {
         swipePointer = -1;
         swipeStartRow = -1;
         swipeStartColumn = -1;
+    }
+
+    private void highlightToken(GridSymbolActor actor) {
+        if (actor == null) return;
+        // Use setColor to tint the token slightly brighter
+        actor.setColor(1.3f, 1.3f, 1.3f, 1f);
+    }
+
+    private void unhighlightToken(GridSymbolActor actor) {
+        if (actor == null) return;
+        // Reset to normal color
+        actor.setColor(1f, 1f, 1f, 1f);
     }
 }
