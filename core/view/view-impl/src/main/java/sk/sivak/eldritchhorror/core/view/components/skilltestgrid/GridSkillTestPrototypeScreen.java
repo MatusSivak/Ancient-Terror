@@ -43,9 +43,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final String TOKEN_EXPLOSION_SOUND_PREFIX = "token_explosion_";
     private static final String GOOD_TOKEN_IMPLOSION_SOUND_PREFIX = "good_token_implosion_pickup_";
     private static final String CHESS_PIECE_MOVE_SOUND_PREFIX = "chess_piece_move_";
-    private static final float BLIND_REVEAL_DURATION = 0.65f;
-    private static final float BLIND_FOCUS_REVEAL_DURATION = 0.32f;
-
     private final Stage stage;
     private final RandomSymbolProvider randomProvider;
     private final GridTestController controller;
@@ -58,9 +55,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label successesLabel;
     private final Label gainLabel;
     private final Label endLabel;
-    private final Label focusLabel;
+    private final Label rerollLabel;
     private final TextButton restartButton;
-    private final TextButton focusButton;
+    private final TextButton rerollButton;
     private final Label superRerollLabel;
     private final TextButton superRerollButton;
     private final Label swapLabel;
@@ -74,7 +71,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestModePreferences modePreferences;
     private final GridTestMomentumPreferences momentumPreferences;
     private final GridTestBlindPreferences blindPreferences;
-    private final FocusReroller focusReroller;
+    private final SymbolReroller reroller;
     private final SymbolReroller superReroller;
     private List<Sound> chessPieceMoveSounds;
     private List<Sound> tokenExplosionSounds;
@@ -101,7 +98,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.setSelectedMode(modePreferences.load());
         controller.setConfiguredMomentum(momentumPreferences.load());
         controller.setConfiguredBlindEnabled(blindPreferences.load());
-        focusReroller = new FocusReroller(this.random);
+        reroller = new SymbolReroller(this.random);
         superReroller = new SymbolReroller(this.random);
         controller.startTest(moves);
         assets = new GridTestAssets();
@@ -118,9 +115,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
-        focusLabel = new Label("", titleStyle);
+        rerollLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
-        focusButton = buildButton("FOCUS");
+        rerollButton = buildButton("REROLL");
         superRerollLabel = new Label("", titleStyle);
         superRerollButton = buildButton("SUPER REROLL");
         swapLabel = new Label("", titleStyle);
@@ -163,22 +160,22 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
-        configureLabel(focusLabel, Align.center);
+        configureLabel(rerollLabel, Align.center);
         configureLabel(superRerollLabel, Align.center);
         configureLabel(swapLabel, Align.center);
         configureLabel(spinLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        focusLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        rerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         superRerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         swapLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         spinLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
         restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        focusButton.setTransform(true);
-        focusButton.setOrigin(0f, 0f);
-        focusButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        rerollButton.setTransform(true);
+        rerollButton.setOrigin(0f, 0f);
+        rerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         superRerollButton.setTransform(true);
         superRerollButton.setOrigin(0f, 0f);
         superRerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
@@ -199,7 +196,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         stage.addActor(controlPanel);
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
-        addClickListener(focusButton, this::onFocusPressed);
+        addClickListener(rerollButton, this::onRerollPressed);
         addClickListener(superRerollButton, this::onSuperRerollPressed);
         addClickListener(swapButton, this::onSwapPressed);
         addClickListener(spinButton, this::onSpinPressed);
@@ -252,21 +249,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInteractionEnabled(false);
         if (controller.isBlindEnabled()) {
             controller.commitBlindMove(move);
-            nextTokenPreview.setHidden(false);
-            setNextTokenPreviewVisible(true);
-            updateCounters();
-            scheduleCommittedBlindMove(BLIND_REVEAL_DURATION);
+            executeCommittedBlindMove();
             return;
         }
         beginShift(controller.applyMove(move));
-    }
-
-    private void scheduleCommittedBlindMove(float delay) {
-        nextTokenPreview.clearActions();
-        nextTokenPreview.addAction(Actions.sequence(
-                Actions.delay(delay),
-                Actions.run(this::executeCommittedBlindMove)
-        ));
     }
 
     private void executeCommittedBlindMove() {
@@ -370,46 +356,48 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateCounters() {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
-        focusLabel.setText("focus: " + controller.getFocusRemaining());
+        rerollLabel.setText("reroll: " + controller.getRemainingRerolls());
         superRerollLabel.setText("super reroll x" + controller.getSuperRerollsRemaining());
         swapLabel.setText("swap: " + controller.getSwapRemaining());
         spinLabel.setText("spin: " + controller.getSpinRemaining());
-        updateFocusButtonState();
+        updateRerollButtonState();
         updateSuperRerollButtonState();
         updateSwapButtonState();
         updateSpinButtonState();
     }
 
-    private void onFocusPressed() {
-        if (!canUseFocus()) {
+    private void onRerollPressed() {
+        if (controller.getState() == GridTestState.REROLL_SELECTING) {
+            controller.cancelRerollTargeting();
+            boardActor.exitRerollTargetingMode();
+            updateCounters();
             return;
         }
-        SymbolType currentNext = randomProvider.peekNext();
-        if (controller.useFocus()) {
-            SymbolType rerolled = focusReroller.reroll(currentNext);
-            randomProvider.overrideNext(rerolled);
-            refreshNextTokenPreview();
-            if (controller.getState() == GridTestState.REVEALING_NEXT_TOKEN) {
-                scheduleCommittedBlindMove(BLIND_FOCUS_REVEAL_DURATION);
-            }
-            updateCounters();
-            updateFocusButtonState();
+        if (!controller.beginRerollTargeting()) {
+            return;
         }
+        boardActor.enterRerollTargetingMode(this::onRerollTargetSelected);
+        updateCounters();
     }
 
-    private boolean canUseFocus() {
-        if (!controller.canUseFocus()) {
-            return false;
+    private void onRerollTargetSelected(GridPosition position) {
+        if (controller.getState() != GridTestState.REROLL_SELECTING) {
+            return;
         }
-        SymbolType currentNext = randomProvider.peekNext();
-        return currentNext != null;
+        boardActor.setInteractionEnabled(false);
+        reserveNextTokenForTacticalEffect();
+        SymbolType rerolledSymbol = controller.performReroll(position, reroller);
+        controller.setState(GridTestState.MATCH_ANIMATION);
+        updateCounters();
+        boardActor.animateReroll(position, rerolledSymbol, () -> startResolutionLoop(false));
     }
 
-    private void updateFocusButtonState() {
-        boolean canUse = canUseFocus();
-        focusButton.setDisabled(!canUse);
-        // Keep button text simple - count is shown in the "focus: N" label
-        focusButton.setText("FOCUS");
+    private void updateRerollButtonState() {
+        boolean targeting = controller.getState() == GridTestState.REROLL_SELECTING;
+        rerollButton.setDisabled(!targeting && !controller.canActivateReroll());
+        rerollButton.setText(targeting
+                ? "CANCEL REROLL"
+                : "REROLL x" + controller.getRemainingRerolls());
     }
 
     private void onSuperRerollPressed() {
@@ -554,7 +542,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void setNextTokenPreviewVisible(boolean visible) {
-        nextTokenPreview.setVisible(visible);
+        nextTokenPreview.setVisible(visible && !controller.isBlindEnabled());
     }
 
     private void playMatchSoundsIfNeeded(List<GridMatch> matches) {
@@ -659,20 +647,20 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float buttonHeight = ViewProperties.VIEWPORT_HEIGHT * 0.06f * controlScale;
         float statsFontScale = UI_LABEL_SCALE * controlScale;
         
-        // Stats block (moves, successes, focus, swap)
+        // Stats block
         Table statsTable = new Table();
         statsTable.align(Align.left);
         
         movesLabel.setFontScale(statsFontScale);
         successesLabel.setFontScale(statsFontScale);
-        focusLabel.setFontScale(statsFontScale);
+        rerollLabel.setFontScale(statsFontScale);
         superRerollLabel.setFontScale(statsFontScale);
         swapLabel.setFontScale(statsFontScale);
         spinLabel.setFontScale(statsFontScale);
         
         statsTable.add(movesLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
-        statsTable.add(focusLabel).left().padBottom(2f).row();
+        statsTable.add(rerollLabel).left().padBottom(2f).row();
         statsTable.add(superRerollLabel).left().padBottom(2f).row();
         statsTable.add(swapLabel).left().padBottom(2f).row();
         statsTable.add(spinLabel).left().row();
@@ -695,11 +683,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         blindCheckBox.getLabel().setFontScale(statsFontScale);
         panel.add(blindCheckBox).left().padBottom(8f).row();
         
-        // Focus button
-        focusButton.setTransform(true);
-        focusButton.setOrigin(0f, 0f);
-        focusButton.setScale(controlScale);
-        panel.add(focusButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+        rerollButton.setTransform(true);
+        rerollButton.setOrigin(0f, 0f);
+        rerollButton.setScale(controlScale);
+        panel.add(rerollButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
 
         superRerollButton.setTransform(true);
         superRerollButton.setOrigin(0f, 0f);

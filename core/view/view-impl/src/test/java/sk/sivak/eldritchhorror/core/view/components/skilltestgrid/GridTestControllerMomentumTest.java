@@ -22,17 +22,13 @@ public class GridTestControllerMomentumTest {
         assertEquals(1, withoutMomentum.getSuccesses());
         assertEquals(3, withoutMomentum.getMovesRemaining());
 
-        GridTestController withMomentum = createStartedController(TestMode.NORMAL, true, 3);
-        setHorizontalMatch(withMomentum, SymbolType.FIVE);
-        withMomentum.resolveMatches(withMomentum.findMatches());
-        assertEquals(1, withMomentum.getSuccesses());
-        assertEquals(4, withMomentum.getMovesRemaining());
-
-        GridTestController sixesWithMomentum = createStartedController(TestMode.NORMAL, true, 3);
-        setHorizontalMatch(sixesWithMomentum, SymbolType.SIX);
-        sixesWithMomentum.resolveMatches(sixesWithMomentum.findMatches());
-        assertEquals(1, sixesWithMomentum.getSuccesses());
-        assertEquals(4, sixesWithMomentum.getMovesRemaining());
+        for (SymbolType symbol : SymbolType.values()) {
+            GridTestController withMomentum = createStartedController(TestMode.NORMAL, true, 3);
+            setHorizontalMatch(withMomentum, symbol);
+            withMomentum.resolveMatches(withMomentum.findMatches());
+            assertEquals(symbol.isScoring() ? 1 : 0, withMomentum.getSuccesses());
+            assertEquals(4, withMomentum.getMovesRemaining());
+        }
     }
 
     @Test
@@ -54,7 +50,7 @@ public class GridTestControllerMomentumTest {
     }
 
     @Test
-    public void neutralMatchAwardsNoMoveWithMomentum() {
+    public void neutralMatchAwardsMoveWithMomentum() {
         QueueProvider provider = new QueueProvider(
                 stableBoard(),
                 SymbolType.THREE,
@@ -73,7 +69,7 @@ public class GridTestControllerMomentumTest {
         controller.applyMove(new GridMove(GridMoveType.ROW_LEFT, 0));
         controller.resolveMatches(controller.findMatches());
 
-        assertEquals(0, controller.getMovesRemaining());
+        assertEquals(1, controller.getMovesRemaining());
         assertEquals(0, controller.getSuccesses());
     }
 
@@ -127,7 +123,7 @@ public class GridTestControllerMomentumTest {
         controller.resolveMatches(controller.findMatches());
 
         assertEquals(1, controller.getSuccesses());
-        assertEquals(4, controller.getMovesRemaining());
+        assertEquals(5, controller.getMovesRemaining());
     }
 
     @Test

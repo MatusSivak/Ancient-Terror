@@ -41,13 +41,6 @@ public class RandomSymbolProvider implements SymbolRandomProvider {
         return symbol;
     }
 
-    public void overrideNext(SymbolType symbol) {
-        if (symbol == null) {
-            throw new IllegalArgumentException("symbol must not be null");
-        }
-        this.nextSymbol = symbol;
-    }
-
     public void reserveNextToken() {
         if (reservedNextSymbol != null) {
             throw new IllegalStateException("Next Token is already reserved");

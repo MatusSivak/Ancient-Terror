@@ -18,9 +18,9 @@ public class GridTestController {
     private boolean configuredBlindEnabled;
     private boolean blindEnabled;
     private GridMove committedBlindMove;
-    private static final int INITIAL_FOCUS_COUNT = 1;
-    private int initialFocusCount = INITIAL_FOCUS_COUNT;
-    private int focusRemaining;
+    private static final int DEFAULT_STARTING_REROLLS = 1;
+    private int startingRerolls = DEFAULT_STARTING_REROLLS;
+    private int remainingRerolls;
     private static final int INITIAL_SWAP_COUNT = 1;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
@@ -51,7 +51,7 @@ public class GridTestController {
         activeMomentum = configuredMomentum;
         blindEnabled = configuredBlindEnabled;
         committedBlindMove = null;
-        focusRemaining = initialFocusCount;
+        remainingRerolls = startingRerolls;
         swapRemaining = initialSwapCount;
         remainingSpins = initialSpinCount;
         superRerollsRemaining = initialSuperRerollCount;
@@ -115,12 +115,11 @@ public class GridTestController {
         int scoringLines = 0;
         int bonusMovesGained = 0;
         for (GridMatch match : matches) {
-            if (match.isScoringMatch()) {
+            boolean scoringMatch = match.isScoringMatch();
+            if (scoringMatch) {
                 scoringLines++;
-                if (activeMomentum) {
-                    bonusMovesGained++;
-                }
-            } else if (neutralMatchMoveRewardsEnabled && !activeMomentum) {
+            }
+            if (activeMomentum || (!scoringMatch && neutralMatchMoveRewardsEnabled)) {
                 bonusMovesGained++;
             }
         }
@@ -200,36 +199,56 @@ public class GridTestController {
         return committedBlindMove;
     }
 
-    public int getFocusRemaining() {
-        return focusRemaining;
+    public int getRemainingRerolls() {
+        return remainingRerolls;
     }
 
-    public boolean canUseFocus() {
-        if (focusRemaining <= 0) {
-            return false;
-        }
-        return blindEnabled
-                ? state == GridTestState.REVEALING_NEXT_TOKEN
-                : state == GridTestState.WAITING_FOR_INPUT;
+    public boolean canActivateReroll() {
+        return state == GridTestState.WAITING_FOR_INPUT
+                && movesRemaining > 0
+                && remainingRerolls > 0
+                && findMatches().isEmpty();
     }
 
-    public boolean useFocus() {
-        if (focusRemaining <= 0) {
+    public boolean beginRerollTargeting() {
+        if (!canActivateReroll()) {
             return false;
         }
-        focusRemaining--;
+        state = GridTestState.REROLL_SELECTING;
         return true;
     }
 
-    public int getInitialFocusCount() {
-        return initialFocusCount;
+    public boolean cancelRerollTargeting() {
+        if (state != GridTestState.REROLL_SELECTING) {
+            return false;
+        }
+        state = GridTestState.WAITING_FOR_INPUT;
+        return true;
     }
 
-    public void setInitialFocusCount(int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException("initialFocusCount must be >= 0");
+    public SymbolType performReroll(GridPosition position, SymbolReroller reroller) {
+        if (state != GridTestState.REROLL_SELECTING) {
+            throw new IllegalStateException("Cannot select a Reroll target in state " + state);
         }
-        this.initialFocusCount = count;
+        if (remainingRerolls <= 0) {
+            throw new IllegalStateException("No Rerolls remaining");
+        }
+        SymbolType rerolled = board.reroll(position, reroller);
+        remainingRerolls--;
+        neutralMatchMoveRewardsEnabled = true;
+        state = GridTestState.CHECKING_MATCHES;
+        return rerolled;
+    }
+
+    public int getStartingRerolls() {
+        return startingRerolls;
+    }
+
+    public void setStartingRerolls(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("startingRerolls must be >= 0");
+        }
+        startingRerolls = count;
     }
 
     public int getSwapRemaining() {

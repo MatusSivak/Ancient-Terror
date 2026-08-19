@@ -122,44 +122,6 @@ public class GridTestControllerBlindTest {
     }
 
     @Test
-    public void focusDuringRevealDoesNotUnlockCommittedMovement() {
-        GridTestController controller = createController(new QueueProvider(
-                stableBoard(),
-                SymbolType.FIVE
-        ));
-        controller.setConfiguredBlindEnabled(true);
-        controller.setInitialFocusCount(1);
-        controller.startTest(3);
-        controller.setState(GridTestState.WAITING_FOR_INPUT);
-        GridMove committed = new GridMove(GridMoveType.COLUMN_DOWN, 2);
-
-        controller.commitBlindMove(committed);
-        assertTrue(controller.useFocus());
-
-        assertSame(committed, controller.getCommittedBlindMove());
-        assertEquals(GridTestState.REVEALING_NEXT_TOKEN, controller.getState());
-        assertEquals(3, controller.getMovesRemaining());
-    }
-
-    @Test
-    public void focusWindowOpensOnlyAfterBlindMovementIsCommitted() {
-        GridTestController controller = createController(new QueueProvider(
-                stableBoard(),
-                SymbolType.FIVE
-        ));
-        controller.setConfiguredBlindEnabled(true);
-        controller.setInitialFocusCount(1);
-        controller.startTest(3);
-        controller.setState(GridTestState.WAITING_FOR_INPUT);
-
-        assertFalse(controller.canUseFocus());
-
-        controller.commitBlindMove(new GridMove(GridMoveType.ROW_LEFT, 0));
-
-        assertTrue(controller.canUseFocus());
-    }
-
-    @Test
     public void blindDoesNotChangeMomentumRewards() {
         GridTestController controller = createController(new QueueProvider((Object) stableBoard()));
         controller.setConfiguredBlindEnabled(true);
@@ -178,7 +140,7 @@ public class GridTestControllerBlindTest {
     }
 
     @Test
-    public void blindWithMomentumDoesNotRewardNeutralMatches() {
+    public void blindWithMomentumRewardsNeutralMatches() {
         QueueProvider provider = new QueueProvider(
                 (Object) stableBoard(),
                 SymbolType.THREE,
@@ -199,7 +161,7 @@ public class GridTestControllerBlindTest {
         controller.applyCommittedBlindMove();
         controller.resolveMatches(controller.findMatches());
 
-        assertEquals(0, controller.getMovesRemaining());
+        assertEquals(1, controller.getMovesRemaining());
         assertEquals(0, controller.getSuccesses());
     }
 

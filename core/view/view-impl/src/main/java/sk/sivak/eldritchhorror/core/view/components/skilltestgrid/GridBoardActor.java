@@ -33,6 +33,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 public class GridBoardActor extends Group {
     private static final float SHIFT_DURATION = 0.24f;
+    private static final float REROLL_HALF_DURATION = 0.10f;
     private static final float REFILL_DURATION = 0.64f;
     private static final float TOKEN_1_TO_3_IMPLOSION_END_SCALE = 1.5f;
     private static final float TOKEN_5_TO_6_IMPLOSION_END_SCALE = 0.65f;
@@ -55,6 +56,10 @@ public class GridBoardActor extends Group {
         void onSwapComplete(GridPosition pos1, GridPosition pos2);
     }
 
+    public interface RerollTargetListener {
+        void onRerollTargetSelected(GridPosition position);
+    }
+
     private final GridTestController controller;
     private final GridTestAssets assets;
     private final Group boardLayer;
@@ -68,7 +73,9 @@ public class GridBoardActor extends Group {
     private final GridSymbolActor[][] symbolActors;
     private MoveSelectedListener moveSelectedListener;
     private SwapCompleteListener swapCompleteListener;
+    private RerollTargetListener rerollTargetListener;
     private boolean interactionEnabled = true;
+    private boolean rerollTargetingMode;
     private boolean swapSelectionMode = false;
     private GridPosition swapFirstSelection = null;
     private GridSymbolActor swapFirstSelectionActor = null;
@@ -195,6 +202,8 @@ public class GridBoardActor extends Group {
     }
 
     public void resetAnimations() {
+        exitRerollTargetingMode();
+        exitSwapSelectionMode();
         clearActions();
         boardLayer.clearActions();
         spawnLayer.clearActions();
@@ -326,6 +335,29 @@ public class GridBoardActor extends Group {
             );
             implosionLayer.addActor(implosionActor);
         }
+    }
+
+    public void animateReroll(GridPosition position, SymbolType rerolledSymbol, Runnable onComplete) {
+        GridSymbolActor actor = symbolActors[position.getRow()][position.getColumn()];
+        actor.clearActions();
+        actor.setOrigin(actor.getWidth() / 2f, actor.getHeight() / 2f);
+        actor.addAction(new FastForwardAction<>(sequence(
+                parallel(
+                        scaleTo(0.65f, 0.65f, REROLL_HALF_DURATION, Interpolation.sineIn),
+                        alpha(0.2f, REROLL_HALF_DURATION, Interpolation.sineIn),
+                        Actions.rotateBy(90f, REROLL_HALF_DURATION, Interpolation.sineIn)
+                ),
+                run(() -> actor.setSymbolType(assets, rerolledSymbol)),
+                parallel(
+                        scaleTo(1f, 1f, REROLL_HALF_DURATION, Interpolation.sineOut),
+                        alpha(1f, REROLL_HALF_DURATION, Interpolation.sineOut),
+                        Actions.rotateBy(90f, REROLL_HALF_DURATION, Interpolation.sineOut)
+                ),
+                run(() -> {
+                    actor.setRotation(0f);
+                    onComplete.run();
+                })
+        )));
     }
 
     private void animateRefillWave(List<GridSymbolActor> matchedActors, Map<GridPosition, SymbolType> replacements, Runnable onComplete) {
@@ -510,6 +542,30 @@ public class GridBoardActor extends Group {
         clearSwipeState();
     }
 
+    public void enterRerollTargetingMode(RerollTargetListener listener) {
+        rerollTargetListener = listener;
+        rerollTargetingMode = true;
+        clearSwipeState();
+        for (int row = 0; row < GridBoard.SIZE; row++) {
+            for (int column = 0; column < GridBoard.SIZE; column++) {
+                highlightToken(symbolActors[row][column]);
+            }
+        }
+    }
+
+    public void exitRerollTargetingMode() {
+        if (!rerollTargetingMode) {
+            return;
+        }
+        rerollTargetingMode = false;
+        for (int row = 0; row < GridBoard.SIZE; row++) {
+            for (int column = 0; column < GridBoard.SIZE; column++) {
+                unhighlightToken(symbolActors[row][column]);
+            }
+        }
+        clearSwipeState();
+    }
+
     public void exitSwapSelectionMode() {
         if (swapFirstSelectionActor != null) {
             unhighlightToken(swapFirstSelectionActor);
@@ -589,7 +645,16 @@ public class GridBoardActor extends Group {
                 
                 int row = toRow(y);
                 int col = toColumn(x);
-                
+
+                if (rerollTargetingMode) {
+                    GridPosition position = new GridPosition(row, col);
+                    exitRerollTargetingMode();
+                    if (rerollTargetListener != null) {
+                        rerollTargetListener.onRerollTargetSelected(position);
+                    }
+                    return true;
+                }
+
                 if (swapSelectionMode) {
                     swipePointer = pointer;  // Track pointer during swap selection
                     GridPosition currentPos = new GridPosition(row, col);
@@ -644,7 +709,7 @@ public class GridBoardActor extends Group {
                     return;
                 }
                 
-                if (swapSelectionMode) {
+                if (rerollTargetingMode || swapSelectionMode) {
                     // Don't process swipe during swap selection
                     if (pointer == swipePointer) {
                         swipePointer = -1;

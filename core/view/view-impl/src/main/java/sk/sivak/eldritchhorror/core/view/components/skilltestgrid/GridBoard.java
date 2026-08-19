@@ -154,6 +154,20 @@ public class GridBoard {
         board[pos2.getRow()][pos2.getColumn()] = temp;
     }
 
+    public SymbolType reroll(GridPosition position, SymbolReroller reroller) {
+        if (position == null) {
+            throw new IllegalArgumentException("position must not be null");
+        }
+        if (reroller == null) {
+            throw new IllegalArgumentException("reroller must not be null");
+        }
+        validateRow(position.getRow());
+        validateColumn(position.getColumn());
+        SymbolType rerolled = reroller.reroll(board[position.getRow()][position.getColumn()]);
+        board[position.getRow()][position.getColumn()] = rerolled;
+        return rerolled;
+    }
+
     public void rotateOuterClockwise() {
         SymbolType topLeft = board[0][0];
         SymbolType topMiddle = board[0][1];
