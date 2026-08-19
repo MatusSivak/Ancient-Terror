@@ -236,6 +236,40 @@ public class GridBoard {
         return replacements;
     }
 
+    public boolean hasSuperRerollCandidates() {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                if (isSuperRerollCandidate(board[row][column])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Map<GridPosition, SymbolType> superReroll(SymbolReroller reroller) {
+        if (reroller == null) {
+            throw new IllegalArgumentException("reroller must not be null");
+        }
+        Map<GridPosition, SymbolType> rerolledCells = new LinkedHashMap<>();
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                SymbolType currentSymbol = board[row][column];
+                if (!isSuperRerollCandidate(currentSymbol)) {
+                    continue;
+                }
+                SymbolType rerolledSymbol = reroller.reroll(currentSymbol);
+                board[row][column] = rerolledSymbol;
+                rerolledCells.put(new GridPosition(row, column), rerolledSymbol);
+            }
+        }
+        return rerolledCells;
+    }
+
+    private boolean isSuperRerollCandidate(SymbolType symbol) {
+        return symbol != null && !symbol.isScoring();
+    }
+
     private void validateRow(int row) {
         if (row < 0 || row >= SIZE) {
             throw new IllegalArgumentException("Row out of range: " + row);

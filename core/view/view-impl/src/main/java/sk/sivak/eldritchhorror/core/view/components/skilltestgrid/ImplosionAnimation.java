@@ -91,15 +91,10 @@ public class ImplosionAnimation {
         float scale = 1f + (endScale - 1f) * scaleProgress;
         float drawWidth = width * scale;
         float drawHeight = height * scale;
-        TextureRegion frame = animation.getKeyFrame(stateTime, false);
         float batchRed = batch.getColor().r;
         float batchGreen = batch.getColor().g;
         float batchBlue = batch.getColor().b;
         float batchAlpha = batch.getColor().a;
-        float baseAlpha = startAlpha + (endAlpha - startAlpha) * progress;
-        batch.setColor(batchRed, batchGreen, batchBlue, batchAlpha * baseAlpha);
-        batch.draw(frame, centerX - drawWidth / 2f, centerY - drawHeight / 2f, drawWidth, drawHeight);
-        batch.setColor(batchRed, batchGreen, batchBlue, batchAlpha);
 
         if (overlayAnimation != null) {
             TextureRegion overlayFrame = overlayAnimation.getKeyFrame(stateTime, false);
@@ -111,6 +106,12 @@ public class ImplosionAnimation {
             batch.draw(overlayFrame, centerX - drawWidth / 2f, centerY - drawHeight / 2f, drawWidth, drawHeight);
             batch.setColor(batchRed, batchGreen, batchBlue, batchAlpha);
         }
+
+        TextureRegion frame = animation.getKeyFrame(stateTime, false);
+        float baseAlpha = startAlpha + (endAlpha - startAlpha) * progress;
+        batch.setColor(batchRed, batchGreen, batchBlue, batchAlpha * baseAlpha);
+        batch.draw(frame, centerX - drawWidth / 2f, centerY - drawHeight / 2f, drawWidth, drawHeight);
+        batch.setColor(batchRed, batchGreen, batchBlue, batchAlpha);
     }
 
     boolean isFinished() {

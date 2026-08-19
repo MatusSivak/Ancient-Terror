@@ -25,6 +25,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton;
@@ -58,6 +59,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label focusLabel;
     private final TextButton restartButton;
     private final TextButton focusButton;
+    private final Label superRerollLabel;
+    private final TextButton superRerollButton;
     private final Label swapLabel;
     private final TextButton swapButton;
     private final SelectBox<TestMode> modeSelectBox;
@@ -66,6 +69,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestModePreferences modePreferences;
     private final GridTestMomentumPreferences momentumPreferences;
     private final FocusReroller focusReroller;
+    private final SymbolReroller superReroller;
     private List<Sound> chessPieceMoveSounds;
     private List<Sound> tokenExplosionSounds;
     private List<Sound> goodTokenImplosionSounds;
@@ -89,6 +93,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         controller.setSelectedMode(modePreferences.load());
         controller.setConfiguredMomentum(momentumPreferences.load());
         focusReroller = new FocusReroller(this.random);
+        superReroller = new SymbolReroller(this.random);
         controller.startTest(moves);
         assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
@@ -107,6 +112,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
         focusButton = buildButton("FOCUS");
+        superRerollLabel = new Label("", titleStyle);
+        superRerollButton = buildButton("SUPER REROLL");
         swapLabel = new Label("", titleStyle);
         swapButton = buildButton("SWAP");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
@@ -136,10 +143,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
         configureLabel(focusLabel, Align.center);
+        configureLabel(superRerollLabel, Align.center);
         configureLabel(swapLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         focusLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        superRerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         swapLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
@@ -147,6 +156,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusButton.setTransform(true);
         focusButton.setOrigin(0f, 0f);
         focusButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        superRerollButton.setTransform(true);
+        superRerollButton.setOrigin(0f, 0f);
+        superRerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         swapButton.setTransform(true);
         swapButton.setOrigin(0f, 0f);
         swapButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
@@ -162,6 +174,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         addClickListener(restartButton, () -> startTest(configuredMoves));
         addClickListener(focusButton, this::onFocusPressed);
+        addClickListener(superRerollButton, this::onSuperRerollPressed);
         addClickListener(swapButton, this::onSwapPressed);
 
         updateCounters();
@@ -255,6 +268,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         refreshNextTokenPreview();
         setNextTokenPreviewVisible(true);
         controller.setState(GridTestState.WAITING_FOR_INPUT);
+        updateCounters();
         boardActor.setInteractionEnabled(true);
     }
 
@@ -268,6 +282,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         endLabel.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f - endLabel.getWidth() / 2f, ViewProperties.VIEWPORT_HEIGHT * 0.08f);
         endLabel.getColor().a = 0f;
         endLabel.addAction(new FastForwardAction<>(Actions.alpha(1f, 0.3f, Interpolation.sineOut)));
+        updateCounters();
         soundHooks.onTestComplete(result);
     }
 
@@ -295,8 +310,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
         focusLabel.setText("focus: " + controller.getFocusRemaining());
+        superRerollLabel.setText("super reroll x" + controller.getSuperRerollsRemaining());
         swapLabel.setText("swap: " + controller.getSwapRemaining());
         updateFocusButtonState();
+        updateSuperRerollButtonState();
         updateSwapButtonState();
     }
 
@@ -332,6 +349,32 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusButton.setText("FOCUS");
     }
 
+    private void onSuperRerollPressed() {
+        if (!controller.canUseSuperReroll()) {
+            return;
+        }
+
+        boardActor.setInteractionEnabled(false);
+        Map<GridPosition, SymbolType> rerolledCells = controller.performSuperReroll(superReroller);
+        if (rerolledCells.isEmpty()) {
+            onBoardStable();
+            return;
+        }
+
+        controller.setState(GridTestState.MATCH_ANIMATION);
+        updateCounters();
+        boardActor.animateSuperReroll(rerolledCells, () -> {
+            controller.setState(GridTestState.CHECKING_MATCHES);
+            startResolutionLoop(false);
+        });
+    }
+
+    private void updateSuperRerollButtonState() {
+        boolean canUse = controller.canUseSuperReroll();
+        superRerollButton.setDisabled(!canUse);
+        superRerollButton.setText("SUPER REROLL");
+    }
+
     private void onSwapPressed() {
         if (!canUseSwap()) {
             return;
@@ -339,7 +382,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         Gdx.app.log("SWAP", "Swap button clicked");
         controller.setState(GridTestState.SWAP_SELECTING);
         boardActor.enterSwapSelectionMode(this::onSwapComplete);
-        updateSwapButtonState();
+        updateCounters();
     }
 
     private boolean canUseSwap() {
@@ -396,7 +439,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             // Cancelled swap - re-enable normal interaction
             controller.setState(GridTestState.WAITING_FOR_INPUT);
             boardActor.setInteractionEnabled(true);
-            updateSwapButtonState();
+            updateCounters();
         }
     }
 
@@ -517,11 +560,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         movesLabel.setFontScale(statsFontScale);
         successesLabel.setFontScale(statsFontScale);
         focusLabel.setFontScale(statsFontScale);
+        superRerollLabel.setFontScale(statsFontScale);
         swapLabel.setFontScale(statsFontScale);
         
         statsTable.add(movesLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
         statsTable.add(focusLabel).left().padBottom(2f).row();
+        statsTable.add(superRerollLabel).left().padBottom(2f).row();
         statsTable.add(swapLabel).left().row();
         
         panel.add(statsTable).left().padBottom(12f).row();
@@ -545,6 +590,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusButton.setOrigin(0f, 0f);
         focusButton.setScale(controlScale);
         panel.add(focusButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+
+        superRerollButton.setTransform(true);
+        superRerollButton.setOrigin(0f, 0f);
+        superRerollButton.setScale(controlScale);
+        panel.add(superRerollButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
         
         // Swap button
         swapButton.setTransform(true);
@@ -553,7 +603,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         panel.add(swapButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
         
         // Position the panel
-        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.5f);
+        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.58f);
         panel.setPosition(
             ViewProperties.VIEWPORT_WIDTH * 0.02f, 
             ViewProperties.VIEWPORT_HEIGHT * 0.5f - panel.getHeight() / 2f

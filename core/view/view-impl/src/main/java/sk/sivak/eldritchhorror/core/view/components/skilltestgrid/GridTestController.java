@@ -10,7 +10,7 @@ public class GridTestController {
     private int startingMoves;
     private int movesRemaining;
     private int successes;
-    private boolean isPlayerMoveInResolution;
+    private boolean neutralMatchMoveRewardsEnabled;
     private TestMode selectedMode = TestMode.NORMAL;
     private TestMode activeMode = TestMode.NORMAL;
     private boolean configuredMomentum;
@@ -21,6 +21,9 @@ public class GridTestController {
     private static final int INITIAL_SWAP_COUNT = 1;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
+    private static final int INITIAL_SUPER_REROLL_COUNT = 1;
+    private int initialSuperRerollCount = INITIAL_SUPER_REROLL_COUNT;
+    private int superRerollsRemaining;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -36,12 +39,13 @@ public class GridTestController {
         startingMoves = moves;
         movesRemaining = moves;
         successes = 0;
-        isPlayerMoveInResolution = false;
+        neutralMatchMoveRewardsEnabled = false;
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
         activeMomentum = configuredMomentum;
         focusRemaining = initialFocusCount;
         swapRemaining = initialSwapCount;
+        superRerollsRemaining = initialSuperRerollCount;
         board.generateRandomBoard(activeMode);
     }
 
@@ -57,7 +61,7 @@ public class GridTestController {
             throw new IllegalStateException("No moves remaining");
         }
         movesRemaining--;
-        isPlayerMoveInResolution = true;
+        neutralMatchMoveRewardsEnabled = true;
         state = GridTestState.SHIFTING;
         return board.shift(move);
     }
@@ -78,7 +82,7 @@ public class GridTestController {
                 if (activeMomentum) {
                     bonusMovesGained++;
                 }
-            } else if (isPlayerMoveInResolution) {
+            } else if (neutralMatchMoveRewardsEnabled) {
                 bonusMovesGained++;
             }
         }
@@ -95,7 +99,7 @@ public class GridTestController {
     public void setState(GridTestState state) {
         this.state = state;
         if (state == GridTestState.WAITING_FOR_INPUT || state == GridTestState.FINISHED) {
-            isPlayerMoveInResolution = false;
+            neutralMatchMoveRewardsEnabled = false;
         }
     }
 
@@ -186,6 +190,48 @@ public class GridTestController {
             throw new IllegalArgumentException("initialSwapCount must be >= 0");
         }
         this.initialSwapCount = count;
+    }
+
+    public int getSuperRerollsRemaining() {
+        return superRerollsRemaining;
+    }
+
+    public int getInitialSuperRerollCount() {
+        return initialSuperRerollCount;
+    }
+
+    public void setInitialSuperRerollCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("initialSuperRerollCount must be >= 0");
+        }
+        initialSuperRerollCount = count;
+    }
+
+    public boolean canUseSuperReroll() {
+        return state == GridTestState.WAITING_FOR_INPUT
+                && superRerollsRemaining > 0
+                && board.hasSuperRerollCandidates();
+    }
+
+    public Map<GridPosition, SymbolType> performSuperReroll(SymbolReroller reroller) {
+        if (reroller == null) {
+            throw new IllegalArgumentException("reroller must not be null");
+        }
+        if (state != GridTestState.WAITING_FOR_INPUT) {
+            throw new IllegalStateException("Cannot use Super Reroll in state " + state);
+        }
+        if (superRerollsRemaining <= 0) {
+            return Collections.emptyMap();
+        }
+
+        Map<GridPosition, SymbolType> rerolledCells = board.superReroll(reroller);
+        if (rerolledCells.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        superRerollsRemaining--;
+        neutralMatchMoveRewardsEnabled = true;
+        return rerolledCells;
     }
 
     public MatchResolution performSwap(GridPosition pos1, GridPosition pos2) {

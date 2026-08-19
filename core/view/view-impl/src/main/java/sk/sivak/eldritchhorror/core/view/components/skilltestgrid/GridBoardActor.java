@@ -278,6 +278,54 @@ public class GridBoardActor extends Group {
         }
     }
 
+    public void animateSuperReroll(Map<GridPosition, SymbolType> rerolledCells, Runnable onComplete) {
+        if (rerolledCells == null || rerolledCells.isEmpty()) {
+            onComplete.run();
+            return;
+        }
+
+        List<GridSymbolActor> rerolledActors = new ArrayList<>(rerolledCells.size());
+        Map<GridPosition, SymbolType> previousSymbols = new java.util.LinkedHashMap<>();
+        for (Map.Entry<GridPosition, SymbolType> rerolledCell : rerolledCells.entrySet()) {
+            GridPosition position = rerolledCell.getKey();
+            GridSymbolActor actor = symbolActors[position.getRow()][position.getColumn()];
+            rerolledActors.add(actor);
+            previousSymbols.put(position, actor.getSymbolType());
+            actor.clearActions();
+            actor.setScale(1f);
+            actor.getColor().a = 0f;
+        }
+
+        final int[] finishedCount = {0};
+        for (Map.Entry<GridPosition, SymbolType> rerolledCell : rerolledCells.entrySet()) {
+            GridPosition position = rerolledCell.getKey();
+            TokenLayout layout = tokenLayout(position.getRow(), position.getColumn());
+            float centerX = symbolClipContainer.getX() + layout.x + layout.width / 2f;
+            float centerY = symbolClipContainer.getY() + layout.y + layout.height / 2f;
+            SymbolType previousSymbol = previousSymbols.get(position);
+            ImplosionActor implosionActor = new ImplosionActor(
+                    assets.getImplosionFrames(previousSymbol),
+                    overlayFrames(previousSymbol),
+                    centerX,
+                    centerY,
+                    layout.width,
+                    implosionEndScale(previousSymbol),
+                    destroyAnimationStartAlpha(previousSymbol),
+                    destroyAnimationEndAlpha(previousSymbol),
+                    overlayStartAlpha(previousSymbol),
+                    overlayEndAlpha(previousSymbol),
+                    null,
+                    () -> {
+                        finishedCount[0]++;
+                        if (finishedCount[0] == rerolledCells.size()) {
+                            animateRefillWave(rerolledActors, rerolledCells, onComplete);
+                        }
+                    }
+            );
+            implosionLayer.addActor(implosionActor);
+        }
+    }
+
     private void animateRefillWave(List<GridSymbolActor> matchedActors, Map<GridPosition, SymbolType> replacements, Runnable onComplete) {
         final int totalEffects = matchedActors.size() + replacements.size();
         final int[] completedEffects = {0};
