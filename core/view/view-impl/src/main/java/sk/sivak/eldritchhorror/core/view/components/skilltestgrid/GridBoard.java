@@ -154,6 +154,26 @@ public class GridBoard {
         board[pos2.getRow()][pos2.getColumn()] = temp;
     }
 
+    public void rotateOuterClockwise() {
+        SymbolType topLeft = board[0][0];
+        SymbolType topMiddle = board[0][1];
+        SymbolType topRight = board[0][2];
+        SymbolType middleRight = board[1][2];
+        SymbolType bottomRight = board[2][2];
+        SymbolType bottomMiddle = board[2][1];
+        SymbolType bottomLeft = board[2][0];
+        SymbolType middleLeft = board[1][0];
+
+        board[0][1] = topLeft;
+        board[0][2] = topMiddle;
+        board[1][2] = topRight;
+        board[2][2] = middleRight;
+        board[2][1] = bottomRight;
+        board[2][0] = bottomMiddle;
+        board[1][0] = bottomLeft;
+        board[0][0] = middleLeft;
+    }
+
     public List<GridMatch> findMatches() {
         return findMatches(TestMode.NORMAL);
     }

@@ -21,6 +21,9 @@ public class GridTestController {
     private static final int INITIAL_SWAP_COUNT = 1;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
+    private static final int INITIAL_SPIN_COUNT = 1;
+    private int initialSpinCount = INITIAL_SPIN_COUNT;
+    private int remainingSpins;
     private static final int INITIAL_SUPER_REROLL_COUNT = 1;
     private int initialSuperRerollCount = INITIAL_SUPER_REROLL_COUNT;
     private int superRerollsRemaining;
@@ -45,6 +48,7 @@ public class GridTestController {
         activeMomentum = configuredMomentum;
         focusRemaining = initialFocusCount;
         swapRemaining = initialSwapCount;
+        remainingSpins = initialSpinCount;
         superRerollsRemaining = initialSuperRerollCount;
         board.generateRandomBoard(activeMode);
     }
@@ -190,6 +194,49 @@ public class GridTestController {
             throw new IllegalArgumentException("initialSwapCount must be >= 0");
         }
         this.initialSwapCount = count;
+    }
+
+    public int getSpinRemaining() {
+        return remainingSpins;
+    }
+
+    public int getRemainingSpins() {
+        return remainingSpins;
+    }
+
+    public int getInitialSpinCount() {
+        return initialSpinCount;
+    }
+
+    public void setInitialSpinCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("initialSpinCount must be >= 0");
+        }
+        initialSpinCount = count;
+    }
+
+    public boolean canUseSpin() {
+        return state == GridTestState.WAITING_FOR_INPUT
+                && movesRemaining > 0
+                && remainingSpins > 0;
+    }
+
+    public boolean beginSpin() {
+        if (!canUseSpin()) {
+            return false;
+        }
+        remainingSpins--;
+        neutralMatchMoveRewardsEnabled = true;
+        state = GridTestState.SPINNING;
+        return true;
+    }
+
+    public void completeSpin() {
+        if (state != GridTestState.SPINNING) {
+            throw new IllegalStateException("Cannot complete Spin in state " + state);
+        }
+        board.rotateOuterClockwise();
+        state = GridTestState.CHECKING_MATCHES;
     }
 
     public int getSuperRerollsRemaining() {

@@ -44,6 +44,8 @@ public class GridBoardActor extends Group {
     private static final float DEBUG_CLIP_BOUNDS_THICKNESS_PX = 3f;
     private static final float SYMBOL_GAP_PX = 45f;
     private static final float SYMBOL_SIZE_SCALE = 1f;
+    private static final int[] PERIMETER_ROWS = {0, 0, 0, 1, 2, 2, 2, 1};
+    private static final int[] PERIMETER_COLUMNS = {0, 1, 2, 2, 2, 1, 0, 0};
 
     public interface MoveSelectedListener {
         void onMoveSelected(GridMove move);
@@ -557,6 +559,24 @@ public class GridBoardActor extends Group {
         symbolActors[pos1.getRow()][pos1.getColumn()] = actor2;
         symbolActors[pos2.getRow()][pos2.getColumn()] = actor1;
         System.out.println("SWAP_ANIM: symbolActors array updated");
+    }
+
+    public void animateSpin(Runnable onComplete) {
+        int perimeterSize = PERIMETER_ROWS.length;
+        GridSymbolActor[] actors = new GridSymbolActor[perimeterSize];
+        TokenLayout[] targets = new TokenLayout[perimeterSize];
+        for (int i = 0; i < perimeterSize; i++) {
+            actors[i] = symbolActors[PERIMETER_ROWS[i]][PERIMETER_COLUMNS[i]];
+        }
+        for (int i = 0; i < perimeterSize; i++) {
+            int target = (i + 1) % perimeterSize;
+            int targetRow = PERIMETER_ROWS[target];
+            int targetColumn = PERIMETER_COLUMNS[target];
+            targets[i] = tokenLayout(targetRow, targetColumn);
+            symbolActors[targetRow][targetColumn] = actors[i];
+        }
+
+        animateLineMove(actors, targets, onComplete);
     }
 
     private void addSwipeInput() {

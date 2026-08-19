@@ -63,6 +63,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final TextButton superRerollButton;
     private final Label swapLabel;
     private final TextButton swapButton;
+    private final Label spinLabel;
+    private final TextButton spinButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final CheckBox momentumCheckBox;
     private final Table controlPanel;
@@ -75,6 +77,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private List<Sound> goodTokenImplosionSounds;
     private int configuredMoves;
     private GridTestResult result;
+    private boolean spinResolving;
 
     public GridSkillTestPrototypeScreen(int moves) {
         this(moves, new Random(), GridTestSoundHooks.NO_OP);
@@ -116,6 +119,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         superRerollButton = buildButton("SUPER REROLL");
         swapLabel = new Label("", titleStyle);
         swapButton = buildButton("SWAP");
+        spinLabel = new Label("", titleStyle);
+        spinButton = buildButton("SPIN");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
         modeSelectBox.setSelected(controller.getSelectedMode());
@@ -145,11 +150,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(focusLabel, Align.center);
         configureLabel(superRerollLabel, Align.center);
         configureLabel(swapLabel, Align.center);
+        configureLabel(spinLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         focusLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         superRerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         swapLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        spinLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
         restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
@@ -162,6 +169,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         swapButton.setTransform(true);
         swapButton.setOrigin(0f, 0f);
         swapButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        spinButton.setTransform(true);
+        spinButton.setOrigin(0f, 0f);
+        spinButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextTokenPreview);
@@ -176,6 +186,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(focusButton, this::onFocusPressed);
         addClickListener(superRerollButton, this::onSuperRerollPressed);
         addClickListener(swapButton, this::onSwapPressed);
+        addClickListener(spinButton, this::onSpinPressed);
 
         updateCounters();
         setNextTokenPreviewVisible(false);
@@ -187,6 +198,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     public void startTest(int moves) {
         configuredMoves = moves;
         result = null;
+        spinResolving = false;
+        randomProvider.clearNextTokenReservation();
         endLabel.setText("");
         controller.startTest(moves);
         boardActor.resetAnimations();
@@ -244,7 +257,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             soundHooks.onCascade();
         }
         MatchResolution resolution = controller.resolveMatches(matches);
-        setNextTokenPreviewVisible(false);
+        if (!spinResolving) {
+            setNextTokenPreviewVisible(false);
+        }
         controller.setState(GridTestState.MATCH_ANIMATION);
         boardActor.setInteractionEnabled(false);
         int successesGained = resolution.getSuccessesGained();
@@ -264,6 +279,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (controller.shouldFinishWhenStable()) {
             finishTest();
             return;
+        }
+        if (spinResolving) {
+            randomProvider.releaseNextToken();
+            spinResolving = false;
         }
         refreshNextTokenPreview();
         setNextTokenPreviewVisible(true);
@@ -312,9 +331,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusLabel.setText("focus: " + controller.getFocusRemaining());
         superRerollLabel.setText("super reroll x" + controller.getSuperRerollsRemaining());
         swapLabel.setText("swap: " + controller.getSwapRemaining());
+        spinLabel.setText("spin: " + controller.getSpinRemaining());
         updateFocusButtonState();
         updateSuperRerollButtonState();
         updateSwapButtonState();
+        updateSpinButtonState();
     }
 
     private void onFocusPressed() {
@@ -400,6 +421,34 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         swapButton.setDisabled(!canUse);
         // Keep button text simple - count is shown in the "swap: N" label
         swapButton.setText("SWAP");
+    }
+
+    private void onSpinPressed() {
+        if (!controller.canUseSpin()) {
+            return;
+        }
+
+        boardActor.setInteractionEnabled(false);
+        randomProvider.reserveNextToken();
+        spinResolving = true;
+        if (!controller.beginSpin()) {
+            randomProvider.releaseNextToken();
+            spinResolving = false;
+            return;
+        }
+
+        updateCounters();
+        playTokenMoveSound();
+        boardActor.animateSpin(() -> {
+            controller.completeSpin();
+            startResolutionLoop(false);
+        });
+    }
+
+    private void updateSpinButtonState() {
+        boolean canUse = controller.canUseSpin();
+        spinButton.setDisabled(!canUse);
+        spinButton.setText("SPIN x" + controller.getSpinRemaining());
     }
 
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
@@ -562,12 +611,14 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         focusLabel.setFontScale(statsFontScale);
         superRerollLabel.setFontScale(statsFontScale);
         swapLabel.setFontScale(statsFontScale);
+        spinLabel.setFontScale(statsFontScale);
         
         statsTable.add(movesLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
         statsTable.add(focusLabel).left().padBottom(2f).row();
         statsTable.add(superRerollLabel).left().padBottom(2f).row();
-        statsTable.add(swapLabel).left().row();
+        statsTable.add(swapLabel).left().padBottom(2f).row();
+        statsTable.add(spinLabel).left().row();
         
         panel.add(statsTable).left().padBottom(12f).row();
         
@@ -601,6 +652,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         swapButton.setOrigin(0f, 0f);
         swapButton.setScale(controlScale);
         panel.add(swapButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
+
+        spinButton.setTransform(true);
+        spinButton.setOrigin(0f, 0f);
+        spinButton.setScale(controlScale);
+        panel.add(spinButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
         
         // Position the panel
         panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.58f);
