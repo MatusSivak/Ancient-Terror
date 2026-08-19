@@ -1,12 +1,15 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
+import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 public class NextTokenPreview extends Group {
     private static final float TOKEN_BOUNDS_SCALE = 0.92f * 1.1f;
@@ -15,8 +18,10 @@ public class NextTokenPreview extends Group {
     private final Array<TextureRegion> spawnFrames;
     private final Image spawnEffect;
     private final GridSymbolActor tokenActor;
+    private final Label hiddenLabel;
     private final NextTokenSpawnAnimationController animationController;
     private int displayedSpawnFrame = -1;
+    private boolean hidden;
 
     public NextTokenPreview(GridTestAssets assets) {
         this.assets = assets;
@@ -36,6 +41,17 @@ public class NextTokenPreview extends Group {
         tokenActor.setScaling(Scaling.fit);
         tokenActor.setVisible(false);
         addActor(tokenActor);
+        hiddenLabel = new Label(
+                "?",
+                new Label.LabelStyle(
+                        CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY),
+                        Color.WHITE
+                )
+        );
+        hiddenLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+        hiddenLabel.setFontScale(2f);
+        hiddenLabel.setVisible(false);
+        addActor(hiddenLabel);
         setTouchable(Touchable.disabled);
     }
 
@@ -46,12 +62,14 @@ public class NextTokenPreview extends Group {
 
         if (nextToken == null) {
             tokenActor.setVisible(false);
+            hiddenLabel.setVisible(false);
             hideSpawnEffect();
             return true;
         }
 
         tokenActor.setSymbolType(assets, nextToken);
-        tokenActor.setVisible(true);
+        tokenActor.setVisible(!hidden);
+        hiddenLabel.setVisible(hidden);
         displayedSpawnFrame = -1;
         applyAnimationState();
         return true;
@@ -59,6 +77,19 @@ public class NextTokenPreview extends Group {
 
     public void clearNextToken() {
         setNextToken(null);
+    }
+
+    public void setHidden(boolean hidden) {
+        boolean revealing = this.hidden && !hidden;
+        this.hidden = hidden;
+        if (revealing) {
+            animationController.restartCurrentAnimation();
+        }
+        applyAnimationState();
+    }
+
+    boolean isHidden() {
+        return hidden;
     }
 
     @Override
@@ -84,15 +115,26 @@ public class NextTokenPreview extends Group {
                 tokenHeight
         );
         tokenActor.setOrigin(tokenWidth / 2f, tokenHeight / 2f);
+        hiddenLabel.setBounds(0f, 0f, getWidth(), getHeight());
     }
 
     private void applyAnimationState() {
         if (animationController.getCurrentNextToken() == null) {
             tokenActor.setVisible(false);
+            hiddenLabel.setVisible(false);
             hideSpawnEffect();
             return;
         }
 
+        if (hidden) {
+            tokenActor.setVisible(false);
+            hiddenLabel.setVisible(true);
+            hideSpawnEffect();
+            return;
+        }
+
+        hiddenLabel.setVisible(false);
+        tokenActor.setVisible(true);
         tokenActor.getColor().a = animationController.getTokenAlpha();
         float scale = animationController.getTokenScale();
         tokenActor.setScale(scale);

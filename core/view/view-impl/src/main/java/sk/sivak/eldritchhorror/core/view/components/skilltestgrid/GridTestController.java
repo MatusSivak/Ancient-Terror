@@ -15,6 +15,9 @@ public class GridTestController {
     private TestMode activeMode = TestMode.NORMAL;
     private boolean configuredMomentum;
     private boolean activeMomentum;
+    private boolean configuredBlindEnabled;
+    private boolean blindEnabled;
+    private GridMove committedBlindMove;
     private static final int INITIAL_FOCUS_COUNT = 1;
     private int initialFocusCount = INITIAL_FOCUS_COUNT;
     private int focusRemaining;
@@ -46,6 +49,8 @@ public class GridTestController {
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
         activeMomentum = configuredMomentum;
+        blindEnabled = configuredBlindEnabled;
+        committedBlindMove = null;
         focusRemaining = initialFocusCount;
         swapRemaining = initialSwapCount;
         remainingSpins = initialSpinCount;
@@ -70,6 +75,35 @@ public class GridTestController {
         return board.shift(move);
     }
 
+    public void commitBlindMove(GridMove move) {
+        if (move == null) {
+            throw new IllegalArgumentException("move must not be null");
+        }
+        if (!blindEnabled) {
+            throw new IllegalStateException("Blind is not active");
+        }
+        if (state != GridTestState.WAITING_FOR_INPUT) {
+            throw new IllegalStateException("Cannot commit Blind move in state " + state);
+        }
+        if (movesRemaining <= 0) {
+            throw new IllegalStateException("No moves remaining");
+        }
+        committedBlindMove = move;
+        state = GridTestState.REVEALING_NEXT_TOKEN;
+    }
+
+    public GridShiftOutcome applyCommittedBlindMove() {
+        if (state != GridTestState.REVEALING_NEXT_TOKEN || committedBlindMove == null) {
+            throw new IllegalStateException("No Blind move is awaiting insertion");
+        }
+        GridMove move = committedBlindMove;
+        committedBlindMove = null;
+        movesRemaining--;
+        neutralMatchMoveRewardsEnabled = true;
+        state = GridTestState.SHIFTING;
+        return board.shift(move);
+    }
+
     public List<GridMatch> findMatches() {
         return board.findMatches(activeMode);
     }
@@ -86,7 +120,7 @@ public class GridTestController {
                 if (activeMomentum) {
                     bonusMovesGained++;
                 }
-            } else if (neutralMatchMoveRewardsEnabled) {
+            } else if (neutralMatchMoveRewardsEnabled && !activeMomentum) {
                 bonusMovesGained++;
             }
         }
@@ -150,8 +184,33 @@ public class GridTestController {
         return activeMomentum;
     }
 
+    public void setConfiguredBlindEnabled(boolean enabled) {
+        configuredBlindEnabled = enabled;
+    }
+
+    public boolean isConfiguredBlindEnabled() {
+        return configuredBlindEnabled;
+    }
+
+    public boolean isBlindEnabled() {
+        return blindEnabled;
+    }
+
+    public GridMove getCommittedBlindMove() {
+        return committedBlindMove;
+    }
+
     public int getFocusRemaining() {
         return focusRemaining;
+    }
+
+    public boolean canUseFocus() {
+        if (focusRemaining <= 0) {
+            return false;
+        }
+        return blindEnabled
+                ? state == GridTestState.REVEALING_NEXT_TOKEN
+                : state == GridTestState.WAITING_FOR_INPUT;
     }
 
     public boolean useFocus() {

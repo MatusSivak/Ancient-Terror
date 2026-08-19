@@ -43,6 +43,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final String TOKEN_EXPLOSION_SOUND_PREFIX = "token_explosion_";
     private static final String GOOD_TOKEN_IMPLOSION_SOUND_PREFIX = "good_token_implosion_pickup_";
     private static final String CHESS_PIECE_MOVE_SOUND_PREFIX = "chess_piece_move_";
+    private static final float BLIND_REVEAL_DURATION = 0.65f;
+    private static final float BLIND_FOCUS_REVEAL_DURATION = 0.32f;
 
     private final Stage stage;
     private final RandomSymbolProvider randomProvider;
@@ -67,9 +69,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final TextButton spinButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final CheckBox momentumCheckBox;
+    private final CheckBox blindCheckBox;
     private final Table controlPanel;
     private final GridTestModePreferences modePreferences;
     private final GridTestMomentumPreferences momentumPreferences;
+    private final GridTestBlindPreferences blindPreferences;
     private final FocusReroller focusReroller;
     private final SymbolReroller superReroller;
     private List<Sound> chessPieceMoveSounds;
@@ -77,7 +81,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private List<Sound> goodTokenImplosionSounds;
     private int configuredMoves;
     private GridTestResult result;
-    private boolean spinResolving;
+    private boolean tacticalEffectPreservingNextToken;
 
     public GridSkillTestPrototypeScreen(int moves) {
         this(moves, new Random(), GridTestSoundHooks.NO_OP);
@@ -93,8 +97,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
         modePreferences = new GridTestModePreferences(preferences);
         momentumPreferences = new GridTestMomentumPreferences(preferences);
+        blindPreferences = new GridTestBlindPreferences(preferences);
         controller.setSelectedMode(modePreferences.load());
         controller.setConfiguredMomentum(momentumPreferences.load());
+        controller.setConfiguredBlindEnabled(blindPreferences.load());
         focusReroller = new FocusReroller(this.random);
         superReroller = new SymbolReroller(this.random);
         controller.startTest(moves);
@@ -130,6 +136,16 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 TestMode selectedMode = modeSelectBox.getSelected();
                 controller.setSelectedMode(selectedMode);
                 modePreferences.save(selectedMode);
+            }
+        });
+        blindCheckBox = new CheckBox("Blind", CustomAssetManager.getSkin());
+        blindCheckBox.setChecked(controller.isConfiguredBlindEnabled());
+        blindCheckBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                boolean configuredBlind = blindCheckBox.isChecked();
+                controller.setConfiguredBlindEnabled(configuredBlind);
+                blindPreferences.save(configuredBlind);
             }
         });
         momentumCheckBox = new CheckBox("Momentum", CustomAssetManager.getSkin());
@@ -198,12 +214,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     public void startTest(int moves) {
         configuredMoves = moves;
         result = null;
-        spinResolving = false;
+        tacticalEffectPreservingNextToken = false;
         randomProvider.clearNextTokenReservation();
         endLabel.setText("");
         controller.startTest(moves);
         boardActor.resetAnimations();
         boardActor.syncBoardToActors();
+        nextTokenPreview.clearActions();
         nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
         boardActor.setInteractionEnabled(false);
@@ -233,7 +250,33 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             return;
         }
         boardActor.setInteractionEnabled(false);
-        GridShiftOutcome shiftOutcome = controller.applyMove(move);
+        if (controller.isBlindEnabled()) {
+            controller.commitBlindMove(move);
+            nextTokenPreview.setHidden(false);
+            setNextTokenPreviewVisible(true);
+            updateCounters();
+            scheduleCommittedBlindMove(BLIND_REVEAL_DURATION);
+            return;
+        }
+        beginShift(controller.applyMove(move));
+    }
+
+    private void scheduleCommittedBlindMove(float delay) {
+        nextTokenPreview.clearActions();
+        nextTokenPreview.addAction(Actions.sequence(
+                Actions.delay(delay),
+                Actions.run(this::executeCommittedBlindMove)
+        ));
+    }
+
+    private void executeCommittedBlindMove() {
+        if (controller.getState() != GridTestState.REVEALING_NEXT_TOKEN) {
+            return;
+        }
+        beginShift(controller.applyCommittedBlindMove());
+    }
+
+    private void beginShift(GridShiftOutcome shiftOutcome) {
         nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
         updateCounters();
@@ -257,7 +300,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             soundHooks.onCascade();
         }
         MatchResolution resolution = controller.resolveMatches(matches);
-        if (!spinResolving) {
+        if (!tacticalEffectPreservingNextToken) {
             setNextTokenPreviewVisible(false);
         }
         controller.setState(GridTestState.MATCH_ANIMATION);
@@ -280,9 +323,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             finishTest();
             return;
         }
-        if (spinResolving) {
-            randomProvider.releaseNextToken();
-            spinResolving = false;
+        if (tacticalEffectPreservingNextToken) {
+            releaseNextTokenFromTacticalEffect();
         }
         refreshNextTokenPreview();
         setNextTokenPreviewVisible(true);
@@ -347,16 +389,16 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             SymbolType rerolled = focusReroller.reroll(currentNext);
             randomProvider.overrideNext(rerolled);
             refreshNextTokenPreview();
+            if (controller.getState() == GridTestState.REVEALING_NEXT_TOKEN) {
+                scheduleCommittedBlindMove(BLIND_FOCUS_REVEAL_DURATION);
+            }
             updateCounters();
             updateFocusButtonState();
         }
     }
 
     private boolean canUseFocus() {
-        if (controller.getFocusRemaining() <= 0) {
-            return false;
-        }
-        if (controller.getState() != GridTestState.WAITING_FOR_INPUT) {
+        if (!controller.canUseFocus()) {
             return false;
         }
         SymbolType currentNext = randomProvider.peekNext();
@@ -376,8 +418,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
 
         boardActor.setInteractionEnabled(false);
+        reserveNextTokenForTacticalEffect();
         Map<GridPosition, SymbolType> rerolledCells = controller.performSuperReroll(superReroller);
         if (rerolledCells.isEmpty()) {
+            releaseNextTokenFromTacticalEffect();
             onBoardStable();
             return;
         }
@@ -429,11 +473,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
 
         boardActor.setInteractionEnabled(false);
-        randomProvider.reserveNextToken();
-        spinResolving = true;
+        reserveNextTokenForTacticalEffect();
         if (!controller.beginSpin()) {
-            randomProvider.releaseNextToken();
-            spinResolving = false;
+            releaseNextTokenFromTacticalEffect();
             return;
         }
 
@@ -455,6 +497,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (pos1 != null && pos2 != null) {
             Gdx.app.log("SWAP", "onSwapComplete called with pos1=(" + pos1.getRow() + "," + pos1.getColumn() + ") pos2=(" + pos2.getRow() + "," + pos2.getColumn() + ")");
             boardActor.setInteractionEnabled(false);
+            reserveNextTokenForTacticalEffect();
             controller.useSwap();
             MatchResolution resolution = controller.performSwap(pos1, pos2);
             Gdx.app.log("SWAP", "performSwap completed, matches found: " + resolution.getMatches().size());
@@ -492,8 +535,22 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         }
     }
 
+    private void reserveNextTokenForTacticalEffect() {
+        randomProvider.reserveNextToken();
+        tacticalEffectPreservingNextToken = true;
+    }
+
+    private void releaseNextTokenFromTacticalEffect() {
+        randomProvider.releaseNextToken();
+        tacticalEffectPreservingNextToken = false;
+    }
+
     private void refreshNextTokenPreview() {
         nextTokenPreview.setNextToken(randomProvider.peekNext());
+        nextTokenPreview.setHidden(
+                controller.isBlindEnabled()
+                        && controller.getState() != GridTestState.REVEALING_NEXT_TOKEN
+        );
     }
 
     private void setNextTokenPreviewVisible(boolean visible) {
@@ -634,7 +691,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         // Momentum applies to the next started or restarted test.
         momentumCheckBox.getLabel().setFontScale(statsFontScale);
-        panel.add(momentumCheckBox).left().padBottom(8f).row();
+        panel.add(momentumCheckBox).left().padBottom(4f).row();
+        blindCheckBox.getLabel().setFontScale(statsFontScale);
+        panel.add(blindCheckBox).left().padBottom(8f).row();
         
         // Focus button
         focusButton.setTransform(true);
@@ -659,7 +718,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         panel.add(spinButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
         
         // Position the panel
-        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.58f);
+        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.64f);
         panel.setPosition(
             ViewProperties.VIEWPORT_WIDTH * 0.02f, 
             ViewProperties.VIEWPORT_HEIGHT * 0.5f - panel.getHeight() / 2f

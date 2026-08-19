@@ -28,6 +28,14 @@ final class NextTokenSpawnAnimationController {
         return true;
     }
 
+    void restartCurrentAnimation() {
+        if (currentNextToken == null) {
+            return;
+        }
+        elapsed = 0f;
+        phase = Phase.SPAWNING;
+    }
+
     void update(float delta) {
         if (phase == Phase.IDLE || delta <= 0f) {
             return;

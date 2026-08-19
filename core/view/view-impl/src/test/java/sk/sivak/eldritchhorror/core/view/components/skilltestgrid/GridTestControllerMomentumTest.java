@@ -54,7 +54,7 @@ public class GridTestControllerMomentumTest {
     }
 
     @Test
-    public void neutralMatchKeepsExistingRewardWithMomentum() {
+    public void neutralMatchAwardsNoMoveWithMomentum() {
         QueueProvider provider = new QueueProvider(
                 stableBoard(),
                 SymbolType.THREE,
@@ -73,7 +73,7 @@ public class GridTestControllerMomentumTest {
         controller.applyMove(new GridMove(GridMoveType.ROW_LEFT, 0));
         controller.resolveMatches(controller.findMatches());
 
-        assertEquals(1, controller.getMovesRemaining());
+        assertEquals(0, controller.getMovesRemaining());
         assertEquals(0, controller.getSuccesses());
     }
 

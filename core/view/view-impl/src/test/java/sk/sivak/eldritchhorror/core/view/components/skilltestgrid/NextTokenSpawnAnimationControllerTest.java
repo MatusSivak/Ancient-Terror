@@ -82,4 +82,17 @@ public class NextTokenSpawnAnimationControllerTest {
         assertEquals(1f, controller.getTokenScale(), 0f);
         assertEquals(0f, controller.getEffectAlpha(), 0f);
     }
+
+    @Test
+    public void revealingHiddenTokenRestartsItsSpawnAnimationWithoutChangingValue() {
+        NextTokenSpawnAnimationController controller = new NextTokenSpawnAnimationController();
+        controller.setNextToken(SymbolType.FIVE);
+        controller.update(NextTokenSpawnAnimationController.TOTAL_DURATION);
+
+        controller.restartCurrentAnimation();
+
+        assertEquals(SymbolType.FIVE, controller.getCurrentNextToken());
+        assertEquals(NextTokenSpawnAnimationController.Phase.SPAWNING, controller.getPhase());
+        assertEquals(0f, controller.getTokenAlpha(), 0f);
+    }
 }
