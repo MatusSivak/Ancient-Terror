@@ -31,8 +31,8 @@ public class TokenInFrame extends Group {
         image = new Image(tokenTexture);
         image.getColor().a = 0.75f;
         image.setScaling(Scaling.fit);
-        image.setSize(ACTUAL_TOKEN_SIZE - 10, ACTUAL_TOKEN_SIZE - 10);
-        image.setPosition(5,5);
+        image.setSize(ACTUAL_TOKEN_SIZE+10, ACTUAL_TOKEN_SIZE+10);
+        image.setPosition(-5,-5);
         addActor(image);
     }
 

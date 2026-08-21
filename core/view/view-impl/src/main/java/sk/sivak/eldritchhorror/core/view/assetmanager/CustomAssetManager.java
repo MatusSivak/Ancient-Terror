@@ -228,6 +228,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String RESERVE_LABEL = "reserve_label.png";
     public final static String DISCARD_LABEL = "discard_label.png";
     public final static String ANCIENT_ONE_LABEL = "ancient_one_label.png";
+    public final static String ANCIENT_ONE_AZATHOTH_LABEL = "ancient_one/label_azathoth.png";
     public final static String ANCIENT_ONE_LABEL_SK = "ancient_one_label_sk.png";
     public final static String VALUE_LABEL = "valuelabel.png";
     public final static String MONSTER_SHEET = "monster_sheet.png";

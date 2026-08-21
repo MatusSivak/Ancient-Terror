@@ -79,7 +79,7 @@ public class SelectAncientOneTable extends VisTable {
         cthulhuTable = new Table();
         Image buttonCthulhu = new Image(CustomAssetManager.getTexture("ancient_one/button_cthulhu.jpg"));
         Image lockImage = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage.getColor().a = 0.5f;
+        lockImage.getColor().a = 1.0f;
         buttonCthulhu.setScaling(Scaling.fit);
         lockImage.setScaling(Scaling.fit);
 
@@ -116,7 +116,7 @@ public class SelectAncientOneTable extends VisTable {
         shubNiggurathTable = new Table();
         Image buttonShubNiggurath = new Image(CustomAssetManager.getTexture("ancient_one/button_shub_niggurath.jpg"));
         Image lockImage2 = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage2.getColor().a = 0.5f;
+        lockImage2.getColor().a = 1.0f;
         buttonShubNiggurath.setScaling(Scaling.fit);
         lockImage2.setScaling(Scaling.fit);
 
@@ -153,7 +153,7 @@ public class SelectAncientOneTable extends VisTable {
         yogSothothTable= new Table();
         Image buttonYogSothoth = new Image(CustomAssetManager.getTexture("ancient_one/button_yog_sothoth.jpg"));
         Image lockImage3 = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage3.getColor().a = 0.5f;
+        lockImage3.getColor().a = 1.0f;
         buttonYogSothoth.setScaling(Scaling.fit);
         lockImage3.setScaling(Scaling.fit);
 

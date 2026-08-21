@@ -30,6 +30,7 @@ import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ANCIENT_ONE_AZATHOTH_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ANCIENT_ONE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
@@ -63,7 +64,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         setBackground((Drawable) null);
         getColor().a = 1f;
         this.ancientOneInfo = ancientOneInfo;
-        pad(50 * SCALE, 50 * SCALE, 75 * SCALE, 20 * SCALE);
+        pad(50 * SCALE, 50 * SCALE, 25 * SCALE, 50 * SCALE);
 
 
         Table topPart = createTopPart(ancientOneInfo);
@@ -104,7 +105,6 @@ public class AzathothCard extends VisTable implements AncientOneCard{
     private Table createLeftPart(AncientOneInfo ancientOneInfo) {
         VisTable table = new VisTable();
 
-        Label nameLabel = createNameLabel(get(ancientOneInfo.getName()));
         Label altNameLabel = createNiceLabel("-"+get(ancientOneInfo.getAltName())+"-");
         Label flavorLabel = createFlavorLabel(get(ancientOneInfo.getFlavorText()));
         Container<Label> flavorContainer = new Container<>(flavorLabel);
@@ -112,17 +112,16 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         flavorContainer.top();
         flavorContainer.setClip(true);
 
-        Image ancientOneLabel = new Image(CustomAssetManager.getTexture(ANCIENT_ONE_LABEL));
+        Image ancientOneLabel = new Image(CustomAssetManager.getTexture(ANCIENT_ONE_AZATHOTH_LABEL));
         ancientOneLabel.setScaling(Scaling.fit);
 
-        table.add(ancientOneLabel).width(490 * SCALE).height(171 * (490*SCALE / 896f)).align(Align.bottom);
-        table.row();
-        table.add(nameLabel).width(490 * SCALE);
+        table.add(ancientOneLabel).height(80 * SCALE).align(Align.bottom);
         table.row();
         table.add(altNameLabel).width(490 * SCALE);
         table.row();
         table.addSeparator().padTop(10f).padBottom(10f).row();
         table.add(flavorContainer).width(490 * SCALE).height(220f * SCALE).top();
+        table.padLeft(20).padRight(10);
         return table;
     }
 
@@ -141,7 +140,7 @@ public class AzathothCard extends VisTable implements AncientOneCard{
 
         Label midnightValue = createValue(FONT_MINYA, 0.5f);
         midnightValue.setWrap(true);
-        midnightValue.setText("[BLACK]" + get(ancientOneInfo.getMidnightText()) + "[]");
+        midnightValue.setText("[RED]" + get(ancientOneInfo.getMidnightText()) + "[]");
 
         OmenTrack omenTrack = new OmenTrack();
         omenTrack.updateOmen(OmenId.NORTH);
@@ -158,17 +157,17 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         winValue.setText("[BLACK]" + get(ancientOneInfo.getWinText()) + "[]");
 
 
-        table.add(setupLabel).width(73);
-        table.add(setupValue).width(490 * SCALE - 73- 5).padLeft(5);
+        table.add(setupLabel).align(Align.right).width(73);
+        table.add(setupValue).width(490 * SCALE - 73- 50).padLeft(5);
         table.row();
         table.add(midnightDoom).width(73).padTop(5).height(73).align(Align.left);
-        table.add(midnightValue).width(490 * SCALE - 73- 5).padTop(5).padLeft(5);
+        table.add(midnightValue).width(490 * SCALE - 73- 50).padTop(5).padLeft(5);
         table.row();
         table.add(omenTrack).width(73).padTop(5).height(73).align(Align.left);
-        table.add(specialValue).width(490 * SCALE - 73- 5).padTop(5).padLeft(5);
+        table.add(specialValue).width(490 * SCALE - 73- 50).padTop(5).padLeft(5);
         table.row();
-        table.add(winLabel).width(73).padTop(5);
-        table.add(winValue).width(490 * SCALE - 73- 5).padTop(5).padLeft(5);
+        table.add(winLabel).align(Align.right).width(73).padTop(5);
+        table.add(winValue).width(490 * SCALE - 73- 50).padTop(5).padLeft(5);
         table.row();
 
         return table;

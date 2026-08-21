@@ -26,13 +26,13 @@ public class ExpeditionUtils {
         Spawner.SpawnConfigImpl spawnConfig = new Spawner.SpawnConfigImpl(
                 0,
                 0,
-                compassTexture.getHeight() / 32, 1f);
+                0, 1f);
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
             Image compassImage = new RotatingImage(compassTexture);
             compassImage.setTouchable(Touchable.disabled);
-            compassImage.setWidth(compassImage.getWidth() / 6);
-            compassImage.setHeight(compassImage.getHeight() / 6);
+            compassImage.setWidth(compassImage.getWidth() / 5);
+            compassImage.setHeight(compassImage.getHeight() / 5);
             compassImage.setOrigin(compassImage.getWidth() / 2, compassImage.getHeight() / 2);
             return compassImage;
         };
@@ -60,7 +60,7 @@ public class ExpeditionUtils {
 
     private static class RotatingImage extends Image {
 
-        private static final float DIRECTION = MathUtils.random(360);
+        private static final float DIRECTION = MathUtils.random(0);
 
         RotatingImage(Texture texture) {
             super(texture);

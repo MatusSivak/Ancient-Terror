@@ -126,6 +126,7 @@ public class CardTemplate extends WidgetGroup {
                 CustomAssetManager.getTextureAsync(PICTURE_FILTER).subscribe(f -> {
                     pictureFilter = new Image(getTextureRegionDrawable(PICTURE_FILTER));
                     pictureFilter.setPosition(IMAGE_AREA_LEFT, IMAGE_AREA_BOTTOM);
+                    pictureFilter.getColor().a = 0.75f;
                     addActorAt(2, pictureFilter);
                 });
             });
