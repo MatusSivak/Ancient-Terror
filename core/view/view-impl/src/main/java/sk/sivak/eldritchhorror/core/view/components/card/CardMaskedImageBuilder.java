@@ -13,8 +13,8 @@ public class CardMaskedImageBuilder {
     public static TextureRegion buildMaskedTextureRegion(Texture cardTexture) {
         Texture shadowTexture = getTexture(ACTION_BUTTON_CARD_MASK_SHADOW);
 
-        int imageWidth = shadowTexture.getWidth();
-        int imageHeight = shadowTexture.getHeight();
+        int imageWidth = 320;
+        int imageHeight = 340;
         SpriteBatch spriteBatch = new SpriteBatch();
         OrthographicCamera camera = new OrthographicCamera(imageWidth, imageHeight);
         camera.position.x = imageWidth / 2;
@@ -27,14 +27,13 @@ public class CardMaskedImageBuilder {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         spriteBatch.begin();
-        int offsetY = imageHeight-cardTexture.getHeight();
-        spriteBatch.draw(cardTexture,0, offsetY,cardTexture.getWidth(),cardTexture.getHeight());
+        float offsetX = -(cardTexture.getWidth() - imageWidth) / 2f;
+        spriteBatch.draw(cardTexture,offsetX, 0,cardTexture.getWidth(),cardTexture.getHeight());
 
         spriteBatch.setColor(Color.WHITE);
         spriteBatch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
         Texture maskTexture = getTexture(ACTION_BUTTON_CARD_MASK);
-        spriteBatch.draw(maskTexture, 0, offsetY, maskTexture.getWidth(), maskTexture.getHeight());
-
+        spriteBatch.draw(maskTexture, 0, 0, maskTexture.getWidth(), maskTexture.getHeight());
 
         spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         spriteBatch.draw(shadowTexture,0,0,imageWidth,imageHeight);

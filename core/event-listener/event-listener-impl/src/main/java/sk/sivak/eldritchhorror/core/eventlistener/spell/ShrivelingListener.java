@@ -88,7 +88,7 @@ public class ShrivelingListener extends AbstractSpellListener<ShrivelingSpell> {
 
         @Override
         protected float getScaleDownPercentage() {
-        return 0.5f;
+        return 1.0f;
     }
 
         @Override

@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.encounter;
 
+import com.badlogic.gdx.math.Vector2;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
 
@@ -31,7 +32,7 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public float getScaleDownPercentage() {
-                return 0.5f;
+                return 1.10f;
             }
 
             @Override
@@ -41,7 +42,12 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public boolean needsMask() {
-                return false;
+                return encounterButtonData.isNeedsMask();
+            }
+
+            @Override
+            public Vector2 getOffset() {
+                return new Vector2(0, 1);
             }
         };
     }

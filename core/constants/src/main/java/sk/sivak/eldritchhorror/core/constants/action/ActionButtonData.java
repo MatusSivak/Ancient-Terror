@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.constants.action;
 
+import com.badlogic.gdx.math.Vector2;
+
 public interface ActionButtonData {
     ActionButtonId getActionButtonId();
     String getTexturePath();
@@ -7,6 +9,7 @@ public interface ActionButtonData {
     float getScaleDownPercentage();
     boolean isEnabled();
     boolean needsMask();
+    Vector2 getOffset();
 
     enum ActionButtonId {
         INVESTIGATOR,

@@ -7,9 +7,18 @@ public class EncounterButtonData {
     private String secondLine;
     private boolean enabled = true;
     private String disabledReason;
+    private boolean needsMask = false;
 
     public EncounterButtonData(String uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isNeedsMask() {
+        return needsMask;
+    }
+
+    public void setNeedsMask(boolean needsMask) {
+        this.needsMask = needsMask;
     }
 
     public String getUuid() {

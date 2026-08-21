@@ -108,7 +108,7 @@ public class DeVermisMysteriisListener extends AbstractArtifactListener<DeVermis
 
         @Override
         protected float getScaleDownPercentage() {
-        return 0.5f;
+        return 1.0f;
     }
 
         @Override

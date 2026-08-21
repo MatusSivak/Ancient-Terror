@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.eventlistener.action;
 
+import com.badlogic.gdx.math.Vector2;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 
 public class ActionButtonDataImpl implements ActionButtonData {
@@ -56,6 +57,11 @@ public class ActionButtonDataImpl implements ActionButtonData {
 
     public boolean needsMask() {
         return needsMask;
+    }
+
+    @Override
+    public Vector2 getOffset() {
+        return new Vector2(0,2);
     }
 
     public void setNeedsMask(boolean needsMask) {

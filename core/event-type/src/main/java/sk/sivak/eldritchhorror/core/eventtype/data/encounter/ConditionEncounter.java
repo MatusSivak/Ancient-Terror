@@ -23,6 +23,7 @@ public class ConditionEncounter extends Encounter{
         encounterButtonData.setButtonIcon("card/condition/"+conditionInfo.getId()+".jpg");
         encounterButtonData.setFirstLine(conditionInfo.getName());
         encounterButtonData.setSecondLine(null);
+        encounterButtonData.setNeedsMask(true);
         return encounterButtonData;
     }
 

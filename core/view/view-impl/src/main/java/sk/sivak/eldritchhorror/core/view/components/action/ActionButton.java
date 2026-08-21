@@ -2,16 +2,12 @@ package sk.sivak.eldritchhorror.core.view.components.action;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
-import sk.sivak.eldritchhorror.core.view.components.card.CardMaskedImageBuilder;
 import sk.sivak.eldritchhorror.core.view.shader.GrayscaleShader;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
@@ -25,6 +21,7 @@ public class ActionButton extends ImageButton {
     protected float scaleMax = 1f;
     protected float scaleMin = 0.85f;
     protected ActionButtonData actionButtonData;
+    private Vector2 iconOffset = new Vector2();
 
     public static ActionButton build(ActionButtonData actionButtonData) {
         if (actionButtonData.isEnabled()) {
@@ -40,6 +37,7 @@ public class ActionButton extends ImageButton {
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_CHECKED));
         actionButton.initIcon(actionButtonData.getTexturePath(), actionButtonData.needsMask());
+        actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = false;
         actionButton.actionButtonData = actionButtonData;
@@ -53,11 +51,17 @@ public class ActionButton extends ImageButton {
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_CHECKED));
         actionButton.initIcon(actionButtonData.getTexturePath(), actionButtonData.needsMask());
+        actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = true;
         actionButton.actionButtonData = actionButtonData;
         init(actionButtonData.getScaleDownPercentage(), actionButton);
         return actionButton;
+    }
+
+    private void setIconOffset(Vector2 offset) {
+        this.iconOffset = offset;
+
     }
 
     public ActionButtonData getActionButtonData() {
@@ -101,19 +105,19 @@ public class ActionButton extends ImageButton {
         if (widthHeightRatio < 1) {
             icon.setSize(getWidth() * widthHeightRatio, getHeight());
             icon.setPosition(
-                    getX() + (getWidth() - widthHeightRatio * getWidth()) / 2,
-                    getY());
+                    iconOffset.x + getX() + (getWidth() - widthHeightRatio * getWidth()) / 2,
+                    iconOffset.y + getY());
         } else {
             icon.setSize(getWidth(), getHeight() * (1/widthHeightRatio));
             icon.setPosition(
-                    getX(),
-                    getY()  + (getHeight() - (1/widthHeightRatio) * getHeight()) / 2 );
+                    iconOffset.x + getX(),
+                    iconOffset.y + getY()  + (getHeight() - (1/widthHeightRatio) * getHeight()) / 2 );
         }
 
         if (!disabled) {
             if (isPressed()) {
                 icon.setColor(Color.GREEN);
-                icon.setScale(scaleMin * 0.8f);
+                icon.setScale(scaleMin * 0.85f);
             } else if (isChecked()) {
                 icon.setColor(Color.GREEN);
                 icon.setScale(scaleMin);
@@ -126,7 +130,7 @@ public class ActionButton extends ImageButton {
             if (isPressed()) {
                 batch.setShader(null);
                 icon.setColor(Color.RED);
-                icon.setScale(scaleMin * 0.8f);
+                icon.setScale(scaleMin * 0.85f);
             } else if (isChecked()) {
                 batch.setShader(null);
                 icon.setColor(Color.RED);

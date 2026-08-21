@@ -102,7 +102,7 @@ public class DragonIdolListener extends AbstractArtifactListener<DragonIdolArtif
 
         @Override
         protected float getScaleDownPercentage() {
-        return 0.5f;
+        return 1.0f;
     }
 
         @Override

@@ -84,7 +84,7 @@ public class PlumbTheVoidListener extends AbstractSpellListener<PlumbTheVoidSpel
 
         @Override
         protected float getScaleDownPercentage() {
-        return 0.5f;
+        return 1.0f;
     }
 
         @Override
