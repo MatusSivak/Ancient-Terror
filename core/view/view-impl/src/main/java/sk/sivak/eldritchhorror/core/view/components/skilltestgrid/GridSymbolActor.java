@@ -7,13 +7,12 @@ public class GridSymbolActor extends Image {
     private SymbolType symbolType;
 
     public GridSymbolActor(GridTestAssets assets, SymbolType symbolType) {
-        super(new TextureRegionDrawable(assets.getSymbolRegion(symbolType)));
-        this.symbolType = symbolType;
+        setSymbolType(assets, symbolType);
     }
 
     public void setSymbolType(GridTestAssets assets, SymbolType symbolType) {
         this.symbolType = symbolType;
-        setDrawable(new TextureRegionDrawable(assets.getSymbolRegion(symbolType)));
+        setDrawable(symbolType == null ? null : new TextureRegionDrawable(assets.getSymbolRegion(symbolType)));
     }
 
     public SymbolType getSymbolType() {

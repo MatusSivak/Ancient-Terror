@@ -8,7 +8,7 @@ public class TulzschaMonster extends AbstractMonsterInfo{
         super("Tulzscha", -1, 3, -1, 3, null);
         setReckoning(true);
         setEpic(true);
-        setReckoningText("Token spawns on the Green Omen.");
+        setReckoningText("Orb spawns on the Green Omen.");
         setMonsterId(EpicMonsterId.TULZSCHA);
     }
 }

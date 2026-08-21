@@ -26,7 +26,7 @@ public class RemoveTokenFromOmenTrackAction implements Action<Object, Void> {
             if (ServicePlatform.get().getOmenTrack().getOmenInfo(omenId).getTokensCount() == 0) {
                 Question<Object> question = new Question<>();
                 question.setOptions(Question.Option.okOption);
-                question.setTitle("There are no Tokens.");
+                question.setTitle("There are no Orbs.");
                 ServicePlatform.get().getGameService().ask(question).subscribe(x -> {
 
                 });

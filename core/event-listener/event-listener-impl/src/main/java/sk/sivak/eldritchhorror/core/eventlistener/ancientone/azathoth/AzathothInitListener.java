@@ -97,7 +97,7 @@ public class AzathothInitListener extends AncientOneInitListener {
             }
             int tokensCount = eventData.getTokensCount();
             Question<Object> question = new Question<>();
-            question.setTitle("Doom advances for each Token on the Green Omen.");
+            question.setTitle("Doom advances for each Orb on the Green Omen.");
             question.setPortraitBeforeTitle(AncientOneId.AZATHOTH);
             question.setOptions(Collections.singletonList(
                     new Question.Option<>("OK", true)));

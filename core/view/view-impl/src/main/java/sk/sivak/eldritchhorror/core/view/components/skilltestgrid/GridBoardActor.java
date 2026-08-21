@@ -548,7 +548,9 @@ public class GridBoardActor extends Group {
         clearSwipeState();
         for (int row = 0; row < GridBoard.SIZE; row++) {
             for (int column = 0; column < GridBoard.SIZE; column++) {
-                highlightToken(symbolActors[row][column]);
+                if (!controller.getBoard().isGap(new GridPosition(row, column))) {
+                    highlightToken(symbolActors[row][column]);
+                }
             }
         }
     }
@@ -648,6 +650,9 @@ public class GridBoardActor extends Group {
 
                 if (rerollTargetingMode) {
                     GridPosition position = new GridPosition(row, col);
+                    if (controller.getBoard().isGap(position)) {
+                        return true;
+                    }
                     exitRerollTargetingMode();
                     if (rerollTargetListener != null) {
                         rerollTargetListener.onRerollTargetSelected(position);

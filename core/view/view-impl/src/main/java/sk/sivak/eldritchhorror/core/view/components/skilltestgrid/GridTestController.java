@@ -10,6 +10,7 @@ public class GridTestController {
     private int startingMoves;
     private int movesRemaining;
     private int successes;
+    private int configuredGapCount;
     private boolean neutralMatchMoveRewardsEnabled;
     private TestMode selectedMode = TestMode.NORMAL;
     private TestMode activeMode = TestMode.NORMAL;
@@ -55,7 +56,7 @@ public class GridTestController {
         swapRemaining = initialSwapCount;
         remainingSpins = initialSpinCount;
         superRerollsRemaining = initialSuperRerollCount;
-        board.generateRandomBoard(activeMode);
+        board.generateRandomBoard(activeMode, configuredGapCount);
     }
 
     public void setDebugBoard(SymbolType... cells) {
@@ -150,6 +151,21 @@ public class GridTestController {
 
     public int getSuccesses() {
         return successes;
+    }
+
+    public void setConfiguredGapCount(int gapCount) {
+        if (gapCount < 0 || gapCount > GridBoard.SIZE) {
+            throw new IllegalArgumentException("gapCount must be between 0 and " + GridBoard.SIZE);
+        }
+        configuredGapCount = gapCount;
+    }
+
+    public int getConfiguredGapCount() {
+        return configuredGapCount;
+    }
+
+    public int getGapCount() {
+        return board.getGapCount();
     }
 
     public GridBoard getBoard() {

@@ -5,18 +5,28 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class GridBoard {
     public static final int SIZE = 3;
     private final SymbolType[][] board = new SymbolType[SIZE][SIZE];
     private final SymbolRandomProvider randomProvider;
+    private final Random random;
 
     public GridBoard(SymbolRandomProvider randomProvider) {
+        this(randomProvider, new Random());
+    }
+
+    public GridBoard(SymbolRandomProvider randomProvider, Random random) {
         if (randomProvider == null) {
             throw new IllegalArgumentException("randomProvider must not be null");
         }
+        if (random == null) {
+            throw new IllegalArgumentException("random must not be null");
+        }
         this.randomProvider = randomProvider;
+        this.random = random;
     }
 
     public void generateRandomBoard() {
@@ -24,7 +34,14 @@ public class GridBoard {
     }
 
     public void generateRandomBoard(TestMode mode) {
+        generateRandomBoard(mode, 0);
+    }
+
+    public void generateRandomBoard(TestMode mode, int gapCount) {
         validateMode(mode);
+        if (gapCount < 0 || gapCount > SIZE) {
+            throw new IllegalArgumentException("gapCount must be between 0 and " + SIZE);
+        }
         boolean hasMatches = true;
         while (hasMatches) {
             for (int row = 0; row < SIZE; row++) {
@@ -33,6 +50,21 @@ public class GridBoard {
                 }
             }
             hasMatches = !findMatches(mode).isEmpty();
+        }
+        placeRandomGaps(gapCount);
+    }
+
+    private void placeRandomGaps(int gapCount) {
+        int[] positions = new int[SIZE * SIZE];
+        for (int i = 0; i < positions.length; i++) {
+            positions[i] = i;
+        }
+        for (int i = 0; i < gapCount; i++) {
+            int selected = i + random.nextInt(positions.length - i);
+            int position = positions[selected];
+            positions[selected] = positions[i];
+            positions[i] = position;
+            board[position / SIZE][position % SIZE] = null;
         }
     }
 
@@ -43,11 +75,7 @@ public class GridBoard {
         int index = 0;
         for (int row = 0; row < SIZE; row++) {
             for (int col = 0; col < SIZE; col++) {
-                SymbolType symbol = cells[index++];
-                if (symbol == null) {
-                    throw new IllegalArgumentException("Board cell must not be null");
-                }
-                board[row][col] = symbol;
+                board[row][col] = cells[index++];
             }
         }
     }
@@ -56,6 +84,25 @@ public class GridBoard {
         validateRow(row);
         validateColumn(column);
         return board[row][column];
+    }
+
+    public boolean isGap(GridPosition position) {
+        if (position == null) {
+            throw new IllegalArgumentException("position must not be null");
+        }
+        return getCell(position.getRow(), position.getColumn()) == null;
+    }
+
+    public int getGapCount() {
+        int gapCount = 0;
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                if (board[row][column] == null) {
+                    gapCount++;
+                }
+            }
+        }
+        return gapCount;
     }
 
     public GridShiftOutcome shift(GridMove move) {
@@ -163,6 +210,9 @@ public class GridBoard {
         }
         validateRow(position.getRow());
         validateColumn(position.getColumn());
+        if (isGap(position)) {
+            throw new IllegalArgumentException("Cannot reroll a GAP");
+        }
         SymbolType rerolled = reroller.reroll(board[position.getRow()][position.getColumn()]);
         board[position.getRow()][position.getColumn()] = rerolled;
         return rerolled;
@@ -241,7 +291,7 @@ public class GridBoard {
     }
 
     private boolean isThreeOfAKind(SymbolType first, SymbolType second, SymbolType third) {
-        return first == second && first == third;
+        return first != null && first == second && first == third;
     }
 
     public boolean hasMatches() {

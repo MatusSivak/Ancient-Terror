@@ -321,6 +321,20 @@ public class GridTestControllerTest {
         assertEquals(1, controller.getMovesRemaining());
     }
 
+    @Test
+    public void configuredGapsAreAppliedWhenTestStarts() {
+        GridTestController controller = createController(new QueueSymbolProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.FIVE
+        ));
+        controller.setConfiguredGapCount(3);
+
+        controller.startTest(3);
+
+        assertEquals(3, controller.getGapCount());
+    }
+
     private GridTestController createController(SymbolRandomProvider provider) {
         return new GridTestController(new GridBoard(provider));
     }

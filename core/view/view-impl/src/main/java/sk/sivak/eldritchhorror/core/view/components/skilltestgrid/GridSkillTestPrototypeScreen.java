@@ -65,6 +65,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label spinLabel;
     private final TextButton spinButton;
     private final SelectBox<TestMode> modeSelectBox;
+    private final SelectBox<String> gapSelectBox;
     private final CheckBox momentumCheckBox;
     private final CheckBox blindCheckBox;
     private final Table controlPanel;
@@ -90,7 +91,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         this.random = random == null ? new Random() : random;
         stage = new Stage(new FitViewport(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT));
         randomProvider = new RandomSymbolProvider(this.random);
-        controller = new GridTestController(new GridBoard(randomProvider));
+        controller = new GridTestController(new GridBoard(randomProvider, this.random));
         Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
         modePreferences = new GridTestModePreferences(preferences);
         momentumPreferences = new GridTestMomentumPreferences(preferences);
@@ -133,6 +134,15 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 TestMode selectedMode = modeSelectBox.getSelected();
                 controller.setSelectedMode(selectedMode);
                 modePreferences.save(selectedMode);
+            }
+        });
+        gapSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
+        gapSelectBox.setItems("0 GAPs", "1 GAP", "2 GAPs", "3 GAPs");
+        gapSelectBox.setSelectedIndex(controller.getConfiguredGapCount());
+        gapSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                controller.setConfiguredGapCount(gapSelectBox.getSelectedIndex());
             }
         });
         blindCheckBox = new CheckBox("Blind", CustomAssetManager.getSkin());
@@ -676,6 +686,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         // Mode select box
         modeSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
         panel.add(modeSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
+        gapSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
+        panel.add(gapSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
 
         // Momentum applies to the next started or restarted test.
         momentumCheckBox.getLabel().setFontScale(statsFontScale);

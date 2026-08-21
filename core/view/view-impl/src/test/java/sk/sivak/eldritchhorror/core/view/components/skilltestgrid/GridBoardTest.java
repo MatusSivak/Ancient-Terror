@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -275,6 +276,53 @@ public class GridBoardTest {
     }
 
     @Test
+    public void gapPreventsMatchesAndDoesNotGenerateRewards() {
+        GridBoard board = new GridBoard(new QueueSymbolProvider());
+        board.setBoard(
+                SymbolType.FIVE, null, SymbolType.FIVE,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE
+        );
+
+        assertTrue(board.findMatches().isEmpty());
+        assertEquals(1, board.getGapCount());
+    }
+
+    @Test
+    public void shiftingMovesGapsUntilEachOneIsPushedOut() {
+        GridBoard board = new GridBoard(new QueueSymbolProvider());
+        board.setBoard(
+                null, null, SymbolType.FOUR,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE
+        );
+
+        board.shift(new GridMove(GridMoveType.ROW_LEFT, 0), SymbolType.SIX);
+        assertRow(board, 0, null, SymbolType.FOUR, SymbolType.SIX);
+        assertEquals(1, board.getGapCount());
+
+        board.shift(new GridMove(GridMoveType.ROW_LEFT, 0), SymbolType.FIVE);
+        assertRow(board, 0, SymbolType.FOUR, SymbolType.SIX, SymbolType.FIVE);
+        assertEquals(0, board.getGapCount());
+    }
+
+    @Test
+    public void generatedBoardPlacesRequestedDistinctGapsAfterSymbolGeneration() {
+        CountingQueueProvider provider = new CountingQueueProvider(
+                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.FIVE
+        );
+        GridBoard board = new GridBoard(provider, new Random(7L));
+
+        board.generateRandomBoard(TestMode.NORMAL, 3);
+
+        assertEquals(9, provider.consumed);
+        assertEquals(3, board.getGapCount());
+        assertTrue(board.findMatches().isEmpty());
+    }
+
+    @Test
     public void rotateOuterClockwiseMovesOnlyPerimeterOnePosition() {
         GridBoard board = new GridBoard(new QueueSymbolProvider());
         board.setBoard(
@@ -346,6 +394,21 @@ public class GridBoardTest {
                 return symbol;
             }
             return queue.removeFirst();
+        }
+
+    }
+
+    static class CountingQueueProvider extends QueueSymbolProvider {
+        int consumed;
+
+        CountingQueueProvider(SymbolType... symbols) {
+            super(symbols);
+        }
+
+        @Override
+        public SymbolType next() {
+            consumed++;
+            return super.next();
         }
     }
 }

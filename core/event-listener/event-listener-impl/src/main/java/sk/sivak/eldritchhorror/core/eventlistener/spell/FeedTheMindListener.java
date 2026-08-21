@@ -82,7 +82,7 @@ public class FeedTheMindListener extends AbstractSpellListener<FeedTheMindSpell>
 
         @Override
         protected float getScaleDownPercentage() {
-        return 0.5f;
+        return 1.5f;
     }
 
         @Override
