@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.draganddrop.impl;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -30,7 +31,7 @@ import static sk.sivak.eldritchhorror.core.view.components.card.CardTemplate.CAR
  */
 public class CardClickListener extends ClickListener {
 
-    public static final float SCALE_AMOUNT = 0.53f;
+    public static final float SCALE_AMOUNT = 0.4f;
     public static final int CARD_ORIGIN_X = CARD_WIDTH / 2;
     public static final int CARD_ORIGIN_Y = CARD_HEIGHT / 2;
     private static final float DURATION = FADING_EFFECT_DURATION / 1.5f;
@@ -88,16 +89,17 @@ public class CardClickListener extends ClickListener {
         cardTemplate.getColor().a = 0f;
         duplicate = duplicate(cardTemplate);
         cardTemplate.getStage().addActor(duplicate);
-        Vector2 position = cardTemplate.localToStageCoordinates(new Vector2(0, 0));
+        Vector2 position = cardTemplate.localToStageCoordinates(new Vector2(CARD_WIDTH/2f, CARD_HEIGHT/2f));
         duplicate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
         duplicate.setPosition(position.x + cardTemplate.getPrefWidth() / 2 - CARD_ORIGIN_X,
                 position.y + cardTemplate.getPrefHeight() / 2 - CARD_ORIGIN_Y);
 
-        ScaleToAction scaleToAction = Actions.scaleTo(SCALE_AMOUNT, SCALE_AMOUNT, DURATION);
+        ScaleToAction scaleToAction = Actions.scaleTo(SCALE_AMOUNT, SCALE_AMOUNT, DURATION, Interpolation.sine);
         MoveToAction moveToAction = Actions.moveTo(
-                VIEWPORT_WIDTH / 2 - CARD_ORIGIN_X,
-                VIEWPORT_HEIGHT / 2 - CARD_ORIGIN_Y,
-                DURATION);
+                VIEWPORT_WIDTH / 2f - CARD_ORIGIN_X,
+                VIEWPORT_HEIGHT / 2f - CARD_ORIGIN_Y,
+                DURATION,
+                Interpolation.sine);
         duplicate.addAction(sequence(parallel(scaleToAction, moveToAction), Actions.run(() -> {
             forEach(allTemplates, it -> it.setTouchable(Touchable.enabled));
             zoomed = true;
@@ -174,7 +176,7 @@ public class CardClickListener extends ClickListener {
 
         void scaleDown() {
             ScaleToAction scaleToAction = Actions.scaleTo(defaultScaleX, defaultScaleY, DURATION);
-            Vector2 position = original.localToStageCoordinates(new Vector2(0, 0));
+            Vector2 position = original.localToStageCoordinates(new Vector2(CARD_WIDTH/2f, CARD_HEIGHT/2f));
             MoveToAction moveToAction = Actions.moveTo(
                     position.x + original.getPrefWidth() / 2 - CARD_ORIGIN_X,
                     position.y + original.getPrefHeight() / 2 - CARD_ORIGIN_Y,

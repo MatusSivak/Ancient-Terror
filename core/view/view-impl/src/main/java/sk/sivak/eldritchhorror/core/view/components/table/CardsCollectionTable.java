@@ -97,7 +97,8 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
 
         Collections.sort(cards, cardsComparator);
 
-        float scale = 0.23f;
+        float scale = 0.145f;
+//        float scale = 0.4f;
         int cardsInRow = 0;
         List<CardTemplate> allCardTemplates = new LinkedList<>();
         for (int i = 0; i < cards.size(); i++) {
@@ -125,20 +126,20 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
             cardsInRow++;
 
             E cardId = cardInfoToIdFunction.apply(cards.get(i));
-            if (unlocked.contains(cardId) && discovered.contains(cardId)) {
+            if (0==0/*unlocked.contains(cardId) && discovered.contains(cardId)*/) {
                 CardTemplate card = CardTemplate.buildCard(cards.get(i));
                 allCardTemplates.add(card);
                 card.setScale(scale);
-                add(card).width(741 * scale).height(1024 * scale).pad(5);
+                add(card).width(1191 * scale).height(1254 * scale).pad(5);
             } else if (unlocked.contains(cardId) && !discovered.contains(cardId)) {
                 Image hiddenCard = new Image();
-                add(hiddenCard).width(741 * scale).height(1024 * scale).pad(5);
+                add(hiddenCard).width(1191 * scale).height(1254 * scale).pad(5);
                 CustomAssetManager.getTextureAsync("card/card_template_hidden.png").subscribe(texture -> {
                     hiddenCard.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
                 });
             } else {
                 Image lockedCard = new Image();
-                add(lockedCard).width(741 * scale).height(1024 * scale).pad(5);
+                add(lockedCard).width(1191 * scale).height(1254 * scale).pad(5);
                 CustomAssetManager.getTextureAsync("card/card_template_locked.png").subscribe(texture -> {
                     lockedCard.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
                 });

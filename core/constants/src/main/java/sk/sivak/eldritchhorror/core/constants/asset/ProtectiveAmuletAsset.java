@@ -26,7 +26,7 @@ public class ProtectiveAmuletAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Will\n" +
-                "during Combat Encounters.";
+        return "Combat Will tests:\n" +
+                "+1 Shift";
     }
 }

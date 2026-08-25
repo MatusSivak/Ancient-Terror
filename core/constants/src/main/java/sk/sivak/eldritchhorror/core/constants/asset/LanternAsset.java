@@ -26,8 +26,7 @@ public class LanternAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
-                "you may roll 1 additional die\n" +
-                "when resolving a test.";
+        return "Once per round\n" +
+                "+1 Shift";
     }
 }

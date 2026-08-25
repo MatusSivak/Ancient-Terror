@@ -55,31 +55,17 @@ public class SaveLoadGameHelper {
 
     public void save(Object saveData) {
         String saveDataString = json.toJson(saveData);
-        FileHandle tmpFile = Gdx.files.local(FILE_NAME + ".tmp");
         FileHandle saveFile = Gdx.files.local(FILE_NAME);
-        FileHandle bakFile = Gdx.files.local(FILE_NAME + ".bak");
-        tmpFile.writeString(saveDataString, false);
-        if (saveFile.exists()) {
-            saveFile.file().renameTo(bakFile.file());
-        }
-        tmpFile.file().renameTo(saveFile.file());
+        saveFile.writeString(saveDataString, false);
     }
 
     public <T> T load(Class<T> saveDataClazz) {
         FileHandle saveFile = Gdx.files.local(FILE_NAME);
-        FileHandle bakFile = Gdx.files.local(FILE_NAME + ".bak");
         if (saveFile.exists()) {
             try {
                 return json.fromJson(saveDataClazz, saveFile.readString());
             } catch (Exception e) {
-                Gdx.app.error("SaveLoad", "save.json corrupt, trying backup", e);
-            }
-        }
-        if (bakFile.exists()) {
-            try {
-                return json.fromJson(saveDataClazz, bakFile.readString());
-            } catch (Exception e) {
-                Gdx.app.error("SaveLoad", "save.json.bak also corrupt", e);
+                Gdx.app.error("SaveLoad", "save.json corrupt", e);
             }
         }
         return null;

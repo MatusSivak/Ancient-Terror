@@ -27,6 +27,6 @@ public class ArcaneManuscriptsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore when resolving Spell effects.";
+        return "Spell tests:\n+1 Shift";
     }
 }

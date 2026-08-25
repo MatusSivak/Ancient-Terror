@@ -27,8 +27,8 @@ public class Dot45ColtRevolverAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
-                "you may gain +3 Strength\n" +
-                "during a Combat Encounter.";
+        return "Once per round\n" +
+                "Combat Strength tests:\n" +
+                "+3 Shifts";
     }
 }

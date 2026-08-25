@@ -27,9 +27,8 @@ public class ExpeditionMapAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
-                "you may add 1 to the result of 1 die\n" +
-                "when resolving a test during\n" +
-                "an Expedition Encounter";
+        return "Once per round\n" +
+                "Expedition tests:\n" +
+                "+1 Rotate";
     }
 }

@@ -26,8 +26,7 @@ public class KeroseneAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may discard this card\n" +
-                "to gain +5 Strength\n" +
-                "during a Combat Encounter.";
+        return "Combat Strength tests:\n" +
+                "Discard → +5 Shifts";
     }
 }

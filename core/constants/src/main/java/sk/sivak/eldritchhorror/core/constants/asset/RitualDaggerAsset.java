@@ -28,9 +28,9 @@ public class RitualDaggerAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may gain +1 Lore\n" +
-                "when resolving a Spell effect\n" +
-                "or +2 Strength when\n" +
-                "resolving a Combat Encounter.";
+        return "Once per round\n" +
+                "Spell tests: +1 Shift\n"+
+                "— or —\n"+
+                "Combat Strength tests: +2 Shifts";
     }
 }

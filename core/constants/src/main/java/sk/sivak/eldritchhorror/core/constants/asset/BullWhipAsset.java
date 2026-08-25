@@ -27,9 +27,6 @@ public class BullWhipAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Strength during Combat Encounters.\n" +
-                "\n" +
-                "You may reroll 1 die when resolving\n" +
-                "a Strength test during a Combat Encounter.";
+        return "Combat Strength tests:\n+1 Shift, +1 Reroll";
     }
 }

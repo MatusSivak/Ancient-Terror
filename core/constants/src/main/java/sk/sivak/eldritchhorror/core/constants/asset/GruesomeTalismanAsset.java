@@ -26,8 +26,7 @@ public class GruesomeTalismanAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may add 1 to the result of 1 die\n" +
-                "when resolving a Will test\n" +
-                "during a Combat Encounter.";
+        return "Combat Will tests:\n" +
+                "+1 Rotate";
     }
 }

@@ -61,7 +61,7 @@ public class EncounterButton extends Table {
     }
 
     private void initDisabled() {
-        ActionButton actionButton = addActionButton();
+        actionButton = addActionButton();
         actionButton.setChecked(true);
         Label disabledLabel = createDisabledLabel(encounterButtonData.getDisabledReason());
         disabledLabel.setWrap(true);

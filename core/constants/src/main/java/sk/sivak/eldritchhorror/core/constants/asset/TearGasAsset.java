@@ -27,7 +27,8 @@ public class TearGasAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may discard this card to reroll up to 2 dice when resolving a Strength test during a Combat Encounter.\n" +
-                "In addition, reduce the Monster's Damage by 2 to a minimum of 1.";
+        return "Combat Strength tests:\n" +
+                "Discard → +2 Rerolls\n" +
+                "greenMinus2 Monster Damage (min. 1)";
     }
 }

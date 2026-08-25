@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.constants.encounter;
 
+import com.badlogic.gdx.math.Vector2;
+
 public class EncounterButtonData {
     private String uuid;
     private String buttonIcon;
@@ -8,9 +10,27 @@ public class EncounterButtonData {
     private boolean enabled = true;
     private String disabledReason;
     private boolean needsMask = false;
+    private Vector2 offset = new Vector2();
+    private float scaleDownPercentage = 1.10f;
 
     public EncounterButtonData(String uuid) {
         this.uuid = uuid;
+    }
+
+    public float getScaleDownPercentage() {
+        return scaleDownPercentage;
+    }
+
+    public void setScaleDownPercentage(float scaleDownPercentage) {
+        this.scaleDownPercentage = scaleDownPercentage;
+    }
+
+    public Vector2 getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Vector2 offset) {
+        this.offset = offset;
     }
 
     public boolean isNeedsMask() {

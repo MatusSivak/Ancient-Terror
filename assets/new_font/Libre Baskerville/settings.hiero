@@ -1,0 +1,32 @@
+font.name=Franklin Gothic Demi Cond
+font.size=64
+font.bold=true
+font.italic=false
+font.gamma=1.8
+font.mono=false
+
+font2.file=C:\WORK\Projects\Ancient Terror\assets\new_font\Libre Baskerville\LibreBaskerville-VariableFont_wght.ttf
+font2.use=true
+
+pad.top=3
+pad.right=3
+pad.bottom=3
+pad.left=3
+pad.advance.x=-2
+pad.advance.y=-2
+
+glyph.native.rendering=false
+glyph.page.width=512
+glyph.page.height=512
+glyph.text=ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\nÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ\náäčďéíĺľňóôŕšťúýž\n\n.,!?;:'"()-+/%[]{}<>@#&_*=
+
+render_type=0
+
+effect.class=com.badlogic.gdx.tools.hiero.unicodefont.effects.ColorEffect
+effect.Color=ffffff
+
+effect.class=com.badlogic.gdx.tools.hiero.unicodefont.effects.OutlineEffect
+effect.Color=000000
+effect.Width=2.0
+effect.Join=2
+

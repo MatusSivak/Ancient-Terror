@@ -2,6 +2,8 @@ package sk.sivak.eldritchhorror.core.view.components.encounter;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
@@ -48,7 +50,7 @@ public class GateEncounterButton extends ActionButton{
 
         actionButton.disabled = false;
         actionButton.actionButtonData = actionButtonData;
-        init(actionButtonData.getScaleDownPercentage(), actionButton);
+        init(1.4f, actionButton);
         return actionButton;
     }
 
@@ -67,7 +69,8 @@ public class GateEncounterButton extends ActionButton{
     }
 
     private void initAnimation() {
-        icon = new AnimatedImage(new Animation<>(0.04f, CustomAssetManager.getGateAnimation(), Animation.PlayMode.LOOP));
+        icon = new Image(getTextureRegion("gate/gate_border.png"));
+        icon.addAction(Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(360f, 8f)));
         switch (colorName) {
             case "BLUE" :
                 icon.setColor(new Color(0.33f,0.33f,1,1f));

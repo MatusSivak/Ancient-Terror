@@ -127,6 +127,7 @@ public class ActionButton extends ImageButton {
                 icon.setScale(scaleMin);
             }
         } else {
+            icon.setOrigin(Align.center);
             if (isPressed()) {
                 batch.setShader(null);
                 icon.setColor(Color.RED);

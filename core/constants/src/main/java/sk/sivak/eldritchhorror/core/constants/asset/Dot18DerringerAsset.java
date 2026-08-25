@@ -27,7 +27,7 @@ public class Dot18DerringerAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may add 1 to the result of 1 die\n" +
-                "when resolving a Strength test during a Combat Encounter.";
+        return "Combat Strength tests:\n" +
+                "+1 Rotate";
     }
 }

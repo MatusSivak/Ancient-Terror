@@ -48,7 +48,7 @@ public class CollectCommonEncountersListener implements EventListener<AvailableE
     private void addSkipEncounter() {
         List<MonsterInfo> monstersAtLocation = ServicePlatform.get().getMonsterCup()
                 .getMonstersAtLocation(locationInfo.getLocationId());
-        if (ServicePlatform.get().getPerformedEncounters().canSkip(getActiveInvestigatorId(), !monstersAtLocation.isEmpty())) {
+        if (0==0 || ServicePlatform.get().getPerformedEncounters().canSkip(getActiveInvestigatorId(), !monstersAtLocation.isEmpty())) {
             availableEncounters.addEncounter(new SkipEncounter());
         }
     }

@@ -17,12 +17,14 @@ import rx.Single;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -306,6 +308,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SQUARE_BUTTON_DOWN = "icon/squareButton_down.png";
     public final static String DOWN_UP = "icon/down_up.png";
     public final static String CARD_TEMPLATE = "card/card_template.png";
+    public final static String NEW_CARD_TEMPLATE = "card/new_card_template.png";
     public final static String PICTURE_FILTER = "card/filter.png";
     public final static String CARD_TEMPLATE_MASK_LEFT = "card/card_template_mask_left.png";
     public final static String CARD_TEMPLATE_MASK_RIGHT = "card/card_template_mask_right.png";
@@ -317,7 +320,11 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPELL_CARD_BACKGROUND = "card/spell_background.jpg";
     public final static String TOKEN_CARD_BACKGROUND = "card/token_background.jpg";
     public final static String DISABLED_CARD = "card/disabled.png";
+    public final static String NEW_FONT_LIBRE_BASKERVILLE = "new_font/Libre Baskerville/hiero.fnt";
+    public final static String NEW_FONT_CINZEL = "new_font/Cinzel/hiero.fnt";
+    public final static String NEW_FONT_SOURCE_SERIF_4 = "new_font/Source Serif 4/hiero.fnt";
     public final static String FONT_ADLER = "font/Adler/Adler.fnt";
+    public final static String FONT_TYPEWRITER = "font/typewriter/typewriter.fnt";
     public final static String FONT_GOBLIN_ONE = "font/goblinOne/goblinOne.fnt"; // card cost, monster card, remaining cost, stat value, token value
     public final static String FONT_BLACK_CHANCERY = "font/BlackChancery/BlackChancery.fnt"; // ancient one alt name, card type, card traits, it's epic?, mystery flavor, quote
     public final static String FONT_MINYA = "font/minya/minya.fnt";
@@ -492,6 +499,16 @@ public class CustomAssetManager extends AssetManager {
         return skin;
     }
 
+    public static BitmapFont getBitmapFontNew(String fontId) {
+        BitmapFont bitmapFont = commonLoad(fontId, BitmapFont.class);
+        if (Objects.equals(fontId, NEW_FONT_SOURCE_SERIF_4)) {
+            FontGlyphEnricher.enrich(bitmapFont);
+        }
+        if (bitmapFont.getRegion().getTexture().getMinFilter() == Texture.TextureFilter.Nearest) {
+            bitmapFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        }
+        return bitmapFont;
+    }
     public static BitmapFont getBitmapFont(String fontId) {
         if (isRuntimeFontGenerationEnabled() && isRuntimeEligibleFont(fontId)) {
             synchronized (get()) {

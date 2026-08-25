@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.eventtype.data.encounter;
 
+import com.badlogic.gdx.math.Vector2;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterType;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
@@ -22,6 +23,8 @@ public class ExpeditionEncounter extends Encounter {
         EncounterButtonData encounterButtonData = super.buildButtonData();
         encounterButtonData.setButtonIcon("token/compass.png");
         encounterButtonData.setFirstLine("Expedition");
+        encounterButtonData.setScaleDownPercentage(1.4f);
+        encounterButtonData.setOffset(new Vector2(0,2));
 
         String secondLine;
         if (locationId == LocationId.THE_AMAZON) {

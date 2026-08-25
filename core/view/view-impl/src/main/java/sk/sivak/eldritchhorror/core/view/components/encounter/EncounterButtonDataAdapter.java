@@ -32,7 +32,7 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public float getScaleDownPercentage() {
-                return 1.10f;
+                return encounterButtonData.getScaleDownPercentage();
             }
 
             @Override
@@ -47,7 +47,7 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public Vector2 getOffset() {
-                return new Vector2(0, 1);
+                return encounterButtonData.getOffset();
             }
         };
     }
