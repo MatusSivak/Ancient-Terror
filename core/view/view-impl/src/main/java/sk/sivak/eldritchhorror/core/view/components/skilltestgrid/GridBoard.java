@@ -86,6 +86,23 @@ public class GridBoard {
         return board[row][column];
     }
 
+    public SymbolType getNextToken() {
+        return randomProvider.peekNext();
+    }
+
+    public SymbolType insertNextToken(GridPosition position) {
+        if (position == null) {
+            throw new IllegalArgumentException("position must not be null");
+        }
+        SymbolType insertedToken = randomProvider.next();
+        if (insertedToken == null) {
+            throw new IllegalStateException("No revealed next token is available");
+        }
+        board[position.getRow()][position.getColumn()] = insertedToken;
+        randomProvider.peekNext();
+        return insertedToken;
+    }
+
     public boolean isGap(GridPosition position) {
         if (position == null) {
             throw new IllegalArgumentException("position must not be null");

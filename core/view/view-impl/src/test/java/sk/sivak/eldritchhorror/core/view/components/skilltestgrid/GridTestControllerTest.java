@@ -240,6 +240,7 @@ public class GridTestControllerTest {
                 SymbolType.FIVE, // shift produces 555
                 SymbolType.SIX, SymbolType.TWO, SymbolType.THREE // replacements
         ));
+        controller.setInitialInsertCount(0);
         controller.startTest(1);
         controller.setDebugBoard(
                 SymbolType.TWO, SymbolType.FIVE, SymbolType.FIVE,

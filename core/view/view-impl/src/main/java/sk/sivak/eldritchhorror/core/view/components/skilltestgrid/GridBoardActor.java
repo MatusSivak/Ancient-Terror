@@ -60,6 +60,10 @@ public class GridBoardActor extends Group {
         void onRerollTargetSelected(GridPosition position);
     }
 
+    public interface InsertTargetListener {
+        void onInsertTargetSelected(GridPosition position);
+    }
+
     private final GridTestController controller;
     private final GridTestAssets assets;
     private final Group boardLayer;
@@ -74,8 +78,10 @@ public class GridBoardActor extends Group {
     private MoveSelectedListener moveSelectedListener;
     private SwapCompleteListener swapCompleteListener;
     private RerollTargetListener rerollTargetListener;
+    private InsertTargetListener insertTargetListener;
     private boolean interactionEnabled = true;
     private boolean rerollTargetingMode;
+    private boolean insertTargetingMode;
     private boolean swapSelectionMode = false;
     private GridPosition swapFirstSelection = null;
     private GridSymbolActor swapFirstSelectionActor = null;
@@ -203,6 +209,7 @@ public class GridBoardActor extends Group {
 
     public void resetAnimations() {
         exitRerollTargetingMode();
+        exitInsertTargetingMode();
         exitSwapSelectionMode();
         clearActions();
         boardLayer.clearActions();
@@ -358,6 +365,10 @@ public class GridBoardActor extends Group {
                     onComplete.run();
                 })
         )));
+    }
+
+    public void animateInsert(GridPosition position, SymbolType insertedSymbol, Runnable onComplete) {
+        animateReroll(position, insertedSymbol, onComplete);
     }
 
     private void animateRefillWave(List<GridSymbolActor> matchedActors, Map<GridPosition, SymbolType> replacements, Runnable onComplete) {
@@ -555,6 +566,30 @@ public class GridBoardActor extends Group {
         }
     }
 
+    public void enterInsertTargetingMode(InsertTargetListener listener) {
+        insertTargetListener = listener;
+        insertTargetingMode = true;
+        clearSwipeState();
+        for (int row = 0; row < GridBoard.SIZE; row++) {
+            for (int column = 0; column < GridBoard.SIZE; column++) {
+                highlightToken(symbolActors[row][column]);
+            }
+        }
+    }
+
+    public void exitInsertTargetingMode() {
+        if (!insertTargetingMode) {
+            return;
+        }
+        insertTargetingMode = false;
+        for (int row = 0; row < GridBoard.SIZE; row++) {
+            for (int column = 0; column < GridBoard.SIZE; column++) {
+                unhighlightToken(symbolActors[row][column]);
+            }
+        }
+        clearSwipeState();
+    }
+
     public void exitRerollTargetingMode() {
         if (!rerollTargetingMode) {
             return;
@@ -648,6 +683,15 @@ public class GridBoardActor extends Group {
                 int row = toRow(y);
                 int col = toColumn(x);
 
+                if (insertTargetingMode) {
+                    GridPosition position = new GridPosition(row, col);
+                    exitInsertTargetingMode();
+                    if (insertTargetListener != null) {
+                        insertTargetListener.onInsertTargetSelected(position);
+                    }
+                    return true;
+                }
+
                 if (rerollTargetingMode) {
                     GridPosition position = new GridPosition(row, col);
                     if (controller.getBoard().isGap(position)) {
@@ -714,7 +758,7 @@ public class GridBoardActor extends Group {
                     return;
                 }
                 
-                if (rerollTargetingMode || swapSelectionMode) {
+                if (insertTargetingMode || rerollTargetingMode || swapSelectionMode) {
                     // Don't process swipe during swap selection
                     if (pointer == swipePointer) {
                         swipePointer = -1;

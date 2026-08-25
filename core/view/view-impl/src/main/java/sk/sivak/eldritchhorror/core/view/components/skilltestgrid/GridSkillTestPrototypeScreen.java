@@ -55,15 +55,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label successesLabel;
     private final Label gainLabel;
     private final Label endLabel;
-    private final Label rerollLabel;
     private final TextButton restartButton;
     private final TextButton rerollButton;
-    private final Label superRerollLabel;
     private final TextButton superRerollButton;
-    private final Label swapLabel;
     private final TextButton swapButton;
-    private final Label spinLabel;
     private final TextButton spinButton;
+    private final TextButton insertButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final SelectBox<String> gapSelectBox;
     private final CheckBox momentumCheckBox;
@@ -116,15 +113,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
-        rerollLabel = new Label("", titleStyle);
         restartButton = buildButton("RESTART");
         rerollButton = buildButton("REROLL");
-        superRerollLabel = new Label("", titleStyle);
         superRerollButton = buildButton("SUPER REROLL");
-        swapLabel = new Label("", titleStyle);
         swapButton = buildButton("SWAP");
-        spinLabel = new Label("", titleStyle);
         spinButton = buildButton("SPIN");
+        insertButton = buildButton("INSERT");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
         modeSelectBox.setSelected(controller.getSelectedMode());
@@ -170,16 +164,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
-        configureLabel(rerollLabel, Align.center);
-        configureLabel(superRerollLabel, Align.center);
-        configureLabel(swapLabel, Align.center);
-        configureLabel(spinLabel, Align.center);
         movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        rerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        superRerollLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        swapLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        spinLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
         restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
@@ -195,6 +181,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         spinButton.setTransform(true);
         spinButton.setOrigin(0f, 0f);
         spinButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        insertButton.setTransform(true);
+        insertButton.setOrigin(0f, 0f);
+        insertButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextTokenPreview);
@@ -210,6 +199,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(superRerollButton, this::onSuperRerollPressed);
         addClickListener(swapButton, this::onSwapPressed);
         addClickListener(spinButton, this::onSpinPressed);
+        addClickListener(insertButton, this::onInsertPressed);
 
         updateCounters();
         setNextTokenPreviewVisible(false);
@@ -366,14 +356,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateCounters() {
         movesLabel.setText("moves: " + controller.getMovesRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
-        rerollLabel.setText("reroll: " + controller.getRemainingRerolls());
-        superRerollLabel.setText("super reroll x" + controller.getSuperRerollsRemaining());
-        swapLabel.setText("swap: " + controller.getSwapRemaining());
-        spinLabel.setText("spin: " + controller.getSpinRemaining());
         updateRerollButtonState();
         updateSuperRerollButtonState();
         updateSwapButtonState();
         updateSpinButtonState();
+        updateInsertButtonState();
     }
 
     private void onRerollPressed() {
@@ -489,6 +476,44 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boolean canUse = controller.canUseSpin();
         spinButton.setDisabled(!canUse);
         spinButton.setText("SPIN x" + controller.getSpinRemaining());
+    }
+
+    private void onInsertPressed() {
+        if (controller.getState() == GridTestState.INSERT_SELECTING) {
+            controller.cancelInsertMode();
+            boardActor.exitInsertTargetingMode();
+            updateCounters();
+            return;
+        }
+        if (!controller.startInsertMode()) {
+            return;
+        }
+        boardActor.enterInsertTargetingMode(this::onInsertTargetSelected);
+        updateCounters();
+    }
+
+    private void onInsertTargetSelected(GridPosition position) {
+        if (controller.getState() != GridTestState.INSERT_SELECTING) {
+            return;
+        }
+        boardActor.setInteractionEnabled(false);
+        SymbolType insertedToken = controller.insertNextToken(position.getRow(), position.getColumn());
+        reserveNextTokenForTacticalEffect();
+        refreshNextTokenPreview();
+        setNextTokenPreviewVisible(true);
+        controller.setState(GridTestState.MATCH_ANIMATION);
+        updateCounters();
+        boardActor.animateInsert(position, insertedToken, () -> startResolutionLoop(false));
+    }
+
+    private void updateInsertButtonState() {
+        boolean selecting = controller.getState() == GridTestState.INSERT_SELECTING;
+        boolean available = controller.getInsertsAvailable() > 0;
+        insertButton.setVisible(available);
+        insertButton.setDisabled(!selecting && !controller.canUseInsert());
+        insertButton.setText(selecting
+                ? "CANCEL INSERT"
+                : "INSERT x" + controller.getInsertsAvailable());
     }
 
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
@@ -663,17 +688,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         
         movesLabel.setFontScale(statsFontScale);
         successesLabel.setFontScale(statsFontScale);
-        rerollLabel.setFontScale(statsFontScale);
-        superRerollLabel.setFontScale(statsFontScale);
-        swapLabel.setFontScale(statsFontScale);
-        spinLabel.setFontScale(statsFontScale);
-        
         statsTable.add(movesLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
-        statsTable.add(rerollLabel).left().padBottom(2f).row();
-        statsTable.add(superRerollLabel).left().padBottom(2f).row();
-        statsTable.add(swapLabel).left().padBottom(2f).row();
-        statsTable.add(spinLabel).left().row();
         
         panel.add(statsTable).left().padBottom(12f).row();
         
@@ -715,6 +731,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         spinButton.setOrigin(0f, 0f);
         spinButton.setScale(controlScale);
         panel.add(spinButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
+
+        insertButton.setTransform(true);
+        insertButton.setOrigin(0f, 0f);
+        insertButton.setScale(controlScale);
+        panel.add(insertButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
         
         // Position the panel
         panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.64f);
