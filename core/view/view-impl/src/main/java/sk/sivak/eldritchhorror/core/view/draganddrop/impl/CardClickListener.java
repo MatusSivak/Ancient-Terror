@@ -129,11 +129,11 @@ public class CardClickListener extends ClickListener {
 
     private void darkenOtherCards() {
         cardColorMap.clear();
-        forEach(collectToList(allTemplates, it -> !it.getForeground().getColor().equals(new Color(0, 0, 0, 0.66f))),
+        forEach(collectToList(allTemplates, it -> !it.getForeground().getColor().equals(new Color(0, 0, 0, 0.75f))),
                 it -> {
                     cardColorMap.put(it, new Color(it.getForeground().getColor()));
                     it.setForegroundColor(new Color(0f, 0f, 0f, 0f));
-                    it.getForeground().addAction(Actions.color(new Color(0, 0, 0, 0.66f), DURATION));
+                    it.getForeground().addAction(Actions.color(new Color(0, 0, 0, 0.75f), DURATION));
                 });
     }
 

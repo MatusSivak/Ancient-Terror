@@ -383,11 +383,11 @@ public class CustomAssetManager extends AssetManager {
 
     public static Single<Texture> getTextureAsync(String id) {
         String resolvedId = resolveLocalizedTextureId(id);
+        if (get().isLoaded(resolvedId)) {
+            return Single.just(get().get(id));
+        }
         Single<Texture> textureSingle = Single.create(onSub -> {
-            if (get().isLoaded(resolvedId)) {
-                completeTextureRequest(resolvedId, onSub);
-                return;
-            }
+
             synchronized (get()) {
                 if (!get().isLoaded(resolvedId)) {
                     get().load(resolvedId, Texture.class);
@@ -400,7 +400,7 @@ public class CustomAssetManager extends AssetManager {
             }
             requestTextureAsyncOnRenderThread(resolvedId, onSub);
         });
-        return get().isLoaded(resolvedId) ? textureSingle : textureSingle.subscribeOn(Schedulers.io());
+        return textureSingle.subscribeOn(Schedulers.io());
     }
 
     public static Texture getTexture(String id) {
@@ -444,7 +444,7 @@ public class CustomAssetManager extends AssetManager {
                 completeTextureRequest(id, onSub);
                 return;
             }
-            get().update(20);
+            get().update(5000);
             requestTextureAsyncOnRenderThread(id, onSub);
         });
     }

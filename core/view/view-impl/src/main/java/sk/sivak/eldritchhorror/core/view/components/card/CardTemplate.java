@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.components.card;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -65,6 +64,7 @@ public class CardTemplate extends WidgetGroup {
                             String reckoningText,
                             boolean isDisabled) {
 
+        long start = System.currentTimeMillis();
         loadPicture(textureId, () -> {
             loadCardDescriptionBackground(descriptionBackgroundColor, () -> {
                 loadCardTitle(title, titleBackgroundColor, titleFontColor, () -> {
@@ -78,8 +78,6 @@ public class CardTemplate extends WidgetGroup {
                 });
             });
         });
-
-        setOrigin(Align.center);
     }
 
 	private void loadForeground() {
@@ -95,17 +93,17 @@ public class CardTemplate extends WidgetGroup {
     private void loadTemplate(Runnable callback) {
         getTextureAsync(NEW_CARD_TEMPLATE).subscribe(ct -> {
             addActor(new Image(getTextureRegionDrawable(NEW_CARD_TEMPLATE)));
-            Gdx.app.postRunnable(callback);
+            callback.run();
         });
     }
 
     private void loadPicture(String textureId, Runnable callback) {
         getTextureAsync(textureId).subscribe(t -> {
-            Image picture = new Image(getTextureRegionDrawable(textureId));
+			Image picture = new Image(getTextureRegionDrawable(textureId));
             picture.setScale(1.62f);
             picture.setPosition(30,665);
             addActor(picture);
-            Gdx.app.postRunnable(callback);
+            callback.run();
         });
     }
 
@@ -123,7 +121,7 @@ public class CardTemplate extends WidgetGroup {
             titleLabel.setPosition(310,618);
             titleLabel.setFontScale(Math.min(0.7f, 13f / title.length()));
             addActor(titleLabel);
-            Gdx.app.postRunnable(callback);
+            callback.run();
         });
     }
 
@@ -134,7 +132,7 @@ public class CardTemplate extends WidgetGroup {
             Image descriptionBackground = new Image(getTextureRegionDrawable(cardDescriptionBackgroundTexture));
             descriptionBackground.setColor(descriptionBackgroundColor);
             addActor(descriptionBackground);
-            Gdx.app.postRunnable(callback);
+            callback.run();
         });
     }
 
