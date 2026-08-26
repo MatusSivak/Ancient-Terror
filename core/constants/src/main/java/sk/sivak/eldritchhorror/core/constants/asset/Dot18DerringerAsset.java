@@ -28,6 +28,6 @@ public class Dot18DerringerAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Combat Strength tests:\n" +
-                "+1 Rotate";
+                "+1 Lift";
     }
 }

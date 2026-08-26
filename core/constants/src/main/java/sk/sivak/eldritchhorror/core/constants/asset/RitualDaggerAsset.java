@@ -29,8 +29,8 @@ public class RitualDaggerAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Once per round\n" +
-                "Spell tests: +1 Shift\n"+
+                "Spell tests: +1 Swap\n"+
                 "— or —\n"+
-                "Combat Strength tests: +2 Shifts";
+                "Combat Strength tests: +2 Swaps";
     }
 }

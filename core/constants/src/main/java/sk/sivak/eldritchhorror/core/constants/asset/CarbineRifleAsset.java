@@ -27,8 +27,8 @@ public class CarbineRifleAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
+        return "Once per round\n" +
                 "Combat Strength tests:\n" +
-                "+5 Shifts";
+                "+5 Swaps";
     }
 }

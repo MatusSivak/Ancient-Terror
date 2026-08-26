@@ -27,6 +27,6 @@ public class GruesomeTalismanAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Combat Will tests:\n" +
-                "+1 Rotate";
+                "+1 Lift";
     }
 }

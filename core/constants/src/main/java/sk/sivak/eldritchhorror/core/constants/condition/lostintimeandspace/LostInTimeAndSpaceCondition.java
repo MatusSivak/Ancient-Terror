@@ -2,8 +2,13 @@ package sk.sivak.eldritchhorror.core.constants.condition.lostintimeandspace;
 
 import sk.sivak.eldritchhorror.core.constants.condition.AbstractConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 
 public class LostInTimeAndSpaceCondition extends AbstractConditionInfo {
+
+    public LostInTimeAndSpaceCondition() {
+        traits.add(ConditionTrait.RESTRICTION);
+    }
 
     @Override
     public ConditionId getId() {
