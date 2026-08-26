@@ -34,6 +34,9 @@ public class GridTestController {
     private static final int INITIAL_INSERT_COUNT = 1;
     private int initialInsertCount = INITIAL_INSERT_COUNT;
     private int insertsAvailable;
+    private static final int INITIAL_PICKUP_COUNT = 1;
+    private int initialPickupCount = INITIAL_PICKUP_COUNT;
+    private int pickupsAvailable;
 
     public GridTestController(GridBoard board) {
         if (board == null) {
@@ -60,6 +63,7 @@ public class GridTestController {
         remainingSpins = initialSpinCount;
         superRerollsRemaining = initialSuperRerollCount;
         insertsAvailable = initialInsertCount;
+        pickupsAvailable = initialPickupCount;
         board.generateRandomBoard(activeMode, configuredGapCount);
     }
 
@@ -407,6 +411,14 @@ public class GridTestController {
         return board.getNextToken();
     }
 
+    public void reserveNextToken() {
+        board.reserveNextToken();
+    }
+
+    public void releaseNextToken() {
+        board.releaseNextToken();
+    }
+
     public boolean canUseInsert() {
         return state == GridTestState.WAITING_FOR_INPUT
                 && insertsAvailable > 0
@@ -444,6 +456,57 @@ public class GridTestController {
         return insertedToken;
     }
 
+    public int getPickupsAvailable() {
+        return pickupsAvailable;
+    }
+
+    public int getInitialPickupCount() {
+        return initialPickupCount;
+    }
+
+    public void setInitialPickupCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("initialPickupCount must be >= 0");
+        }
+        initialPickupCount = count;
+    }
+
+    public boolean canUsePickup() {
+        return state == GridTestState.WAITING_FOR_INPUT
+                && pickupsAvailable > 0
+                && board.getNextToken() != null
+                && board.hasOccupiedCell();
+    }
+
+    public boolean startPickupMode() {
+        if (!canUsePickup()) {
+            return false;
+        }
+        state = GridTestState.PICKUP_SELECTING;
+        return true;
+    }
+
+    public boolean cancelPickupMode() {
+        if (state != GridTestState.PICKUP_SELECTING) {
+            return false;
+        }
+        state = GridTestState.WAITING_FOR_INPUT;
+        return true;
+    }
+
+    public SymbolType pickupToken(int row, int column) {
+        if (state != GridTestState.PICKUP_SELECTING) {
+            throw new IllegalStateException("Cannot select a Pickup target in state " + state);
+        }
+        if (pickupsAvailable <= 0) {
+            throw new IllegalStateException("No Pickups remaining");
+        }
+        SymbolType pickedUpToken = board.pickup(new GridPosition(row, column));
+        pickupsAvailable--;
+        state = GridTestState.WAITING_FOR_INPUT;
+        return pickedUpToken;
+    }
+
     private boolean isValidAdjacentPair(GridPosition pos1, GridPosition pos2) {
         int rowDiff = Math.abs(pos1.getRow() - pos2.getRow());
         int colDiff = Math.abs(pos1.getColumn() - pos2.getColumn());
@@ -452,7 +515,8 @@ public class GridTestController {
 
     public boolean shouldFinishWhenStable() {
         return movesRemaining == 0
-                && (insertsAvailable == 0 || blindEnabled || board.getNextToken() == null);
+                && (insertsAvailable == 0 || blindEnabled || board.getNextToken() == null)
+                && (pickupsAvailable == 0 || board.getNextToken() == null || !board.hasOccupiedCell());
     }
 
     public GridTestResult finish() {

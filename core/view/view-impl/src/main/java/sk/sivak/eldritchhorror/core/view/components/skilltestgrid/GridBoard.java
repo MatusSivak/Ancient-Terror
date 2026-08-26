@@ -1,6 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,6 +15,8 @@ public class GridBoard {
     private final SymbolType[][] board = new SymbolType[SIZE][SIZE];
     private final SymbolRandomProvider randomProvider;
     private final Random random;
+    private final Deque<SymbolType> queuedNextTokens = new ArrayDeque<>();
+    private boolean nextTokenReserved;
 
     public GridBoard(SymbolRandomProvider randomProvider) {
         this(randomProvider, new Random());
@@ -42,6 +46,9 @@ public class GridBoard {
         if (gapCount < 0 || gapCount > SIZE) {
             throw new IllegalArgumentException("gapCount must be between 0 and " + SIZE);
         }
+        queuedNextTokens.clear();
+        nextTokenReserved = false;
+        randomProvider.clearNextTokenReservation();
         boolean hasMatches = true;
         while (hasMatches) {
             for (int row = 0; row < SIZE; row++) {
@@ -87,20 +94,58 @@ public class GridBoard {
     }
 
     public SymbolType getNextToken() {
-        return randomProvider.peekNext();
+        return queuedNextTokens.isEmpty() ? randomProvider.peekNext() : queuedNextTokens.peekFirst();
     }
 
     public SymbolType insertNextToken(GridPosition position) {
         if (position == null) {
             throw new IllegalArgumentException("position must not be null");
         }
-        SymbolType insertedToken = randomProvider.next();
+        SymbolType insertedToken = takeNextToken();
         if (insertedToken == null) {
             throw new IllegalStateException("No revealed next token is available");
         }
         board[position.getRow()][position.getColumn()] = insertedToken;
-        randomProvider.peekNext();
+        getNextToken();
         return insertedToken;
+    }
+
+    public SymbolType pickup(GridPosition position) {
+        if (position == null) {
+            throw new IllegalArgumentException("position must not be null");
+        }
+        validateRow(position.getRow());
+        validateColumn(position.getColumn());
+        SymbolType pickedUpToken = board[position.getRow()][position.getColumn()];
+        if (pickedUpToken == null) {
+            throw new IllegalArgumentException("Cannot pick up a GAP");
+        }
+        if (getNextToken() == null) {
+            throw new IllegalStateException("No revealed next token is available");
+        }
+        board[position.getRow()][position.getColumn()] = null;
+        queuedNextTokens.addFirst(pickedUpToken);
+        return pickedUpToken;
+    }
+
+    public boolean hasOccupiedCell() {
+        return getGapCount() < SIZE * SIZE;
+    }
+
+    public void reserveNextToken() {
+        if (nextTokenReserved) {
+            throw new IllegalStateException("Next Token is already reserved");
+        }
+        randomProvider.reserveNextToken();
+        nextTokenReserved = true;
+    }
+
+    public void releaseNextToken() {
+        if (!nextTokenReserved) {
+            throw new IllegalStateException("Next Token is not reserved");
+        }
+        randomProvider.releaseNextToken();
+        nextTokenReserved = false;
     }
 
     public boolean isGap(GridPosition position) {
@@ -126,7 +171,7 @@ public class GridBoard {
         if (move == null) {
             throw new IllegalArgumentException("move must not be null");
         }
-        SymbolType incoming = randomProvider.next();
+        SymbolType incoming = takeNextToken();
         return shift(move, incoming);
     }
 
@@ -330,7 +375,7 @@ public class GridBoard {
     public Map<GridPosition, SymbolType> replaceCells(Set<GridPosition> positions) {
         Map<GridPosition, SymbolType> replacements = new LinkedHashMap<>();
         for (GridPosition position : positions) {
-            SymbolType replacement = randomProvider.next();
+            SymbolType replacement = takeNextToken();
             board[position.getRow()][position.getColumn()] = replacement;
             replacements.put(position, replacement);
         }
@@ -369,6 +414,13 @@ public class GridBoard {
 
     private boolean isSuperRerollCandidate(SymbolType symbol) {
         return symbol != null && !symbol.isScoring();
+    }
+
+    private SymbolType takeNextToken() {
+        if (nextTokenReserved) {
+            return randomProvider.next();
+        }
+        return queuedNextTokens.isEmpty() ? randomProvider.next() : queuedNextTokens.removeFirst();
     }
 
     private void validateRow(int row) {

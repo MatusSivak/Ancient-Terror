@@ -21,6 +21,7 @@ public class GridTestControllerInsertTest {
         provider = new QueueSymbolProvider();
         controller = new GridTestController(new GridBoard(provider));
         controller.setInitialInsertCount(2);
+        controller.setInitialPickupCount(0);
         controller.startTest(5);
         provider.resetConsumed();
         setStableBoard();

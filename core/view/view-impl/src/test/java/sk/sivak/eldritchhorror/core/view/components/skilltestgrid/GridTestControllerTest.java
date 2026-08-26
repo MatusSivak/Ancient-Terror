@@ -241,6 +241,7 @@ public class GridTestControllerTest {
                 SymbolType.SIX, SymbolType.TWO, SymbolType.THREE // replacements
         ));
         controller.setInitialInsertCount(0);
+        controller.setInitialPickupCount(0);
         controller.startTest(1);
         controller.setDebugBoard(
                 SymbolType.TWO, SymbolType.FIVE, SymbolType.FIVE,

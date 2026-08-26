@@ -61,6 +61,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final TextButton swapButton;
     private final TextButton spinButton;
     private final TextButton insertButton;
+    private final TextButton pickupButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final SelectBox<String> gapSelectBox;
     private final CheckBox momentumCheckBox;
@@ -119,6 +120,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         swapButton = buildButton("SWAP");
         spinButton = buildButton("SPIN");
         insertButton = buildButton("INSERT");
+        pickupButton = buildButton("PICKUP");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
         modeSelectBox.setSelected(controller.getSelectedMode());
@@ -184,6 +186,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         insertButton.setTransform(true);
         insertButton.setOrigin(0f, 0f);
         insertButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        pickupButton.setTransform(true);
+        pickupButton.setOrigin(0f, 0f);
+        pickupButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
 
         stage.addActor(boardActor);
         stage.addActor(nextTokenPreview);
@@ -200,6 +205,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(swapButton, this::onSwapPressed);
         addClickListener(spinButton, this::onSpinPressed);
         addClickListener(insertButton, this::onInsertPressed);
+        addClickListener(pickupButton, this::onPickupPressed);
 
         updateCounters();
         setNextTokenPreviewVisible(false);
@@ -361,6 +367,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         updateSwapButtonState();
         updateSpinButtonState();
         updateInsertButtonState();
+        updatePickupButtonState();
     }
 
     private void onRerollPressed() {
@@ -516,6 +523,45 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 : "INSERT x" + controller.getInsertsAvailable());
     }
 
+    private void onPickupPressed() {
+        if (controller.getState() == GridTestState.PICKUP_SELECTING) {
+            controller.cancelPickupMode();
+            boardActor.exitPickupTargetingMode();
+            updateCounters();
+            return;
+        }
+        if (!controller.startPickupMode()) {
+            return;
+        }
+        boardActor.enterPickupTargetingMode(this::onPickupTargetSelected);
+        updateCounters();
+    }
+
+    private void onPickupTargetSelected(GridPosition position) {
+        if (controller.getState() != GridTestState.PICKUP_SELECTING) {
+            return;
+        }
+        boardActor.setInteractionEnabled(false);
+        controller.pickupToken(position.getRow(), position.getColumn());
+        updateCounters();
+        boardActor.animatePickup(position, () -> {
+            boardActor.syncBoardToActors();
+            refreshNextTokenPreview();
+            setNextTokenPreviewVisible(true);
+            onBoardStable();
+        });
+    }
+
+    private void updatePickupButtonState() {
+        boolean selecting = controller.getState() == GridTestState.PICKUP_SELECTING;
+        boolean available = controller.getPickupsAvailable() > 0;
+        pickupButton.setVisible(available);
+        pickupButton.setDisabled(!selecting && !controller.canUsePickup());
+        pickupButton.setText(selecting
+                ? "CANCEL PICKUP"
+                : "PICKUP x" + controller.getPickupsAvailable());
+    }
+
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
         if (pos1 != null && pos2 != null) {
             Gdx.app.log("SWAP", "onSwapComplete called with pos1=(" + pos1.getRow() + "," + pos1.getColumn() + ") pos2=(" + pos2.getRow() + "," + pos2.getColumn() + ")");
@@ -559,17 +605,17 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void reserveNextTokenForTacticalEffect() {
-        randomProvider.reserveNextToken();
+        controller.reserveNextToken();
         tacticalEffectPreservingNextToken = true;
     }
 
     private void releaseNextTokenFromTacticalEffect() {
-        randomProvider.releaseNextToken();
+        controller.releaseNextToken();
         tacticalEffectPreservingNextToken = false;
     }
 
     private void refreshNextTokenPreview() {
-        nextTokenPreview.setNextToken(randomProvider.peekNext());
+        nextTokenPreview.setNextToken(controller.getNextToken());
         nextTokenPreview.setHidden(
                 controller.isBlindEnabled()
                         && controller.getState() != GridTestState.REVEALING_NEXT_TOKEN
@@ -736,6 +782,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         insertButton.setOrigin(0f, 0f);
         insertButton.setScale(controlScale);
         panel.add(insertButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
+
+        pickupButton.setTransform(true);
+        pickupButton.setOrigin(0f, 0f);
+        pickupButton.setScale(controlScale);
+        panel.add(pickupButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
         
         // Position the panel
         panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.64f);

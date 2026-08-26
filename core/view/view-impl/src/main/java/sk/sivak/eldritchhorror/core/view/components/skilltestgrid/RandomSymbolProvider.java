@@ -41,6 +41,7 @@ public class RandomSymbolProvider implements SymbolRandomProvider {
         return symbol;
     }
 
+    @Override
     public void reserveNextToken() {
         if (reservedNextSymbol != null) {
             throw new IllegalStateException("Next Token is already reserved");
@@ -49,6 +50,7 @@ public class RandomSymbolProvider implements SymbolRandomProvider {
         nextSymbol = null;
     }
 
+    @Override
     public void releaseNextToken() {
         if (reservedNextSymbol == null) {
             throw new IllegalStateException("Next Token is not reserved");
@@ -57,6 +59,7 @@ public class RandomSymbolProvider implements SymbolRandomProvider {
         reservedNextSymbol = null;
     }
 
+    @Override
     public void clearNextTokenReservation() {
         reservedNextSymbol = null;
     }
