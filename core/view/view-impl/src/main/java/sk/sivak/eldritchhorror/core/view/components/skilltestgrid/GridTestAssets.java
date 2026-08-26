@@ -21,6 +21,7 @@ public class GridTestAssets {
     private static final String SLOT_EXPLOSION_OVERLAY = "slot/animation/explosion.png";
     private static final String SLOT_IMPLOSION_OVERLAY = "slot/animation/implosion.png";
     private static final String SLOT_SPAWN_ANIMATION = "slot/animation/spawn.png";
+    private static final String SLOT_HIGHLIGHT_ANIMATION = "slot/animation/highlight.png";
     private static final int IMPLOSION_COLS = 4;
     private static final int IMPLOSION_ROWS = 4;
     private static final int DICE_SHEET_CELL = 46;
@@ -32,6 +33,7 @@ public class GridTestAssets {
     private final Array<TextureRegion> explosionOverlayFrames;
     private final Array<TextureRegion> implosionOverlayFrames;
     private final Array<TextureRegion> spawnFrames;
+    private final Array<TextureRegion> highlightFrames;
 
     public GridTestAssets() {
         boardBackground = CustomAssetManager.getTextureRegion(SLOT_GRID_BOTTOM);
@@ -56,6 +58,7 @@ public class GridTestAssets {
         explosionOverlayFrames = loadImplosionSheet(SLOT_EXPLOSION_OVERLAY);
         implosionOverlayFrames = loadImplosionSheet(SLOT_IMPLOSION_OVERLAY);
         spawnFrames = loadImplosionSheet(SLOT_SPAWN_ANIMATION);
+        highlightFrames = loadImplosionSheet(SLOT_HIGHLIGHT_ANIMATION);
     }
 
     public TextureRegion getBoardBackground() {
@@ -93,6 +96,11 @@ public class GridTestAssets {
     /** Shared 16-frame spawn array; do not modify or dispose. */
     public Array<TextureRegion> getSpawnFrames() {
         return spawnFrames;
+    }
+
+    /** Shared 16-frame highlight (looping ring) array; do not modify or dispose. */
+    public Array<TextureRegion> getHighlightFrames() {
+        return highlightFrames;
     }
 
     private Array<TextureRegion> loadImplosionSheet(String path) {

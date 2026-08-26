@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
@@ -20,6 +21,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +71,7 @@ public class GridBoardActor extends Group {
     private final GridTestAssets assets;
     private final Group boardLayer;
     private final Group spawnLayer;
+    private final Group highlightLayer;
     private final Group symbolLayer;
     private final Group implosionLayer;
     private final Container<Group> symbolClipContainer;
@@ -88,6 +91,7 @@ public class GridBoardActor extends Group {
     private boolean swapSelectionMode = false;
     private GridPosition swapFirstSelection = null;
     private GridSymbolActor swapFirstSelectionActor = null;
+    private final Map<GridPosition, Actor> swapHighlightActors = new HashMap<>();
     private float layoutScale = 1f;
     private float boardSize;
     private float cellSize;
@@ -102,6 +106,7 @@ public class GridBoardActor extends Group {
         this.assets = assets;
         boardLayer = new Group();
         spawnLayer = new Group();
+        highlightLayer = new Group();
         symbolLayer = new Group();
         implosionLayer = new Group();
         symbolClipContainer = new Container<>(symbolLayer);
@@ -116,6 +121,7 @@ public class GridBoardActor extends Group {
 
         boardLayer.addActor(backgroundImage);
         boardLayer.addActor(spawnLayer);
+        boardLayer.addActor(highlightLayer);
         boardLayer.addActor(symbolClipContainer);
         boardLayer.addActor(implosionLayer);
         if (overlayImage != null) {
@@ -154,6 +160,7 @@ public class GridBoardActor extends Group {
 
         boardLayer.setBounds(boardX, boardY, boardSize, boardSize);
         spawnLayer.setBounds(0f, 0f, boardSize, boardSize);
+        highlightLayer.setBounds(0f, 0f, boardSize, boardSize);
         float backgroundSize = boardSize * BACKGROUND_SCALE;
         backgroundImage.setBounds(
                 (boardSize - backgroundSize) / 2f,
@@ -652,9 +659,7 @@ public class GridBoardActor extends Group {
     }
 
     public void exitSwapSelectionMode() {
-        if (swapFirstSelectionActor != null) {
-            unhighlightToken(swapFirstSelectionActor);
-        }
+        removeAllSwapHighlights();
         swapSelectionMode = false;
         swapFirstSelection = null;
         swapFirstSelectionActor = null;
@@ -772,20 +777,20 @@ public class GridBoardActor extends Group {
                     if (swapFirstSelection == null) {
                         swapFirstSelection = currentPos;
                         swapFirstSelectionActor = currentActor;
-                        highlightToken(currentActor);
+                        addSwapHighlightAt(row, col);
+                        addAdjacentSwapHighlights(row, col);
                         Gdx.app.log("SWAP", "First token selected at (" + row + ", " + col + ")");
                         return true;
                     } else if (swapFirstSelection.equals(currentPos)) {
                         // Deselect
                         Gdx.app.log("SWAP", "First token deselected at (" + row + ", " + col + ")");
-                        unhighlightToken(swapFirstSelectionActor);
+                        removeAllSwapHighlights();
                         swapFirstSelection = null;
                         swapFirstSelectionActor = null;
                         return true;
                     } else if (isOrthogonallyAdjacent(swapFirstSelection, currentPos)) {
                         // Valid swap - save positions BEFORE clearing selection
                         Gdx.app.log("SWAP", "Second token selected at (" + row + ", " + col + ") - valid adjacent pair");
-                        unhighlightToken(swapFirstSelectionActor);
                         GridPosition pos1 = swapFirstSelection;
                         GridPosition pos2 = currentPos;
                         exitSwapSelectionMode();
@@ -796,10 +801,11 @@ public class GridBoardActor extends Group {
                     } else {
                         // Invalid selection, try new first selection
                         Gdx.app.log("SWAP", "Non-adjacent token at (" + row + ", " + col + ") - changing first selection");
-                        unhighlightToken(swapFirstSelectionActor);
+                        removeAllSwapHighlights();
                         swapFirstSelection = currentPos;
                         swapFirstSelectionActor = currentActor;
-                        highlightToken(currentActor);
+                        addSwapHighlightAt(row, col);
+                        addAdjacentSwapHighlights(row, col);
                         return true;
                     }
                 }
@@ -1134,5 +1140,69 @@ public class GridBoardActor extends Group {
         if (actor == null) return;
         // Reset to normal color
         actor.setColor(1f, 1f, 1f, 1f);
+    }
+
+    private void addSwapHighlightAt(int row, int col) {
+        GridPosition pos = new GridPosition(row, col);
+        if (swapHighlightActors.containsKey(pos)) return;
+        TokenLayout layout = tokenLayout(row, col);
+        float centerX = symbolClipContainer.getX() + layout.x + layout.width / 2f;
+        float centerY = symbolClipContainer.getY() + layout.y + layout.height / 2f;
+        Actor actor = new HighlightActor(assets.getHighlightFrames(), centerX, centerY, layout.width * 1.4f);
+        swapHighlightActors.put(pos, actor);
+        highlightLayer.addActor(actor);
+    }
+
+    private void addAdjacentSwapHighlights(int row, int col) {
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] d : dirs) {
+            int nr = row + d[0];
+            int nc = col + d[1];
+            if (nr >= 0 && nr < GridBoard.SIZE && nc >= 0 && nc < GridBoard.SIZE) {
+                addSwapHighlightAt(nr, nc);
+            }
+        }
+    }
+
+    private void removeAllSwapHighlights() {
+        for (Actor actor : swapHighlightActors.values()) {
+            actor.remove();
+        }
+        swapHighlightActors.clear();
+    }
+
+    private static class HighlightActor extends Actor {
+        private final Animation<TextureRegion> animation;
+        private final float centerX;
+        private final float centerY;
+        private final float size;
+        private float stateTime;
+        private float rotation = 0f;
+
+        HighlightActor(Array<TextureRegion> frames, float centerX, float centerY, float size) {
+            this.animation = frames != null && frames.size > 0
+                    ? new Animation<>(ImplosionAnimation.FRAME_DURATION, frames, Animation.PlayMode.LOOP_PINGPONG)
+                    : null;
+            this.centerX = centerX;
+            this.centerY = centerY;
+            this.size = size;
+            this.stateTime = (float)(Math.random() * 16 * ImplosionAnimation.FRAME_DURATION);
+            setTouchable(Touchable.disabled);
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            stateTime += delta;
+            rotation += 45f * delta;
+        }
+
+        @Override
+        public void draw(Batch batch, float parentAlpha) {
+            if (animation == null) return;
+            batch.setColor(1f, 1f, 1f, 0.75f * parentAlpha);
+            TextureRegion frame = animation.getKeyFrame(stateTime);
+            batch.draw(frame, centerX - size / 2f, centerY - size / 2f, size / 2f, size / 2f, size, size, 1f, 1f, rotation);
+        }
     }
 }
