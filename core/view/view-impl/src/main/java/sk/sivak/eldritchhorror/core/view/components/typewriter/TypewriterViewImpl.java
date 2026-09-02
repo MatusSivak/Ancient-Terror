@@ -24,20 +24,19 @@ import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
 import sk.sivak.eldritchhorror.core.view.TypewriterView;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.SafeTypingLabel;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getSkin;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BACKGROUND_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BACKGROUND_WIDTH;
@@ -150,7 +149,7 @@ public class TypewriterViewImpl implements TypewriterView  {
                 Actions.run(() -> typewriterTableStack.peek().increaseOffsetY(TEXT_LINE_HEIGHT))
         )));
         text = replacePlaceholders(text);
-        BitmapFont bitmapFont = getBitmapFont(FONT_ADLER);
+        BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
         bitmapFont.getData().markupEnabled = true;
         GlyphLayout glyphLayout = new GlyphLayout(bitmapFont, text, fontColor, TEXT_AREA_WIDTH * TABLE_SCALE / FONT_SCALE, Align.left, true);
 
@@ -215,8 +214,8 @@ public class TypewriterViewImpl implements TypewriterView  {
     }
 
     private TypingLabel createTypingLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.WHITE);
-        TypingLabel typingLabel = new BoldSafeTypingLabel(text, labelStyle);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), Color.WHITE);
+        TypingLabel typingLabel = new SafeTypingLabel(text, labelStyle);
         typingLabel.setWrap(true);
         typingLabel.setAlignment(Align.left, Align.center);
         typingLabel.setFontScale(FONT_SCALE);
@@ -254,7 +253,7 @@ public class TypewriterViewImpl implements TypewriterView  {
         };
 
         textButtonStyle.checked = textButtonStyle.down;
-        textButtonStyle.font = getBitmapFont(FONT_ADLER);
+        textButtonStyle.font = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
         TextButton textButton = new TextButton(text, textButtonStyle);
         textButton.getLabel().setColor(Color.WHITE);
         textButton.getLabel().setFontScale(FONT_SCALE);

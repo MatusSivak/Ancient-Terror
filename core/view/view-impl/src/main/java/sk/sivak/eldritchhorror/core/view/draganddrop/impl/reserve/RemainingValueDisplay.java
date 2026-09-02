@@ -17,7 +17,7 @@ public class RemainingValueDisplay extends Group {
     private final Image background;
 
     public RemainingValueDisplay() {
-        background = new Image(CustomAssetManager.getTexture(CustomAssetManager.CARD_CIRCLE));
+        background = new Image(CustomAssetManager.getTexture(CustomAssetManager.ACQUIRE_ASSETS_REMAINING_BG));
         costLabel = createCostLabel();
         background.setWidth(background.getWidth() * SCALE);
         background.setHeight(background.getHeight() * SCALE);
@@ -51,7 +51,7 @@ public class RemainingValueDisplay extends Group {
     private Label createCostLabel() {
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = getBitmapFont(FONT_GOBLIN_ONE);
-        style.fontColor = new Color(0x00ff00ff);
+        style.fontColor = new Color(0xf6c06fff);
         Label label = new Label("0", style);
         label.setAlignment(Align.center);
         return label;

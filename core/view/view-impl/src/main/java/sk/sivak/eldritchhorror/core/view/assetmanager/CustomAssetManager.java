@@ -313,7 +313,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String CARD_TEMPLATE_MASK_LEFT = "card/card_template_mask_left.png";
     public final static String CARD_TEMPLATE_MASK_RIGHT = "card/card_template_mask_right.png";
     public final static String CARD_RIBBON = "card/ribbon.png";
-    public final static String CARD_CIRCLE = "card/circle.png";
+    public final static String ACQUIRE_ASSETS_REMAINING_BG = "card/circle.png";
     public final static String ASSET_CARD_BACKGROUND = "card/asset_background.jpg";
     public final static String CONDITION_CARD_BACKGROUND = "card/condition_background.jpg";
     public final static String ARTIFACT_CARD_BACKGROUND = "card/artifact_background.jpg";
@@ -323,6 +323,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String NEW_FONT_LIBRE_BASKERVILLE = "new_font/Libre Baskerville/hiero.fnt";
     public final static String NEW_FONT_CINZEL = "new_font/Cinzel/hiero.fnt";
     public final static String NEW_FONT_SOURCE_SERIF_4 = "new_font/Source Serif 4/hiero.fnt";
+    public final static String NEW_FONT_SPECIAL_ELITE = "new_font/Special_Elite/hiero.fnt";
     public final static String FONT_ADLER = "font/Adler/Adler.fnt";
     public final static String FONT_TYPEWRITER = "font/typewriter/typewriter.fnt";
     public final static String FONT_GOBLIN_ONE = "font/goblinOne/goblinOne.fnt"; // card cost, monster card, remaining cost, stat value, token value
@@ -503,6 +504,9 @@ public class CustomAssetManager extends AssetManager {
         BitmapFont bitmapFont = commonLoad(fontId, BitmapFont.class);
         if (Objects.equals(fontId, NEW_FONT_SOURCE_SERIF_4)) {
             FontGlyphEnricher.enrich(bitmapFont);
+        }
+        if (Objects.equals(fontId, NEW_FONT_SPECIAL_ELITE)) {
+            bitmapFont.getData().markupEnabled = true;
         }
         if (bitmapFont.getRegion().getTexture().getMinFilter() == Texture.TextureFilter.Nearest) {
             bitmapFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);

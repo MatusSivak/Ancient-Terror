@@ -2,7 +2,7 @@ package sk.sivak.eldritchhorror.core.view.components.typewriter;
 
 public class TypewriterConstants {
 
-    static final float FONT_SCALE = 0.42f;
+    static final float FONT_SCALE = 0.3f;
     static final float TEXT_AREA_WIDTH = 400f;
     static final int BACKGROUND_WIDTH = 540;
     static final int BACKGROUND_HEIGHT = 960;
@@ -18,5 +18,5 @@ public class TypewriterConstants {
     static final float BUTTON_HEIGHT = TEXT_LINE_HEIGHT * 2.9f;
     static final float BUTTON_BORDER = 10f / FONT_SCALE;
 
-    static final float MIN_BUTTON_WIDTH = 130f;
+    static final float MIN_BUTTON_WIDTH = 150f;
 }

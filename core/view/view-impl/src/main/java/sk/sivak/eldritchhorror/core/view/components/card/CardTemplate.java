@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.card;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -455,7 +456,10 @@ public class CardTemplate extends WidgetGroup {
 
     public void setForegroundColor(Color color) {
         if (foreground != null) {
-            foreground.setColor(color);
+            foreground.clearActions();
+            foreground.addAction(Actions.color(color, FAST_ACTION_DURATION));
+        } else {
+            Gdx.app.postRunnable(() -> setForegroundColor(color));
         }
     }
 

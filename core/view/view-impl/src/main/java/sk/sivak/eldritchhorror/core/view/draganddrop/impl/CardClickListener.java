@@ -132,8 +132,7 @@ public class CardClickListener extends ClickListener {
         forEach(collectToList(allTemplates, it -> !it.getForeground().getColor().equals(new Color(0, 0, 0, 0.75f))),
                 it -> {
                     cardColorMap.put(it, new Color(it.getForeground().getColor()));
-                    it.setForegroundColor(new Color(0f, 0f, 0f, 0f));
-                    it.getForeground().addAction(Actions.color(new Color(0, 0, 0, 0.75f), DURATION));
+                    it.setForegroundColor(new Color(0, 0, 0, 0.75f));
                 });
     }
 
@@ -164,12 +163,12 @@ public class CardClickListener extends ClickListener {
             forEach(allTemplates, otherTemplate -> {
                 Color color = cardColorMap.get(otherTemplate);
                 if (color != null) {
-                    otherTemplate.getForeground().addAction(Actions.color(color, DURATION));
+                    otherTemplate.setForegroundColor(color);
                 }
             });
             scaleDown();
             if (cardColorMap.get(original) != null) {
-                original.getForeground().setColor(cardColorMap.get(original));
+                original.setForegroundColor(cardColorMap.get(original));
             }
             forEach(allTemplates, it -> it.setTouchable(Touchable.enabled));
         }

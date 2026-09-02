@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.components.typewriter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -16,8 +17,9 @@ import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import java.util.LinkedList;
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BUTTON_BORDER;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BUTTON_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.FONT_SCALE;
@@ -55,7 +57,7 @@ public class TypewriterQuestionTyper {
                 addClickListenerOnButtons(buttons, onSub);
             } else {
 
-                BitmapFont bitmapFont = getBitmapFont(FONT_ADLER);
+                BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
                 float buttonWidth = findButtonWidth(answersModified1, bitmapFont);
                 List<ButtonData> buttonDatas = createButtonDatas(answersModified1, buttonWidth);
                 List<TextButtonWithValue> buttons = createButtons(buttonDatas);
@@ -88,10 +90,10 @@ public class TypewriterQuestionTyper {
             miniTable.add(button.textButton).width(maxWidth).height(BUTTON_HEIGHT);
             first = false;
         }
-        typewriterView.getTable().add(miniTable).padTop(0).padBottom(10).row();
+        typewriterView.getTable().add(miniTable).padTop(10).padBottom(10).row();
         typewriterView.getTable().addAction(Actions.moveBy(0,
-                5 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED));
-        typewriterView.increaseOffset(10 + BUTTON_HEIGHT / 2f);
+                15 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED));
+        typewriterView.increaseOffset(20 + BUTTON_HEIGHT / 2f);
         BigActorsManager.unlock(BigActorsManager.BigActorKey.PAPER);
     }
 
@@ -100,7 +102,7 @@ public class TypewriterQuestionTyper {
         for (int i = 0; i < buttonDatas.size(); i++) {
             TextButton button = typewriterView.createTextButton(buttonDatas.get(i).buttonText);
             button.getLabel().setColor(Color.WHITE);
-            button.getLabel().setFontScale(FONT_SCALE * BUTTON_FONT_SCALE_MULTIPLIER);
+            button.getLabel().setFontScale(FONT_SCALE);
 
             TextButtonWithValue textButtonWithValue = new TextButtonWithValue(button);
             textButtonWithValue.setButtonId(i);
@@ -116,7 +118,7 @@ public class TypewriterQuestionTyper {
             ButtonData buttonData = new ButtonData();
 
             glyphLayout.reset();
-            glyphLayout.setText(getBitmapFont(FONT_ADLER), answerModified, Color.WHITE, maxWidth, Align.center, true);
+            glyphLayout.setText(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), answerModified, Color.WHITE, maxWidth, Align.center, true);
 
             StringBuilder stringBuilder = new StringBuilder();
             buttonData.buttonColor = new Color(glyphLayout.runs.get(0).color);
@@ -137,24 +139,26 @@ public class TypewriterQuestionTyper {
         return buttonDatas;
     }
 
-    private float findButtonWidth(List<String> answersModified1, BitmapFont bitmapFont) {
-        float buttonWidth = 0;
-        GlyphLayout glyphLayout = new GlyphLayout();
-        for (String answerModified : answersModified1) {
-            glyphLayout.reset();
-            glyphLayout.setText(bitmapFont, answerModified);
-            float width = glyphLayout.width;
-            glyphLayout.reset();
-            for (float i = 0.5f; i < 1; i += 0.01) {
-                glyphLayout.reset();
-                glyphLayout.setText(bitmapFont, answerModified, Color.WHITE, width * i, Align.center, true);
-                if (glyphLayout.runs.size == 2 && (width * i) > buttonWidth) {
-                    buttonWidth = width * i;
-                    break;
-                }
-            }
+    private float findButtonWidth(List<String> answers, BitmapFont font) {
+        GlyphLayout layout = new GlyphLayout();
+        font.getData().markupEnabled = true;
+        float width = 0f;
+
+        for (String answer : answers) {
+            layout.setText(font, answer);
+            width = Math.max(width, layout.width);
         }
-        return Math.max(buttonWidth + BUTTON_BORDER, TypewriterConstants.MIN_BUTTON_WIDTH / FONT_SCALE);
+
+        System.out.println(answers + ", findButtonWidth: " + width);
+        return Math.max(width * 1.1f, TypewriterConstants.MIN_BUTTON_WIDTH);
+        /* TODO clamp
+        return MathUtils.clamp(
+                ,
+                TypewriterConstants.MIN_BUTTON_WIDTH / FONT_SCALE,
+                TypewriterConstants.MAX_BUTTON_WIDTH / FONT_SCALE
+        );
+
+         */
     }
 
     private List<String> replacePlaceholdersInAnswers(String[] answers) {
