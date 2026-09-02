@@ -189,10 +189,11 @@ public class CardViewImpl implements CardView {
         if (bankLoanAvailable) {
             cardTemplates.add(0, CardTemplate.buildCard(new BankLoanAsset()));
         }
-        forEach(cardTemplates, cardTemplate -> cardTemplate.setScale(0.16f));
+        forEach(cardTemplates, cardTemplate -> cardTemplate.setScale(0.133f));
         dragAndDropBinder = new ReserveDragAndDropBinder(testScore, InfoStage.getStageSafe());
         dragAndDropBinder.init(cardTemplates.toArray(new CardTemplate[cardTemplates.size()]));
-        dragAndDropBinder.getSourceTargetGroup().setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.02f);
+        dragAndDropBinder.getSourceTargetGroup().setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.02f - 2);
+        dragAndDropBinder.getSourceTargetGroup().setX(85);
         InfoStage.addBigActor(OnScreenActors.ActorKey.DRAG_AND_DROP, dragAndDropBinder.getSourceTargetGroup(),
                 () -> dragAndDropBinder.getSourceTargetGroup().addAction(Actions.alpha(0f, 1f)),
                 () -> dragAndDropBinder.getSourceTargetGroup().addAction(Actions.alpha(1f, 1f)));

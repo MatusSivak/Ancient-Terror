@@ -22,7 +22,7 @@ public class GridTestController {
     private static final int DEFAULT_STARTING_REROLLS = 1;
     private int startingRerolls = DEFAULT_STARTING_REROLLS;
     private int remainingRerolls;
-    private static final int INITIAL_SWAP_COUNT = 1;
+    private static final int INITIAL_SWAP_COUNT = 3;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
     private static final int INITIAL_SPIN_COUNT = 1;

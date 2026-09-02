@@ -142,7 +142,7 @@ public class CustomAssetManager extends AssetManager {
         load("token/compass.png", Texture.class);
         load("reserve_label.png", Texture.class);
         // load("ancient_one/AZATHOTH.png", Texture.class);
-        load("ancient_one_label.png", Texture.class);
+//        load("ancient_one_label.png", Texture.class);
         load("valuelabel.png", Texture.class);
 //        load("monster_sheet.png", Texture.class);
         load("discard_label.png", Texture.class);

@@ -6,16 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.card.Trait;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ASSET_CARD_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.CARD_CIRCLE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.DISABLED_CARD;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_CARD_TEMPLATE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PICTURE_FILTER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.RECKONING;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureAsync;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
-import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class NewCardTemplate extends WidgetGroup {
 

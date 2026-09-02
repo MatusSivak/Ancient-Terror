@@ -27,6 +27,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class TradeView {
+    public static final float SCALE_XY = 0.133f;
     private TradeDragAndDropBinder dragAndDrop;
     private HideOkButtons hideOkButtons;
     private TradeData input;
@@ -104,7 +105,7 @@ public class TradeView {
 
         Function<CardInfo, CardTemplate> cardInfoToTemplate = it -> {
             CardTemplate cardTemplate = CardTemplate.buildCard(it);
-            cardTemplate.setScale(0.16f);
+            cardTemplate.setScale(SCALE_XY);
             return cardTemplate;
         };
         CardTemplate[] sourceCardTemplates = collectToList(map(sourceCards, cardInfoToTemplate)).toArray(new CardTemplate[sourceCards.size()]);
@@ -126,17 +127,17 @@ public class TradeView {
         cardTemplates = Arrays.copyOf(cardTemplates, cards.size() + clues + shipTickets + trainTickets);
         for (int i = 0; i < clues; i++) {
             CardTemplate clueCard = CardTemplate.buildClueCard();
-            clueCard.setScale(0.16f);
+            clueCard.setScale(SCALE_XY);
             cardTemplates[i + cards.size()] = clueCard;
         }
         for (int i = clues; i < clues + shipTickets; i++) {
             CardTemplate shipCard = CardTemplate.buildShipTicketCard();
-            shipCard.setScale(0.16f);
+            shipCard.setScale(SCALE_XY);
             cardTemplates[i + cards.size()] = shipCard;
         }
         for (int i = clues + shipTickets; i < clues + shipTickets + trainTickets; i++) {
             CardTemplate trainCard = CardTemplate.buildTrainTicketCard();
-            trainCard.setScale(0.16f);
+            trainCard.setScale(SCALE_XY);
             cardTemplates[i + cards.size()] = trainCard;
         }
         return cardTemplates;

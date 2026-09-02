@@ -72,7 +72,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         pack();
 
         setPosition(
-                VIEWPORT_WIDTH / 2 - getWidth() / 2,
+                VIEWPORT_WIDTH / 2 - getWidth() / 2 + 5,
                 VIEWPORT_HEIGHT / 2 - getHeight() / 2);
 
 

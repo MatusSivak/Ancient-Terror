@@ -59,12 +59,12 @@ public class ReserveSheet extends VisTable {
 
         createListeners(cardTemplates);
 
-        float cardScale = (1627 * SCALE - BORDER) / (4 * CardTemplate.CARD_WIDTH);
+        float cardScale = 0.133f;
 
         addHitImage(onClickAction);
 
         reserveLabel.setTouchable(Touchable.disabled);
-        add(reserveLabel).height(100).align(Align.top).padTop(40).padBottom(40).padLeft(53).colspan(4).row();
+        add(reserveLabel).height(100).align(Align.top).padTop(20).colspan(4).row();
 
         boolean first = true;
         for (CardTemplate cardTemplate : cardTemplates) {
@@ -73,15 +73,12 @@ public class ReserveSheet extends VisTable {
                     .align(Align.topLeft)
                     .width(CardTemplate.CARD_WIDTH * cardScale)
                     .height(CardTemplate.CARD_HEIGHT * cardScale);
-            if (first) {
-                cell.padLeft(53);
-            }
-            first = false;
         }
+        padLeft(50);
 
         pack();
-        setHeight(1083 * SCALE);
-        setWidth(1627 * SCALE);
+        setHeight(600 * SCALE);
+        setWidth(1450 * SCALE);
         CustomAssetManager.getTextureAsync("wooden_background.png").subscribe(texture -> {
             TextureRegionDrawable background = CustomAssetManager.getTextureRegionDrawable("wooden_background.png");
             setBackground(background);

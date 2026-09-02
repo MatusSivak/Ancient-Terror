@@ -1,21 +1,28 @@
 package sk.sivak.eldritchhorror.core.view.components.card;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.utils.Align;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.TokenCardInfo;
+import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.card.CardInfo;
 import sk.sivak.eldritchhorror.core.constants.card.Trait;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.Set;
 
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_CARD_TEMPLATE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_CINZEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
@@ -34,8 +41,6 @@ public class CardTemplate extends WidgetGroup {
 
     public static final int CARD_WIDTH = 1191;
     public static final int CARD_HEIGHT = 1254;
-    private static final int DISABLED_AREA_LEFT = 215;
-    private static final int DISABLED_AREA_BOTTOM = 75;
 
     private ArtifactInfo artifactInfo;
     private ConditionInfo conditionInfo;
@@ -44,6 +49,7 @@ public class CardTemplate extends WidgetGroup {
     private TokenCardInfo tokenCardInfo;
 
     private Image foreground;
+    private Image disabledImage;
 
     private CardTemplate(String textureId,
                          String title,
@@ -58,6 +64,8 @@ public class CardTemplate extends WidgetGroup {
                          String cardTypeTexture,
                          boolean isDisabled) {
 
+        System.out.println(title + " Disabled: " + isDisabled);
+
         loadPicture(textureId, () -> {
             loadCardDescriptionBackground(descriptionBackgroundColor, () -> {
                 loadCardTitle(title, titleBackgroundColor, titleFontColor, () -> {
@@ -66,6 +74,7 @@ public class CardTemplate extends WidgetGroup {
                         loadCardType(cardTypeTexture);
                         loadTraits(traitSet, traitsColor);
                         loadDescription(description, descriptionColor);
+                        loadDisabled(isDisabled);
                         loadForeground();
                     });
                 });
@@ -202,6 +211,27 @@ public class CardTemplate extends WidgetGroup {
         }
     }
 
+    private void loadDisabled(boolean isDisabled) {
+        String disabledTexture = "card/disabled.png";
+        getTextureAsync(disabledTexture).subscribe(t -> {
+            disabledImage = new Image(getTextureRegionDrawable(disabledTexture));
+            disabledImage.setOrigin(Align.center);
+            disabledImage.setScale(0.70f);
+            disabledImage.setPosition(CARD_WIDTH/2f-disabledImage.getWidth()/2f,
+                    CARD_HEIGHT/4f-disabledImage.getHeight()/2f);
+
+            if (!isDisabled) {
+                disabledImage.getColor().a = 0.0f;
+            }
+
+            if (foreground != null) {
+                addActorBefore(foreground, disabledImage);
+            } else {
+                addActor(disabledImage);
+            }
+        });
+    }
+
     public static CardTemplate buildCard(CardInfo cardInfo) {
         if (cardInfo instanceof AssetInfo) {
             return buildCard(((AssetInfo) cardInfo));
@@ -305,14 +335,14 @@ public class CardTemplate extends WidgetGroup {
     public static CardTemplate buildClueCard() {
         CardTemplate cardTemplate = new CardTemplate("card/special/clue.jpg",
                 get("card.clue.title"),
-                Color.valueOf("583878"),
-                Color.valueOf("F0E8F4"),
-                Color.valueOf("C9C1D0"),
+                Color.valueOf("4A7A43"),
+                Color.valueOf("E8F1E5"),
+                Color.valueOf("D4E0CF"),
                 null,
                 null,
-                Color.valueOf("684183"),
+                Color.valueOf("5E8F57"),
                 get("card.clue.description"),
-                Color.valueOf("211B24"),
+                Color.valueOf("1B2118"),
                 null,
                 false);
 
@@ -325,14 +355,14 @@ public class CardTemplate extends WidgetGroup {
 
         CardTemplate cardTemplate = new CardTemplate("card/special/train.jpg",
                 get("card.trainTicket.title"),
-                Color.valueOf("583878"),
-                Color.valueOf("F0E8F4"),
-                Color.valueOf("C9C1D0"),
+                Color.valueOf("4A7A43"),
+                Color.valueOf("E8F1E5"),
+                Color.valueOf("D4E0CF"),
                 null,
                 null,
-                Color.valueOf("684183"),
+                Color.valueOf("5E8F57"),
                 get("card.trainTicket.description"),
-                Color.valueOf("211B24"),
+                Color.valueOf("1B2118"),
                 null,
                 false);
 
@@ -345,14 +375,14 @@ public class CardTemplate extends WidgetGroup {
 
         CardTemplate cardTemplate = new CardTemplate("card/special/ship.jpg",
                 get("card.shipTicket.title"),
-                Color.valueOf("583878"),
-                Color.valueOf("F0E8F4"),
-                Color.valueOf("C9C1D0"),
+                Color.valueOf("4A7A43"),
+                Color.valueOf("E8F1E5"),
+                Color.valueOf("D4E0CF"),
                 null,
                 null,
-                Color.valueOf("684183"),
+                Color.valueOf("5E8F57"),
                 get("card.shipTicket.description"),
-                Color.valueOf("211B24"),
+                Color.valueOf("1B2118"),
                 null,
                 false);
 
@@ -424,7 +454,9 @@ public class CardTemplate extends WidgetGroup {
     }
 
     public void setForegroundColor(Color color) {
-        foreground.setColor(color);
+        if (foreground != null) {
+            foreground.setColor(color);
+        }
     }
 
     public Image getForeground() {
@@ -462,14 +494,11 @@ public class CardTemplate extends WidgetGroup {
     public Completable disable() {
         return Completable.create(onSub -> {
             updateDisabledPositionAndScale();
-            /*
-            disabled.addAction(new FastForwardAction<>(sequence(
-                    alpha(0.75f, ViewProperties.FADING_EFFECT_DURATION),
+            disabledImage.addAction(new FastForwardAction<>(sequence(
+                    alpha(1f, ViewProperties.FADING_EFFECT_DURATION),
                     delay(FAST_ACTION_DURATION),
                     Actions.run(onSub::onCompleted))
             ));
-
-             */
         });
 
     }
@@ -487,5 +516,15 @@ public class CardTemplate extends WidgetGroup {
         disabled.setX(disabled.getX() + (width-newWidth) /2f);
 
          */
+    }
+
+    @Override
+    public float getPrefWidth() {
+        return CARD_WIDTH * getScaleX();
+    }
+
+    @Override
+    public float getPrefHeight() {
+        return CARD_HEIGHT * getScaleY();
     }
 }

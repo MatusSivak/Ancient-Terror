@@ -126,7 +126,7 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
             cardsInRow++;
 
             E cardId = cardInfoToIdFunction.apply(cards.get(i));
-            if (0==0/*unlocked.contains(cardId) && discovered.contains(cardId)*/) {
+            if (unlocked.contains(cardId) && discovered.contains(cardId)) {
                 CardTemplate card = CardTemplate.buildCard(cards.get(i));
                 allCardTemplates.add(card);
                 card.setScale(scale);
