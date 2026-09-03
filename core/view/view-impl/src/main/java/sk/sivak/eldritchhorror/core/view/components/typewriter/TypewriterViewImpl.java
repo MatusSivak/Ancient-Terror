@@ -50,6 +50,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_AREA_PAD_TOP;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_AREA_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_LINE_HEIGHT;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceImproveSkillKeywords;
 
 public class TypewriterViewImpl implements TypewriterView  {
     private TypewriterTableStack typewriterTableStack;
@@ -174,13 +175,32 @@ public class TypewriterViewImpl implements TypewriterView  {
         if (text == null || text.isEmpty()) {
             return text;
         }
-        return text
+        return replaceImproveSkillKeywords(text
                 .replaceAll(BAD_PLACEHOLDER, "[#" + HEX_BAD + "]")
-                .replaceAll(GOOD_PLACEHOLDER, "[#" + HEX_GOOD + "]");
+                .replaceAll(GOOD_PLACEHOLDER, "[#" + HEX_GOOD + "]"));
     }
 
     private void repeatRuns(List<String> runs, CompletableSubscriber onSub) {
-        TypingLabel typingLabel = createTypingLabel(runs.remove(0));
+        String run = runs.remove(0);
+        if (containsPrivateUseGlyph(run)) {
+            Label label = createGlyphSafeLabel(run);
+            typewriterTableStack.peek().getTable().add(label).width(TEXT_AREA_WIDTH * TABLE_SCALE).height(TEXT_LINE_HEIGHT).center().row();
+            if (runs.isEmpty()) {
+                InfoStage.getFastForwardButton().setTypewriterTyping(false);
+                typewriterTableStack.peek().getTable().addAction(Actions.run(onSub::onCompleted));
+            } else {
+                typewriterTableStack.peek().getTable().addAction(new FastForwardAction(Actions.sequence(
+                        Actions.moveBy(0, TEXT_LINE_HEIGHT, NEW_LINE_SPEED),
+                        Actions.run(() -> {
+                            typewriterTableStack.peek().increaseOffsetY(TEXT_LINE_HEIGHT);
+                            repeatRuns(runs, onSub);
+                        })
+                )));
+            }
+            return;
+        }
+
+        TypingLabel typingLabel = createTypingLabel(run);
         typewriterTableStack.peek().getTable().add(typingLabel).width(TEXT_AREA_WIDTH * TABLE_SCALE).height(TEXT_LINE_HEIGHT).center().row();
 
         typingLabel.setTypingListener(new TypingAdapter() {
@@ -211,6 +231,28 @@ public class TypewriterViewImpl implements TypewriterView  {
 
             }
         });
+    }
+
+    private boolean containsPrivateUseGlyph(String text) {
+        if (text == null) {
+            return false;
+        }
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            if (ch >= '\uE000' && ch <= '\uF8FF') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Label createGlyphSafeLabel(String text) {
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), Color.WHITE);
+        Label label = new Label(text, labelStyle);
+        label.setWrap(true);
+        label.setAlignment(Align.center, Align.center);
+        label.setFontScale(FONT_SCALE);
+        return label;
     }
 
     private TypingLabel createTypingLabel(String text) {

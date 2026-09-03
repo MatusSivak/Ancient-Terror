@@ -27,6 +27,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TABLE_SCALE;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_AREA_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceGlyphKeywords;
 
 public class TypewriterQuestionTyper {
     private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.24f;
@@ -85,11 +86,12 @@ public class TypewriterQuestionTyper {
         boolean first = true;
         for (TextButtonWithValue button : buttons) {
             if (!first) {
-                miniTable.add().width((TEXT_AREA_WIDTH * TABLE_SCALE - maxWidth * buttons.size()) / buttons.size() + 1).height(BUTTON_HEIGHT);
+                miniTable.add().width(12f).height(BUTTON_HEIGHT);
             }
             miniTable.add(button.textButton).width(maxWidth).height(BUTTON_HEIGHT);
             first = false;
         }
+        miniTable.center();
         typewriterView.getTable().add(miniTable).padTop(10).padBottom(10).row();
         typewriterView.getTable().addAction(Actions.moveBy(0,
                 15 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED));
@@ -104,6 +106,8 @@ public class TypewriterQuestionTyper {
             TextButton button = typewriterView.createTextButton(buttonData.buttonText);
             button.getLabel().setColor(buttonData.buttonColor);
             button.getLabel().setFontScale(FONT_SCALE);
+            button.getLabel().setAlignment(Align.center, Align.center);
+            button.getLabelCell().growX();
 
             TextButtonWithValue textButtonWithValue = new TextButtonWithValue(button);
             textButtonWithValue.setButtonId(i);
@@ -125,17 +129,21 @@ public class TypewriterQuestionTyper {
 
             StringBuilder stringBuilder = new StringBuilder();
             buttonData.buttonColor = new Color(glyphLayout.runs.get(0).color);
-            for (GlyphLayout.GlyphRun run : glyphLayout.runs) {
-                for (BitmapFont.Glyph glyph : run.glyphs) {
-                    stringBuilder.append((char) glyph.id);
+            if (answerModified.contains("\n")) {
+                buttonData.buttonText = answerModified;
+            } else {
+                for (GlyphLayout.GlyphRun run : glyphLayout.runs) {
+                    for (BitmapFont.Glyph glyph : run.glyphs) {
+                        stringBuilder.append((char) glyph.id);
+                    }
+                    if (stringBuilder.charAt(stringBuilder.length() - 1) == ' ') {
+                        stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
+                    }
+                    stringBuilder.append("\n");
                 }
-                if (stringBuilder.charAt(stringBuilder.length() - 1) == ' ') {
-                    stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
-                }
-                stringBuilder.append("\n");
+                stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
+                buttonData.buttonText = stringBuilder.toString();
             }
-            stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
-            buttonData.buttonText = stringBuilder.toString();
             buttonDatas.add(buttonData);
         }
 
@@ -148,12 +156,15 @@ public class TypewriterQuestionTyper {
         float width = 0f;
 
         for (String answer : answers) {
-            layout.setText(font, answer);
-            width = Math.max(width, layout.width);
+            String[] lines = answer.split("\n");
+            for (String line : lines) {
+                layout.setText(font, line);
+                width = Math.max(width, layout.width);
+            }
         }
 
         System.out.println(answers + ", findButtonWidth: " + width);
-        return Math.max(width * 1.1f, TypewriterConstants.MIN_BUTTON_WIDTH);
+        return Math.max(width + 15, TypewriterConstants.MIN_BUTTON_WIDTH);
         /* TODO clamp
         return MathUtils.clamp(
                 ,
@@ -167,7 +178,8 @@ public class TypewriterQuestionTyper {
     private List<String> replacePlaceholdersInAnswers(String[] answers) {
         List<String> answersModified1 = new LinkedList<>();
         for (String answer : answers) {
-            answersModified1.add(typewriterView.replacePlaceholders(answer));
+            String formattedAnswer = typewriterView.replacePlaceholders(answer);
+            answersModified1.add(replaceGlyphKeywords(formattedAnswer));
         }
         return answersModified1;
     }

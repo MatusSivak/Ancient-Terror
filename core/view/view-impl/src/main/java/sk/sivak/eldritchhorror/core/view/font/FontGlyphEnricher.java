@@ -25,6 +25,7 @@ public class FontGlyphEnricher {
 		glyphMap.put("Will", GLYPH_WILL);
 		glyphMap.put("Lore", GLYPH_LORE);
 		glyphMap.put("→", GLYPH_ARROW);
+
 	}
 
 	public static boolean containsGlyph(String glyphName) {
@@ -35,22 +36,36 @@ public class FontGlyphEnricher {
 		return glyphMap.get(glyphName);
 	}
 
+
+
 	public static void enrich(BitmapFont bitmapFont) {
 		int renderWidth = 90;
 		int renderHeight = 90;
 		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/influence.png"), GLYPH_INFLUENCE, renderWidth,renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/strength.png"), GLYPH_STRENGTH, renderWidth,renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/observation.png"), GLYPH_OBSERVATION, renderWidth,renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/will.png"), GLYPH_WILL, renderWidth,renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/will.png"), GLYPH_WILL, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/lore.png"), GLYPH_LORE, renderWidth,renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/arrow.png"), GLYPH_ARROW, 90,90);
 	}
+
 	private static void addIconGlyph(
 			BitmapFont font,
 			TextureRegion icon,
 			char character,
 			int renderWidth,
 			int renderHeight
+	) {
+		addIconGlyph(font, icon, character, renderWidth, renderHeight, 0);
+	}
+
+	private static void addIconGlyph(
+			BitmapFont font,
+			TextureRegion icon,
+			char character,
+			int renderWidth,
+			int renderHeight,
+			int yOffsetAdjustment
 	) {
 		BitmapFont.BitmapFontData data = font.getData();
 
@@ -82,7 +97,7 @@ public class FontGlyphEnricher {
 		glyph.xoffset = 0;
 
 		BitmapFont.Glyph referenceGlyph = data.getGlyph('A');
-		glyph.yoffset = referenceGlyph.yoffset + (referenceGlyph.height - renderHeight) / 2;
+		glyph.yoffset = referenceGlyph.yoffset + (referenceGlyph.height - renderHeight) / 2 + yOffsetAdjustment;
 
 		// Horizontal space occupied by icon.
 		glyph.xadvance = renderWidth + 2;

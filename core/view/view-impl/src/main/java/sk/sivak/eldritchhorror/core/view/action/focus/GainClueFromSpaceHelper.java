@@ -66,13 +66,13 @@ public final class GainClueFromSpaceHelper {
                         Actions.rotateTo(360, normalActionDuration, sine),
                         Actions.moveTo(
                                 ViewProperties.VIEWPORT_WIDTH / 2f - clueActor.getWidth() / 2,
-                                ViewProperties.VIEWPORT_HEIGHT / 2f - clueActor.getWidth() / 2,
+                                ViewProperties.VIEWPORT_HEIGHT / 2f - clueActor.getHeight() / 2,
                                 normalActionDuration, sine),
                         Actions.scaleTo(4, 4, normalActionDuration, sine)
                 ),
                 Actions.parallel(
-                        Actions.moveTo(emptyContainerPosition.x - (clueActor.getWidth() * targetScale)/2f,
-                                emptyContainerPosition.y - (clueActor.getHeight() * targetScale)/2f, normalActionDuration, sine),
+                        Actions.moveTo(emptyContainerPosition.x - (clueActor.getWidth() * targetScale)/2f - 7,
+                                emptyContainerPosition.y - (clueActor.getHeight() * targetScale)/2f - 7, normalActionDuration, sine),
                         Actions.rotateTo(0, normalActionDuration, sine),
                         Actions.scaleTo(targetScale, targetScale, normalActionDuration, sine)
                 ),

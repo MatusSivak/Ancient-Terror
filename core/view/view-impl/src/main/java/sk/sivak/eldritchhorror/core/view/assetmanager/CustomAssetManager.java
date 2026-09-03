@@ -502,7 +502,7 @@ public class CustomAssetManager extends AssetManager {
 
     public static BitmapFont getBitmapFontNew(String fontId) {
         BitmapFont bitmapFont = commonLoad(fontId, BitmapFont.class);
-        if (Objects.equals(fontId, NEW_FONT_SOURCE_SERIF_4)) {
+        if (Objects.equals(fontId, NEW_FONT_SOURCE_SERIF_4) || Objects.equals(fontId, NEW_FONT_SPECIAL_ELITE)) {
             FontGlyphEnricher.enrich(bitmapFont);
         }
         if (Objects.equals(fontId, NEW_FONT_SPECIAL_ELITE)) {
