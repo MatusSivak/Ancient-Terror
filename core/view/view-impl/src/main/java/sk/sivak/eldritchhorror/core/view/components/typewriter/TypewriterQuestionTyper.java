@@ -100,8 +100,9 @@ public class TypewriterQuestionTyper {
     private LinkedList<TextButtonWithValue> createButtons(List<ButtonData> buttonDatas) {
         LinkedList<TextButtonWithValue> buttons = new LinkedList<>();
         for (int i = 0; i < buttonDatas.size(); i++) {
-            TextButton button = typewriterView.createTextButton(buttonDatas.get(i).buttonText);
-            button.getLabel().setColor(Color.WHITE);
+            ButtonData buttonData = buttonDatas.get(i);
+            TextButton button = typewriterView.createTextButton(buttonData.buttonText);
+            button.getLabel().setColor(buttonData.buttonColor);
             button.getLabel().setFontScale(FONT_SCALE);
 
             TextButtonWithValue textButtonWithValue = new TextButtonWithValue(button);
@@ -114,11 +115,13 @@ public class TypewriterQuestionTyper {
     private List<ButtonData> createButtonDatas(List<String> answersModified1, float maxWidth) {
         List<ButtonData> buttonDatas = new LinkedList<>();
         GlyphLayout glyphLayout = new GlyphLayout();
+        BitmapFont buttonFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
+        buttonFont.getData().markupEnabled = true;
         for (String answerModified : answersModified1) {
             ButtonData buttonData = new ButtonData();
 
             glyphLayout.reset();
-            glyphLayout.setText(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), answerModified, Color.WHITE, maxWidth, Align.center, true);
+            glyphLayout.setText(buttonFont, answerModified, Color.WHITE, maxWidth, Align.center, true);
 
             StringBuilder stringBuilder = new StringBuilder();
             buttonData.buttonColor = new Color(glyphLayout.runs.get(0).color);
