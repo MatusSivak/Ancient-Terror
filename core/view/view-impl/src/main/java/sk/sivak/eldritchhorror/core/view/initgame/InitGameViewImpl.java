@@ -65,8 +65,12 @@ import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.A
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_NORMAL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_PRESSED;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH_TITLE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.loadTextures1;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
@@ -108,10 +112,10 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private static final int FLAGS_ROWS = 13;
     private static final String LANGUAGE_ENGLISH = "en";
     private static final String LANGUAGE_SLOVAK = "sk";
-    private static final float MENU_VERTICAL_OFFSET = -45f;
+    private static final float MENU_VERTICAL_OFFSET = -100f;
     private static final float SPLASH_TITLE_SCALE = 0.6f;
-    private static final float MAIN_MENU_BUTTON_WIDTH = 400f;
-    private static final float MAIN_MENU_BUTTON_HEIGHT = 100f;
+    private static final float MAIN_MENU_BUTTON_WIDTH = 2172f;
+    private static final float MAIN_MENU_BUTTON_HEIGHT = 724f;
 
     public void setDefaultSkin(Skin skin) {
         this.skin = skin;
@@ -493,16 +497,21 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     private TextButton createMainMenuButton(String text) {
         TextButton.TextButtonStyle baseStyle = new TextButton("", skin).getStyle();
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(baseStyle);
-        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_NORMAL);
-        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_PRESSED);
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
+        style.fontColor = Color.valueOf("D2DADF");
+        style.downFontColor = Color.valueOf("98A9B2");
+        style.overFontColor = Color.valueOf("4F8DB7");
+        style.checkedFontColor = style.fontColor;
+        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_PRESSED);
+        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_NORMAL);
         style.over = style.up;
-        style.checked = style.down;
+        style.checked = style.up;;
 
         TextButton button = new TextButton(text, style);
-        button.getLabel().setFontScale(0.5f);
-        button.setSize(MAIN_MENU_BUTTON_WIDTH, MAIN_MENU_BUTTON_HEIGHT);
-        button.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        button.getLabel().setFontScale(0.45f);
+        button.padBottom(5);
+        button.setSize(MAIN_MENU_BUTTON_WIDTH * 0.13f, MAIN_MENU_BUTTON_HEIGHT * 0.13f);
         return button;
     }
 
