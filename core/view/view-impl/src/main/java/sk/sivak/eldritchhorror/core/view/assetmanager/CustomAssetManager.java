@@ -52,6 +52,11 @@ public class CustomAssetManager extends AssetManager {
         get().load(TICK, Texture.class);
         get().load("skills.png", Texture.class);
         get().load("skills_labels.png", Texture.class);
+        get().load(MAIN_MENU_BUTTON_NORMAL, Texture.class);
+        get().load(MAIN_MENU_BUTTON_PRESSED, Texture.class);
+        get().load(MAIN_MENU_DIALOG, Texture.class);
+        get().load(MAIN_MENU_DIALOG_BUTTON_NORMAL, Texture.class);
+        get().load(MAIN_MENU_DIALOG_BUTTON_PRESSED, Texture.class);
         get().load("background/gray.jpg", Texture.class);
         get().load("background/pure_white.png", Texture.class);
         if (!isRuntimeFontGenerationEnabled()) {
@@ -344,6 +349,12 @@ public class CustomAssetManager extends AssetManager {
     public final static String ACTION_BUTTON_DISABLED_NORMAL = "action_button/disabled.png";
     public final static String ACTION_BUTTON_DISABLED_PRESSED = "action_button/disabled_pressed.png";
     public final static String ACTION_BUTTON_DISABLED_CHECKED = "action_button/disabled_checked.png";
+
+    public final static String MAIN_MENU_BUTTON_NORMAL = "main_menu_button/normal.png";
+    public final static String MAIN_MENU_BUTTON_PRESSED = "main_menu_button/pressed.png";
+    public final static String MAIN_MENU_DIALOG = "main_menu_button/dialog.png";
+    public final static String MAIN_MENU_DIALOG_BUTTON_NORMAL = "main_menu_button/dialog_button_normal.png";
+    public final static String MAIN_MENU_DIALOG_BUTTON_PRESSED = "main_menu_button/dialog_button_pressed.png";
 
     public final static String ACTION_BUTTON_CARD_MASK_SHADOW = "action_button/card_mask_shadow.png";
     public final static String ACTION_BUTTON_CARD_MASK = "action_button/card_mask.png";

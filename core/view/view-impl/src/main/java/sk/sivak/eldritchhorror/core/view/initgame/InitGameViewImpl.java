@@ -63,6 +63,8 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.AD_MOB;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_NORMAL;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_PRESSED;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH_TITLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.loadTextures1;
@@ -108,6 +110,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private static final String LANGUAGE_SLOVAK = "sk";
     private static final float MENU_VERTICAL_OFFSET = -45f;
     private static final float SPLASH_TITLE_SCALE = 0.6f;
+    private static final float MAIN_MENU_BUTTON_WIDTH = 400f;
+    private static final float MAIN_MENU_BUTTON_HEIGHT = 100f;
 
     public void setDefaultSkin(Skin skin) {
         this.skin = skin;
@@ -118,9 +122,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
         return Single.<Integer>create(sub -> {
             numberOfPlayersSingleSubscriber = sub;
             loadTextures1();
-            nrPlayersDialog.getColor().a = 0f;
+            nrPlayersDialog.getColor().a = 1f;
             nrPlayersDialog.show(stage);
-            nrPlayersDialog.setY(305);
+            nrPlayersDialog.setSize(420f, 220f);
+            nrPlayersDialog.setPosition(
+                    stage.getWidth() / 2f - nrPlayersDialog.getWidth() / 2f,
+                    stage.getHeight() / 2f - nrPlayersDialog.getHeight() / 2f + 120f
+            );
             nrPlayersDialog.setSubscriber(sub);
         }).doOnSuccess(x -> {
             collectionButton.remove();
@@ -213,6 +221,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
                 sub.onSuccess(DifficultyId.NORMAL);
             });
 
+            dialog.setSize(430f, 220f);
             dialog.setPosition(VIEWPORT_WIDTH/2f - dialog.getWidth()/2,
                     VIEWPORT_HEIGHT/2f - dialog.getHeight()/2f);
             stage.addActor(dialog);
@@ -264,7 +273,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
         NewMusicBox.getInstance().changeMusic(NewMusicBox.TRACK_HORROR_GAME_INTRO);
 
 
-        replayTutorialButton = createNiceButton(get("init.tutorial"));
+        replayTutorialButton = createMainMenuButton(get("init.tutorial"));
         replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, 245 + MENU_VERTICAL_OFFSET);
         addClickListener(replayTutorialButton, () -> {
             GoogleServicesHolder.setTutorialPassed(false);
@@ -278,13 +287,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         });
 
-        collectionButton = createNiceButton(get("init.cardsCollection"));
+        collectionButton = createMainMenuButton(get("init.cardsCollection"));
         collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, 185 + MENU_VERTICAL_OFFSET);
         addClickListener(collectionButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.CARDS);
         });
 
-        hallOfFameButton = createNiceButton(get("init.hallOfFame"));
+        hallOfFameButton = createMainMenuButton(get("init.hallOfFame"));
         hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, 125 + MENU_VERTICAL_OFFSET);
         addClickListener(hallOfFameButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.HALL_OF_FAME);
@@ -307,12 +316,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         if (Gdx.files.local("save.json").exists()) {
 
-            loadGameButton = createNiceButton(get("init.continue"));
+            loadGameButton = createMainMenuButton(get("init.continue"));
             loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, 365 + MENU_VERTICAL_OFFSET);
             stage.addActor(loadGameButton);
             ButtonUtils.addClickListener(loadGameButton, continueGameAction);
 
-            newGameButton = createNiceButton(get("init.newGame"));
+            newGameButton = createMainMenuButton(get("init.newGame"));
             newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, 305 + MENU_VERTICAL_OFFSET);
             stage.addActor(newGameButton);
 
@@ -480,6 +489,21 @@ public class InitGameViewImpl implements Screen, InitGameView {
         niceButton.setSize(280, 50);
         niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
         return niceButton;
+    }
+
+    private TextButton createMainMenuButton(String text) {
+        TextButton.TextButtonStyle baseStyle = new TextButton("", skin).getStyle();
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(baseStyle);
+        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_NORMAL);
+        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_PRESSED);
+        style.over = style.up;
+        style.checked = style.down;
+
+        TextButton button = new TextButton(text, style);
+        button.getLabel().setFontScale(0.5f);
+        button.setSize(MAIN_MENU_BUTTON_WIDTH, MAIN_MENU_BUTTON_HEIGHT);
+        button.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        return button;
     }
 
     @Override

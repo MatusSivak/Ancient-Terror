@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -7,8 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
+import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 import java.util.List;
+
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_NORMAL;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_PRESSED;
 
 /**
  * @author msivak
@@ -19,11 +26,34 @@ public class SelectAncientOneDialog extends Dialog {
 
     public SelectAncientOneDialog(String title, Skin skin) {
         super(title, skin);
+        setBackground(CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG));
+        setModal(true);
+        setMovable(false);
+        setResizable(false);
+        setTransform(true);
+        setScale(0.8f);
+        getContentTable().pad(22f, 26f, 12f, 26f);
+        getContentTable().defaults().space(12f);
+        setSize(520f, 280f);
     }
 
     void init(List<AncientOneInfo> ancientOnes) {
         for (AncientOneInfo ancientOne : ancientOnes) {
-            TextButton button = new TextButton(ancientOne.getAncientOneId().name(), getSkin());
+            TextButton button = new TextButton(ancientOne.getAncientOneId().name(), createDialogButtonStyle()) {
+                @Override
+                public float getPrefWidth() {
+                    return 200f;
+                }
+
+                @Override
+                public float getPrefHeight() {
+                    return 46f;
+                }
+            };
+            button.setTransform(true);
+            button.setScale(0.34f);
+            button.setSize(200f, 46f);
+            button.getLabel().setFontScale(0.45f);
             getContentTable().add(button);
             button.addListener(new SelectAncientOneDialog.ButtonListener(ancientOne));
         }
@@ -31,6 +61,16 @@ public class SelectAncientOneDialog extends Dialog {
 
     public void setSubscriber(SingleSubscriber<? super AncientOneInfo> subscriber) {
         this.subscriber = subscriber;
+    }
+
+    private TextButton.TextButtonStyle createDialogButtonStyle() {
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_NORMAL);
+        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_PRESSED);
+        style.over = style.up;
+        style.font = CustomAssetManager.getBitmapFont(FONT_ADLER);
+        style.fontColor = Color.WHITE;
+        return style;
     }
 
     private class ButtonListener extends ClickListener {
