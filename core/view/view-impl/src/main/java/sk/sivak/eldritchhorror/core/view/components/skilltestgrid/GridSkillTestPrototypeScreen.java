@@ -315,12 +315,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void onBoardStable() {
+        if (tacticalEffectPreservingNextToken) {
+            releaseNextTokenFromTacticalEffect();
+        }
         if (controller.shouldFinishWhenStable()) {
             finishTest();
             return;
-        }
-        if (tacticalEffectPreservingNextToken) {
-            releaseNextTokenFromTacticalEffect();
         }
         refreshNextTokenPreview();
         setNextTokenPreviewVisible(true);
@@ -517,7 +517,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             Gdx.app.log("SWAP", "onSwapComplete called with pos1=(" + pos1.getRow() + "," + pos1.getColumn() + ") pos2=(" + pos2.getRow() + "," + pos2.getColumn() + ")");
             boardActor.setInteractionEnabled(false);
             reserveNextTokenForTacticalEffect();
-            controller.useSwap();
             int shiftsBefore = controller.getMovesRemaining();
             MatchResolution resolution = controller.performSwap(pos1, pos2);
             int bonusShifts = controller.getMovesRemaining() - shiftsBefore;
@@ -551,7 +550,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         } else {
             Gdx.app.log("SWAP", "onSwapComplete cancelled - pos1 or pos2 is null");
             // Cancelled swap - re-enable normal interaction
-            controller.setState(GridTestState.WAITING_FOR_INPUT);
+            controller.cancelSwapSelection();
             boardActor.setInteractionEnabled(true);
             audio.play(Cue.CANCEL);
             updateCounters();

@@ -51,6 +51,7 @@ public class GridTestControllerRerollTest {
 
         assertEquals(0, controller.getRemainingRerolls());
         assertEquals(movesBefore, controller.getMovesRemaining());
+        assertEquals(0, controller.finish().getMovesUsed());
     }
 
     @Test
@@ -101,6 +102,7 @@ public class GridTestControllerRerollTest {
         assertEquals(1, resolution.getMatchedLines());
         assertEquals(6, controller.getMovesRemaining());
         assertEquals(0, controller.getSuccesses());
+        assertEquals(0, controller.finish().getMovesUsed());
     }
 
     @Test

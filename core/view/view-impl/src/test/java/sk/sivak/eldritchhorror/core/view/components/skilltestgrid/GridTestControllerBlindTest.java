@@ -97,6 +97,7 @@ public class GridTestControllerBlindTest {
         } catch (IllegalStateException expected) {
             assertSame(committed, controller.getCommittedBlindMove());
         }
+        assertEquals(0, controller.finish().getMovesUsed());
     }
 
     @Test
@@ -119,6 +120,15 @@ public class GridTestControllerBlindTest {
         assertEquals(generatedNext, controller.getBoard().getCell(0, 0));
         assertEquals(2, controller.getMovesRemaining());
         assertEquals(GridTestState.SHIFTING, controller.getState());
+        int consumed = provider.getConsumedCount();
+        try {
+            controller.applyCommittedBlindMove();
+            fail("Blind shift must not execute twice");
+        } catch (IllegalStateException expected) {
+            assertEquals(2, controller.getMovesRemaining());
+            assertEquals(consumed, provider.getConsumedCount());
+        }
+        assertEquals(1, controller.finish().getMovesUsed());
     }
 
     @Test

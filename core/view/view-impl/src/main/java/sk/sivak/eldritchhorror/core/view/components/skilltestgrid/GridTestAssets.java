@@ -9,7 +9,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class GridTestAssets {
+public class GridTestAssets implements GridBoardAssets {
     private static final String SLOT_SYMBOL_ONE = "slot/symbol/1.png";
     private static final String SLOT_SYMBOL_TWO = "slot/symbol/2.png";
     private static final String SLOT_SYMBOL_THREE = "slot/symbol/3.png";
@@ -63,6 +63,11 @@ public class GridTestAssets {
 
     public TextureRegion getBoardBackground() {
         return boardBackground;
+    }
+
+    @Override
+    public TextureRegion getWhitePixel() {
+        return CustomAssetManager.getTextureRegion("background/pure_white.png");
     }
 
     public TextureRegion getOverlayRegion() {

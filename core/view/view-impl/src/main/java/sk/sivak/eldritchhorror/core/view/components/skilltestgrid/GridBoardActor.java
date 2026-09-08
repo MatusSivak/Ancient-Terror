@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -17,7 +18,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.ArrayList;
@@ -25,7 +25,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.parallel;
@@ -66,8 +68,10 @@ public class GridBoardActor extends Group {
     }
 
     private final GridTestController controller;
-    private final GridTestAssets assets;
+    private final GridBoardAssets assets;
+    private final UnaryOperator<Action> animationWrapper;
     private final Group boardLayer;
+    private final Actor inputSurface;
     private final Group spawnLayer;
     private final Group highlightLayer;
     private final GridActionHighlight exhaustedActionHighlight;
@@ -96,20 +100,27 @@ public class GridBoardActor extends Group {
     private float layoutScale = 1f;
     private float boardSize;
     private float cellSize;
+    private GridBoardGeometry geometry = new GridBoardGeometry(0f, SYMBOL_GAP_PX);
     private float swipeStartX;
     private float swipeStartY;
     private int swipeStartRow = -1;
     private int swipeStartColumn = -1;
     private int swipePointer = -1;
 
-    public GridBoardActor(GridTestController controller, GridTestAssets assets) {
-        this.controller = controller;
-        this.assets = assets;
+    public GridBoardActor(GridTestController controller, GridBoardAssets assets) {
+        this(controller, assets, action -> new FastForwardAction<>(action));
+    }
+
+    GridBoardActor(GridTestController controller, GridBoardAssets assets, UnaryOperator<Action> animationWrapper) {
+        this.controller = Objects.requireNonNull(controller, "controller must not be null");
+        this.assets = Objects.requireNonNull(assets, "assets must not be null");
+        this.animationWrapper = Objects.requireNonNull(animationWrapper, "animationWrapper must not be null");
         boardLayer = new Group();
+        inputSurface = new Actor();
         spawnLayer = new Group();
         highlightLayer = new Group();
         exhaustedActionHighlight = new GridActionHighlight(
-                new TextureRegionDrawable(CustomAssetManager.getTextureRegion("background/pure_white.png")));
+                new TextureRegionDrawable(assets.getWhitePixel()));
         symbolLayer = new Group();
         implosionLayer = new Group();
         symbolClipContainer = new Container<>(symbolLayer);
@@ -118,7 +129,7 @@ public class GridBoardActor extends Group {
         backgroundImage = new Image(new TextureRegionDrawable(assets.getBoardBackground()));
         overlayImage = assets.getOverlayRegion() == null ? null : new Image(new TextureRegionDrawable(assets.getOverlayRegion()));
         debugClipBoundsActor = SHOW_DEBUG_CLIP_BOUNDS
-                ? new DebugBoundsActor(CustomAssetManager.getTextureRegion("background/pure_white.png"), DEBUG_CLIP_BOUNDS_THICKNESS_PX, Color.RED)
+                ? new DebugBoundsActor(assets.getWhitePixel(), DEBUG_CLIP_BOUNDS_THICKNESS_PX, Color.RED)
                 : null;
         symbolActors = new GridSymbolActor[GridBoard.SIZE][GridBoard.SIZE];
 
@@ -134,6 +145,7 @@ public class GridBoardActor extends Group {
         if (debugClipBoundsActor != null) {
             boardLayer.addActor(debugClipBoundsActor);
         }
+        boardLayer.addActor(inputSurface);
 
         addActor(boardLayer);
         createBoardSymbols();
@@ -162,6 +174,7 @@ public class GridBoardActor extends Group {
 
     public void setLayoutScale(float layoutScale) {
         this.layoutScale = layoutScale <= 0f ? 1f : layoutScale;
+        geometry = new GridBoardGeometry(cellSize, scaledSymbolGap());
     }
 
     public void setInteractionEnabled(boolean enabled) {
@@ -173,33 +186,25 @@ public class GridBoardActor extends Group {
     }
 
     public void showExhaustedShift(GridMove move) {
-        TokenLayout cell = visualGridOriginCell();
-        exhaustedActionHighlight.show(move, cell.width, cell.x, cell.y);
+        exhaustedActionHighlight.show(move, geometry.getCellSize(), geometry.getOrigin(), geometry.getOrigin());
     }
 
     public void showExhaustedSwap(GridPosition position) {
-        TokenLayout cell = visualGridOriginCell();
-        exhaustedActionHighlight.show(position, cell.width, cell.x, cell.y);
-    }
-
-    private TokenLayout visualGridOriginCell() {
-        TokenLayout bottomLeft = tokenLayout(GridBoard.SIZE - 1, 0);
-        TokenLayout bottomMiddle = tokenLayout(GridBoard.SIZE - 1, 1);
-        float visualCellSize = bottomMiddle.x - bottomLeft.x;
-        float originX = symbolClipContainer.getX() + bottomLeft.x + bottomLeft.width / 2f - visualCellSize / 2f;
-        float originY = symbolClipContainer.getY() + bottomLeft.y + bottomLeft.height / 2f - visualCellSize / 2f;
-        return new TokenLayout(originX, originY, visualCellSize, visualCellSize);
+        exhaustedActionHighlight.show(position, geometry.getCellSize(), geometry.getOrigin(), geometry.getOrigin());
     }
 
     public void layout(float centerX, float centerY, float desiredBoardSize) {
         exhaustedActionHighlight.hide();
         boardSize = desiredBoardSize;
         cellSize = boardSize / GridBoard.SIZE;
+        geometry = new GridBoardGeometry(cellSize, scaledSymbolGap());
+        clearSwipeState();
         float symbolClipPadding = symbolClipPadding();
         float boardX = centerX - boardSize / 2f;
         float boardY = centerY - boardSize / 2f;
 
         boardLayer.setBounds(boardX, boardY, boardSize, boardSize);
+        inputSurface.setBounds(geometry.getOrigin(), geometry.getOrigin(), geometry.getSize(), geometry.getSize());
         spawnLayer.setBounds(0f, 0f, boardSize, boardSize);
         highlightLayer.setBounds(0f, 0f, boardSize, boardSize);
         float backgroundSize = boardSize * BACKGROUND_SCALE;
@@ -402,7 +407,7 @@ public class GridBoardActor extends Group {
         GridSymbolActor actor = symbolActors[position.getRow()][position.getColumn()];
         actor.clearActions();
         actor.setOrigin(actor.getWidth() / 2f, actor.getHeight() / 2f);
-        actor.addAction(new FastForwardAction<>(sequence(
+        actor.addAction(animationWrapper.apply(sequence(
                 parallel(
                         scaleTo(0.65f, 0.65f, REROLL_HALF_DURATION, Interpolation.sineIn),
                         alpha(0.2f, REROLL_HALF_DURATION, Interpolation.sineIn),
@@ -425,7 +430,7 @@ public class GridBoardActor extends Group {
         GridSymbolActor actor = symbolActors[position.getRow()][position.getColumn()];
         actor.clearActions();
         actor.setOrigin(actor.getWidth() / 2f, actor.getHeight() / 2f);
-        actor.addAction(new FastForwardAction<>(sequence(
+        actor.addAction(animationWrapper.apply(sequence(
                 parallel(
                         scaleTo(1.3f, 1.3f, PICKUP_DURATION, Interpolation.sineOut),
                         alpha(0f, PICKUP_DURATION, Interpolation.sineIn),
@@ -481,7 +486,7 @@ public class GridBoardActor extends Group {
 
         for (GridSymbolActor actor : matchedActors) {
             actor.clearActions();
-            actor.addAction(new FastForwardAction<>(sequence(
+            actor.addAction(animationWrapper.apply(sequence(
                     parallel(
                             scaleTo(1f, 1f, REFILL_DURATION, Interpolation.swingOut),
                             alpha(1f, REFILL_DURATION, Interpolation.sineOut)
@@ -591,7 +596,7 @@ public class GridBoardActor extends Group {
             GridSymbolActor actor = actors[i];
             TokenLayout target = targets[i];
             actor.clearActions();
-            actor.addAction(new FastForwardAction<>(sequence(
+            actor.addAction(animationWrapper.apply(sequence(
                     parallel(
                             Actions.moveTo(target.x, target.y, SHIFT_DURATION, Interpolation.sine),
                             Actions.sizeTo(target.width, target.height, SHIFT_DURATION, Interpolation.sine)
@@ -719,7 +724,7 @@ public class GridBoardActor extends Group {
         };
 
         actor1.clearActions();
-        actor1.addAction(new FastForwardAction<>(Actions.sequence(
+        actor1.addAction(animationWrapper.apply(Actions.sequence(
                 Actions.parallel(
                         Actions.moveTo(layout2.x, layout2.y, SHIFT_DURATION, Interpolation.sineOut)
                 ),
@@ -727,7 +732,7 @@ public class GridBoardActor extends Group {
         )));
 
         actor2.clearActions();
-        actor2.addAction(new FastForwardAction<>(Actions.sequence(
+        actor2.addAction(animationWrapper.apply(Actions.sequence(
                 Actions.parallel(
                         Actions.moveTo(layout1.x, layout1.y, SHIFT_DURATION, Interpolation.sineOut)
                 ),
@@ -743,7 +748,7 @@ public class GridBoardActor extends Group {
         boardLayer.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (!canHandleBoardInput() || cellSize <= 0f || !isInsideBoard(x, y)) {
+                if (!canHandleBoardInput() || swipePointer != -1 || cellSize <= 0f || !isInsideBoard(x, y)) {
                     return false;
                 }
                 
@@ -807,6 +812,12 @@ public class GridBoardActor extends Group {
                         }
                         return true;
                     } else {
+                        if (controller.getBoard().isGap(currentPos)) {
+                            if (invalidTargetListener != null) {
+                                invalidTargetListener.run();
+                            }
+                            return true;
+                        }
                         // Invalid selection, try new first selection
                         Gdx.app.log("SWAP", "Non-adjacent token at (" + row + ", " + col + ") - changing first selection");
                         selectFirstSwapToken(currentPos);
@@ -824,6 +835,12 @@ public class GridBoardActor extends Group {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (event.isTouchFocusCancel()) {
+                    if (pointer == swipePointer) {
+                        clearSwipeState();
+                    }
+                    return;
+                }
                 if (!canHandleBoardInput()) {
                     return;
                 }
@@ -844,7 +861,7 @@ public class GridBoardActor extends Group {
 
                 float dx = x - swipeStartX;
                 float dy = y - swipeStartY;
-                if (isTap(dx, dy, cellSize)) {
+                if (isTap(dx, dy, geometry.getCellSize())) {
                     if (isInsideBoard(x, y)
                             && toRow(y) == swipeStartRow && toColumn(x) == swipeStartColumn
                             && tokenTappedListener != null) {
@@ -888,18 +905,15 @@ public class GridBoardActor extends Group {
     }
 
     private boolean isInsideBoard(float x, float y) {
-        return x >= 0f && x <= boardSize && y >= 0f && y <= boardSize;
+        return geometry.contains(x, y);
     }
 
     private int toColumn(float x) {
-        int column = (int) (x / cellSize);
-        return Math.max(0, Math.min(GridBoard.SIZE - 1, column));
+        return geometry.columnAt(x);
     }
 
     private int toRow(float y) {
-        int fromBottom = (int) (y / cellSize);
-        int row = GridBoard.SIZE - 1 - fromBottom;
-        return Math.max(0, Math.min(GridBoard.SIZE - 1, row));
+        return geometry.rowAt(y);
     }
 
     private boolean isOrthogonallyAdjacent(GridPosition pos1, GridPosition pos2) {
@@ -915,14 +929,9 @@ public class GridBoardActor extends Group {
     private Vector2 tokenPosition(int row, int column) {
         float tokenSize = tokenSize();
         float symbolClipPadding = symbolClipPadding();
-        float halfGap = scaledSymbolGap() / 2f;
-        float xOffset = (column - 1) * halfGap;
-        float yOffset = (1 - row) * halfGap;
-        float centerX = column * cellSize + cellSize / 2f;
-        float centerY = (GridBoard.SIZE - row - 0.5f) * cellSize;
         return new Vector2(
-                symbolClipPadding + centerX - tokenSize / 2f + xOffset,
-                symbolClipPadding + centerY - tokenSize / 2f + yOffset
+                symbolClipPadding + geometry.centerX(column) - tokenSize / 2f,
+                symbolClipPadding + geometry.centerY(row) - tokenSize / 2f
         );
     }
 

@@ -113,6 +113,8 @@ public class GridTestControllerPickupTest {
     @Test
     public void pickupCanBeUsedWithNoMovesRemaining() {
         controller.setInitialPickupCount(1);
+        controller.setInitialSwapCount(0);
+        controller.setInitialSuperRerollCount(0);
         controller.startTest(0);
         controller.setDebugBoard(
                 SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,

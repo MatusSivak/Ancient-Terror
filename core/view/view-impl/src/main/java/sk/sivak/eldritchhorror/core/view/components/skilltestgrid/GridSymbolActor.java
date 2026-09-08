@@ -6,11 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 public class GridSymbolActor extends Image {
     private SymbolType symbolType;
 
-    public GridSymbolActor(GridTestAssets assets, SymbolType symbolType) {
+    public GridSymbolActor(GridBoardAssets assets, SymbolType symbolType) {
         setSymbolType(assets, symbolType);
     }
 
-    public void setSymbolType(GridTestAssets assets, SymbolType symbolType) {
+    public void setSymbolType(GridBoardAssets assets, SymbolType symbolType) {
         this.symbolType = symbolType;
         setDrawable(symbolType == null ? null : new TextureRegionDrawable(assets.getSymbolRegion(symbolType)));
     }

@@ -6,9 +6,13 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class GridTestControllerTest {
 
@@ -241,6 +245,8 @@ public class GridTestControllerTest {
                 SymbolType.SIX, SymbolType.TWO, SymbolType.THREE // replacements
         ));
         controller.setInitialPickupCount(0);
+        controller.setInitialSwapCount(0);
+        controller.setInitialSuperRerollCount(0);
         controller.startTest(1);
         controller.setDebugBoard(
                 SymbolType.TWO, SymbolType.FIVE, SymbolType.FIVE,
@@ -256,14 +262,234 @@ public class GridTestControllerTest {
     }
 
     @Test
-    public void zeroMovesAndNoPickupsFinishRegardlessOfBlindMode() {
+    public void zeroMovesAndNoTacticalChargesFinishRegardlessOfBlindMode() {
         for (boolean blind : new boolean[] {false, true}) {
             GridTestController controller = createController(new QueueSymbolProvider());
             controller.setConfiguredBlindEnabled(blind);
             controller.setInitialPickupCount(0);
+            controller.setInitialSwapCount(0);
+            controller.setInitialSuperRerollCount(0);
             controller.startTest(0);
 
             assertTrue(controller.shouldFinishWhenStable());
+        }
+    }
+
+    @Test
+    public void eachAvailableTacticalActionKeepsZeroShiftTestOpenInEveryMode() {
+        for (TestMode mode : TestMode.values()) {
+            for (boolean momentum : new boolean[] {false, true}) {
+                for (boolean blind : new boolean[] {false, true}) {
+                    for (int action = 0; action < 3; action++) {
+                        GridTestController controller = createController(new QueueSymbolProvider());
+                        controller.setSelectedMode(mode);
+                        controller.setConfiguredMomentum(momentum);
+                        controller.setConfiguredBlindEnabled(blind);
+                        controller.setInitialSwapCount(action == 0 ? 1 : 0);
+                        controller.setInitialSuperRerollCount(action == 1 ? 1 : 0);
+                        controller.setInitialPickupCount(action == 2 ? 1 : 0);
+                        controller.startTest(0);
+                        controller.setDebugBoard(
+                                SymbolType.ONE, null, null,
+                                null, null, null,
+                                null, null, null
+                        );
+
+                        controller.setState(GridTestState.CHECKING_MATCHES);
+                        assertFalse(controller.shouldFinishWhenStable());
+                        controller.setState(GridTestState.WAITING_FOR_INPUT);
+                        assertFalse(controller.shouldFinishWhenStable());
+                        assertFalse(controller.canAcceptInput());
+                        assertFalse(controller.canActivateReroll());
+                        assertFalse(controller.beginRerollTargeting());
+
+                        if (action == 0) {
+                            assertTrue(controller.beginSwapSelection(new GridPosition(0, 0)));
+                            MatchResolution resolution = controller.performSwap(new GridPosition(0, 0), new GridPosition(0, 1));
+                            assertEquals(0, resolution.getMatchedLines());
+                            assertEquals(0, controller.getSwapRemaining());
+                            assertNull(controller.getBoard().getCell(0, 0));
+                            assertEquals(SymbolType.ONE, controller.getBoard().getCell(0, 1));
+                            assertEquals(GridTestState.CHECKING_MATCHES, controller.getState());
+                        } else if (action == 1) {
+                            assertTrue(controller.canUseSuperReroll());
+                            assertEquals(1, controller.performSuperReroll(new FixedReroller(SymbolType.TWO)).size());
+                            assertEquals(0, controller.getSuperRerollsRemaining());
+                            assertEquals(SymbolType.TWO, controller.getBoard().getCell(0, 0));
+                        } else {
+                            assertTrue(controller.startPickupMode());
+                            assertEquals(SymbolType.ONE, controller.pickupToken(0, 0));
+                            assertEquals(0, controller.getPickupsAvailable());
+                            assertEquals(SymbolType.ONE, controller.getNextToken());
+                            assertNull(controller.getBoard().getCell(0, 0));
+                        }
+                        assertTrue(controller.findMatches().isEmpty());
+                        assertTrue(controller.shouldFinishWhenStable());
+                        assertEquals(0, controller.getMovesRemaining());
+                        assertEquals(0, controller.finish().getMovesUsed());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void unusableTacticalChargesDoNotPreventCompletion() {
+        for (TestMode mode : TestMode.values()) {
+            GridTestController empty = createController(new QueueSymbolProvider());
+            empty.setSelectedMode(mode);
+            empty.startTest(0);
+            empty.setDebugBoard(new SymbolType[GridBoard.SIZE * GridBoard.SIZE]);
+            empty.setState(GridTestState.CHECKING_MATCHES);
+            assertTrue(empty.shouldFinishWhenStable());
+            empty.setState(GridTestState.WAITING_FOR_INPUT);
+            assertFalse(empty.beginSwapSelection(new GridPosition(0, 0)));
+            assertFalse(empty.canUseSuperReroll());
+            assertFalse(empty.canUsePickup());
+            assertTrue(empty.shouldFinishWhenStable());
+            assertEquals(3, empty.getSwapRemaining());
+            assertEquals(1, empty.getSuperRerollsRemaining());
+            assertEquals(1, empty.getPickupsAvailable());
+
+            GridTestController scoringOnly = createController(new QueueSymbolProvider());
+            scoringOnly.setSelectedMode(mode);
+            scoringOnly.setInitialSwapCount(0);
+            scoringOnly.setInitialPickupCount(0);
+            scoringOnly.setInitialSuperRerollCount(2);
+            scoringOnly.startTest(0);
+            scoringOnly.setDebugBoard(SymbolType.ONE, null, null, null, null, null, null, null, null);
+            scoringOnly.setState(GridTestState.WAITING_FOR_INPUT);
+            assertFalse(scoringOnly.shouldFinishWhenStable());
+            assertEquals(1, scoringOnly.performSuperReroll(new FixedReroller(SymbolType.FIVE)).size());
+            assertEquals(1, scoringOnly.getSuperRerollsRemaining());
+            assertFalse(scoringOnly.canUseSuperReroll());
+            scoringOnly.setState(GridTestState.CHECKING_MATCHES);
+            assertTrue(scoringOnly.shouldFinishWhenStable());
+
+            GridTestController missingNext = createController(new QueueSymbolProvider() {
+                @Override
+                public SymbolType peekNext() {
+                    return null;
+                }
+            });
+            missingNext.setSelectedMode(mode);
+            missingNext.setInitialSwapCount(0);
+            missingNext.setInitialSuperRerollCount(0);
+            missingNext.startTest(0);
+            missingNext.setState(GridTestState.WAITING_FOR_INPUT);
+            assertTrue(missingNext.getBoard().hasOccupiedCell());
+            assertNull(missingNext.getNextToken());
+            assertEquals(1, missingNext.getPickupsAvailable());
+            assertFalse(missingNext.canUsePickup());
+            assertTrue(missingNext.shouldFinishWhenStable());
+            missingNext.setState(GridTestState.CHECKING_MATCHES);
+            assertTrue(missingNext.shouldFinishWhenStable());
+        }
+    }
+
+    @Test
+    public void availableShiftsPreventCompletionEvenWithoutTacticalCharges() {
+        GridTestController controller = createController(new QueueSymbolProvider());
+        controller.setInitialSwapCount(0);
+        controller.setInitialSuperRerollCount(0);
+        controller.setInitialPickupCount(0);
+        controller.startTest(1);
+        controller.setState(GridTestState.CHECKING_MATCHES);
+        assertFalse(controller.shouldFinishWhenStable());
+    }
+
+    @Test
+    public void bonusShiftsCountAsActualUsesForNormalAndBlindMovesInEveryMode() {
+        for (TestMode mode : TestMode.values()) {
+            for (boolean momentum : new boolean[] {false, true}) {
+                for (boolean blind : new boolean[] {false, true}) {
+                    for (SymbolType symbol : new SymbolType[] {SymbolType.ONE, SymbolType.FIVE}) {
+                        GridTestController controller = createController(new QueueSymbolProvider(
+                                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
+                                SymbolType.FOUR, SymbolType.FIVE, SymbolType.SIX,
+                                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                                symbol, SymbolType.ONE, SymbolType.TWO, SymbolType.THREE, SymbolType.SIX
+                        ));
+                        controller.setSelectedMode(mode);
+                        controller.setConfiguredMomentum(momentum);
+                        controller.setConfiguredBlindEnabled(blind);
+                        controller.startTest(1);
+                        int row;
+                        if (mode == TestMode.CURSED) {
+                            controller.setDebugBoard(symbol, null, null, null, symbol, null, null, null, null);
+                            row = 2;
+                        } else {
+                            controller.setDebugBoard(null, symbol, symbol, null, null, null, null, null, null);
+                            row = 0;
+                        }
+                        controller.setState(GridTestState.WAITING_FOR_INPUT);
+                        applyShift(controller, blind, new GridMove(GridMoveType.ROW_LEFT, row));
+                        assertEquals(0, controller.getMovesRemaining());
+                        MatchResolution resolution = controller.resolveMatches(controller.findMatches());
+                        assertEquals(1, resolution.getMatchedLines());
+                        assertEquals(symbol == SymbolType.FIVE ? 1 : 0, resolution.getSuccessesGained());
+                        boolean bonus = momentum || symbol == SymbolType.ONE;
+                        assertEquals(bonus ? 1 : 0, controller.getMovesRemaining());
+
+                        if (bonus) {
+                            controller.setState(GridTestState.WAITING_FOR_INPUT);
+                            applyShift(controller, blind, new GridMove(GridMoveType.ROW_LEFT, 1));
+                            assertEquals(0, controller.getMovesRemaining());
+                        }
+                        GridTestResult result = controller.finish();
+                        assertEquals(bonus ? 2 : 1, result.getMovesUsed());
+                        assertEquals(bonus ? 2 : 1, controller.finish().getMovesUsed());
+                        controller.startTest(7);
+                        assertEquals(0, controller.finish().getMovesUsed());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void invalidShiftDoesNotSpendMoveOrTokenOrChangeState() {
+        CountingQueueProvider provider = new CountingQueueProvider();
+        GridTestController controller = createController(provider);
+        controller.startTest(1);
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+        SymbolType next = controller.getNextToken();
+        int consumed = provider.consumed;
+        SymbolType firstCell = controller.getBoard().getCell(0, 0);
+
+        try {
+            controller.applyMove(null);
+            fail("Null shift must be rejected before spending");
+        } catch (IllegalArgumentException expected) {
+            assertEquals(1, controller.getMovesRemaining());
+            assertEquals(GridTestState.WAITING_FOR_INPUT, controller.getState());
+            assertEquals(next, controller.getNextToken());
+            assertEquals(consumed, provider.consumed);
+            assertEquals(firstCell, controller.getBoard().getCell(0, 0));
+            assertEquals(0, controller.finish().getMovesUsed());
+        }
+    }
+
+    private static void applyShift(GridTestController controller, boolean blind, GridMove move) {
+        if (blind) {
+            controller.commitBlindMove(move);
+            controller.applyCommittedBlindMove();
+        } else {
+            controller.applyMove(move);
+        }
+    }
+
+    private static class FixedReroller extends SymbolReroller {
+        private final SymbolType result;
+
+        FixedReroller(SymbolType result) {
+            super(new Random(0L));
+            this.result = result;
+        }
+
+        @Override
+        public SymbolType reroll(SymbolType previousSymbol) {
+            return result;
         }
     }
 

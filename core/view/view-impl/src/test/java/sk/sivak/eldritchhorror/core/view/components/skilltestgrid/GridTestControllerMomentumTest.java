@@ -97,10 +97,14 @@ public class GridTestControllerMomentumTest {
                 SymbolType.THREE, SymbolType.FOUR, SymbolType.SIX
         );
 
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+        assertTrue(controller.beginSwapSelection(new GridPosition(0, 2)));
         controller.performSwap(new GridPosition(0, 2), new GridPosition(1, 2));
 
         assertEquals(1, controller.getSuccesses());
         assertEquals(4, controller.getMovesRemaining());
+        assertEquals(2, controller.getSwapRemaining());
+        assertEquals(0, controller.finish().getMovesUsed());
     }
 
     @Test

@@ -7,7 +7,7 @@ import java.util.Map;
 public class GridTestController {
     private final GridBoard board;
     private GridTestState state = GridTestState.INITIALIZING;
-    private int startingMoves;
+    private int movesUsed;
     private int movesRemaining;
     private int successes;
     private int configuredGapCount;
@@ -43,7 +43,7 @@ public class GridTestController {
         if (moves < 0) {
             throw new IllegalArgumentException("moves must be >= 0");
         }
-        startingMoves = moves;
+        movesUsed = 0;
         movesRemaining = moves;
         successes = 0;
         neutralMatchMoveRewardsEnabled = false;
@@ -70,10 +70,12 @@ public class GridTestController {
         if (movesRemaining <= 0) {
             throw new IllegalStateException("No moves remaining");
         }
+        GridShiftOutcome outcome = board.shift(move);
         movesRemaining--;
+        movesUsed++;
         neutralMatchMoveRewardsEnabled = true;
         state = GridTestState.SHIFTING;
-        return board.shift(move);
+        return outcome;
     }
 
     public void commitBlindMove(GridMove move) {
@@ -98,11 +100,13 @@ public class GridTestController {
             throw new IllegalStateException("No Blind move is awaiting insertion");
         }
         GridMove move = committedBlindMove;
+        GridShiftOutcome outcome = board.shift(move);
         committedBlindMove = null;
         movesRemaining--;
+        movesUsed++;
         neutralMatchMoveRewardsEnabled = true;
         state = GridTestState.SHIFTING;
-        return board.shift(move);
+        return outcome;
     }
 
     public List<GridMatch> findMatches() {
@@ -282,11 +286,11 @@ public class GridTestController {
         return true;
     }
 
-    public boolean useSwap() {
-        if (swapRemaining <= 0) {
+    public boolean cancelSwapSelection() {
+        if (state != GridTestState.SWAP_SELECTING) {
             return false;
         }
-        swapRemaining--;
+        setState(GridTestState.WAITING_FOR_INPUT);
         return true;
     }
 
@@ -317,9 +321,11 @@ public class GridTestController {
     }
 
     public boolean canUseSuperReroll() {
-        return state == GridTestState.WAITING_FOR_INPUT
-                && superRerollsRemaining > 0
-                && board.hasSuperRerollCandidates();
+        return state == GridTestState.WAITING_FOR_INPUT && hasAvailableSuperReroll();
+    }
+
+    private boolean hasAvailableSuperReroll() {
+        return superRerollsRemaining > 0 && board.hasSuperRerollCandidates();
     }
 
     public Map<GridPosition, SymbolType> performSuperReroll(SymbolReroller reroller) {
@@ -344,10 +350,19 @@ public class GridTestController {
     }
 
     public MatchResolution performSwap(GridPosition pos1, GridPosition pos2) {
+        if (state != GridTestState.SWAP_SELECTING) {
+            throw new IllegalStateException("Cannot swap in state " + state);
+        }
+        if (swapRemaining <= 0) {
+            throw new IllegalStateException("No Swaps remaining");
+        }
         if (!isValidAdjacentPair(pos1, pos2)) {
             throw new IllegalArgumentException("Positions must be orthogonally adjacent");
         }
         board.swap(pos1, pos2);
+        swapRemaining--;
+        neutralMatchMoveRewardsEnabled = true;
+        state = GridTestState.CHECKING_MATCHES;
         List<GridMatch> matches = findMatches();
         return resolveMatches(matches);
     }
@@ -380,8 +395,11 @@ public class GridTestController {
     }
 
     public boolean canUsePickup() {
-        return state == GridTestState.WAITING_FOR_INPUT
-                && pickupsAvailable > 0
+        return state == GridTestState.WAITING_FOR_INPUT && hasAvailablePickup();
+    }
+
+    private boolean hasAvailablePickup() {
+        return pickupsAvailable > 0
                 && board.getNextToken() != null
                 && board.hasOccupiedCell();
     }
@@ -416,6 +434,9 @@ public class GridTestController {
     }
 
     private boolean isValidAdjacentPair(GridPosition pos1, GridPosition pos2) {
+        if (pos1 == null || pos2 == null) {
+            return false;
+        }
         int rowDiff = Math.abs(pos1.getRow() - pos2.getRow());
         int colDiff = Math.abs(pos1.getColumn() - pos2.getColumn());
         return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
@@ -423,11 +444,13 @@ public class GridTestController {
 
     public boolean shouldFinishWhenStable() {
         return movesRemaining == 0
-                && (pickupsAvailable == 0 || board.getNextToken() == null || !board.hasOccupiedCell());
+                && !(swapRemaining > 0 && board.hasOccupiedCell())
+                && !hasAvailableSuperReroll()
+                && !hasAvailablePickup();
     }
 
     public GridTestResult finish() {
         state = GridTestState.FINISHED;
-        return new GridTestResult(successes, startingMoves - movesRemaining);
+        return new GridTestResult(successes, movesUsed);
     }
 }
