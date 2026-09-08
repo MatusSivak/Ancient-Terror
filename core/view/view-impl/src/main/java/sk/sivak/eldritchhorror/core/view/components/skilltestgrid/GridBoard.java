@@ -97,19 +97,6 @@ public class GridBoard {
         return queuedNextTokens.isEmpty() ? randomProvider.peekNext() : queuedNextTokens.peekFirst();
     }
 
-    public SymbolType insertNextToken(GridPosition position) {
-        if (position == null) {
-            throw new IllegalArgumentException("position must not be null");
-        }
-        SymbolType insertedToken = takeNextToken();
-        if (insertedToken == null) {
-            throw new IllegalStateException("No revealed next token is available");
-        }
-        board[position.getRow()][position.getColumn()] = insertedToken;
-        getNextToken();
-        return insertedToken;
-    }
-
     public SymbolType pickup(GridPosition position) {
         if (position == null) {
             throw new IllegalArgumentException("position must not be null");
@@ -278,26 +265,6 @@ public class GridBoard {
         SymbolType rerolled = reroller.reroll(board[position.getRow()][position.getColumn()]);
         board[position.getRow()][position.getColumn()] = rerolled;
         return rerolled;
-    }
-
-    public void rotateOuterClockwise() {
-        SymbolType topLeft = board[0][0];
-        SymbolType topMiddle = board[0][1];
-        SymbolType topRight = board[0][2];
-        SymbolType middleRight = board[1][2];
-        SymbolType bottomRight = board[2][2];
-        SymbolType bottomMiddle = board[2][1];
-        SymbolType bottomLeft = board[2][0];
-        SymbolType middleLeft = board[1][0];
-
-        board[0][1] = topLeft;
-        board[0][2] = topMiddle;
-        board[1][2] = topRight;
-        board[2][2] = middleRight;
-        board[2][1] = bottomRight;
-        board[2][0] = bottomMiddle;
-        board[1][0] = bottomLeft;
-        board[0][0] = middleLeft;
     }
 
     public List<GridMatch> findMatches() {

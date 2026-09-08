@@ -240,7 +240,6 @@ public class GridTestControllerTest {
                 SymbolType.FIVE, // shift produces 555
                 SymbolType.SIX, SymbolType.TWO, SymbolType.THREE // replacements
         ));
-        controller.setInitialInsertCount(0);
         controller.setInitialPickupCount(0);
         controller.startTest(1);
         controller.setDebugBoard(
@@ -254,6 +253,18 @@ public class GridTestControllerTest {
         assertTrue(controller.shouldFinishWhenStable());
         GridTestResult result = controller.finish();
         assertEquals(1, result.getMovesUsed());
+    }
+
+    @Test
+    public void zeroMovesAndNoPickupsFinishRegardlessOfBlindMode() {
+        for (boolean blind : new boolean[] {false, true}) {
+            GridTestController controller = createController(new QueueSymbolProvider());
+            controller.setConfiguredBlindEnabled(blind);
+            controller.setInitialPickupCount(0);
+            controller.startTest(0);
+
+            assertTrue(controller.shouldFinishWhenStable());
+        }
     }
 
     @Test

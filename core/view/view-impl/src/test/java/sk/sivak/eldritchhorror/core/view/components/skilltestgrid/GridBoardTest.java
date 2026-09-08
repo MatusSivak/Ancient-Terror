@@ -323,19 +323,19 @@ public class GridBoardTest {
     }
 
     @Test
-    public void rotateOuterClockwiseMovesOnlyPerimeterOnePosition() {
-        GridBoard board = new GridBoard(new QueueSymbolProvider());
-        board.setBoard(
-                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
-                SymbolType.FOUR, SymbolType.FIVE, SymbolType.SIX,
-                SymbolType.ONE, SymbolType.TWO, SymbolType.THREE
-        );
+    public void nextTokenReservationSurvivesRefillDraws() {
+        RandomSymbolProvider provider = new RandomSymbolProvider(new Random(42L));
+        SymbolType revealed = provider.peekNext();
 
-        board.rotateOuterClockwise();
+        provider.reserveNextToken();
+        for (int i = 0; i < 12; i++) {
+            provider.next();
+            assertEquals(revealed, provider.peekNext());
+        }
+        provider.releaseNextToken();
 
-        assertRow(board, 0, SymbolType.FOUR, SymbolType.ONE, SymbolType.TWO);
-        assertRow(board, 1, SymbolType.ONE, SymbolType.FIVE, SymbolType.THREE);
-        assertRow(board, 2, SymbolType.TWO, SymbolType.THREE, SymbolType.SIX);
+        assertEquals(revealed, provider.peekNext());
+        assertEquals(revealed, provider.next());
     }
 
     @Test

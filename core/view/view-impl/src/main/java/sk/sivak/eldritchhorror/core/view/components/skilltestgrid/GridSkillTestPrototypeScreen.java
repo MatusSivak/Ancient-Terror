@@ -51,16 +51,14 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Random random;
     private final GridTestAssets assets;
     private final NextTokenPreview nextTokenPreview;
-    private final Label movesLabel;
+    private final Label shiftsLabel;
+    private final Label swapsLabel;
     private final Label successesLabel;
     private final Label gainLabel;
     private final Label endLabel;
     private final TextButton restartButton;
     private final TextButton rerollButton;
     private final TextButton superRerollButton;
-    private final TextButton swapButton;
-    private final TextButton spinButton;
-    private final TextButton insertButton;
     private final TextButton pickupButton;
     private final SelectBox<TestMode> modeSelectBox;
     private final SelectBox<String> gapSelectBox;
@@ -104,12 +102,14 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor = new GridBoardActor(controller, assets);
         boardActor.setLayoutScale(PLAY_AREA_SCALE);
         boardActor.setMoveSelectedListener(this::onMoveSelected);
+        boardActor.setTokenTappedListener(this::onTokenTapped);
         boardActor.setInteractionEnabled(false);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY), Color.WHITE);
         Label.LabelStyle gainStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_ADLER), new Color(0x6fff6fff));
 
-        movesLabel = new Label("moves: 0", titleStyle);
+        shiftsLabel = new Label("Shifts: 0", titleStyle);
+        swapsLabel = new Label("Swaps: 0", titleStyle);
         successesLabel = new Label("successes: 0", titleStyle);
         nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
@@ -117,9 +117,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         restartButton = buildButton("RESTART");
         rerollButton = buildButton("REROLL");
         superRerollButton = buildButton("SUPER REROLL");
-        swapButton = buildButton("SWAP");
-        spinButton = buildButton("SPIN");
-        insertButton = buildButton("INSERT");
         pickupButton = buildButton("PICKUP");
         modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
         modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
@@ -162,11 +159,13 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             }
         });
 
-        configureLabel(movesLabel, Align.center);
+        configureLabel(shiftsLabel, Align.left);
+        configureLabel(swapsLabel, Align.left);
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
         configureLabel(endLabel, Align.center);
-        movesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        shiftsLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        swapsLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         restartButton.setTransform(true);
         restartButton.setOrigin(0f, 0f);
@@ -177,15 +176,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         superRerollButton.setTransform(true);
         superRerollButton.setOrigin(0f, 0f);
         superRerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        swapButton.setTransform(true);
-        swapButton.setOrigin(0f, 0f);
-        swapButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        spinButton.setTransform(true);
-        spinButton.setOrigin(0f, 0f);
-        spinButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        insertButton.setTransform(true);
-        insertButton.setOrigin(0f, 0f);
-        insertButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
         pickupButton.setTransform(true);
         pickupButton.setOrigin(0f, 0f);
         pickupButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
@@ -202,9 +192,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         addClickListener(restartButton, () -> startTest(configuredMoves));
         addClickListener(rerollButton, this::onRerollPressed);
         addClickListener(superRerollButton, this::onSuperRerollPressed);
-        addClickListener(swapButton, this::onSwapPressed);
-        addClickListener(spinButton, this::onSpinPressed);
-        addClickListener(insertButton, this::onInsertPressed);
         addClickListener(pickupButton, this::onPickupPressed);
 
         updateCounters();
@@ -360,13 +347,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void updateCounters() {
-        movesLabel.setText("moves: " + controller.getMovesRemaining());
+        shiftsLabel.setText("Shifts: " + controller.getMovesRemaining());
+        swapsLabel.setText("Swaps: " + controller.getSwapRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
         updateRerollButtonState();
         updateSuperRerollButtonState();
-        updateSwapButtonState();
-        updateSpinButtonState();
-        updateInsertButtonState();
         updatePickupButtonState();
     }
 
@@ -432,95 +417,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         superRerollButton.setText("SUPER REROLL");
     }
 
-    private void onSwapPressed() {
-        if (!canUseSwap()) {
+    private void onTokenTapped(GridPosition position) {
+        if (!controller.beginSwapSelection(position)) {
             return;
         }
-        Gdx.app.log("SWAP", "Swap button clicked");
-        controller.setState(GridTestState.SWAP_SELECTING);
-        boardActor.enterSwapSelectionMode(this::onSwapComplete);
+        boardActor.enterSwapSelectionMode(position, this::onSwapComplete);
         updateCounters();
-    }
-
-    private boolean canUseSwap() {
-        if (controller.getSwapRemaining() <= 0) {
-            return false;
-        }
-        if (controller.getState() != GridTestState.WAITING_FOR_INPUT) {
-            return false;
-        }
-        return true;
-    }
-
-    private void updateSwapButtonState() {
-        boolean canUse = canUseSwap();
-        swapButton.setDisabled(!canUse);
-        // Keep button text simple - count is shown in the "swap: N" label
-        swapButton.setText("SWAP");
-    }
-
-    private void onSpinPressed() {
-        if (!controller.canUseSpin()) {
-            return;
-        }
-
-        boardActor.setInteractionEnabled(false);
-        reserveNextTokenForTacticalEffect();
-        if (!controller.beginSpin()) {
-            releaseNextTokenFromTacticalEffect();
-            return;
-        }
-
-        updateCounters();
-        playTokenMoveSound();
-        boardActor.animateSpin(() -> {
-            controller.completeSpin();
-            startResolutionLoop(false);
-        });
-    }
-
-    private void updateSpinButtonState() {
-        boolean canUse = controller.canUseSpin();
-        spinButton.setDisabled(!canUse);
-        spinButton.setText("SPIN x" + controller.getSpinRemaining());
-    }
-
-    private void onInsertPressed() {
-        if (controller.getState() == GridTestState.INSERT_SELECTING) {
-            controller.cancelInsertMode();
-            boardActor.exitInsertTargetingMode();
-            updateCounters();
-            return;
-        }
-        if (!controller.startInsertMode()) {
-            return;
-        }
-        boardActor.enterInsertTargetingMode(this::onInsertTargetSelected);
-        updateCounters();
-    }
-
-    private void onInsertTargetSelected(GridPosition position) {
-        if (controller.getState() != GridTestState.INSERT_SELECTING) {
-            return;
-        }
-        boardActor.setInteractionEnabled(false);
-        SymbolType insertedToken = controller.insertNextToken(position.getRow(), position.getColumn());
-        reserveNextTokenForTacticalEffect();
-        refreshNextTokenPreview();
-        setNextTokenPreviewVisible(true);
-        controller.setState(GridTestState.MATCH_ANIMATION);
-        updateCounters();
-        boardActor.animateInsert(position, insertedToken, () -> startResolutionLoop(false));
-    }
-
-    private void updateInsertButtonState() {
-        boolean selecting = controller.getState() == GridTestState.INSERT_SELECTING;
-        boolean available = controller.getInsertsAvailable() > 0;
-        insertButton.setVisible(available);
-        insertButton.setDisabled(!selecting && !controller.canUseInsert());
-        insertButton.setText(selecting
-                ? "CANCEL INSERT"
-                : "INSERT x" + controller.getInsertsAvailable());
     }
 
     private void onPickupPressed() {
@@ -732,9 +634,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         Table statsTable = new Table();
         statsTable.align(Align.left);
         
-        movesLabel.setFontScale(statsFontScale);
+        shiftsLabel.setFontScale(statsFontScale);
+        swapsLabel.setFontScale(statsFontScale);
         successesLabel.setFontScale(statsFontScale);
-        statsTable.add(movesLabel).left().padBottom(2f).row();
+        statsTable.add(shiftsLabel).left().padBottom(2f).row();
+        statsTable.add(swapsLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
         
         panel.add(statsTable).left().padBottom(12f).row();
@@ -767,22 +671,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         superRerollButton.setScale(controlScale);
         panel.add(superRerollButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
         
-        // Swap button
-        swapButton.setTransform(true);
-        swapButton.setOrigin(0f, 0f);
-        swapButton.setScale(controlScale);
-        panel.add(swapButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
-
-        spinButton.setTransform(true);
-        spinButton.setOrigin(0f, 0f);
-        spinButton.setScale(controlScale);
-        panel.add(spinButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
-
-        insertButton.setTransform(true);
-        insertButton.setOrigin(0f, 0f);
-        insertButton.setScale(controlScale);
-        panel.add(insertButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
-
         pickupButton.setTransform(true);
         pickupButton.setOrigin(0f, 0f);
         pickupButton.setScale(controlScale);

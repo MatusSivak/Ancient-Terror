@@ -25,15 +25,9 @@ public class GridTestController {
     private static final int INITIAL_SWAP_COUNT = 3;
     private int initialSwapCount = INITIAL_SWAP_COUNT;
     private int swapRemaining;
-    private static final int INITIAL_SPIN_COUNT = 1;
-    private int initialSpinCount = INITIAL_SPIN_COUNT;
-    private int remainingSpins;
     private static final int INITIAL_SUPER_REROLL_COUNT = 1;
     private int initialSuperRerollCount = INITIAL_SUPER_REROLL_COUNT;
     private int superRerollsRemaining;
-    private static final int INITIAL_INSERT_COUNT = 1;
-    private int initialInsertCount = INITIAL_INSERT_COUNT;
-    private int insertsAvailable;
     private static final int INITIAL_PICKUP_COUNT = 1;
     private int initialPickupCount = INITIAL_PICKUP_COUNT;
     private int pickupsAvailable;
@@ -60,9 +54,7 @@ public class GridTestController {
         committedBlindMove = null;
         remainingRerolls = startingRerolls;
         swapRemaining = initialSwapCount;
-        remainingSpins = initialSpinCount;
         superRerollsRemaining = initialSuperRerollCount;
-        insertsAvailable = initialInsertCount;
         pickupsAvailable = initialPickupCount;
         board.generateRandomBoard(activeMode, configuredGapCount);
     }
@@ -279,6 +271,17 @@ public class GridTestController {
         return swapRemaining;
     }
 
+    public boolean beginSwapSelection(GridPosition position) {
+        if (position == null) {
+            throw new IllegalArgumentException("position must not be null");
+        }
+        if (state != GridTestState.WAITING_FOR_INPUT || swapRemaining <= 0 || board.isGap(position)) {
+            return false;
+        }
+        state = GridTestState.SWAP_SELECTING;
+        return true;
+    }
+
     public boolean useSwap() {
         if (swapRemaining <= 0) {
             return false;
@@ -296,49 +299,6 @@ public class GridTestController {
             throw new IllegalArgumentException("initialSwapCount must be >= 0");
         }
         this.initialSwapCount = count;
-    }
-
-    public int getSpinRemaining() {
-        return remainingSpins;
-    }
-
-    public int getRemainingSpins() {
-        return remainingSpins;
-    }
-
-    public int getInitialSpinCount() {
-        return initialSpinCount;
-    }
-
-    public void setInitialSpinCount(int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException("initialSpinCount must be >= 0");
-        }
-        initialSpinCount = count;
-    }
-
-    public boolean canUseSpin() {
-        return state == GridTestState.WAITING_FOR_INPUT
-                && movesRemaining > 0
-                && remainingSpins > 0;
-    }
-
-    public boolean beginSpin() {
-        if (!canUseSpin()) {
-            return false;
-        }
-        remainingSpins--;
-        neutralMatchMoveRewardsEnabled = true;
-        state = GridTestState.SPINNING;
-        return true;
-    }
-
-    public void completeSpin() {
-        if (state != GridTestState.SPINNING) {
-            throw new IllegalStateException("Cannot complete Spin in state " + state);
-        }
-        board.rotateOuterClockwise();
-        state = GridTestState.CHECKING_MATCHES;
     }
 
     public int getSuperRerollsRemaining() {
@@ -392,21 +352,6 @@ public class GridTestController {
         return resolveMatches(matches);
     }
 
-    public int getInsertsAvailable() {
-        return insertsAvailable;
-    }
-
-    public int getInitialInsertCount() {
-        return initialInsertCount;
-    }
-
-    public void setInitialInsertCount(int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException("initialInsertCount must be >= 0");
-        }
-        initialInsertCount = count;
-    }
-
     public SymbolType getNextToken() {
         return board.getNextToken();
     }
@@ -417,43 +362,6 @@ public class GridTestController {
 
     public void releaseNextToken() {
         board.releaseNextToken();
-    }
-
-    public boolean canUseInsert() {
-        return state == GridTestState.WAITING_FOR_INPUT
-                && insertsAvailable > 0
-                && !blindEnabled
-                && board.getNextToken() != null;
-    }
-
-    public boolean startInsertMode() {
-        if (!canUseInsert()) {
-            return false;
-        }
-        state = GridTestState.INSERT_SELECTING;
-        return true;
-    }
-
-    public boolean cancelInsertMode() {
-        if (state != GridTestState.INSERT_SELECTING) {
-            return false;
-        }
-        state = GridTestState.WAITING_FOR_INPUT;
-        return true;
-    }
-
-    public SymbolType insertNextToken(int row, int column) {
-        if (state != GridTestState.INSERT_SELECTING) {
-            throw new IllegalStateException("Cannot select an Insert target in state " + state);
-        }
-        if (insertsAvailable <= 0) {
-            throw new IllegalStateException("No Inserts remaining");
-        }
-        SymbolType insertedToken = board.insertNextToken(new GridPosition(row, column));
-        insertsAvailable--;
-        neutralMatchMoveRewardsEnabled = true;
-        state = GridTestState.CHECKING_MATCHES;
-        return insertedToken;
     }
 
     public int getPickupsAvailable() {
@@ -515,7 +423,6 @@ public class GridTestController {
 
     public boolean shouldFinishWhenStable() {
         return movesRemaining == 0
-                && (insertsAvailable == 0 || blindEnabled || board.getNextToken() == null)
                 && (pickupsAvailable == 0 || board.getNextToken() == null || !board.hasOccupiedCell());
     }
 

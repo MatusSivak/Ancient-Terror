@@ -112,6 +112,7 @@ public class GridTestControllerPickupTest {
 
     @Test
     public void pickupCanBeUsedWithNoMovesRemaining() {
+        controller.setInitialPickupCount(1);
         controller.startTest(0);
         controller.setDebugBoard(
                 SymbolType.ONE, SymbolType.TWO, SymbolType.THREE,
@@ -122,11 +123,13 @@ public class GridTestControllerPickupTest {
         provider.add(SymbolType.TWO);
 
         assertTrue(controller.canUsePickup());
+        assertFalse(controller.shouldFinishWhenStable());
         controller.startPickupMode();
         controller.pickupToken(2, 2);
 
         assertEquals(0, controller.getMovesRemaining());
         assertEquals(SymbolType.SIX, controller.getNextToken());
+        assertTrue(controller.shouldFinishWhenStable());
     }
 
     @Test

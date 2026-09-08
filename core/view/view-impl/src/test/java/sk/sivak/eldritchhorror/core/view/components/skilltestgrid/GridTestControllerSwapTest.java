@@ -30,6 +30,70 @@ public class GridTestControllerSwapTest {
     }
 
     @Test
+    public void tokenTapBeginsSwapSelectionWithoutConsumingResources() {
+        controller.startTest(4);
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+        SymbolType token = board.getCell(0, 0);
+        SymbolType nextToken = controller.getNextToken();
+
+        assertTrue(controller.beginSwapSelection(new GridPosition(0, 0)));
+
+        assertEquals(GridTestState.SWAP_SELECTING, controller.getState());
+        assertEquals(3, controller.getSwapRemaining());
+        assertEquals(4, controller.getMovesRemaining());
+        assertEquals(token, board.getCell(0, 0));
+        assertEquals(nextToken, controller.getNextToken());
+    }
+
+    @Test
+    public void tokenTapWithNoSwapsLeavesNormalInputAvailable() {
+        controller.setInitialSwapCount(0);
+        controller.startTest(4);
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+
+        assertFalse(controller.beginSwapSelection(new GridPosition(0, 0)));
+        assertTrue(controller.canAcceptInput());
+        assertEquals(GridTestState.WAITING_FOR_INPUT, controller.getState());
+    }
+
+    @Test
+    public void tokenTapCannotInterruptOtherStates() {
+        controller.startTest(4);
+        for (GridTestState state : GridTestState.values()) {
+            if (state == GridTestState.WAITING_FOR_INPUT) {
+                continue;
+            }
+            controller.setState(state);
+
+            assertFalse(controller.beginSwapSelection(new GridPosition(0, 0)));
+            assertEquals(state, controller.getState());
+            assertEquals(3, controller.getSwapRemaining());
+        }
+    }
+
+    @Test
+    public void gapTapDoesNotBeginSwapSelection() {
+        controller.startTest(4);
+        controller.setDebugBoard(
+                null, SymbolType.TWO, SymbolType.THREE,
+                SymbolType.TWO, SymbolType.THREE, SymbolType.FOUR,
+                SymbolType.THREE, SymbolType.FOUR, SymbolType.FIVE
+        );
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+
+        assertFalse(controller.beginSwapSelection(new GridPosition(0, 0)));
+        assertEquals(GridTestState.WAITING_FOR_INPUT, controller.getState());
+    }
+
+    @Test
+    public void tokenTapCanBeginSwapWhenWaitingWithNoShifts() {
+        controller.startTest(0);
+        controller.setState(GridTestState.WAITING_FOR_INPUT);
+
+        assertTrue(controller.beginSwapSelection(new GridPosition(0, 0)));
+    }
+
+    @Test
     public void restartResetsSwapToN() {
         controller.setInitialSwapCount(2);
         controller.startTest(10);
