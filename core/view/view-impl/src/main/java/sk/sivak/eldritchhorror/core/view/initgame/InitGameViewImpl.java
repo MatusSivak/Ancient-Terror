@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -65,6 +66,7 @@ import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.A
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_NORMAL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_PRESSED;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
@@ -72,6 +74,8 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH_TITLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.loadTextures1;
+import static sk.sivak.eldritchhorror.core.view.initgame.NrPlayersDialog.DIALOG_HEIGHT;
+import static sk.sivak.eldritchhorror.core.view.initgame.NrPlayersDialog.DIALOG_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
@@ -128,10 +132,11 @@ public class InitGameViewImpl implements Screen, InitGameView {
             loadTextures1();
             nrPlayersDialog.getColor().a = 1f;
             nrPlayersDialog.show(stage);
-            nrPlayersDialog.setSize(420f, 220f);
+            nrPlayersDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+            nrPlayersDialog.setScale(0.25f);
             nrPlayersDialog.setPosition(
                     stage.getWidth() / 2f - nrPlayersDialog.getWidth() / 2f,
-                    stage.getHeight() / 2f - nrPlayersDialog.getHeight() / 2f + 120f
+                    stage.getHeight() / 2f - nrPlayersDialog.getHeight() / 2f + 40f
             );
             nrPlayersDialog.setSubscriber(sub);
         }).doOnSuccess(x -> {
@@ -402,8 +407,11 @@ public class InitGameViewImpl implements Screen, InitGameView {
     }
 
     private void rebuildLocalizedDialogs() {
-        nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), skin);
-        nrPlayersDialog.setModal(false);
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.background = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG);
+        windowStyle.titleFont = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
+        windowStyle.titleFontColor = Color.valueOf("D2DADF");
+        nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), windowStyle);
         selectAncientOneDialog = new SelectAncientOneDialog(get("init.selectAncientOne"), skin);
     }
 
@@ -496,7 +504,6 @@ public class InitGameViewImpl implements Screen, InitGameView {
     }
 
     private TextButton createMainMenuButton(String text) {
-        TextButton.TextButtonStyle baseStyle = new TextButton("", skin).getStyle();
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
         style.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
         style.fontColor = Color.valueOf("D2DADF");
