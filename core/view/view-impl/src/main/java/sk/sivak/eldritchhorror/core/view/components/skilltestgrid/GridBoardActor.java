@@ -70,6 +70,7 @@ public class GridBoardActor extends Group {
     private final Group boardLayer;
     private final Group spawnLayer;
     private final Group highlightLayer;
+    private final GridActionHighlight exhaustedActionHighlight;
     private final Group symbolLayer;
     private final Group implosionLayer;
     private final Container<Group> symbolClipContainer;
@@ -79,6 +80,9 @@ public class GridBoardActor extends Group {
     private final GridSymbolActor[][] symbolActors;
     private MoveSelectedListener moveSelectedListener;
     private CellTargetListener tokenTappedListener;
+    private CellTargetListener swapTokenSelectedListener;
+    private Runnable refillStartedListener;
+    private Runnable invalidTargetListener;
     private SwapCompleteListener swapCompleteListener;
     private RerollTargetListener rerollTargetListener;
     private CellTargetListener pickupTargetListener;
@@ -104,6 +108,8 @@ public class GridBoardActor extends Group {
         boardLayer = new Group();
         spawnLayer = new Group();
         highlightLayer = new Group();
+        exhaustedActionHighlight = new GridActionHighlight(
+                new TextureRegionDrawable(CustomAssetManager.getTextureRegion("background/pure_white.png")));
         symbolLayer = new Group();
         implosionLayer = new Group();
         symbolClipContainer = new Container<>(symbolLayer);
@@ -120,6 +126,7 @@ public class GridBoardActor extends Group {
         boardLayer.addActor(spawnLayer);
         boardLayer.addActor(highlightLayer);
         boardLayer.addActor(symbolClipContainer);
+        boardLayer.addActor(exhaustedActionHighlight);
         boardLayer.addActor(implosionLayer);
         if (overlayImage != null) {
             boardLayer.addActor(overlayImage);
@@ -141,6 +148,18 @@ public class GridBoardActor extends Group {
         this.tokenTappedListener = tokenTappedListener;
     }
 
+    public void setSwapTokenSelectedListener(CellTargetListener swapTokenSelectedListener) {
+        this.swapTokenSelectedListener = swapTokenSelectedListener;
+    }
+
+    public void setRefillStartedListener(Runnable refillStartedListener) {
+        this.refillStartedListener = refillStartedListener;
+    }
+
+    public void setInvalidTargetListener(Runnable invalidTargetListener) {
+        this.invalidTargetListener = invalidTargetListener;
+    }
+
     public void setLayoutScale(float layoutScale) {
         this.layoutScale = layoutScale <= 0f ? 1f : layoutScale;
     }
@@ -149,10 +168,31 @@ public class GridBoardActor extends Group {
         interactionEnabled = enabled;
         if (!enabled) {
             clearSwipeState();
+            exhaustedActionHighlight.hide();
         }
     }
 
+    public void showExhaustedShift(GridMove move) {
+        TokenLayout cell = visualGridOriginCell();
+        exhaustedActionHighlight.show(move, cell.width, cell.x, cell.y);
+    }
+
+    public void showExhaustedSwap(GridPosition position) {
+        TokenLayout cell = visualGridOriginCell();
+        exhaustedActionHighlight.show(position, cell.width, cell.x, cell.y);
+    }
+
+    private TokenLayout visualGridOriginCell() {
+        TokenLayout bottomLeft = tokenLayout(GridBoard.SIZE - 1, 0);
+        TokenLayout bottomMiddle = tokenLayout(GridBoard.SIZE - 1, 1);
+        float visualCellSize = bottomMiddle.x - bottomLeft.x;
+        float originX = symbolClipContainer.getX() + bottomLeft.x + bottomLeft.width / 2f - visualCellSize / 2f;
+        float originY = symbolClipContainer.getY() + bottomLeft.y + bottomLeft.height / 2f - visualCellSize / 2f;
+        return new TokenLayout(originX, originY, visualCellSize, visualCellSize);
+    }
+
     public void layout(float centerX, float centerY, float desiredBoardSize) {
+        exhaustedActionHighlight.hide();
         boardSize = desiredBoardSize;
         cellSize = boardSize / GridBoard.SIZE;
         float symbolClipPadding = symbolClipPadding();
@@ -219,6 +259,7 @@ public class GridBoardActor extends Group {
     }
 
     public void resetAnimations() {
+        exhaustedActionHighlight.hide();
         exitRerollTargetingMode();
         exitPickupTargetingMode();
         exitSwapSelectionMode();
@@ -226,6 +267,8 @@ public class GridBoardActor extends Group {
         boardLayer.clearActions();
         spawnLayer.clearActions();
         spawnLayer.clearChildren();
+        implosionLayer.clearActions();
+        implosionLayer.clearChildren();
         symbolLayer.clearActions();
         rebuildSymbolLayerChildren();
         for (int row = 0; row < GridBoard.SIZE; row++) {
@@ -397,6 +440,9 @@ public class GridBoardActor extends Group {
     }
 
     private void animateRefillWave(List<GridSymbolActor> matchedActors, Map<GridPosition, SymbolType> replacements, Runnable onComplete) {
+        if (!replacements.isEmpty() && refillStartedListener != null) {
+            refillStartedListener.run();
+        }
         final int totalEffects = matchedActors.size() + replacements.size();
         final int[] completedEffects = {0};
         Runnable effectFinished = () -> {
@@ -572,6 +618,7 @@ public class GridBoardActor extends Group {
     }
 
     public void enterSwapSelectionMode(GridPosition firstSelection, SwapCompleteListener listener) {
+        exhaustedActionHighlight.hide();
         this.swapCompleteListener = listener;
         swapSelectionMode = true;
         clearSwipeState();
@@ -584,9 +631,13 @@ public class GridBoardActor extends Group {
         swapFirstSelectionActor = symbolActors[position.getRow()][position.getColumn()];
         addSwapHighlightAt(position.getRow(), position.getColumn());
         addAdjacentSwapHighlights(position.getRow(), position.getColumn());
+        if (swapTokenSelectedListener != null) {
+            swapTokenSelectedListener.onTargetSelected(position);
+        }
     }
 
     public void enterRerollTargetingMode(RerollTargetListener listener) {
+        exhaustedActionHighlight.hide();
         rerollTargetListener = listener;
         rerollTargetingMode = true;
         clearSwipeState();
@@ -600,6 +651,7 @@ public class GridBoardActor extends Group {
     }
 
     public void enterPickupTargetingMode(CellTargetListener listener) {
+        exhaustedActionHighlight.hide();
         pickupTargetListener = listener;
         pickupTargetingMode = true;
         clearSwipeState();
@@ -691,7 +743,7 @@ public class GridBoardActor extends Group {
         boardLayer.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (!interactionEnabled || cellSize <= 0f || !isInsideBoard(x, y)) {
+                if (!canHandleBoardInput() || cellSize <= 0f || !isInsideBoard(x, y)) {
                     return false;
                 }
                 
@@ -701,6 +753,9 @@ public class GridBoardActor extends Group {
                 if (pickupTargetingMode) {
                     GridPosition position = new GridPosition(row, col);
                     if (controller.getBoard().isGap(position)) {
+                        if (invalidTargetListener != null) {
+                            invalidTargetListener.run();
+                        }
                         return true;
                     }
                     exitPickupTargetingMode();
@@ -713,6 +768,9 @@ public class GridBoardActor extends Group {
                 if (rerollTargetingMode) {
                     GridPosition position = new GridPosition(row, col);
                     if (controller.getBoard().isGap(position)) {
+                        if (invalidTargetListener != null) {
+                            invalidTargetListener.run();
+                        }
                         return true;
                     }
                     exitRerollTargetingMode();
@@ -766,7 +824,7 @@ public class GridBoardActor extends Group {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!interactionEnabled) {
+                if (!canHandleBoardInput()) {
                     return;
                 }
                 
@@ -809,6 +867,10 @@ public class GridBoardActor extends Group {
     static boolean isTap(float dx, float dy, float cellSize) {
         float minSwipeDistance = cellSize * SWIPE_MIN_CELL_RATIO;
         return cellSize > 0f && Math.abs(dx) < minSwipeDistance && Math.abs(dy) < minSwipeDistance;
+    }
+
+    private boolean canHandleBoardInput() {
+        return interactionEnabled || controller.getState() == GridTestState.FINISHED;
     }
 
     private GridMove toSwipeMove(float dx, float dy) {

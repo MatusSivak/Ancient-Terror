@@ -3,7 +3,6 @@ package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Interpolation;
@@ -20,10 +19,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.components.skilltestgrid.GridTestAudio.Cue;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -38,11 +36,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private static final float BOARD_WIDTH_RATIO = 0.50f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
     private static final float UI_LABEL_SCALE = 0.70f;
-    private static final String SOUND_VARIANTS_DIR = "sounds";
-    private static final String SOUND_VARIANT_SUFFIX = ".wav";
-    private static final String TOKEN_EXPLOSION_SOUND_PREFIX = "token_explosion_";
-    private static final String GOOD_TOKEN_IMPLOSION_SOUND_PREFIX = "good_token_implosion_pickup_";
-    private static final String CHESS_PIECE_MOVE_SOUND_PREFIX = "chess_piece_move_";
     private final Stage stage;
     private final RandomSymbolProvider randomProvider;
     private final GridTestController controller;
@@ -54,6 +47,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label shiftsLabel;
     private final Label swapsLabel;
     private final Label successesLabel;
+    private final Label resourceWarningLabel;
     private final Label gainLabel;
     private final Label endLabel;
     private final TextButton restartButton;
@@ -70,9 +64,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final GridTestBlindPreferences blindPreferences;
     private final SymbolReroller reroller;
     private final SymbolReroller superReroller;
-    private List<Sound> chessPieceMoveSounds;
-    private List<Sound> tokenExplosionSounds;
-    private List<Sound> goodTokenImplosionSounds;
+    private final GridTestAudio audio = new GridTestAudio();
     private int configuredMoves;
     private GridTestResult result;
     private boolean tacticalEffectPreservingNextToken;
@@ -103,6 +95,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setLayoutScale(PLAY_AREA_SCALE);
         boardActor.setMoveSelectedListener(this::onMoveSelected);
         boardActor.setTokenTappedListener(this::onTokenTapped);
+        boardActor.setSwapTokenSelectedListener(position -> audio.play(Cue.SELECT));
+        boardActor.setRefillStartedListener(() -> audio.play(Cue.SPAWN));
+        boardActor.setInvalidTargetListener(() -> audio.play(Cue.UNAVAILABLE));
         boardActor.setInteractionEnabled(false);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY), Color.WHITE);
@@ -111,6 +106,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         shiftsLabel = new Label("Shifts: 0", titleStyle);
         swapsLabel = new Label("Swaps: 0", titleStyle);
         successesLabel = new Label("successes: 0", titleStyle);
+        resourceWarningLabel = new Label("No Shifts remaining", titleStyle);
+        resourceWarningLabel.setColor(0.95f, 0.4f, 0.45f, 0f);
+        resourceWarningLabel.setWrap(true);
         nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
@@ -127,6 +125,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 TestMode selectedMode = modeSelectBox.getSelected();
                 controller.setSelectedMode(selectedMode);
                 modePreferences.save(selectedMode);
+                audio.play(Cue.SETTING);
             }
         });
         gapSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
@@ -136,6 +135,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 controller.setConfiguredGapCount(gapSelectBox.getSelectedIndex());
+                audio.play(Cue.SETTING);
             }
         });
         blindCheckBox = new CheckBox("Blind", CustomAssetManager.getSkin());
@@ -146,6 +146,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 boolean configuredBlind = blindCheckBox.isChecked();
                 controller.setConfiguredBlindEnabled(configuredBlind);
                 blindPreferences.save(configuredBlind);
+                audio.play(Cue.SETTING);
             }
         });
         momentumCheckBox = new CheckBox("Momentum", CustomAssetManager.getSkin());
@@ -156,6 +157,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 boolean configuredMomentum = momentumCheckBox.isChecked();
                 controller.setConfiguredMomentum(configuredMomentum);
                 momentumPreferences.save(configuredMomentum);
+                audio.play(Cue.SETTING);
             }
         });
 
@@ -198,15 +200,18 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         setNextTokenPreviewVisible(false);
         layoutUi(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
         setInputEnabled(true);
+        audio.play(Cue.TEST_START);
         startResolutionLoop(false);
     }
 
     public void startTest(int moves) {
+        audio.stopAll();
         configuredMoves = moves;
         result = null;
         tacticalEffectPreservingNextToken = false;
         randomProvider.clearNextTokenReservation();
         endLabel.setText("");
+        clearResourceWarning();
         controller.startTest(moves);
         boardActor.resetAnimations();
         boardActor.syncBoardToActors();
@@ -216,6 +221,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInteractionEnabled(false);
         restartButton.setDisabled(false);
         updateCounters();
+        audio.play(Cue.TEST_START);
         startResolutionLoop(false);
     }
 
@@ -224,7 +230,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     public void setBoard(SymbolType... symbols) {
+        audio.stopAll();
+        clearResourceWarning();
         controller.setDebugBoard(symbols);
+        boardActor.resetAnimations();
         boardActor.syncBoardToActors();
         nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
@@ -237,6 +246,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     private void onMoveSelected(GridMove move) {
         if (!controller.canAcceptInput()) {
+            if (controller.getMovesRemaining() == 0
+                    && (controller.getState() == GridTestState.WAITING_FOR_INPUT
+                    || controller.getState() == GridTestState.FINISHED)) {
+                boardActor.showExhaustedShift(move);
+                showResourceWarning("No Shifts remaining");
+            }
             return;
         }
         boardActor.setInteractionEnabled(false);
@@ -260,7 +275,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         setNextTokenPreviewVisible(false);
         updateCounters();
         soundHooks.onShift();
-        playTokenMoveSound();
+        audio.play(Cue.SHIFT);
         boardActor.animateShift(shiftOutcome, () -> {
             soundHooks.onSymbolEnter();
             startResolutionLoop(false);
@@ -278,7 +293,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (cascade) {
             soundHooks.onCascade();
         }
+        int shiftsBefore = controller.getMovesRemaining();
         MatchResolution resolution = controller.resolveMatches(matches);
+        int bonusShifts = controller.getMovesRemaining() - shiftsBefore;
         if (!tacticalEffectPreservingNextToken) {
             setNextTokenPreviewVisible(false);
         }
@@ -289,7 +306,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             pulseSuccessCounter(successesGained);
         }
         soundHooks.onMatch(successesGained, cascade);
-        playMatchSoundsIfNeeded(matches);
+        audio.playMatchWave(matches, bonusShifts, cascade);
         boardActor.animateMatchWave(matches, resolution.getReplacements(), () -> {
             updateCounters();
             controller.setState(GridTestState.CASCADE_CHECK);
@@ -324,6 +341,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         endLabel.addAction(new FastForwardAction<>(Actions.alpha(1f, 0.3f, Interpolation.sineOut)));
         updateCounters();
         soundHooks.onTestComplete(result);
+        audio.play(Cue.TEST_COMPLETE);
     }
 
     private void pulseSuccessCounter(int gained) {
@@ -347,6 +365,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void updateCounters() {
+        clearResourceWarning();
         shiftsLabel.setText("Shifts: " + controller.getMovesRemaining());
         swapsLabel.setText("Swaps: " + controller.getSwapRemaining());
         successesLabel.setText("successes: " + controller.getSuccesses());
@@ -355,10 +374,27 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         updatePickupButtonState();
     }
 
+    private void showResourceWarning(String message) {
+        audio.play(Cue.UNAVAILABLE);
+        resourceWarningLabel.clearActions();
+        resourceWarningLabel.setText(message);
+        resourceWarningLabel.getColor().a = 1f;
+        resourceWarningLabel.addAction(Actions.sequence(
+                Actions.delay(1.1f),
+                Actions.alpha(0f, 0.4f, Interpolation.fade)
+        ));
+    }
+
+    private void clearResourceWarning() {
+        resourceWarningLabel.clearActions();
+        resourceWarningLabel.getColor().a = 0f;
+    }
+
     private void onRerollPressed() {
         if (controller.getState() == GridTestState.REROLL_SELECTING) {
             controller.cancelRerollTargeting();
             boardActor.exitRerollTargetingMode();
+            audio.play(Cue.CANCEL);
             updateCounters();
             return;
         }
@@ -366,6 +402,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             return;
         }
         boardActor.enterRerollTargetingMode(this::onRerollTargetSelected);
+        audio.play(Cue.SELECT);
         updateCounters();
     }
 
@@ -378,6 +415,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         SymbolType rerolledSymbol = controller.performReroll(position, reroller);
         controller.setState(GridTestState.MATCH_ANIMATION);
         updateCounters();
+        audio.play(Cue.REROLL);
         boardActor.animateReroll(position, rerolledSymbol, () -> startResolutionLoop(false));
     }
 
@@ -405,6 +443,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         controller.setState(GridTestState.MATCH_ANIMATION);
         updateCounters();
+        audio.play(Cue.SUPER_REROLL);
         boardActor.animateSuperReroll(rerolledCells, () -> {
             controller.setState(GridTestState.CHECKING_MATCHES);
             startResolutionLoop(false);
@@ -419,6 +458,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     private void onTokenTapped(GridPosition position) {
         if (!controller.beginSwapSelection(position)) {
+            if (controller.getSwapRemaining() == 0
+                    && (controller.getState() == GridTestState.WAITING_FOR_INPUT
+                    || controller.getState() == GridTestState.FINISHED)) {
+                boardActor.showExhaustedSwap(position);
+                showResourceWarning("No Swaps remaining");
+            }
             return;
         }
         boardActor.enterSwapSelectionMode(position, this::onSwapComplete);
@@ -429,6 +474,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (controller.getState() == GridTestState.PICKUP_SELECTING) {
             controller.cancelPickupMode();
             boardActor.exitPickupTargetingMode();
+            audio.play(Cue.CANCEL);
             updateCounters();
             return;
         }
@@ -436,6 +482,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             return;
         }
         boardActor.enterPickupTargetingMode(this::onPickupTargetSelected);
+        audio.play(Cue.SELECT);
         updateCounters();
     }
 
@@ -446,6 +493,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInteractionEnabled(false);
         controller.pickupToken(position.getRow(), position.getColumn());
         updateCounters();
+        audio.play(Cue.PICKUP);
         boardActor.animatePickup(position, () -> {
             boardActor.syncBoardToActors();
             refreshNextTokenPreview();
@@ -470,9 +518,12 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             boardActor.setInteractionEnabled(false);
             reserveNextTokenForTacticalEffect();
             controller.useSwap();
+            int shiftsBefore = controller.getMovesRemaining();
             MatchResolution resolution = controller.performSwap(pos1, pos2);
+            int bonusShifts = controller.getMovesRemaining() - shiftsBefore;
             Gdx.app.log("SWAP", "performSwap completed, matches found: " + resolution.getMatches().size());
             
+            audio.play(Cue.SWAP);
             boardActor.animateSwap(pos1, pos2, () -> {
                 Gdx.app.log("SWAP", "animateSwap animation complete");
                 updateCounters();
@@ -482,7 +533,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
                 }
                 
                 soundHooks.onMatch(resolution.getSuccessesGained(), false);
-                playMatchSoundsIfNeeded(resolution.getMatches());
+                audio.playMatchWave(resolution.getMatches(), bonusShifts, false);
                 
                 if (!resolution.getReplacements().isEmpty()) {
                     Gdx.app.log("SWAP", "Matches detected, animating match wave");
@@ -502,6 +553,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
             // Cancelled swap - re-enable normal interaction
             controller.setState(GridTestState.WAITING_FOR_INPUT);
             boardActor.setInteractionEnabled(true);
+            audio.play(Cue.CANCEL);
             updateCounters();
         }
     }
@@ -528,99 +580,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         nextTokenPreview.setVisible(visible && !controller.isBlindEnabled());
     }
 
-    private void playMatchSoundsIfNeeded(List<GridMatch> matches) {
-        boolean playedTokenExplosion = false;
-        boolean playedGoodTokenImplosion = false;
-        for (GridMatch match : matches) {
-            SymbolType symbol = match.getSymbol();
-            if (!playedTokenExplosion && (symbol == SymbolType.ONE || symbol == SymbolType.TWO || symbol == SymbolType.THREE || symbol == SymbolType.FOUR)) {
-                Sound sound = getRandomTokenExplosionSound();
-                if (sound != null) {
-                    sound.play();
-                }
-                playedTokenExplosion = true;
-            }
-            if (!playedGoodTokenImplosion && (symbol == SymbolType.FIVE || symbol == SymbolType.SIX)) {
-                Sound sound = getRandomGoodTokenImplosionSound();
-                if (sound != null) {
-                    sound.play();
-                }
-                playedGoodTokenImplosion = true;
-            }
-            if (playedTokenExplosion && playedGoodTokenImplosion) {
-                return;
-            }
-        }
-    }
-
-    private Sound getRandomTokenExplosionSound() {
-        List<Sound> sounds = getOrLoadSounds(TOKEN_EXPLOSION_SOUND_PREFIX, 0);
-        if (sounds.isEmpty()) {
-            return null;
-        }
-        return sounds.get(random.nextInt(sounds.size()));
-    }
-
-    private Sound getRandomGoodTokenImplosionSound() {
-        List<Sound> sounds = getOrLoadSounds(GOOD_TOKEN_IMPLOSION_SOUND_PREFIX, 1);
-        if (sounds.isEmpty()) {
-            return null;
-        }
-        return sounds.get(random.nextInt(sounds.size()));
-    }
-
-    private void playTokenMoveSound() {
-        Sound sound = getRandomChessPieceMoveSound();
-        if (sound != null) {
-            sound.play();
-        }
-    }
-
-    private Sound getRandomChessPieceMoveSound() {
-        List<Sound> sounds = getOrLoadSounds(CHESS_PIECE_MOVE_SOUND_PREFIX, 2);
-        if (sounds.isEmpty()) {
-            return null;
-        }
-        return sounds.get(random.nextInt(sounds.size()));
-    }
-
-    private List<Sound> getOrLoadSounds(String prefix, int soundType) {
-        List<Sound> sounds = null;
-        if (soundType == 0) {
-            sounds = tokenExplosionSounds;
-        } else if (soundType == 1) {
-            sounds = goodTokenImplosionSounds;
-        } else if (soundType == 2) {
-            sounds = chessPieceMoveSounds;
-        }
-         
-        if (sounds != null) {
-            return sounds;
-        }
-
-        sounds = new ArrayList<>();
-        if (Gdx.audio != null && Gdx.files != null) {
-            com.badlogic.gdx.files.FileHandle soundsDir = Gdx.files.internal(SOUND_VARIANTS_DIR);
-            if (soundsDir.exists() && soundsDir.isDirectory()) {
-                com.badlogic.gdx.files.FileHandle[] files = soundsDir.list((dir, name) ->
-                        name.startsWith(prefix) && name.endsWith(SOUND_VARIANT_SUFFIX));
-                java.util.Arrays.sort(files, Comparator.comparing(com.badlogic.gdx.files.FileHandle::name));
-                for (com.badlogic.gdx.files.FileHandle file : files) {
-                    sounds.add(Gdx.audio.newSound(file));
-                }
-            }
-        }
-
-        if (soundType == 0) {
-            tokenExplosionSounds = sounds;
-        } else if (soundType == 1) {
-            goodTokenImplosionSounds = sounds;
-        } else if (soundType == 2) {
-            chessPieceMoveSounds = sounds;
-        }
-        return sounds;
-    }
-
     private Table buildControlPanel() {
         Table panel = new Table();
         panel.pad(8f);
@@ -637,9 +596,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         shiftsLabel.setFontScale(statsFontScale);
         swapsLabel.setFontScale(statsFontScale);
         successesLabel.setFontScale(statsFontScale);
+        resourceWarningLabel.setFontScale(statsFontScale * 0.75f);
         statsTable.add(shiftsLabel).left().padBottom(2f).row();
         statsTable.add(swapsLabel).left().padBottom(2f).row();
         statsTable.add(successesLabel).left().padBottom(2f).row();
+        statsTable.add(resourceWarningLabel).width(panelWidth).left().padTop(4f).row();
         
         panel.add(statsTable).left().padBottom(12f).row();
         
@@ -738,6 +699,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
+        audio.stopAll();
         setInputEnabled(false);
     }
 
@@ -746,24 +708,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         if (Gdx.input.getInputProcessor() == stage) {
             Gdx.input.setInputProcessor(null);
         }
-        if (tokenExplosionSounds != null) {
-            for (Sound tokenExplosionSound : tokenExplosionSounds) {
-                tokenExplosionSound.dispose();
-            }
-            tokenExplosionSounds = null;
-        }
-        if (goodTokenImplosionSounds != null) {
-            for (Sound goodTokenImplosionSound : goodTokenImplosionSounds) {
-                goodTokenImplosionSound.dispose();
-            }
-            goodTokenImplosionSounds = null;
-        }
-        if (chessPieceMoveSounds != null) {
-            for (Sound chessPieceMoveSound : chessPieceMoveSounds) {
-                chessPieceMoveSound.dispose();
-            }
-            chessPieceMoveSounds = null;
-        }
+        audio.dispose();
         stage.dispose();
     }
 }
