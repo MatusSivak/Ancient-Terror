@@ -1,20 +1,18 @@
 package sk.sivak.eldritchhorror.core.view.components.skilltestgrid;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
@@ -30,12 +28,9 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class GridSkillTestPrototypeScreen extends ScreenAdapter {
-    private static final int DEFAULT_MOVES = 60;
     private static final float PLAY_AREA_SCALE = 0.80f * 1.2f;
-    private static final float LEFT_HUD_SCALE = 0.85f;
-    private static final float BOARD_WIDTH_RATIO = 0.50f;
+    private static final float BOARD_WIDTH_RATIO = 0.42f;
     private static final float BOARD_HEIGHT_RATIO = 0.58f;
-    private static final float UI_LABEL_SCALE = 0.70f;
     private final Stage stage;
     private final RandomSymbolProvider randomProvider;
     private final GridTestController controller;
@@ -50,46 +45,33 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private final Label resourceWarningLabel;
     private final Label gainLabel;
     private final Label endLabel;
+    private final Label rulesLabel;
+    private final Label setupHint;
     private final TextButton restartButton;
     private final TextButton rerollButton;
     private final TextButton superRerollButton;
     private final TextButton pickupButton;
-    private final SelectBox<TestMode> modeSelectBox;
-    private final SelectBox<String> gapSelectBox;
-    private final CheckBox momentumCheckBox;
-    private final CheckBox blindCheckBox;
     private final Table controlPanel;
-    private final GridTestModePreferences modePreferences;
-    private final GridTestMomentumPreferences momentumPreferences;
-    private final GridTestBlindPreferences blindPreferences;
+    private final GridTestSetupPanel setupPanel;
     private final SymbolReroller reroller;
     private final SymbolReroller superReroller;
     private final GridTestAudio audio = new GridTestAudio();
-    private int configuredMoves;
+    private boolean preparing = true;
     private GridTestResult result;
     private boolean tacticalEffectPreservingNextToken;
 
-    public GridSkillTestPrototypeScreen(int moves) {
-        this(moves, new Random(), GridTestSoundHooks.NO_OP);
+    public GridSkillTestPrototypeScreen() {
+        this(new Random(), GridTestSoundHooks.NO_OP);
     }
 
-    public GridSkillTestPrototypeScreen(int moves, Random random, GridTestSoundHooks soundHooks) {
-        this.configuredMoves = moves;
+    public GridSkillTestPrototypeScreen(Random random, GridTestSoundHooks soundHooks) {
         this.soundHooks = soundHooks == null ? GridTestSoundHooks.NO_OP : soundHooks;
         this.random = random == null ? new Random() : random;
         stage = new Stage(new FitViewport(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT));
         randomProvider = new RandomSymbolProvider(this.random);
         controller = new GridTestController(new GridBoard(randomProvider, this.random));
-        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
-        modePreferences = new GridTestModePreferences(preferences);
-        momentumPreferences = new GridTestMomentumPreferences(preferences);
-        blindPreferences = new GridTestBlindPreferences(preferences);
-        controller.setSelectedMode(modePreferences.load());
-        controller.setConfiguredMomentum(momentumPreferences.load());
-        controller.setConfiguredBlindEnabled(blindPreferences.load());
         reroller = new SymbolReroller(this.random);
         superReroller = new SymbolReroller(this.random);
-        controller.startTest(moves);
         assets = new GridTestAssets();
         boardActor = new GridBoardActor(controller, assets);
         boardActor.setLayoutScale(PLAY_AREA_SCALE);
@@ -105,124 +87,122 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
         shiftsLabel = new Label("Shifts: 0", titleStyle);
         swapsLabel = new Label("Swaps: 0", titleStyle);
-        successesLabel = new Label("successes: 0", titleStyle);
+        successesLabel = new Label("Successes: 0", titleStyle);
         resourceWarningLabel = new Label("No Shifts remaining", titleStyle);
         resourceWarningLabel.setColor(0.95f, 0.4f, 0.45f, 0f);
         resourceWarningLabel.setWrap(true);
         nextTokenPreview = new NextTokenPreview(assets);
         gainLabel = new Label("", gainStyle);
         endLabel = new Label("", titleStyle);
-        restartButton = buildButton("RESTART");
+        endLabel.setWrap(true);
+        endLabel.setVisible(false);
+        rulesLabel = new Label("", titleStyle);
+        rulesLabel.setWrap(true);
+        setupHint = new Label("Prepare your test\n\nConfirm parameters on the left to start.", titleStyle);
+        setupHint.setAlignment(Align.center);
+        setupHint.setWrap(true);
+        setupHint.setFontScale(0.55f);
+        setupHint.setColor(0.7f, 0.7f, 0.75f, 1f);
+        restartButton = buildButton("NEW TEST");
         rerollButton = buildButton("REROLL");
         superRerollButton = buildButton("SUPER REROLL");
-        pickupButton = buildButton("PICKUP");
-        modeSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
-        modeSelectBox.setItems(TestMode.BLESSED, TestMode.NORMAL, TestMode.CURSED);
-        modeSelectBox.setSelected(controller.getSelectedMode());
-        modeSelectBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                TestMode selectedMode = modeSelectBox.getSelected();
-                controller.setSelectedMode(selectedMode);
-                modePreferences.save(selectedMode);
-                audio.play(Cue.SETTING);
-            }
-        });
-        gapSelectBox = new SelectBox<>(CustomAssetManager.getSkin());
-        gapSelectBox.setItems("0 GAPs", "1 GAP", "2 GAPs", "3 GAPs");
-        gapSelectBox.setSelectedIndex(controller.getConfiguredGapCount());
-        gapSelectBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                controller.setConfiguredGapCount(gapSelectBox.getSelectedIndex());
-                audio.play(Cue.SETTING);
-            }
-        });
-        blindCheckBox = new CheckBox("Blind", CustomAssetManager.getSkin());
-        blindCheckBox.setChecked(controller.isConfiguredBlindEnabled());
-        blindCheckBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                boolean configuredBlind = blindCheckBox.isChecked();
-                controller.setConfiguredBlindEnabled(configuredBlind);
-                blindPreferences.save(configuredBlind);
-                audio.play(Cue.SETTING);
-            }
-        });
-        momentumCheckBox = new CheckBox("Momentum", CustomAssetManager.getSkin());
-        momentumCheckBox.setChecked(controller.isConfiguredMomentum());
-        momentumCheckBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                boolean configuredMomentum = momentumCheckBox.isChecked();
-                controller.setConfiguredMomentum(configuredMomentum);
-                momentumPreferences.save(configuredMomentum);
-                audio.play(Cue.SETTING);
-            }
-        });
+        pickupButton = buildButton("LIFT");
 
         configureLabel(shiftsLabel, Align.left);
         configureLabel(swapsLabel, Align.left);
         configureLabel(successesLabel, Align.center);
         configureLabel(gainLabel, Align.center);
-        configureLabel(endLabel, Align.center);
-        shiftsLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        swapsLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        successesLabel.setFontScale(UI_LABEL_SCALE * PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        restartButton.setTransform(true);
-        restartButton.setOrigin(0f, 0f);
-        restartButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        rerollButton.setTransform(true);
-        rerollButton.setOrigin(0f, 0f);
-        rerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        superRerollButton.setTransform(true);
-        superRerollButton.setOrigin(0f, 0f);
-        superRerollButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
-        pickupButton.setTransform(true);
-        pickupButton.setOrigin(0f, 0f);
-        pickupButton.setScale(PLAY_AREA_SCALE * LEFT_HUD_SCALE);
+        configureLabel(endLabel, Align.left);
 
         stage.addActor(boardActor);
         stage.addActor(nextTokenPreview);
         stage.addActor(gainLabel);
-        stage.addActor(endLabel);
-        
-        // Build control panel as a responsive table
+        stage.addActor(setupHint);
+
         controlPanel = buildControlPanel();
         stage.addActor(controlPanel);
+        TextButton confirm = buildButton("CONFIRM & START");
+        configurePanelButton(confirm);
+        setupPanel = new GridTestSetupPanel(CustomAssetManager.getSkin(), confirm,
+                GridTestParameters.randomized(this.random), this::startTest, () -> audio.play(Cue.SETTING));
+        setupPanel.setBackground(new TextureRegionDrawable(assets.getWhitePixel())
+                .tint(new Color(0.11f, 0.12f, 0.15f, 1f)));
+        stage.addActor(setupPanel);
 
-        addClickListener(restartButton, () -> startTest(configuredMoves));
+        addClickListener(restartButton, this::showSetup);
         addClickListener(rerollButton, this::onRerollPressed);
         addClickListener(superRerollButton, this::onSuperRerollPressed);
         addClickListener(pickupButton, this::onPickupPressed);
 
-        updateCounters();
+        boardActor.setVisible(false);
+        controlPanel.setVisible(false);
         setNextTokenPreviewVisible(false);
         layoutUi(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
         setInputEnabled(true);
+    }
+
+    public void startTest(GridTestParameters parameters) {
+        resetPresentation();
+        controller.startTest(parameters);
+        showPreparedTest();
+    }
+
+    public void startTest(int moves) {
+        resetPresentation();
+        controller.startTest(moves);
+        showPreparedTest();
+    }
+
+    private void resetPresentation() {
+        audio.stopAll();
+        stage.cancelTouchFocus();
+        boardActor.setInteractionEnabled(false);
+        boardActor.resetAnimations();
+        result = null;
+        tacticalEffectPreservingNextToken = false;
+        randomProvider.clearNextTokenReservation();
+        endLabel.clearActions();
+        endLabel.setText("");
+        endLabel.setVisible(false);
+        rulesLabel.setVisible(true);
+        gainLabel.clearActions();
+        gainLabel.setText("");
+        successesLabel.clearActions();
+        successesLabel.setScale(1f);
+        clearResourceWarning();
+        nextTokenPreview.clearActions();
+        nextTokenPreview.clearNextToken();
+        setNextTokenPreviewVisible(false);
+    }
+
+    private void showPreparedTest() {
+        preparing = false;
+        setupPanel.setVisible(false);
+        setupHint.setVisible(false);
+        controlPanel.setVisible(true);
+        boardActor.setVisible(true);
+        boardActor.syncBoardToActors();
+        restartButton.setDisabled(false);
+        rulesLabel.setText(controller.getActiveMode() + "  |  Gaps: " + controller.getGapCount()
+                + "\nMomentum: " + (controller.isActiveMomentum() ? "On" : "Off")
+                + "  |  Blind: " + (controller.isBlindEnabled() ? "On" : "Off"));
+        updateCounters();
         audio.play(Cue.TEST_START);
         startResolutionLoop(false);
     }
 
-    public void startTest(int moves) {
-        audio.stopAll();
-        configuredMoves = moves;
-        result = null;
-        tacticalEffectPreservingNextToken = false;
-        randomProvider.clearNextTokenReservation();
-        endLabel.setText("");
-        clearResourceWarning();
-        controller.startTest(moves);
-        boardActor.resetAnimations();
-        boardActor.syncBoardToActors();
-        nextTokenPreview.clearActions();
-        nextTokenPreview.clearNextToken();
-        setNextTokenPreviewVisible(false);
-        boardActor.setInteractionEnabled(false);
-        restartButton.setDisabled(false);
-        updateCounters();
-        audio.play(Cue.TEST_START);
-        startResolutionLoop(false);
+    private void showSetup() {
+        resetPresentation();
+        preparing = true;
+        controller.setState(GridTestState.INITIALIZING);
+        boardActor.setVisible(false);
+        controlPanel.setVisible(false);
+        setupHint.setVisible(true);
+        setupPanel.setParameters(GridTestParameters.randomized(random));
+        setupPanel.setVisible(true);
+        stage.setKeyboardFocus(null);
+        stage.setScrollFocus(null);
+        audio.play(Cue.SETTING);
     }
 
     public void setRandomSeed(long seed) {
@@ -237,7 +217,9 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.syncBoardToActors();
         nextTokenPreview.clearNextToken();
         setNextTokenPreviewVisible(false);
-        startResolutionLoop(false);
+        if (!preparing) {
+            startResolutionLoop(false);
+        }
     }
 
     private void configureLabel(Label label, int align) {
@@ -283,6 +265,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void startResolutionLoop(boolean cascade) {
+        if (controller.hasReachedSuccessTarget()) {
+            onBoardStable();
+            return;
+        }
         controller.setState(GridTestState.CHECKING_MATCHES);
         List<GridMatch> matches = controller.findMatches();
         if (matches.isEmpty()) {
@@ -334,9 +320,23 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInteractionEnabled(false);
         setNextTokenPreviewVisible(false);
         restartButton.setDisabled(false);
-        endLabel.setText("TEST COMPLETE");
-        endLabel.pack();
-        endLabel.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f - endLabel.getWidth() / 2f, ViewProperties.VIEWPORT_HEIGHT * 0.08f);
+        switch (result.getOutcome()) {
+            case SUCCESS:
+                endLabel.setText("TEST SUCCESSFUL");
+                endLabel.setColor(0.55f, 1f, 0.65f, 1f);
+                break;
+            case FAILURE:
+                endLabel.setText("TEST FAILED");
+                endLabel.setColor(1f, 0.5f, 0.5f, 1f);
+                break;
+            case SCORE_ONLY:
+                endLabel.setText("TEST COMPLETE");
+                endLabel.setColor(Color.WHITE);
+                break;
+        }
+        endLabel.setText(endLabel.getText() + "\nShifts used: " + result.getMovesUsed());
+        rulesLabel.setVisible(false);
+        endLabel.setVisible(true);
         endLabel.getColor().a = 0f;
         endLabel.addAction(new FastForwardAction<>(Actions.alpha(1f, 0.3f, Interpolation.sineOut)));
         updateCounters();
@@ -353,7 +353,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         gainLabel.clearActions();
         gainLabel.setText("+" + gained);
         gainLabel.pack();
-        gainLabel.setPosition(successesLabel.getX() + successesLabel.getWidth() + 8f, successesLabel.getY());
+        Vector2 gainPosition = successesLabel.localToStageCoordinates(new Vector2(successesLabel.getWidth() + 8f, 0f));
+        gainLabel.setPosition(gainPosition.x, gainPosition.y);
         gainLabel.getColor().a = 1f;
         gainLabel.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.parallel(
@@ -368,7 +369,11 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         clearResourceWarning();
         shiftsLabel.setText("Shifts: " + controller.getMovesRemaining());
         swapsLabel.setText("Swaps: " + controller.getSwapRemaining());
-        successesLabel.setText("successes: " + controller.getSuccesses());
+        GridSuccessTarget target = controller.getSuccessTarget();
+        successesLabel.setText("Successes: " + controller.getSuccesses()
+                + (target.isUnlimited() ? "\nScore only" : " / " + target.getMinimumSuccesses()));
+        successesLabel.setColor(!target.isUnlimited() && controller.getSuccesses() >= target.getMinimumSuccesses()
+                ? new Color(0.55f, 1f, 0.65f, 1f) : Color.WHITE);
         updateRerollButtonState();
         updateSuperRerollButtonState();
         updatePickupButtonState();
@@ -453,7 +458,7 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     private void updateSuperRerollButtonState() {
         boolean canUse = controller.canUseSuperReroll();
         superRerollButton.setDisabled(!canUse);
-        superRerollButton.setText("SUPER REROLL");
+        superRerollButton.setText("SUPER REROLL x" + controller.getSuperRerollsRemaining());
     }
 
     private void onTokenTapped(GridPosition position) {
@@ -504,12 +509,10 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
 
     private void updatePickupButtonState() {
         boolean selecting = controller.getState() == GridTestState.PICKUP_SELECTING;
-        boolean available = controller.getPickupsAvailable() > 0;
-        pickupButton.setVisible(available);
         pickupButton.setDisabled(!selecting && !controller.canUsePickup());
         pickupButton.setText(selecting
-                ? "CANCEL PICKUP"
-                : "PICKUP x" + controller.getPickupsAvailable());
+                ? "CANCEL LIFT"
+                : "LIFT x" + controller.getPickupsAvailable());
     }
 
     public void onSwapComplete(GridPosition pos1, GridPosition pos2) {
@@ -576,81 +579,56 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
     }
 
     private void setNextTokenPreviewVisible(boolean visible) {
-        nextTokenPreview.setVisible(visible && !controller.isBlindEnabled());
+        nextTokenPreview.setVisible(visible && !preparing && !controller.isBlindEnabled());
     }
 
     private Table buildControlPanel() {
         Table panel = new Table();
-        panel.pad(8f);
-        
-        float controlScale = PLAY_AREA_SCALE * LEFT_HUD_SCALE;
-        float panelWidth = ViewProperties.VIEWPORT_WIDTH * 0.25f * controlScale;
-        float buttonHeight = ViewProperties.VIEWPORT_HEIGHT * 0.06f * controlScale;
-        float statsFontScale = UI_LABEL_SCALE * controlScale;
-        
-        // Stats block
-        Table statsTable = new Table();
-        statsTable.align(Align.left);
-        
-        shiftsLabel.setFontScale(statsFontScale);
-        swapsLabel.setFontScale(statsFontScale);
-        successesLabel.setFontScale(statsFontScale);
-        resourceWarningLabel.setFontScale(statsFontScale * 0.75f);
-        statsTable.add(shiftsLabel).left().padBottom(2f).row();
-        statsTable.add(swapsLabel).left().padBottom(2f).row();
-        statsTable.add(successesLabel).left().padBottom(2f).row();
-        statsTable.add(resourceWarningLabel).width(panelWidth).left().padTop(4f).row();
-        
-        panel.add(statsTable).left().padBottom(12f).row();
-        
-        // Restart button
-        restartButton.setTransform(true);
-        restartButton.setOrigin(0f, 0f);
-        restartButton.setScale(controlScale);
-        panel.add(restartButton).width(panelWidth).height(buttonHeight * 1.2f).padBottom(8f).center().row();
-        
-        // Mode select box
-        modeSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
-        panel.add(modeSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
-        gapSelectBox.setSize(panelWidth / controlScale, buttonHeight / controlScale);
-        panel.add(gapSelectBox).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
-
-        // Momentum applies to the next started or restarted test.
-        momentumCheckBox.getLabel().setFontScale(statsFontScale);
-        panel.add(momentumCheckBox).left().padBottom(4f).row();
-        blindCheckBox.getLabel().setFontScale(statsFontScale);
-        panel.add(blindCheckBox).left().padBottom(8f).row();
-        
-        rerollButton.setTransform(true);
-        rerollButton.setOrigin(0f, 0f);
-        rerollButton.setScale(controlScale);
-        panel.add(rerollButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
-
-        superRerollButton.setTransform(true);
-        superRerollButton.setOrigin(0f, 0f);
-        superRerollButton.setScale(controlScale);
-        panel.add(superRerollButton).width(panelWidth).height(buttonHeight).padBottom(8f).center().row();
-        
-        pickupButton.setTransform(true);
-        pickupButton.setOrigin(0f, 0f);
-        pickupButton.setScale(controlScale);
-        panel.add(pickupButton).width(panelWidth).height(buttonHeight).padBottom(20f).center().row();
-        
-        // Position the panel
-        panel.setSize(panelWidth + 16f, ViewProperties.VIEWPORT_HEIGHT * 0.64f);
-        panel.setPosition(
-            ViewProperties.VIEWPORT_WIDTH * 0.02f, 
-            ViewProperties.VIEWPORT_HEIGHT * 0.5f - panel.getHeight() / 2f
-        );
-        
+        panel.setBackground(new TextureRegionDrawable(assets.getWhitePixel())
+                .tint(new Color(0.11f, 0.12f, 0.15f, 1f)));
+        panel.pad(16f).top().left();
+        panel.defaults().minWidth(0f).growX().padBottom(10f);
+        shiftsLabel.setFontScale(20f / shiftsLabel.getStyle().font.getCapHeight());
+        swapsLabel.setFontScale(shiftsLabel.getFontScaleX());
+        successesLabel.setFontScale(shiftsLabel.getFontScaleX());
+        successesLabel.setAlignment(Align.left);
+        rulesLabel.setFontScale(11f / rulesLabel.getStyle().font.getCapHeight());
+        resourceWarningLabel.setFontScale(12f / resourceWarningLabel.getStyle().font.getCapHeight());
+        endLabel.setFontScale(14f / endLabel.getStyle().font.getCapHeight());
+        panel.add(new Stack(rulesLabel, endLabel)).height(48f).row();
+        panel.add(shiftsLabel).left().row();
+        panel.add(swapsLabel).left().row();
+        panel.add(successesLabel).left().padBottom(4f).row();
+        panel.add(resourceWarningLabel).height(30f).row();
+        for (TextButton button : new TextButton[] {rerollButton, superRerollButton, pickupButton}) {
+            configurePanelButton(button);
+            panel.add(button).height(34f).row();
+        }
+        Label instructions = new Label("Tap a token to swap.\nSwipe a row or column to shift.", rulesLabel.getStyle());
+        instructions.setFontScale(rulesLabel.getFontScaleX());
+        instructions.setWrap(true);
+        panel.add(instructions).height(46f).padTop(6f).row();
+        configurePanelButton(restartButton);
+        panel.add(restartButton).height(34f).padTop(10f).row();
         return panel;
     }
 
+    private static void configurePanelButton(TextButton button) {
+        button.clearActions();
+        button.setTransform(false);
+        button.setScale(1f);
+        button.getLabel().setFontScale(14f / button.getStyle().font.getCapHeight());
+    }
+
     private void layoutUi(float width, float height) {
-        float centerX = width * 0.5f;
+        float centerX = width * 0.65f;
         float centerY = height * 0.5f;
         float boardSize = Math.min(width * BOARD_WIDTH_RATIO, height * BOARD_HEIGHT_RATIO) * PLAY_AREA_SCALE;
         boardActor.layout(centerX, centerY, boardSize);
+        float panelWidth = width * 0.29f;
+        setupPanel.setBounds(width * 0.02f, 12f, panelWidth, height - 24f);
+        controlPanel.setBounds(width * 0.02f, 12f, panelWidth, height - 24f);
+        setupHint.setBounds(width * 0.34f, height * 0.25f, width * 0.62f, height * 0.5f);
         float boardBottom = centerY - boardSize / 2f;
 
         float nextPreviewSize = height * 0.12f * PLAY_AREA_SCALE;
@@ -659,10 +637,6 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         float nextTokenGap = height * 0.072f * PLAY_AREA_SCALE;
         float nextTokenY = boardBottom - nextTokenGap - nextPreviewSize;
         nextTokenPreview.setPosition(centerX - nextTokenPreview.getWidth() / 2f, nextTokenY);
-    }
-
-    private static float scaleAround(float anchor, float value, float scale) {
-        return anchor + (value - anchor) * scale;
     }
 
     private void setInputEnabled(boolean enabled) {

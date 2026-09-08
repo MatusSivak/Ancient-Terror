@@ -10,6 +10,7 @@ public class GridTestController {
     private int movesUsed;
     private int movesRemaining;
     private int successes;
+    private GridSuccessTarget successTarget = GridSuccessTarget.UNLIMITED;
     private int configuredGapCount;
     private boolean neutralMatchMoveRewardsEnabled;
     private TestMode selectedMode = TestMode.NORMAL;
@@ -39,6 +40,22 @@ public class GridTestController {
         this.board = board;
     }
 
+    public void startTest(GridTestParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters must not be null");
+        }
+        setInitialSwapCount(parameters.getSwaps());
+        setStartingRerolls(parameters.getRerolls());
+        setInitialPickupCount(parameters.getLifts());
+        setInitialSuperRerollCount(parameters.getSuperRerolls());
+        setConfiguredGapCount(parameters.getGaps());
+        setConfiguredMomentum(parameters.isMomentum());
+        setConfiguredBlindEnabled(parameters.isBlind());
+        setSelectedMode(parameters.getDifficulty());
+        startTest(parameters.getShifts());
+        successTarget = parameters.getSuccessTarget();
+    }
+
     public void startTest(int moves) {
         if (moves < 0) {
             throw new IllegalArgumentException("moves must be >= 0");
@@ -46,6 +63,7 @@ public class GridTestController {
         movesUsed = 0;
         movesRemaining = moves;
         successes = 0;
+        successTarget = GridSuccessTarget.UNLIMITED;
         neutralMatchMoveRewardsEnabled = false;
         state = GridTestState.INITIALIZING;
         activeMode = selectedMode;
@@ -64,6 +82,7 @@ public class GridTestController {
     }
 
     public GridShiftOutcome applyMove(GridMove move) {
+        requireUnreachedTarget();
         if (state != GridTestState.WAITING_FOR_INPUT) {
             throw new IllegalStateException("Cannot apply move in state " + state);
         }
@@ -79,6 +98,7 @@ public class GridTestController {
     }
 
     public void commitBlindMove(GridMove move) {
+        requireUnreachedTarget();
         if (move == null) {
             throw new IllegalArgumentException("move must not be null");
         }
@@ -96,6 +116,7 @@ public class GridTestController {
     }
 
     public GridShiftOutcome applyCommittedBlindMove() {
+        requireUnreachedTarget();
         if (state != GridTestState.REVEALING_NEXT_TOKEN || committedBlindMove == null) {
             throw new IllegalStateException("No Blind move is awaiting insertion");
         }
@@ -135,7 +156,7 @@ public class GridTestController {
     }
 
     public boolean canAcceptInput() {
-        return state == GridTestState.WAITING_FOR_INPUT && movesRemaining > 0;
+        return state == GridTestState.WAITING_FOR_INPUT && movesRemaining > 0 && !hasReachedSuccessTarget();
     }
 
     public void setState(GridTestState state) {
@@ -155,6 +176,10 @@ public class GridTestController {
 
     public int getSuccesses() {
         return successes;
+    }
+
+    public GridSuccessTarget getSuccessTarget() {
+        return successTarget;
     }
 
     public void setConfiguredGapCount(int gapCount) {
@@ -225,6 +250,7 @@ public class GridTestController {
 
     public boolean canActivateReroll() {
         return state == GridTestState.WAITING_FOR_INPUT
+                && !hasReachedSuccessTarget()
                 && movesRemaining > 0
                 && remainingRerolls > 0
                 && findMatches().isEmpty();
@@ -247,6 +273,7 @@ public class GridTestController {
     }
 
     public SymbolType performReroll(GridPosition position, SymbolReroller reroller) {
+        requireUnreachedTarget();
         if (state != GridTestState.REROLL_SELECTING) {
             throw new IllegalStateException("Cannot select a Reroll target in state " + state);
         }
@@ -279,7 +306,8 @@ public class GridTestController {
         if (position == null) {
             throw new IllegalArgumentException("position must not be null");
         }
-        if (state != GridTestState.WAITING_FOR_INPUT || swapRemaining <= 0 || board.isGap(position)) {
+        if (state != GridTestState.WAITING_FOR_INPUT || hasReachedSuccessTarget()
+                || swapRemaining <= 0 || board.isGap(position)) {
             return false;
         }
         state = GridTestState.SWAP_SELECTING;
@@ -321,7 +349,7 @@ public class GridTestController {
     }
 
     public boolean canUseSuperReroll() {
-        return state == GridTestState.WAITING_FOR_INPUT && hasAvailableSuperReroll();
+        return state == GridTestState.WAITING_FOR_INPUT && !hasReachedSuccessTarget() && hasAvailableSuperReroll();
     }
 
     private boolean hasAvailableSuperReroll() {
@@ -329,6 +357,7 @@ public class GridTestController {
     }
 
     public Map<GridPosition, SymbolType> performSuperReroll(SymbolReroller reroller) {
+        requireUnreachedTarget();
         if (reroller == null) {
             throw new IllegalArgumentException("reroller must not be null");
         }
@@ -350,6 +379,7 @@ public class GridTestController {
     }
 
     public MatchResolution performSwap(GridPosition pos1, GridPosition pos2) {
+        requireUnreachedTarget();
         if (state != GridTestState.SWAP_SELECTING) {
             throw new IllegalStateException("Cannot swap in state " + state);
         }
@@ -358,6 +388,9 @@ public class GridTestController {
         }
         if (!isValidAdjacentPair(pos1, pos2)) {
             throw new IllegalArgumentException("Positions must be orthogonally adjacent");
+        }
+        if (board.isGap(pos1)) {
+            throw new IllegalArgumentException("Swap origin must contain a token");
         }
         board.swap(pos1, pos2);
         swapRemaining--;
@@ -395,7 +428,7 @@ public class GridTestController {
     }
 
     public boolean canUsePickup() {
-        return state == GridTestState.WAITING_FOR_INPUT && hasAvailablePickup();
+        return state == GridTestState.WAITING_FOR_INPUT && !hasReachedSuccessTarget() && hasAvailablePickup();
     }
 
     private boolean hasAvailablePickup() {
@@ -421,6 +454,7 @@ public class GridTestController {
     }
 
     public SymbolType pickupToken(int row, int column) {
+        requireUnreachedTarget();
         if (state != GridTestState.PICKUP_SELECTING) {
             throw new IllegalStateException("Cannot select a Pickup target in state " + state);
         }
@@ -443,14 +477,24 @@ public class GridTestController {
     }
 
     public boolean shouldFinishWhenStable() {
-        return movesRemaining == 0
+        return hasReachedSuccessTarget() || (movesRemaining == 0
                 && !(swapRemaining > 0 && board.hasOccupiedCell())
                 && !hasAvailableSuperReroll()
-                && !hasAvailablePickup();
+                && !hasAvailablePickup());
+    }
+
+    public boolean hasReachedSuccessTarget() {
+        return !successTarget.isUnlimited() && successes >= successTarget.getMinimumSuccesses();
+    }
+
+    private void requireUnreachedTarget() {
+        if (hasReachedSuccessTarget()) {
+            throw new IllegalStateException("Test is already successful");
+        }
     }
 
     public GridTestResult finish() {
         state = GridTestState.FINISHED;
-        return new GridTestResult(successes, movesUsed);
+        return new GridTestResult(successes, movesUsed, successTarget);
     }
 }

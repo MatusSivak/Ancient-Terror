@@ -887,7 +887,8 @@ public class GridBoardActor extends Group {
     }
 
     private boolean canHandleBoardInput() {
-        return interactionEnabled || controller.getState() == GridTestState.FINISHED;
+        return !controller.hasReachedSuccessTarget()
+                && (interactionEnabled || controller.getState() == GridTestState.FINISHED);
     }
 
     private GridMove toSwipeMove(float dx, float dy) {

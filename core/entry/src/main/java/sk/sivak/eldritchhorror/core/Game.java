@@ -37,8 +37,7 @@ public class Game extends com.badlogic.gdx.Game {
 
     public void start() {
         if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
-            int moves = Integer.getInteger("ancientterror.gridtest.moves", 4);
-            setScreen(new GridSkillTestPrototypeScreen(moves));
+            setScreen(new GridSkillTestPrototypeScreen());
             return;
         }
         ServiceLocator.setGame(this);

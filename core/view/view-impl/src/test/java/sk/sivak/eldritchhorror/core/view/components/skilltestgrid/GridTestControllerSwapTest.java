@@ -128,6 +128,23 @@ public class GridTestControllerSwapTest {
     }
 
     @Test
+    public void gapOriginCannotSpendSwapOrChangeBoard() {
+        start(4);
+        controller.setDebugBoard(null, TWO, THREE, FOUR, FIVE, SIX, TWO, THREE, FOUR);
+        assertTrue(controller.beginSwapSelection(new GridPosition(0, 1)));
+        try {
+            controller.performSwap(new GridPosition(0, 0), new GridPosition(0, 1));
+            fail("A gap cannot be the first swap target");
+        } catch (IllegalArgumentException expected) {
+            assertEquals(GridTestState.SWAP_SELECTING, controller.getState());
+            assertBoard(null, TWO, THREE, FOUR, FIVE, SIX, TWO, THREE, FOUR);
+            assertResources(3, 4);
+            assertEquals(0, controller.getSuccesses());
+            assertEquals(9, provider.consumed);
+        }
+    }
+
+    @Test
     public void swapCannotExecuteOutsideSelectionOrSpendAnExhaustedCharge() {
         start(4);
         for (GridTestState state : GridTestState.values()) {
