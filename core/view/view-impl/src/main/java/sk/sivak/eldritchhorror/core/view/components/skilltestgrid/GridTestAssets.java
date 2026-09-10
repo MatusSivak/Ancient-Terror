@@ -16,7 +16,7 @@ public class GridTestAssets implements GridBoardAssets {
     private static final String SLOT_SYMBOL_FOUR = "slot/symbol/4.png";
     private static final String SLOT_SYMBOL_FIVE = "slot/symbol/5.png";
     private static final String SLOT_SYMBOL_SIX = "slot/symbol/6.png";
-    private static final String SLOT_GRID_BOTTOM = "slot/decorative/bottom.png";
+    private static final String SLOT_GRID_BOTTOM = "slot/decorative/bottom.jpg";
     private static final String SLOT_GRID_OVERLAY = "slot/decorative/overlay.png";
     private static final String SLOT_EXPLOSION_OVERLAY = "slot/animation/explosion.png";
     private static final String SLOT_IMPLOSION_OVERLAY = "slot/animation/implosion.png";

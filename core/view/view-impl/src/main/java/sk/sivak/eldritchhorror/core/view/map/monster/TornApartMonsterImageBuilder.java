@@ -38,8 +38,8 @@ public class TornApartMonsterImageBuilder {
 
         monsterImage.setPosition(0, 0);
         monsterImage.setScale(1f);
-        monsterImage.setWidth(400);
-        monsterImage.setHeight(400);
+        monsterImage.setWidth(512);
+        monsterImage.setHeight(512);
 
         SpriteBatch spriteBatch = new SpriteBatch();
         spriteBatch.setColor(Color.WHITE);

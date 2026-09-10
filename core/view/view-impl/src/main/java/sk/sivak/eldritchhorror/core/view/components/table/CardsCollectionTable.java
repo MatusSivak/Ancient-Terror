@@ -134,13 +134,13 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
             } else if (unlocked.contains(cardId) && !discovered.contains(cardId)) {
                 Image hiddenCard = new Image();
                 add(hiddenCard).width(1191 * scale).height(1254 * scale).pad(5);
-                CustomAssetManager.getTextureAsync("card/card_template_hidden.png").subscribe(texture -> {
+                CustomAssetManager.getTextureAsync("card/card_template_hidden.jpg").subscribe(texture -> {
                     hiddenCard.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
                 });
             } else {
                 Image lockedCard = new Image();
                 add(lockedCard).width(1191 * scale).height(1254 * scale).pad(5);
-                CustomAssetManager.getTextureAsync("card/card_template_locked.png").subscribe(texture -> {
+                CustomAssetManager.getTextureAsync("card/card_template_locked.jpg").subscribe(texture -> {
                     lockedCard.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
                 });
 

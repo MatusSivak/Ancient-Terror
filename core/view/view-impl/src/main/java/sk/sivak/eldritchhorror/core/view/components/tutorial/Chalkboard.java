@@ -46,7 +46,7 @@ public class Chalkboard extends Group {
     public Chalkboard(Skin skin) {
         TypingConfig.INTERVAL_MULTIPLIERS_BY_CHAR.put('\n',0);
         this.skin = skin;
-        CustomAssetManager.getTextureAsync("tutorial/chalkboard.png").subscribe(chalkboardTexture -> {
+        CustomAssetManager.getTextureAsync("tutorial/chalkboard.jpg").subscribe(chalkboardTexture -> {
             background = new Image(chalkboardTexture);
             background.setScaling(Scaling.fit);
             background.setColor(Color.WHITE);

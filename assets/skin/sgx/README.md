@@ -13,7 +13,7 @@ http://creativecommons.org/licenses/by/4.0/
 
 Features styles of most of **Scene2D** and a few **Skin Composer** widgets. Designed for an upcoming game: *Supergalactix* by *Betalord*.
 
-![SGX](preview.png)
+![SGX](preview.jpg)
 
 ### About
 

@@ -240,7 +240,7 @@ public class AssetView {
     }
 
     private void displayHiddentTemplate(AssetOriginType assetOriginType) {
-        cardTemplate = new Image(CustomAssetManager.getTexture("card/card_template_hidden.png"));
+        cardTemplate = new Image(CustomAssetManager.getTexture("card/card_template_hidden.jpg"));
         cardTemplate.setSize(CARD_ORIGIN_X * 2, CARD_ORIGIN_Y*2);
         cardTemplate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
         cardTemplate.setScale(0.0f);

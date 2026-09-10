@@ -24,6 +24,16 @@ public class MonsterImageEffect {
             monsterImage.setOrigin(monsterImage.getWidth() / 2, monsterImage.getHeight() / 2);
             float normalActionDuration = ViewProperties.NORMAL_ACTION_DURATION;
 
+            if (monsterImage instanceof MonsterImage) {
+                MonsterImage monsterImageActor = (MonsterImage) monsterImage;
+                monsterImageActor.hideShadow();
+            }
+
+            if (monsterImage instanceof EpicMonsterImage) {
+                EpicMonsterImage epicMonsterImageActor = (EpicMonsterImage) monsterImage;
+                epicMonsterImageActor.hideShadow();
+            }
+
             monsterImage.addAction(new FastForwardAction<>(Actions.sequence(
                     Actions.parallel(
                             Actions.rotateTo(360, normalActionDuration, Interpolation.sine),
@@ -62,7 +72,7 @@ public class MonsterImageEffect {
         bottom.addAction(new FastForwardAction<>(createParallelAction(0, -1 * distance)));
 
         monsterImage.getStage().addAction(new FastForwardAction<>(Actions.sequence(
-                Actions.delay(ViewProperties.NORMAL_ACTION_DURATION),
+                Actions.delay(1.5f*ViewProperties.NORMAL_ACTION_DURATION),
                 Actions.run(() -> {
                     monsterImage.remove();
                     left.remove();
@@ -77,8 +87,9 @@ public class MonsterImageEffect {
         float actionDuration = ViewProperties.NORMAL_ACTION_DURATION;
 
         return Actions.parallel(
-                Actions.moveBy(xMul, yMul, actionDuration, Interpolation.sineIn),
-                Actions.alpha(0, actionDuration, Interpolation.linear)
+                Actions.rotateBy(60, 1.5f*actionDuration, Interpolation.sineOut),
+                Actions.moveBy(xMul, yMul, 1.5f*actionDuration, Interpolation.sineOut),
+                Actions.delay(actionDuration / 2f, Actions.scaleTo(0,0, actionDuration, Interpolation.sineIn))
         );
     }
 

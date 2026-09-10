@@ -37,7 +37,7 @@ class GridActionHighlight extends Actor {
 
     private void flash() {
         clearActions();
-        setColor(0.82f, 0.08f, 0.18f, 1f);
+        setColor(1f, 0.02f, 0.04f, 1f);
         setVisible(true);
         addAction(Actions.sequence(
                 Actions.delay(0.15f),
@@ -54,14 +54,14 @@ class GridActionHighlight extends Actor {
         float glowWidth = Math.min(getWidth(), getHeight()) * 0.05f;
         float stripWidth = glowWidth / GLOW_STEPS;
 
-        batch.setColor(color.r, color.g, color.b, 0.10f * opacity);
+        batch.setColor(color.r, color.g, color.b, 0.25f * opacity);
         drawable.draw(batch, getX(), getY(), getWidth(), getHeight());
         for (int i = 0; i < GLOW_STEPS; i++) {
             float inset = i * stripWidth;
             float strength = 1f - Math.abs(2f * (i + 0.5f) / GLOW_STEPS - 1f);
             float width = getWidth() - inset * 2f;
             float sideHeight = getHeight() - (inset + stripWidth) * 2f;
-            batch.setColor(color.r, color.g, color.b, 0.32f * strength * opacity);
+            batch.setColor(color.r, color.g, color.b, 0.70f * strength * opacity);
             drawable.draw(batch, getX() + inset, getY() + inset, width, stripWidth);
             drawable.draw(batch, getX() + inset, getTop() - inset - stripWidth, width, stripWidth);
             drawable.draw(batch, getX() + inset, getY() + inset + stripWidth, stripWidth, sideHeight);

@@ -41,6 +41,8 @@ public class MonsterImage extends Image {
     private boolean drawReckoningPulse = false;
     private float reckoningPulseTime = 0f;
 
+    private boolean drawShadow = true;
+
     public MonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
         super(texture);
         this.monsterInfo = monsterInfo;
@@ -58,6 +60,10 @@ public class MonsterImage extends Image {
         addSquishStretchAnimation();
     }
 
+    public void hideShadow() {
+        drawShadow = false;
+    }
+
     private void displayMonsterCard() {
         gameController.displayMonsterCard(monsterInfo, () -> gameController.hideMonsterCard(monsterInfo, null), null);
     }
@@ -73,7 +79,7 @@ public class MonsterImage extends Image {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         // Draw blurred shadow using Gaussian blur shader
-        if (getDrawable() instanceof TextureRegionDrawable) {
+        if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
             TextureRegionDrawable trd = (TextureRegionDrawable) getDrawable();
             ShaderProgram prevShader = batch.getShader();
             Color prevColor = batch.getColor().cpy();

@@ -48,9 +48,9 @@ public class GridActionHighlightTest {
 
         assertBounds(highlight, 100f, 0f, 100f, 300f);
         assertEquals(1, highlight.getActions().size);
-        assertEquals(0.82f, highlight.getColor().r, 0f);
-        assertEquals(0.08f, highlight.getColor().g, 0f);
-        assertEquals(0.18f, highlight.getColor().b, 0f);
+        assertEquals(1f, highlight.getColor().r, 0f);
+        assertEquals(0.02f, highlight.getColor().g, 0f);
+        assertEquals(0.04f, highlight.getColor().b, 0f);
         assertEquals(1f, highlight.getColor().a, 0f);
         assertEquals(Touchable.disabled, highlight.getTouchable());
     }
@@ -96,6 +96,7 @@ public class GridActionHighlightTest {
     @Test
     public void softGlowStaysInsideOneLineAndRestoresBatchColor() {
         final int[] draws = {0};
+        final float[] peakOpacity = {0f};
         final boolean[] restoredColor = {false};
         final float previousColor = Color.BLUE.toFloatBits();
         Batch batch = (Batch) Proxy.newProxyInstance(Batch.class.getClassLoader(), new Class<?>[] {Batch.class},
@@ -108,8 +109,15 @@ public class GridActionHighlightTest {
                             assertEquals(previousColor, (Float) arguments[0], 0f);
                             restoredColor[0] = true;
                         } else {
+                            assertEquals(1f, (Float) arguments[0], 0f);
+                            assertEquals(0.02f, (Float) arguments[1], 0f);
+                            assertEquals(0.04f, (Float) arguments[2], 0f);
                             assertTrue((Float) arguments[3] > 0f);
-                            assertTrue((Float) arguments[3] <= 0.32f);
+                            assertTrue((Float) arguments[3] <= 0.70f);
+                            if (draws[0] == 0) {
+                                assertEquals(0.25f, (Float) arguments[3], 0f);
+                            }
+                            peakOpacity[0] = Math.max(peakOpacity[0], (Float) arguments[3]);
                         }
                         return null;
                     }
@@ -130,6 +138,7 @@ public class GridActionHighlightTest {
         highlight.draw(batch, 1f);
 
         assertTrue(draws[0] > 5);
+        assertTrue(peakOpacity[0] > 0.60f);
         assertTrue(restoredColor[0]);
     }
 
@@ -141,6 +150,9 @@ public class GridActionHighlightTest {
                 highlight.show(new GridPosition(row, column), 120f, -30f, -30f);
 
                 assertBounds(highlight, -30f + column * 120f, -30f + (2 - row) * 120f, 120f, 120f);
+                assertEquals(1f, highlight.getColor().r, 0f);
+                assertEquals(0.02f, highlight.getColor().g, 0f);
+                assertEquals(0.04f, highlight.getColor().b, 0f);
             }
         }
     }

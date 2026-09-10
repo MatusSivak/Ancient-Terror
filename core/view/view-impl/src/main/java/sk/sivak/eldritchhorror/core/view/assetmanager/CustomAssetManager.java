@@ -99,7 +99,7 @@ public class CustomAssetManager extends AssetManager {
     public static void loadTexturesTutorial() {
         get().load("monster/Maniac.png", Texture.class);
         get().load("icon/reckoning.png", Texture.class);
-//        get().load("tutorial/chalkboard.png", Texture.class);
+//        get().load("tutorial/chalkboard.jpg", Texture.class);
 //        get().load("monster/filter.png", Texture.class);
     }
 
@@ -263,7 +263,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPLASH_TITLE = "background/title.png";
     public final static String BLANK_MAP = "map/blank_map.png";
     public final static String ASTEROID = "map/asteroid.png";
-    public final static String MAP = "map/new_map.png";
+    public final static String MAP = "map/new_map.jpg";
     public final static String RED_PIN = "map/redpin.png";
     public final static String STORM = "map/storm.png";
     public final static String SPACE = "map/space_background.jpg";
