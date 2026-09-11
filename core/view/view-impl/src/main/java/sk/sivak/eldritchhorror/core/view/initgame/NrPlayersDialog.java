@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -8,12 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import rx.SingleSubscriber;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_NORMAL;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_PRESSED;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 
 /**
  * @author msivak
@@ -21,18 +17,16 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class NrPlayersDialog extends Dialog {
 
     public static final int MAX_NUMBER_OF_PLAYERS = 8;
-    private static final float INVESTIGATOR_BUTTON_SIZE = 280f;
-    private static final float INVESTIGATOR_BUTTON_SPACING = 10f;
-    public static final int DIALOG_WIDTH = 2098;
-    public static final int DIALOG_HEIGHT = 750;
-    public static final int CELL_PAD_RIGHT = -50;
+    private static final float INVESTIGATOR_BUTTON_SIZE = 50f;
+    private static final float INVESTIGATOR_BUTTON_SPACING = 6f;
+    public static final int DIALOG_WIDTH = 530;
+    public static final int DIALOG_HEIGHT = 147;
     private SingleSubscriber<? super Integer> subscriber;
 
     public NrPlayersDialog(String title, WindowStyle windowStyle) {
         super(title, windowStyle);
         getTitleLabel().setAlignment(Align.center, Align.center);
-        getTitleLabel().setFontScale(1.5f);
-        getTitleTable().padTop(315);
+        getTitleLabel().setFontScale(0.4f);
         setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
         setOrigin(Align.center);
         setModal(false);
@@ -40,27 +34,28 @@ public class NrPlayersDialog extends Dialog {
         setResizable(false);
         setKeepWithinStage(false);
 
-        getContentTable().padTop(20f).padBottom(0f);
+        getContentTable().pad(0f);
         Table buttonRow = new Table();
         buttonRow.defaults().size(INVESTIGATOR_BUTTON_SIZE);
 
         for (int i = 1; i <= MAX_NUMBER_OF_PLAYERS; i++) {
             TextButton button = new TextButton(String.valueOf(i), createDialogButtonStyle());
+            AncientTerrorMenuStyles.addFocusHighlight(button);
             button.setSize(INVESTIGATOR_BUTTON_SIZE, INVESTIGATOR_BUTTON_SIZE);
             button.getLabel().setAlignment(Align.center);
-            button.getLabel().setFontScale(2.5f);
-            button.padBottom(20f);
+            button.getLabel().setFontScale(0.54f);
+            button.pad(0f);
             Cell<TextButton> cell = buttonRow.add(button).size(INVESTIGATOR_BUTTON_SIZE);
             if (i < MAX_NUMBER_OF_PLAYERS) {
-                cell.padRight(CELL_PAD_RIGHT);
+                cell.padRight(INVESTIGATOR_BUTTON_SPACING);
             }
             button.addListener(new ButtonListener(i));
         }
 
-        getContentTable().add(buttonRow).padTop(30);
+        getContentTable().add(buttonRow);
         getContentTable().pack();
         pack();
-        setSize(getPrefWidth(), getPrefHeight());
+        setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
         new InAppPurchaseManager().isProductPurchased("no_ads").subscribe();
     }
 
@@ -69,15 +64,7 @@ public class NrPlayersDialog extends Dialog {
     }
 
     private TextButton.TextButtonStyle createDialogButtonStyle() {
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_NORMAL);
-        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_PRESSED);
-        style.over = style.up;
-        style.font = CustomAssetManager.getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
-        style.fontColor = Color.valueOf("D2DADF");
-        style.downFontColor = Color.valueOf("98A9B2");
-        style.overFontColor = Color.valueOf("4F8DB7");
-        return style;
+        return AncientTerrorMenuStyles.investigatorButton();
     }
 
     private class ButtonListener extends ClickListener {

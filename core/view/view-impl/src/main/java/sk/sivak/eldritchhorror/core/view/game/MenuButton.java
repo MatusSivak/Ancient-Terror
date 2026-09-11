@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
@@ -246,6 +247,7 @@ public class MenuButton extends ImageButton {
         imageTextButtonStyle.imageUp = textureRegionDrawable;
         ImageTextButton niceButton = new ImageTextButton(text, imageTextButtonStyle);
         niceButton.getLabel().setFontScale(0.4f);
+        AncientTerrorMenuStyles.addFocusHighlight(niceButton);
         niceButton.setSize(280, 50);
         niceButton.getImage().setAlign(Align.left);
         niceButton.getLabel().setAlignment(Align.left);
@@ -257,25 +259,12 @@ public class MenuButton extends ImageButton {
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, createMenuButtonStyle());
         niceButton.getLabel().setFontScale(0.4f);
+        AncientTerrorMenuStyles.addFocusHighlight(niceButton);
         niceButton.setSize(280, 50);
         return niceButton;
     }
 
     private TextButton.TextButtonStyle createMenuButtonStyle() {
-        NinePatch normal = CustomAssetManager.createMenuButtonPatch(false);
-        NinePatch pressed = CustomAssetManager.createMenuButtonPatch(true);
-        normal.scale(0.5f, 0.5f);
-        pressed.scale(0.5f, 0.5f);
-        NinePatchDrawable up = new NinePatchDrawable(normal);
-        NinePatchDrawable down = new NinePatchDrawable(pressed);
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(
-                up, down, down, CustomAssetManager.getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4));
-        style.over = up;
-        style.fontColor = new Color(0.91f, 0.85f, 0.69f, 1f);
-        style.overFontColor = new Color(1f, 0.94f, 0.79f, 1f);
-        style.downFontColor = new Color(0.82f, 0.75f, 0.59f, 1f);
-        style.checkedFontColor = style.downFontColor;
-        style.pressedOffsetY = -1f;
-        return style;
+        return AncientTerrorMenuStyles.button();
     }
 }

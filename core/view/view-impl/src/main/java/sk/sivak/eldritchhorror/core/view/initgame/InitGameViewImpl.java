@@ -8,6 +8,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -16,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -42,7 +47,6 @@ import sk.sivak.eldritchhorror.core.view.InitGameView;
 import sk.sivak.eldritchhorror.core.view.ScreenType;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
-import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
 import sk.sivak.eldritchhorror.core.view.components.investigator.SelectMultipleInvestigators;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
 import sk.sivak.eldritchhorror.core.view.components.table.ActorFrame;
@@ -64,9 +68,6 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.AD_MOB;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_NORMAL;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_BUTTON_PRESSED;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
@@ -108,18 +109,17 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private SingleSubscriber<? super Integer> numberOfPlayersSingleSubscriber;
     private Runnable removeOnRewardedAdLoadedListener = () -> {};
     private Runnable removeOnRewardedAdFailedToLoadListener = () -> {};
-    private Image englishLocaleFlag;
-    private Image slovakLocaleFlag;
+    private ImageButton englishLocaleFlag;
+    private ImageButton slovakLocaleFlag;
 
     private static final String FLAGS_TEXTURE = "flags/flags.png";
     private static final int FLAGS_COLUMNS = 15;
     private static final int FLAGS_ROWS = 13;
     private static final String LANGUAGE_ENGLISH = "en";
     private static final String LANGUAGE_SLOVAK = "sk";
-    private static final float MENU_VERTICAL_OFFSET = -100f;
+    private static final float MENU_BUTTON_BOTTOM = 33f;
+    private static final float MENU_BUTTON_STEP = 60f;
     private static final float SPLASH_TITLE_SCALE = 0.6f;
-    private static final float MAIN_MENU_BUTTON_WIDTH = 2172f;
-    private static final float MAIN_MENU_BUTTON_HEIGHT = 724f;
 
     public void setDefaultSkin(Skin skin) {
         this.skin = skin;
@@ -133,10 +133,10 @@ public class InitGameViewImpl implements Screen, InitGameView {
             nrPlayersDialog.getColor().a = 1f;
             nrPlayersDialog.show(stage);
             nrPlayersDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-            nrPlayersDialog.setScale(0.25f);
+            nrPlayersDialog.setScale(1f);
             nrPlayersDialog.setPosition(
                     stage.getWidth() / 2f - nrPlayersDialog.getWidth() / 2f,
-                    stage.getHeight() / 2f - nrPlayersDialog.getHeight() / 2f + 40f
+                    stage.getHeight() / 2f - nrPlayersDialog.getHeight() / 2f + 20f
             );
             nrPlayersDialog.setSubscriber(sub);
         }).doOnSuccess(x -> {
@@ -283,7 +283,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
 
         replayTutorialButton = createMainMenuButton(get("init.tutorial"));
-        replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, 245 + MENU_VERTICAL_OFFSET);
+        replayTutorialButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - replayTutorialButton.getWidth()/2f, MENU_BUTTON_BOTTOM + 2 * MENU_BUTTON_STEP);
         addClickListener(replayTutorialButton, () -> {
             GoogleServicesHolder.setTutorialPassed(false);
             replayTutorialButton.setTouchable(Touchable.disabled);
@@ -297,13 +297,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
         });
 
         collectionButton = createMainMenuButton(get("init.cardsCollection"));
-        collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, 185 + MENU_VERTICAL_OFFSET);
+        collectionButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - collectionButton.getWidth()/2f, MENU_BUTTON_BOTTOM + MENU_BUTTON_STEP);
         addClickListener(collectionButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.CARDS);
         });
 
         hallOfFameButton = createMainMenuButton(get("init.hallOfFame"));
-        hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, 125 + MENU_VERTICAL_OFFSET);
+        hallOfFameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - hallOfFameButton.getWidth()/2f, MENU_BUTTON_BOTTOM);
         addClickListener(hallOfFameButton, () -> {
             changeScreenHandler.changeScreen(ScreenType.HALL_OF_FAME);
         });
@@ -326,12 +326,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
         if (Gdx.files.local("save.json").exists()) {
 
             loadGameButton = createMainMenuButton(get("init.continue"));
-            loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, 365 + MENU_VERTICAL_OFFSET);
+            loadGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - loadGameButton.getWidth()/2f, MENU_BUTTON_BOTTOM + 4 * MENU_BUTTON_STEP);
             stage.addActor(loadGameButton);
             ButtonUtils.addClickListener(loadGameButton, continueGameAction);
 
             newGameButton = createMainMenuButton(get("init.newGame"));
-            newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, 305 + MENU_VERTICAL_OFFSET);
+            newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, MENU_BUTTON_BOTTOM + 3 * MENU_BUTTON_STEP);
             stage.addActor(newGameButton);
 
             if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {
@@ -408,9 +408,11 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     private void rebuildLocalizedDialogs() {
         Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.background = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG);
+        NinePatch background = CustomAssetManager.createMenuDialogPatch();
+        background.scale(0.5f, 0.5f);
+        windowStyle.background = new NinePatchDrawable(background);
         windowStyle.titleFont = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
-        windowStyle.titleFontColor = Color.valueOf("D2DADF");
+        windowStyle.titleFontColor = Color.valueOf("E8D9B0");
         nrPlayersDialog = new NrPlayersDialog(get("init.numberOfInvestigators"), windowStyle);
         selectAncientOneDialog = new SelectAncientOneDialog(get("init.selectAncientOne"), skin);
     }
@@ -431,15 +433,29 @@ public class InitGameViewImpl implements Screen, InitGameView {
         refreshLocaleFlagSelection();
     }
 
-    private Image createLocaleFlag(int row, int column, String languageTag) {
+    private ImageButton createLocaleFlag(int row, int column, String languageTag) {
         Texture flagsTexture = CustomAssetManager.getTexture(FLAGS_TEXTURE);
         int regionWidth = flagsTexture.getWidth() / FLAGS_COLUMNS;
         int regionHeight = flagsTexture.getHeight() / FLAGS_ROWS;
         TextureRegion region = new TextureRegion(flagsTexture, (column - 1) * regionWidth, (row - 1) * regionHeight, regionWidth, regionHeight);
-        Image image = new Image(new TextureRegionDrawable(region));
-        image.setSize(regionWidth * 0.55f, regionHeight * 0.55f);
-        ButtonUtils.addClickListener(image, () -> applyLanguage(languageTag));
-        return image;
+        TextButton.TextButtonStyle frame = AncientTerrorMenuStyles.investigatorButton();
+        ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+        style.up = frame.up;
+        style.down = frame.down;
+        style.over = frame.over;
+
+        style.checked = AncientTerrorMenuStyles.highlight(frame.up);
+        style.checkedOver = style.checked;
+        style.imageUp = new TextureRegionDrawable(region);
+        ImageButton button = new ImageButton(style);
+        AncientTerrorMenuStyles.addFocusHighlight(button);
+        button.getImageCell().size(40f, 20f);
+        button.setSize(52f, 32f);
+        ButtonUtils.addClickListener(button, () -> {
+            applyLanguage(languageTag);
+            refreshLocaleFlagSelection();
+        });
+        return button;
     }
 
     private void applyLanguage(String languageTag) {
@@ -457,8 +473,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
             return;
         }
         boolean englishSelected = LANGUAGE_ENGLISH.equals(UiText.getLanguage());
-        englishLocaleFlag.setColor(1f, 1f, 1f, englishSelected ? 1f : 0.45f);
-        slovakLocaleFlag.setColor(1f, 1f, 1f, englishSelected ? 0.45f : 1f);
+        englishLocaleFlag.setChecked(englishSelected);
+        slovakLocaleFlag.setChecked(!englishSelected);
     }
 
     private void refreshLocalizedTexts() {
@@ -504,21 +520,10 @@ public class InitGameViewImpl implements Screen, InitGameView {
     }
 
     private TextButton createMainMenuButton(String text) {
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
-        style.fontColor = Color.valueOf("D2DADF");
-        style.downFontColor = Color.valueOf("98A9B2");
-        style.overFontColor = Color.valueOf("4F8DB7");
-        style.checkedFontColor = style.fontColor;
-        style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_PRESSED);
-        style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_BUTTON_NORMAL);
-        style.over = style.up;
-        style.checked = style.up;;
-
-        TextButton button = new TextButton(text, style);
-        button.getLabel().setFontScale(0.45f);
-        button.padBottom(5);
-        button.setSize(MAIN_MENU_BUTTON_WIDTH * 0.13f, MAIN_MENU_BUTTON_HEIGHT * 0.13f);
+        TextButton button = new TextButton(text, AncientTerrorMenuStyles.button());
+        AncientTerrorMenuStyles.addFocusHighlight(button);
+        button.getLabel().setFontScale(0.4f);
+        button.setSize(280f, 50f);
         return button;
     }
 

@@ -1,0 +1,12 @@
+[
+  {
+    "state": "normal",
+    "prompt": "Production game UI asset for Ancient Terror: ONE EMPTY SQUARE button, antique bronze thin frame with small symmetrical curled tentacle engravings confined to four corners, dark desaturated jade inset, matte subtle fine grain. Matches bronze and jade Lovecraftian dialog. Large blank central 70% for an ivory numeral rendered separately in game. Rounded square corners, straight sides, front-on orthographic, almost fills canvas with 2% margin. True transparent alpha outside corners, no backdrop, no checkerboard, no letters, no numbers, no icons. NORMAL raised state, warm bronze upper bevel and softly lit jade face. Simple readable shape at 50x50 pixels.",
+    "path": "C:\\Users\\matus.sivak\\.codex\\generated_images\\01a08c08-2ba2-74f2-8a77-5e7b4d74d759\\exec-39866d86-1815-4240-b273-fce96d9097a4.png"
+  },
+  {
+    "state": "pressed",
+    "prompt": "Production game UI asset for Ancient Terror: ONE EMPTY SQUARE button, antique bronze thin frame with small symmetrical curled tentacle engravings confined to four corners, dark desaturated jade inset, matte subtle fine grain. Matches bronze and jade Lovecraftian dialog. Large blank central 70% for an ivory numeral rendered separately in game. Rounded square corners, straight sides, front-on orthographic, almost fills canvas with 2% margin. True transparent alpha outside corners, no backdrop, no checkerboard, no letters, no numbers, no icons. PRESSED state, recessed very dark jade face, dark upper inner shadow, restrained bronze lower inner highlight, subdued bronze outer rim. Simple readable shape at 50x50 pixels.",
+    "path": "C:\\Users\\matus.sivak\\.codex\\generated_images\\01a08c08-2ba2-74f2-8a77-5e7b4d74d759\\exec-a4cbc68f-b0ec-45bd-93d7-e07efc42d346.png"
+  }
+]
