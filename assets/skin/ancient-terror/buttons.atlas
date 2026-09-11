@@ -1,0 +1,29 @@
+button_normal.png
+size: 560,100
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+button-normal
+  rotate: false
+  xy: 0, 0
+  size: 560, 100
+  split: 80, 80, 24, 24
+  pad: 28, 28, 14, 14
+  orig: 560, 100
+  offset: 0, 0
+  index: -1
+
+button_pressed.png
+size: 560,100
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+button-pressed
+  rotate: false
+  xy: 0, 0
+  size: 560, 100
+  split: 80, 80, 24, 24
+  pad: 28, 28, 14, 14
+  orig: 560, 100
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,14 @@
+dialog.png
+size: 512,384
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+ancient-terror-dialog
+  rotate: false
+  xy: 0, 0
+  size: 512, 384
+  split: 80, 80, 100, 104
+  pad: 80, 80, 108, 40
+  orig: 512, 384
+  offset: 0, 0
+  index: -1

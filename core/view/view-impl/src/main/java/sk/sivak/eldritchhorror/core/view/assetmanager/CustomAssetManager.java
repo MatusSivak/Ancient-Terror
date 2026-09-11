@@ -5,6 +5,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -763,6 +765,16 @@ public class CustomAssetManager extends AssetManager {
             }
         }
         runtimeFonts.clear();
+    }
+
+    public static NinePatch createMenuDialogPatch() {
+        TextureAtlas atlas = commonLoad("skin/ancient-terror/dialog.atlas", TextureAtlas.class);
+        return atlas.createPatch("ancient-terror-dialog");
+    }
+
+    public static NinePatch createMenuButtonPatch(boolean pressed) {
+        TextureAtlas atlas = commonLoad("skin/ancient-terror/buttons.atlas", TextureAtlas.class);
+        return atlas.createPatch(pressed ? "button-pressed" : "button-normal");
     }
 
     private static <T> T commonLoad(String id, Class<T> clazz) {
