@@ -521,6 +521,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     private TextButton createMainMenuButton(String text) {
         TextButton button = new TextButton(text, AncientTerrorMenuStyles.button());
+        AncientTerrorMenuStyles.makeMomentary(button);
         AncientTerrorMenuStyles.addFocusHighlight(button);
         button.getLabel().setFontScale(0.4f);
         button.setSize(280f, 50f);

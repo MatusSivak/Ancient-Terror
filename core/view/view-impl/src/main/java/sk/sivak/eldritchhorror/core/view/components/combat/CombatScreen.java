@@ -4,13 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.FloatAction;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -33,7 +32,7 @@ import sk.sivak.eldritchhorror.core.view.components.table.CardsCollectionTable;
 import sk.sivak.eldritchhorror.core.view.components.table.ConditionsCollectionTable;
 import sk.sivak.eldritchhorror.core.view.components.table.SpellsCollectionTable;
 import sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler;
-import sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.MyMoveToAction;
 
@@ -43,7 +42,6 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
@@ -96,165 +94,45 @@ public class CombatScreen implements Screen {
         TextButton buttonArtifacts = buildButton(get("combat.artifacts"));
         TextButton buttonSpells = buildButton(get("combat.spells"));
         TextButton buttonConditions = buildButton(get("combat.conditions"));
+        new ButtonGroup<TextButton>(buttonAssets, buttonArtifacts, buttonSpells, buttonConditions);
 
         Table buttonsTable = new Table();
         buttonsTable.pad(15);
         buttonsTable.setHeight(ViewProperties.VIEWPORT_HEIGHT);
-
-        buttonAssets.clearActions();
-        buttonArtifacts.clearActions();
-        buttonSpells.clearActions();
-        buttonConditions.clearActions();
+        buttonsTable.align(Align.topLeft);
 
         ButtonUtils.addClickListener(buttonAssets, () -> {
             AssetsCollectionTable table = new AssetsCollectionTable();
             table.setUnlocked(unlockedAssets);
             table.setDiscovered(discoveredAssets);
             initNewTable(table);
-            buttonsTable.getCell(buttonAssets).width(175);
-            buttonAssets.getLabel().setFontScale(0.5f);
-            buttonAssets.setChecked(true);
-            buttonAssets.setColor(Color.WHITE);
-            buttonAssets.getLabel().setColor(Color.WHITE);
-
-
-            buttonArtifacts.getLabel().setColor(Color.GRAY);
-            buttonSpells.getLabel().setColor(Color.GRAY);
-            buttonConditions.getLabel().setColor(Color.GRAY);
-            buttonsTable.getCell(buttonArtifacts).width(175 * 0.75f);
-            buttonsTable.getCell(buttonSpells).width(175 * 0.75f);
-            buttonsTable.getCell(buttonConditions).width(175 * 0.75f);
-            buttonArtifacts.getLabel().setFontScale(0.35f);
-            buttonSpells.getLabel().setFontScale(0.35f);
-            buttonConditions.getLabel().setFontScale(0.35f);
-            buttonArtifacts.setChecked(false);
-            buttonSpells.setChecked(false);
-            buttonConditions.setChecked(false);
-            buttonArtifacts.setColor(Color.GRAY);
-            buttonSpells.setColor(Color.GRAY);
-            buttonConditions.setColor(Color.GRAY);
-//            scrollDown(1, table.getRows());
         });
-
         ButtonUtils.addClickListener(buttonArtifacts, () -> {
             ArtifactsCollectionTable table = new ArtifactsCollectionTable();
             table.setUnlocked(unlockedArtifacts);
             table.setDiscovered(discoveredArtifacts);
             initNewTable(table);
-            buttonsTable.getCell(buttonArtifacts).width(175);
-            buttonArtifacts.getLabel().setFontScale(0.5f);
-            buttonArtifacts.setChecked(true);
-            buttonArtifacts.getStyle().checked = buttonArtifacts.getStyle().down;
-            buttonArtifacts.setColor(Color.WHITE);
-            buttonArtifacts.getLabel().setColor(Color.WHITE);
-
-            buttonAssets.getLabel().setColor(Color.GRAY);
-            buttonSpells.getLabel().setColor(Color.GRAY);
-            buttonConditions.getLabel().setColor(Color.GRAY);
-            buttonsTable.getCell(buttonAssets).width(175 * 0.75f);
-            buttonsTable.getCell(buttonSpells).width(175 * 0.75f);
-            buttonsTable.getCell(buttonConditions).width(175 * 0.75f);
-            buttonAssets.getLabel().setFontScale(0.35f);
-            buttonSpells.getLabel().setFontScale(0.35f);
-            buttonConditions.getLabel().setFontScale(0.35f);
-            buttonAssets.setChecked(false);
-            buttonSpells.setChecked(false);
-            buttonConditions.setChecked(false);
-            buttonAssets.setColor(Color.GRAY);
-            buttonSpells.setColor(Color.GRAY);
-            buttonConditions.setColor(Color.GRAY);
-//            scrollDown(1, table.getRows());
         });
-
         ButtonUtils.addClickListener(buttonSpells, () -> {
             SpellsCollectionTable table = new SpellsCollectionTable();
             table.setUnlocked(Arrays.asList(SpellId.values()));
             table.setDiscovered(discoveredSpells);
             initNewTable(table);
-            buttonsTable.getCell(buttonSpells).width(175);
-            buttonSpells.getLabel().setFontScale(0.5f);
-            buttonSpells.setChecked(true);
-            buttonSpells.setColor(Color.WHITE);
-            buttonSpells.getStyle().checked = buttonSpells.getStyle().down;
-            buttonSpells.getLabel().setColor(Color.WHITE);
-
-
-            buttonAssets.getLabel().setColor(Color.GRAY);
-            buttonArtifacts.getLabel().setColor(Color.GRAY);
-            buttonConditions.getLabel().setColor(Color.GRAY);
-            buttonsTable.getCell(buttonAssets).width(175 * 0.75f);
-            buttonsTable.getCell(buttonArtifacts).width(175 * 0.75f);
-            buttonsTable.getCell(buttonConditions).width(175 * 0.75f);
-            buttonAssets.getLabel().setFontScale(0.35f);
-            buttonArtifacts.getLabel().setFontScale(0.35f);
-            buttonConditions.getLabel().setFontScale(0.35f);
-            buttonAssets.setChecked(false);
-            buttonArtifacts.setChecked(false);
-            buttonConditions.setChecked(false);
-            buttonAssets.setColor(Color.GRAY);
-            buttonArtifacts.setColor(Color.GRAY);
-            buttonConditions.setColor(Color.GRAY);
-//            scrollDown(1, table.getRows());
-
         });
-
         ButtonUtils.addClickListener(buttonConditions, () -> {
             ConditionsCollectionTable table = new ConditionsCollectionTable();
             table.setUnlocked(Arrays.asList(ConditionId.values()));
             table.setDiscovered(discoveredConditions);
             initNewTable(table);
-            buttonsTable.getCell(buttonConditions).width(175);
-            buttonConditions.getLabel().setFontScale(0.5f);
-            buttonConditions.setChecked(true);
-            buttonConditions.getStyle().checked = buttonConditions.getStyle().down;
-            buttonConditions.setColor(Color.WHITE);
-            buttonConditions.getLabel().setColor(Color.WHITE);
-
-            buttonAssets.getLabel().setColor(Color.GRAY);
-            buttonArtifacts.getLabel().setColor(Color.GRAY);
-            buttonSpells.getLabel().setColor(Color.GRAY);
-            buttonsTable.getCell(buttonAssets).width(175 * 0.75f);
-            buttonsTable.getCell(buttonArtifacts).width(175 * 0.75f);
-            buttonsTable.getCell(buttonSpells).width(175 * 0.75f);
-            buttonAssets.getLabel().setFontScale(0.35f);
-            buttonArtifacts.getLabel().setFontScale(0.35f);
-            buttonSpells.getLabel().setFontScale(0.35f);
-            buttonAssets.setChecked(false);
-            buttonArtifacts.setChecked(false);
-            buttonSpells.setChecked(false);
-            buttonAssets.setColor(Color.GRAY);
-            buttonArtifacts.setColor(Color.GRAY);
-            buttonSpells.setColor(Color.GRAY);
-//            scrollDown(1, table.getRows());
         });
 
-        buttonsTable.add(buttonAssets).align(Align.center).width(175).pad(0).height(buttonAssets.getHeight()).row();
-        buttonsTable.add(buttonArtifacts).align(Align.center).width(175  * 0.75f).pad(0).height(buttonArtifacts.getHeight()).row();
-        buttonsTable.add(buttonSpells).align(Align.center).width(175  * 0.75f).pad(0).height(buttonSpells.getHeight()).row();
-        buttonsTable.add(buttonConditions).align(Align.center).width(175 * 0.75f).pad(0).height(buttonConditions.getHeight()).row();
-
-        buttonAssets.getLabel().setColor(Color.WHITE);
-        buttonArtifacts.getLabel().setColor(Color.GRAY);
-        buttonSpells.getLabel().setColor(Color.GRAY);
-        buttonConditions.getLabel().setColor(Color.GRAY);
-
-        buttonAssets.getLabel().setFontScale(0.5f);
-        buttonArtifacts.getLabel().setFontScale(0.35f);
-        buttonSpells.getLabel().setFontScale(0.35f);
-        buttonConditions.getLabel().setFontScale(0.35f);
-
-        buttonAssets.setColor(Color.WHITE);
-        buttonArtifacts.setColor(Color.GRAY);
-        buttonSpells.setColor(Color.GRAY);
-        buttonConditions.setColor(Color.GRAY);
+        for (TextButton button : new TextButton[]{buttonAssets, buttonArtifacts, buttonSpells, buttonConditions}) {
+            buttonsTable.add(button).width(175f).height(50f).padBottom(8f).row();
+        }
 
         TextButton backButton = buildButton(get("combat.back"));
-        backButton.setColor(Color.GRAY);
-        ButtonUtils.addClickListener(backButton, () -> {
-            changeScreenHandler.changeScreen(ScreenType.INIT_GAME);
-        });
-        buttonsTable.add(backButton).width(175).pad(0).align(Align.bottomLeft).expandY().height(backButton.getHeight());
-        buttonsTable.align(Align.topLeft);
+        ButtonUtils.addClickListener(backButton, () -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME));
+        buttonsTable.add(backButton).width(175f).height(50f).align(Align.bottomLeft).expandY();
 
         AssetsCollectionTable table = new AssetsCollectionTable();
         table.setUnlocked(unlockedAssets);
@@ -262,9 +140,6 @@ public class CombatScreen implements Screen {
         table.init();
 
         buttonAssets.setChecked(true);
-        buttonAssets.getStyle().checked = buttonAssets.getStyle().over;
-        buttonAssets.setScale(0.8f);
-
 
         scrollPane = new ScrollPane(table);
         scrollPane.setSize(table.getWidth(),ViewProperties.VIEWPORT_HEIGHT - 30);
@@ -289,10 +164,10 @@ public class CombatScreen implements Screen {
 
 
     private TextButton buildButton(String title) {
-        TextButton button = new TextButton(title, skin);
-        button.getLabel().setFontScale(0.5f);
-        button.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
-        button.setSize(280, button.getHeight()*1.5f);
+        TextButton button = new TextButton(title, AncientTerrorMenuStyles.button());
+        AncientTerrorMenuStyles.addFocusHighlight(button);
+        button.getLabel().setFontScale(0.35f);
+        button.setSize(175f, 50f);
         return button;
     }
 

@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
@@ -57,6 +58,17 @@ public final class AncientTerrorMenuStyles {
         style.disabledFontColor = new Color(0.55f, 0.52f, 0.44f, 1f);
         style.pressedOffsetY = -1f;
         return style;
+    }
+
+    public static void makeMomentary(Button button) {
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (actor == button && button.isChecked()) {
+                    event.cancel();
+                }
+            }
+        });
     }
 
     public static void addFocusHighlight(Button button) {

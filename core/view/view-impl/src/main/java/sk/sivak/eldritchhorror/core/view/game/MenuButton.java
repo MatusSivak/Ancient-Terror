@@ -246,6 +246,7 @@ public class MenuButton extends ImageButton {
         ImageTextButton.ImageTextButtonStyle imageTextButtonStyle = new ImageTextButton.ImageTextButtonStyle(textButtonStyle);
         imageTextButtonStyle.imageUp = textureRegionDrawable;
         ImageTextButton niceButton = new ImageTextButton(text, imageTextButtonStyle);
+        AncientTerrorMenuStyles.makeMomentary(niceButton);
         niceButton.getLabel().setFontScale(0.4f);
         AncientTerrorMenuStyles.addFocusHighlight(niceButton);
         niceButton.setSize(280, 50);
@@ -258,6 +259,7 @@ public class MenuButton extends ImageButton {
 
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, createMenuButtonStyle());
+        AncientTerrorMenuStyles.makeMomentary(niceButton);
         niceButton.getLabel().setFontScale(0.4f);
         AncientTerrorMenuStyles.addFocusHighlight(niceButton);
         niceButton.setSize(280, 50);

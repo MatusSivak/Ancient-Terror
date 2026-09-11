@@ -3,7 +3,6 @@ package sk.sivak.eldritchhorror.core.view.components.typewriter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.rafaskoberg.gdx.typinglabel.TypingAdapter;
 import com.rafaskoberg.gdx.typinglabel.TypingLabel;
-import java8.features.util.MapUtils;
 import rx.Completable;
 import rx.CompletableSubscriber;
 import rx.Single;
@@ -29,10 +27,7 @@ import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
@@ -151,24 +146,7 @@ public class TypewriterViewImpl implements TypewriterView  {
         )));
         text = replacePlaceholders(text);
         BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
-        bitmapFont.getData().markupEnabled = true;
-        GlyphLayout glyphLayout = new GlyphLayout(bitmapFont, text, fontColor, TEXT_AREA_WIDTH * TABLE_SCALE / FONT_SCALE, Align.left, true);
-
-        Map<Float, String> linesMap = new LinkedHashMap<>();
-
-        for (GlyphLayout.GlyphRun run : glyphLayout.runs) {
-            StringBuilder sentenceBuilder = new StringBuilder();
-            sentenceBuilder.append("[#").append(run.color.toString()).append("]");
-            for (BitmapFont.Glyph glyph : run.glyphs) {
-                sentenceBuilder.append((char) glyph.id);
-            }
-            sentenceBuilder.append("[]");
-
-            MapUtils.computeIfAbsent(linesMap, run.y, key -> "");
-            String existing = linesMap.get(run.y);
-            linesMap.put(run.y, existing + sentenceBuilder.toString());
-        }
-        return new LinkedList<>(linesMap.values());
+        return TypewriterTextLayout.splitLines(bitmapFont, text, fontColor);
     }
 
     String replacePlaceholders(String text) {
@@ -249,18 +227,16 @@ public class TypewriterViewImpl implements TypewriterView  {
     private Label createGlyphSafeLabel(String text) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), Color.WHITE);
         Label label = new Label(text, labelStyle);
-        label.setWrap(true);
         label.setAlignment(Align.center, Align.center);
-        label.setFontScale(FONT_SCALE);
+        TypewriterTextLayout.configureLine(label);
         return label;
     }
 
     private TypingLabel createTypingLabel(String text) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE), Color.WHITE);
         TypingLabel typingLabel = new SafeTypingLabel(text, labelStyle);
-        typingLabel.setWrap(true);
         typingLabel.setAlignment(Align.left, Align.center);
-        typingLabel.setFontScale(FONT_SCALE);
+        TypewriterTextLayout.configureLine(typingLabel);
         return typingLabel;
     }
 
@@ -331,6 +307,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     public Single<String> readInput(String label) {
         return Single.create(onSub -> {
             TypingLabel typingLabel = createTypingLabel(label);
+            typingLabel.setWrap(true);
             typingLabel.setAlignment(Align.left, Align.center);
             typingLabel.setColor(Color.BLACK);
 
