@@ -11,6 +11,14 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class CardMaskedImageBuilder {
 
     public static TextureRegion buildMaskedTextureRegion(Texture cardTexture) {
+        return buildMaskedTextureRegion(cardTexture, false);
+    }
+
+    public static TextureRegion buildMaskedInvestigatorTextureRegion(Texture portraitTexture) {
+        return buildMaskedTextureRegion(portraitTexture, true);
+    }
+
+    private static TextureRegion buildMaskedTextureRegion(Texture cardTexture, boolean investigatorPortrait) {
         Texture shadowTexture = getTexture(ACTION_BUTTON_CARD_MASK_SHADOW);
 
         int imageWidth = 320;
@@ -27,8 +35,17 @@ public class CardMaskedImageBuilder {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         spriteBatch.begin();
-        float offsetX = -(cardTexture.getWidth() - imageWidth) / 2f;
-        spriteBatch.draw(cardTexture,offsetX, 0,cardTexture.getWidth(),cardTexture.getHeight());
+        if (investigatorPortrait) {
+            // Crop the top of the full-length portrait to show the face and upper body.
+            int cropHeight = Math.min(cardTexture.getHeight(), cardTexture.getWidth() * imageHeight / imageWidth);
+            int cropWidth = cropHeight * imageWidth / imageHeight;
+            TextureRegion portrait = new TextureRegion(cardTexture,
+                    (cardTexture.getWidth() - cropWidth) / 2, 0, cropWidth, cropHeight);
+            spriteBatch.draw(portrait, 0, 0, imageWidth, imageHeight);
+        } else {
+            float offsetX = -(cardTexture.getWidth() - imageWidth) / 2f;
+            spriteBatch.draw(cardTexture,offsetX, 0,cardTexture.getWidth(),cardTexture.getHeight());
+        }
 
         spriteBatch.setColor(Color.WHITE);
         spriteBatch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);

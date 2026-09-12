@@ -36,7 +36,7 @@ public class ActionButton extends ImageButton {
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_NORMAL),
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_CHECKED));
-        actionButton.initIcon(actionButtonData.getTexturePath(), actionButtonData.needsMask());
+        actionButton.initIcon(actionButtonData);
         actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = false;
@@ -50,7 +50,7 @@ public class ActionButton extends ImageButton {
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_NORMAL),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_CHECKED));
-        actionButton.initIcon(actionButtonData.getTexturePath(), actionButtonData.needsMask());
+        actionButton.initIcon(actionButtonData);
         actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = true;
@@ -83,8 +83,11 @@ public class ActionButton extends ImageButton {
         icon.act(delta);
     }
 
-    private void initIcon(String texturePath, boolean needsMask) {
-        if (needsMask) {
+    private void initIcon(ActionButtonData actionButtonData) {
+        String texturePath = actionButtonData.getTexturePath();
+        if (actionButtonData.getActionButtonId() == ActionButtonData.ActionButtonId.INVESTIGATOR) {
+            icon = new Image(buildMaskedInvestigatorTextureRegion(getTexture(texturePath)));
+        } else if (actionButtonData.needsMask()) {
             icon = new Image(buildMaskedTextureRegion(getTexture(texturePath)));
         } else {
             icon = new Image(getTextureRegion(texturePath));

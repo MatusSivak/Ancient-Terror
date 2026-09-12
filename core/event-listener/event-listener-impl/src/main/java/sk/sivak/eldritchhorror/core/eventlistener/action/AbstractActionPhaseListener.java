@@ -40,9 +40,12 @@ public abstract class AbstractActionPhaseListener<T extends AbstractActionPhaseA
         action.setName(getName());
         action.setGeneralDescription(getGeneralDescription());
         action.setActionButtonId(getActionButtonId());
-        action.setTexturePath(getTexturePath());
-        action.setScaleDownPercentage(getScaleDownPercentage());
-        action.setNeedsMask(getNeedsMask());
+        boolean investigatorAction = getActionButtonId() == ActionButtonData.ActionButtonId.INVESTIGATOR;
+        action.setTexturePath(investigatorAction
+                ? "investigator/" + getInvestigators().getActiveInvestigatorId().name() + ".png"
+                : getTexturePath());
+        action.setScaleDownPercentage(investigatorAction ? 1.0f : getScaleDownPercentage());
+        action.setNeedsMask(investigatorAction || getNeedsMask());
 
         if (isDisabled()) {
             action.setDisabled(true);
