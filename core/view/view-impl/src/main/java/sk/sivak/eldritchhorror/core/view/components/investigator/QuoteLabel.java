@@ -5,17 +5,17 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class QuoteLabel extends Label{
 
     public QuoteLabel() {
-        super("", new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.WHITE));
+        super("", new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4), new Color(0.86f, 0.84f, 0.77f, 1f)));
         getStyle().font.getData().markupEnabled = true;
         setAlignment(Align.center);
         setWrap(true);
-        setFontScale(0.45f);
+        setFontScale(0.3f);
         getStyle().font.getData().markupEnabled = true;
     }
 

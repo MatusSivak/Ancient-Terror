@@ -52,8 +52,6 @@ public class CustomAssetManager extends AssetManager {
     public static void loadTextures1() {
         get().progressSubject = PublishSubject.create();
         get().load(TICK, Texture.class);
-        get().load("skills.png", Texture.class);
-        get().load("skills_labels.png", Texture.class);
         get().load(MAIN_MENU_BUTTON_NORMAL, Texture.class);
         get().load(MAIN_MENU_BUTTON_PRESSED, Texture.class);
         get().load(MAIN_MENU_DIALOG, Texture.class);
@@ -248,8 +246,6 @@ public class CustomAssetManager extends AssetManager {
     public final static String NOISE_2 = "effect/noise_2.png";
     public final static String NOISE_3 = "effect/noise_3.png";
     public final static String NOISE_4 = "effect/noise_4.png";
-    public final static String SKILLS = "skills.png";
-    public final static String SKILLS_LABELS = "skills_labels.png";
     public final static String FAST_FORWARD_UP = "icon/fast_forward_up.png";
     public final static String FAST_FORWARD_DiSABLED = "icon/fast_forward_disabled.png";
     public final static String FAST_FORWARD_DOWN = "icon/fast_forward_down.png";

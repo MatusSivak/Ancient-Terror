@@ -6,125 +6,73 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.Scaling;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 public class StatChart extends Group {
+    private static final Color HEALTH = new Color(0xc55e59ff);
+    private static final Color SANITY = new Color(0x658fcaff);
+    private static final Color SKILL = new Color(0x659d83ff);
+    private static final Color GRID = new Color(0xd1bf8fff);
+    private final ShapeRenderer renderer = new ShapeRenderer();
+    private final Matrix4 transform = new Matrix4();
+    private StatChartData data;
 
-    private final Image background;
-    private final ShapeRenderer shapeRenderer;
-    private StatChartData statChartData;
-    private float parentAlpha;
-
-    StatChart() {
-        background = new Image(CustomAssetManager.getTexture(CustomAssetManager.SKILLS));
-        background.setScaling(Scaling.fit);
-        background.setColor(Color.BLACK);
-        background.setSize(0,0);
-        shapeRenderer = new ShapeRenderer(3);
-        addActor(background);
-    }
-
-    public void init(StatChartData statChartData) {
-        this.statChartData = statChartData;
+    public void init(StatChartData data) {
+        this.data = data;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        this.parentAlpha = parentAlpha;
+        float alpha = parentAlpha * getColor().a;
         batch.end();
-        drawStats();
-        batch.begin();
-        super.draw(batch, parentAlpha);
-    }
-
-    private void drawStats() {
-        if (statChartData == null) {
-            return;
-        }
-        shapeRenderer.setProjectionMatrix(getStage().getCamera().combined);
+        renderer.setProjectionMatrix(batch.getProjectionMatrix());
+        renderer.setTransformMatrix(transform.set(batch.getTransformMatrix()).translate(getX(), getY(), 0));
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        drawHealth(statChartData.getHealth());
-        drawSanity(statChartData.getSanity());
-        drawWil(statChartData.getWill());
-        drawLore(statChartData.getLore());
-        drawInfluence(statChartData.getInfluence());
-        drawObservation(statChartData.getObservation());
-        drawStrength(statChartData.getStrength());
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+        float cx = getWidth() / 2f;
+        float cy = getHeight() / 2f;
+        float radius = Math.min(getWidth(), getHeight()) * 0.49f;
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
+        renderer.setColor(0.06f, 0.09f, 0.08f, alpha);
+        for (int i = 0; i < 7; i++) triangle(cx, cy, radius, i);
+        if (data != null) {
+            int[] values = {data.getSanity(), data.getWill(), data.getLore(), data.getInfluence(),
+                    data.getObservation(), data.getStrength(), data.getHealth()};
+            for (int i = 0; i < 7; i++) {
+                Color color = i == 0 ? SANITY : i == 6 ? HEALTH : SKILL;
+                renderer.setColor(color.r, color.g, color.b, alpha * 0.78f);
+                float maximum = i == 0 || i == 6 ? 8f : 4f;
+                triangle(cx, cy, radius * MathUtils.clamp(values[i] / maximum, 0f, 1f), i);
+            }
+        }
+        renderer.end();
+        renderer.begin(ShapeRenderer.ShapeType.Line);
+        // Four rings: one skill point or two health/sanity points per ring.
+        for (int ring = 1; ring <= 4; ring++) {
+            renderer.setColor(GRID.r, GRID.g, GRID.b, alpha * (ring == 4 ? 0.65f : 0.25f));
+            float r = radius * ring / 4f;
+            for (int i = 0; i < 7; i++) {
+                renderer.line(cx + dx(i) * r, cy + dy(i) * r,
+                        cx + dx(i + 1) * r, cy + dy(i + 1) * r);
+            }
+        }
+        renderer.setColor(GRID.r, GRID.g, GRID.b, alpha * 0.35f);
+        for (int i = 0; i < 7; i++) renderer.line(cx, cy, cx + dx(i) * radius, cy + dy(i) * radius);
+        renderer.end();
+        batch.begin();
     }
 
-    private float getCenterX() {
-        return localToStageCoordinates(new Vector2()).x + getWidth() / 2f;
+    private void triangle(float cx, float cy, float radius, int sector) {
+        renderer.triangle(cx, cy, cx + dx(sector) * radius, cy + dy(sector) * radius,
+                cx + dx(sector + 1) * radius, cy + dy(sector + 1) * radius);
     }
 
-    private float getCenterY() {
-        return localToStageCoordinates(new Vector2()).y + getHeight() / 2f - getHeight() * 0.025f;
+    private static float dx(int sector) {
+        return MathUtils.cosDeg(90f + sector * 360f / 7f);
     }
 
-    private void drawHealth(int amount) {
-        drawTriangle(new Color(0xff4040ff), 6, amount);
-    }
-
-    private void drawSanity(int amount) {
-        drawTriangle(new Color(0x4040ffff), 0, amount);
-    }
-
-    private void drawWil(int amount) {
-        drawStat(1, amount);
-    }
-
-    private void drawLore(int amount) {
-        drawStat(2, amount);
-    }
-
-    private void drawInfluence(int amount) {
-        drawStat(3, amount);
-    }
-
-    private void drawObservation(int amount) {
-        drawStat(4, amount);
-    }
-
-    private void drawStrength(int amount) {
-        drawStat(5, amount);
-    }
-
-    private void drawStat(int sector, int amount) {
-        drawTriangle(new Color(0x40ff40ff), sector, amount*2);
-    }
-
-    private void drawTriangle(Color color, int sector, int amount) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(color);
-        shapeRenderer.getColor().a = parentAlpha;
-        float centerX = getCenterX();
-        float centerY = getCenterY();
-        float length = getHeight()/2f * 1.01f * (amount/8f);
-        shapeRenderer.triangle(
-                centerX, centerY,
-                centerX + getDirectionX(sector) * length,
-                centerY + getDirectionY(sector) * length,
-                centerX + getDirectionX(sector+1) * length,
-                centerY + getDirectionY(sector+1)  * length);
-        shapeRenderer.end();
-    }
-
-    private float getDirectionX(int i) {
-        return MathUtils.cosDeg((360 / 7f) * i + 90);
-    }
-
-    private float getDirectionY(int i) {
-        return MathUtils.sinDeg((360 / 7f) * i + 90);
-    }
-
-    @Override
-    protected void sizeChanged() {
-        super.sizeChanged();
-        background.setSize(getWidth(), getHeight());
+    private static float dy(int sector) {
+        return MathUtils.sinDeg(90f + sector * 360f / 7f);
     }
 }

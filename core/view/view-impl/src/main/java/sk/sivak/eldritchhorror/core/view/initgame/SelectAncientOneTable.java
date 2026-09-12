@@ -1,383 +1,207 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
-import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Stack;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
-import com.kotcrab.vis.ui.widget.VisTable;
 import rx.SingleSubscriber;
-import rx.schedulers.Schedulers;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
-import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.components.table.ActorFrame;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
-public class SelectAncientOneTable extends VisTable {
-
-
-    private final ScaleImageUpAction azathothScaleImageUpAction;
-    private final ScaleImageDownAction azathothScaleImageDownAction;
-    private final Table azathothTable;
-    private final ScaleImageUpAction cthulhuScaleImageUpAction;
-    private final ScaleImageDownAction cthulhuScaleImageDownAction;
-    private final ScaleImageUpAction yogSothothScaleImageUpAction;
-    private final ScaleImageDownAction yogSothothScaleImageDownAction;
-    private final ScaleImageUpAction shubNiggurathScaleImageUpAction;
-    private final ScaleImageDownAction shubNiggurathScaleImageDownAction;
-    private final Table cthulhuTable;
-    private final Table shubNiggurathTable;
-    private final Table yogSothothTable;
-    private ActorFrame frame;
+/** Portrait selection and persistent details, matching investigator selection. */
+public class SelectAncientOneTable extends Table {
+    private final Map<AncientOneId, AncientOneInfo> choices = new EnumMap<>(AncientOneId.class);
+    private final Map<AncientOneId, Table> cards = new EnumMap<>(AncientOneId.class);
+    private final Map<AncientOneId, Image> locks = new EnumMap<>(AncientOneId.class);
+    private final Map<AncientOneId, Boolean> unlocked = new EnumMap<>(AncientOneId.class);
+    private final SingleSubscriber<? super AncientOneInfo> subscriber;
+    private final Label name = label("", 0.4f, "E8D9B0");
+    private final Label subtitle = label("", 0.28f, "BEB69F");
+    private final Label stats = label("", 0.28f, "E8D9B0");
+    private final Label description = label("", 0.27f, "E5DFCC");
+    private final Label status = label("", 0.25f, "BEB69F");
+    private final TextButton confirm = new TextButton("", AncientTerrorMenuStyles.button());
+    private final ScrollPane descriptionScroll;
+    private AncientOneId selected;
+    private boolean purchasePending;
+    private boolean completed;
 
     public SelectAncientOneTable(List<AncientOneInfo> availableAncientOnes,
-                                 boolean isCthulhuPurchased,
-                                 boolean isShubNiggurathPurchased,
-                                 boolean isYogSothothPurchased,
-                                 SingleSubscriber<? super AncientOneInfo> sub) {
+                                 boolean cthulhuPurchased, boolean shubPurchased, boolean yogPurchased,
+                                 SingleSubscriber<? super AncientOneInfo> subscriber) {
+        this.subscriber = subscriber;
+        for (AncientOneInfo info : availableAncientOnes) choices.put(info.getAncientOneId(), info);
+        unlocked.put(AncientOneId.AZATHOTH, true);
+        unlocked.put(AncientOneId.CTHULHU, cthulhuPurchased);
+        unlocked.put(AncientOneId.SHUB_NIGGURATH, shubPurchased);
+        unlocked.put(AncientOneId.YOG_SOTHOTH, yogPurchased);
 
-
-        int imageSize = 230;
-
-        azathothTable = new Table();
-        Image buttonAzathoth = new Image(CustomAssetManager.getTexture("ancient_one/button_azathoth.jpg"));
-        buttonAzathoth.setScaling(Scaling.fit);
-        Cell<Image> azathothButtonCell = azathothTable.add(buttonAzathoth).width(imageSize).height(imageSize);
-        azathothScaleImageUpAction = new ScaleImageUpAction(azathothButtonCell, imageSize-30, imageSize-10);
-        azathothScaleImageUpAction.setDuration(0.75f);
-        azathothScaleImageUpAction.setInterpolation(Interpolation.sine);
-        azathothScaleImageDownAction = new ScaleImageDownAction(azathothButtonCell, imageSize-30, imageSize-10);
-        azathothScaleImageDownAction.setDuration(0.75f);
-        azathothScaleImageDownAction.setInterpolation(Interpolation.sine);
-
-        azathothButtonCell.row();
-        azathothTable.add(createNameLabel(get("ancientOne.azathoth.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        azathothTable.add(createNiceLabel(get("ancientOne.azathoth.alt"))).padBottom(5);
-
-        // Cthulhu
-        cthulhuTable = new Table();
-        Image buttonCthulhu = new Image(CustomAssetManager.getTexture("ancient_one/button_cthulhu.jpg"));
-        Image lockImage = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage.getColor().a = 1.0f;
-        buttonCthulhu.setScaling(Scaling.fit);
-        lockImage.setScaling(Scaling.fit);
-
-        Cell<?> cthulhuButtonCell;
-        if (isCthulhuPurchased) {
-            cthulhuButtonCell = cthulhuTable.add(buttonCthulhu).width(imageSize).height(imageSize);
-        } else {
-            cthulhuButtonCell = cthulhuTable.add(new Stack(buttonCthulhu, lockImage)).width(imageSize).height(imageSize);
+        Table gallery = new Table();
+        gallery.setBackground(panelBackground("09130FE8"));
+        gallery.add(label(get("init.selectAncientOne"), 0.42f, "E8D9B0")).growX().height(44f).row();
+        Table grid = new Table();
+        int count = 0;
+        for (AncientOneId id : AncientOneId.values()) {
+            if (!choices.containsKey(id)) continue;
+            Table card = createCard(id);
+            cards.put(id, card);
+            grid.add(card).size(288f, 224f).pad(3f);
+            if (++count % 2 == 0) grid.row();
         }
+        gallery.add(grid).expand().top();
 
-        cthulhuScaleImageUpAction = new ScaleImageUpAction(cthulhuButtonCell, imageSize-30, imageSize-10);
-        cthulhuScaleImageUpAction.setDuration(0.75f);
-        cthulhuScaleImageUpAction.setInterpolation(Interpolation.sine);
-        cthulhuScaleImageDownAction = new ScaleImageDownAction(cthulhuButtonCell, imageSize-30, imageSize-10);
-        cthulhuScaleImageDownAction.setDuration(0.75f);
-        cthulhuScaleImageDownAction.setInterpolation(Interpolation.sine);
+        Table details = new Table();
+        details.setBackground(panelBackground("07110FEE"));
+        details.pad(14f);
+        details.add(name).growX().height(46f).row();
+        details.add(subtitle).growX().height(42f).padBottom(6f).row();
+        details.add(stats).growX().height(52f).padBottom(8f).row();
+        description.setAlignment(Align.topLeft);
+        descriptionScroll = new ScrollPane(description);
+        descriptionScroll.setScrollingDisabled(true, false);
+        descriptionScroll.setOverscroll(false, false);
+        details.add(descriptionScroll).grow().minHeight(100f).padBottom(10f).row();
+        details.add(status).growX().height(30f).padBottom(6f).row();
+        confirm.getLabel().setFontScale(0.33f);
+        confirm.getLabel().setWrap(true);
+        AncientTerrorMenuStyles.makeMomentary(confirm);
+        AncientTerrorMenuStyles.addFocusHighlight(confirm);
+        addClickListener(confirm, this::confirmSelection);
+        details.add(confirm).growX().height(50f);
 
-        cthulhuButtonCell.row();
-
-        cthulhuTable.add(createNameLabel(get("ancientOne.cthulhu.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        cthulhuTable.add(createNiceLabel(get("ancientOne.cthulhu.alt"))).padBottom(5).row();
-        if (!isCthulhuPurchased) {
-            cthulhuTable.add(createFeaturesSection(
-                    get("ancientOne.features.sixMysteries"),
-                    get("ancientOne.features.threeEpicMonsters"),
-                    get("ancientOne.features.eightyEncounters"),
-                    get("ancientOne.features.exploreRlyeh"),
-                    get("ancientOne.features.endingRisenFromSea"),
-                    get("ancientOne.features.priceCoffee")
-            )).padBottom(10).align(Align.left);
+        add(gallery).width(600f).growY().padRight(12f);
+        add(details).grow();
+        setSize(940f, 510f);
+        for (AncientOneId id : AncientOneId.values()) {
+            if (choices.containsKey(id)) { select(id); break; }
         }
-
-        // Shub Niggurath
-        shubNiggurathTable = new Table();
-        Image buttonShubNiggurath = new Image(CustomAssetManager.getTexture("ancient_one/button_shub_niggurath.jpg"));
-        Image lockImage2 = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage2.getColor().a = 1.0f;
-        buttonShubNiggurath.setScaling(Scaling.fit);
-        lockImage2.setScaling(Scaling.fit);
-
-        Cell<?> shubNiggurathButtonCell;
-        if (isShubNiggurathPurchased) {
-            shubNiggurathButtonCell = shubNiggurathTable.add(buttonShubNiggurath).width(imageSize).height(imageSize);
-        } else {
-            shubNiggurathButtonCell = shubNiggurathTable.add(new Stack(buttonShubNiggurath, lockImage2)).width(imageSize).height(imageSize);
-        }
-
-        shubNiggurathScaleImageUpAction = new ScaleImageUpAction(shubNiggurathButtonCell, imageSize-30, imageSize-10);
-        shubNiggurathScaleImageUpAction.setDuration(0.75f);
-        shubNiggurathScaleImageUpAction.setInterpolation(Interpolation.sine);
-        shubNiggurathScaleImageDownAction = new ScaleImageDownAction(shubNiggurathButtonCell, imageSize-30, imageSize-10);
-        shubNiggurathScaleImageDownAction.setDuration(0.75f);
-        shubNiggurathScaleImageDownAction.setInterpolation(Interpolation.sine);
-
-        shubNiggurathButtonCell.row();
-
-        shubNiggurathTable.add(createNameLabel(get("ancientOne.shubNiggurath.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        shubNiggurathTable.add(createNiceLabel(get("ancientOne.shubNiggurath.alt"))).padBottom(5).row();
-        if (!isShubNiggurathPurchased) {
-            shubNiggurathTable.add(createFeaturesSection(
-                    get("ancientOne.features.sixMysteries"),
-                    get("ancientOne.features.threeEpicMonsters"),
-                    get("ancientOne.features.seventyEncounters"),
-                    get("ancientOne.features.combatOriented"),
-                    get("ancientOne.features.endingBattleInWoods"),
-                    get("ancientOne.features.priceCoffee")
-            )).padBottom(10).align(Align.left);
-        }
-
-        // Yog-Sothoth
-        yogSothothTable= new Table();
-        Image buttonYogSothoth = new Image(CustomAssetManager.getTexture("ancient_one/button_yog_sothoth.jpg"));
-        Image lockImage3 = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
-        lockImage3.getColor().a = 1.0f;
-        buttonYogSothoth.setScaling(Scaling.fit);
-        lockImage3.setScaling(Scaling.fit);
-
-        Cell<?> yogSothothButtonCell;
-        if (isYogSothothPurchased) {
-            yogSothothButtonCell = yogSothothTable.add(buttonYogSothoth).width(imageSize).height(imageSize);
-        } else {
-            yogSothothButtonCell = yogSothothTable.add(new Stack(buttonYogSothoth, lockImage3)).width(imageSize).height(imageSize);
-        }
-
-        yogSothothScaleImageUpAction = new ScaleImageUpAction(yogSothothButtonCell, imageSize-30, imageSize-10);
-        yogSothothScaleImageUpAction.setDuration(0.75f);
-        yogSothothScaleImageUpAction.setInterpolation(Interpolation.sine);
-        yogSothothScaleImageDownAction = new ScaleImageDownAction(yogSothothButtonCell, imageSize-30, imageSize-10);
-        yogSothothScaleImageDownAction.setDuration(0.75f);
-        yogSothothScaleImageDownAction.setInterpolation(Interpolation.sine);
-
-        yogSothothButtonCell.row();
-
-        yogSothothTable.add(createNameLabel(get("ancientOne.yogSothoth.name"))).width(imageSize).padLeft(10).padRight(10).height(25).row();
-        yogSothothTable.add(createNiceLabel(get("ancientOne.yogSothoth.alt"))).padBottom(5).row();
-        if (!isYogSothothPurchased) {
-            yogSothothTable.add(createFeaturesSection(
-                    get("ancientOne.features.sixMysteries"),
-                    get("ancientOne.features.dunwichHorror"),
-                    get("ancientOne.features.eightyEncounters"),
-                    get("ancientOne.features.visitVoidBetweenWorlds"),
-                    get("ancientOne.features.endingKeyAndGate"),
-                    get("ancientOne.features.priceCoffee")
-            )).padBottom(10).align(Align.left);
-        }
-
-        List<Table> ancientOneTables = new LinkedList<>(Arrays.asList(azathothTable, cthulhuTable, shubNiggurathTable, yogSothothTable));
-        Collections.shuffle(ancientOneTables);
-        add(createTitleLabel(get("init.selectAncientOne"))).colspan(7).row();
-        addSeparator().colspan(7).padBottom(0).row();
-        add(ancientOneTables.get(0)).align(Align.top);
-        addSeparator(true).padTop(0).padLeft(5).padRight(5);
-        add(ancientOneTables.get(1)).align(Align.top);
-        addSeparator(true).padTop(0).padLeft(5).padRight(5);
-        add(ancientOneTables.get(2)).align(Align.top);
-        addSeparator(true).padTop(0).padLeft(5).padRight(5);
-        add(ancientOneTables.get(3)).align(Align.top);
-
-        pack();
-
-        setBackground(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.GRAY_BACKGROUND));
-
-        addClickListener(azathothTable, () -> {
-            sub.onSuccess(availableAncientOnes.get(0));
-            remove();
-            frame.remove();
-        });
-        if (isCthulhuPurchased) {
-            addClickListener(cthulhuTable, () -> {
-                sub.onSuccess(availableAncientOnes.get(1));
-                remove();
-                frame.remove();
-            });
-        } else {
-            addClickListener(cthulhuTable, () -> {
-                new InAppPurchaseManager().purchaseProduct("cthulhu").subscribe(purchaseResult -> {
-                    if (purchaseResult) {
-                        sub.onSuccess(availableAncientOnes.get(1));
-                        remove();
-                        frame.remove();
-                    }
-                });
-            });
-        }
-
-        if (isShubNiggurathPurchased) {
-            addClickListener(shubNiggurathTable, () -> {
-                sub.onSuccess(availableAncientOnes.get(2));
-                remove();
-                frame.remove();
-            });
-        } else {
-            addClickListener(shubNiggurathTable, () -> {
-                new InAppPurchaseManager().purchaseProduct("shub_niggurath").subscribe(purchaseResult -> {
-                    if (purchaseResult) {
-                        sub.onSuccess(availableAncientOnes.get(2));
-                        remove();
-                        frame.remove();
-                    }
-                });
-            });
-        }
-
-        if (isYogSothothPurchased) {
-            addClickListener(yogSothothTable, () -> {
-                sub.onSuccess(availableAncientOnes.get(3));
-                remove();
-                frame.remove();
-            });
-        } else {
-            addClickListener(yogSothothTable, () -> {
-                new InAppPurchaseManager().purchaseProduct("yog_sothoth").subscribe(purchaseResult -> {
-                    if (purchaseResult) {
-                        sub.onSuccess(availableAncientOnes.get(3));
-                        remove();
-                        frame.remove();
-                    }
-                });
-            });
-        }
+        if (selected == null) confirm.setDisabled(true);
     }
 
-    public void animate() {
-        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                azathothScaleImageUpAction,
-                azathothScaleImageDownAction
-        )));
-        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                cthulhuScaleImageDownAction,
-                cthulhuScaleImageUpAction
-
-        )));
-        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                shubNiggurathScaleImageUpAction,
-                shubNiggurathScaleImageDownAction
-
-        )));
-        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                yogSothothScaleImageDownAction,
-                yogSothothScaleImageUpAction
-
-        )));
+    private Table createCard(AncientOneId id) {
+        Table card = new Table();
+        card.pad(7f);
+        card.setBackground(panelBackground("17201B"));
+        Image portrait = new Image(CustomAssetManager.getTexture("ancient_one/button_" + productId(id) + ".jpg"));
+        portrait.setScaling(Scaling.fit);
+        Image lock = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
+        lock.setScaling(Scaling.fit);
+        lock.setVisible(!unlocked.get(id));
+        locks.put(id, lock);
+        Table lockOverlay = new Table();
+        lockOverlay.top().right();
+        lockOverlay.add(lock).size(34f).pad(4f);
+        card.add(new Stack(portrait, lockOverlay)).growX().height(144f).row();
+        card.add(label(get(prefix(id) + ".name"), 0.33f, "E8D9B0")).growX().height(28f).row();
+        card.add(label(get(prefix(id) + ".alt"), 0.25f, "BEB69F")).growX().height(32f);
+        addClickListener(card, () -> { if (!purchasePending && !completed) select(id); });
+        return card;
     }
 
-    private Label createFeaturesSection(String... rows) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.WHITE);
+    private void select(AncientOneId id) {
+        selected = id;
+        for (Map.Entry<AncientOneId, Table> entry : cards.entrySet()) {
+            Drawable normal = panelBackground("17201B");
+            entry.getValue().setBackground(entry.getKey() == id ? AncientTerrorMenuStyles.highlight(normal) : normal);
+        }
+        AncientOneInfo info = choices.get(id);
+        name.setText(get(prefix(id) + ".name"));
+        subtitle.setText(get(prefix(id) + ".alt"));
+        stats.setText(get("ancientOne.selection.stats", info.getStartingDoom(), info.getMysteriesRequired()));
         StringBuilder text = new StringBuilder();
-        for (String row : rows) {
-            text.append(row).append("\n");
+        section(text, get("ancientOne.setup"), info.getSetupText());
+        section(text, get("ancientOne.selection.special"), info.getSpecialText());
+        section(text, get("ancientOne.selection.reckoning"), info.getReckoningText());
+        section(text, get("ancientOne.victory"), info.getWinText());
+        section(text, "", info.getFlavorText());
+        if (!unlocked.get(id)) {
+            text.append("[#E8D9B0]").append(get("ancientOne.selection.includes")).append("[]\n");
+            for (String feature : features(id)) text.append(get("ancientOne.features." + feature)).append('\n');
         }
-        text.delete(text.length()-1, text.length());
-        Label label = new Label(text.toString(), labelStyle);
-        label.setAlignment(Align.left);
-        label.setFontScale(0.5f);
-        return label;
+        description.setText(text.toString());
+        descriptionScroll.setScrollY(0f);
+        status.setText(get(unlocked.get(id) ? "ancientOne.selection.available" : "ancientOne.selection.locked"));
+        confirm.setText(get(unlocked.get(id) ? "ancientOne.selection.confirm" : "ancientOne.selection.unlock", get(prefix(id) + ".name")));
+        confirm.setDisabled(false);
     }
 
-    private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.WHITE);
-        Color color = new Color(0f, 0f, 0f, 0.5f);
-        labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(PURE_WHITE_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(color);
-                super.draw(batch, x, y, width, height);
+    private void confirmSelection() {
+        if (selected == null || confirm.isDisabled() || completed || purchasePending) return;
+        final AncientOneId id = selected;
+        if (unlocked.get(id)) {
+            completed = true;
+            confirm.setDisabled(true);
+            remove();
+            if (!subscriber.isUnsubscribed()) subscriber.onSuccess(choices.get(id));
+            return;
+        }
+        purchasePending = true;
+        confirm.setDisabled(true);
+        status.setText(get("ancientOne.selection.purchasing"));
+        new InAppPurchaseManager().purchaseProduct(productId(id)).subscribe(success -> Gdx.app.postRunnable(() -> {
+            purchasePending = false;
+            if (success) {
+                unlocked.put(id, true);
+                locks.get(id).setVisible(false);
             }
-        };
-        Label label = new Label(text, labelStyle);
-        label.setAlignment(Align.center);
-        label.setFontScale(0.35f);
-        return label;
+            select(id);
+            if (!success) status.setText(get("ancientOne.selection.purchaseCancelled"));
+        }), error -> Gdx.app.postRunnable(() -> {
+            purchasePending = false;
+            select(id);
+            status.setText(get("ancientOne.selection.purchaseFailed"));
+        }));
     }
 
-    private Label createNiceLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.LIGHT_GRAY);
-        Label label = new Label(text, labelStyle);
+    private static void section(StringBuilder result, String heading, String value) {
+        if (value == null || value.trim().isEmpty()) return;
+        String resolved = value.startsWith("ancientOne.") ? get(value) : value;
+        if (!heading.isEmpty()) result.append("[#E8D9B0]").append(heading).append("[]\n");
+        result.append(resolved).append("\n\n");
+    }
+
+    private static String[] features(AncientOneId id) {
+        if (id == AncientOneId.CTHULHU) return new String[]{"sixMysteries", "threeEpicMonsters", "eightyEncounters", "exploreRlyeh", "endingRisenFromSea", "priceCoffee"};
+        if (id == AncientOneId.SHUB_NIGGURATH) return new String[]{"sixMysteries", "threeEpicMonsters", "seventyEncounters", "combatOriented", "endingBattleInWoods", "priceCoffee"};
+        return new String[]{"sixMysteries", "dunwichHorror", "eightyEncounters", "visitVoidBetweenWorlds", "endingKeyAndGate", "priceCoffee"};
+    }
+
+    private static String prefix(AncientOneId id) {
+        switch (id) {
+            case SHUB_NIGGURATH: return "ancientOne.shubNiggurath";
+            case YOG_SOTHOTH: return "ancientOne.yogSothoth";
+            default: return "ancientOne." + productId(id);
+        }
+    }
+
+    private static String productId(AncientOneId id) { return id.name().toLowerCase(Locale.ROOT); }
+
+    private static Label label(String text, float scale, String color) {
+        Label label = new Label(text, new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(
+                CustomAssetManager.NEW_FONT_SOURCE_SERIF_4), Color.valueOf(color)));
+        label.getStyle().font.getData().markupEnabled = true;
+        label.setFontScale(scale);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.5f);
         return label;
     }
 
-    private Label createTitleLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.GREEN);
-        Label label = new Label(text, labelStyle);
-        label.setFontScale(0.9f);
-        label.setAlignment(Align.center, Align.center);
-        return label;
+    private static Drawable panelBackground(String color) {
+        Drawable drawable = CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.PURE_WHITE_BACKGROUND).tint(Color.valueOf(color));
+        drawable.setMinWidth(0f);
+        drawable.setMinHeight(0f);
+        return drawable;
     }
-
-    public void setFrame(ActorFrame frame) {
-        this.frame = frame;
-    }
-
-    private class ScaleImageUpAction extends TemporalAction {
-
-        private Cell<?> cell;
-        private final float padMin;
-        private final float padMax;
-
-        public ScaleImageUpAction(Cell<?> cell, float padMin, float padMax) {
-            this.cell = cell;
-            this.padMin = padMin;
-            this.padMax = padMax;
-        }
-
-        @Override
-        protected void update(float percent) {
-            float padding = padMin + percent * (padMax - padMin);
-            cell.width(padding);
-            azathothTable.invalidate();
-            cthulhuTable.invalidate();
-            shubNiggurathTable.invalidate();
-            yogSothothTable.invalidate();
-        }
-    }
-
-    private class ScaleImageDownAction extends TemporalAction {
-
-        private Cell<?> cell;
-        private final float padMin;
-        private final float padMax;
-
-        public ScaleImageDownAction(Cell<?> cell, float padMin, float padMax) {
-            this.cell = cell;
-            this.padMin = padMin;
-            this.padMax = padMax;
-        }
-
-        @Override
-        protected void update(float percent) {
-            float padding = padMax - percent * (padMax - padMin);
-            cell.width(padding);
-            azathothTable.invalidate();
-            cthulhuTable.invalidate();
-            shubNiggurathTable.invalidate();
-            yogSothothTable.invalidate();
-        }
-    }
-
 }

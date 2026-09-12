@@ -32,7 +32,11 @@ public class InvestigatorSketches extends Table {
         for (int i = 0; i < investigatorIds.length; i++) {
             InvestigatorSketch sketch = new InvestigatorSketch(investigatorIds[i]);
             ButtonUtils.addClickListener(sketch, () -> selectSketch(sketch));
-            add(sketch).width(175).height(220).pad(5);
+            if (disabledInvestigators.contains(investigatorIds[i])) {
+                sketch.clearListeners();
+                sketch.showTicked();
+            }
+            add(sketch).width(175).height(196).pad(3);
             sketches.add(sketch);
             if (i == (investigatorIds.length-1)/2) {
                 row();
@@ -43,12 +47,15 @@ public class InvestigatorSketches extends Table {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.setColor(new Color(0.25f, 0.25f, 0.25f, parentAlpha));
+        float previousColor = batch.getPackedColor();
+        batch.setColor(0.035f, 0.045f, 0.04f, parentAlpha);
         batch.draw(getTexture(PURE_WHITE_BACKGROUND), getX(), getY(), getPrefWidth(), getPrefHeight());
+        batch.setColor(previousColor);
         super.draw(batch, parentAlpha);
     }
 
     private void selectSketch(InvestigatorSketch selectedSketch) {
+        if (selectedSketch != null && disabledInvestigators.contains(selectedSketch.getInvestigatorId())) return;
         for (InvestigatorSketch sketch : sketches) {
             if (selectedSketch == sketch) {
                 if (!sketch.isSelected()) {
@@ -78,7 +85,7 @@ public class InvestigatorSketches extends Table {
     }
 
     public void disable(InvestigatorId investigatorId) {
-        disabledInvestigators.add(investigatorId);
+        if (!disabledInvestigators.contains(investigatorId)) disabledInvestigators.add(investigatorId);
         for (InvestigatorSketch sketch : sketches) {
             if (sketch.getInvestigatorId().equals(investigatorId)) {
                 sketch.clearListeners();

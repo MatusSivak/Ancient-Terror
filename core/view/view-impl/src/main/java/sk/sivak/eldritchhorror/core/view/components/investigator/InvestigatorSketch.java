@@ -8,12 +8,17 @@ import com.badlogic.gdx.scenes.scene2d.actions.FloatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.select.SelectComponent;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import java.util.Locale;
 
 import java.util.List;
 
@@ -22,7 +27,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class InvestigatorSketch extends VisTable implements SelectComponent<InvestigatorId> {
 
     public static final float PADDING = 5;
-    public static final float DESELECT_SCALE = 0.75f;
+    public static final float DESELECT_SCALE = 0.88f;
     public static final int SCALE_SPEED = 2;
     private final Cell<Image> imageCell;
     private final Label nameLabel;
@@ -32,6 +37,8 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
     private boolean scaling;
     private boolean selected;
     private boolean ticked = false;
+    private Drawable normalBackground;
+    private Drawable selectedBackground;
 
     public InvestigatorSketch(InvestigatorId investigatorId) {
         selected = false;
@@ -46,34 +53,50 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
                 if (!ticked) {
                     return;
                 }
-                batch.setColor(new Color(1f, 1f, 1f, 0.5f * parentAlpha));
-                batch.draw(CustomAssetManager.getTexture(TICK),
-                        getX() + 30,
-                        getY() + 30,
-                        getWidth() - 60,
-                        getWidth() - 60);
+                float badgeSize = Math.min(getWidth(), getHeight()) * 0.78f;
+                float badgeX = getX() + (getWidth() - badgeSize) / 2f;
+                float badgeY = getY() + (getHeight() - badgeSize) / 2f;
+                float previousColor = batch.getPackedColor();
+                float alpha = getColor().a * parentAlpha;
+                // An opaque, centered badge with a shadow stays legible over busy portraits.
+                batch.setColor(0f, 0f, 0f, alpha * 0.85f);
+                batch.draw(CustomAssetManager.getTexture(TICK), badgeX + 2f, badgeY - 2f, badgeSize, badgeSize);
+                batch.setColor(1f, 1f, 1f, alpha);
+                batch.draw(CustomAssetManager.getTexture(TICK), badgeX, badgeY, badgeSize, badgeSize);
+                batch.setColor(previousColor);
             }
         };
         image.setScale(currentScale);
         image.setScaling(Scaling.fit);
-        nameLabel = createLabel(investigatorId.toString(), Color.WHITE);
+        nameLabel = createLabel(UiText.get("investigator.profession." + investigatorId.name().toLowerCase(Locale.ROOT)), Color.WHITE);
 
         imageCell = add(image).grow().pad(PADDING).align(Align.center);
         row();
-        addSeparator();
-        add(nameLabel).pad(PADDING);
+        Image divider = new Image(getTextureRegionDrawable(PURE_WHITE_BACKGROUND));
+        divider.setColor(0.16f, 0.18f, 0.16f, 1f);
+        add(divider).growX().height(1f).row();
+        Image investigatorIcon = new Image(CustomAssetManager.getTexture(
+                "investigator/ICON_" + investigatorId.name() + ".png"));
+        investigatorIcon.setScaling(Scaling.fit);
+        Table caption = new Table();
+        caption.add(investigatorIcon).size(32f, 36f).padRight(5f);
+        caption.add(nameLabel).growX().minWidth(0f);
+        add(caption).growX().height(52f).pad(PADDING);
 
         pack();
 
-        setBackground(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND));
+        normalBackground = CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND);
+        selectedBackground = AncientTerrorMenuStyles.highlight(normalBackground);
+        setBackground(normalBackground);
 
         deselectFast();
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4), color);
         Label label = new Label(text, labelStyle);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.27f);
+        label.setWrap(true);
         label.setAlignment(Align.center, Align.center);
         return label;
     }
@@ -90,6 +113,7 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
             clearActions();
         }
         selected = true;
+        setBackground(selectedBackground);
         scaling = true;
         selectDeselectAction = new FloatAction(currentScale, 1f) {
             @Override
@@ -111,6 +135,7 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
 
     public void deselectFast() {
         selected = false;
+        setBackground(normalBackground);
         scaling = false;
         updateFloatAction(DESELECT_SCALE);
     }
@@ -122,6 +147,7 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
         }
         selected = false;
         scaling = true;
+        setBackground(normalBackground);
         selectDeselectAction = new FloatAction(currentScale, DESELECT_SCALE) {
             @Override
             protected void update(float percent) {

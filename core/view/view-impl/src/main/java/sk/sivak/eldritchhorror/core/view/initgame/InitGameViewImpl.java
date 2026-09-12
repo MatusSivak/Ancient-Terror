@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
 import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
+import sk.sivak.eldritchhorror.core.view.components.RestartConfirmationDialog;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -87,7 +88,6 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class InitGameViewImpl implements Screen, InitGameView {
 
     private NrPlayersDialog nrPlayersDialog;
-    private SelectDifficultyDialog selectDifficultyDialog;
     private SelectAncientOneDialog selectAncientOneDialog;
     private Stage stage;
     private Skin skin;
@@ -111,6 +111,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private Runnable removeOnRewardedAdFailedToLoadListener = () -> {};
     private ImageButton englishLocaleFlag;
     private ImageButton slovakLocaleFlag;
+    private Image splashTitle;
+    private boolean menuDecorationsVisible = true;
 
     private static final String FLAGS_TEXTURE = "flags/flags.png";
     private static final int FLAGS_COLUMNS = 15;
@@ -152,6 +154,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
     @Override
     public Single<InvestigatorInfo[]> selectInvestigators(Integer input, List<InvestigatorInfo> availableInvestigators, Supplier<List<InvestigatorInfo>> initInvestigatorsAction) {
         return Single.<InvestigatorInfo[]>create(sub -> {
+            setMenuDecorationsVisible(false);
 
             Runnable updateAvailableInvestigatorsAction = () -> {
                 selectMultipleInvestigators.remove();
@@ -184,61 +187,20 @@ public class InitGameViewImpl implements Screen, InitGameView {
             SelectAncientOneTable selectAncientOneTable = new SelectAncientOneTable(availableAncientOnes, isCthulhuPurchased, isShubNiggurathPurchased, isYogSothothPurchased, sub);
 
 
-            ScrollPane scrollPane = new ScrollPane(selectAncientOneTable);
-
-            scrollPane.setPosition(
-                    stage.getWidth() * 0.05f,
-                    stage.getHeight()/2f - selectAncientOneTable.getHeight()/2f);
-            scrollPane.setWidth(stage.getWidth() * 0.9f);
-            scrollPane.setHeight(selectAncientOneTable.getHeight());
-            scrollPane.setOverscroll(false, false);
-            ActorFrame frame = new ActorFrame(scrollPane, 5);
-            selectAncientOneTable.setFrame(frame);
-            stage.addActor(frame);
-            stage.addActor(scrollPane);
-            selectAncientOneTable.animate();
-//            sub.onSuccess(availableAncientOnes.get(0));
-            /*
-            selectAncientOneDialog.initImproveSkill(availableAncientOnes);
-            selectAncientOneDialog.setSubscriber(sub);
-            selectAncientOneDialog.show(stage);
-            */
+            setMenuDecorationsVisible(false);
+            selectAncientOneTable.setPosition(10f, 15f);
+            stage.addActor(selectAncientOneTable);
         });
     }
 
     @Override
     public Single<DifficultyId> selectDifficulty() {
-        return Single.create(sub -> {
-
-            Dialog dialog = new Dialog(get("init.selectDifficulty"), skin);
-
-            TextButton difficultyEasyButton = createNiceButton(get("init.difficulty.easy"));
-            TextButton difficultyNormalButton = createNiceButton(get("init.difficulty.normal"));
-
-            dialog.getContentTable().add(difficultyEasyButton).size(280,50);
-            dialog.getContentTable().row();
-            dialog.getContentTable().add(difficultyNormalButton).size(280,50);
-
-            dialog.pack();
-
-            addClickListener(difficultyEasyButton, () -> {
-                dialog.hide();
-                sub.onSuccess(DifficultyId.EASY);
-            });
-            addClickListener(difficultyNormalButton, () -> {
-                dialog.hide();
-                sub.onSuccess(DifficultyId.NORMAL);
-            });
-
-            dialog.setSize(430f, 220f);
-            dialog.setPosition(VIEWPORT_WIDTH/2f - dialog.getWidth()/2,
-                    VIEWPORT_HEIGHT/2f - dialog.getHeight()/2f);
-            stage.addActor(dialog);
-        });
+        return Single.just(DifficultyId.NORMAL);
     }
 
     @Override
     public void show() {
+        setMenuDecorationsVisible(true);
         if (screenInitialized) {
             initLocaleFromPreferences();
             refreshLocalizedTexts();
@@ -268,7 +230,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
             new ThunderEffect(background).execute();
         });
         CustomAssetManager.getTextureAsync(SPLASH_TITLE).subscribe(texture -> {
-            Image splashTitle = new Image(texture);
+            splashTitle = new Image(texture);
+            splashTitle.setVisible(menuDecorationsVisible);
             splashTitle.setSize(texture.getWidth() * SPLASH_TITLE_SCALE, texture.getHeight() * SPLASH_TITLE_SCALE);
             splashTitle.setPosition(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT - 20f, Align.top);
             stage.addActor(splashTitle);
@@ -361,8 +324,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
                 GoogleServicesHolder.getAdHandler().isRewardedVideoAdLoaded().subscribe(isLoaded -> {
                     Gdx.app.postRunnable(() -> {
                         if (isLoaded) {
-                            displayChalkboardWithNoYesButtons(get("init.restartPrompt"),
-                                    VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2).subscribe(answerIsTrue -> {
+                            RestartConfirmationDialog.show(stage).subscribe(answerIsTrue -> {
                                 if (!answerIsTrue) {
                                     return;
                                 }
@@ -423,9 +385,17 @@ public class InitGameViewImpl implements Screen, InitGameView {
         UiText.setLanguage(preferredLanguage);
     }
 
+    private void setMenuDecorationsVisible(boolean visible) {
+        menuDecorationsVisible = visible;
+        if (splashTitle != null) splashTitle.setVisible(visible);
+        if (englishLocaleFlag != null) englishLocaleFlag.setVisible(visible);
+        if (slovakLocaleFlag != null) slovakLocaleFlag.setVisible(visible);
+    }
+
     private void initLocaleSelector() {
         englishLocaleFlag = createLocaleFlag(13, 5, LANGUAGE_ENGLISH);
         slovakLocaleFlag = createLocaleFlag(11, 8, LANGUAGE_SLOVAK);
+        setMenuDecorationsVisible(menuDecorationsVisible);
 
         float margin = 8f;
         englishLocaleFlag.setPosition(margin, margin);
