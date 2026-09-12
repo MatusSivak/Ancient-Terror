@@ -98,7 +98,7 @@ public class TheViolinistActionListener extends AbstractActionPhaseListener<TheV
 
     @Override
     protected String getTexturePath() {
-        return "investigator/ICON_THE_VIOLINIST.png";
+        return "investigator/THE_VIOLINIST.png";
     }
 
     @Override

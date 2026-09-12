@@ -141,7 +141,7 @@ public class SelectInvestigatorComponent extends Table {
             Table slot = new Table();
             slot.setBackground(getTextureRegionDrawable(PURE_WHITE_BACKGROUND).tint(new Color(0.12f, 0.16f, 0.14f, 1f)));
             if (i < selected.size()) {
-                Image icon = new Image(getTexture("investigator/ICON_" + selected.get(i).getInvestigatorId().name() + ".png"));
+                Image icon = new Image(getTexture("investigator/" + selected.get(i).getInvestigatorId().name() + ".png"));
                 icon.setScaling(Scaling.fit);
                 slot.add(icon).size(28f);
             } else {

@@ -1,10 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.map.investigator;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
@@ -47,13 +44,8 @@ public class InvestigatorImage extends Image {
     private static final float SOURCE_IMAGE_HEIGHT = 1536f;
     private static final float IMAGE_HEIGHT = 100f;
     private static final float IMAGE_WIDTH = IMAGE_HEIGHT * SOURCE_IMAGE_WIDTH / SOURCE_IMAGE_HEIGHT;
-    private static final int ROLE_ICON_SCREEN_SIZE = 48;
-    private static final int ROLE_ICON_X_OFFSET = 0;
-    private static final int ROLE_ICON_Y_OFFSET = -15;
-    private static final float ROLE_ICON_HIGHLIGHT_OVERLAY_ALPHA = 0.45f;
     private final InvestigatorId investigatorId;
     private final GameController gameController;
-    private final TextureRegion roleIconTextureRegion;
     private Image asteroid;
     private Image borderImage;
     private float offsetX;
@@ -73,7 +65,6 @@ public class InvestigatorImage extends Image {
 
         this.gameController = gameController;
         this.investigatorId = investigatorId;
-        this.roleIconTextureRegion = createRoleIconTextureRegion(investigatorId);
         setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
         createBorderImage();
         setOrigin(getWidth() / 2, 10);
@@ -189,41 +180,9 @@ public class InvestigatorImage extends Image {
         }
         borderImage.draw(batch, parentAlpha);
         super.draw(batch, parentAlpha);
-        drawRoleIcon(batch, parentAlpha);
         if (hourglassComponent != null) {
             hourglassComponent.draw(batch, parentAlpha);
         }
-    }
-
-    private void drawRoleIcon(Batch batch, float parentAlpha) {
-        if (roleIconTextureRegion == null) {
-            return;
-        }
-        OrthographicCamera camera = MapStage.getCamera();
-        float iconSize = ROLE_ICON_SCREEN_SIZE * camera.zoom;
-        float sourceWidth = roleIconTextureRegion.getRegionWidth();
-        float sourceHeight = roleIconTextureRegion.getRegionHeight();
-        float scale = Math.min(iconSize / sourceWidth, iconSize / sourceHeight);
-        float drawWidth = sourceWidth * scale;
-        float drawHeight = sourceHeight * scale;
-        Vector2 bottomCenter = localToStageCoordinates(new Vector2(getWidth() / 2f, 20));
-        float x = bottomCenter.x - drawWidth / 2f + ROLE_ICON_X_OFFSET * camera.zoom;
-        float y = bottomCenter.y + ROLE_ICON_Y_OFFSET * camera.zoom;
-        Color previousColor = new Color(batch.getColor());
-        Color actorColor = getColor();
-        batch.setColor(actorColor.r, actorColor.g, actorColor.b, parentAlpha * actorColor.a);
-        batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
-        if (highlighted) {
-            Color borderColor = borderImage.getColor();
-            batch.setColor(
-                    borderColor.r,
-                    borderColor.g,
-                    borderColor.b,
-                    parentAlpha * getColor().a * ROLE_ICON_HIGHLIGHT_OVERLAY_ALPHA
-            );
-            batch.draw(roleIconTextureRegion, x, y, drawWidth, drawHeight);
-        }
-        batch.setColor(previousColor);
     }
 
     public void setAsteroidVisible(boolean asteroidVisible) {
@@ -318,10 +277,5 @@ public class InvestigatorImage extends Image {
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeatedByHealth = defeatedByHealth;
-    }
-
-    private static TextureRegion createRoleIconTextureRegion(InvestigatorId investigatorId) {
-        Texture iconTexture = CustomAssetManager.getTexture("investigator/ICON_" + investigatorId.name() + ".png");
-        return new TextureRegion(iconTexture);
     }
 }

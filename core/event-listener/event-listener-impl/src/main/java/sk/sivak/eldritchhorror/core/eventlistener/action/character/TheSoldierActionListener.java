@@ -74,7 +74,7 @@ public class TheSoldierActionListener extends AbstractActionPhaseListener<TheSol
 
     @Override
     protected String getTexturePath() {
-        return "investigator/ICON_THE_SOLDIER.png";
+        return "investigator/THE_SOLDIER.png";
     }
 
     @Override

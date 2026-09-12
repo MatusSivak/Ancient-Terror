@@ -80,7 +80,7 @@ public class TheActressActionListener extends AbstractActionPhaseListener<TheAct
 
     @Override
     protected String getTexturePath() {
-        return "investigator/ICON_THE_ACTRESS.png";
+        return "investigator/THE_ACTRESS.png";
     }
 
     @Override

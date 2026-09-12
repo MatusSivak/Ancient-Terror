@@ -16,10 +16,14 @@ import sk.sivak.eldritchhorror.core.view.components.RestartConfirmationDialog;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -109,8 +113,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private SingleSubscriber<? super Integer> numberOfPlayersSingleSubscriber;
     private Runnable removeOnRewardedAdLoadedListener = () -> {};
     private Runnable removeOnRewardedAdFailedToLoadListener = () -> {};
-    private ImageButton englishLocaleFlag;
-    private ImageButton slovakLocaleFlag;
+    private ImageButton selectedLocaleFlag;
+    private Table localeOptions;
     private Image splashTitle;
     private boolean menuDecorationsVisible = true;
 
@@ -276,8 +280,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
         noAdsButton = new NoAdsButton();
         noAdsButton.setPosition(VIEWPORT_WIDTH - noAdsButton.getWidth() - 5, 5);
         initLocaleSelector();
-        stage.addActor(englishLocaleFlag);
-        stage.addActor(slovakLocaleFlag);
+        stage.addActor(selectedLocaleFlag);
+        stage.addActor(localeOptions);
 
         if (GoogleServicesHolder.isTutorialPassed()) {
             stage.addActor(collectionButton);
@@ -388,19 +392,55 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private void setMenuDecorationsVisible(boolean visible) {
         menuDecorationsVisible = visible;
         if (splashTitle != null) splashTitle.setVisible(visible);
-        if (englishLocaleFlag != null) englishLocaleFlag.setVisible(visible);
-        if (slovakLocaleFlag != null) slovakLocaleFlag.setVisible(visible);
+        if (selectedLocaleFlag != null) selectedLocaleFlag.setVisible(visible);
+        closeLocaleOptions();
     }
 
     private void initLocaleSelector() {
-        englishLocaleFlag = createLocaleFlag(13, 5, LANGUAGE_ENGLISH);
-        slovakLocaleFlag = createLocaleFlag(11, 8, LANGUAGE_SLOVAK);
-        setMenuDecorationsVisible(menuDecorationsVisible);
+        selectedLocaleFlag = createLocaleFlag(13, 5, null);
+        selectedLocaleFlag.setPosition(8f, 8f);
+        Label arrow = new Label("v", new Label.LabelStyle(
+                getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4), Color.valueOf("E8D9B0")));
+        arrow.setFontScale(0.2f);
+        selectedLocaleFlag.add(arrow).padLeft(5f);
+        selectedLocaleFlag.setWidth(68f);
+        localeOptions = new Table();
+        localeOptions.add(createLocaleFlag(13, 5, LANGUAGE_ENGLISH)).size(68f, 32f).row();
+        localeOptions.add(createLocaleFlag(11, 8, LANGUAGE_SLOVAK)).size(68f, 32f);
+        localeOptions.pack();
+        localeOptions.setPosition(8f, 44f);
+        ButtonUtils.addClickListener(selectedLocaleFlag, () -> {
+            localeOptions.setVisible(!localeOptions.isVisible());
+            localeOptions.toFront();
+            selectedLocaleFlag.setChecked(localeOptions.isVisible());
+        });
+        stage.addCaptureListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event,
+                                     float x, float y, int pointer, int button) {
+                Actor target = event.getTarget();
+                if (!target.isDescendantOf(selectedLocaleFlag) && !target.isDescendantOf(localeOptions)) {
+                    closeLocaleOptions();
+                }
+                return false;
+            }
 
-        float margin = 8f;
-        englishLocaleFlag.setPosition(margin, margin);
-        slovakLocaleFlag.setPosition(margin + englishLocaleFlag.getWidth() + margin, margin);
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE && localeOptions.isVisible()) {
+                    closeLocaleOptions();
+                    return true;
+                }
+                return false;
+            }
+        });
+        setMenuDecorationsVisible(menuDecorationsVisible);
         refreshLocaleFlagSelection();
+    }
+
+    private void closeLocaleOptions() {
+        if (localeOptions != null) localeOptions.setVisible(false);
+        if (selectedLocaleFlag != null) selectedLocaleFlag.setChecked(false);
     }
 
     private ImageButton createLocaleFlag(int row, int column, String languageTag) {
@@ -421,10 +461,12 @@ public class InitGameViewImpl implements Screen, InitGameView {
         AncientTerrorMenuStyles.addFocusHighlight(button);
         button.getImageCell().size(40f, 20f);
         button.setSize(52f, 32f);
-        ButtonUtils.addClickListener(button, () -> {
-            applyLanguage(languageTag);
-            refreshLocaleFlagSelection();
-        });
+        if (languageTag != null) {
+            ButtonUtils.addClickListener(button, () -> {
+                applyLanguage(languageTag);
+                closeLocaleOptions();
+            });
+        }
         return button;
     }
 
@@ -439,12 +481,18 @@ public class InitGameViewImpl implements Screen, InitGameView {
     }
 
     private void refreshLocaleFlagSelection() {
-        if (englishLocaleFlag == null || slovakLocaleFlag == null) {
-            return;
-        }
+        if (selectedLocaleFlag == null) return;
         boolean englishSelected = LANGUAGE_ENGLISH.equals(UiText.getLanguage());
-        englishLocaleFlag.setChecked(englishSelected);
-        slovakLocaleFlag.setChecked(!englishSelected);
+        Texture texture = CustomAssetManager.getTexture(FLAGS_TEXTURE);
+        int width = texture.getWidth() / FLAGS_COLUMNS;
+        int height = texture.getHeight() / FLAGS_ROWS;
+        TextureRegion region = new TextureRegion(texture,
+                (englishSelected ? 4 : 7) * width,
+                (englishSelected ? 12 : 10) * height, width, height);
+        ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle(selectedLocaleFlag.getStyle());
+        style.imageUp = new TextureRegionDrawable(region);
+        selectedLocaleFlag.setStyle(style);
+        closeLocaleOptions();
     }
 
     private void refreshLocalizedTexts() {
@@ -538,6 +586,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public void hide() {
+        closeLocaleOptions();
         removeOnRewardedAdLoadedListener.run();
         removeOnRewardedAdLoadedListener = () -> {};
         removeOnRewardedAdFailedToLoadListener.run();

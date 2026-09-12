@@ -19,6 +19,7 @@ public interface ActionButtonData {
         ACQUIRE_ASSETS,
         TICKET,
         TRADE,
-        SKIP
+        SKIP,
+        NOT_APPLICABLE
     }
 }

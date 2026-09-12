@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
 
+import static sk.sivak.eldritchhorror.core.constants.action.ActionButtonData.ActionButtonId.NOT_APPLICABLE;
+
 public class EncounterButtonDataAdapter {
 
     private final EncounterButtonData encounterButtonData;
@@ -17,7 +19,7 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public ActionButtonId getActionButtonId() {
-                throw new UnsupportedOperationException();
+                return NOT_APPLICABLE;
             }
 
             @Override

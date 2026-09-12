@@ -1,0 +1,132 @@
+[
+  {
+    "id": "ACTRESS",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 25.7,
+    "new_mean_brightness": 102.6
+  },
+  {
+    "id": "ASTRONOMER",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 31.9,
+    "new_mean_brightness": 93.2
+  },
+  {
+    "id": "BOOTLEGGER",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 29.3,
+    "new_mean_brightness": 92.8
+  },
+  {
+    "id": "BOUNTY_HUNTER",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 31.2,
+    "new_mean_brightness": 84.4
+  },
+  {
+    "id": "ENTERTAINER",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 30.7,
+    "new_mean_brightness": 86.5
+  },
+  {
+    "id": "EX_CONVICT",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 35.0,
+    "new_mean_brightness": 105.2
+  },
+  {
+    "id": "EXPEDITION_LEADER",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 38.5,
+    "new_mean_brightness": 108.5
+  },
+  {
+    "id": "HANDYMAN",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 42.9,
+    "new_mean_brightness": 109.3
+  },
+  {
+    "id": "MARTIAL_ARTIST",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 46.7,
+    "new_mean_brightness": 136.7
+  },
+  {
+    "id": "MUSICIAN",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 37.6,
+    "new_mean_brightness": 120.4
+  },
+  {
+    "id": "POLITICIAN",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 26.0,
+    "new_mean_brightness": 89.4
+  },
+  {
+    "id": "PSYCHIC",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 38.1,
+    "new_mean_brightness": 107.3
+  },
+  {
+    "id": "REDEEMED_CULTIST",
+    "size": [
+      512,
+      768
+    ],
+    "alpha_sha256": "bd2cca0ecc6dc29aa7f354576428dfce1ff5bedc0989128cc13e115e45320d1c",
+    "old_mean_brightness": 21.5,
+    "new_mean_brightness": 72.5
+  }
+]

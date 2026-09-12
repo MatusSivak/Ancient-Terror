@@ -77,7 +77,7 @@ public class TheEntertainerActionListener extends AbstractActionPhaseListener<Th
 
     @Override
     protected String getTexturePath() {
-        return "investigator/ICON_THE_ENTERTAINER.png";
+        return "investigator/THE_ENTERTAINER.png";
     }
 
     @Override

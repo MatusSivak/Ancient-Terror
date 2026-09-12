@@ -75,11 +75,7 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
         Image divider = new Image(getTextureRegionDrawable(PURE_WHITE_BACKGROUND));
         divider.setColor(0.16f, 0.18f, 0.16f, 1f);
         add(divider).growX().height(1f).row();
-        Image investigatorIcon = new Image(CustomAssetManager.getTexture(
-                "investigator/ICON_" + investigatorId.name() + ".png"));
-        investigatorIcon.setScaling(Scaling.fit);
         Table caption = new Table();
-        caption.add(investigatorIcon).size(32f, 36f).padRight(5f);
         caption.add(nameLabel).growX().minWidth(0f);
         add(caption).growX().height(52f).pad(PADDING);
 
