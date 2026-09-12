@@ -4,31 +4,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisTable;
-import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
 import sk.sivak.eldritchhorror.core.view.ScreenType;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
-import sk.sivak.eldritchhorror.core.view.components.table.ActorFrame;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler;
+import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.MyMoveToAction;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
@@ -38,177 +28,150 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
-import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPLASH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.*;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class HallOfFameScreen implements Screen {
+    private static final Color GOLD = Color.valueOf("E8D9B0");
+    private static final Color TEXT = Color.valueOf("E5DFCC");
+    private static final Color MUTED = Color.valueOf("BEB69F");
     private Stage stage;
-    private ScrollPane scrollPane;
-    private Skin skin;
+    private ScrollPane recordsScroll;
+    private ScrollPane detailsScroll;
+    private Table detailsTable;
+    private Button selectedRow;
     private ChangeScreenHandler changeScreenHandler;
-    private boolean screenInitialized;
-    private List<HallOfFameData> hallOfFameDataList;
-    private VisTable detailsTable;
-    private ActorFrame detailsTableFrame;
-    private Label selectedNameLabel;
-    private Label selectedAncientOneLabel;
-    private Label selectedDifficultyLabel;
     private String initializedLanguage;
 
     @Override
     public void show() {
-        if (screenInitialized) {
-            if (initializedLanguage != null && !initializedLanguage.equals(UiText.getLanguage())) {
-                rebuildForLanguageChange();
-                show();
-                return;
-            }
-            Gdx.input.setInputProcessor(stage);
-            return;
+        if (stage != null && !UiText.getLanguage().equals(initializedLanguage)) dispose();
+        if (stage == null) {
+            initializedLanguage = UiText.getLanguage();
+            stage = new Stage(new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
+            Image background = new Image(CustomAssetManager.getTexture(SPLASH));
+            background.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+            background.setOrigin(Align.center);
+            background.setScale(1.25f);
+            background.addAction(Actions.repeat(RepeatAction.FOREVER, new MyMoveToAction(
+                    new Vector2(0, 0), () -> randomPointInRectangle(new Vector2(0, 0),
+                    VIEWPORT_WIDTH * 0.25f, VIEWPORT_HEIGHT * 0.25f), 30f, 1.25f)));
+            stage.addActor(background);
+            new ThunderEffect(background).execute();
+            initTable();
         }
-        screenInitialized = true;
-        initializedLanguage = UiText.getLanguage();
-        if (!VisUI.isLoaded()) {
-            VisUI.load();
-        }
-        stage = new Stage(new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
-        Image background = new Image(CustomAssetManager.getTexture(SPLASH));
-        background.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-        background.setOrigin(Align.center);
-
-        background.setScale(1.25f);
-        float width = ViewProperties.VIEWPORT_WIDTH * background.getScaleX() - ViewProperties.VIEWPORT_WIDTH;
-        float height = ViewProperties.VIEWPORT_HEIGHT * background.getScaleY() - ViewProperties.VIEWPORT_HEIGHT;
-        MyMoveToAction moveToAction = new MyMoveToAction(new Vector2(0, 0),
-                () -> randomPointInRectangle(new Vector2(0, 0), width, height), 30f, 1.25f);
-        background.addAction(Actions.repeat(RepeatAction.FOREVER, moveToAction));
-        stage.addActor(background);
-        new ThunderEffect(background).execute();
-
-        Table buttonsTable = new Table();
-        buttonsTable.pad(15);
-        buttonsTable.setHeight(ViewProperties.VIEWPORT_HEIGHT);
-
-        TextButton backButton = buildButton(get("hallOfFame.back"));
-        backButton.setColor(Color.GRAY);
-        ButtonUtils.addClickListener(backButton, () -> {
-            changeScreenHandler.changeScreen(ScreenType.INIT_GAME);
-        });
-        buttonsTable.add(backButton).width(175).pad(0).align(Align.bottomLeft).expandY().height(backButton.getHeight());
-        buttonsTable.align(Align.topLeft);
-
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         Gdx.input.setInputProcessor(stage);
-
-        buttonsTable.validate();
-        stage.addActor(buttonsTable);
-
-        initTable();
-
     }
 
     private void initTable() {
-        VisTable headerTable = new VisTable();
-        headerTable.add(createHeaderLabel(get("hallOfFame.header.player"), Color.YELLOW)).pad(0).width(220);
-        headerTable.addSeparator(true).padTop(0).padBottom(0);
-        headerTable.add(createHeaderLabel(get("hallOfFame.header.ancientOne"), Color.YELLOW)).pad(0).width(180);
-        headerTable.addSeparator(true).padTop(0).padBottom(0);
-        headerTable.add(createHeaderLabel(get("hallOfFame.header.difficulty"), Color.YELLOW)).pad(0).width(120);
-        headerTable.pack();
-        headerTable.setPosition(417, VIEWPORT_HEIGHT - 40);
-        stage.addActor(new ActorFrame(headerTable,5));
-        stage.addActor(headerTable);
+        Table root = new Table();
+        root.setFillParent(true);
+        root.pad(12f);
+        root.add(label(get("init.hallOfFame"), 0.5f, GOLD)).colspan(2).height(48f).row();
 
+        Table detailsPanel = new Table();
+        detailsPanel.setBackground(panel("35483EF5"));
+        detailsPanel.pad(14f);
+        detailsScroll = scroll(new Table());
+        detailsPanel.add(detailsScroll).grow();
         createDetailsTable(null);
 
-        new FirebaseHallOfFame().fetchHallOfFameData().subscribe(list -> {
-            Gdx.app.postRunnable(() -> {
-                this.hallOfFameDataList = list;
-                VisTable table = new VisTable();
-                for (int i = 0; i < list.size(); i++) {
-                    HallOfFameData hallOfFameData = list.get(i);
-                    float alpha = i%2 == 0 ? 0.33f : 0.66f;
-                    Label nameLabel = createNameLabel(" " + hallOfFameData.getName().trim(), Color.WHITE, alpha);
-                    table.add(nameLabel).pad(0).width(220);
-                    table.addSeparator(true).padTop(0).padBottom(0);
-                    Label ancientOneLabel = createNameLabel(" " + hallOfFameData.getAncientOneId().toPrettyString(), Color.LIGHT_GRAY, alpha);
-                    table.add(ancientOneLabel).pad(0).width(180);
-                    table.addSeparator(true).padTop(0).padBottom(0);
-                    String difficulty = hallOfFameData.getDifficulty().equals("EASY") ? get("hallOfFame.difficulty.easy") : get("hallOfFame.difficulty.normal");
-                    Label difficultyLabel = createNameLabel(" " + difficulty, Color.LIGHT_GRAY, alpha);
-                    table.add(difficultyLabel).pad(0).width(120);
-                    table.row();
-                    table.addSeparator(false).pad(0).colspan(5).row();
+        Table recordsPanel = new Table();
+        recordsPanel.setBackground(panel("2B3C33F5"));
+        recordsPanel.pad(10f);
+        Table header = new Table();
+        header.add(label(get("hallOfFame.header.player").trim(), 0.29f, GOLD)).width(180f).padLeft(10f);
+        header.add(label(get("hallOfFame.header.ancientOne").trim(), 0.29f, GOLD)).width(190f);
+        header.add(label(get("hallOfFame.header.datetime"), 0.29f, GOLD)).width(168f);
+        recordsPanel.add(header).growX().height(36f).row();
+        recordsScroll = scroll(label(get("hallOfFame.loading"), 0.3f, MUTED));
+        recordsPanel.add(recordsScroll).grow();
+        root.add(detailsPanel).width(340f).growY().padRight(12f);
+        root.add(recordsPanel).grow().row();
 
-                    Runnable onRowClick = () -> {
-                        createDetailsTable(hallOfFameData);
-                        if (selectedNameLabel != null) {
-                            selectedNameLabel.setColor(Color.WHITE);
-                        }
-                        if (selectedAncientOneLabel != null) {
-                            selectedAncientOneLabel.setColor(Color.LIGHT_GRAY);
-                        }
-                        if (selectedDifficultyLabel != null) {
-                            selectedDifficultyLabel.setColor(Color.LIGHT_GRAY);
-                        }
-                        selectedNameLabel = nameLabel;
-                        selectedAncientOneLabel = ancientOneLabel;
-                        selectedDifficultyLabel = difficultyLabel;
+        TextButton back = new TextButton(get("hallOfFame.back"), AncientTerrorMenuStyles.button());
+        back.getLabel().setFontScale(0.33f);
+        AncientTerrorMenuStyles.makeMomentary(back);
+        AncientTerrorMenuStyles.addFocusHighlight(back);
+        ButtonUtils.addClickListener(back, () -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME));
+        root.add(back).width(175f).height(46f).padTop(10f).left();
+        stage.addActor(root);
 
-                        selectedNameLabel.setColor(Color.YELLOW);
-                        selectedAncientOneLabel.setColor(Color.YELLOW);
-                        selectedDifficultyLabel.setColor(Color.YELLOW);
-                    };
-                    ButtonUtils.addClickListener(nameLabel, onRowClick);
-                    ButtonUtils.addClickListener(ancientOneLabel, onRowClick);
-                    ButtonUtils.addClickListener(difficultyLabel, onRowClick);
-                }
+        final Stage requestingStage = stage;
+        new FirebaseHallOfFame().fetchHallOfFameData().subscribe(list -> Gdx.app.postRunnable(() -> {
+            if (stage == requestingStage) populateRecords(list);
+        }), error -> Gdx.app.postRunnable(() -> {
+            if (stage == requestingStage) recordsScroll.setWidget(label(get("hallOfFame.unavailable"), 0.3f, MUTED));
+        }));
+    }
 
-                table.pack();
-                scrollPane = new ScrollPane(table);
-                scrollPane.setSize(table.getWidth(),ViewProperties.VIEWPORT_HEIGHT - 60);
-                scrollPane.setPosition(VIEWPORT_WIDTH - scrollPane.getWidth() - 15, 15);
-                scrollPane.setOverscroll(false, false);
+    private void populateRecords(List<HallOfFameData> list) {
+        if (list.isEmpty()) {
+            recordsScroll.setWidget(label(get("hallOfFame.empty"), 0.3f, MUTED));
+            return;
+        }
+        Table records = new Table();
+        records.top();
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
+        for (int i = 0; i < list.size(); i++) {
+            HallOfFameData record = list.get(i);
+            Drawable normal = panel(i % 2 == 0 ? "46584A" : "394B40");
+            Button.ButtonStyle style = new Button.ButtonStyle();
+            style.up = normal;
+            style.over = AncientTerrorMenuStyles.highlight(normal);
+            style.down = style.over;
+            style.checked = style.over;
+            Button row = new Button(style);
+            row.pad(10f);
+            row.add(label(record.getName().trim(), 0.3f, TEXT)).width(180f);
+            row.add(label(record.getAncientOneId().toPrettyString(), 0.29f, MUTED)).width(190f);
+            Date timestamp = new Date(record.getTimestamp());
+            row.add(label(dateFormat.format(timestamp) + "\n" + timeFormat.format(timestamp),
+                    0.28f, MUTED)).width(158f);
+            AncientTerrorMenuStyles.addFocusHighlight(row);
+            ButtonUtils.addClickListener(row, () -> selectRecord(row, record));
+            records.add(row).growX().minHeight(54f).padBottom(4f).row();
+            if (i == 0) selectRecord(row, record);
+        }
+        recordsScroll.setWidget(records);
+    }
 
-                stage.addActor(new ActorFrame(scrollPane, 5));
-                stage.addActor(scrollPane);
-
-            });
-        });
+    private void selectRecord(Button row, HallOfFameData record) {
+        if (selectedRow != null) selectedRow.setChecked(false);
+        selectedRow = row;
+        row.setChecked(true);
+        createDetailsTable(record);
     }
 
     private void createDetailsTable(HallOfFameData hallOfFameData) {
-        if (detailsTable != null) {
-            detailsTable.remove();
-            detailsTableFrame.remove();
+        detailsTable = new Table();
+        detailsTable.top().left();
+        if (hallOfFameData != null) {
+            detailsTable.add(label(hallOfFameData.getName().trim(), 0.4f, GOLD))
+                    .width(300f).padBottom(16f).row();
         }
-        detailsTable = new VisTable();
-        detailsTable.pad(5);
         if (hallOfFameData == null) {
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.datetime"), Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.investigators"), Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.doom"), Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.rounds"), Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.mysteries"), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.datetime"), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.investigators"), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.doom"), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.rounds"), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.unknown.mysteries"), TEXT)).width(300).padBottom(12).row();
         } else {
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
             DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.DEFAULT, Locale.getDefault());
             String dateAsString = dateFormat.format(new Date(hallOfFameData.getTimestamp()));
             String timeAsString = timeFormat.format(new Date(hallOfFameData.getTimestamp()));
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.datetime", dateAsString, timeAsString), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.datetime", dateAsString, timeAsString), TEXT)).width(300).padBottom(12).row();
 
             String investigatorsString = "";
             for (String investigator : hallOfFameData.getInvestigators()) {
                 investigatorsString += "\n - " + investigator;
             }
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.investigators", hallOfFameData.getInvestigatorsCount(), investigatorsString), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.investigators", hallOfFameData.getInvestigatorsCount(), investigatorsString), TEXT)).width(300).padBottom(12).row();
 
             int minutes;
             int hours;
@@ -225,29 +188,48 @@ public class HallOfFameScreen implements Screen {
             }
 
 
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.doom", String.format(Locale.getDefault(), "%02d",hours), String.format(Locale.getDefault(), "%02d",minutes)), Color.WHITE)).width(375).row();
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.rounds", hallOfFameData.getRounds()), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.doom", String.format(Locale.getDefault(), "%02d",hours), String.format(Locale.getDefault(), "%02d",minutes)), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.rounds", hallOfFameData.getRounds()), TEXT)).width(300).padBottom(12).row();
             String mysteriesString = "";
             for (String mystery : hallOfFameData.getSolvedMysteries()) {
                 mysteriesString += "\n - " + mystery;
             }
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.mysteries", hallOfFameData.getSolvedMysteries().size(), mysteriesString), Color.WHITE)).width(375).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.mysteries", hallOfFameData.getSolvedMysteries().size(), mysteriesString), TEXT)).width(300).padBottom(12).row();
         }
 
-        detailsTable.pack();
-        detailsTable.setPosition(15, VIEWPORT_HEIGHT - detailsTable.getHeight() - 18);
-        detailsTable.setBackground(getTextureRegionDrawable(GRAY_BACKGROUND));
-        detailsTableFrame = new ActorFrame(detailsTable, 5);
-        stage.addActor(detailsTableFrame);
-        stage.addActor(detailsTable);
+        detailsScroll.setWidget(detailsTable);
+        detailsScroll.setScrollY(0f);
     }
 
-    private TextButton buildButton(String text) {
-        TextButton button = new TextButton(text, skin);
-        button.getLabel().setFontScale(0.5f);
-        button.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
-        button.setSize(280, button.getHeight()*1.5f);
-        return button;
+    private static ScrollPane scroll(com.badlogic.gdx.scenes.scene2d.Actor content) {
+        ScrollPane pane = new ScrollPane(content);
+        pane.setScrollingDisabled(true, false);
+        pane.setOverscroll(false, false);
+        return pane;
+    }
+
+    private static Drawable panel(String color) {
+        Drawable background = getTextureRegionDrawable(PURE_WHITE_BACKGROUND).tint(Color.valueOf(color));
+        background.setMinWidth(0f);
+        background.setMinHeight(0f);
+        return background;
+    }
+
+    private static Label label(String text, float scale, Color color) {
+        // Locale date formats can emit non-breaking spaces absent from the bitmap font.
+        text = text.replace('\u202F', ' ').replace('\u00A0', ' ');
+        Label label = new Label(text, new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4), color));
+        label.setFontScale(scale);
+        label.setWrap(true);
+        label.setAlignment(Align.left);
+        return label;
+    }
+
+    private Label createDetailsLabel(String text, Color color) {
+        Label result = label(text.replace("[#ffff00]", "[#E8D9B0]")
+                .replace("[#bfbfbf]", "[#E5DFCC]"), 0.28f, color);
+        result.getStyle().font.getData().markupEnabled = true;
+        return result;
     }
 
     @Override
@@ -258,93 +240,20 @@ public class HallOfFameScreen implements Screen {
         stage.draw();
     }
 
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, false);
+    @Override public void resize(int width, int height) {
+        if (stage != null) stage.getViewport().update(width, height, true);
     }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
-    }
-
-
-    public void setDefaultSkin(Skin skin) {
-        this.skin = skin;
-    }
-
-    public void setChangeScreenHandler(ChangeScreenHandler changeScreenHandler) {
-        this.changeScreenHandler = changeScreenHandler;
-    }
-
-    private void rebuildForLanguageChange() {
-        if (stage != null) {
-            stage.dispose();
-        }
-        screenInitialized = false;
+    @Override public void pause() { }
+    @Override public void resume() { }
+    @Override public void hide() { }
+    @Override public void dispose() {
+        if (stage != null) stage.dispose();
         stage = null;
-        scrollPane = null;
-        detailsTable = null;
-        detailsTableFrame = null;
-        selectedNameLabel = null;
-        selectedAncientOneLabel = null;
-        selectedDifficultyLabel = null;
+        selectedRow = null;
     }
 
-    private Label createNameLabel(String text, Color fontColor, float alpha) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), fontColor);
-        Color color = new Color(1f, 1f, 1f, alpha);
-        labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(color);
-                super.draw(batch, x, y, width, height);
-            }
-        };
-        Label label = new Label(text, labelStyle);
-        label.setAlignment(Align.left);
-        label.setFontScale(0.35f);
-        return label;
-    }
-
-    private Label createHeaderLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
-        Color bgColor = new Color(1f, 1f, 1f, 1f);
-        labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(bgColor);
-                super.draw(batch, x, y, width, height);
-            }
-        };
-        Label label = new Label(text, labelStyle);
-        label.setFontScale(0.5f);
-        label.setAlignment(Align.left, Align.left);
-        return label;
-    }
-
-    private Label createDetailsLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
-        Label label = new Label(text, labelStyle);
-        labelStyle.font.getData().markupEnabled = true;
-        label.setFontScale(0.5f);
-        label.setWrap(true);
-        label.setAlignment(Align.left, Align.left);
-        return label;
+    public void setDefaultSkin(Skin skin) { }
+    public void setChangeScreenHandler(ChangeScreenHandler handler) {
+        changeScreenHandler = handler;
     }
 }
