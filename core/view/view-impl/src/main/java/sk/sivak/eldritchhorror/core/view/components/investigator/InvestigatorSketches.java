@@ -36,7 +36,7 @@ public class InvestigatorSketches extends Table {
                 sketch.clearListeners();
                 sketch.showTicked();
             }
-            add(sketch).width(175).height(196).pad(3);
+            add(sketch).width(148).height(180).pad(4);
             sketches.add(sketch);
             if (i == (investigatorIds.length-1)/2) {
                 row();

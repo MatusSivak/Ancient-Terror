@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.investigator;
 
 import com.badlogic.gdx.graphics.Color;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -27,7 +28,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class InvestigatorSketch extends VisTable implements SelectComponent<InvestigatorId> {
 
     public static final float PADDING = 5;
-    public static final float DESELECT_SCALE = 0.88f;
+    public static final float DESELECT_SCALE = 0.96f;
     public static final int SCALE_SPEED = 2;
     private final Cell<Image> imageCell;
     private final Label nameLabel;
@@ -53,12 +54,15 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
                 if (!ticked) {
                     return;
                 }
-                float badgeSize = Math.min(getWidth(), getHeight()) * 0.78f;
-                float badgeX = getX() + (getWidth() - badgeSize) / 2f;
-                float badgeY = getY() + (getHeight() - badgeSize) / 2f;
+                float badgeSize = 26f;
+                float badgeX = getX() + getWidth() - badgeSize - 6f;
+                float badgeY = getY() + 6f;
                 float previousColor = batch.getPackedColor();
                 float alpha = getColor().a * parentAlpha;
-                // An opaque, centered badge with a shadow stays legible over busy portraits.
+                // Keep the recruited marker clear without covering the portrait.
+                batch.setColor(0.04f, 0.10f, 0.07f, alpha);
+                batch.draw(CustomAssetManager.getTexture(PURE_WHITE_BACKGROUND),
+                        badgeX - 3f, badgeY - 3f, badgeSize + 6f, badgeSize + 6f);
                 batch.setColor(0f, 0f, 0f, alpha * 0.85f);
                 batch.draw(CustomAssetManager.getTexture(TICK), badgeX + 2f, badgeY - 2f, badgeSize, badgeSize);
                 batch.setColor(1f, 1f, 1f, alpha);
@@ -68,21 +72,21 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
         };
         image.setScale(currentScale);
         image.setScaling(Scaling.fit);
-        nameLabel = createLabel(UiText.get("investigator.profession." + investigatorId.name().toLowerCase(Locale.ROOT)), Color.WHITE);
+        nameLabel = createLabel(UiText.get("investigator.profession." + investigatorId.name().toLowerCase(Locale.ROOT)), Color.valueOf("E8D9B0"));
 
         imageCell = add(image).grow().pad(PADDING).align(Align.center);
         row();
         Image divider = new Image(getTextureRegionDrawable(PURE_WHITE_BACKGROUND));
-        divider.setColor(0.16f, 0.18f, 0.16f, 1f);
+        divider.setColor(Color.valueOf("48503A"));
         add(divider).growX().height(1f).row();
         Table caption = new Table();
         caption.add(nameLabel).growX().minWidth(0f);
-        add(caption).growX().height(52f).pad(PADDING);
+        add(caption).growX().height(36f).pad(PADDING);
 
         pack();
 
-        normalBackground = CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND);
-        selectedBackground = AncientTerrorMenuStyles.highlight(normalBackground);
+        normalBackground = SelectionPanelStyle.panel("18271F", "394839");
+        selectedBackground = AncientTerrorMenuStyles.highlight(SelectionPanelStyle.panel("2A3725", "B99C60"));
         setBackground(normalBackground);
 
         deselectFast();
@@ -167,7 +171,7 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
         float colorValue = 1 - 2 * (1 - value);
         Color color = new Color(colorValue, colorValue, colorValue, 1f);
         imageCell.getActor().setColor(color);
-        nameLabel.setColor(color);
+        nameLabel.setColor(Color.WHITE);
     }
 
     @Override
@@ -190,6 +194,8 @@ public class InvestigatorSketch extends VisTable implements SelectComponent<Inve
 
     public void showTicked() {
         ticked = true;
+        deselectFast();
+        setBackground(SelectionPanelStyle.panel("11251E", "66784E"));
     }
 
     @Override

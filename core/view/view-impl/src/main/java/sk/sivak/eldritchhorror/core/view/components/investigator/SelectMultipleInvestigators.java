@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.investigator;
 
 import com.badlogic.gdx.graphics.Color;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -57,7 +58,8 @@ public class SelectMultipleInvestigators {
         this.stage = stage;
         this.labeledStatChart = new LabeledStatChart();
         quoteLabel = new QuoteLabel();
-        quoteLabel.setFontScale(0.24f);
+        quoteLabel.setFontScale(0.25f);
+        quoteLabel.getStyle().fontColor = Color.valueOf("AFA990");
         quoteLabel.setAlignment(Align.topLeft);
         abilityLabel = new Label("", new Label.LabelStyle(
                 CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4),
@@ -83,7 +85,7 @@ public class SelectMultipleInvestigators {
                 onSelect(previewedInvestigator);
             }
         });
-        selectInvestigatorComponent = new SelectInvestigatorComponent(0.66f) {
+        selectInvestigatorComponent = new SelectInvestigatorComponent(0.64f) {
             @Override
             public void hideOkButton() {
                 clearPreview();
@@ -129,22 +131,24 @@ public class SelectMultipleInvestigators {
         selectInvestigatorComponent.init(investigatorIds.toArray(new InvestigatorId[investigatorIds.size()]));
         selectInvestigatorComponent.updateTeam(selectedInvestigators, totalToSelect);
         selectInvestigatorComponent.setPosition(
-                5,
+                12,
                 VIEWPORT_HEIGHT/2f - selectInvestigatorComponent.getHeight()/2f);
 
-        float panelWidth = VIEWPORT_WIDTH - selectInvestigatorComponent.getWidth() - 25f;
+        float panelWidth = VIEWPORT_WIDTH - selectInvestigatorComponent.getWidth() - 36f;
         detailsPanel = new Table();
-        detailsPanel.setBackground(CustomAssetManager.getTextureRegionDrawable(
-                CustomAssetManager.PURE_WHITE_BACKGROUND).tint(new Color(0.025f, 0.04f, 0.035f, 0.88f)));
-        detailsPanel.setBounds(VIEWPORT_WIDTH - panelWidth - 10f, 15f, panelWidth, VIEWPORT_HEIGHT - 30f);
-        detailsPanel.pad(12f);
-        detailsPanel.add(investigatorName).growX().height(44f).padBottom(4f).row();
-        float chartSize = Math.min(panelWidth - 24f, 220f);
+        detailsPanel.setBackground(SelectionPanelStyle.panel("0C1714F5", "676044"));
+        detailsPanel.setBounds(VIEWPORT_WIDTH - panelWidth - 12f, 12f, panelWidth, VIEWPORT_HEIGHT - 24f);
+        detailsPanel.pad(14f);
+        detailsPanel.add(investigatorName).growX().height(48f).padBottom(6f).row();
+        Image divider = new Image(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.PURE_WHITE_BACKGROUND));
+        divider.setColor(Color.valueOf("75633E"));
+        detailsPanel.add(divider).growX().height(1f).padBottom(8f).row();
+        float chartSize = Math.min(panelWidth - 28f, 204f);
         detailsPanel.add(labeledStatChart).size(chartSize).row();
         Table description = new Table();
         description.top();
         description.add(abilityLabel).growX().padBottom(14f).row();
-        description.add(quoteLabel).growX();
+        description.add(quoteLabel).growX().pad(10f);
         quotePane = new ScrollPane(description);
         quotePane.setScrollingDisabled(true, false);
         quotePane.setOverscroll(false, false);

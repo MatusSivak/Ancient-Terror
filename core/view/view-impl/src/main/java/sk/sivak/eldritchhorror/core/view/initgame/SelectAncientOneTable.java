@@ -2,6 +2,9 @@ package sk.sivak.eldritchhorror.core.view.initgame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
@@ -24,12 +27,16 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class SelectAncientOneTable extends Table {
     private final Map<AncientOneId, AncientOneInfo> choices = new EnumMap<>(AncientOneId.class);
     private final Map<AncientOneId, Table> cards = new EnumMap<>(AncientOneId.class);
-    private final Map<AncientOneId, Image> locks = new EnumMap<>(AncientOneId.class);
+    private final Map<AncientOneId, Table> lockBadges = new EnumMap<>(AncientOneId.class);
     private final Map<AncientOneId, Boolean> unlocked = new EnumMap<>(AncientOneId.class);
     private final SingleSubscriber<? super AncientOneInfo> subscriber;
     private final Label name = label("", 0.4f, "E8D9B0");
     private final Label subtitle = label("", 0.28f, "BEB69F");
-    private final Label stats = label("", 0.28f, "E8D9B0");
+    private final Label doom = label("", 0.48f, "D5AD89");
+    private final Label mysteries = label("", 0.48f, "E8D9B0");
+    private final Drawable normalCard = SelectionPanelStyle.panel("18271F", "394839");
+    private final Drawable selectedCard = AncientTerrorMenuStyles.highlight(
+            SelectionPanelStyle.panel("2A3725", "B99C60"));
     private final Label description = label("", 0.27f, "E5DFCC");
     private final Label status = label("", 0.25f, "BEB69F");
     private final TextButton confirm = new TextButton("", AncientTerrorMenuStyles.button());
@@ -49,27 +56,42 @@ public class SelectAncientOneTable extends Table {
         unlocked.put(AncientOneId.YOG_SOTHOTH, yogPurchased);
 
         Table gallery = new Table();
-        gallery.setBackground(panelBackground("09130FE8"));
-        gallery.add(label(get("init.selectAncientOne"), 0.42f, "E8D9B0")).growX().height(44f).row();
+        gallery.setBackground(SelectionPanelStyle.panel("0C1714F5", "48503A"));
+        gallery.pad(8f);
+        gallery.add(label(get("init.selectAncientOne"), 0.38f, "E8D9B0")).growX().height(36f).row();
+        gallery.add(divider()).growX().height(1f).pad(0f, 8f, 6f, 8f).row();
         Table grid = new Table();
         int count = 0;
         for (AncientOneId id : AncientOneId.values()) {
             if (!choices.containsKey(id)) continue;
             Table card = createCard(id);
             cards.put(id, card);
-            grid.add(card).size(288f, 224f).pad(3f);
+            grid.add(card).size(280f, 216f).pad(4f);
             if (++count % 2 == 0) grid.row();
         }
         gallery.add(grid).expand().top();
 
         Table details = new Table();
-        details.setBackground(panelBackground("07110FEE"));
+        details.setBackground(SelectionPanelStyle.panel("0C1714F5", "676044"));
         details.pad(14f);
         details.add(name).growX().height(46f).row();
-        details.add(subtitle).growX().height(42f).padBottom(6f).row();
-        details.add(stats).growX().height(52f).padBottom(8f).row();
+        details.add(subtitle).growX().height(34f).padBottom(8f).row();
+        details.add(divider()).growX().height(1f).padBottom(12f).row();
+        Table stats = new Table();
+        stats.add(metric(doom, "ancientOne.selection.doom")).growX().uniformX().padRight(4f);
+        stats.add(metric(mysteries, "ancientOne.selection.mysteries")).growX().uniformX().padLeft(4f);
+        details.add(stats).growX().height(72f).padBottom(12f).row();
         description.setAlignment(Align.topLeft);
-        descriptionScroll = new ScrollPane(description);
+        Table rules = new Table();
+        rules.top().add(description).growX().padRight(10f);
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = panelBackground("15251D");
+        scrollStyle.vScrollKnob = panelBackground("89774B");
+        scrollStyle.vScroll.setMinWidth(3f);
+        scrollStyle.vScrollKnob.setMinWidth(3f);
+        scrollStyle.vScrollKnob.setMinHeight(24f);
+        descriptionScroll = new ScrollPane(rules, scrollStyle);
+        descriptionScroll.setFadeScrollBars(false);
         descriptionScroll.setScrollingDisabled(true, false);
         descriptionScroll.setOverscroll(false, false);
         details.add(descriptionScroll).grow().minHeight(100f).padBottom(10f).row();
@@ -92,20 +114,28 @@ public class SelectAncientOneTable extends Table {
 
     private Table createCard(AncientOneId id) {
         Table card = new Table();
-        card.pad(7f);
-        card.setBackground(panelBackground("17201B"));
-        Image portrait = new Image(CustomAssetManager.getTexture("ancient_one/button_" + productId(id) + ".jpg"));
+        card.pad(6f);
+        card.setBackground(normalCard);
+        Texture artwork = CustomAssetManager.getTexture("ancient_one/button_" + productId(id) + ".jpg");
+        // A centered landscape crop fills the card without stretching the artwork.
+        int cropHeight = Math.min(artwork.getHeight(), Math.round(artwork.getWidth() * 152f / 268f));
+        Image portrait = new Image(new TextureRegion(artwork, 0,
+                (artwork.getHeight() - cropHeight) / 2, artwork.getWidth(), cropHeight));
         portrait.setScaling(Scaling.fit);
         Image lock = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
         lock.setScaling(Scaling.fit);
         lock.setVisible(!unlocked.get(id));
-        locks.put(id, lock);
         Table lockOverlay = new Table();
         lockOverlay.top().right();
-        lockOverlay.add(lock).size(34f).pad(4f);
-        card.add(new Stack(portrait, lockOverlay)).growX().height(144f).row();
-        card.add(label(get(prefix(id) + ".name"), 0.33f, "E8D9B0")).growX().height(28f).row();
-        card.add(label(get(prefix(id) + ".alt"), 0.25f, "BEB69F")).growX().height(32f);
+        Table badge = new Table();
+        badge.setBackground(SelectionPanelStyle.panel("0C1714EE", "89774B"));
+        badge.add(lock).size(22f).pad(4f);
+        badge.setVisible(!unlocked.get(id));
+        lockOverlay.add(badge).pad(5f);
+        lockBadges.put(id, badge);
+        card.add(new Stack(portrait, lockOverlay)).growX().height(152f).row();
+        card.add(label(get(prefix(id) + ".name"), 0.32f, "E8D9B0")).growX().height(26f).row();
+        card.add(label(get(prefix(id) + ".alt"), 0.23f, "BEB69F")).growX().height(26f);
         addClickListener(card, () -> { if (!purchasePending && !completed) select(id); });
         return card;
     }
@@ -113,13 +143,13 @@ public class SelectAncientOneTable extends Table {
     private void select(AncientOneId id) {
         selected = id;
         for (Map.Entry<AncientOneId, Table> entry : cards.entrySet()) {
-            Drawable normal = panelBackground("17201B");
-            entry.getValue().setBackground(entry.getKey() == id ? AncientTerrorMenuStyles.highlight(normal) : normal);
+            entry.getValue().setBackground(entry.getKey() == id ? selectedCard : normalCard);
         }
         AncientOneInfo info = choices.get(id);
         name.setText(get(prefix(id) + ".name"));
         subtitle.setText(get(prefix(id) + ".alt"));
-        stats.setText(get("ancientOne.selection.stats", info.getStartingDoom(), info.getMysteriesRequired()));
+        doom.setText(Integer.toString(info.getStartingDoom()));
+        mysteries.setText(Integer.toString(info.getMysteriesRequired()));
         StringBuilder text = new StringBuilder();
         section(text, get("ancientOne.setup"), info.getSetupText());
         section(text, get("ancientOne.selection.special"), info.getSpecialText());
@@ -132,6 +162,7 @@ public class SelectAncientOneTable extends Table {
         }
         description.setText(text.toString());
         descriptionScroll.setScrollY(0f);
+        status.setColor(Color.valueOf(unlocked.get(id) ? "BDD0A6" : "D5AD89"));
         status.setText(get(unlocked.get(id) ? "ancientOne.selection.available" : "ancientOne.selection.locked"));
         confirm.setText(get(unlocked.get(id) ? "ancientOne.selection.confirm" : "ancientOne.selection.unlock", get(prefix(id) + ".name")));
         confirm.setDisabled(false);
@@ -154,7 +185,7 @@ public class SelectAncientOneTable extends Table {
             purchasePending = false;
             if (success) {
                 unlocked.put(id, true);
-                locks.get(id).setVisible(false);
+                lockBadges.get(id).setVisible(false);
             }
             select(id);
             if (!success) status.setText(get("ancientOne.selection.purchaseCancelled"));
@@ -196,6 +227,19 @@ public class SelectAncientOneTable extends Table {
         label.setAlignment(Align.center);
         label.setWrap(true);
         return label;
+    }
+
+    private static Image divider() {
+        return new Image(panelBackground("75633E"));
+    }
+
+    private static Table metric(Label value, String captionKey) {
+        Table metric = new Table();
+        metric.setBackground(SelectionPanelStyle.panel("14231D", "394839"));
+        metric.pad(4f);
+        metric.add(value).growX().height(34f).row();
+        metric.add(label(get(captionKey), 0.23f, "BEB69F")).growX().height(26f);
+        return metric;
     }
 
     private static Drawable panelBackground(String color) {

@@ -2,7 +2,7 @@ package sk.sivak.eldritchhorror.core.view.components.investigator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -14,7 +14,6 @@ import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import java8.features.function.Consumer;
-import java8.features.function.Supplier;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -41,9 +40,12 @@ public class SelectInvestigatorComponent extends Table {
     private final TextButton nextButton;
 
     SelectInvestigatorComponent(float widthPercentage) {
+        pad(6f, 8f, 6f, 8f);
+        setBackground(SelectionPanelStyle.panel("0C1714F5", "48503A"));
         sketches = new InvestigatorSketches();
         titleLabel = createLabel(get("investigator.select"), new Color(0.91f, 0.85f, 0.69f, 1f));
-        add(titleLabel).pad(5);
+        titleLabel.setFontScale(0.38f);
+        add(titleLabel).height(38f).growX();
         row();
         teamCell = add(teamStrip).height(0f);
         row();
@@ -60,17 +62,18 @@ public class SelectInvestigatorComponent extends Table {
         scrollPane.setScrollingDisabled(false, true);
         scrollPane.setOverscroll(false, false);
         scrollPane.setFadeScrollBars(false);
-        add(scrollPane).width(VIEWPORT_WIDTH * widthPercentage).height(408f).pad(5);
+        add(scrollPane).width(VIEWPORT_WIDTH * widthPercentage).height(382f).padTop(5f).padBottom(5f);
         row();
         previousButton = browseButton("<", -1);
         nextButton = browseButton(">", 1);
         Table navigation = new Table();
         navigation.setBackground(navigationBackground("101B18"));
-        navigation.add(previousButton).size(32f, 26f);
+        navigation.pad(3f);
+        navigation.add(previousButton).size(36f, 28f);
         Label browseHint = createLabel(get("investigator.browse"), new Color(0.75f, 0.72f, 0.63f, 1f));
         browseHint.setFontScale(0.24f);
-        navigation.add(browseHint).padLeft(12f).padRight(12f);
-        navigation.add(nextButton).size(32f, 26f);
+        navigation.add(browseHint).expandX().padLeft(12f).padRight(12f);
+        navigation.add(nextButton).size(36f, 28f);
         add(navigation).width(VIEWPORT_WIDTH * widthPercentage).padBottom(4f).row();
         pack();
 
@@ -80,7 +83,7 @@ public class SelectInvestigatorComponent extends Table {
     public void showUnlockNewImage() {
         Image unlockNewImage = new Image(CustomAssetManager.getTexture("investigator/unlock_new.jpg"));
         unlockNewImage.setScaling(Scaling.fit);
-        sketchesAndUnlockNewTable.add(unlockNewImage).size(398).align(Align.left);
+        sketchesAndUnlockNewTable.add(unlockNewImage).size(372).align(Align.left);
         ButtonUtils.addClickListener(unlockNewImage, () -> {
             new InAppPurchaseManager().purchaseProduct("investigators_1").subscribe(purchaseResult -> {
                 if (purchaseResult) {
@@ -112,7 +115,7 @@ public class SelectInvestigatorComponent extends Table {
         AncientTerrorMenuStyles.addFocusHighlight(button);
         ButtonUtils.addClickListener(button, () -> {
             if (!button.isDisabled()) {
-                scrollPane.setScrollX(Math.max(0f, Math.min(scrollPane.getMaxX(), scrollPane.getScrollX() + direction * 364f)));
+                scrollPane.setScrollX(Math.max(0f, Math.min(scrollPane.getMaxX(), scrollPane.getScrollX() + direction * 312f)));
             }
         });
         return button;
@@ -134,12 +137,18 @@ public class SelectInvestigatorComponent extends Table {
 
     public void updateTeam(List<InvestigatorInfo> selected, int total) {
         teamStrip.clearChildren();
+        teamStrip.setBackground(navigationBackground("14231D"));
+        teamStrip.pad(4f, 10f, 4f, 10f);
         Label teamLabel = createLabel(get("investigator.team"), new Color(0.91f, 0.85f, 0.69f, 1f));
         teamLabel.setFontScale(0.25f);
         teamStrip.add(teamLabel).padRight(10f);
+        Label count = createLabel(selected.size() + " / " + total, Color.valueOf("A69A7B"));
+        count.setFontScale(0.24f);
+        teamStrip.add(count).padRight(14f);
         for (int i = 0; i < total; i++) {
             Table slot = new Table();
-            slot.setBackground(getTextureRegionDrawable(PURE_WHITE_BACKGROUND).tint(new Color(0.12f, 0.16f, 0.14f, 1f)));
+            slot.setBackground(SelectionPanelStyle.panel("0D1915",
+                    i < selected.size() ? "B49A60" : i == selected.size() ? "79704C" : "344237"));
             if (i < selected.size()) {
                 Image icon = new Image(getTexture("investigator/" + selected.get(i).getInvestigatorId().name() + ".png"));
                 icon.setScaling(Scaling.fit);
@@ -151,7 +160,7 @@ public class SelectInvestigatorComponent extends Table {
             }
             teamStrip.add(slot).size(32f).padRight(5f);
         }
-        teamCell.height(36f);
+        teamCell.height(42f).growX();
         pack();
     }
 
@@ -167,14 +176,6 @@ public class SelectInvestigatorComponent extends Table {
 
     public InvestigatorId getSelectedInvestigatorId() {
         return selectedInvestigatorId;
-    }
-
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        batch.setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f * getColor().a * parentAlpha));
-        batch.draw(getTexture(PURE_WHITE_BACKGROUND), getX(), getY(), getPrefWidth(), getPrefHeight());
-        batch.setColor(Color.WHITE);
-        super.draw(batch, parentAlpha);
     }
 
     private Label createLabel(String text, Color color) {
