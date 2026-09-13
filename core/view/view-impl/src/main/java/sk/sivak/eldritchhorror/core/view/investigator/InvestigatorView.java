@@ -276,11 +276,8 @@ public class InvestigatorView {
             HudButtons.getTrackHud().hide().subscribe();
             HudButtons.getInstance().hide().subscribe();
 
-            Runnable updateAvailableInvestigatorsAction = () -> {
-                selectMultipleInvestigators.remove();
-                selectMultipleInvestigators = new SelectMultipleInvestigators(initInvestigatorsAction.get(), sub, 1, InfoStage.getStageSafe());
-                selectMultipleInvestigators.show();
-            };
+            Runnable updateAvailableInvestigatorsAction = () ->
+                    selectMultipleInvestigators.refreshAvailableInvestigators(initInvestigatorsAction.get());
 
             selectMultipleInvestigators = new SelectMultipleInvestigators(availableInvestigators, sub, 1, InfoStage.getStageSafe());
             selectMultipleInvestigators.setUpdateAvailableInvestigatorsAction(updateAvailableInvestigatorsAction);

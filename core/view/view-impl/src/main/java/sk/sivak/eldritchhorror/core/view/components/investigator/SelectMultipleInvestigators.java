@@ -119,7 +119,7 @@ public class SelectMultipleInvestigators {
         clearPreview();
         new InAppPurchaseManager().isProductPurchased("investigators_1").subscribe(isPurchased -> {
             if (!isPurchased) {
-                selectInvestigatorComponent.showUnlockNewImage();
+                com.badlogic.gdx.Gdx.app.postRunnable(() -> selectInvestigatorComponent.showLockedInvestigators());
             }
         });
 
@@ -157,6 +157,13 @@ public class SelectMultipleInvestigators {
         stage.addActor(selectInvestigatorComponent);
         stage.addActor(detailsPanel);
         CustomAssetManager.loadTextures2();
+    }
+
+    public void refreshAvailableInvestigators(List<InvestigatorInfo> availableInvestigators) {
+        this.availableInvestigators = availableInvestigators;
+        Collection<InvestigatorId> ids = Stream.map(availableInvestigators, InvestigatorInfo::getInvestigatorId);
+        selectInvestigatorComponent.init(ids.toArray(new InvestigatorId[ids.size()]));
+        clearPreview();
     }
 
     public void remove() {

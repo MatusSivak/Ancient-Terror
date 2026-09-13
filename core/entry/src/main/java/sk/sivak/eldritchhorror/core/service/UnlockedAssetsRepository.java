@@ -53,6 +53,9 @@ public class UnlockedAssetsRepository  {
     }
 
     public List<AssetId> getUnlockedAssets() {
+        if (preferences.getBoolean("full_game", false)) {
+            return new LinkedList<>(Arrays.asList(AssetId.values()));
+        }
         if (unlockedAssets == null) {
             loadData();
         }

@@ -56,7 +56,7 @@ public class FirebaseHallOfFame {
 
                 List<HallOfFameData> hallOfFameDataList = new LinkedList<>();
                 JsonValue jsonValue = new JsonReader().parse(resultAsString);
-                for (int i = 0; i < new JsonReader().parse(resultAsString).size; i++) {
+                for (int i = 0; i < jsonValue.size; i++) {
 
                     try {
                         HallOfFameData hallOfFameData = new HallOfFameData();

@@ -8,6 +8,7 @@ import com.badlogic.gdx.pay.Transaction;
 import rx.Completable;
 
 import java.util.concurrent.TimeUnit;
+import java.util.Date;
 
 public class DummyPurchaseManager implements PurchaseManager {
 
@@ -37,7 +38,8 @@ public class DummyPurchaseManager implements PurchaseManager {
     public void purchase(String identifier) {
         Completable.timer(2, TimeUnit.SECONDS).subscribe(() -> {
             Transaction transaction = new Transaction();
-            transaction.setIdentifier("whatever");
+            transaction.setIdentifier(identifier);
+            transaction.setPurchaseTime(new Date());
             observer.handlePurchase(transaction);
         });
 
@@ -45,7 +47,7 @@ public class DummyPurchaseManager implements PurchaseManager {
 
     @Override
     public void purchaseRestore() {
-
+        observer.handleRestore(new Transaction[0]);
     }
 
     @Override

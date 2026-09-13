@@ -104,7 +104,8 @@ public class TypewriterQuestionTyper {
         for (int i = 0; i < buttonDatas.size(); i++) {
             ButtonData buttonData = buttonDatas.get(i);
             TextButton button = typewriterView.createTextButton(buttonData.buttonText);
-            button.getLabel().setColor(buttonData.buttonColor);
+            button.getStyle().fontColor = buttonData.buttonColor;
+            button.getLabel().setColor(Color.WHITE);
             button.getLabel().setFontScale(FONT_SCALE);
             button.getLabel().setAlignment(Align.center, Align.center);
             button.getLabelCell().growX();
@@ -128,7 +129,7 @@ public class TypewriterQuestionTyper {
             glyphLayout.setText(buttonFont, answerModified, Color.WHITE, maxWidth, Align.center, true);
 
             StringBuilder stringBuilder = new StringBuilder();
-            buttonData.buttonColor = new Color(glyphLayout.runs.get(0).color);
+            buttonData.buttonColor = Color.valueOf("F4E8C9");
             if (answerModified.contains("\n")) {
                 buttonData.buttonText = answerModified;
             } else {
@@ -178,7 +179,10 @@ public class TypewriterQuestionTyper {
     private List<String> replacePlaceholdersInAnswers(String[] answers) {
         List<String> answersModified1 = new LinkedList<>();
         for (String answer : answers) {
-            String formattedAnswer = typewriterView.replacePlaceholders(answer);
+            // Choices sit on dark wood, unlike the surrounding parchment prose.
+            String formattedAnswer = typewriterView.replacePlaceholders(answer)
+                    .replace("[#" + TypewriterConstants.HEX_GOOD + "]", "[#B9E6A2]")
+                    .replace("[#" + TypewriterConstants.HEX_BAD + "]", "[#FFB4A8]");
             answersModified1.add(replaceGlyphKeywords(formattedAnswer));
         }
         return answersModified1;

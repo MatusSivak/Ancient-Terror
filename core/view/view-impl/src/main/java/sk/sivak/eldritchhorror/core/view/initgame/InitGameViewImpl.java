@@ -136,6 +136,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
         return Single.<Integer>create(sub -> {
             numberOfPlayersSingleSubscriber = sub;
             loadTextures1();
+            restoreNoAdsButton();
             nrPlayersDialog.getColor().a = 1f;
             nrPlayersDialog.show(stage);
             nrPlayersDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
@@ -157,17 +158,14 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public Single<InvestigatorInfo[]> selectInvestigators(Integer input, List<InvestigatorInfo> availableInvestigators, Supplier<List<InvestigatorInfo>> initInvestigatorsAction) {
-        return Single.<InvestigatorInfo[]>create(sub -> {
+        return refreshPurchasedInvestigators(availableInvestigators, initInvestigatorsAction)
+                .flatMap(roster -> Single.<InvestigatorInfo[]>create(sub -> {
             setMenuDecorationsVisible(false);
 
-            Runnable updateAvailableInvestigatorsAction = () -> {
-                selectMultipleInvestigators.remove();
-                selectMultipleInvestigators = new SelectMultipleInvestigators(initInvestigatorsAction.get(), sub, input, stage);
-                selectMultipleInvestigators.setBackground(background);
-                selectMultipleInvestigators.show();
-            };
+            Runnable updateAvailableInvestigatorsAction = () ->
+                    selectMultipleInvestigators.refreshAvailableInvestigators(initInvestigatorsAction.get());
 
-            selectMultipleInvestigators = new SelectMultipleInvestigators(availableInvestigators, sub, input, stage);
+            selectMultipleInvestigators = new SelectMultipleInvestigators(roster, sub, input, stage);
             selectMultipleInvestigators.setUpdateAvailableInvestigatorsAction(updateAvailableInvestigatorsAction);
             selectMultipleInvestigators.setBackground(background);
             selectMultipleInvestigators.show();
@@ -178,7 +176,14 @@ public class InitGameViewImpl implements Screen, InitGameView {
                     .andThen(CustomAssetManager.getTextureAsync("ancient_one/button_cthulhu.jpg").toCompletable())
                     .andThen(CustomAssetManager.getTextureAsync("ancient_one/button_azathoth.jpg").toCompletable()).subscribe();
 
-        });
+        }));
+    }
+
+    static Single<List<InvestigatorInfo>> refreshPurchasedInvestigators(
+            List<InvestigatorInfo> availableInvestigators, Supplier<List<InvestigatorInfo>> refresh) {
+        // Basic setup can predate a purchase on the Ancient One screen or a restored entitlement.
+        return new InAppPurchaseManager().isProductPurchased("investigators_1")
+                .map(purchased -> purchased ? refresh.get() : availableInvestigators);
     }
 
     @Override
@@ -206,6 +211,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
     public void show() {
         setMenuDecorationsVisible(true);
         if (screenInitialized) {
+            restoreNoAdsButton();
             initLocaleFromPreferences();
             refreshLocalizedTexts();
             refreshLocaleFlagSelection();
@@ -213,6 +219,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
             return;
         }
         initLocaleFromPreferences();
+        new InAppPurchaseManager().isProductPurchased(InAppPurchaseManager.FULL_GAME).subscribe();
         new InAppPurchaseManager().isProductPurchased("cthulhu").subscribe();
         new InAppPurchaseManager().isProductPurchased("shub_niggurath").subscribe();
         new InAppPurchaseManager().isProductPurchased("yog_sothoth").subscribe();
@@ -279,6 +286,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
         noAdsButton = new NoAdsButton();
         noAdsButton.setPosition(VIEWPORT_WIDTH - noAdsButton.getWidth() - 5, 5);
+        stage.addActor(noAdsButton);
         initLocaleSelector();
         stage.addActor(selectedLocaleFlag);
         stage.addActor(localeOptions);
@@ -287,7 +295,6 @@ public class InitGameViewImpl implements Screen, InitGameView {
             stage.addActor(collectionButton);
             stage.addActor(hallOfFameButton);
             stage.addActor(replayTutorialButton);
-            stage.addActor(noAdsButton);
         }
 
         if (Gdx.files.local("save.json").exists()) {
@@ -772,13 +779,19 @@ public class InitGameViewImpl implements Screen, InitGameView {
         stage.addActor(collectionButton);
         stage.addActor(hallOfFameButton);
         stage.addActor(replayTutorialButton);
-        stage.addActor(noAdsButton);
+        restoreNoAdsButton();
         if (newGameButton != null) {
             newGameButton.remove();
         }
         if (loadGameButton != null) {
             loadGameButton.remove();
         }
+    }
+
+    private void restoreNoAdsButton() {
+        if (noAdsButton == null || stage == null) return;
+        noAdsButton.setPosition(VIEWPORT_WIDTH - noAdsButton.getWidth() - 12f, 12f);
+        stage.addActor(noAdsButton);
     }
 
     public void setContinueGameAction(Runnable continueGameAction) {
@@ -825,6 +838,8 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public boolean hasPurchasedBonusInvestigators() {
-        return Gdx.app.getPreferences("AncientTerror.xml").getBoolean("investigators_1", false);
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        return preferences.getBoolean(InAppPurchaseManager.FULL_GAME, false)
+                || preferences.getBoolean("investigators_1", false);
     }
 }

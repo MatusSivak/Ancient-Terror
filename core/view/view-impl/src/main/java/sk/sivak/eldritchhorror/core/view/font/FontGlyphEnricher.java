@@ -39,14 +39,20 @@ public class FontGlyphEnricher {
 
 
 	public static void enrich(BitmapFont bitmapFont) {
+        enrich(bitmapFont, name -> getTextureRegion(name));
+    }
+
+    static void enrich(BitmapFont bitmapFont, java.util.function.Function<String, TextureRegion> icons) {
+		// Shared fonts are requested for every label; append the icon pages only once.
+		if (bitmapFont.getData().getGlyph(GLYPH_INFLUENCE) != null) return;
 		int renderWidth = 90;
 		int renderHeight = 90;
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/influence.png"), GLYPH_INFLUENCE, renderWidth,renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/strength.png"), GLYPH_STRENGTH, renderWidth,renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/observation.png"), GLYPH_OBSERVATION, renderWidth,renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/will.png"), GLYPH_WILL, renderWidth, renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/lore.png"), GLYPH_LORE, renderWidth,renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, getTextureRegion("glyphs/arrow.png"), GLYPH_ARROW, 90,90);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/influence.png"), GLYPH_INFLUENCE, renderWidth,renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/strength.png"), GLYPH_STRENGTH, renderWidth,renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/observation.png"), GLYPH_OBSERVATION, renderWidth,renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/will.png"), GLYPH_WILL, renderWidth, renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/lore.png"), GLYPH_LORE, renderWidth,renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/arrow.png"), GLYPH_ARROW, 90,90);
 	}
 
 	private static void addIconGlyph(

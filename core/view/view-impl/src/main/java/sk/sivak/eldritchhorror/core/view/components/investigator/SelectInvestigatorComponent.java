@@ -18,6 +18,7 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
+import sk.sivak.eldritchhorror.core.view.initgame.FullGamePurchaseDialog;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 import java.util.List;
@@ -78,6 +79,12 @@ public class SelectInvestigatorComponent extends Table {
         pack();
 
         sketches.addObserver(new SelectObserver());
+    }
+
+    public void showLockedInvestigators() {
+        sketches.showLockedInvestigators(() ->
+                FullGamePurchaseDialog.show(getStage(), updateAvailableInvestigatorsAction));
+        pack();
     }
 
     public void showUnlockNewImage() {

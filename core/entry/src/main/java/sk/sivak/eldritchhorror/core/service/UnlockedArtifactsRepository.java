@@ -52,6 +52,9 @@ public class UnlockedArtifactsRepository {
     }
 
     public List<ArtifactId> getUnlockedArtifacts() {
+        if (preferences.getBoolean("full_game", false)) {
+            return new LinkedList<>(Arrays.asList(ArtifactId.values()));
+        }
         if (unlockedArtifacts == null) {
             loadData();
         }

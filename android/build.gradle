@@ -19,10 +19,21 @@ def useTestAdMobIds = propOrDefault("USE_TEST_ADMOB_IDS", "false").toBoolean()
 def resolvedAdMobAppId = useTestAdMobIds ? testAdMobAppId : propOrDefault("ADMOB_APP_ID", testAdMobAppId)
 def resolvedInterstitialAdUnitId = useTestAdMobIds ? testInterstitialAdUnitId : propOrDefault("ADMOB_INTERSTITIAL_AD_UNIT_ID", testInterstitialAdUnitId)
 def resolvedRewardedAdUnitId = useTestAdMobIds ? testRewardedAdUnitId : propOrDefault("ADMOB_REWARDED_AD_UNIT_ID", testRewardedAdUnitId)
-def resolvedFirebaseApiKey = propOrDefault("FIREBASE_API_KEY", "")
-def resolvedFirebaseAppId = propOrDefault("FIREBASE_APP_ID", "")
-def resolvedFirebaseProjectId = propOrDefault("FIREBASE_PROJECT_ID", "")
-def resolvedFirebaseGcmSenderId = propOrDefault("FIREBASE_GCM_SENDER_ID", "")
+def androidApplicationId = "sk.sivak.eldritchhorror.android"
+def firebaseConfigFile = file("google-services.json")
+if (!firebaseConfigFile.exists()) {
+    firebaseConfigFile = rootProject.file("google-services.json")
+}
+def firebaseConfig = firebaseConfigFile.exists()
+        ? new groovy.json.JsonSlurper().parse(firebaseConfigFile) : [:]
+def firebaseClient = firebaseConfig.client?.find {
+    it.client_info?.android_client_info?.package_name == androidApplicationId
+}
+// Explicit Gradle properties take precedence over the matching Firebase Android client.
+def resolvedFirebaseApiKey = propOrDefault("FIREBASE_API_KEY", firebaseClient?.api_key?.find { it.current_key }?.current_key ?: "")
+def resolvedFirebaseAppId = propOrDefault("FIREBASE_APP_ID", firebaseClient?.client_info?.mobilesdk_app_id ?: "")
+def resolvedFirebaseProjectId = propOrDefault("FIREBASE_PROJECT_ID", firebaseClient ? firebaseConfig.project_info?.project_id ?: "" : "")
+def resolvedFirebaseGcmSenderId = propOrDefault("FIREBASE_GCM_SENDER_ID", firebaseClient ? firebaseConfig.project_info?.project_number ?: "" : "")
 
 tasks.register("verifyReleaseAdMobConfig") {
     doLast {
@@ -104,7 +115,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId "sk.sivak.eldritchhorror.android"
+        applicationId androidApplicationId
         minSdkVersion 26
         multiDexEnabled true
         targetSdkVersion 35
