@@ -16,6 +16,17 @@ public class InvestigatorsSaveData implements SaveDataWrite.InvestigatorsSaveDat
     private List<? extends DefeatedInvestigatorSaveDataRead> defeatedInvestigators = new LinkedList<>();
     private List<InvestigatorId> investigatorOrder = new LinkedList<>();
     private int defeatedOrDevouredCount;
+    // Null distinguishes legacy saves without participation history.
+    private List<InvestigatorId> playedInvestigators;
+
+    @Override
+    public List<InvestigatorId> getPlayedInvestigators() {
+        return playedInvestigators;
+    }
+
+    public void setPlayedInvestigators(List<InvestigatorId> playedInvestigators) {
+        this.playedInvestigators = playedInvestigators;
+    }
 
     public void setAvailableInvestigators(List<InvestigatorId> availableInvestigators) {
         this.availableInvestigators = availableInvestigators;

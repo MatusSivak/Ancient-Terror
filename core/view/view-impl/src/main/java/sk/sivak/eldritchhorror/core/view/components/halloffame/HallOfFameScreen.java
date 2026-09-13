@@ -192,13 +192,18 @@ public class HallOfFameScreen implements Screen {
             detailsTable.add(createDetailsLabel(get("hallOfFame.details.rounds", hallOfFameData.getRounds()), TEXT)).width(300).padBottom(12).row();
             String mysteriesString = "";
             for (String mystery : hallOfFameData.getSolvedMysteries()) {
-                mysteriesString += "\n - " + mystery;
+                mysteriesString += "\n - " + resolveMysteryName(mystery);
             }
             detailsTable.add(createDetailsLabel(get("hallOfFame.details.mysteries", hallOfFameData.getSolvedMysteries().size(), mysteriesString), TEXT)).width(300).padBottom(12).row();
         }
 
         detailsScroll.setWidget(detailsTable);
         detailsScroll.setScrollY(0f);
+    }
+
+    static String resolveMysteryName(String mystery) {
+        String localized = get(mystery);
+        return ("!" + mystery + "!").equals(localized) ? mystery : localized;
     }
 
     private static ScrollPane scroll(com.badlogic.gdx.scenes.scene2d.Actor content) {

@@ -22,6 +22,8 @@ public interface InvestigatorsRead {
 
     List<InvestigatorInfo> getAvailableInvestigators();
 
+    List<InvestigatorId> getPlayedInvestigators();
+
     boolean isActiveLast();
 
     InvestigatorRead getLeadInvestigator();

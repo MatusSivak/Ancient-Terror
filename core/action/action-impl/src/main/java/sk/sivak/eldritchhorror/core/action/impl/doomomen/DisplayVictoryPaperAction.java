@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.action.impl.doomomen;
 
-import java8.features.stream.Stream;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.action.Action;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
@@ -8,7 +7,6 @@ import sk.sivak.eldritchhorror.core.constants.MysteryCardId;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
 import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
-import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 
 import java.io.IOException;
@@ -48,11 +46,8 @@ public class DisplayVictoryPaperAction implements Action<Object, Void> {
                     hallOfFameData.setRounds(ServicePlatform.get().getModel().getCurrentRound());
                     hallOfFameData.setInvestigatorsCount(ServicePlatform.get().getModel().getReferenceCard().getPlayers());
                     List<String> investigators = new LinkedList<>();
-                    List<InvestigatorInfo> availableInvestigators = ServicePlatform.get().getInvestigators().getAvailableInvestigators();
-                    for (InvestigatorId investigatorId : InvestigatorId.values()) {
-                        if (!Stream.anyMatch(availableInvestigators, ai -> ai.getInvestigatorId() == investigatorId)) {
-                            investigators.add(investigatorId.toString());
-                        }
+                    for (InvestigatorId investigatorId : ServicePlatform.get().getInvestigators().getPlayedInvestigators()) {
+                        investigators.add(investigatorId.toString());
                     }
                     hallOfFameData.setInvestigators(investigators);
                     AncientOneId ancientOneId = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo().getAncientOneId();

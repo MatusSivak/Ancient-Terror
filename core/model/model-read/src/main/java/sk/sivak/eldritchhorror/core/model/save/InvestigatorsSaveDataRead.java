@@ -10,6 +10,8 @@ public interface InvestigatorsSaveDataRead {
 
     List<InvestigatorId> getAvailableInvestigators();
 
+    List<InvestigatorId> getPlayedInvestigators();
+
     List<? extends InvestigatorSaveDataRead> getSelectedInvestigators();
 
     List<InvestigatorId> getInvestigatorOrder();

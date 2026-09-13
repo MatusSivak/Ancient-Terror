@@ -32,6 +32,12 @@ public class Investigators implements InvestigatorsWrite {
     private List<InvestigatorWrite> defeatedInvestigators;
     private List<InvestigatorId> investigatorOrder;
     private int defeatedOrDevouredCount = 0;
+    private List<InvestigatorId> playedInvestigators = new ArrayList<>();
+
+    @Override
+    public List<InvestigatorId> getPlayedInvestigators() {
+        return new ArrayList<>(playedInvestigators);
+    }
 
     public List<InvestigatorWrite> getOnBoardInvestigators() {
         return Stream.collectToList(selectedInvestigators,
@@ -50,6 +56,7 @@ public class Investigators implements InvestigatorsWrite {
         availableInvestigators = null;
         defeatedInvestigators = new LinkedList<>();
         investigatorOrder = new LinkedList<>();
+        playedInvestigators = new ArrayList<>();
 
         availableInvestigators = InvestigatorsHelper.initAvailableInvestigators(bonusInvestigatorsPurchased);
     }
@@ -68,11 +75,15 @@ public class Investigators implements InvestigatorsWrite {
 
         for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
             investigatorOrder.add(selectedInvestigator.getInfo().getInvestigatorId());
+            playedInvestigators.add(selectedInvestigator.getInfo().getInvestigatorId());
         }
     }
 
     @Override
     public void initReplacingInvestigator(InvestigatorId removedInvestigator, InvestigatorInfo replacing) {
+        if (!playedInvestigators.contains(replacing.getInvestigatorId())) {
+            playedInvestigators.add(replacing.getInvestigatorId());
+        }
         int indexOfRemovedInvestigator = investigatorOrder.indexOf(removedInvestigator);
         investigatorOrder.remove(removedInvestigator);
         investigatorOrder.add(indexOfRemovedInvestigator, replacing.getInvestigatorId());
@@ -272,6 +283,7 @@ public class Investigators implements InvestigatorsWrite {
     @Override
     public InvestigatorsSaveData save() {
         InvestigatorsSaveData investigatorsSaveData = new InvestigatorsSaveData();
+        investigatorsSaveData.setPlayedInvestigators(getPlayedInvestigators());
         investigatorsSaveData.setAvailableInvestigators(Stream.collectToList(Stream.map(availableInvestigators, InvestigatorInfo::getInvestigatorId)));
         investigatorsSaveData.setInvestigatorOrder(investigatorOrder);
         investigatorsSaveData.setDefeatedOrDevouredCount(defeatedOrDevouredCount);
@@ -325,6 +337,18 @@ public class Investigators implements InvestigatorsWrite {
     @Override
     public void load(InvestigatorsSaveDataRead saveData, boolean hasPurchasedBonusInvestigators) {
         initAvailableInvestigators(hasPurchasedBonusInvestigators);
+
+        if (saveData.getPlayedInvestigators() != null) {
+            playedInvestigators.addAll(saveData.getPlayedInvestigators());
+        } else {
+            // Legacy saves tracked participation only by removal from the eligible pool.
+            // Locked bonus investigators were never in that pool.
+            for (InvestigatorInfo investigator : availableInvestigators) {
+                if (!saveData.getAvailableInvestigators().contains(investigator.getInvestigatorId())) {
+                    playedInvestigators.add(investigator.getInvestigatorId());
+                }
+            }
+        }
 
         investigatorOrder = saveData.getInvestigatorOrder();
         defeatedOrDevouredCount = saveData.getDefeatedOrDevouredCount();
