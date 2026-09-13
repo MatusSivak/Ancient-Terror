@@ -46,6 +46,12 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class RumorCard extends VisTable {
+    private static final int CARD_WIDTH = 620;
+    private static final int CONTENT_PADDING = 40;
+    private static final int CONTENT_WIDTH = CARD_WIDTH - 2 * CONTENT_PADDING;
+    private static final int LABEL_WIDTH = 95;
+    private static final int COLUMN_GAP = 10;
+    private static final int ROW_GAP = 10;
     private final DisplayHide displayHide;
     private Image hitImage;
     private RumorCardInfo rumorCardInfo;
@@ -78,15 +84,13 @@ public class RumorCard extends VisTable {
         getColor().a = 1f;
         setBackground((Drawable) null);
         this.rumorCardInfo = rumorCardInfo;
-        int width = 560;
-        int padLeft = 30;
-        int padRight = 30;
-        padTop(30);
-        padBottom(40);
-        add(createNameLabel(resolveLocalizedText(rumorCardInfo.getTitleText()))).pad(0, padLeft, 0, padRight).width(width).padBottom(10);
+
+        padTop(36);
+        padBottom(36);
+        add(createNameLabel(resolveLocalizedText(rumorCardInfo.getTitleText()))).pad(0, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH).padBottom(12);
         row();
         Label flavorLabel = createFlavorLabel(resolveLocalizedText(rumorCardInfo.getFlavorText()));
-        add(flavorLabel).pad(5, padLeft, 0, padRight).width(width);
+        add(flavorLabel).pad(0, CONTENT_PADDING, 6, CONTENT_PADDING).width(CONTENT_WIDTH);
         row();
 
         objectiveCell = createOneGenericRow(get("rumor.objective"), rumorCardInfo.getObjectiveText());
@@ -100,7 +104,7 @@ public class RumorCard extends VisTable {
 
         background.setMinWidth(0);
         background.setMinHeight(0);
-        setWidth(620);
+        setWidth(CARD_WIDTH);
         setHeight(VIEWPORT_HEIGHT);
         invalidateHierarchy();
         // First assign widths to nested wrapped labels, then measure their actual height.
@@ -118,9 +122,9 @@ public class RumorCard extends VisTable {
         Label resolveTextLabel = createResolveLabel(replacePlaceholders(resolveLocalizedText(text)));
 
         Table resolveRow = new Table();
-        resolveRow.add(resolveLabel).width(95).align(Align.topRight).padRight(5);
+        resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
         resolveRow.add(resolveTextLabel).growX();
-        Cell<Table> mysteryLabelCell = add(resolveRow).pad(8, 30, 0, 30).width(560);
+        Cell<Table> mysteryLabelCell = add(resolveRow).pad(ROW_GAP, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH);
         row();
         return mysteryLabelCell;
     }
@@ -132,7 +136,7 @@ public class RumorCard extends VisTable {
         Label resolveLabel = createJustLabel(get("rumor.requires"));
 
         Table resolveRow = new Table();
-        resolveRow.add(resolveLabel).width(95).align(Align.topRight).padRight(5);
+        resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
         for (int i = 0; i < cluesRequired; i++) {
             Image actor = new Image(CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
             actor.setScaling(Scaling.fit);
@@ -140,7 +144,7 @@ public class RumorCard extends VisTable {
             resolveRow.add(actor).size(36).padLeft(5).align(Align.left);
         }
         resolveRow.add().growX();
-        Cell<Table> mysteryLabelCell = add(resolveRow).pad(8, 30, 0, 30).width(560);
+        Cell<Table> mysteryLabelCell = add(resolveRow).pad(ROW_GAP, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH);
 
 
 
@@ -157,7 +161,7 @@ public class RumorCard extends VisTable {
             Label resolveLabel = createJustLabel(get("rumor.timeLeft"));
 
             Table resolveRow = new Table();
-            resolveRow.add(resolveLabel).width(95).align(Align.topRight).padRight(5);
+            resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
             for (int i = 0; i < countdown; i++) {
                 Image actor = new Image(texture);
                 actor.setScaling(Scaling.fit);
@@ -165,7 +169,7 @@ public class RumorCard extends VisTable {
                 resolveRow.add(actor).height(36).width(89/100f* 36).padLeft(5).align(Align.left);
             }
             resolveRow.add().growX();
-            Cell<Table> mysteryLabelCell = add(resolveRow).pad(8, 30, 0, 30).width(560);
+            Cell<Table> mysteryLabelCell = add(resolveRow).pad(ROW_GAP, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH);
 
 
 
@@ -181,9 +185,9 @@ public class RumorCard extends VisTable {
         Image actor = new Image(CustomAssetManager.getTexture(CustomAssetManager.RECKONING));
         actor.setScaling(Scaling.fit);
         actor.setAlign(Align.right);
-        resolveRow.add(actor).height(36).width(95).padRight(5).align(Align.right);
+        resolveRow.add(actor).height(36).width(LABEL_WIDTH).padRight(COLUMN_GAP).align(Align.right);
         resolveRow.add(resolveTextLabel).growX();
-        Cell<Table> mysteryLabelCell = add(resolveRow).pad(8, 30, 0, 30).width(560);
+        Cell<Table> mysteryLabelCell = add(resolveRow).pad(ROW_GAP, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH);
         row();
         return mysteryLabelCell;
     }
@@ -227,12 +231,12 @@ public class RumorCard extends VisTable {
 
             @Override
             public float getTopHeight() {
-                return 6;
+                return 9;
             }
 
             @Override
             public float getBottomHeight() {
-                return 8;
+                return 9;
             }
 
             @Override
@@ -242,6 +246,8 @@ public class RumorCard extends VisTable {
             }
         });
 
+        ((NinePatchDrawable) style.background).setLeftWidth(12);
+        ((NinePatchDrawable) style.background).setRightWidth(12);
         Label label = new Label(text, style);
         label.setWrap(true);
         label.setAlignment(Align.left);
