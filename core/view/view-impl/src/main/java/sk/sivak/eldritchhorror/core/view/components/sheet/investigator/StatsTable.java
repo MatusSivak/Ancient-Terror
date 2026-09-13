@@ -63,7 +63,7 @@ public class StatsTable extends VisTable {
     }
 
     private Label createLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
         label.setFontScale(0.5f);
@@ -71,7 +71,7 @@ public class StatsTable extends VisTable {
     }
 
     private Label createValue() {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFont(FONT_GOBLIN_ONE), Color.WHITE);
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_LIBRE_BASKERVILLE, 64), Color.WHITE);
         style.background = new ValueFieldNinePatch();
 
         Label label = new Label("0", style);

@@ -28,12 +28,11 @@ import java.util.concurrent.TimeUnit;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.components.sheet.mystery.ProgressTokenBar.ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
@@ -111,7 +110,7 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.BLACK);
         Color color = new Color(1f, 1f, 1f, 0.42f);
         labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
             @Override
@@ -128,7 +127,7 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createFlavorLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
@@ -137,7 +136,7 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createMysteryText(String text) {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.BLACK);
         style.background = new NinePatchDrawable(new NinePatch(CustomAssetManager.getTexture(VALUE_LABEL), 11, 11, 11, 12) {
 
             @Override
@@ -170,7 +169,7 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createProgressLabel() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
         Label label = new Label(get("mystery.progress"), labelStyle);
         label.setAlignment(Align.left);
         label.setFontScale(0.5f);

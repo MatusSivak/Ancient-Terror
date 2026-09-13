@@ -65,7 +65,7 @@ public class SectionWrapper extends Table {
     }
 
     private Label createLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.LIGHT_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.LIGHT_GRAY);
         labelStyle.background = CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);

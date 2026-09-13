@@ -13,7 +13,7 @@ import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class ReportBugDialog extends Dialog {
@@ -52,7 +52,7 @@ public class ReportBugDialog extends Dialog {
         TextButton niceButton = new TextButton(text, skin);
         niceButton.getLabel().setFontScale(0.5f);
         niceButton.setSize(280, 50);
-        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.WHITE));
         return niceButton;
     }
 

@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.SourceTargetGroup;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
@@ -34,7 +34,7 @@ public class ReserveSourceTargetGroup extends SourceTargetGroup {
 
     private Label createLabel(String text, Color color) {
         Label.LabelStyle style = new Label.LabelStyle();
-        style.font = getBitmapFont(FONT_BLACK_CHANCERY);
+        style.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44);
         style.fontColor = new Color(color);
         Label label = new Label(text, style);
         label.setFontScale(0.6f);

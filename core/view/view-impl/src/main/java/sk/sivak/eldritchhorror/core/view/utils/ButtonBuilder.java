@@ -16,8 +16,8 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.shader.GrayscaleShader;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 /**
  * @author msivak
@@ -36,7 +36,7 @@ public class ButtonBuilder {
                 drawableUp,
                 drawableDown,
                 null,
-                getBitmapFont(FONT_MINYA)
+                getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40)
         );
         float buttonHeightRatio = 0.09f;
         style.fontColor = new Color(0x102033ff);

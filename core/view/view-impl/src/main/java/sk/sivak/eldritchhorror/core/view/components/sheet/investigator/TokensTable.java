@@ -70,7 +70,7 @@ public class TokensTable extends VisTable {
     }
 
     private Label createLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
         label.setFontScale(0.5f);
@@ -78,7 +78,7 @@ public class TokensTable extends VisTable {
     }
 
     private Label createValue() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_GOBLIN_ONE), Color.BLACK);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_LIBRE_BASKERVILLE, 64), Color.BLACK);
         labelStyle.background = new ValueFieldNinePatch();
         Label label = new Label("0", labelStyle);
         label.setAlignment(Align.center);

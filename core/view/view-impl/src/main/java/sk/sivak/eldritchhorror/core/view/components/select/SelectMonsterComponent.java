@@ -19,10 +19,10 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
 
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.TICK;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getEpicMonsterTexture;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getNonEpicMonsterTexture;
 
@@ -106,7 +106,7 @@ public class SelectMonsterComponent extends VisTable implements SelectComponent<
     }
 
     private Label createLocationLabel(LocationId currentLocation) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
         Label label = new Label("(" + currentLocation.toString() + ")", labelStyle);
         label.setFontScale(0.31f);
         label.setAlignment(Align.center, Align.center);
@@ -114,7 +114,7 @@ public class SelectMonsterComponent extends VisTable implements SelectComponent<
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setFontScale(0.5f);
         label.setAlignment(Align.center, Align.center);

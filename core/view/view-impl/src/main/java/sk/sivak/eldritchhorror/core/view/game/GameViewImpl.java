@@ -86,7 +86,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.AD_MOB;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPACE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
@@ -1051,7 +1051,7 @@ public class GameViewImpl implements Screen, GameView {
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, skin);
         niceButton.getLabel().setFontScale(0.38f);
-        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.WHITE));
         niceButton.getLabel().setColor(Color.WHITE);
         return niceButton;
     }

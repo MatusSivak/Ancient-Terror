@@ -26,7 +26,7 @@ import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class Chalkboard extends Group {
@@ -56,7 +56,7 @@ public class Chalkboard extends Group {
 
 
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY), Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44), Color.WHITE);
         textArea = new SafeTypingLabel("", labelStyle);
         textArea.getStyle().font.getData().markupEnabled = true;
         textArea.setFontScale(FONT_SCALE);
@@ -163,7 +163,7 @@ public class Chalkboard extends Group {
     private TextButton createNiceButton(String text) {
         TextButton niceButton = new TextButton(text, skin);
         niceButton.getLabel().setFontScale(0.58f);
-        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFont(FONT_ADLER), Color.WHITE));
+        niceButton.getLabel().setStyle(new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.WHITE));
         return niceButton;
     }
 

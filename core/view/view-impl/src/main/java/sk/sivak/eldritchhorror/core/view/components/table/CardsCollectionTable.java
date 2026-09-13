@@ -20,10 +20,10 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.WHITE_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> extends VisTable {
 
@@ -108,7 +108,7 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
                 if (cardsInRow != 0) {
                     addSeparator().colspan(7).pad(0);
                 }
-                Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.LIGHT_GRAY);
+                Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.LIGHT_GRAY);
                 Label label = new Label(labelNameFunction.apply(previousInitValue), labelStyle) {
                     @Override
                     public void draw(Batch batch, float parentAlpha) {

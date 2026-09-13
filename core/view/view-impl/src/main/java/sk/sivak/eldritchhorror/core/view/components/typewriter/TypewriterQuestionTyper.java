@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BUTTON_BORDER;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.BUTTON_HEIGHT;

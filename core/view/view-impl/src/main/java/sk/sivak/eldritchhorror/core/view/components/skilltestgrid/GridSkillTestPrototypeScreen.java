@@ -82,8 +82,8 @@ public class GridSkillTestPrototypeScreen extends ScreenAdapter {
         boardActor.setInvalidTargetListener(() -> audio.play(Cue.UNAVAILABLE));
         boardActor.setInteractionEnabled(false);
 
-        Label.LabelStyle titleStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY), Color.WHITE);
-        Label.LabelStyle gainStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_ADLER), new Color(0x6fff6fff));
+        Label.LabelStyle titleStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44), Color.WHITE);
+        Label.LabelStyle gainStyle = new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SPECIAL_ELITE, 42), new Color(0x6fff6fff));
 
         shiftsLabel = new Label("Shifts: 0", titleStyle);
         swapsLabel = new Label("Swaps: 0", titleStyle);

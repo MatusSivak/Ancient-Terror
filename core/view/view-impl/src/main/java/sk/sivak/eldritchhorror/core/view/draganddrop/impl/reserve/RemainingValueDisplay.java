@@ -7,8 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_GOBLIN_ONE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class RemainingValueDisplay extends Group {
 
@@ -50,7 +50,7 @@ public class RemainingValueDisplay extends Group {
 
     private Label createCostLabel() {
         Label.LabelStyle style = new Label.LabelStyle();
-        style.font = getBitmapFont(FONT_GOBLIN_ONE);
+        style.font = getBitmapFontNew(NEW_FONT_LIBRE_BASKERVILLE, 64);
         style.fontColor = new Color(0xf6c06fff);
         Label label = new Label("0", style);
         label.setAlignment(Align.center);

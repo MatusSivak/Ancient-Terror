@@ -76,7 +76,7 @@ public class ActionInfoTable extends VisTable {
         if (text == null) {
             return null;
         }
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
         label.setFontScale(0.5f);

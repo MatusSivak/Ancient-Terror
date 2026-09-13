@@ -36,13 +36,12 @@ import java.util.concurrent.TimeUnit;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MYSTERY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
@@ -190,7 +189,7 @@ public class RumorCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.DARK_GRAY);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.48f);
@@ -199,7 +198,7 @@ public class RumorCard extends VisTable {
     }
 
     private Label createFlavorLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
         Label label = new Label(text.replaceAll("\\s*\\n\\s*", " "), labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
@@ -208,7 +207,7 @@ public class RumorCard extends VisTable {
     }
 
     private Label createJustLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
         label.setFontScale(0.4f);
@@ -216,7 +215,7 @@ public class RumorCard extends VisTable {
     }
 
     private Label createResolveLabel(String text) {
-        BitmapFont bitmapFont = getBitmapFont(FONT_MINYA);
+        BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
         bitmapFont.getData().markupEnabled = true;
         Label.LabelStyle style = new Label.LabelStyle(bitmapFont, Color.WHITE);
         style.background = new NinePatchDrawable(new NinePatch(CustomAssetManager.getTexture(VALUE_LABEL), 11, 11, 11, 12) {
@@ -252,7 +251,7 @@ public class RumorCard extends VisTable {
     }
 
     private Label createProgressLabel() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
         Label label = new Label(get("rumor.progress"), labelStyle);
         label.setAlignment(Align.left);
         label.setFontScale(0.4f);

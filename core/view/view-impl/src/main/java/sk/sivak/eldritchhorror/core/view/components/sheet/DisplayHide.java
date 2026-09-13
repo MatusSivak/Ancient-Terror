@@ -2,6 +2,10 @@ package sk.sivak.eldritchhorror.core.view.components.sheet;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
@@ -17,6 +21,7 @@ public class DisplayHide {
     private final BigActorsManager.BigActorKey bigActorKey;
     private boolean displayed = false;
 
+    private Image backdrop;
     private Actor actor;
     private OnScreenActors.ActorKey actorKey;
     private float displayedY;
@@ -61,6 +66,17 @@ public class DisplayHide {
         return Completable.create(onSub -> {
             beforeDisplayAction.call();
             InfoStage.addBigActor(actorKey, actor, () -> hide().subscribe(), null);
+            if (bigActorKey == BigActorsManager.BigActorKey.ANCIENT_ONE) {
+                backdrop = new Image(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.PURE_WHITE_BACKGROUND));
+                backdrop.setColor(0f, 0f, 0f, 0.45f);
+                backdrop.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+                actor.getParent().addActorBefore(actor, backdrop);
+                ButtonUtils.addClickListener(backdrop, () -> {
+                    if (displayed && actor.getTouchable() == Touchable.enabled) {
+                        BigActorsManager.displayOrHideAncientOne();
+                    }
+                });
+            }
             actor.setPosition((VIEWPORT_WIDTH - actor.getWidth()) / 2, -actor.getHeight());
             actor.setOrigin(actor.getWidth() / 2, actor.getHeight() / 2);
             actor.setScale(0f);
@@ -107,6 +123,10 @@ public class DisplayHide {
                     Actions.run(() -> {
                         BigActorsManager.unlock(bigActorKey);
                         actor.remove();
+                        if (backdrop != null) {
+                            backdrop.remove();
+                            backdrop = null;
+                        }
                         afterHideAction.call();
                         onSub.onCompleted();
                     }))

@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class BackgroundBioTable extends VisTable {
 
@@ -26,7 +26,7 @@ public class BackgroundBioTable extends VisTable {
     }
 
     private Label createValue() {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.BLACK);
         style.background = new ValueFieldNinePatch();
 
         Label label = new Label("0", style);

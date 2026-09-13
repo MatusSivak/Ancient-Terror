@@ -25,14 +25,14 @@ public class TestResultTable extends VisTable {
         TestResultTable table = new TestResultTable();
 
         Label.LabelStyle headerLabelStyle = new Label.LabelStyle();
-        headerLabelStyle.font = getBitmapFont(FONT_MINYA);
+        headerLabelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
         headerLabelStyle.fontColor = Color.WHITE;
 
         Label headerLabel = new Label(get("test.outcome"), headerLabelStyle);
         headerLabel.setFontScale(0.5f);
 
         Label.LabelStyle resultLabelStyle = new Label.LabelStyle();
-        resultLabelStyle.font = getBitmapFont(FONT_MINYA);
+        resultLabelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
         resultLabelStyle.fontColor = color;
 
         Label resultLabel = new Label(resultText, resultLabelStyle);

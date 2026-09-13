@@ -12,7 +12,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_NORMAL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MAIN_MENU_DIALOG_BUTTON_PRESSED;
@@ -68,7 +68,7 @@ public class SelectAncientOneDialog extends Dialog {
         style.up = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_NORMAL);
         style.down = CustomAssetManager.getTextureRegionDrawable(MAIN_MENU_DIALOG_BUTTON_PRESSED);
         style.over = style.up;
-        style.font = CustomAssetManager.getBitmapFont(FONT_ADLER);
+        style.font = CustomAssetManager.getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42);
         style.fontColor = Color.WHITE;
         return style;
     }

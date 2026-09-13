@@ -16,9 +16,9 @@ import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
 
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class SelectGateComponent extends VisTable implements SelectComponent<GateInfo> {
 
@@ -164,7 +164,7 @@ public class SelectGateComponent extends VisTable implements SelectComponent<Gat
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setFontScale(0.5f);
         label.setAlignment(Align.bottom, Align.center);

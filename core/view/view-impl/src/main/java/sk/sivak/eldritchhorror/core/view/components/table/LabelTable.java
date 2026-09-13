@@ -29,7 +29,7 @@ public class LabelTable extends VisTable {
 
         Consumer<Table> consumer = table -> {
             Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFont(FONT_MINYA);
+            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
             labelStyle.fontColor = Color.YELLOW;
 
             Label resultLabel = new Label(labelText, labelStyle);
@@ -51,7 +51,7 @@ public class LabelTable extends VisTable {
 
         Consumer<Table> consumer = table -> {
             Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFont(FONT_MINYA);
+            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
             labelStyle.fontColor = Color.YELLOW;
 
             Label resultLabel = new Label(labelText, labelStyle);
@@ -82,7 +82,7 @@ public class LabelTable extends VisTable {
 
         Consumer<Table> consumer = table -> {
             Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFont(FONT_MINYA);
+            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
             labelStyle.fontColor = Color.YELLOW;
 
             Label resultLabel = new Label(labelText, labelStyle);

@@ -19,8 +19,8 @@ import java.util.List;
 
 import static java8.features.stream.Stream.*;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
@@ -193,7 +193,7 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
         label.setFontScale(0.5f);

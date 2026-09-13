@@ -75,7 +75,7 @@ public class SelectComponentsComplexTable<Key> extends Table {
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), color);
         Label label = new Label(text, labelStyle);
         label.setFontScale(0.5f);
         label.setAlignment(Align.center, Align.center);

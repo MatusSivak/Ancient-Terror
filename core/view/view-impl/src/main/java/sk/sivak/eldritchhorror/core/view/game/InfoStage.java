@@ -434,7 +434,7 @@ public class InfoStage {
 
     private Label createLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY);
+        labelStyle.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44);
         Label createdLabel = new Label("", labelStyle);
         createdLabel.setFontScale(1f);
         return createdLabel;

@@ -18,7 +18,6 @@ import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
-import sk.sivak.eldritchhorror.core.view.components.sheet.ValueFieldNinePatch;
 import sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -28,12 +27,11 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ANCIENT_ONE_LABEL;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ANCIENT_ONE_DIALOG_BACKGROUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
@@ -82,12 +80,13 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
         add(createEndGameTable(ancientOneInfo)).align(Align.left).growX().colspan(2);
 
         pack();
-        TextureRegionDrawable background = CustomAssetManager.getTextureRegionDrawable(MONSTER_SHEET);
+        TextureRegionDrawable background = CustomAssetManager.getTextureRegionDrawable(ANCIENT_ONE_DIALOG_BACKGROUND);
         setBackground(background);
         setHeight(748 * 0.85f * SCALE);
         setWidth(1067 * SCALE);
 
         addHitImage();
+        AncientOneStyles.addCloseButton(this);
     }
 
     private Table createReckoningTable(AncientOneInfo ancientOneInfo) {
@@ -95,7 +94,7 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
 
         Image reckoningImage = new Image(CustomAssetManager.getTexture(CustomAssetManager.RECKONING));
 
-        Label reckoningValue = createValue(FONT_MINYA, 0.5f);
+        Label reckoningValue = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         reckoningValue.setWrap(true);
         reckoningValue.setText("[BLACK]" + get(ancientOneInfo.getReckoningText()) + "[]");
 
@@ -112,13 +111,13 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
         midnightDoom.setScale(53/593f);
 
 
-        Label midnightValue = createValue(FONT_MINYA, 0.5f);
+        Label midnightValue = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         midnightValue.setWrap(true);
         midnightValue.setText("[BLACK]" + get(ancientOneInfo.getMidnightText()) + "[]");
 
         Label winLabel = createTextLabel(get("ancientOne.victory"));
 
-        Label winValue = createValue(FONT_MINYA, 0.5f);
+        Label winValue = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         winValue.setWrap(true);
         winValue.setText("[BLACK]" + get(ancientOneInfo.getWinText()) + "[]");
 
@@ -246,7 +245,7 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
 
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.DARK_GRAY);
         Color color = new Color(1f, 1f, 1f, 0.25f);
         labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
             @Override
@@ -263,7 +262,7 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
 
 
     private Label createNiceLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
@@ -272,8 +271,8 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
     }
 
     private Label createValue(String fontName, float fontScale) {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFont(fontName), Color.WHITE);
-        style.background = new ValueFieldNinePatch();
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(fontName, AncientOneStyles.RULE_FONT_SIZE), Color.WHITE);
+        style.background = AncientOneStyles.ruleBackground();
 
         Label label = new Label("0", style);
         style.font.getData().markupEnabled = true;
@@ -283,7 +282,7 @@ public class AwakenYogSothothCard extends VisTable implements AncientOneCard{
     }
 
     private Label createTextLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.BLACK);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, AncientOneStyles.RULE_FONT_SIZE), Color.BLACK);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.5f);

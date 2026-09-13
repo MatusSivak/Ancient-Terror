@@ -7,9 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
@@ -80,7 +80,7 @@ public class InvestigatorSheetButtons extends Group {
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), color);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.35f);

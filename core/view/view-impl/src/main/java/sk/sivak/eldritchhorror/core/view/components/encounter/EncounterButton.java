@@ -22,8 +22,8 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 
 public class EncounterButton extends Table {
 
@@ -173,7 +173,7 @@ public class EncounterButton extends Table {
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setFontScale(0.5f);
         label.setAlignment(Align.left, Align.left);

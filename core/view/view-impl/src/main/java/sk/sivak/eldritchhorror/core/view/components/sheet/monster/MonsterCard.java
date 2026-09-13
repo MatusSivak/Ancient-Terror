@@ -27,14 +27,13 @@ import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.DAMAGE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_ADLER;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_BLACK_CHANCERY;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_GOBLIN_ONE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.FONT_MINYA;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_LIBRE_BASKERVILLE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.HORROR;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFont;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getEpicMonsterTexture;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getNonEpicMonsterTexture;
 
@@ -175,7 +174,7 @@ public class MonsterCard extends VisTable {
     private Table createSpecialTextTable(String specialText) {
         Table table = new Table();
 
-        Label specialValueLabel = createValue(FONT_MINYA, 0.5f);
+        Label specialValueLabel = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         specialValueLabel.setWrap(true);
         specialValueLabel.setAlignment(Align.topLeft);
         specialValueLabel.setText("[BLACK]" + specialText + "[]");
@@ -193,7 +192,7 @@ public class MonsterCard extends VisTable {
     private Table createSpawnTextTable(String spawnText) {
         Table table = new Table();
 
-        Label specialValueLabel = createValue(FONT_MINYA, 0.5f);
+        Label specialValueLabel = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         specialValueLabel.setWrap(true);
         specialValueLabel.setAlignment(Align.topLeft);
         specialValueLabel.setText("[BLACK]" + spawnText + "[]");
@@ -211,7 +210,7 @@ public class MonsterCard extends VisTable {
     private Table createReckoningTextTable(String specialText) {
         Table table = new Table();
 
-        Label specialValueLabel = createValue(FONT_MINYA, 0.5f);
+        Label specialValueLabel = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         specialValueLabel.setWrap(true);
         specialValueLabel.setAlignment(Align.topLeft);
         specialValueLabel.setText("[BLACK]" + specialText + "[]");
@@ -238,7 +237,7 @@ public class MonsterCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_ADLER), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.DARK_GRAY);
         Color color = new Color(1f, 1f, 1f, 0.25f);
         labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
             @Override
@@ -254,7 +253,7 @@ public class MonsterCard extends VisTable {
     }
 
     private Label createNiceLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_BLACK_CHANCERY), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
@@ -263,7 +262,7 @@ public class MonsterCard extends VisTable {
     }
 
     private static Label createTestLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFont(FONT_MINYA), Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.42f);
@@ -275,7 +274,7 @@ public class MonsterCard extends VisTable {
         Label modifierLabel = createTestLabel(testType == null ? "x" : testType.prettyString() + "\nModifier");
         modifierLabel.setAlignment(Align.center, Align.center);
 
-        Label modifierValueLabel = createValue(FONT_GOBLIN_ONE, 0.25f);
+        Label modifierValueLabel = createValue(NEW_FONT_LIBRE_BASKERVILLE, 0.25f);
         modifierValueLabel.setAlignment(Align.center);
         if (testModifier == 0) {
             modifierValueLabel.setText("[BLACK]" + 0 + "[]");
@@ -295,7 +294,7 @@ public class MonsterCard extends VisTable {
         Image image = new Image(imageTexture);
         image.setScaling(Scaling.fit);
 
-        Label ratingValueLabel = createValue(FONT_GOBLIN_ONE, 0.25f);
+        Label ratingValueLabel = createValue(NEW_FONT_LIBRE_BASKERVILLE, 0.25f);
         ratingValueLabel.setAlignment(Align.center);
         ratingValueLabel.setText("[BLACK]" + rating + "[]");
 
@@ -318,7 +317,7 @@ public class MonsterCard extends VisTable {
     }
 
     private static Label createValue(String fontName, float fontScale) {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFont(fontName), Color.WHITE);
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(fontName, 64), Color.WHITE);
         style.background = new ValueFieldNinePatch();
 
         Label label = new Label("0", style);

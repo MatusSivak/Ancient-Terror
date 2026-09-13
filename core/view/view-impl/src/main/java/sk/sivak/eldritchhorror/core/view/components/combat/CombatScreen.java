@@ -150,7 +150,7 @@ public class CombatScreen implements Screen {
         stage.addActor(scrollPane);
 
 
-        fpsLabel = new Label("XX", new Label.LabelStyle(CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_ADLER), Color.YELLOW));
+        fpsLabel = new Label("XX", new Label.LabelStyle(CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SPECIAL_ELITE, 42), Color.YELLOW));
         fpsLabel.setPosition(0, ViewProperties.VIEWPORT_HEIGHT - fpsLabel.getHeight());
 //        stage.addActor(fpsLabel);
 

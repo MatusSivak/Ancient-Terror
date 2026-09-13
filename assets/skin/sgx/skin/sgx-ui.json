@@ -1,18 +1,4 @@
 {
-  com.badlogic.gdx.graphics.g2d.BitmapFont: {
-    font: {
-      file: font-export.fnt
-    }
-    medium: {
-      file: font-medium-export.fnt
-    }
-    small: {
-      file: font-small-export.fnt
-    }
-    title: {
-      file: font-title-export.fnt
-    }
-  }
   com.badlogic.gdx.graphics.Color: {
     black: {
       r: 0

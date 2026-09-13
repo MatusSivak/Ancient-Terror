@@ -44,7 +44,7 @@ public class NextTokenPreview extends Group {
         hiddenLabel = new Label(
                 "?",
                 new Label.LabelStyle(
-                        CustomAssetManager.getBitmapFont(CustomAssetManager.FONT_BLACK_CHANCERY),
+                        CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44),
                         Color.WHITE
                 )
         );
