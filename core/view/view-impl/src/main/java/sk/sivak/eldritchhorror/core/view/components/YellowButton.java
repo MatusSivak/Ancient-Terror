@@ -21,9 +21,6 @@ public class YellowButton extends CustomButton {
         buttonBackgroundDown = createBackground(CustomAssetManager.LOCATION_BUTTON_DOWN);
         setColor(0.94f, 0.89f, 0.69f, 1f);
 
-        buttonBackgroundUp.setOrigin(buttonBackgroundUp.getWidth() / 2, buttonBackgroundUp.getHeight() / 2);
-        buttonBackgroundDown.setOrigin(buttonBackgroundDown.getWidth() / 2, buttonBackgroundDown.getHeight() / 2);
-
         backgroundToDraw = buttonBackgroundUp;
     }
 
@@ -34,23 +31,14 @@ public class YellowButton extends CustomButton {
             private static final float SCALE = 1.8f;
 
             @Override
-            public float getWidth() {
-                return YellowButton.this.getWidth() * SCALE;
-            }
-
-            @Override
-            public float getHeight() {
-                return YellowButton.this.getHeight() * SCALE;
-            }
-
-            @Override
-            public float getX() {
-                return YellowButton.this.getX() - ((SCALE - 1) * YellowButton.this.getWidth()) / 2;
-            }
-
-            @Override
-            public float getY() {
-                return YellowButton.this.getY() - ((SCALE - 1) * YellowButton.this.getHeight()) / 2;
+            public void draw(Batch batch, float parentAlpha) {
+                float diameter = Math.max(YellowButton.this.getWidth(), YellowButton.this.getHeight()) * SCALE;
+                setSize(diameter, diameter);
+                setOrigin(diameter / 2, diameter / 2);
+                setPosition(
+                        YellowButton.this.getX() + (YellowButton.this.getWidth() - diameter) / 2,
+                        YellowButton.this.getY() + (YellowButton.this.getHeight() - diameter) / 2);
+                super.draw(batch, parentAlpha);
             }
 
             @Override

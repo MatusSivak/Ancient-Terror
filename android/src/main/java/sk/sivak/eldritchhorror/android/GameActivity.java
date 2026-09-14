@@ -1,12 +1,10 @@
 package sk.sivak.eldritchhorror.android;
 
 import android.os.Bundle;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import main.java.sk.sivak.eldritchhorror.android.JustRateThisGame;
 import sk.sivak.eldritchhorror.core.Game;
-import sk.sivak.eldritchhorror.core.constants.AdHandler;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsTracker;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 
@@ -15,7 +13,7 @@ public class GameActivity extends AndroidApplication {
     private Game game;
     private AnalyticsTracker analyticsTracker;
     private AndroidBillingPurchaseManager billingPurchaseManager;
-    private AdHandler adHandler;
+    private AndroidAdHandler adHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +37,7 @@ public class GameActivity extends AndroidApplication {
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         initialize(game, config);
+        adHandler.initialize();
     }
 
     @Override

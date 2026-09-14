@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.view.components.action;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -131,24 +132,19 @@ public class ActionButton extends ImageButton {
             }
         } else {
             icon.setOrigin(Align.center);
-            if (isPressed()) {
-                batch.setShader(null);
-                icon.setColor(Color.RED);
-                icon.setScale(scaleMin * 0.85f);
-            } else if (isChecked()) {
-                batch.setShader(null);
-                icon.setColor(Color.RED);
-                icon.setScale(scaleMin);
-            } else {
-                icon.setColor(Color.WHITE);
-                batch.setShader(GrayscaleShader.get());
-                icon.setOrigin(Align.center);
-                icon.setScale(scaleMin);
-            }
+            icon.setColor(Color.WHITE);
+            icon.setScale(isPressed() ? scaleMin * 0.85f : scaleMin);
         }
 
-        icon.draw(batch, parentAlpha);
-        batch.setShader(null);
+        ShaderProgram previousShader = batch.getShader();
+        if (disabled) {
+            batch.setShader(GrayscaleShader.get());
+        }
+        try {
+            icon.draw(batch, parentAlpha);
+        } finally {
+            batch.setShader(previousShader);
+        }
     }
 
     public Image getIcon() {

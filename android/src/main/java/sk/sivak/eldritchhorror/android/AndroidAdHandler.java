@@ -49,6 +49,7 @@ public class AndroidAdHandler implements AdHandler {
     private boolean interstitialAdShowing = false;
     private boolean rewardedLoadInFlight = false;
     private boolean interstitialLoadInFlight = false;
+    private boolean mobileAdsInitialized = false;
     private volatile boolean destroyed = false;
     private final Runnable rewardedReloadRunnable = () -> {
         if (destroyed) {
@@ -72,11 +73,24 @@ public class AndroidAdHandler implements AdHandler {
         this.applicationContext = activity.getApplicationContext();
         rewardedAdUnitId = resolveAdUnitId(BuildConfig.ADMOB_REWARDED_AD_UNIT_ID, TEST_REWARDED_AD_UNIT_ID);
         interstitialAdUnitId = resolveAdUnitId(BuildConfig.ADMOB_INTERSTITIAL_AD_UNIT_ID, TEST_INTERSTITIAL_AD_UNIT_ID);
-        Log.i(TAG, "Initializing ads. rewardedUnitId=" + rewardedAdUnitId + ", interstitialUnitId=" + interstitialAdUnitId);
-        MobileAds.initialize(applicationContext, initializationStatus -> {
-            Log.i(TAG, "MobileAds initialized");
-            preloadAds("startup");
-        });
+        Log.i(TAG, "Ads handler created. rewardedUnitId=" + rewardedAdUnitId + ", interstitialUnitId=" + interstitialAdUnitId);
+    }
+
+    public void initialize() {
+        if (destroyed || mobileAdsInitialized) {
+            return;
+        }
+        mobileAdsInitialized = true;
+        Log.i(TAG, "Initializing MobileAds");
+        try {
+            MobileAds.initialize(applicationContext, initializationStatus -> {
+                Log.i(TAG, "MobileAds initialized");
+                preloadAds("startup");
+            });
+        } catch (NoClassDefFoundError | RuntimeException e) {
+            mobileAdsInitialized = false;
+            Log.w(TAG, "MobileAds initialization skipped", e);
+        }
     }
 
     @Override
