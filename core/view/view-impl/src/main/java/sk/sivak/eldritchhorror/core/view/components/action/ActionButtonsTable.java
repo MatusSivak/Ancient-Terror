@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.components.action;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -17,7 +16,8 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class ActionButtonsTable extends Table {
 
     private final static int CELL_WIDTH = 100;
-    private final static int CELL_HEIGHT = 145; //+10
+    private final static float CELL_HEIGHT = CELL_WIDTH + ActionButtonWithText.CAPTION_GAP
+            + ActionButtonWithText.CAPTION_HEIGHT;
     private final static int CELL_PADDING = 5;
 
     private ActionButtonClickedListener actionButtonClickedListener;
@@ -129,8 +129,11 @@ public class ActionButtonsTable extends Table {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f * parentAlpha));
+        float previousColor = batch.getPackedColor();
+        batch.setColor(0.045f, 0.055f, 0.05f, 0.9f * parentAlpha * getColor().a);
         batch.draw(getTexture(PURE_WHITE_BACKGROUND), getX(), getY(), getPrefWidth(), getPrefHeight());
+        batch.setColor(previousColor);
         super.draw(batch, parentAlpha);
     }
+
 }

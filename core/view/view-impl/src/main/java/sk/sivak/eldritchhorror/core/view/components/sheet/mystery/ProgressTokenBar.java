@@ -4,43 +4,46 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 
 public class ProgressTokenBar extends Table {
 
-    public static final int TOKEN_SIZE = 38;
+    public static final int TOKEN_SIZE = 28;
+    private static final int TOKENS_PER_ROW = 8;
     public static final float ACTION_DURATION = 1f;
 
     private Integer progress;
 
     public void init(int tokensCount, Integer progress) {
-        this.progress = progress;
+        this.progress = Math.max(0, Math.min(progress, tokensCount));
 
         align(Align.left);
         clearChildren();
         for (int i = 0; i < tokensCount; i++) {
-            add(new ProgressToken()).width(TOKEN_SIZE * 0.66f).height(TOKEN_SIZE * 0.66f).padRight(5).padBottom(5);
-            if (tokensCount >= 10 && i == tokensCount/2 -1) {
+            Container<ProgressToken> slot = new Container<>(new ProgressToken());
+            slot.size(TOKEN_SIZE * 0.78f);
+            add(slot).size(TOKEN_SIZE).padRight(4).padBottom(3);
+            if ((i + 1) % TOKENS_PER_ROW == 0 && i + 1 < tokensCount) {
                 row();
             }
         }
-        for (int i = 0; i < progress; i++) {
-            ProgressToken progressToken = (ProgressToken) getCells().get(i).getActor();
-            getCells().get(i).size(TOKEN_SIZE);
-            progressToken.activateImmediately();
+        for (int i = 0; i < this.progress; i++) {
+            Container<ProgressToken> slot = (Container<ProgressToken>) getCells().get(i).getActor();
+            slot.size(TOKEN_SIZE);
+            slot.getActor().activateImmediately();
         }
     }
 
     public void activate() {
-        if (getCells().size == progress) {
+        if (getCells().size <= progress) {
             return;
         }
         Cell progressTokenCell = getCells().get(progress++);
-        ProgressToken progressToken = (ProgressToken) progressTokenCell.getActor();
+        Container<ProgressToken> slot = (Container<ProgressToken>) progressTokenCell.getActor();
+        ProgressToken progressToken = slot.getActor();
         progressToken.activate();
-        MyTemporalAction action = new MyTemporalAction(progressTokenCell);
+        MyTemporalAction action = new MyTemporalAction(slot);
         action.setDuration(ACTION_DURATION);
         action.setInterpolation(Interpolation.sine);
         progressToken.addAction(action);
@@ -48,17 +51,16 @@ public class ProgressTokenBar extends Table {
 
     private class MyTemporalAction extends TemporalAction {
 
-        private final Cell progressTokenCell;
+        private final Container<ProgressToken> slot;
 
-        public MyTemporalAction(Cell progressTokenCell) {
-            this.progressTokenCell = progressTokenCell;
+        public MyTemporalAction(Container<ProgressToken> slot) {
+            this.slot = slot;
         }
 
         @Override
         protected void update(float percent) {
-            float tokenSize = (0.66f + percent * (1 - 0.66f)) * TOKEN_SIZE;
-            progressTokenCell.width(tokenSize).height(tokenSize);
-            ProgressTokenBar.this.invalidate();
+            float tokenSize = (0.78f + percent * (1 - 0.78f)) * TOKEN_SIZE;
+            slot.size(tokenSize);
         }
     }
 }

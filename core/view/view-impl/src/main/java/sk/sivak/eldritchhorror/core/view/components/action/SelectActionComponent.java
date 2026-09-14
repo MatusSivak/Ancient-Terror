@@ -67,7 +67,8 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             add(actionButtonsTableWrapper).maxWidth(500);
         }
 
-        add(actionInfoTable).pad(5).growY().width(250);
+        add(actionInfoTable).padLeft(5).padRight(5)
+                .height(actionButtonsTable.getPrefHeight()).width(250);
 
         pack();
 

@@ -218,7 +218,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String ACTION_SKIP = "action_button/skip.png";
 
     public final static String GATE = "gate/gate.png";
-    public final static String RESERVE_LABEL = "reserve_label.png";
+    public final static String RESERVE_BACKGROUND = "reserve/background.png";
     public final static String DISCARD_LABEL = "discard_label.png";
     public final static String ANCIENT_ONE_LABEL = "ancient_one_label.png";
     public final static String ANCIENT_ONE_AZATHOTH_LABEL = "ancient_one/label_azathoth.png";
@@ -498,7 +498,12 @@ public class CustomAssetManager extends AssetManager {
 
     /** Uses independent metrics so compact controls do not resize shared card fonts. */
     public static BitmapFont getBitmapFontNew(String fontId, int size) {
-        String key = fontId + ":" + size;
+        return getBitmapFontNew(fontId, size, 1f);
+    }
+
+    /** Keeps compact caption leading independent from other users of the same font size. */
+    public static BitmapFont getBitmapFontNew(String fontId, int size, float lineHeightScale) {
+        String key = fontId + ":" + size + ":" + lineHeightScale;
         BitmapFont font = get().sizedFonts.get(key);
         if (font == null) {
             BitmapFont source = getBitmapFontNew(fontId);
@@ -512,6 +517,7 @@ public class CustomAssetManager extends AssetManager {
             prepareFont(fontId, font);
             // All bundled new fonts are exported at 64 px.
             BitmapFontSizing.resize(font, size);
+            font.getData().lineHeight *= lineHeightScale;
             get().sizedFonts.put(key, font);
         }
         return font;

@@ -1,16 +1,12 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.mystery;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -28,15 +24,17 @@ import java.util.concurrent.TimeUnit;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.components.sheet.mystery.ProgressTokenBar.ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MysteryCard extends VisTable {
+
+    private static final float CARD_WIDTH = 500f;
+    private static final float SIDE_PADDING = 44f;
+    private static final float CONTENT_WIDTH = CARD_WIDTH - SIDE_PADDING * 2;
+    private static final Color INK = new Color(0.18f, 0.16f, 0.12f, 1f);
 
     private final DisplayHide displayHide;
     private ProgressTokenBar progressTokenBar;
@@ -55,12 +53,15 @@ public class MysteryCard extends VisTable {
         hitImage = new Image(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND));
         addActor(hitImage);
         hitImage.getColor().a = 0.0f;
+        hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     }
 
     @Override
     protected void positionChanged() {
         super.positionChanged();
-        hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        if (hitImage != null) {
+            hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        }
     }
 
     public void init(MysteryCardInfo mysteryCardInfo) {
@@ -68,32 +69,47 @@ public class MysteryCard extends VisTable {
         getColor().a = 1f;
         setBackground((Drawable) null);
         this.mysteryCardInfo = mysteryCardInfo;
-        int width = 495;
-        int padLeft = 40;
-        int padRight = 20;
-        padTop(8);
-        add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).pad(46, padLeft, 0, padRight).width(360);
+        TextureRegionDrawable parchment = new TextureRegionDrawable(
+                CustomAssetManager.getTextureRegion(CustomAssetManager.MYSTERY_BACKGROUND));
+        parchment.setMinWidth(0);
+        parchment.setMinHeight(0);
+        setBackground(parchment);
+        pad(30, SIDE_PADDING, 32, SIDE_PADDING);
+        defaults().width(CONTENT_WIDTH).left();
+
+        add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).padBottom(8);
         row();
-        Label flavorLabel = createFlavorLabel(resolveLocalizedText(mysteryCardInfo.getFlavorText()));
-        Cell<Label> flavorLabelCell = add(flavorLabel).pad(12, padLeft - 8, 0, padRight - 8).width(width + 16);
+        add(createDivider()).height(1).padBottom(9);
         row();
-        Label mysteryTextLabel = createMysteryText(getProcessedMysteryText(mysteryCardInfo));
-        Cell<Label> mysteryLabelCell = add(mysteryTextLabel).pad(10, padLeft, 0, padRight).width(width);
+        String flavorText = resolveLocalizedText(mysteryCardInfo.getFlavorText());
+        if (flavorText != null && !flavorText.trim().isEmpty()) {
+            add(createFlavorLabel(flavorText)).padBottom(11);
+            row();
+        }
+        Table objective = new Table();
+        objective.setBackground(createTintedBackground(new Color(1f, 0.97f, 0.85f, 0.22f)));
+        objective.add(createMysteryText(getProcessedMysteryText(mysteryCardInfo)))
+                .width(CONTENT_WIDTH - 22).pad(7, 11, 8, 11);
+        add(objective);
         row();
+
+        add(createDivider()).height(1).padTop(12).padBottom(7);
+        row();
+
         progressTokenBar = createProgressTokenBar(mysteryCardInfo.getMysteryComplexity(), Math.min(mysteryCardInfo.getProgress(), mysteryCardInfo.getMysteryComplexity()));
         Table progressRow = new Table();
-        progressRow.align(Align.left);
-        progressRow.add(createProgressLabel()).padRight(10).align(Align.left);
-        progressRow.add(progressTokenBar).growX().align(Align.left);
-        Cell<Table> progressRowCell = add(progressRow).pad(14, padLeft, 58, padRight).width(width).align(Align.left);
+        progressRow.left();
+        progressRow.add(createProgressLabel()).width(80).padRight(12).left();
+        progressRow.add(progressTokenBar).expandX().left();
+        add(progressRow);
 
-
-        TextureRegionDrawable background = CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.MYSTERY_BACKGROUND);
-        setBackground(background);
-
-        setWidth(555);
-        setHeight(flavorLabelCell.getPrefHeight() + mysteryLabelCell.getPrefHeight() + progressRowCell.getPrefHeight() + 188);
-
+        // Measure wrapped text at the final width, including localized titles and rules.
+        setWidth(CARD_WIDTH);
+        invalidateHierarchy();
+        setHeight(getPrefHeight());
+        validate();
+        setHeight(getPrefHeight());
+        validate();
 
         addHitImage();
     }
@@ -110,19 +126,11 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.BLACK);
-        Color color = new Color(1f, 1f, 1f, 0.42f);
-        labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                color.a = 0.42f * getColor().a;
-                batch.setColor(color);
-                super.draw(batch, x, y, width, height);
-            }
-        };
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), INK);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
-        label.setFontScale(0.48f);
+        label.setWrap(true);
+        label.setFontScale(0.52f);
         return label;
     }
 
@@ -131,40 +139,16 @@ public class MysteryCard extends VisTable {
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.35f);
+        label.setFontScale(0.32f);
         return label;
     }
 
     private Label createMysteryText(String text) {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.BLACK);
-        style.background = new NinePatchDrawable(new NinePatch(CustomAssetManager.getTexture(VALUE_LABEL), 11, 11, 11, 12) {
-
-            @Override
-            public float getMiddleHeight() {
-                return 0;
-            }
-
-            @Override
-            public float getTopHeight() {
-                return 6;
-            }
-
-            @Override
-            public float getBottomHeight() {
-                return 8;
-            }
-
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(new Color(1f, 1f, 1f, 0.5f * MysteryCard.this.getColor().a));
-                super.draw(batch, x, y, width, height);
-            }
-        });
-
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), INK);
         Label label = new Label(text, style);
         label.setWrap(true);
         label.setAlignment(Align.center);
-        label.setFontScale(0.46f);
+        label.setFontScale(0.42f);
         return label;
     }
 
@@ -172,8 +156,28 @@ public class MysteryCard extends VisTable {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
         Label label = new Label(get("mystery.progress"), labelStyle);
         label.setAlignment(Align.left);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.35f);
+        label.setWrap(true);
         return label;
+    }
+
+    private Image createDivider() {
+        Image divider = new Image(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND));
+        divider.setColor(0.30f, 0.25f, 0.16f, 0.35f);
+        return divider;
+    }
+
+    private Drawable createTintedBackground(Color tint) {
+        return new TextureRegionDrawable(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND)) {
+            @Override
+            public void draw(Batch batch, float x, float y, float width, float height) {
+                float previousColor = batch.getPackedColor();
+                Color current = batch.getColor();
+                batch.setColor(current.r * tint.r, current.g * tint.g, current.b * tint.b, current.a * tint.a);
+                super.draw(batch, x, y, width, height);
+                batch.setColor(previousColor);
+            }
+        };
     }
 
     private String resolveLocalizedText(String text) {

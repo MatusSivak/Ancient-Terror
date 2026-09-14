@@ -133,8 +133,8 @@ public class AzathothCard extends VisTable implements AncientOneCard{
         omen.setScale(48 / 700f);
 
         addRuleRow(table, get("ancientOne.setup"), null, get(info.getSetupText()), false);
-        addRuleRow(table, get("ancientOne.midnightLabel"), clock, get(info.getMidnightText()), true);
-        addRuleRow(table, get("ancientOne.omenLabel"), omen, get(info.getSpecialText()), false);
+        addRuleRow(table, null, clock, get(info.getMidnightText()), true);
+        addRuleRow(table, null, omen, get(info.getSpecialText()), false);
         addRuleRow(table, get("ancientOne.victory"), null, get(info.getWinText()), false);
         return table;
     }
@@ -142,10 +142,12 @@ public class AzathothCard extends VisTable implements AncientOneCard{
     private void addRuleRow(Table table, String heading, Actor icon, String text, boolean danger) {
         Table marker = new Table();
         if (icon != null) marker.add(icon).width(48).height(48).row();
-        Label label = createTextLabel(heading);
-        label.setFontScale(0.4f);
-        label.setColor(AncientOneStyles.BRONZE);
-        marker.add(label).width(76).padTop(icon == null ? 0 : 3);
+        if (heading != null) {
+            Label label = createTextLabel(heading);
+            label.setFontScale(0.4f);
+            label.setColor(AncientOneStyles.BRONZE);
+            marker.add(label).width(76).padTop(icon == null ? 0 : 3);
+        }
         Label value = createValue(NEW_FONT_SOURCE_SERIF_4, 0.5f);
         value.setText((danger ? "[#8C292D]" : "[#30271E]") + text + "[]");
         value.setWrap(true);
