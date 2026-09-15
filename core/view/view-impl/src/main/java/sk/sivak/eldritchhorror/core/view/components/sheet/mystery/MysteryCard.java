@@ -31,8 +31,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MysteryCard extends VisTable {
 
-    private static final float CARD_WIDTH = 500f;
-    private static final float SIDE_PADDING = 44f;
+    private static final float CARD_WIDTH = 620f;
+    private static final float SIDE_PADDING = 48f;
     private static final float CONTENT_WIDTH = CARD_WIDTH - SIDE_PADDING * 2;
     private static final Color INK = new Color(0.18f, 0.16f, 0.12f, 1f);
 
@@ -74,7 +74,7 @@ public class MysteryCard extends VisTable {
         parchment.setMinWidth(0);
         parchment.setMinHeight(0);
         setBackground(parchment);
-        pad(30, SIDE_PADDING, 32, SIDE_PADDING);
+        pad(32, SIDE_PADDING, 34, SIDE_PADDING);
         defaults().width(CONTENT_WIDTH).left();
 
         add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).padBottom(8);
@@ -83,13 +83,13 @@ public class MysteryCard extends VisTable {
         row();
         String flavorText = resolveLocalizedText(mysteryCardInfo.getFlavorText());
         if (flavorText != null && !flavorText.trim().isEmpty()) {
-            add(createFlavorLabel(flavorText)).padBottom(11);
+            add(createFlavorLabel(flavorText)).padBottom(18);
             row();
         }
         Table objective = new Table();
         objective.setBackground(createTintedBackground(new Color(1f, 0.97f, 0.85f, 0.22f)));
         objective.add(createMysteryText(getProcessedMysteryText(mysteryCardInfo)))
-                .width(CONTENT_WIDTH - 22).pad(7, 11, 8, 11);
+                .width(CONTENT_WIDTH - 28).pad(12, 14, 13, 14);
         add(objective);
         row();
 
@@ -136,7 +136,7 @@ public class MysteryCard extends VisTable {
 
     private Label createFlavorLabel(String text) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
-        Label label = new Label(text, labelStyle);
+        Label label = new Label(reflowText(text), labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
         label.setFontScale(0.32f);
@@ -145,11 +145,17 @@ public class MysteryCard extends VisTable {
 
     private Label createMysteryText(String text) {
         Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), INK);
-        Label label = new Label(text, style);
+        Label label = new Label(reflowText(text), style);
         label.setWrap(true);
         label.setAlignment(Align.center);
         label.setFontScale(0.42f);
         return label;
+    }
+
+    private String reflowText(String text) {
+        // Legacy copy has hard-wrapped lines. Let the label wrap to the card width,
+        // while retaining explicit blank lines between paragraphs.
+        return text.replace("\r\n", "\n").replaceAll("(?<!\n)\n(?!\n)", " ");
     }
 
     private Label createProgressLabel() {

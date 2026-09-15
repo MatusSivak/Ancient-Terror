@@ -171,9 +171,4 @@ public class SelectGateComponent extends VisTable implements SelectComponent<Gat
         return label;
     }
 
-    @Override
-    protected void sizeChanged() {
-        super.sizeChanged();
-        imageCell.getActor().setOrigin(currentGateSize/2f,currentGateSize/2f);
-    }
 }

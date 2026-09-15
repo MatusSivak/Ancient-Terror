@@ -18,7 +18,7 @@ pad.advance.y=-2
 glyph.native.rendering=false
 glyph.page.width=512
 glyph.page.height=512
-glyph.text=ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\nÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ\náäčďéíĺľňóôŕšťúýž\n\n.,!?;:'"()-+/%[]{}<>@#&_*=→—
+glyph.text=ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\nÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ\náäčďéíĺľňóôŕšťúýž\n\n.,!?;:'"()-+/%[]{}<>@#&_*=•→—$€
 
 render_type=0
 

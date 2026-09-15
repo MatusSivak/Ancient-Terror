@@ -24,6 +24,7 @@ public class HideOkButtons {
     private LabelTable labelTable;
 
     private Action0 onConfirmAction;
+    private Action0 onShowAction;
     private String displayLabelText;
     private Actor actorToHide;
     private boolean displayed;
@@ -41,6 +42,10 @@ public class HideOkButtons {
             return;
         }
         prepareYesButton(hideButton, false).run();
+    }
+
+    public void setOnShowAction(Action0 onShowAction) {
+        this.onShowAction = onShowAction;
     }
 
     public void hideInstantly() {
@@ -140,7 +145,7 @@ public class HideOkButtons {
             }
             displayed = false;
             actorToHide.setTouchable(Touchable.disabled);
-            labelTable = LabelTable.createAndShowTable(0, displayLabelText);
+            labelTable = LabelTable.createAndShowHint(displayLabelText);
             button.setText(get("dialog.yes"));
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
@@ -172,6 +177,9 @@ public class HideOkButtons {
                 return;
             }
             displayed = true;
+            if (onShowAction != null) {
+                onShowAction.call();
+            }
             actorToHide.setTouchable(Touchable.enabled);
             InfoStage.setBottomHeight(InfoStage.getBottomHeight() - labelTable.getHeight() - 5);
             labelTable.addAction(new FastForwardAction<>(sequence(

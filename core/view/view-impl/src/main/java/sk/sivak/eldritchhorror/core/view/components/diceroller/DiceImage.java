@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.components.diceroller;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -11,9 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ColorAction;
 import com.badlogic.gdx.scenes.scene2d.actions.FloatAction;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
-import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -30,6 +30,7 @@ public class DiceImage extends Image {
     public static final float ACTUAL_DICE_SIZE = ACTUAL_SIZE_RATIO * DICE_SIZE;
     private Vector3 modelRotation;
     private final Texture texture;
+    private int frameSize;
     private TextureRegion textureRegion;
     private float textureRegionRotation;
     private int diceNumber;
@@ -39,8 +40,8 @@ public class DiceImage extends Image {
     private FastForwardAction<FloatAction> rollRotationActionY;
     private FastForwardAction<FloatAction> rollRotationActionZ;
     private boolean rolling = false;
-    private FastForwardAction rollScaleToAction;
-    private FastForwardAction rollMoveToAction;
+    private FastForwardAction<TemporalAction> throwAction;
+
     private Rectangle area;
     private int diceValue;
     private Action1<DiceImage> onRollEndAction = diceImage -> {
@@ -48,6 +49,39 @@ public class DiceImage extends Image {
     private Action1<DiceImage> onAddOneEndAction = diceImage -> {
     };
     private RepeatAction highlightAction;
+    private DiceRollAudio rollAudio;
+    private int audibleDiceCount = 1;
+    private Texture shadowTexture;
+    private float flightHeight;
+
+    void setShadowTexture(Texture texture) {
+        shadowTexture = texture;
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        if (shadowTexture != null) {
+            float packedColor = batch.getPackedColor();
+            float altitude = MathUtils.clamp(flightHeight / 70f, 0f, 1f);
+            // The soft mask's outer edge is nearly transparent. Its footprint must
+            // extend beyond the opaque die so the contact shadow remains visible.
+            float width = ACTUAL_DICE_SIZE * (1.65f + altitude * 0.45f) * getScaleX();
+            float height = ACTUAL_DICE_SIZE * (1.40f + altitude * 0.40f) * getScaleY();
+            batch.setColor(0f, 0f, 0f, (0.72f - altitude * 0.42f) * getColor().a * parentAlpha);
+            batch.draw(shadowTexture, getX() + getWidth() / 2f - width / 2f + 8f * getScaleX(),
+                    getY() + getHeight() / 2f - flightHeight - height / 2f - 10f * getScaleY(), width, height);
+            batch.setColor(packedColor);
+        }
+        super.draw(batch, parentAlpha);
+    }
+
+    void setRollAudio(DiceRollAudio audio) {
+        this.rollAudio = audio;
+    }
+
+    void setAudibleDiceCount(int count) {
+        audibleDiceCount = count;
+    }
 
 
     public DiceImage(Texture texture) {
@@ -99,6 +133,10 @@ public class DiceImage extends Image {
     }
 
     private void commonInit() {
+        if (texture.getWidth() % 16 != 0 || texture.getHeight() != texture.getWidth() / 16 * 9) {
+            throw new IllegalArgumentException("Dice texture must contain 16 by 9 square frames");
+        }
+        frameSize = texture.getWidth() / 16;
         updateTextureRegion();
         setWidth(DICE_SIZE);
         setHeight(DICE_SIZE);
@@ -138,23 +176,25 @@ public class DiceImage extends Image {
         if (!rolling) {
             return;
         }
+        if (throwAction != null) {
+            throwAction.act(delta);
+            return;
+        }
         rollRotationActionX.act(delta);
         rollRotationActionY.act(delta);
         rollRotationActionZ.act(delta);
-        rollMoveToAction.act(delta);
-        rollScaleToAction.act(delta);
-        setModelRotation(new Vector3(rollRotationActionX.getTypedAction().getValue(), rollRotationActionY.getTypedAction().getValue(), rollRotationActionZ.getTypedAction().getValue()));
+        modelRotation.set(rollRotationActionX.getTypedAction().getValue(), rollRotationActionY.getTypedAction().getValue(), rollRotationActionZ.getTypedAction().getValue());
         updateTextureRegion();
 
     }
 
     private void updateTextureRegion() {
-        modelRotation.x = modelRotation.x % 360;
-        modelRotation.y = modelRotation.y % 360;
-        modelRotation.z = modelRotation.z % 360;
+        modelRotation.x = (modelRotation.x % 360 + 360) % 360;
+        modelRotation.y = (modelRotation.y % 360 + 360) % 360;
+        modelRotation.z = (modelRotation.z % 360 + 360) % 360;
 
-        int x = (int) (modelRotation.x / 22.5f);
-        int y = (int) (modelRotation.y / 22.5f);
+        int x = Math.round(modelRotation.x / 22.5f) % 16;
+        int y = Math.round(modelRotation.y / 22.5f) % 16;
 
         textureRegionRotation = 0;
         int gridX = x;
@@ -178,10 +218,14 @@ public class DiceImage extends Image {
         }
         textureRegionRotation += modelRotation.z;
 
-        textureRegion = new TextureRegion(texture, gridX * 46, gridY * 46, 46, 46);
+        if (textureRegion == null) {
+            textureRegion = new TextureRegion(texture, gridX * frameSize, gridY * frameSize, frameSize, frameSize);
+            setDrawable(new TextureRegionDrawable(textureRegion));
+        } else {
+            textureRegion.setRegion(gridX * frameSize, gridY * frameSize, frameSize, frameSize);
+        }
 
         setOrigin(Align.center);
-        setDrawable(new TextureRegionDrawable(textureRegion));
         setRotation(textureRegionRotation);
     }
 
@@ -190,61 +234,68 @@ public class DiceImage extends Image {
     }
 
     public void roll() {
+        if (rolling) {
+            return;
+        }
         Group parent = getParent();
         remove();
         parent.addActor(this);
         clearActions();
         setColor(Color.WHITE);
-        if (rolling) {
-            return;
-        }
-        modelRotation = findModelRotationBasedOnDiceValue(diceValue);
         rolling = true;
-        float duration = (float) (Math.random() * 0.5 + 1.0);
 
-        float rollDestinationX = MathUtils.random(area.getX() + getWidth() * ACTUAL_SIZE_RATIO * 0.207F,
-                area.getX() + area.getWidth() - getWidth() * ACTUAL_SIZE_RATIO * 1.207F);
-        float rollDestinationY = MathUtils.random(area.getY() + getHeight() * ACTUAL_SIZE_RATIO * 0.207F,
-                area.getY() + area.getHeight() - getHeight() * ACTUAL_SIZE_RATIO * 1.207F);
+        final Vector3 landing = findModelRotationBasedOnDiceValue(diceValue);
+        final Vector3 launch = new Vector3(
+                landing.x + MathUtils.random(480f, 840f),
+                landing.y + MathUtils.random(480f, 840f),
+                landing.z + MathUtils.random(180f, 420f));
+        final float startX = VIEWPORT_WIDTH / 2f - getWidth() / 2f + MathUtils.random(-45f, 45f);
+        final float startY = -getHeight() * 1.3f;
+        final float margin = getWidth() * ACTUAL_SIZE_RATIO * 0.207f;
+        final float destinationX = MathUtils.random(area.x + margin,
+                Math.max(area.x + margin, area.x + area.width - getWidth() * ACTUAL_SIZE_RATIO * 1.207f));
+        final float destinationY = MathUtils.random(area.y + margin,
+                Math.max(area.y + margin, area.y + area.height - getHeight() * ACTUAL_SIZE_RATIO * 1.207f));
+        final float lift = MathUtils.random(45f, 70f);
+        final float curve = MathUtils.random(-28f, 28f);
+        final DiceRollAudio.Roll sound = rollAudio == null ? null : rollAudio.newRoll(audibleDiceCount);
+        TemporalAction motion = new TemporalAction() {
+            @Override
+            protected void update(float progress) {
+                float travel = DiceThrowMotion.travel(progress);
+                float height = DiceThrowMotion.height(progress);
+                float tumble = DiceThrowMotion.tumble(progress);
+                float wobble = DiceThrowMotion.wobble(progress);
+                flightHeight = lift * height;
+                setPosition(MathUtils.lerp(startX, destinationX, travel)
+                                + curve * 4f * travel * (1f - travel),
+                        MathUtils.lerp(startY, destinationY, travel) + lift * height);
+                float scale = 1f + 0.35f * height + 0.2f * (1f - travel);
+                setScale(scale, scale * (1f - Math.abs(wobble) * 0.035f));
+                modelRotation.set(
+                        MathUtils.lerp(launch.x, landing.x, tumble),
+                        MathUtils.lerp(launch.y, landing.y, tumble),
+                        MathUtils.lerp(launch.z, landing.z, travel) + wobble * 5f);
+                updateTextureRegion();
+                if (sound != null) {
+                    sound.update(progress, ((getX() + getWidth() / 2f) / VIEWPORT_WIDTH * 2f - 1f) * 0.65f);
+                }
+            }
 
-        setScale(5f);
-        setPosition(VIEWPORT_WIDTH / 2 - getWidth() / 2, -getHeight() * getScaleY() * 0.25f);
-
-        MoveToAction moveToAction = new MoveToAction();
-        moveToAction.setPosition(rollDestinationX, rollDestinationY);
-        moveToAction.setTarget(this);
-        moveToAction.setInterpolation(Interpolation.sineOut);
-        moveToAction.setDuration(duration);
-        this.rollMoveToAction = new FastForwardAction<>(moveToAction);
-
-        ScaleToAction scaleToAction = new ScaleToAction();
-        scaleToAction.setScale(1.0f);
-        scaleToAction.setTarget(this);
-        scaleToAction.setInterpolation(Interpolation.sineOut);
-        scaleToAction.setDuration(duration / 2f);
-        this.rollScaleToAction = new FastForwardAction<>(scaleToAction);
-
-        FloatAction floatActionX = new FloatAction((float) (Math.random() * 365) + (365), getModelRotation().x);
-        floatActionX.setDuration(duration);
-        floatActionX.setInterpolation(Interpolation.sineOut);
-        rollRotationActionX = new FastForwardAction<>(floatActionX);
-
-        FloatAction floatActionY = new FloatAction((float) (Math.random() * 365) + (365), getModelRotation().y);
-        floatActionY.setDuration(duration);
-        floatActionY.setInterpolation(Interpolation.sineOut);
-        rollRotationActionY = new FastForwardAction<>(floatActionY);
-
-
-        FloatAction floatActionZ = new FloatAction((float) (Math.random() * 365) + (365), getModelRotation().z) {
             @Override
             protected void end() {
-                onRollEndAction.call(DiceImage.this);
+                // Publish completion only after the final pose and position have been applied.
                 rolling = false;
+                throwAction = null;
+                onRollEndAction.call(DiceImage.this);
             }
         };
-        floatActionZ.setDuration(duration);
-        floatActionZ.setInterpolation(Interpolation.sineOut);
-        rollRotationActionZ = new FastForwardAction<>(floatActionZ);
+        motion.setDuration(MathUtils.random(1.1f, 1.45f));
+        throwAction = new FastForwardAction<>(motion);
+        setPosition(startX, startY);
+        setScale(1.2f);
+        modelRotation.set(launch);
+        updateTextureRegion();
     }
 
 

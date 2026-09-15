@@ -12,9 +12,11 @@ import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 
 import java.util.List;
 
@@ -40,7 +42,12 @@ public class SelectActionView {
                 return;
             }
             Gdx.app.postRunnable(() -> {
-                BigActorsManager.initActionsTable(actionPhaseActions, onSub);
+                BigActorsManager.initActionsTable(actionPhaseActions, onSub, () -> {
+                    LocationId location = controller.getInvestigatorBasics().getLocationId();
+                    if (location != null) {
+                        MapUtils.moveCameraToLocation(location).subscribe();
+                    }
+                });
                 BigActorsManager.displayOrHideActionsTable();
             });
         });

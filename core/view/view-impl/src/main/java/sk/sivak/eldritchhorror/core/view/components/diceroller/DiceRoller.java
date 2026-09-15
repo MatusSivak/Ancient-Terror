@@ -42,11 +42,15 @@ public class DiceRoller {
 //        diceLayer.clearChildren();
         dices.clear();
         Texture texture = CustomAssetManager.getTexture("dice_sheet.png");
+        DiceRollAudio audio = new DiceRollAudio(CustomAssetManager::getSound);
+        Texture shadow = CustomAssetManager.getTexture("dice_shadow.png");
         diceAreaCalculator = new DiceAreaCalculator();
         diceAreaCalculator.prepareRollArea(diceRolls.size());
         diceAreaCalculator.prepareReturnArea(diceRolls.size());
         for (int i = 0; i < diceRolls.size(); i++) {
             DiceImage diceImage = new DiceImage(texture);
+            diceImage.setRollAudio(audio);
+            diceImage.setShadowTexture(shadow);
             diceImage.setArea(diceAreaCalculator.getRollArea(i));
             diceImage.setOnRollEndAction(this::onRollEnd);
             diceImage.setOnAddOneEndAction(this::onAddOneEnd);
@@ -63,6 +67,22 @@ public class DiceRoller {
             this.onSub = onSub;
             dicesFinished = 0;
             dicesRolled = 0;
+            int audibleCount = 0;
+            for (DiceImage dice : dices) {
+                if (diceNumbers == null || diceNumbers.length == 0) {
+                    audibleCount++;
+                } else {
+                    for (int number : diceNumbers) {
+                        if (dice.getDiceNumber() == number) {
+                            audibleCount++;
+                            break;
+                        }
+                    }
+                }
+            }
+            for (DiceImage dice : dices) dice.setAudibleDiceCount(audibleCount);
+            // Count all scheduled dice before any can finish (including fast-forward).
+            dicesRolled = audibleCount;
             if (diceNumbers == null || diceNumbers.length == 0) {
                 onRoll();
             } else {
@@ -203,10 +223,15 @@ public class DiceRoller {
     }
 
     private void onRoll() {
+        int index = 0;
         for (DiceImage dice : dices) {
-            dicesRolled++;
-            dice.roll();
+            scheduleRoll(dice, DiceThrowMotion.releaseDelay(index++, dices.size()));
         }
+    }
+
+    private void scheduleRoll(DiceImage dice, float delay) {
+        dice.addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.delay(delay), Actions.run(dice::roll))));
     }
 
     private void onReroll(int[] diceNumbers) {
@@ -219,22 +244,19 @@ public class DiceRoller {
                     continue;
                 }
                 diceImage.setArea(diceAreaCalculator.getRollArea(nr++));
-                moveDiceDownAndReroll(diceImage);
+                moveDiceDownAndReroll(diceImage, DiceThrowMotion.releaseDelay(nr - 1, dicesRolled));
+                break;
             }
         }
     }
 
-    private void moveDiceDownAndReroll(DiceImage dice) {
+    private void moveDiceDownAndReroll(DiceImage dice, float delay) {
         dice.remove();
         diceLayer.addActor(dice);
-        dice.addAction(Actions.sequence(
-                new FastForwardAction<>(Actions.moveTo(ViewProperties.VIEWPORT_WIDTH / 2 - dice.getWidth() / 2,
-                        -dice.getHeight() * dice.getScaleY(), 0.25f)),
-                Actions.run(() -> {
-                    dicesRolled++;
-                    dice.roll();
-                }))
-        );
+        dice.addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.moveTo(ViewProperties.VIEWPORT_WIDTH / 2 - dice.getWidth() / 2,
+                        -dice.getHeight() * dice.getScaleY(), 0.25f),
+                Actions.delay(delay), Actions.run(dice::roll))));
 
     }
 

@@ -18,16 +18,10 @@ pad.advance.y=-2
 glyph.native.rendering=false
 glyph.page.width=512
 glyph.page.height=512
-glyph.text=ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\nÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ\náäčďéíĺľňóôŕšťúýž\n\n.,!?;:'"()-+/%[]{}<>@#&_*=
+glyph.text=ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\nÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ\náäčďéíĺľňóôŕšťúýž\n\n.,!?;:'"()-+/%[]{}<>@#&_*=•→—$€
 
 render_type=0
 
 effect.class=com.badlogic.gdx.tools.hiero.unicodefont.effects.ColorEffect
 effect.Color=ffffff
-
-effect.class=com.badlogic.gdx.tools.hiero.unicodefont.effects.OutlineWobbleEffect
-effect.Color=cccccc
-effect.Width=0.5
-effect.Detail=1.0
-effect.Amplitude=1.0
 

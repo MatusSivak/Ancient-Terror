@@ -117,5 +117,8 @@ public class NewGateAnimatedImage extends Group {
         for (Actor child : getChildren()) {
             child.setSize(getWidth(), getHeight());
         }
+        // Selection animates the gate size without resizing its surrounding panel.
+        // Keep both rotating layers centered on their current bounds.
+        setOrigin(getWidth() / 2f, getHeight() / 2f);
     }
 }

@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.table;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,7 +15,11 @@ import sk.sivak.eldritchhorror.core.constants.card.CardInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CardClickListener;
+import sk.sivak.eldritchhorror.core.view.initgame.FullGamePurchaseDialog;
+import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -87,6 +92,11 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
     }
 
     public void init() {
+        clearChildren();
+        O previousInitValue = this.previousInitValue;
+        if (Gdx.app.getPreferences("AncientTerror.xml").getBoolean(InAppPurchaseManager.FULL_GAME, false)) {
+            unlocked = new LinkedList<>(Arrays.asList(enumValuesSupplier.get()));
+        }
         List<C> cards = new LinkedList<>();
         for (E enumValue : enumValuesSupplier.get()) {
             if (filterOutFunction.apply(enumValue)) {
@@ -139,6 +149,7 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
                 });
             } else {
                 Image lockedCard = new Image();
+                ButtonUtils.addClickListener(lockedCard, () -> FullGamePurchaseDialog.show(getStage(), this::init));
                 add(lockedCard).width(1191 * scale).height(1254 * scale).pad(5);
                 CustomAssetManager.getTextureAsync("card/card_template_locked.jpg").subscribe(texture -> {
                     lockedCard.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));

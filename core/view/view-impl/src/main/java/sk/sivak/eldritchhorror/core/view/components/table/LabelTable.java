@@ -94,6 +94,17 @@ public class LabelTable extends VisTable {
         return createAndShowTable(delay, consumer, 0);
     }
 
+    public static LabelTable createAndShowHint(String text) {
+        return createAndShowTable(0, table -> {
+            Label.LabelStyle style = new Label.LabelStyle(
+                    getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf("E8D9B0"));
+            Label hint = new Label(text, style);
+            hint.setAlignment(Align.center);
+            hint.setFontScale(0.42f);
+            table.add(hint).pad(3f, 10f, 3f, 10f);
+        }, 0);
+    }
+
     private static LabelTable createAndShowTable(float delay, Consumer<Table> prepareTableFunction, int offsetX) {
         if (!VisUI.isLoaded()) {
             VisUI.load();

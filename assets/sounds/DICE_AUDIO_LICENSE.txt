@@ -1,0 +1,11 @@
+Dice roll audio: Kenney, Casino Audio 1.1, CC0.
+Source: https://kenney.nl/assets/casino-audio
+Download mirror: https://opengameart.org/content/54-casino-sound-effects-cards-dice-chips
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+dice_roll_1.ogg = Audio/die-throw-1.ogg
+dice_roll_2.ogg = Audio/die-throw-2.ogg
+dice_roll_3.ogg = Audio/die-throw-4.ogg
+
+Unmodified recordings. Each contains one die throw with its natural rebounds.
+The game's former synthesized dice_impact WAVs are no longer used by DiceRollAudio.

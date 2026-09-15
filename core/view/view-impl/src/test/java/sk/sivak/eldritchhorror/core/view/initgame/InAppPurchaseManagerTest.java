@@ -26,6 +26,7 @@ public class InAppPurchaseManagerTest {
     private PurchaseManager oldStore;
     private int assetCount;
     private int artifactCount;
+    private Application.ApplicationType applicationType = Application.ApplicationType.Android;
 
     @Before public void setup() {
         oldApp = Gdx.app;
@@ -38,6 +39,7 @@ public class InAppPurchaseManagerTest {
             throw new UnsupportedOperationException(method.getName());
         });
         Gdx.app = (Application) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Application.class}, (proxy, method, args) -> {
+            if (method.getName().equals("getType")) return applicationType;
             if (method.getName().equals("getPreferences")) return preferences;
             if (method.getName().equals("postRunnable")) ((Runnable) args[0]).run();
             return null;
@@ -64,6 +66,7 @@ public class InAppPurchaseManagerTest {
     }
 
     @Test public void desktopPurchaseUnlocksAndPersistsFullGame() {
+        applicationType = Application.ApplicationType.Desktop;
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
         assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
@@ -71,6 +74,16 @@ public class InAppPurchaseManagerTest {
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
         assertTrue(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertUnlocked();
+    }
+
+    @Test public void desktopFullGamePurchaseBypassesStoreAndNetwork() {
+        applicationType = Application.ApplicationType.Desktop;
+        store.fail = true;
+        Gdx.net = (Net) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Net.class},
+                (proxy, method, args) -> { throw new AssertionError("Desktop purchase must not use the network"); });
+        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertNull(store.requested);
         assertUnlocked();
     }
 

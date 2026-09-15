@@ -260,13 +260,13 @@ public class BigActorsManager {
         displayOrHide(BigActorKey.DOOM_TRACK);
     }
 
-    public static void initActionsTable(List<ActionPhaseAction> actionPhaseActions, SingleSubscriber<? super ActionPhaseAction> sub) {
+    public static void initActionsTable(List<ActionPhaseAction> actionPhaseActions, SingleSubscriber<? super ActionPhaseAction> sub, Action0 onShowAction) {
         if (isLocked()) {
             sub.onError(new IllegalArgumentException("something is blocking action table"));
             return;
         }
         getInstance().selectActionComponent.setSubscriber(sub);
-        getInstance().selectActionComponent.init(actionPhaseActions);
+        getInstance().selectActionComponent.init(actionPhaseActions, onShowAction);
     }
 
     public static void displayOrHideActionsTable() {

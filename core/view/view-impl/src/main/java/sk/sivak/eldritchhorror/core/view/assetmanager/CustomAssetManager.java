@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.assetmanager;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
 import com.badlogic.gdx.graphics.Texture;
@@ -335,6 +336,17 @@ public class CustomAssetManager extends AssetManager {
 
 
     private static CustomAssetManager instance;
+    private final java.util.Set<String> soundPaths = new java.util.HashSet<>();
+
+    public static Sound getSound(String path) {
+        CustomAssetManager manager = get();
+        if (!manager.isLoaded(path, Sound.class)) {
+            manager.load(path, Sound.class);
+            manager.finishLoadingAsset(path);
+        }
+        manager.soundPaths.add(path);
+        return manager.get(path, Sound.class);
+    }
 
     private static CustomAssetManager get() {
         if (instance == null) {
@@ -346,6 +358,10 @@ public class CustomAssetManager extends AssetManager {
     public static void nullifyInstance() {
         if (instance != null) {
             instance.disposeSizedFonts();
+            for (String path : instance.soundPaths) {
+                if (instance.isLoaded(path)) instance.unload(path);
+            }
+            instance.soundPaths.clear();
         }
         instance = null;
     }

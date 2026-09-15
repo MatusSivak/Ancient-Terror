@@ -305,7 +305,7 @@ public class InfoStage {
         label.getColor().a = 0f;
         label.setText(text);
         label.pack();
-        label.setPosition(VIEWPORT_WIDTH / 2 - label.getWidth() / 2, VIEWPORT_HEIGHT - label.getHeight() - 8);
+        label.setPosition(VIEWPORT_WIDTH / 2 - label.getWidth() / 2, VIEWPORT_HEIGHT - label.getHeight() - 3);
 
         AlphaAction alphaActionIn = new AlphaAction();
         alphaActionIn.setActor(label);
@@ -436,7 +436,7 @@ public class InfoStage {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44);
         Label createdLabel = new Label("", labelStyle);
-        createdLabel.setFontScale(1f);
+        createdLabel.setFontScale(0.65f);
         return createdLabel;
     }
 

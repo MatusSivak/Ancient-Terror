@@ -44,7 +44,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         */
     }
 
-    public void init(List<ActionPhaseAction> actionPhaseActions) {
+    public void init(List<ActionPhaseAction> actionPhaseActions, Action0 onShowAction) {
         onStage = true;
         clear();
         setPosition(0, 0);
@@ -80,6 +80,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         hideOkButtons = new HideOkButtons();
 
         hideOkButtons.init(get("action.displayActions"), getOnConfirmAction(), this);
+        hideOkButtons.setOnShowAction(onShowAction);
     }
 
     private void addHitImage() {

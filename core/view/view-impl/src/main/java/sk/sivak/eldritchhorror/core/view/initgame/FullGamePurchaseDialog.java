@@ -32,39 +32,40 @@ public final class FullGamePurchaseDialog extends Dialog {
         setKeepWithinStage(false);
         getTitleLabel().setFontScale(0.38f);
         getTitleLabel().setAlignment(Align.center);
-        getContentTable().pad(8f, 10f, 0f, 10f);
+        getContentTable().pad(4f, 10f, 0f, 10f);
         Table offer = new Table();
         offer.add(artwork()).width(264f).top().padRight(14f);
         Table benefits = new Table();
         Label introduction = label(get("purchase.fullGame.description"), 0.26f);
         introduction.setAlignment(Align.left);
-        benefits.add(introduction).width(280f).padBottom(10f).row();
-        for (String feature : new String[]{"investigators", "ancientOnes", "noAds", "cards"}) {
+        benefits.add(introduction).colspan(2).width(280f).padBottom(6f).row();
+        for (String feature : new String[]{"ancientOnes", "investigators", "cards", "noAds"}) {
+            Image check = new Image(CustomAssetManager.getTexture("icon/tick.png"));
+            check.setScaling(Scaling.fit);
+            benefits.add(check).size(16f).top().padTop(3f).padRight(8f).padBottom(4f);
             Label benefit = label(get("purchase.fullGame." + feature), 0.25f);
             benefit.setAlignment(Align.left);
-            benefits.add(benefit).width(280f).padBottom(7f).row();
+            benefits.add(benefit).width(256f).padBottom(4f).row();
         }
-        Table price = new Table();
-        price.setBackground(SelectionPanelStyle.panel("18271F", "89774B"));
-        price.add(label(get("purchase.fullGame.price"), 0.26f)).width(260f).pad(7f, 10f, 7f, 10f);
-        benefits.add(price).width(280f).padTop(2f);
         offer.add(benefits).width(280f).top();
         getContentTable().add(offer).row();
         status = label("", 0.25f);
         getContentTable().add(status).width(558f).height(24f);
         buy = buttonText(get("purchase.fullGame.buy"));
-        buy.getLabel().setFontScale(0.3f);
-        buy.getStyle().up = AncientTerrorMenuStyles.highlight(buy.getStyle().up);
-        cancel = buttonText(get("purchase.fullGame.cancel"));
-        restore = buttonText(get("purchase.fullGame.restore"));
-        getButtonTable().defaults().height(42f).pad(4f, 6f, 4f, 6f);
-        button(cancel, "cancel");
-        getButtonTable().getCell(cancel).width(190f);
+        cancel = textLink(get("purchase.fullGame.cancel"), 0.24f);
+        restore = textLink(get("purchase.fullGame.restore"), 0.21f);
+        getButtonTable().defaults().pad(1f, 6f, 1f, 6f);
         button(buy, "buy");
-        getButtonTable().getCell(buy).width(344f);
+        getButtonTable().getCell(buy).width(470f).height(54f);
+        getButtonTable().row();
+        Label purchaseNote = label(get("purchase.fullGame.oneTime"), 0.21f);
+        purchaseNote.setColor(Color.valueOf("BEB69F"));
+        getButtonTable().add(purchaseNote).width(470f).padTop(0f).padBottom(1f).row();
+        button(cancel, "cancel");
+        getButtonTable().getCell(cancel).width(150f).height(28f);
         getButtonTable().row();
         button(restore, "restore");
-        getButtonTable().getCell(restore).colspan(2).width(270f).height(32f);
+        getButtonTable().getCell(restore).width(180f).height(28f).padTop(0f);
         key(Input.Keys.ESCAPE, "cancel");
         key(Input.Keys.BACK, "cancel");
     }
@@ -178,6 +179,22 @@ public final class FullGamePurchaseDialog extends Dialog {
         button.getLabel().setFontScale(0.3f);
         button.getStyle().checked = null;
         button.getStyle().checkedFontColor = null;
+        button.getStyle().up = AncientTerrorMenuStyles.highlight(button.getStyle().up);
+        AncientTerrorMenuStyles.addFocusHighlight(button);
+        return button;
+    }
+
+    private static TextButton textLink(String text, float scale) {
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4);
+        style.fontColor = Color.valueOf("BEB69F");
+        style.overFontColor = Color.valueOf("FFF0CA");
+        style.downFontColor = Color.valueOf("E8D9B0");
+        style.disabledFontColor = Color.valueOf("777264");
+        style.up = new com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable();
+        style.over = AncientTerrorMenuStyles.highlight(style.up);
+        TextButton button = new TextButton(text, style);
+        button.getLabel().setFontScale(scale);
         AncientTerrorMenuStyles.addFocusHighlight(button);
         return button;
     }

@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.pay.Transaction;
 import rx.Single;
@@ -89,6 +90,11 @@ public class InAppPurchaseManager {
         final Action1<Throwable>[] purchaseErrorActionRef = new Action1[1];
 
         return Single.<Boolean>create(onSub -> {
+            if (Gdx.app.getType() == ApplicationType.Desktop && FULL_GAME.equals(productName)) {
+                unlockFullGame(Gdx.app.getPreferences("AncientTerror.xml"));
+                onSub.onSuccess(true);
+                return;
+            }
             if (GoogleServicesHolder.getCustomPurchaseObserver() == null || GoogleServicesHolder.getPurchaseManager() == null) {
                 onSub.onError(new IllegalStateException("Store unavailable"));
                 return;
