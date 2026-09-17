@@ -292,6 +292,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String HEALTH_ICON_LEFT = "token/health_left.png";
     public final static String HEALTH_ICON_RIGHT = "token/health_right.png";
     public final static String SANITY_ICON = "token/sanity.png";
+    public final static String EMPTY_SANITY_ICON = "token/empty_sanity.png";
     public final static String SANITY_ICON_LEFT = "token/sanity_left.png";
     public final static String SANITY_ICON_RIGHT = "token/sanity_right.png";
     public final static String SQUARE_BUTTON_UP = "icon/squareButton_up.png";

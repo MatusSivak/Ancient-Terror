@@ -25,6 +25,8 @@ public class DisplayHide {
     private Actor actor;
     private OnScreenActors.ActorKey actorKey;
     private float displayedY;
+    private Float displayedX;
+    private float displayedScale = 1f;
 
     private Action0 beforeDisplayAction = () -> {
     };
@@ -48,6 +50,17 @@ public class DisplayHide {
         this.displayedY = displayedY;
     }
 
+    public void setDisplayedX(float displayedX) {
+        this.displayedX = displayedX;
+    }
+
+    public void setDisplayedScale(float displayedScale) {
+        this.displayedScale = displayedScale;
+    }
+
+    private float getDisplayedX() {
+        return displayedX == null ? (VIEWPORT_WIDTH - actor.getWidth()) / 2 : displayedX;
+    }
     public void setAfterDisplayAction(Action0 afterDisplayAction) {
         this.afterDisplayAction = afterDisplayAction;
     }
@@ -77,15 +90,15 @@ public class DisplayHide {
                     }
                 });
             }
-            actor.setPosition((VIEWPORT_WIDTH - actor.getWidth()) / 2, -actor.getHeight());
+            actor.setPosition(getDisplayedX(), -actor.getHeight());
             actor.setOrigin(actor.getWidth() / 2, actor.getHeight() / 2);
             actor.setScale(0f);
             actor.addAction(Actions.sequence(
                     new FastForwardAction(Actions.parallel(
-                            Actions.moveTo((VIEWPORT_WIDTH - actor.getWidth()) / 2, displayedY, 0.5f, Interpolation.linear),
+                            Actions.moveTo(getDisplayedX(), displayedY, 0.5f, Interpolation.linear),
                             Actions.scaleTo(0.33f, 0.33f, 0.5f, Interpolation.linear)
                     )),
-                    new FastForwardAction(Actions.scaleTo(1f, 1f, 0.5f, Interpolation.swingOut)), // zoom
+                    new FastForwardAction(Actions.scaleTo(displayedScale, displayedScale, 0.5f, Interpolation.swingOut)), // zoom
                     Actions.run(() -> {
                         BigActorsManager.unlock(bigActorKey);
                         actor.setTouchable(Touchable.enabled);
@@ -117,7 +130,7 @@ public class DisplayHide {
             actor.addAction(Actions.sequence(
                     new FastForwardAction(Actions.scaleTo(0.33f, 0.33f, 0.5f, Interpolation.swingIn)), // zoom
                     new FastForwardAction(Actions.parallel(
-                            Actions.moveTo((VIEWPORT_WIDTH - actor.getWidth()) / 2, -actor.getHeight(), 0.5f, Interpolation.linear),
+                            Actions.moveTo(getDisplayedX(), -actor.getHeight(), 0.5f, Interpolation.linear),
                             Actions.scaleTo(0f, 0f, 0.5f, Interpolation.linear)
                     )),
                     Actions.run(() -> {

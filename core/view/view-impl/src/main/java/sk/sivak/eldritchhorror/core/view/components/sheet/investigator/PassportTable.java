@@ -6,6 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+
+
 import com.badlogic.gdx.utils.Align;
 import java8.features.stream.Stream;
 import rx.functions.Action0;
@@ -34,6 +36,11 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class PassportTable extends Table {
+    private static final float PASSPORT_SCALE = 0.9f;
+    private static final float BACKGROUND_WIDTH = 800f;
+    private static final float BACKGROUND_HEIGHT = BACKGROUND_WIDTH / 1.5f;
+    private static final float BACKGROUND_X = -15f;
+    private static final float BACKGROUND_Y = -12f;
 
     private boolean displayed;
     private InvestigatorSheetButtons buttons;
@@ -52,6 +59,7 @@ public class PassportTable extends Table {
         align(Align.topLeft);
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.PASSPORT);
         displayHide.setActorKey(OnScreenActors.ActorKey.PASSPORT);
+        displayHide.setDisplayedScale(PASSPORT_SCALE);
     }
 
     public void init(BioTableData bioTableData,
@@ -71,7 +79,7 @@ public class PassportTable extends Table {
     public void prepareBasicInfoTab() {
         clear();
         padLeft(35);
-        padBottom(20);
+        padBottom(50);
 
         SpecialTable specialTable = new SpecialTable();
         specialTable.init(specialTableData);
@@ -82,20 +90,28 @@ public class PassportTable extends Table {
         TokensTable tokensTable = new TokensTable();
         tokensTable.init(tokensTableData);
 
-        StatsTable statsTable = new StatsTable();
+        CharacterSkillsTable statsTable = new CharacterSkillsTable();
         statsTable.init(statsTableData);
 
 
-        SectionWrapper bioSection = new SectionWrapper().init(get("investigator.section.bio"), bioTable);
-        SectionWrapper tokenSection = new SectionWrapper().init(get("investigator.section.tokens"), tokensTable);
-        SectionWrapper statsSection = new SectionWrapper().init(get("investigator.section.skills"), statsTable);
-        SectionWrapper specialSection = new SectionWrapper().init(get("investigator.section.special"), specialTable);
+        Table skillsAndVitals = new Table();
+        skillsAndVitals.add(CharacterSheetWidgets.section(statsTable))
+                .grow().minWidth(0).padBottom(8).row();
+        skillsAndVitals.add(CharacterSheetWidgets.section(CharacterSheetWidgets.createVitals(tokensTableData))).grow().minWidth(0);
+        Table topPanels = new Table();
+        topPanels.defaults().growY().minWidth(0);
+        topPanels.add(CharacterSheetWidgets.section(bioTable))
+                .width(CharacterSheetWidgets.panelWidth(topPanels, 0.32f)).padRight(8);
+        topPanels.add(skillsAndVitals)
+                .width(CharacterSheetWidgets.panelWidth(topPanels, 0.45f)).padRight(8);
+        topPanels.add(CharacterSheetWidgets.section(tokensTable))
+                .width(CharacterSheetWidgets.panelWidth(topPanels, 0.23f));
 
-        add(bioSection).align(Align.topLeft).width(bioSection.getWidth()).height(bioSection.getHeight());
-        add(statsSection).align(Align.topRight).width(statsSection.getWidth()).height(statsSection.getHeight());
-        add(tokenSection).align(Align.top).width(tokenSection.getWidth()).height(tokenSection.getHeight());
-        row();
-        add(specialSection).colspan(3).align(Align.topLeft).width(specialSection.getWidth()).height(specialSection.getHeight());
+        Table sheet = new Table();
+        sheet.top();
+        sheet.add(topPanels).growX().minHeight(220).padBottom(8).row();
+        sheet.add(CharacterSheetWidgets.section(specialTable)).growX();
+        add(new FittedCharacterSheet(sheet)).width(700).height(400);
 
         buttons = new InvestigatorSheetButtons() {
             @Override
@@ -110,6 +126,7 @@ public class PassportTable extends Table {
         };
 
         addHitImage();
+
         buttons.initButtons();
         buttons.highlightBasicInfo();
 
@@ -248,6 +265,16 @@ public class PassportTable extends Table {
         pack();
 
         setTransform(true);
+        setOrigin(getWidth() / 2, getHeight() / 2);
+        setScale(PASSPORT_SCALE);
+        // Center the visible artwork, which extends beyond this table's layout bounds.
+        float x = (VIEWPORT_WIDTH - BACKGROUND_WIDTH * PASSPORT_SCALE) / 2
+                - BACKGROUND_X * PASSPORT_SCALE - (1 - PASSPORT_SCALE) * getOriginX();
+        float y = (VIEWPORT_HEIGHT - BACKGROUND_HEIGHT * PASSPORT_SCALE) / 2
+                - BACKGROUND_Y * PASSPORT_SCALE - (1 - PASSPORT_SCALE) * getOriginY();
+        displayHide.setDisplayedX(x);
+        displayHide.setDisplayedY(y);
+        setPosition(x, y);
     }
 
     private void addHitImage() {
@@ -305,19 +332,19 @@ public class PassportTable extends Table {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        float widthHeightRatio = 1100 / 808f;
-        float height = (VIEWPORT_HEIGHT + 60) * getScaleY();
+
+        float height = BACKGROUND_HEIGHT * getScaleY();
         batch.setColor(Color.WHITE);
-        batch.draw(CustomAssetManager.getTexture("passport.png"),
-                -35 * getScaleX() + getX() + (1 - getScaleX()) * getWidth() * 0.5f,
-                -75 * getScaleY() + getY() + (1 - getScaleY()) * getHeight() * 0.5f,
-                height * widthHeightRatio, height);
+        batch.draw(CustomAssetManager.getTexture("passport-dossier.png"),
+                BACKGROUND_X * getScaleX() + getX() + (1 - getScaleX()) * getWidth() * 0.5f,
+                BACKGROUND_Y * getScaleY() + getY() + (1 - getScaleY()) * getHeight() * 0.5f,
+                BACKGROUND_WIDTH * getScaleX(), height);
         super.draw(batch, parentAlpha);
     }
 
 
     public void displayOrHide() {
-        displayHide.setDisplayedY(8);
+
         displayHide.setBeforeDisplayAction(() -> {
             prepareBasicInfoTab();
             InfoStage.getInvestigatorHud().hide().subscribe();

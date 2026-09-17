@@ -18,22 +18,22 @@ public class InvestigatorSheetButtons extends Group {
 
     void initButtons() {
         Label basicInfoLabel = createLabel(get("investigator.tab.basicInfo"), Color.BLACK);
-        Label cardsLabel = createLabel(get("investigator.tab.cards"), Color.BLACK);
-        Label miscLabel = createLabel(get("investigator.tab.background"), Color.BLACK);
+        Label cardsLabel = createLabel(get("investigator.tab.cards"), CharacterSheetWidgets.INK);
+        Label miscLabel = createLabel(get("investigator.tab.background"), CharacterSheetWidgets.INK);
 
-        basicInfoLabel.setX(20);
-        basicInfoLabel.setY(480);
+        basicInfoLabel.setX(40);
+        basicInfoLabel.setY(490);
         basicInfoLabel.setWidth(200);
         basicInfoLabel.setHeight(basicInfoLabel.getPrefHeight());
         addActor(basicInfoLabel);
 
-        cardsLabel.setX(275);
+        cardsLabel.setX(285);
         cardsLabel.setY(490);
         cardsLabel.setWidth(200);
         cardsLabel.setHeight(cardsLabel.getPrefHeight());
         addActor(cardsLabel);
 
-        miscLabel.setX(530);
+        miscLabel.setX(540);
         miscLabel.setY(490);
         miscLabel.setWidth(200);
         miscLabel.setHeight(miscLabel.getPrefHeight());
@@ -92,25 +92,25 @@ public class InvestigatorSheetButtons extends Group {
         underline.setColor(Color.BLACK);
         underline.setWidth(125);
         underline.setHeight(5);
-        underline.setPosition(20 + 37.5f, 475);
+        underline.setPosition(40 + 37.5f, 485);
         addActor(underline);
     }
 
     public void highlightCards() {
         Image underline = new Image(getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        underline.setColor(Color.BLACK);
+        underline.setColor(CharacterSheetWidgets.INK);
         underline.setWidth(125);
         underline.setHeight(5);
-        underline.setPosition(275 + 37.5f, 485);
+        underline.setPosition(285 + 37.5f, 485);
         addActor(underline);
     }
 
     public void highlightBio() {
         Image underline = new Image(getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        underline.setColor(Color.BLACK);
+        underline.setColor(CharacterSheetWidgets.INK);
         underline.setWidth(125);
         underline.setHeight(5);
-        underline.setPosition(530 + 37.5f, 485);
+        underline.setPosition(540 + 37.5f, 485);
         addActor(underline);
     }
 }
