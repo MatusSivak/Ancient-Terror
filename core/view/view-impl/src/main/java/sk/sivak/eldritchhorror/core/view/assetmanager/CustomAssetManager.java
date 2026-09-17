@@ -46,6 +46,17 @@ public class CustomAssetManager extends AssetManager {
 
     public static void loadTextures1() {
         get().progressSubject = PublishSubject.create();
+        // Queue small audio buffers during the loading screen, not while typing.
+        for (int i = 1; i <= 6; i++) {
+            String path = "sounds/typewriter_key_" + i + ".wav";
+            get().load(path, Sound.class);
+            get().soundPaths.add(path);
+        }
+        for (String cue : new String[]{"space", "button_stamp", "paper_out"}) {
+            String path = "sounds/typewriter_" + cue + ".wav";
+            get().load(path, Sound.class);
+            get().soundPaths.add(path);
+        }
         get().load(TICK, Texture.class);
         get().load(MAIN_MENU_BUTTON_NORMAL, Texture.class);
         get().load(MAIN_MENU_BUTTON_PRESSED, Texture.class);
@@ -337,7 +348,18 @@ public class CustomAssetManager extends AssetManager {
 
 
     private static CustomAssetManager instance;
+    private static long soundGeneration;
     private final java.util.Set<String> soundPaths = new java.util.HashSet<>();
+
+    public static long getSoundGeneration() {
+        return soundGeneration;
+    }
+
+    /** Nonblocking lookup: unavailable audio stays silent rather than stalling a frame. */
+    public static Sound getLoadedSound(String path) {
+        return instance != null && instance.isLoaded(path, Sound.class)
+                ? instance.get(path, Sound.class) : null;
+    }
 
     public static Sound getSound(String path) {
         CustomAssetManager manager = get();
@@ -357,6 +379,7 @@ public class CustomAssetManager extends AssetManager {
     }
 
     public static void nullifyInstance() {
+        soundGeneration++;
         if (instance != null) {
             instance.disposeSizedFonts();
             for (String path : instance.soundPaths) {

@@ -76,6 +76,8 @@ public interface GameController {
 
     void showReserve();
 
+    void showInvestigators();
+
     void showDiscard();
 
     void updateDoom();

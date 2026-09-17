@@ -52,6 +52,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     private final TypewriterHeaderTyper typewriterHeaderTyper;
     private final TypewriterQuestionTyper typewriterQuestionTyper;
     private final TypewriterEffect typewriterEffect;
+    private final TypewriterAudio audio = new TypewriterAudio();
 
     private Color fontColor = Color.BLACK;
 
@@ -139,6 +140,14 @@ public class TypewriterViewImpl implements TypewriterView  {
         repeatRuns(prepareRuns(text), onSub);
     }
 
+    void playButtonStamp() {
+        audio.buttonsDisplayed();
+    }
+
+    void playPaperRemoval() {
+        audio.removePaper(FastForwardAction.isOn());
+    }
+
     private List<String> prepareRuns(String text) {
         typewriterTableStack.peek().getTable().addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.moveBy(0, TEXT_LINE_HEIGHT, NEW_LINE_SPEED),
@@ -185,7 +194,7 @@ public class TypewriterViewImpl implements TypewriterView  {
 
             @Override
             public void onChar(Character ch) {
-                super.onChar(ch);
+                audio.onChar(ch, FastForwardAction.isOn());
                 InfoStage.getFastForwardButton().setTypewriterTyping(true);
                 if (FastForwardAction.isOn()) {
                     typingLabel.skipToTheEnd();
@@ -280,6 +289,7 @@ public class TypewriterViewImpl implements TypewriterView  {
 
     @Override
     public Completable showPaper(boolean newPaper) {
+        audio.prepare(CustomAssetManager.getSoundGeneration());
         BigActorsManager.setTypewriterView(this);
         if (newPaper) {
             createTable();
@@ -308,6 +318,11 @@ public class TypewriterViewImpl implements TypewriterView  {
         return Single.create(onSub -> {
             TypingLabel typingLabel = createTypingLabel(label);
             typingLabel.setWrap(true);
+            typingLabel.setTypingListener(new TypingAdapter() {
+                @Override public void onChar(Character ch) {
+                    audio.onChar(ch, FastForwardAction.isOn());
+                }
+            });
             typingLabel.setAlignment(Align.left, Align.center);
             typingLabel.setColor(Color.BLACK);
 

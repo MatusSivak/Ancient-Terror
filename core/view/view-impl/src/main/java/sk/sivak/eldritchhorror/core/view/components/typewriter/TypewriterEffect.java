@@ -39,7 +39,8 @@ public class TypewriterEffect {
         }
         Table table = typewriterView.getTable();
         return Actions.sequence(
-                Actions.moveTo(table.getX(), ViewProperties.VIEWPORT_HEIGHT, .5f, Interpolation.sineIn),
+                Actions.parallel(Actions.run(typewriterView::playPaperRemoval),
+                        Actions.moveTo(table.getX(), ViewProperties.VIEWPORT_HEIGHT, .5f, Interpolation.sineIn)),
                 Actions.run(() -> {
                     table.clear();
                     BigActorsManager.unlock(BigActorsManager.BigActorKey.PAPER);

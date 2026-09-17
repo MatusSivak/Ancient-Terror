@@ -55,6 +55,20 @@ public class InvestigatorsParticipationTest {
         assertEquals(Collections.singletonList(InvestigatorId.THE_SPY), restored.getPlayedInvestigators());
     }
 
+    @Test public void overviewIncludesLostInvestigatorsButExcludesReplacedCharacters() {
+        Investigators investigators = start(true, InvestigatorId.THE_SPY);
+        investigators.lostInTimeAndSpace(InvestigatorId.THE_SPY);
+        assertTrue(investigators.getOnBoardInvestigators().isEmpty());
+        assertEquals(InvestigatorId.THE_SPY,
+                investigators.getSelectedInvestigators().get(0).getInfo().getInvestigatorId());
+        investigators.getSelectedInvestigators().clear();
+        assertEquals(1, investigators.getSelectedInvestigators().size());
+        investigators.defeatInvestigator(InvestigatorId.THE_SPY);
+        investigators.initReplacingInvestigator(InvestigatorId.THE_SPY, find(investigators, InvestigatorId.THE_SAILOR));
+        assertEquals(1, investigators.getSelectedInvestigators().size());
+        assertEquals(InvestigatorId.THE_SAILOR,
+                investigators.getSelectedInvestigators().get(0).getInfo().getInvestigatorId());
+    }
     @Test public void newGameClearsParticipation() {
         Investigators investigators = start(true, InvestigatorId.THE_VIOLINIST);
         investigators.initAvailableInvestigators(false);

@@ -352,6 +352,12 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
+    public void showInvestigators(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
+        BigActorsManager.initInvestigatorsSheet(investigators, activeInvestigatorId);
+        BigActorsManager.displayOrHideInvestigators();
+    }
+
+    @Override
     public void showDiscard(List<CardInfo> discardedCards) {
         BigActorsManager.initDiscardSheet(discardedCards, BigActorsManager::displayOrHideDiscard);
         BigActorsManager.displayOrHideDiscard();

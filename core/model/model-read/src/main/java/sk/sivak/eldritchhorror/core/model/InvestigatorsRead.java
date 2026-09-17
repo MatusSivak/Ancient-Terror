@@ -20,6 +20,8 @@ public interface InvestigatorsRead {
 
     List<? extends InvestigatorRead> getOnBoardInvestigators();
 
+    List<? extends InvestigatorRead> getSelectedInvestigators();
+
     List<InvestigatorInfo> getAvailableInvestigators();
 
     List<InvestigatorId> getPlayedInvestigators();

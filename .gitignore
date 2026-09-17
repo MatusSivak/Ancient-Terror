@@ -4,5 +4,6 @@ core/initializer/target/
 target/
 *.iml
 build/
+output/audio-tools/
 *-logcat.txt
 *-logcat-*.txt

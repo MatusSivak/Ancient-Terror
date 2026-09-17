@@ -357,6 +357,15 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public void showInvestigators() {
+        List<InvestigatorBasics> overview = new LinkedList<>();
+        for (InvestigatorRead investigator : investigators.getSelectedInvestigators()) {
+            overview.add(getInvestigatorBasics(investigator.getInfo().getInvestigatorId()));
+        }
+        view.showInvestigators(overview, investigators.getActiveInvestigatorId());
+    }
+
+    @Override
     public void showDiscard() {
         LinkedList<CardInfo> discardedCards = new LinkedList<>();
         discardedCards.addAll(assetDeck.getDiscardPile());

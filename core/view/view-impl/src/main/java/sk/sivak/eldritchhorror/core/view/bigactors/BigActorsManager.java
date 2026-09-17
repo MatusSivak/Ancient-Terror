@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.card.CardInfo;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorBasics;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.view.components.action.SelectActionComponent;
 import sk.sivak.eldritchhorror.core.view.components.encounter.SelectEncounterTable;
@@ -49,6 +50,7 @@ public class BigActorsManager {
     private AncientOneCard ancientOneCard;
     private Boolean ancientOneAwaken;
     private ReserveSheet reserveSheet;
+    private InvestigatorsSheet investigatorsSheet;
     private DiscardSheet discardSheet;
     private MonsterCard monsterCard;
     private SelectEncounterTable selectEncounterTable;
@@ -72,6 +74,7 @@ public class BigActorsManager {
         mysteryCard = new MysteryCard();
         rumorCard = new RumorCard();
         reserveSheet = new ReserveSheet();
+        investigatorsSheet = new InvestigatorsSheet();
         discardSheet = new DiscardSheet();
         monsterCard = new MonsterCard();
         selectEncounterTable = new SelectEncounterTable();
@@ -224,6 +227,15 @@ public class BigActorsManager {
         displayOrHide(BigActorKey.RESERVE);
     }
 
+    public static void initInvestigatorsSheet(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
+        if (isLocked()) return;
+        getInstance().investigatorsSheet.init(investigators, activeInvestigatorId);
+    }
+
+    public static void displayOrHideInvestigators() {
+        displayOrHide(BigActorKey.INVESTIGATORS);
+    }
+
     public static void initDiscardSheet(List<CardInfo> discardedCards, Action0 onClickAction) {
         if (isLocked()) return;
         getInstance().discardSheet.init(discardedCards, onClickAction);
@@ -338,6 +350,7 @@ public class BigActorsManager {
         RUMOR_CARD(() -> getInstance().rumorCard.displayOrHide()),
         ANCIENT_ONE(() -> getInstance().ancientOneCard.displayOrHide()),
         RESERVE(() -> getInstance().reserveSheet.displayOrHide(null)),
+        INVESTIGATORS(() -> getInstance().investigatorsSheet.displayOrHide()),
         DISCARD(() -> getInstance().discardSheet.displayOrHide(null)),
         PASSPORT(() -> getInstance().passportTable.displayOrHide()),
         PAPER(() -> getInstance().typewriterView.displayOrHide()),

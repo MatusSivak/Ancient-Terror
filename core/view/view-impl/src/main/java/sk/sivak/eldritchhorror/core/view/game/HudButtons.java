@@ -94,8 +94,8 @@ public class HudButtons {
 
         hudButtons = new ButtonGroup<>();
         addHudButtonOnStage(HUD_INVESTIGATOR, 0, true, () -> {
-            GoogleServicesHolder.getAnalyticsTracker().trackInteraction(HUD_BUTTON, "Passport");
-            controller.displayInvestigatorPassport();
+            GoogleServicesHolder.getAnalyticsTracker().trackInteraction(HUD_BUTTON, "Investigators");
+            controller.showInvestigators();
         });
         addHudButtonOnStage(HUD_RESERVE, 1, true, () -> {
             GoogleServicesHolder.getAnalyticsTracker().trackInteraction(HUD_BUTTON, "Reserve");

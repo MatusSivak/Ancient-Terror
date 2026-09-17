@@ -102,6 +102,7 @@ public class OnScreenActors {
         ANCIENT_ONE_CARD,
         PAPER,
         RESERVE_CARD,
+        INVESTIGATORS,
         DISCARD_CARD,
         DIE, PASSPORT, SELECT_ACTION_TABLE, DRAG_AND_DROP
     }

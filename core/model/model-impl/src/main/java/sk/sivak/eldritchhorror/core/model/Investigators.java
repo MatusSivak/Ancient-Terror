@@ -45,6 +45,11 @@ public class Investigators implements InvestigatorsWrite {
     }
 
     @Override
+    public List<InvestigatorWrite> getSelectedInvestigators() {
+        return new ArrayList<>(selectedInvestigators);
+    }
+
+    @Override
     public List<InvestigatorInfo> getAvailableInvestigators() {
         return new LinkedList<>(availableInvestigators);
     }

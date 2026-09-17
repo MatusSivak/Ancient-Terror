@@ -76,6 +76,8 @@ public interface GameView {
 
     void showReserve(List<AssetInfo> reserve);
 
+    void showInvestigators(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId);
+
     Completable showAncientOneCard(AncientOneInfo ancientOneInfo);
 
     void updateDoom(int doom);

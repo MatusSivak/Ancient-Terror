@@ -74,6 +74,7 @@ public class TypewriterQuestionTyper {
             miniTable.add(button.textButton).width(350).height(BUTTON_HEIGHT).padBottom(5).row();
         }
         typewriterView.getTable().add(miniTable).padTop(0).padBottom(10).row();
+        if (!buttons.isEmpty()) typewriterView.playButtonStamp();
         typewriterView.getTable().addAction(Actions.moveBy(0,
                 5 + (BUTTON_HEIGHT / 2f) * buttons.size(), NEW_LINE_SPEED));
         typewriterView.increaseOffset(10 + (BUTTON_HEIGHT / 2f) * buttons.size());
@@ -92,6 +93,7 @@ public class TypewriterQuestionTyper {
         }
         miniTable.center();
         typewriterView.getTable().add(miniTable).padTop(10).padBottom(10).row();
+        if (!buttons.isEmpty()) typewriterView.playButtonStamp();
         typewriterView.getTable().addAction(Actions.moveBy(0,
                 15 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED));
         typewriterView.increaseOffset(20 + BUTTON_HEIGHT / 2f);
