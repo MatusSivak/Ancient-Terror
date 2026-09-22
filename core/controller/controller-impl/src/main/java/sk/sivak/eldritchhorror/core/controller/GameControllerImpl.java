@@ -43,6 +43,7 @@ import sk.sivak.eldritchhorror.core.model.LocationMapRead;
 import sk.sivak.eldritchhorror.core.model.MonsterCupRead;
 import sk.sivak.eldritchhorror.core.model.MysteryDeckRead;
 import sk.sivak.eldritchhorror.core.model.OmenTrackRead;
+import sk.sivak.eldritchhorror.core.model.PerformedActionsRead;
 import sk.sivak.eldritchhorror.core.model.RumorsRead;
 import sk.sivak.eldritchhorror.core.model.SpellsDeckRead;
 import sk.sivak.eldritchhorror.core.view.EncounterView;
@@ -75,6 +76,7 @@ public class GameControllerImpl implements GameController {
     private DoomTrackRead doomTrackRead;
     private BackgroundModelRead backgroundModel;
     private InvestigatorsRead investigators;
+    private PerformedActionsRead performedActions;
     private LocationMapRead locationMap;
     private CluePoolRead cluePoolRead;
     private AncientOneRead ancientOne;
@@ -99,6 +101,10 @@ public class GameControllerImpl implements GameController {
 
     public void setInvestigators(InvestigatorsRead investigators) {
         this.investigators = investigators;
+    }
+
+    public void setPerformedActions(PerformedActionsRead performedActions) {
+        this.performedActions = performedActions;
     }
 
     public void setOmenTrack(OmenTrackRead omenTrack) {
@@ -387,6 +393,12 @@ public class GameControllerImpl implements GameController {
     public Single<ActionPhaseAction> selectAction(List<ActionPhaseAction> actionPhaseActions) {
 //        return Single.create(onSub -> {});
         return view.selectAction(actionPhaseActions);
+    }
+
+    @Override
+    public int getCurrentActionNumber() {
+        int actionsRemaining = performedActions.getActionsRemaining(investigators.getActiveInvestigatorId());
+        return actionsRemaining >= 2 ? 1 : 2;
     }
 
     @Override

@@ -86,6 +86,8 @@ public interface GameController {
 
     Single<ActionPhaseAction> selectAction(List<ActionPhaseAction> actionPhaseActions);
 
+    int getCurrentActionNumber();
+
     Completable travelToLocation(LocationId input);
 
     Completable initInvestigators();

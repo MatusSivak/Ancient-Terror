@@ -35,6 +35,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
     private Image noHitImage;
     private boolean onStage;
     private boolean visible;
+    private String selectActionText;
 
     public SelectActionComponent() {
         /*
@@ -44,7 +45,8 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         */
     }
 
-    public void init(List<ActionPhaseAction> actionPhaseActions, Action0 onShowAction) {
+    public void init(List<ActionPhaseAction> actionPhaseActions, int actionNumber, Action0 onShowAction) {
+        selectActionText = get("action.select", actionNumber);
         onStage = true;
         clear();
         setPosition(0, 0);
@@ -114,7 +116,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
     public void displayOrHide() {
         if (getParent() == null) {
-            InfoStage.displayTextDontHide(get("action.select"));
+            InfoStage.displayTextDontHide(selectActionText);
             visible = true;
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
             InfoStage.addBigActor(null, this, null, null);
@@ -130,11 +132,11 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             return;
         }
         if (!visible) {
-            InfoStage.displayTextDontHide(get("action.select"));
+            InfoStage.displayTextDontHide(selectActionText);
             hideOkButtons.alphaToValue(1f);
             visible = true;
         } else {
-            InfoStage.hideLabel(get("action.select"));
+            InfoStage.hideLabel(selectActionText);
             hideOkButtons.alphaToValue(0f);
             visible = false;
         }
@@ -153,7 +155,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             ActionPhaseAction selectedActionPhaseAction = findSelectedActionPhaseAction(selectedActionButtonData);
             BigActorsManager.displayOrHideActionsTable();
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
-            InfoStage.hideLabel(get("action.select"));
+            InfoStage.hideLabel(selectActionText);
             subscriber.onSuccess(selectedActionPhaseAction);
         };
     }

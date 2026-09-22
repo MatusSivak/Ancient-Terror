@@ -291,6 +291,9 @@ public class GameViewImpl implements Screen, GameView {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         backgroundStage.act();
+        // Off-screen icon rendering resets the GL viewport to the full window.
+        // Restore the fitted viewport so stars cannot spill into the black gutters.
+        backgroundStage.getViewport().apply();
         backgroundStage.draw();
 
         MapStage.render(delta);

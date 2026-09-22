@@ -42,7 +42,7 @@ public class SelectActionView {
                 return;
             }
             Gdx.app.postRunnable(() -> {
-                BigActorsManager.initActionsTable(actionPhaseActions, onSub, () -> {
+                BigActorsManager.initActionsTable(actionPhaseActions, controller.getCurrentActionNumber(), onSub, () -> {
                     LocationId location = controller.getInvestigatorBasics().getLocationId();
                     if (location != null) {
                         MapUtils.moveCameraToLocation(location).subscribe();

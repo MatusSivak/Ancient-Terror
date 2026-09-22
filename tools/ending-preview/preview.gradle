@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('endingPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/ending-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewAzathothEnding', JavaExec) {
+        dependsOn desktop.tasks.named('endingPreviewClasses')
+        classpath = desktop.sourceSets.endingPreview.runtimeClasspath
+        mainClass.set('AzathothEndingPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

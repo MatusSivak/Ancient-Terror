@@ -56,6 +56,7 @@ import sk.sivak.eldritchhorror.core.view.components.investigator.SelectMultipleI
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
 import sk.sivak.eldritchhorror.core.view.components.table.ActorFrame;
 import sk.sivak.eldritchhorror.core.view.components.tutorial.Chalkboard;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.AzathothEndingDialog;
 import sk.sivak.eldritchhorror.core.view.components.tutorial.TouchBlocker;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -99,6 +100,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private MonsterCard monsterCard;
     private Image background;
     private Chalkboard chalkboard;
+    private AzathothEndingDialog azathothEndingDialog;
     private boolean screenInitialized;
     private TextButton collectionButton;
     private TextButton hallOfFameButton;
@@ -613,6 +615,17 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public Completable displayChalkboard(String text, int positionX, int positionY) {
+        if (AzathothEndingDialog.TEXT_KEY.equals(text)) {
+            if (chalkboard != null) {
+                chalkboard.remove();
+            }
+            if (azathothEndingDialog != null) {
+                azathothEndingDialog.remove();
+            }
+            azathothEndingDialog = new AzathothEndingDialog();
+            InfoStage.getChalkboardLayer().addActor(azathothEndingDialog);
+            return azathothEndingDialog.awaitDismissal();
+        }
         if (chalkboard == null) {
             chalkboard = new Chalkboard(skin);
         }
@@ -644,7 +657,13 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public void hideChalkboard() {
-        chalkboard.hide();
+        if (azathothEndingDialog != null) {
+            azathothEndingDialog.remove();
+            azathothEndingDialog = null;
+        }
+        if (chalkboard != null) {
+            chalkboard.hide();
+        }
     }
 
     @Override

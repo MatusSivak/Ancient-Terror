@@ -58,11 +58,6 @@ public class CustomAssetManager extends AssetManager {
             get().soundPaths.add(path);
         }
         get().load(TICK, Texture.class);
-        get().load(MAIN_MENU_BUTTON_NORMAL, Texture.class);
-        get().load(MAIN_MENU_BUTTON_PRESSED, Texture.class);
-        get().load(MAIN_MENU_DIALOG, Texture.class);
-        get().load(MAIN_MENU_DIALOG_BUTTON_NORMAL, Texture.class);
-        get().load(MAIN_MENU_DIALOG_BUTTON_PRESSED, Texture.class);
         get().load("background/gray.jpg", Texture.class);
         get().load("background/pure_white.png", Texture.class);
 
@@ -322,7 +317,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPELL_CARD_BACKGROUND = "card/spell_background.jpg";
     public final static String TOKEN_CARD_BACKGROUND = "card/token_background.jpg";
     public final static String DISABLED_CARD = "card/disabled.png";
-    public final static String ANCIENT_ONE_DIALOG_BACKGROUND = "ancient_one/dialog-background.png";
+    public final static String ANCIENT_ONE_DIALOG_BACKGROUND = "ancient_one/azathoth-ending-background.png";
     public final static String NEW_FONT_LIBRE_BASKERVILLE = "new_font/Libre Baskerville/hiero.fnt";
     public final static String NEW_FONT_CINZEL = "new_font/Cinzel/hiero.fnt";
     public final static String NEW_FONT_SOURCE_SERIF_4 = "new_font/Source Serif 4/hiero.fnt";
@@ -336,12 +331,6 @@ public class CustomAssetManager extends AssetManager {
     public final static String ACTION_BUTTON_DISABLED_NORMAL = "action_button/disabled.png";
     public final static String ACTION_BUTTON_DISABLED_PRESSED = "action_button/disabled_pressed.png";
     public final static String ACTION_BUTTON_DISABLED_CHECKED = "action_button/disabled_checked.png";
-
-    public final static String MAIN_MENU_BUTTON_NORMAL = "main_menu_button/normal.png";
-    public final static String MAIN_MENU_BUTTON_PRESSED = "main_menu_button/pressed.png";
-    public final static String MAIN_MENU_DIALOG = "main_menu_button/dialog.png";
-    public final static String MAIN_MENU_DIALOG_BUTTON_NORMAL = "main_menu_button/dialog_button_normal.png";
-    public final static String MAIN_MENU_DIALOG_BUTTON_PRESSED = "main_menu_button/dialog_button_pressed.png";
 
     public final static String ACTION_BUTTON_CARD_MASK_SHADOW = "action_button/card_mask_shadow.png";
     public final static String ACTION_BUTTON_CARD_MASK = "action_button/card_mask.png";

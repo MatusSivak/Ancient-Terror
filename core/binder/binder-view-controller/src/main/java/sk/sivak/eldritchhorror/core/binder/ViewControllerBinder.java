@@ -58,6 +58,7 @@ public class ViewControllerBinder {
         controller.setArtifactsDeck(modelProvider.getArtifactsDeck());
         controller.setDoomTrackRead(modelProvider.getDoomTrack());
         controller.setOmenTrack(modelProvider.getOmenTrack());
+        controller.setPerformedActions(modelProvider.getPerformedActions());
         controller.setInvestigators(modelProvider.getInvestigators());
         controller.setLocationMap(modelProvider.getLocationMap());
         controller.setCluePoolRead(modelProvider.getCluePool());
