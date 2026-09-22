@@ -28,8 +28,6 @@ import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MONSTER_SHEET;
-
 public class MonsterCardEffect {
 
     private static Table specialTextTable;
@@ -183,16 +181,13 @@ public class MonsterCardEffect {
                 if (monsterCard.getStage() == null) {
                     return;
                 }
-                CustomAssetManager.getTextureAsync(MONSTER_SHEET).subscribe(ok -> {
-                    blackMonsterCard = new Image(CustomAssetManager.getTextureRegionDrawable(MONSTER_SHEET));
-                    blackMonsterCard.setTouchable(Touchable.disabled);
-                    blackMonsterCard.setColor(0f, 0f, 0f, 0f);
-                    blackMonsterCard.addAction(Actions.color(new Color(0f, 0f, 0f, 0.75f),0.5f));
-
-                    blackMonsterCard.setSize(monsterCard.getWidth(), monsterCard.getHeight());
-                    blackMonsterCard.setPosition(monsterCard.getX(), monsterCard.getY());
-                    monsterCard.getStage().addActor(blackMonsterCard);
-                });
+                blackMonsterCard = new Image(MonsterCard.createSheetBackground());
+                blackMonsterCard.setTouchable(Touchable.disabled);
+                blackMonsterCard.setColor(0f, 0f, 0f, 0f);
+                blackMonsterCard.addAction(Actions.color(new Color(0f, 0f, 0f, 0.75f),0.5f));
+                blackMonsterCard.setSize(monsterCard.getWidth(), monsterCard.getHeight());
+                blackMonsterCard.setPosition(monsterCard.getX(), monsterCard.getY());
+                monsterCard.getStage().addActor(blackMonsterCard);
 
                 c1.accept(monsterCard);
                 Table textTable = s1.get();

@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -35,7 +34,6 @@ public class SelectAncientOneTable extends Table {
     private final TextButton confirm = new TextButton("", AncientTerrorMenuStyles.button());
     private final ScrollPane descriptionScroll;
     private AncientOneId selected;
-    private boolean purchasePending;
     private boolean completed;
 
     public SelectAncientOneTable(List<AncientOneInfo> availableAncientOnes,
@@ -106,7 +104,11 @@ public class SelectAncientOneTable extends Table {
         card.add(new Stack(portrait, lockOverlay)).growX().height(144f).row();
         card.add(label(get(prefix(id) + ".name"), 0.33f, "E8D9B0")).growX().height(28f).row();
         card.add(label(get(prefix(id) + ".alt"), 0.25f, "BEB69F")).growX().height(32f);
-        addClickListener(card, () -> { if (!purchasePending && !completed) select(id); });
+        addClickListener(card, () -> {
+            if (completed) return;
+            select(id);
+            if (!unlocked.get(id)) showFullGamePurchase();
+        });
         return card;
     }
 
@@ -133,12 +135,14 @@ public class SelectAncientOneTable extends Table {
         description.setText(text.toString());
         descriptionScroll.setScrollY(0f);
         status.setText(get(unlocked.get(id) ? "ancientOne.selection.available" : "ancientOne.selection.locked"));
-        confirm.setText(get(unlocked.get(id) ? "ancientOne.selection.confirm" : "ancientOne.selection.unlock", get(prefix(id) + ".name")));
+        confirm.setText(unlocked.get(id)
+                ? get("ancientOne.selection.confirm", get(prefix(id) + ".name"))
+                : get("purchase.fullGame.buy"));
         confirm.setDisabled(false);
     }
 
     private void confirmSelection() {
-        if (selected == null || confirm.isDisabled() || completed || purchasePending) return;
+        if (selected == null || confirm.isDisabled() || completed) return;
         final AncientOneId id = selected;
         if (unlocked.get(id)) {
             completed = true;
@@ -147,22 +151,18 @@ public class SelectAncientOneTable extends Table {
             if (!subscriber.isUnsubscribed()) subscriber.onSuccess(choices.get(id));
             return;
         }
-        purchasePending = true;
-        confirm.setDisabled(true);
-        status.setText(get("ancientOne.selection.purchasing"));
-        new InAppPurchaseManager().purchaseProduct(productId(id)).subscribe(success -> Gdx.app.postRunnable(() -> {
-            purchasePending = false;
-            if (success) {
+        showFullGamePurchase();
+    }
+
+    private void showFullGamePurchase() {
+        FullGamePurchaseDialog.show(getStage(), () -> {
+            for (AncientOneId id : unlocked.keySet()) {
                 unlocked.put(id, true);
-                locks.get(id).setVisible(false);
+                Image lock = locks.get(id);
+                if (lock != null) lock.setVisible(false);
             }
-            select(id);
-            if (!success) status.setText(get("ancientOne.selection.purchaseCancelled"));
-        }), error -> Gdx.app.postRunnable(() -> {
-            purchasePending = false;
-            select(id);
-            status.setText(get("ancientOne.selection.purchaseFailed"));
-        }));
+            if (selected != null) select(selected);
+        });
     }
 
     private static void section(StringBuilder result, String heading, String value) {

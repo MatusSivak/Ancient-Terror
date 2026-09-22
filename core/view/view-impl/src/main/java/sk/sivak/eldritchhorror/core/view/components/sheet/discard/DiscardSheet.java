@@ -1,11 +1,13 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.discard;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -15,7 +17,6 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
-import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CardClickListener;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
@@ -25,7 +26,6 @@ import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_CINZEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
@@ -67,7 +67,6 @@ public class DiscardSheet extends VisTable {
         pad(16, PANEL_PADDING, 20, PANEL_PADDING);
 
         List<CardTemplate> cardTemplates = toCardTemplates(discardedCards);
-        createListeners(cardTemplates);
         addHitImage(onClickAction);
 
         discardLabel.setText(get("discard.label"));
@@ -133,7 +132,13 @@ public class DiscardSheet extends VisTable {
         hitImage.getColor().a = 0.0f;
         hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
         if (onClickAction != null) {
-            addClickListener(hitImage, onClickAction::call);
+            // Capture taps anywhere in the sheet, including its cards and scrollbar.
+            addCaptureListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    onClickAction.call();
+                }
+            });
         }
     }
 
@@ -152,22 +157,6 @@ public class DiscardSheet extends VisTable {
             cardTemplates.add(CardTemplate.buildCard(discardedCard));
         }
         return cardTemplates;
-    }
-
-    private List<CardClickListener> createListeners(List<CardTemplate> cardTemplates) {
-        List<CardClickListener> listeners = new LinkedList<>();
-        for (CardTemplate currentTemplate : cardTemplates) {
-            CardClickListener listener = new CardClickListener();
-            listeners.add(listener);
-            listener.setAllTemplates(cardTemplates);
-            currentTemplate.addListener(listener);
-        }
-
-        for (CardClickListener currentListener : listeners) {
-            currentListener.setOtherListeners(listeners);
-        }
-
-        return listeners;
     }
 
     public void displayOrHide(Action0 action) {

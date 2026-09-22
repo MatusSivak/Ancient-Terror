@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('monsterSheetPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/monster-sheet-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewMonsterSheet', JavaExec) {
+        dependsOn desktop.tasks.named('monsterSheetPreviewClasses')
+        classpath = desktop.sourceSets.monsterSheetPreview.runtimeClasspath
+        mainClass.set('MonsterSheetPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}
