@@ -1,14 +1,14 @@
 package sk.sivak.eldritchhorror.core.view.components.encounter;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
 import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -41,30 +41,29 @@ public class SelectEncounterTable extends Table {
         this.onSub = onSub;
     }
 
-    private static final int TABLE_WIDTH = 2* (EncounterButton.LABEL_WIDTH + EncounterButton.BUTTON_SIZE + 15) + 90;
-    private static final int TABLE_HEIGHT = (int) (1083f/1627f * TABLE_WIDTH);
-    private static final int PAD_LEFT = 37;
-    private static final int PAD_TOP = 35;
+    private static final int TABLE_WIDTH = 744;
+    private static final int CONTENT_WIDTH = TABLE_WIDTH - 64;
+    private static final int OPTION_WIDTH = (CONTENT_WIDTH - 12) / 2;
 
     public void init(Collection<EncounterButtonData> encounterButtonDataList) {
         clear();
         setTransform(true);
         displayHide.setBeforeHideAction(this::beforeHide);
-        align(Align.topLeft);
-        padTop(PAD_TOP);
-        padLeft(PAD_LEFT);
-        Image selectEncounterImage = new Image(CustomAssetManager.getTexture("select_encounter_label.png"));
-        selectEncounterImage.setScaling(Scaling.fit);
-        int imageMaxWidth = 2 * (EncounterButton.LABEL_WIDTH + EncounterButton.BUTTON_SIZE + 15) + 5;
-        float imageHeight = 130/903f * imageMaxWidth;
-        add(selectEncounterImage)
-                .colspan(2)
-                .height(80)
-                .padLeft(10)
-                .padRight(10)
-                .maxWidth(imageMaxWidth)
-                .height(imageHeight)
-                .row();
+        top();
+        NinePatch background = CustomAssetManager.createMenuDialogPatch();
+        background.scale(0.5f, 0.5f);
+        setBackground(new NinePatchDrawable(background));
+        pad(8, 32, 24, 32);
+        Label title = new Label(get("encounter.chooseTitle"), new Label.LabelStyle(
+                CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 30),
+                new Color(0xeee1c5ff)));
+        title.setAlignment(Align.center);
+        add(title).width(CONTENT_WIDTH).height(36).padBottom(18).row();
+        Label hint = new Label(get("encounter.chooseHint"), new Label.LabelStyle(
+                CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 18),
+                new Color(0xcbb990ff)));
+        hint.setAlignment(Align.center);
+        add(hint).width(CONTENT_WIDTH).padBottom(14).row();
 
         Table buttonsTable = new Table();
         buttonsTable.align(Align.topLeft);
@@ -73,10 +72,11 @@ public class SelectEncounterTable extends Table {
             EncounterButton encounterButton = new EncounterButton(encounterButtonData);
             encounterButton.setSelectEncounterListener(this);
             buttonsTable.add(encounterButton)
-                    .width(EncounterButton.LABEL_WIDTH + EncounterButton.BUTTON_SIZE + 15)
-                    .height(EncounterButton.BUTTON_SIZE + 10)
-                    .padLeft(left?0:5)
-                    .padBottom(5);
+                    .width(OPTION_WIDTH)
+                    .minHeight(70)
+                    .fillY()
+                    .padLeft(left ? 0 : 12)
+                    .padBottom(10);
             if (!left) {
                 buttonsTable.row();
             }
@@ -86,27 +86,33 @@ public class SelectEncounterTable extends Table {
         if (!left) {
             buttonsTable.row();
         }
-        scrollPane = new ScrollPane(buttonsTable);
+        buttonsTable.pack();
+        scrollPane = new ScrollPane(buttonsTable, new ScrollPane.ScrollPaneStyle());
         scrollPane.setScrollingDisabled(true,false);
-        add(scrollPane).height(220).width(595).align(Align.topLeft).row();
+        scrollPane.setOverscroll(false, false);
+        float listHeight = Math.min(282, buttonsTable.getPrefHeight());
+        add(scrollPane).height(Math.max(70, listHeight)).width(CONTENT_WIDTH).row();
+        if (buttonsTable.getPrefHeight() > listHeight) {
+            Label scrollHint = new Label(get("encounter.scrollHint"), hint.getStyle());
+            scrollHint.setAlignment(Align.center);
+            add(scrollHint).height(22).row();
+        }
 
-        TextButton hideButton = ButtonBuilder.buildButton(get("dialog.hide"));
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(
+                EncounterChoiceDrawable.NORMAL, EncounterChoiceDrawable.PRESSED, null,
+                CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 21));
+        style.over = EncounterChoiceDrawable.HOVER;
+        style.fontColor = new Color(0xeee1c5ff);
+        TextButton hideButton = new TextButton(get("dialog.hide"), style);
+        hideButton.pad(6, 18, 6, 18);
         add(hideButton)
-                .height(hideButton.getHeight())
-                .width(hideButton.getWidth())
-                .growY()
-                .padBottom(34)
-                .align(Align.bottom)
-                .colspan(2);
+                .height(38)
+                .width(120)
+                .padTop(12);
 
         ButtonUtils.addClickListener(hideButton, BigActorsManager::displayOrHideEncounterTable);
         pack();
-        // 1627 x 1083
-        setSize(TABLE_WIDTH, TABLE_HEIGHT);
-        CustomAssetManager.getTextureAsync("wooden_background.png").subscribe(ok -> {
-            TextureRegionDrawable textureRegionDrawable = CustomAssetManager.getTextureRegionDrawable("wooden_background.png");
-            setBackground(textureRegionDrawable);
-        });
+        setWidth(TABLE_WIDTH);
 
 
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -28,7 +29,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public class EncounterButton extends Table {
 
     public static final int LABEL_WIDTH = 230;
-    public static final int BUTTON_SIZE = 50;
+    public static final int BUTTON_SIZE = 44;
     public static final float OPACITY_3 = 1f;
     public static final float OPACITY_1 = 0.75f;
     public static final float OPACITY_2 = 0.875f;
@@ -37,6 +38,8 @@ public class EncounterButton extends Table {
     private EncounterButtonData encounterButtonData;
     private ActionButton actionButton;
     private SelectEncounterTable selectEncounterListener;
+    private Image hitImage;
+    private ClickListener choiceListener;
 
     public EncounterButton(EncounterButtonData encounterButtonData) {
         this.encounterButtonData = encounterButtonData;
@@ -51,9 +54,11 @@ public class EncounterButton extends Table {
             initDisabled();
         }
 
+        setBackground(EncounterChoiceDrawable.NORMAL);
+        left();
+        pad(12);
         addHitImage();
         pack();
-        setBackground(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.GRAY_BACKGROUND));
     }
 
     public void setSelectEncounterListener(SelectEncounterTable selectEncounterListener) {
@@ -88,7 +93,9 @@ public class EncounterButton extends Table {
         addActionButton();
         Table lines = new Table();
         lines.add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getFirstLine()))).left().width(LABEL_WIDTH).row();
-        lines.add(createEnabledLabel(resolveLocalizedText(encounterButtonData.getSecondLine()))).left().width(LABEL_WIDTH).row();
+        Label detail = createLabel(resolveLocalizedText(encounterButtonData.getSecondLine()), new Color(0xcbb990ff));
+        detail.setStyle(new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 18), new Color(0xcbb990ff)));
+        lines.add(detail).left().width(LABEL_WIDTH).padTop(3).row();
         add(lines).padLeft(5).padRight(5);
     }
 
@@ -102,7 +109,7 @@ public class EncounterButton extends Table {
         Integer currentHealth = combatEncounterButtonData.getMonsterInfo().getCurrentHealth();
 
         ToughnessBar toughnessBar = new ToughnessBar();
-        float scale = 0.49f;
+        float scale = Math.min(0.49f, LABEL_WIDTH / (Math.max(1, toughness == null ? 0 : toughness) * 42.3f));
         toughnessBar.init(toughness == null ? 0 : toughness, currentHealth == null ? 0 : currentHealth, scale);
 
         lines.add(toughnessBar).height(53 * scale).left().row();
@@ -127,6 +134,9 @@ public class EncounterButton extends Table {
             actionButton = ActionButton.build(actionButtonData);
         }
 
+        ImageButton.ImageButtonStyle iconStyle = new ImageButton.ImageButtonStyle(actionButton.getStyle());
+        iconStyle.up = iconStyle.down = iconStyle.checked = iconStyle.over = iconStyle.disabled = null;
+        actionButton.setStyle(iconStyle);
         actionButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -165,17 +175,17 @@ public class EncounterButton extends Table {
     }
 
     private Label createEnabledLabel(String text) {
-        return createLabel(text, Color.WHITE);
+        return createLabel(text, new Color(0xeee1c5ff));
     }
 
     private Label createDisabledLabel(String text) {
-        return createLabel(resolveLocalizedText(text), new Color(1f, 0.25f, 0.25f, 1f));
+        return createLabel(resolveLocalizedText(text), new Color(0xe4a39aff));
     }
 
     private Label createLabel(String text, Color color) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 20), color);
         Label label = new Label(text, labelStyle);
-        label.setFontScale(0.5f);
+        label.setWrap(true);
         label.setAlignment(Align.left, Align.left);
         return label;
     }
@@ -194,16 +204,28 @@ public class EncounterButton extends Table {
 
     @Override
     protected void drawBackground(Batch batch, float parentAlpha, float x, float y) {
-        super.drawBackground(batch, parentAlpha * backgroundAlpha, x, y);
+        EncounterChoiceDrawable background = !encounterButtonData.isEnabled() ? EncounterChoiceDrawable.DISABLED
+                : choiceListener != null && choiceListener.isPressed() ? EncounterChoiceDrawable.PRESSED
+                : choiceListener != null && choiceListener.isOver() ? EncounterChoiceDrawable.HOVER
+                : EncounterChoiceDrawable.NORMAL;
+        Color before = batch.getColor();
+        float r = before.r, g = before.g, b = before.b, a = before.a;
+        Color tint = getColor();
+        batch.setColor(tint.r, tint.g, tint.b, tint.a * parentAlpha);
+        background.draw(batch, x, y, getWidth(), getHeight());
+        batch.setColor(r, g, b, a);
     }
 
     private void addHitImage() {
         Image image = new Image(CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
         image.setColor(new Color(1f,1f,1f,0f));
-        image.setWidth(LABEL_WIDTH + 5);
-        image.setHeight(BUTTON_SIZE);
-        image.setPosition(BUTTON_SIZE + 5, 5);
-        image.addListener(new ClickListener() {
+        hitImage = image;
+        choiceListener = new ClickListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                super.touchUp(event, x, y, pointer, button);
+                actionButton.setPressedOverride(false);
+            }
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 boolean result = super.touchDown(event, x, y, pointer, button);
@@ -239,8 +261,17 @@ public class EncounterButton extends Table {
                 super.touchDragged(event, x, y, pointer);
             }
 
-        });
+        };
+        image.addListener(choiceListener);
         addActor(image);
+    }
+
+    @Override
+    public void layout() {
+        super.layout();
+        if (hitImage != null) {
+            hitImage.setBounds(0, 0, getWidth(), getHeight());
+        }
     }
 
     private void onClick() {
