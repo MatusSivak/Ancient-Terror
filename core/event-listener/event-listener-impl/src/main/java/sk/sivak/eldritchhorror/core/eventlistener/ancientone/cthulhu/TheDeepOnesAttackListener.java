@@ -158,7 +158,7 @@ public class TheDeepOnesAttackListener extends AbstractMysteryListener implement
         MysteryEncounter encounter = new MysteryEncounter(mysteryCardInfo.getName());
         availableEncounters.addEncounter(encounter);
         if (!spendData.hasEnough()) {
-            encounter.disable("Requires Clue");
+            encounter.disable("encounter.disabled.requiresClue");
         }
         encounter.setButtonIcon("VORTEX");
         ServicePlatform.get().getService().convertTo(AvailableEncounters.class, () -> availableEncounters);

@@ -29,7 +29,7 @@ public class DisableNonCombatEncountersAction extends AbstractHookableAction<Ava
     private void disableNonCombatEncounters() {
         IterableUtils.forEach(input.getEncounters(), encounter -> {
             if (encounter.getEncounterType() != EncounterType.COMBAT) {
-                encounter.getEncounterButtonData().disable("Defeat Monsters first");
+                encounter.getEncounterButtonData().disable("encounter.disabled.defeatMonsters");
             }
         });
     }

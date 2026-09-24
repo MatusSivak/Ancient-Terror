@@ -15,6 +15,7 @@ import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.constants.encounter.*;
 import sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster;
 import sk.sivak.eldritchhorror.core.view.components.encounter.*;
+import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import java.util.*;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class EncounterPreview extends ApplicationAdapter {
             combat.setButtonIcon("monster/ElderThing.png"); combat.setFirstLine("Elder Thing");
             options.add(combat);
             EncounterButtonData disabled = option("disabled", "glyphs/will.png", "Other world", null);
-            disabled.disable("You cannot enter this encounter until the monsters on your space are defeated.");
+            disabled.disable("encounter.disabled.detained");
             options.add(disabled);
             options.add(option("rest", "glyphs/influence.png", "Recover and prepare", null));
             render(table, options, "encounters");
@@ -66,8 +67,10 @@ public class EncounterPreview extends ApplicationAdapter {
             draw("encounters-bottom");
             render(table, options.subList(0, 1), "encounters-single");
             render(table, Arrays.asList(
-                    option("city", "encounter/CITY.png", "City", null),
-                    option("skip", "action_button/skip.png", "Skip", null)), "encounters-city-skip");
+                    typed(option("city", "encounter/CITY.png", "City", null), EncounterType.GENERAL),
+                    typed(option("buenos", "encounter/CITY.png", "Buenos Aires", "Gain Ritual Spells"), EncounterType.LOCATION),
+                    typed(option("gate", "RED_GATE", "Other World", null), EncounterType.OTHER_WORLD),
+                    typed(option("skip", "encounter/skip.png", "Skip", null), EncounterType.SKIP)), "encounters-city-skip");
             cards.clear();
             collect(table, cards);
             Vector2 point = cards.get(0).localToStageCoordinates(new Vector2(100, 30));
@@ -77,9 +80,52 @@ public class EncounterPreview extends ApplicationAdapter {
             stage.touchDown((int) point.x, (int) point.y, 0, 0);
             draw("encounters-pressed");
             stage.touchUp((int) point.x, (int) point.y, 0, 0);
+            render(table, Arrays.asList(
+                    typed(option("red", "RED_GATE", "Other World", null), EncounterType.OTHER_WORLD),
+                    typed(option("green", "GREEN_GATE", "Other World", null), EncounterType.OTHER_WORLD),
+                    typed(option("blue", "BLUE_GATE", "Other World", null), EncounterType.OTHER_WORLD)), "encounters-gates");
+            CombatEncounterButtonData monster = new CombatEncounterButtonData("monster", new ElderThingMonster());
+            monster.setButtonIcon("monster/ElderThing.png"); monster.setFirstLine("Elder Thing");
+            EncounterButtonData wilderness = typed(option("wild", "encounter/WILDERNESS.png", "Wilderness", null), EncounterType.GENERAL);
+            wilderness.disable("encounter.disabled.defeatMonsters");
+            EncounterButtonData blockedSkip = typed(option("skip", "encounter/skip.png", "Skip", null), EncounterType.SKIP);
+            blockedSkip.disable("encounter.disabled.defeatMonsters");
+            render(table, Arrays.asList(wilderness, blockedSkip, monster), "encounters-required");
+            cards.clear(); collect(table, cards);
+            if (cards.size() != 2) throw new AssertionError("Disabled Skip should be hidden");
+            if (!cards.get(0).isRequired()) throw new AssertionError("Required monster should be first");
+            List<String> texts = new ArrayList<>(); labels(table, texts);
+            if (!texts.contains(UiText.get("encounter.defeatTitle.one"))) throw new AssertionError("Missing defeat heading: " + texts);
+            if (!texts.contains(UiText.get("encounter.defeatHint"))) throw new AssertionError("Missing defeat hint: " + texts);
+            if (texts.contains(UiText.get("encounter.disabled.defeatMonsters"))) throw new AssertionError("Per-card reason should be hidden");
+            if (texts.contains(UiText.get("dialog.hide"))) throw new AssertionError("Hide button should be removed");
+            List<EncounterButtonData> reasons = new ArrayList<>();
+            for (String key : new String[]{"defeatMonsters", "nonEpicFirst", "alreadyEncountered", "notEnoughClues",
+                    "requiresClue", "requiresSpell", "detained", "tutorial"}) {
+                EncounterButtonData reason = option(key, "encounter/CITY.png", "Arkham Asylum Gate", null);
+                reason.disable("encounter.disabled." + key);
+                reasons.add(reason);
+            }
+            render(table, reasons, "encounters-reasons");
+            List<String> reasonTexts = new ArrayList<>(); labels(table, reasonTexts);
+            if (!reasonTexts.contains(UiText.get("encounter.chooseTitle"))) throw new AssertionError("No combat option: expected choose heading");
+            List<EncounterButtonData> longest = new ArrayList<>();
+            longest.add(typed(option("arkham", "encounter/big_city.png", "San Francisco", "Gain Incantation Spells"), EncounterType.LOCATION));
+            longest.add(typed(option("sf", "encounter/big_city.png", "San Francisco", "Improve Observation"), EncounterType.LOCATION));
+            longest.add(typed(option("mystery", "encounter/redpin.png", "Active Mystery", "Seed of the Daemon Sultan"), EncounterType.MYSTERY));
+            longest.add(typed(option("mystery2", "encounter/redpin.png", "Active Mystery", "Hour of the Moon Lens"), EncounterType.MYSTERY));
+            longest.add(typed(option("title", "encounter/CITY.png", "Arkham Asylum Gate", null), EncounterType.GENERAL));
+            CombatEncounterButtonData shambler = new CombatEncounterButtonData("shambler", new ElderThingMonster());
+            shambler.setButtonIcon("monster/ElderThing.png"); shambler.setFirstLine("Dimensional Shambler");
+            longest.add(shambler);
+            render(table, longest, "encounters-longest");
+            assertSingleLines(table);
             System.out.println("PASS: encounter layout, selection, disabled option, overflow and single option");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }
+    }
+    private EncounterButtonData typed(EncounterButtonData data, EncounterType type) {
+        data.setEncounterType(type); return data;
     }
     private EncounterButtonData option(String id, String icon, String first, String second) {
         EncounterButtonData data = new EncounterButtonData(id);
@@ -107,6 +153,20 @@ public class EncounterPreview extends ApplicationAdapter {
                     throw new AssertionError("Clipped label: " + label.getText());
             }
             if (actor instanceof Group) check((Group) actor);
+        }
+    }
+    private void assertSingleLines(Group group) {
+        for (Actor actor : group.getChildren()) {
+            if (actor instanceof Label && ((Label) actor).getGlyphLayout().runs.size > 1)
+                throw new AssertionError("Wrapped encounter text: " + ((Label) actor).getText());
+            if (actor instanceof Group) assertSingleLines((Group) actor);
+        }
+    }
+    private void labels(Group group, List<String> texts) {
+        for (Actor child : group.getChildren()) {
+            if (child instanceof Label) texts.add(((Label) child).getText().toString());
+            else if (child instanceof TextButton) texts.add(((TextButton) child).getText().toString());
+            if (child instanceof Group) labels((Group) child, texts);
         }
     }
     private void collect(Group group, List<EncounterButton> cards) {

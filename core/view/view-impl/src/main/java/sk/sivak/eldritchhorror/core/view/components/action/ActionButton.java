@@ -22,6 +22,7 @@ public class ActionButton extends ImageButton {
     protected float scaleMax = 1f;
     protected float scaleMin = 0.85f;
     protected ActionButtonData actionButtonData;
+    protected Color iconTint = Color.WHITE;
     private Vector2 iconOffset = new Vector2();
 
     public static ActionButton build(ActionButtonData actionButtonData) {
@@ -98,7 +99,11 @@ public class ActionButton extends ImageButton {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
+        drawBehindIcon(batch, parentAlpha);
         drawIcon(batch, parentAlpha);
+    }
+
+    protected void drawBehindIcon(Batch batch, float parentAlpha) {
     }
 
     private void drawIcon(Batch batch, float parentAlpha) {
@@ -126,13 +131,13 @@ public class ActionButton extends ImageButton {
                 icon.setColor(Color.GREEN);
                 icon.setScale(scaleMin);
             } else {
-                icon.setColor(Color.WHITE);
+                icon.setColor(iconTint);
                 icon.setOrigin(Align.center);
                 icon.setScale(scaleMin);
             }
         } else {
             icon.setOrigin(Align.center);
-            icon.setColor(Color.WHITE);
+            icon.setColor(iconTint);
             icon.setScale(isPressed() ? scaleMin * 0.85f : scaleMin);
         }
 
@@ -149,6 +154,11 @@ public class ActionButton extends ImageButton {
 
     public Image getIcon() {
         return icon;
+    }
+
+    public void scaleIcon(float factor) {
+        scaleMax *= factor;
+        scaleMin *= factor;
     }
 
     private boolean pressedOverride = false;

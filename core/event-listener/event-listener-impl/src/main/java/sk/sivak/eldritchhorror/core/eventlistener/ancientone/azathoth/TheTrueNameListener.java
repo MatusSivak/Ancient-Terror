@@ -120,7 +120,7 @@ public class TheTrueNameListener extends AbstractMysteryListener implements Even
         MysteryEncounter encounter = new MysteryEncounter(mysteryCardInfo.getName());
         availableEncounters.addEncounter(encounter);
         if (!spendData.hasEnough()) {
-            encounter.disable("Not enough Clues");
+            encounter.disable("encounter.disabled.notEnoughClues");
         }
         ServicePlatform.get().getService().convertTo(AvailableEncounters.class, () -> availableEncounters);
     }

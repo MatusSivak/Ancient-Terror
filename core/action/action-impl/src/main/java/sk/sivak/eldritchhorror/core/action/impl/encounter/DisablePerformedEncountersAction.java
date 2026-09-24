@@ -28,7 +28,7 @@ public class DisablePerformedEncountersAction extends AbstractHookableAction<Ava
         for (Encounter encounter : input.getEncounters()) {
             boolean performed = performedEncounters.isPerformed(activeInvestigatorId, encounter.getEncounterType(), encounter.getUuid());
             if (performed) {
-                encounter.getEncounterButtonData().disable("Monster already encountered");
+                encounter.getEncounterButtonData().disable("encounter.disabled.alreadyEncountered");
             }
         }
 

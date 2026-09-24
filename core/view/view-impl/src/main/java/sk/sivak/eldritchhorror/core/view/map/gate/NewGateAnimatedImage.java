@@ -85,7 +85,7 @@ public class NewGateAnimatedImage extends Group {
         }
     }
 
-    private static Color toLibgdxColor(GateColor gateColor) {
+    public static Color toLibgdxColor(GateColor gateColor) {
         switch (gateColor) {
             case RED:   return new Color(1f, 0.3f, 0.3f, 1f);
             case GREEN: return new Color(0.3f, 1f, 0.3f, 1f);

@@ -12,9 +12,18 @@ public class EncounterButtonData {
     private boolean needsMask = false;
     private Vector2 offset = new Vector2();
     private float scaleDownPercentage = 1.10f;
+    private EncounterType encounterType;
 
     public EncounterButtonData(String uuid) {
         this.uuid = uuid;
+    }
+
+    public EncounterType getEncounterType() {
+        return encounterType;
+    }
+
+    public void setEncounterType(EncounterType encounterType) {
+        this.encounterType = encounterType;
     }
 
     public float getScaleDownPercentage() {

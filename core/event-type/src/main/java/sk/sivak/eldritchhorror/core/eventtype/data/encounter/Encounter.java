@@ -48,6 +48,7 @@ public class Encounter {
 
     public EncounterButtonData buildButtonData() {
         EncounterButtonData encounterButtonData = new EncounterButtonData(getUuid());
+        encounterButtonData.setEncounterType(encounterType);
         if (!enabled) {
             encounterButtonData.disable(disabledReason);
         }

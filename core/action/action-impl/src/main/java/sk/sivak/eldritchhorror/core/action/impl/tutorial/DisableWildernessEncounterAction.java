@@ -50,7 +50,7 @@ public class DisableWildernessEncounterAction implements Action<Object, Object> 
         public void onNotify(AvailableEncounters eventData) {
             for (Encounter encounter : eventData.getEncounters()) {
                 if (encounter.getEncounterType() == EncounterType.GENERAL) {
-                    encounter.getEncounterButtonData().disable("tutorial.disabled.notAvailable");
+                    encounter.getEncounterButtonData().disable("encounter.disabled.tutorial");
                 }
             }
         }

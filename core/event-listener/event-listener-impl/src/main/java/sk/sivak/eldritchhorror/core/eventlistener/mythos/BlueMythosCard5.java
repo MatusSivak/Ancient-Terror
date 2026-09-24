@@ -146,7 +146,7 @@ public class BlueMythosCard5 implements MythosCardEventListener{
             RumorEncounter encounter = new RumorEncounter(activeRumor.getTitleText());
             eventData.addEncounter(encounter);
             if (!spendData.hasEnough()) {
-                encounter.disable("Not enough Clues");
+                encounter.disable("encounter.disabled.notEnoughClues");
             }
             ServicePlatform.get().getService().convertTo(AvailableEncounters.class, () -> eventData);
         }

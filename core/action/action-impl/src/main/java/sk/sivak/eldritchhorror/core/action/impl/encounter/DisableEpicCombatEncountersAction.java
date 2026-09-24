@@ -30,7 +30,7 @@ public class DisableEpicCombatEncountersAction extends AbstractHookableAction<Av
     private void disableEpicCombatEncounters() {
         IterableUtils.forEach(input.getEncounters(), encounter -> {
             if (encounter.getEncounterType() == EncounterType.COMBAT && ((CombatEncounter) encounter).getMonsterInfo().isEpic()) {
-                encounter.getEncounterButtonData().disable("Encounter Non-Epic Monsters first");
+                encounter.getEncounterButtonData().disable("encounter.disabled.nonEpicFirst");
             }
         });
     }

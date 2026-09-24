@@ -22,6 +22,7 @@ public class CombatEncounter extends Encounter {
     public EncounterButtonData buildButtonData() {
         this.setUuid(monsterInfo.getUuid());
         CombatEncounterButtonData combatEncounterButtonData = new CombatEncounterButtonData(monsterInfo.getUuid(), monsterInfo);
+        combatEncounterButtonData.setEncounterType(getEncounterType());
         if (!isEnabled()) {
             combatEncounterButtonData.disable(getDisabledReason());
         }

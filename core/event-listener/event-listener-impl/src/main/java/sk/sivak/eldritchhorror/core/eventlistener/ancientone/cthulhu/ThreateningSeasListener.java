@@ -184,9 +184,9 @@ public class ThreateningSeasListener extends AbstractMysteryListener implements 
         MysteryEncounter encounter = new MysteryEncounter(mysteryCardInfo.getName());
         availableEncounters.addEncounter(encounter);
         if (!spendData.hasEnough()) {
-            encounter.disable("Requires Clue");
+            encounter.disable("encounter.disabled.requiresClue");
         } else if (ServicePlatform.get().getSpellsDeck().getSpells(investigatorId).isEmpty()) {
-            encounter.disable("Requires Spell");
+            encounter.disable("encounter.disabled.requiresSpell");
         }
         encounter.setButtonIcon("VORTEX");
         ServicePlatform.get().getService().convertTo(AvailableEncounters.class, () -> availableEncounters);

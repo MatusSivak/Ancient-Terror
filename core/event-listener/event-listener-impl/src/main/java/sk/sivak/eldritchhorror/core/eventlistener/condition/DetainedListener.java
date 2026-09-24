@@ -93,7 +93,7 @@ public class DetainedListener extends AbstractConditionListener<DetainedConditio
                 if (encounter == detainedEncounter) {
                     continue;
                 }
-                encounter.getEncounterButtonData().disable("You are Detained");
+                encounter.getEncounterButtonData().disable("encounter.disabled.detained");
             }
         }
 
