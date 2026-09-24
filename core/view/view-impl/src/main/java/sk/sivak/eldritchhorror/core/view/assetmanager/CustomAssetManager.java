@@ -2,9 +2,13 @@ package sk.sivak.eldritchhorror.core.view.assetmanager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.FileTextureData;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -22,10 +26,17 @@ import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.font.BitmapFontSizing;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author msivak
@@ -44,6 +55,243 @@ public class CustomAssetManager extends AssetManager {
 
     }
 
+    // ---- Parallel texture decoding -------------------------------------------------------------
+    // AssetManager decodes one texture at a time on a single thread and needs several frame round
+    // trips per asset. Plain PNG/JPG textures are instead decoded on a small pool and only the GL
+    // upload stays on the render thread (inside update()), so the rest of the API is unchanged.
+
+    private static final int ASYNC_PUMP_MS = 8;
+    private static final int DECODE_THREADS =
+            Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() - 1));
+    /** Bounds decoded-but-not-uploaded pixmaps so eager decoding cannot pile up native memory. */
+    private static final int MAX_DECODED_WAITING = DECODE_THREADS * 3;
+    private static ExecutorService decodePool;
+
+    private final Map<String, PendingTexture> pendingTextures = new HashMap<>();
+    private final ConcurrentLinkedQueue<PendingTexture> decodedTextures = new ConcurrentLinkedQueue<>();
+    private final Semaphore decodedSlots = new Semaphore(MAX_DECODED_WAITING);
+    private volatile boolean decodingCancelled;
+    private int batchTextures;
+    private int batchTexturesDone;
+    private int batchManagerAssets;
+    private long lastPumpedFrame = -1;
+
+    private static final class PendingTexture {
+        final String fileName;
+        final AtomicBoolean claimed = new AtomicBoolean();
+        int references = 1;
+        volatile Pixmap pixmap;
+        volatile boolean failed;
+        boolean slotHeld;
+
+        PendingTexture(String fileName) {
+            this.fileName = fileName;
+        }
+    }
+
+    private static synchronized ExecutorService decodePool() {
+        if (decodePool == null) {
+            AtomicInteger counter = new AtomicInteger();
+            decodePool = Executors.newFixedThreadPool(DECODE_THREADS, runnable -> {
+                Thread thread = new Thread(runnable, "TextureDecoder-" + counter.incrementAndGet());
+                thread.setDaemon(true);
+                thread.setPriority(Thread.NORM_PRIORITY - 1);
+                return thread;
+            });
+        }
+        return decodePool;
+    }
+
+    private static boolean isDecodableTexture(String fileName, Class<?> type, AssetLoaderParameters<?> parameter) {
+        if (type != Texture.class || parameter != null || Gdx.app == null || Gdx.gl == null) {
+            return false;
+        }
+        String lower = fileName.toLowerCase(Locale.ENGLISH);
+        return lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg");
+    }
+
+    @Override
+    public synchronized <T> void load(String fileName, Class<T> type, AssetLoaderParameters<T> parameter) {
+        if (!isDecodableTexture(fileName, type, parameter)) {
+            if (super.getQueuedAssets() == 0) {
+                batchManagerAssets = 0;
+            }
+            batchManagerAssets++;
+            super.load(fileName, type, parameter);
+            return;
+        }
+        if (isLoaded(fileName, Texture.class)) {
+            // Same effect as AssetManager queueing an already loaded asset.
+            setReferenceCount(fileName, getReferenceCount(fileName) + 1);
+            return;
+        }
+        PendingTexture pending = pendingTextures.get(fileName);
+        if (pending != null) {
+            pending.references++;
+            return;
+        }
+        pending = new PendingTexture(fileName);
+        pendingTextures.put(fileName, pending);
+        batchTextures++;
+        PendingTexture task = pending;
+        decodePool().execute(() -> decodeOnWorker(task));
+    }
+
+    private void decodeOnWorker(PendingTexture pending) {
+        if (decodingCancelled || !pending.claimed.compareAndSet(false, true)) {
+            return;
+        }
+        try {
+            decodedSlots.acquire();
+            pending.slotHeld = true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        decode(pending);
+        if (decodingCancelled) {
+            discard(pending);
+            return;
+        }
+        decodedTextures.add(pending);
+    }
+
+    private static void decode(PendingTexture pending) {
+        try {
+            pending.pixmap = new Pixmap(Gdx.files.internal(pending.fileName));
+        } catch (RuntimeException e) {
+            pending.failed = true;
+        }
+    }
+
+    private void discard(PendingTexture pending) {
+        if (pending.pixmap != null) {
+            pending.pixmap.dispose();
+            pending.pixmap = null;
+        }
+        if (pending.slotHeld) {
+            pending.slotHeld = false;
+            decodedSlots.release();
+        }
+    }
+
+    /** GL upload of one decoded texture; must run on the render thread. */
+    private boolean uploadOneDecoded() {
+        PendingTexture pending = decodedTextures.poll();
+        if (pending == null) {
+            return false;
+        }
+        upload(pending);
+        return true;
+    }
+
+    private void upload(PendingTexture pending) {
+        if (pendingTextures.get(pending.fileName) != pending) {
+            discard(pending);
+            return;
+        }
+        pendingTextures.remove(pending.fileName);
+        batchTexturesDone++;
+        if (pending.failed || pending.pixmap == null) {
+            discard(pending);
+            // Let the regular loader report the problem exactly as before.
+            for (int i = 0; i < pending.references; i++) {
+                batchManagerAssets++;
+                super.load(pending.fileName, Texture.class, null);
+            }
+            return;
+        }
+        FileHandle file = Gdx.files.internal(pending.fileName);
+        // FileTextureData keeps the texture managed, so it is reloaded from file after a GL context loss.
+        Texture texture = new Texture(new FileTextureData(file, pending.pixmap, null, false));
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        pending.pixmap = null;
+        discard(pending);
+        addAsset(pending.fileName, Texture.class, texture);
+        if (pending.references > 1) {
+            setReferenceCount(pending.fileName, pending.references);
+        }
+    }
+
+    @Override
+    protected synchronized <T> void addAsset(String fileName, Class<T> type, T asset) {
+        if (isLoaded(fileName, type)) {
+            T existing = get(fileName, type);
+            if (existing != asset) {
+                // A regular load of the same file finished too; keep one copy and merge the references.
+                if (asset instanceof com.badlogic.gdx.utils.Disposable) {
+                    ((com.badlogic.gdx.utils.Disposable) asset).dispose();
+                }
+                setReferenceCount(fileName, getReferenceCount(fileName) + 1);
+                return;
+            }
+        }
+        super.addAsset(fileName, type, asset);
+    }
+
+    @Override
+    public synchronized boolean update() {
+        uploadOneDecoded();
+        boolean managerDone = super.update();
+        boolean done = managerDone && pendingTextures.isEmpty();
+        if (done) {
+            batchTextures = 0;
+            batchTexturesDone = 0;
+            batchManagerAssets = 0;
+        }
+        return done;
+    }
+
+    @Override
+    public void finishLoadingAsset(String fileName) {
+        System.out.println("Finish loading called for: " + fileName);
+        PendingTexture pending;
+        synchronized (this) {
+            pending = pendingTextures.get(fileName);
+            if (pending != null && pending.claimed.compareAndSet(false, true)) {
+                // Needed right now: decode here instead of waiting behind the pool queue.
+                decode(pending);
+                upload(pending);
+            }
+        }
+        super.finishLoadingAsset(fileName);
+    }
+
+    @Override
+    public synchronized float getProgress() {
+        int total = batchTextures + batchManagerAssets;
+        if (total == 0) {
+            return super.getProgress();
+        }
+        float managerDone = batchManagerAssets * super.getProgress();
+        return Math.min(1f, (batchTexturesDone + managerDone) / total);
+    }
+
+    @Override
+    public synchronized int getQueuedAssets() {
+        return super.getQueuedAssets() + pendingTextures.size();
+    }
+
+    @Override
+    public synchronized void unload(String fileName) {
+        PendingTexture pending = pendingTextures.get(fileName);
+        if (pending != null && !isLoaded(fileName)) {
+            if (--pending.references <= 0) {
+                pendingTextures.remove(fileName);
+                batchTexturesDone++;
+            }
+            return;
+        }
+        super.unload(fileName);
+    }
+
+    private void cancelDecoding() {
+        decodingCancelled = true;
+        PendingTexture pending;
+        while ((pending = decodedTextures.poll()) != null) {
+            discard(pending);
+        }
+    }
+
     /**
      * Queues everything the menu and first game frames need, so the preloader can pump it with a
      * visible percentage instead of the first frame blocking on it.
@@ -52,6 +300,18 @@ public class CustomAssetManager extends AssetManager {
         CustomAssetManager manager = get();
         manager.load(SPLASH_TITLE, Texture.class);
         manager.load(SPLASH, Texture.class);
+        // Main menu and HUD widgets that would otherwise be loaded synchronously when the menu opens.
+        for (String path : new String[]{"skin/ancient-terror/square_normal.png", "skin/ancient-terror/square_pressed.png",
+                "icon/fast_forward_up.png", "icon/fast_forward_down.png", "icon/menu.png", "token/health.png",
+                "token/sanity.png", "token/clue.png", "token/focus.png", "token/ticket_blank.png", "no_ads.png",
+                "flags/flags.png"}) {
+            if (!manager.isLoaded(path)) {
+                manager.load(path, Texture.class);
+            }
+        }
+        if (!manager.isLoaded("skin/ancient-terror/buttons.atlas")) {
+            manager.load("skin/ancient-terror/buttons.atlas", TextureAtlas.class);
+        }
         manager.queueTextures1();
         for (InvestigatorId investigatorId : InvestigatorId.values()) {
             manager.load("investigator/" + investigatorId.name() + ".png", Texture.class);
@@ -412,6 +672,7 @@ public class CustomAssetManager extends AssetManager {
     public static void nullifyInstance() {
         soundGeneration++;
         if (instance != null) {
+            instance.cancelDecoding();
             instance.disposeSizedFonts();
             for (String path : instance.soundPaths) {
                 if (instance.isLoaded(path)) instance.unload(path);
@@ -441,7 +702,7 @@ public class CustomAssetManager extends AssetManager {
     public static Single<Texture> getTextureAsync(String id) {
         String resolvedId = resolveLocalizedTextureId(id);
         if (get().isLoaded(resolvedId)) {
-            return Single.just(get().get(id));
+            return Single.just(get().get(resolvedId, Texture.class));
         }
         Single<Texture> textureSingle = Single.create(onSub -> {
 
@@ -501,9 +762,18 @@ public class CustomAssetManager extends AssetManager {
                 completeTextureRequest(id, onSub);
                 return;
             }
-            get().update(5000);
+            get().pumpOncePerFrame();
             requestTextureAsyncOnRenderThread(id, onSub);
         });
+    }
+
+    /** Many pending async requests share one small loading slice per frame instead of freezing it. */
+    private void pumpOncePerFrame() {
+        long frame = Gdx.graphics.getFrameId();
+        if (frame != lastPumpedFrame) {
+            lastPumpedFrame = frame;
+            update(ASYNC_PUMP_MS);
+        }
     }
 
     private static void completeTextureRequest(String id, rx.SingleSubscriber<? super Texture> onSub) {
@@ -532,12 +802,6 @@ public class CustomAssetManager extends AssetManager {
             callback.accept(id);
         }
         return texture;
-    }
-
-    @Override
-    public void finishLoadingAsset(String fileName) {
-        System.out.println("Finish loading called for: " + fileName);
-        super.finishLoadingAsset(fileName);
     }
 
     public static TextureRegion getTextureRegion(String id) {
