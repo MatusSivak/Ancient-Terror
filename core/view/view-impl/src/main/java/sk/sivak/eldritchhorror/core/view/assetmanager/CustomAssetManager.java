@@ -44,31 +44,73 @@ public class CustomAssetManager extends AssetManager {
 
     }
 
+    /**
+     * Queues everything the menu and first game frames need, so the preloader can pump it with a
+     * visible percentage instead of the first frame blocking on it.
+     */
+    public static void queueStartupAssets() {
+        CustomAssetManager manager = get();
+        manager.load(SPLASH_TITLE, Texture.class);
+        manager.load(SPLASH, Texture.class);
+        manager.queueTextures1();
+        for (InvestigatorId investigatorId : InvestigatorId.values()) {
+            manager.load("investigator/" + investigatorId.name() + ".png", Texture.class);
+        }
+        manager.queueTextures2();
+    }
+
+    /** Advances queued loading for at most {@code millis}; returns the current batch progress (0..1). */
+    public static float pumpLoading(int millis) {
+        return get().update(millis) ? 1f : get().getProgress();
+    }
+
+    public static boolean isAssetLoaded(String path) {
+        return instance != null && instance.isLoaded(path);
+    }
+
+    private boolean textures1Queued;
+    private boolean textures2Queued;
+
     public static void loadTextures1() {
         get().progressSubject = PublishSubject.create();
-        // Queue small audio buffers during the loading screen, not while typing.
-        for (int i = 1; i <= 6; i++) {
-            String path = "sounds/typewriter_key_" + i + ".wav";
-            get().load(path, Sound.class);
-            get().soundPaths.add(path);
-        }
-        for (String cue : new String[]{"space", "button_stamp", "paper_out"}) {
-            String path = "sounds/typewriter_" + cue + ".wav";
-            get().load(path, Sound.class);
-            get().soundPaths.add(path);
-        }
-        get().load(TICK, Texture.class);
-        get().load("background/gray.jpg", Texture.class);
-        get().load("background/pure_white.png", Texture.class);
-
+        get().queueTextures1();
         for (InvestigatorId investigatorId : InvestigatorId.values()) {
             getTextureAsync("investigator/" + investigatorId.name() + ".png").subscribe();
         }
     }
 
+    private synchronized void queueTextures1() {
+        if (textures1Queued) {
+            return;
+        }
+        textures1Queued = true;
+        // Queue small audio buffers during the loading screen, not while typing.
+        for (int i = 1; i <= 6; i++) {
+            String path = "sounds/typewriter_key_" + i + ".wav";
+            load(path, Sound.class);
+            soundPaths.add(path);
+        }
+        for (String cue : new String[]{"space", "button_stamp", "paper_out"}) {
+            String path = "sounds/typewriter_" + cue + ".wav";
+            load(path, Sound.class);
+            soundPaths.add(path);
+        }
+        load(TICK, Texture.class);
+        load("background/gray.jpg", Texture.class);
+        load("background/pure_white.png", Texture.class);
+    }
+
     public static void loadTextures2() {
         get().progressSubject = PublishSubject.create();
-        Schedulers.io().createWorker().schedule(() -> get().initCustomAssetManager());
+        Schedulers.io().createWorker().schedule(() -> get().queueTextures2());
+    }
+
+    private synchronized void queueTextures2() {
+        if (textures2Queued) {
+            return;
+        }
+        textures2Queued = true;
+        initCustomAssetManager();
     }
 
     public static void setCardAssetLoadedCallback(Consumer<String> cardAssetLoadedCallback) {

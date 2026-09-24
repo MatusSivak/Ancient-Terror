@@ -32,7 +32,11 @@ public class Game extends com.badlogic.gdx.Game {
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
         }
-        start();
+        if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
+            start();
+            return;
+        }
+        setScreen(new PreloaderScreen(this::start));
     }
 
     public void start() {
