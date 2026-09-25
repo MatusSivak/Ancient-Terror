@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.view.components.sheet.investigator;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -22,7 +23,6 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
-import sk.sivak.eldritchhorror.core.view.components.sheet.SectionWrapper;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CardClickListener;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -46,6 +46,7 @@ public class PassportTable extends Table {
 
     private boolean displayed;
     private InvestigatorSheetButtons buttons;
+    private TextureRegion selectedTabHeader;
 
     private BioTableData bioTableData;
     private StatsTableData statsTableData;
@@ -257,16 +258,13 @@ public class PassportTable extends Table {
     private void prepareBackgroundTab() {
         clear();
         activeCardListeners = Collections.emptyList();
-        padLeft(35);
-        padBottom(20);
+        addHitImage();
+        pad(0, 35, 50, 0);
 
         BackgroundBioTable backgroundBioTable = new BackgroundBioTable();
-        backgroundBioTable.init(bioTableData.getBackgroundBio());
-        SectionWrapper backgroundSection = new SectionWrapper().init(get("investigator.section.background"), backgroundBioTable);
-        add(backgroundSection).align(Align.topLeft)
-                .width(backgroundSection.getWidth())
-                .height(backgroundSection.getHeight())
-                .padBottom(135);
+        backgroundBioTable.init(bioTableData.getName(), bioTableData.getBackgroundBio());
+        backgroundBioTable.setOnBackgroundClick(this::onClickOutsideCard);
+        add(backgroundBioTable).width(700).height(400);
 
 
         buttons = new InvestigatorSheetButtons() {
@@ -282,7 +280,6 @@ public class PassportTable extends Table {
             }
         };
 
-        addHitImage();
         buttons.initButtons();
         buttons.highlightBio();
 
@@ -291,6 +288,8 @@ public class PassportTable extends Table {
     }
 
     private void prepareCommon() {
+        // Only swap the header strip so the page and frame never change between tabs.
+        selectedTabHeader = new TextureRegion(CustomAssetManager.getTexture(buttons.getHeaderPath()));
         buttons.setPosition(0, 0);
         addActor(buttons);
         pack();
@@ -326,11 +325,17 @@ public class PassportTable extends Table {
     public void draw(Batch batch, float parentAlpha) {
 
         float height = BACKGROUND_HEIGHT * getScaleY();
+        float headerHeight = height * 96f / 1024f;
         batch.setColor(Color.WHITE);
-        batch.draw(CustomAssetManager.getTexture("passport-dossier.png"),
+        batch.draw(CustomAssetManager.getTexture("passport-dossier-center.png"),
                 BACKGROUND_X * getScaleX() + getX() + (1 - getScaleX()) * getWidth() * 0.5f,
                 BACKGROUND_Y * getScaleY() + getY() + (1 - getScaleY()) * getHeight() * 0.5f,
-                BACKGROUND_WIDTH * getScaleX(), height);
+                BACKGROUND_WIDTH * getScaleX(), height - headerHeight);
+        batch.draw(selectedTabHeader,
+                BACKGROUND_X * getScaleX() + getX() + (1 - getScaleX()) * getWidth() * 0.5f,
+                BACKGROUND_Y * getScaleY() + getY() + (1 - getScaleY()) * getHeight() * 0.5f
+                        + height - headerHeight,
+                BACKGROUND_WIDTH * getScaleX(), headerHeight);
         super.draw(batch, parentAlpha);
     }
 

@@ -15,11 +15,19 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class InvestigatorSheetButtons extends Group {
+    private Label basicInfoLabel;
+    private Label cardsLabel;
+    private Label miscLabel;
+    private String headerPath = "passport-dossier-top-basic.png";
+
+    String getHeaderPath() {
+        return headerPath;
+    }
 
     void initButtons() {
-        Label basicInfoLabel = createLabel(get("investigator.tab.basicInfo"), Color.BLACK);
-        Label cardsLabel = createLabel(get("investigator.tab.cards"), CharacterSheetWidgets.INK);
-        Label miscLabel = createLabel(get("investigator.tab.background"), CharacterSheetWidgets.INK);
+        basicInfoLabel = createLabel(get("investigator.tab.basicInfo"), Color.BLACK);
+        cardsLabel = createLabel(get("investigator.tab.cards"), CharacterSheetWidgets.INK);
+        miscLabel = createLabel(get("investigator.tab.background"), CharacterSheetWidgets.INK);
 
         basicInfoLabel.setX(40);
         basicInfoLabel.setY(490);
@@ -88,29 +96,23 @@ public class InvestigatorSheetButtons extends Group {
     }
 
     public void highlightBasicInfo() {
-        Image underline = new Image(getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        underline.setColor(Color.BLACK);
-        underline.setWidth(125);
-        underline.setHeight(5);
-        underline.setPosition(40 + 37.5f, 485);
-        addActor(underline);
+        selectTab(basicInfoLabel, "passport-dossier-top-basic.png");
     }
 
     public void highlightCards() {
-        Image underline = new Image(getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        underline.setColor(CharacterSheetWidgets.INK);
-        underline.setWidth(125);
-        underline.setHeight(5);
-        underline.setPosition(285 + 37.5f, 485);
-        addActor(underline);
+        selectTab(cardsLabel, "passport-dossier-top-cards.png");
     }
 
     public void highlightBio() {
-        Image underline = new Image(getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        underline.setColor(CharacterSheetWidgets.INK);
-        underline.setWidth(125);
-        underline.setHeight(5);
-        underline.setPosition(540 + 37.5f, 485);
-        addActor(underline);
+        selectTab(miscLabel, "passport-dossier-top-background.png");
+    }
+
+    private void selectTab(Label selected, String artwork) {
+        headerPath = artwork;
+        for (Label label : new Label[]{basicInfoLabel, cardsLabel, miscLabel}) {
+            Label.LabelStyle style = new Label.LabelStyle(label.getStyle());
+            style.fontColor = label == selected ? Color.valueOf("29271E") : Color.valueOf("EEE6D5");
+            label.setStyle(style);
+        }
     }
 }

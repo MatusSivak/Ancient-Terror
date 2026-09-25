@@ -1,6 +1,11 @@
 # Passport dossier background
 
-Asset: `passport-dossier.png` (1536 x 1024 PNG).
+Runtime assets, cropped losslessly from the matching 1536 x 1024 dossier variants:
+- Shared body: `passport-dossier-center.png` (1536 x 928).
+- Tab headers: `passport-dossier-top-basic.png`, `passport-dossier-top-cards.png`, and `passport-dossier-top-background.png` (each 1536 x 96).
+
+The renderer places the selected header above the shared body at their original proportions.
+The redundant full-page variants have been removed.
 Generated with the built-in imagegen tool; original `passport.png` is retained.
 Used by `PassportTable`; labels, panels and gameplay information remain live UI.
 

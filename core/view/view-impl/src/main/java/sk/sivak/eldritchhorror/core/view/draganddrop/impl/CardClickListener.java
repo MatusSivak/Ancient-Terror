@@ -2,7 +2,6 @@ package sk.sivak.eldritchhorror.core.view.draganddrop.impl;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -36,8 +35,6 @@ public class CardClickListener extends ClickListener {
     public static final int CARD_ORIGIN_Y = CARD_HEIGHT / 2;
     private static final float DURATION = FADING_EFFECT_DURATION / 1.5f;
     private boolean zoomed = false;
-    private float defaultScaleX;
-    private float defaultScaleY;
 
     private ScaledCardClickListener scaledCardClickListener;
 
@@ -83,16 +80,15 @@ public class CardClickListener extends ClickListener {
         if (!otherCardIsZoomed) {
             cardColorMap.put(cardTemplate, new Color(cardTemplate.getForeground().getColor()));
         }
-        defaultScaleX = cardTemplate.getScaleX();
-        defaultScaleY = cardTemplate.getScaleY();
         cardTemplate.setTouchable(Touchable.disabled);
         cardTemplate.getColor().a = 0f;
         duplicate = duplicate(cardTemplate);
         cardTemplate.getStage().addActor(duplicate);
-        Vector2 position = cardTemplate.localToStageCoordinates(new Vector2(0, 0));
+        CardZoomPlacement placement = new CardZoomPlacement(cardTemplate,
+                CARD_WIDTH, CARD_HEIGHT, CARD_ORIGIN_X, CARD_ORIGIN_Y);
         duplicate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
-        duplicate.setPosition(position.x + cardTemplate.getPrefWidth() / 2 - CARD_ORIGIN_X,
-                position.y + cardTemplate.getPrefHeight() / 2 - CARD_ORIGIN_Y);
+        duplicate.setScale(placement.scaleX, placement.scaleY);
+        duplicate.setPosition(placement.x, placement.y);
 
         ScaleToAction scaleToAction = Actions.scaleTo(SCALE_AMOUNT, SCALE_AMOUNT, DURATION, Interpolation.sine);
         MoveToAction moveToAction = Actions.moveTo(
@@ -181,11 +177,12 @@ public class CardClickListener extends ClickListener {
         }
 
         void scaleDown() {
-            ScaleToAction scaleToAction = Actions.scaleTo(defaultScaleX, defaultScaleY, DURATION);
-            Vector2 position = original.localToStageCoordinates(new Vector2(0, 0));
+            CardZoomPlacement placement = new CardZoomPlacement(original,
+                    CARD_WIDTH, CARD_HEIGHT, CARD_ORIGIN_X, CARD_ORIGIN_Y);
+            ScaleToAction scaleToAction = Actions.scaleTo(placement.scaleX, placement.scaleY, DURATION);
             MoveToAction moveToAction = Actions.moveTo(
-                    position.x + original.getPrefWidth() / 2 - CARD_ORIGIN_X,
-                    position.y + original.getPrefHeight() / 2 - CARD_ORIGIN_Y,
+                    placement.x,
+                    placement.y,
                     DURATION);
             duplicate.addAction(sequence(parallel(scaleToAction, moveToAction), run(() -> {
                 duplicate.remove();

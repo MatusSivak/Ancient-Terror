@@ -149,17 +149,17 @@ def token_leave():
 
 
 def token_land():
-    """Shared by Health and Sanity: a gained token settling into its HUD slot."""
+    """Shared by Health and Sanity: a gained token settling softly into its HUD slot."""
     name = "token_land"
     rng = seeded_random(name)
-    out = blank(0.26)
-    # Soft, damped body with a small bright tick on top: a token snapping into a slot.
-    add(out, lowpass(thump(180.0, 0.55, 0.035, 0.2), 2400.0))
-    add(out, tone(0.08, 1320.0, 0.14, 0.001, 0.014, phase=rng.uniform(0, TAU)), 0.001)
-    add(out, tone(0.08, 1980.0, 0.06, 0.001, 0.009, phase=rng.uniform(0, TAU)), 0.001)
-    grain_env = lambda p: 0.12 * (1.0 - smoothstep(p / 0.25))
-    add(out, swept_breath(rng, len(out), 3600.0, 1800.0, grain_env, q=1.0))
-    return name, fade_tail(room(out, 0.08, 0.6), 0.55)
+    out = blank(0.22)
+    # Muffled felt-on-wood thud: low damped body, no bright partials or comb reverb (they ring like tin).
+    add(out, lowpass(lowpass(thump(120.0, 0.60, 0.030, 0.2), 700.0), 900.0))
+    add(out, lowpass(thump(240.0, 0.12, 0.012, 0.08), 1000.0), 0.002)
+    # Very short, dark brush of air for the contact.
+    brush_env = lambda p: 0.10 * smoothstep(p / 0.02) * (1.0 - smoothstep(p / 0.35))
+    add(out, lowpass(swept_breath(rng, len(out), 900.0, 500.0, brush_env, q=1.2), 1200.0))
+    return name, fade_tail(out, 0.5)
 
 
 def main():
