@@ -1,9 +1,7 @@
 package sk.sivak.eldritchhorror.core.eventlistener.ancientone.azathoth;
 
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
-import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.constants.question.Answer;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
@@ -59,8 +57,7 @@ public class OmenOfDevastationListener extends AbstractMysteryListener {
 
     @Override
     protected List<LocationId> getPinLocations() {
-        OmenColor omenColor = ServicePlatform.get().getOmenTrack().getCurrentOmen().getOmenColor();
-        return ServicePlatform.get().getGateStackRead().getSpawnedGates(omenColor.toGateColor());
+        return ServicePlatform.get().getGateStackRead().getSpawnedGatesLocations();
     }
 
     private class AfterCloseGateListener extends EventListenerImpl<CloseGateData> {
@@ -68,10 +65,6 @@ public class OmenOfDevastationListener extends AbstractMysteryListener {
         @Override
         public void onNotify(CloseGateData eventData) {
             if (progress >= mysteryCardInfo.getMysteryComplexity()) {
-                return;
-            }
-            OmenColor omenColor = ServicePlatform.get().getOmenTrack().getCurrentOmen().getOmenColor();
-            if (!eventData.getGateColor().equals(omenColor.toGateColor())) {
                 return;
             }
             ServicePlatform.get().getTokenService().canSpend(1,0,0,0).subscribe(spendData -> {
