@@ -221,6 +221,7 @@ public class MonsterCombatTable extends VisTable {
             targets.add(target);
             targetScaleMap.put(target, 1f);
             fireballService.setOnLandAction(target, () -> {
+                CombatSounds.playMonsterTokenHit();
                 Float previousScale = targetScaleMap.get(target);
                 float newScale = Math.max(0, previousScale - 1/(float)targetHealth);
                 targetScaleMap.put(target, newScale);

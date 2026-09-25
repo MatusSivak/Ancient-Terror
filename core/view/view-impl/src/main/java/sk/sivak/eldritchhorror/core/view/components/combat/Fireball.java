@@ -94,6 +94,7 @@ public class Fireball extends Image {
                 origin.x - getWidth()/2f,
                 origin.y - getHeight()/2f);
         setScale(0.0f);
+        CombatSounds.playFireballLaunch();
 
         float velocity = MathUtils.random(250,300);
         Vector2 tangent = new Vector2(destination).sub(origin);
@@ -120,8 +121,9 @@ public class Fireball extends Image {
                         Actions.rotateTo(MathUtils.random(-360, 360), duration)
                 ),
                 Actions.run(() -> {
+                    CombatSounds.playFireballImpact();
                     if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
-                        Gdx.input.vibrate(50);
+                        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.runInBackground(() -> Gdx.input.vibrate(50));
                     }
                     for (Runnable onLandAction : onLandActions) {
                         onLandAction.run();

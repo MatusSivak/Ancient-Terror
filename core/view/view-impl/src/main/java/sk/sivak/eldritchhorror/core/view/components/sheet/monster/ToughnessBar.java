@@ -10,8 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.utils.Align;
 import rx.Completable;
 import rx.CompletableSubscriber;
+import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.combat.CombatSounds;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -90,7 +92,11 @@ public class ToughnessBar extends HorizontalGroup {
         getStage().addActor(brokenTokenActor);
 
 
-        return brokenTokenActor.discard(((Container<ToughnessToken>) healthToken).getActor()::deplete, offsetX);
+        Action0 deplete = ((Container<ToughnessToken>) healthToken).getActor()::deplete;
+        return brokenTokenActor.discard(() -> {
+            CombatSounds.playMonsterHealthLeave();
+            deplete.call();
+        }, offsetX, CombatSounds::playMonsterHealthTear);
     }
 
     @Override

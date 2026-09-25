@@ -56,6 +56,6 @@ public final class TokenSounds {
         if (sound == null) {
             sound = CustomAssetManager.getSound(cue.path);
         }
-        sound.play(volume, pitch * MathUtils.random(0.98f, 1.02f), 0f);
+        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(sound, volume, pitch * MathUtils.random(0.98f, 1.02f), 0f);
     }
 }

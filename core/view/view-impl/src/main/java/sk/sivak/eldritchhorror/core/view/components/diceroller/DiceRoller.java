@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.components.diceroller;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -19,8 +20,12 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import sk.sivak.eldritchhorror.core.view.components.combat.ActorCenterPosition;
 
 import static java8.features.util.IterableUtils.forEach;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
@@ -260,14 +265,14 @@ public class DiceRoller {
 
     }
 
-    public Completable moveUp() {
+    public Completable moveUp(float bottomY) {
         return Completable.create(onSub -> {
             float sourceX = dices.get(0).getX();
             float targetX = ViewProperties.VIEWPORT_WIDTH/2 - (ACTUAL_DICE_SIZE * dices.size()) / 2f - (DICE_SIZE - ACTUAL_DICE_SIZE)/2f;
             forEach(dices, diceImageOld -> {
                 MoveToAction moveToAction = new MoveToAction();
                 moveToAction.setActor(diceImageOld);
-                moveToAction.setPosition(diceImageOld.getX() + (targetX - sourceX), 130 - (DICE_SIZE - ACTUAL_DICE_SIZE)/2f);
+                moveToAction.setPosition(diceImageOld.getX() + (targetX - sourceX), bottomY - (DICE_SIZE - ACTUAL_DICE_SIZE)/2f);
                 moveToAction.setDuration(0.5f);
                 moveToAction.setInterpolation(Interpolation.sine);
                 diceImageOld.addAction(new FastForwardAction<>(Actions.sequence(moveToAction, Actions.run(onSub::onCompleted))));
@@ -299,13 +304,48 @@ public class DiceRoller {
         }
     }
 
-    public List<Vector2> getDicesCenterPositions() {
-        List<Vector2> positions = new LinkedList<>();
-        Collections.sort(dices, (o1, o2) -> o1.getDiceNumber()-o2.getDiceNumber());
+    /** Completes once all dice have stopped moving (position, rotation and scale unchanged for a short while). */
+    public Completable waitUntilSettled() {
+        return Completable.create(onSub -> diceLayer.addAction(new Action() {
+            private static final float SETTLE_TIME = 0.1f;
+            private static final float EPSILON = 0.01f;
+            private final Map<DiceImage, float[]> last = new HashMap<>();
+            private float stillTime;
+
+            @Override
+            public boolean act(float delta) {
+                boolean moved = false;
+                for (DiceImage dice : dices) {
+                    float[] now = {dice.getX(), dice.getY(), dice.getRotation(), dice.getScaleX(), dice.getScaleY()};
+                    float[] before = last.put(dice, now);
+                    if (before == null) {
+                        moved = true;
+                        continue;
+                    }
+                    for (int i = 0; i < now.length; i++) {
+                        if (Math.abs(now[i] - before[i]) > EPSILON) {
+                            moved = true;
+                            break;
+                        }
+                    }
+                }
+                stillTime = moved ? 0 : stillTime + delta;
+                if (stillTime >= SETTLE_TIME || FastForwardAction.isOn()) {
+                    onSub.onCompleted();
+                    return true;
+                }
+                return false;
+            }
+        }));
+    }
+
+    /** Live on-screen centres keyed by dice number; they keep following the dice while fireballs are queued. */
+    public Map<Integer, Vector2> getLiveDiceCenters() {
+        Map<Integer, Vector2> centers = new HashMap<>();
         for (DiceImage dice : dices) {
-            positions.add(new Vector2(dice.getX() + dice.getWidth()/2, dice.getY() + dice.getHeight()/2));
+            centers.put(dice.getDiceNumber(), new ActorCenterPosition(dice));
         }
-        return positions;
+        return centers;
     }
 
     public void hideDiceDontRemove() {

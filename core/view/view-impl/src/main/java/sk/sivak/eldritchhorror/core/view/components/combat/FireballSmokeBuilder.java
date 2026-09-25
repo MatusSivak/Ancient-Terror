@@ -44,7 +44,10 @@ public class FireballSmokeBuilder {
         public void act(float delta) {
             super.act(delta);
             if (pooledEffect.isComplete()) {
+                // Return the effect to the pool; otherwise every fireball allocates a new particle effect.
                 remove();
+                pooledEffect.free();
+                return;
             }
             pooledEffect.update(delta);
         }

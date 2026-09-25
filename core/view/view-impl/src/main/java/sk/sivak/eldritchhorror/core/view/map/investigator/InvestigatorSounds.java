@@ -32,6 +32,6 @@ public final class InvestigatorSounds {
         if (sound == null) {
             sound = CustomAssetManager.getSound(path);
         }
-        sound.play(volume, MathUtils.random(0.96f, 1.04f), 0f);
+        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(sound, volume, MathUtils.random(0.96f, 1.04f), 0f);
     }
 }

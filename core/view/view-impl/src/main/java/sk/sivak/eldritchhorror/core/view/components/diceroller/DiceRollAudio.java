@@ -36,9 +36,9 @@ final class DiceRollAudio {
             played = true;
             // Each recording already includes the small rebounds of ONE die.
             // Start it at first contact, never replay a whole roll at every bounce.
-            impacts[variation].play(
+            sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(impacts[variation],
                     volume, pitch,
-                    MathUtils.clamp(pan, -0.65f, 0.65f));
+                    MathUtils.clamp(pan, -0.65f, 0.65f), false);
         }
     }
 }

@@ -156,6 +156,7 @@ public class FireballService {
         stage.addActor(explosionGroup);
         stage.addActor(fireballGroup);
         for (Explosion explosion : explosions) {
+            explosion.setHome(explosionGroup);
             explosionGroup.addActor(explosion);
         }
     }
@@ -181,6 +182,9 @@ public class FireballService {
                     fireball.setMidpointDisplacementDirection(midpointDisplacementDirection);
                     fireball.addOnLandAction(MapUtils.getOrDefault(onLandActions, target, () -> {}));
                     MapUtils.getOrDefault(onThrowActions, source, () -> {}).run();
+                    if (source instanceof ActorCenterPosition) {
+                        ((ActorCenterPosition) source).refresh();
+                    }
                     fireball.throwIt(source, target);
                     fireballGroup.addActor(fireball);
 

@@ -105,10 +105,19 @@ public class TokenActor extends ItemActor {
     }
 
     public Completable discard(Action0 onStartAction, float offsetX) {
-        return Completable.create(onSub -> discard(offsetX, onSub, onStartAction));
+        return Completable.create(onSub -> discard(offsetX, onSub, onStartAction, null));
+    }
+
+    /** Like {@link #discard(Action0, float)}, with a callback when the token splits into halves. */
+    public Completable discard(Action0 onStartAction, float offsetX, Action0 onTearAction) {
+        return Completable.create(onSub -> discard(offsetX, onSub, onStartAction, onTearAction));
     }
 
     private void discard(float offsetX, CompletableSubscriber onSub, Action0 onStartAction) {
+        discard(offsetX, onSub, onStartAction, null);
+    }
+
+    private void discard(float offsetX, CompletableSubscriber onSub, Action0 onStartAction, Action0 onTearAction) {
         setPosition(holderLocation.x, holderLocation.y);
         MoveToAction moveToCenterAction = new MoveToAction();
         moveToCenterAction.setPosition(VIEWPORT_WIDTH / 2 + offsetX,
@@ -167,6 +176,11 @@ public class TokenActor extends ItemActor {
                 moveScaleRotateToCenter,
                 Actions.delay(0.25f),
                 Actions.run(onSub::onCompleted),
+                Actions.run(() -> {
+                    if (onTearAction != null) {
+                        onTearAction.call();
+                    }
+                }),
                 Actions.parallel(
                         fadeOutLeftAction,
                         fadeOutRightAction,

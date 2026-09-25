@@ -78,8 +78,8 @@ final class TypewriterAudio {
         lastPlayed = now;
         previousKey = previousKey < 0 ? random.nextInt(keys.length)
                 : (previousKey + 1 + random.nextInt(keys.length - 1)) % keys.length;
-        keys[previousKey].play(.28f + random.nextFloat() * .04f,
-                .98f + random.nextFloat() * .04f, 0f);
+        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(keys[previousKey], .28f + random.nextFloat() * .04f,
+                .98f + random.nextFloat() * .04f, 0f, false);
     }
 
     void buttonsDisplayed() {
@@ -98,6 +98,6 @@ final class TypewriterAudio {
         if (cuePlayed[index] && now - lastCue[index] < cue.interval) return;
         cuePlayed[index] = true;
         lastCue[index] = now;
-        effects[index].play(cue.volume, .98f + random.nextFloat() * .04f, 0f);
+        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(effects[index], cue.volume, .98f + random.nextFloat() * .04f, 0f, false);
     }
 }

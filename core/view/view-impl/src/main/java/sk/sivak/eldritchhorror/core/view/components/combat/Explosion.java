@@ -7,22 +7,46 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Array;
 
 public class Explosion extends Actor {
 
+    private static ParticleEffectPool sharedPool;
+
     private ExplosionConfig config;
     private final ParticleEffectPool effectPool;
     private final Array<ParticleEffectPool.PooledEffect> effects = new Array();
+    private Group home;
 
     public Explosion() {
-        ParticleEffect particleEffect = new ParticleEffect();
-        particleEffect.load(Gdx.files.internal("particle/explosion.p"), Gdx.files.internal("particle"));
-        effectPool = new ParticleEffectPool(particleEffect, 5, 10);
+        effectPool = pool();
+    }
+
+    /** Parse explosion.p once; parsing it for every target stalled the render thread mid-fight. */
+    private static ParticleEffectPool pool() {
+        if (sharedPool == null) {
+            ParticleEffect particleEffect = new ParticleEffect();
+            particleEffect.load(Gdx.files.internal("particle/explosion.p"), Gdx.files.internal("particle"));
+            sharedPool = new ParticleEffectPool(particleEffect, 5, 20);
+        }
+        return sharedPool;
+    }
+
+    public static void nullifyPool() {
+        sharedPool = null;
+    }
+
+    /** Group the explosion re-joins when it starts; it leaves the stage once its effects are done. */
+    void setHome(Group home) {
+        this.home = home;
     }
 
     public void start(ExplosionConfig config) {
         this.config = config;
+        if (getParent() == null && home != null) {
+            home.addActor(this);
+        }
         ParticleEffectPool.PooledEffect pooledEffect = effectPool.obtain();
         pooledEffect.start();
         pooledEffect.setPosition(config.position.x, config.position.y);
@@ -39,6 +63,9 @@ public class Explosion extends Actor {
                 pooledEffect.free();
                 effects.removeIndex(i);
             }
+        }
+        if (effects.size == 0 && config != null) {
+            remove();
         }
     }
 

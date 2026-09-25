@@ -48,6 +48,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.addAction;
@@ -68,6 +69,10 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
  * @author msivak
  */
 public class TestViewImpl implements TestView {
+
+    private static final float RESULT_DISPLAY_DURATION = 0.0f;
+    /** Result table sits in the bottom strip formerly used by the OK button; dice line up right above it. */
+    private static final float RESULT_TABLE_Y = 5f;
 
     private TestController controller;
     private TestInfoTable testInfoTable;
@@ -101,7 +106,8 @@ public class TestViewImpl implements TestView {
                     monsterCombatTableStack.peek().setLocked(true);
                 }
             }
-            if (modifier == 0 && usableAssets.isEmpty() && additionalDicesCount == 0) {
+            // Nothing can change the dice count, so there's nothing to confirm; roll right away as if Test was pressed.
+            if (usableAssets == null || usableAssets.isEmpty()) {
                 onSub.onSuccess(null);
                 return;
             }
@@ -182,22 +188,20 @@ public class TestViewImpl implements TestView {
             if (!monsterCombatTableStack.isEmpty() && monsterCombatTableStack.peek().isLocked()) {
                 monsterCombatTableStack.peek().setLocked(false);
             }
-            diceRollerStack.peek().moveUp().subscribe();
-
             if (scoreImportant) {
                 confirmScoreTestResult(score, onSub);
             } else {
                 confirmBinaryTestResult(successful, onSub);
             }
+            diceRollerStack.peek().moveUp(testTableStack.peek().getTop() + 5).subscribe();
         });
     }
 
     @Override
     public Completable confirmRollResult(int score) {
         return Completable.create(onSub -> {
-            TextButton button = buildButton(get("dialog.ok"));
             hideDicesAfterConfirm = true;
-            showButton(onSub, button);
+            autoConfirm(onSub);
 
             if (score == 0) {
                 testTableStack.push(createFailedTable());
@@ -224,8 +228,7 @@ public class TestViewImpl implements TestView {
     }
 
     private void confirmBinaryTestResult(boolean successful, CompletableSubscriber onSub) {
-        TextButton button = buildButton(get("dialog.ok"));
-        showButton(onSub, button);
+        autoConfirm(onSub);
 
         if (successful) {
             testTableStack.push(createPassedTable());
@@ -233,34 +236,33 @@ public class TestViewImpl implements TestView {
             testTableStack.push(createFailedTable());
         }
 
-        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2,
-                InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
+        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2, RESULT_TABLE_Y);
         InfoStage.showActor(testTableStack.peek());
     }
 
     private void confirmScoreTestResult(int score, CompletableSubscriber onSub) {
-        TextButton button = buildButton(get("dialog.ok"));
-        showButton(onSub, button);
+        autoConfirm(onSub);
 
         testTableStack.push(createScoreTable(score));
-        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2,
-                InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
+        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2, RESULT_TABLE_Y);
         InfoStage.showActor(testTableStack.peek());
 
     }
 
-    private void showButton(CompletableSubscriber onSub, TextButton button) {
-        addClickListener(button, () -> {
-            if (hideDicesAfterConfirm) {
-                diceRollerStack.pop().hideDices();
-                InfoStage.hideActor(testTableStack.pop());
-                InfoStage.setBottomHeight(5);
-                MapStage.brightenWorld();
-            }
-            InfoStage.setBottomHeight(5);
-            onSub.onCompleted();
-        });
-        InfoStage.showButton(button);
+    private void autoConfirm(CompletableSubscriber onSub) {
+        // No OK button: keep the result readable for a moment, then continue as if it was pressed.
+        InfoStage.addActionToInfoStage(Actions.sequence(
+                new FastForwardAction<>(Actions.delay(RESULT_DISPLAY_DURATION)),
+                Actions.run(() -> {
+                    if (hideDicesAfterConfirm) {
+                        diceRollerStack.pop().hideDices();
+                        InfoStage.hideActor(testTableStack.pop());
+                        InfoStage.setBottomHeight(5);
+                        MapStage.brightenWorld();
+                    }
+                    InfoStage.setBottomHeight(5);
+                    onSub.onCompleted();
+                })));
     }
 
     @Override
@@ -482,28 +484,39 @@ public class TestViewImpl implements TestView {
     }
 
 
-    private Completable destroyHorrorOrDamage(List<DiceRoll> diceRolls, Function<List<Vector2>, Completable> destroyFunction, Action0 onEndAction) {
-        List<Vector2> dicesCenterPositions = diceRollerStack.peek().getDicesCenterPositions();
+    private List<Vector2> successfulDiceSources(List<DiceRoll> diceRolls) {
+        Map<Integer, Vector2> centers = diceRollerStack.peek().getLiveDiceCenters();
         Collections.sort(diceRolls, (o1, o2) -> o1.getDiceNr() - o2.getDiceNr());
         List<Vector2> result = new LinkedList<>();
-        for (int i = 0; i < diceRolls.size(); i++) {
-            if (diceRolls.get(i).getScore() == DiceRoll.Score.GOOD) {
-                result.add(dicesCenterPositions.get(i));
+        for (DiceRoll diceRoll : diceRolls) {
+            Vector2 center = centers.get(diceRoll.getDiceNr());
+            if (center == null) {
+                continue;
             }
-            if (diceRolls.get(i).getScore() == DiceRoll.Score.VERY_GOOD) {
-                result.add(dicesCenterPositions.get(i));
-                result.add(dicesCenterPositions.get(i));
+            if (diceRoll.getScore() == DiceRoll.Score.GOOD) {
+                result.add(center);
+            }
+            if (diceRoll.getScore() == DiceRoll.Score.VERY_GOOD) {
+                result.add(center);
+                result.add(center);
             }
         }
+        return result;
+    }
+
+    private Completable destroyHorrorOrDamage(List<DiceRoll> diceRolls, Function<List<Vector2>, Completable> destroyFunction, Action0 onEndAction) {
+        List<Vector2> result = successfulDiceSources(diceRolls);
         if (result.isEmpty()) {
             onEndAction.call();
             return Completable.complete();
         }
 
-        return destroyFunction.apply(result).concatWith(Completable.create(onSub -> {
-            onEndAction.call();
-            onSub.onCompleted();
-        }));
+        return diceRollerStack.peek().waitUntilSettled()
+                .andThen(Completable.defer(() -> destroyFunction.apply(successfulDiceSources(diceRolls))))
+                .concatWith(Completable.create(onSub -> {
+                    onEndAction.call();
+                    onSub.onCompleted();
+                }));
     }
 
     @Override
@@ -555,21 +568,8 @@ public class TestViewImpl implements TestView {
                     } else {
                         completable = Completable.complete();
                     }
-                    completable.subscribe(() -> {
-
-                        List<Vector2> dicesCenterPositions = diceRollerStack.peek().getDicesCenterPositions();
-                        Collections.sort(diceRolls, (o1, o2) -> o1.getDiceNr() - o2.getDiceNr());
-                        List<Vector2> result = new LinkedList<>();
-                        for (int i = 0; i < diceRolls.size(); i++) {
-                            if (diceRolls.get(i).getScore() == DiceRoll.Score.GOOD) {
-                                result.add(dicesCenterPositions.get(i));
-                            }
-                            if (diceRolls.get(i).getScore() == DiceRoll.Score.VERY_GOOD) {
-                                result.add(dicesCenterPositions.get(i));
-                                result.add(dicesCenterPositions.get(i));
-                            }
-                        }
-
+                    completable.andThen(diceRollerStack.peek().waitUntilSettled()).subscribe(() -> {
+                        List<Vector2> result = successfulDiceSources(diceRolls);
                         monsterCombatTableStack.peek().destroyMonsterHealth(result).concatWith(Completable.create(onSub -> {
                             diceRollerStack.pop().hideDices();
                             InfoStage.hideActor(testTableStack.pop());
