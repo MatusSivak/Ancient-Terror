@@ -48,6 +48,7 @@ import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.constants.trade.TradeData;
 import sk.sivak.eldritchhorror.core.controller.GameController;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 import sk.sivak.eldritchhorror.core.view.GameView;
 import sk.sivak.eldritchhorror.core.view.action.SelectActionView;
 import sk.sivak.eldritchhorror.core.view.action.focus.TokenView;
@@ -356,7 +357,7 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public void showInvestigators(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
-        BigActorsManager.initInvestigatorsSheet(investigators, activeInvestigatorId);
+        BigActorsManager.initInvestigatorsSheet(investigators, activeInvestigatorId, controller::displayInvestigatorPassport);
         BigActorsManager.displayOrHideInvestigators();
     }
 
@@ -553,16 +554,16 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable loseHealth(Integer input) {
-        return loseHealthOrSanity(input, offset -> tokenView.loseHealth(offset));
+        return loseHealthOrSanity(input, offset -> tokenView.loseHealth(offset),         TokenSounds.Cue.LOSS);
     }
 
 
     @Override
     public Completable loseSanity(Integer input) {
-        return loseHealthOrSanity(input, offset -> tokenView.loseSanity(offset));
+                return loseHealthOrSanity(input, offset -> tokenView.loseSanity(offset), TokenSounds.Cue.LOSS);
     }
 
-    private Completable loseHealthOrSanity(Integer amount, Function<Float, Completable> function) {
+    private Completable loseHealthOrSanity(Integer amount, Function<Float, Completable> function, TokenSounds.Cue cue) {
         List<Completable> completables = new LinkedList<>();
         float tokenWidth = 100;
         float baseOffset = - (amount - 1) * tokenWidth / 2f;
@@ -570,7 +571,13 @@ public class GameViewImpl implements Screen, GameView {
             completables.add(function.apply(baseOffset));
             baseOffset += tokenWidth;
         }
-        return Completable.amb(completables);
+        if (completables.isEmpty()) {
+            return Completable.amb(completables);
+        }
+        // Tokens reach the centre together and complete right before they split apart.
+        return Completable.fromAction(TokenSounds::playLeave)
+                .andThen(Completable.amb(completables))
+                .doOnCompleted(() -> TokenSounds.playLoss(cue, amount));
     }
 
 
@@ -717,7 +724,7 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public void displayInvestigatorPassport(InvestigatorBasics investigatorBasics, List<CardInfo> cards) {
-        if (investigatorBasics.getLocationId() != null) {
+        if (investigatorBasics.getLocationId() != null && !investigatorBasics.isLostInTimeAndSpace()) {
             MapUtils.moveCameraToLocation(investigatorBasics.getLocationId()).subscribe();
         }
         BigActorsManager.initPassport(investigatorBasics, cards);

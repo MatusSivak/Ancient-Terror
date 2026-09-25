@@ -26,6 +26,7 @@ import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.helper.TravelHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorSounds;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -108,6 +109,7 @@ public class TravelActionView {
             Completable.create(sub2 -> {
                 SequenceAction sequence = Actions.sequence(
                         Actions.run(() -> {
+                            InvestigatorSounds.playDepart();
                             for (InvestigatorImage investigatorImage : currentInvestigatorList) {
                                 AlphaAction action = new AlphaAction();
                                 action.setTarget(investigatorImage);
@@ -131,6 +133,7 @@ public class TravelActionView {
 
                 SequenceAction sequence = Actions.sequence(
                         Actions.run(() -> {
+                            InvestigatorSounds.playArrive();
                             for (InvestigatorImage investigatorImage : currentInvestigatorList) {
                                 investigatorImage.setX(investigatorImage.getX() + positionDiff.x);
                                 investigatorImage.setY(investigatorImage.getY() + positionDiff.y);

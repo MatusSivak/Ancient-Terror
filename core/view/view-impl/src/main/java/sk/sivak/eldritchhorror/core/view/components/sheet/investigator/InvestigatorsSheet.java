@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
+import rx.functions.Action1;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorBasics;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
@@ -14,7 +15,6 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
-import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +33,7 @@ public class InvestigatorsSheet extends Table {
     private static final float GAP = 10;
     private final DisplayHide displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.INVESTIGATORS);
     private Image hitImage;
-    private InvestigatorBasics selected;
+    private Action1<InvestigatorId> onInvestigatorSelected;
 
     public InvestigatorsSheet() {
         setTransform(true);
@@ -46,19 +46,13 @@ public class InvestigatorsSheet extends Table {
             InfoStage.getInvestigatorHud().show().subscribe();
             HudButtons.getTrackHud().show().subscribe();
         });
-        displayHide.setAfterHideAction(() -> {
-            InvestigatorBasics target = selected;
-            selected = null;
-            if (target != null && !target.isLostInTimeAndSpace() && target.getLocationId() != null) {
-                MapUtils.moveCameraToLocation(target.getLocationId()).subscribe();
-            }
-        });
     }
 
-    public void init(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
+    public void init(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId,
+                     Action1<InvestigatorId> onInvestigatorSelected) {
         if (displayHide.isDisplayed()) return;
+        this.onInvestigatorSelected = onInvestigatorSelected;
         clear();
-        selected = null;
         getColor().a = 1;
         TextureRegionDrawable background = new TextureRegionDrawable(getTextureRegion(RESERVE_BACKGROUND));
         background.setMinWidth(0);
@@ -71,7 +65,7 @@ public class InvestigatorsSheet extends Table {
         addActor(hitImage);
         updateHitBounds();
         // Child clicks bubble here, including labels, tokens and empty panel space.
-        // Portrait clicks start closing first, so the guard prevents a second toggle.
+        // Portrait clicks lock BigActorsManager for the sheet first, so the guard prevents a second toggle.
         addClickListener(this, () -> {
             if (!BigActorsManager.isLocked() && displayHide.isDisplayed()) {
                 BigActorsManager.displayOrHideInvestigators();
@@ -111,9 +105,11 @@ public class InvestigatorsSheet extends Table {
         Image portrait = new Image(getInvestigatorDrawable(investigator.getInvestigatorId()));
         portrait.setScaling(Scaling.fit);
         addClickListener(portrait, () -> {
-            if (BigActorsManager.isLocked() || !displayHide.isDisplayed()) return;
-            selected = investigator;
-            BigActorsManager.displayOrHideInvestigators();
+            if (BigActorsManager.isLocked() || !displayHide.isDisplayed() || onInvestigatorSelected == null) return;
+            // Same as clicking the investigator on the board: centre the camera and open the sheet.
+            // BigActorsManager swaps this overview out while the sheet flies in.
+            onInvestigatorSelected.call(investigator.getInvestigatorId());
+            HudButtons.getInstance().uncheckAll();
         });
         Color highlight = new Color(0xe8c477ff);
         Drawable frame = getTextureRegionDrawable(PURE_WHITE_BACKGROUND)

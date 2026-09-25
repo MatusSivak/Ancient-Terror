@@ -2,10 +2,12 @@ package sk.sivak.eldritchhorror.core.view.components.sheet.investigator;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 
 import com.badlogic.gdx.utils.Align;
@@ -50,6 +52,7 @@ public class PassportTable extends Table {
     private TokensTableData tokensTableData;
     private SpecialTableData specialTableData;
     private List<CardInfo> cards;
+    private List<CardClickListener> activeCardListeners = Collections.emptyList();
     private Image hitImage;
     private final DisplayHide displayHide;
     private Action0 beforeDisplayAction;
@@ -78,6 +81,7 @@ public class PassportTable extends Table {
 
     public void prepareBasicInfoTab() {
         clear();
+        activeCardListeners = Collections.emptyList();
         padLeft(35);
         padBottom(50);
 
@@ -143,69 +147,41 @@ public class PassportTable extends Table {
         clear();
 
         addHitImage();
-        padLeft(35);
-        padBottom(20);
-
-        HorizontalGroup firstRow = new HorizontalGroup();
-        HorizontalGroup secondRow = new HorizontalGroup();
+        pad(0, 35, 50, 0);
 
         List<CardClickListener> cardClickListeners = new LinkedList<>();
         List<CardTemplate> cardTemplates = new LinkedList<>();
-        if (!assets.isEmpty()) {
-            CardsTable assetsTable = new CardsTable();
-            int width = calculateWidthFactor(assets.size(), uniqueAssets.size(), artifacts.size());
-            assetsTable.init(assets, width);
-            cardClickListeners.addAll(assetsTable.getCardClickListeners());
-            cardTemplates.addAll(assetsTable.getCardTemplates());
-            SectionWrapper assetsSection = new SectionWrapper().init(get("investigator.section.assets"), assetsTable);
-            firstRow.addActor(new Container<>(assetsSection).width(assetsSection.getWidth()).height(assetsSection.getHeight()));
-        }
-        if (!uniqueAssets.isEmpty()) {
-            CardsTable uniqueAssetsTable = new CardsTable();
-            int width = calculateWidthFactor(uniqueAssets.size(), assets.size(), artifacts.size());
-            uniqueAssetsTable.init(uniqueAssets, width);
-            cardClickListeners.addAll(uniqueAssetsTable.getCardClickListeners());
-            cardTemplates.addAll(uniqueAssetsTable.getCardTemplates());
-            SectionWrapper uniqueAssetsSection = new SectionWrapper().init(get("investigator.section.uniqueAssets"), uniqueAssetsTable);
-            firstRow.addActor(new Container<>(uniqueAssetsSection).width(uniqueAssetsSection.getWidth()).height(uniqueAssetsSection.getHeight()));
-        }
-        if (!artifacts.isEmpty()) {
-            CardsTable artifactsTable = new CardsTable();
-            int width = calculateWidthFactor(artifacts.size(), assets.size(), uniqueAssets.size());
-            artifactsTable.init(artifacts, width);
-            cardClickListeners.addAll(artifactsTable.getCardClickListeners());
-            cardTemplates.addAll(artifactsTable.getCardTemplates());
-            SectionWrapper artifactsSection = new SectionWrapper().init(get("investigator.section.artifacts"), artifactsTable);
-            firstRow.addActor(new Container<>(artifactsSection).width(artifactsSection.getWidth()).height(artifactsSection.getHeight()));
-        }
-        add(firstRow).width(726).align(Align.topLeft).row();
+        Table sheet = new Table();
+        sheet.top().left();
 
-
-        if (!spells.isEmpty()) {
-            CardsTable spellsTable = new CardsTable();
-            int width = calculateWidthFactor(spells.size(), conditions.size());
-            spellsTable.init(spells, width);
-            cardClickListeners.addAll(spellsTable.getCardClickListeners());
-            cardTemplates.addAll(spellsTable.getCardTemplates());
-            SectionWrapper spellsSection = new SectionWrapper().init(get("investigator.section.spells"), spellsTable);
-            secondRow.addActor(new Container<>(spellsSection).width(spellsSection.getWidth()).height(spellsSection.getHeight()));
+        Table firstRow = createCardRow(
+                new String[]{"investigator.section.assets", "investigator.section.uniqueAssets", "investigator.section.artifacts"},
+                java.util.Arrays.asList(assets, uniqueAssets, artifacts), cardClickListeners, cardTemplates);
+        Table secondRow = createCardRow(
+                new String[]{"investigator.section.spells", "investigator.section.conditions"},
+                java.util.Arrays.asList(spells, conditions), cardClickListeners, cardTemplates);
+        if (firstRow.hasChildren()) {
+            sheet.add(firstRow).width(700).left().padBottom(secondRow.hasChildren() ? 12 : 0).row();
         }
-        if (!conditions.isEmpty()) {
-            CardsTable conditionsTable = new CardsTable();
-            int width = calculateWidthFactor(conditions.size(), spells.size());
-            conditionsTable.init(conditions, width);
-            cardClickListeners.addAll(conditionsTable.getCardClickListeners());
-            cardTemplates.addAll(conditionsTable.getCardTemplates());
-            SectionWrapper conditionsSection = new SectionWrapper().init(get("investigator.section.conditions"), conditionsTable);
-            secondRow.addActor(new Container<>(conditionsSection).width(conditionsSection.getWidth()).height(conditionsSection.getHeight()));
+        if (secondRow.hasChildren()) {
+            sheet.add(secondRow).width(700).left().row();
         }
-
-        for (CardClickListener cardClickListener : cardClickListeners) {
-            cardClickListener.setOtherListeners(cardClickListeners);
-            cardClickListener.setAllTemplates(cardTemplates);
+        for (CardClickListener listener : cardClickListeners) {
+            listener.setOtherListeners(cardClickListeners);
+            listener.setAllTemplates(cardTemplates);
         }
-        add(secondRow).width(726).height(223).align(Align.topLeft);
-
+        FittedCharacterSheet fittedSheet = new FittedCharacterSheet(sheet);
+        add(fittedSheet).width(700).height(400);
+        activeCardListeners = cardClickListeners;
+        // Clicks on titles, panels and empty scroll space bubble here; only the cards themselves keep it open.
+        fittedSheet.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!isInsideCard(event.getTarget())) {
+                    onClickOutsideCard();
+                }
+            }
+        });
         buttons = new InvestigatorSheetButtons() {
             @Override
             protected void onBasicInfoTabClick() {
@@ -224,8 +200,63 @@ public class PassportTable extends Table {
         prepareCommon();
     }
 
+    private static boolean isInsideCard(Actor actor) {
+        for (Actor current = actor; current != null; current = current.getParent()) {
+            if (current instanceof CardTemplate) return true;
+        }
+        return false;
+    }
+
+    private void onClickOutsideCard() {
+        if (!displayHide.isDisplayed() || BigActorsManager.isLocked()) return;
+        for (CardClickListener listener : activeCardListeners) {
+            if (listener.isZoomed()) {
+                // First outside click shrinks a zoomed card back; the next one closes the sheet.
+                listener.scaleDownIfZoomed();
+                return;
+            }
+        }
+        BigActorsManager.displayOrHidePassport();
+    }
+
+    /** Section backgrounds and scroll viewports stay within their allocated page width. */
+    private Table createCardRow(String[] titles, List<? extends List<? extends CardInfo>> groups,
+                                List<CardClickListener> listeners, List<CardTemplate> templates) {
+        Table row = new Table();
+        row.top().left();
+        int populated = 0;
+        for (List<? extends CardInfo> group : groups) {
+            if (!group.isEmpty()) populated++;
+        }
+        if (populated == 0) return row;
+        float sectionWidth = (700f - (populated - 1) * 12f) / populated;
+        int added = 0;
+        for (int i = 0; i < groups.size(); i++) {
+            if (groups.get(i).isEmpty()) continue;
+            CardsTable cardsTable = new CardsTable();
+            cardsTable.init(groups.get(i), (int) (sectionWidth - 30));
+            listeners.addAll(cardsTable.getCardClickListeners());
+            templates.addAll(cardsTable.getCardTemplates());
+
+            Table panel = new Table();
+            panel.setBackground(new RoundedSheetPanel());
+            panel.pad(10);
+            Label title = new Label(
+                    get(titles[i]), new Label.LabelStyle(
+                    CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SPECIAL_ELITE, 42),
+                    Color.valueOf("E8D6AD")));
+            title.setFontScale(0.35f);
+            title.setWrap(true);
+            title.setAlignment(Align.left);
+            panel.add(title).width(sectionWidth - 20).padBottom(8).row();
+            panel.add(cardsTable).width(sectionWidth - 20).left();
+            row.add(panel).width(sectionWidth).top().padRight(++added < populated ? 12 : 0);
+        }
+        return row;
+    }
     private void prepareBackgroundTab() {
         clear();
+        activeCardListeners = Collections.emptyList();
         padLeft(35);
         padBottom(20);
 
@@ -282,52 +313,13 @@ public class PassportTable extends Table {
         addActor(hitImage);
         hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
         hitImage.getColor().a = 0;
-        addClickListener(hitImage, BigActorsManager::displayOrHidePassport);
+        addClickListener(hitImage, this::onClickOutsideCard);
     }
 
     @Override
     protected void positionChanged() {
         super.positionChanged();
         hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    }
-
-    private int calculateWidthFactor(int currentListSize, int... listSizes) {
-        if (currentListSize == 1) {
-            return 195;
-        }
-
-        int widthAvailable = 700;
-        int undecided = 0;
-        for (int listSize : listSizes) {
-            Integer finalWidth = getFinalWidth(listSize);
-            if (finalWidth != null) {
-                widthAvailable -= finalWidth;
-            } else {
-                widthAvailable -= 28;
-                undecided++;
-            }
-        }
-
-        int fairWidth = (int) (widthAvailable / (float) (undecided + 1));
-
-        widthAvailable = 700;
-        for (int listSize : listSizes) {
-            widthAvailable -= Math.max(listSize * CardsTable.CARD_SCALE * CardTemplate.CARD_WIDTH, 195);
-        }
-        if (widthAvailable > fairWidth) {
-            return widthAvailable;
-        }
-        return fairWidth;
-    }
-
-    private Integer getFinalWidth(int listSize) {
-        if (listSize == 0) {
-            return 0;
-        } else if (listSize == 1) {
-            return 195;
-        } else {
-            return null;
-        }
     }
 
     @Override

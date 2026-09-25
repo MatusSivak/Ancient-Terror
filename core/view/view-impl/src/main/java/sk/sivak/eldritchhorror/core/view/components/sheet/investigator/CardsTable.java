@@ -24,9 +24,11 @@ public class CardsTable extends VisTable {
 
     public void init(List<? extends CardInfo> cardInfoList, int maxWidth) {
         cardTemplates.clear();
+        cardClickListeners.clear();
         clear();
         HorizontalGroup horizontalGroup = new HorizontalGroup();
         ScrollPane scrollPane = new ScrollPane(horizontalGroup);
+        scrollPane.setScrollingDisabled(false, true);
         float scrollWidth = Math.min(maxWidth, cardInfoList.size() * CARD_SCALE * CardTemplate.CARD_WIDTH);
         add(scrollPane).width(scrollWidth);
         for (CardInfo cardInfo : cardInfoList) {

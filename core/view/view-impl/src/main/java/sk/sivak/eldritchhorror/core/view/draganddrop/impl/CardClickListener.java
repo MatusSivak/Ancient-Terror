@@ -127,6 +127,13 @@ public class CardClickListener extends ClickListener {
         return zoomed;
     }
 
+    /** Same as clicking the zoomed copy: restores the other cards and shrinks it back into place. */
+    public void scaleDownIfZoomed() {
+        if (zoomed && duplicate != null && duplicate.getActions().size == 0) {
+            scaledCardClickListener.clicked(null, 0, 0);
+        }
+    }
+
     private void darkenOtherCards() {
         cardColorMap.clear();
         forEach(collectToList(allTemplates, it -> !it.getForeground().getColor().equals(new Color(0, 0, 0, 0.75f))),

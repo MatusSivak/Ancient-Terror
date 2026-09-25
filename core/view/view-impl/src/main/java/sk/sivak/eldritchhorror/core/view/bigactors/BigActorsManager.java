@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.kotcrab.vis.ui.VisUI;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
+import rx.functions.Action1;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
@@ -227,9 +228,10 @@ public class BigActorsManager {
         displayOrHide(BigActorKey.RESERVE);
     }
 
-    public static void initInvestigatorsSheet(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
+    public static void initInvestigatorsSheet(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId,
+                                              Action1<InvestigatorId> onInvestigatorSelected) {
         if (isLocked()) return;
-        getInstance().investigatorsSheet.init(investigators, activeInvestigatorId);
+        getInstance().investigatorsSheet.init(investigators, activeInvestigatorId, onInvestigatorSelected);
     }
 
     public static void displayOrHideInvestigators() {

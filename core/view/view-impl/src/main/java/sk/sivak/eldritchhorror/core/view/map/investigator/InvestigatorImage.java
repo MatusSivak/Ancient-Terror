@@ -192,6 +192,10 @@ public class InvestigatorImage extends Image {
         this.asteroidVisible = asteroidVisible;
     }
 
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
     void highlight(boolean active) {
         this.highlighted = active;
         if (active) {

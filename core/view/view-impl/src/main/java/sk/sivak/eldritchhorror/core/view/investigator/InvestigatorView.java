@@ -32,6 +32,7 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorSounds;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -65,10 +66,18 @@ public class InvestigatorView {
             displayTransitionCompletable = Completable.complete();
         }
 
-        InvestigatorUtils.highlightInvestigators(MapStage.getAllActors(getInvestigatorLayer()), false);
         List<InvestigatorImage> currentInvestigatorList = MapStage
                 .getActor(InvestigatorUtils.getIdLayerResolver(currentInvestigator.getInvestigatorId(), lostInTimeAndSpace));
+        // Re-showing the same active investigator is common; only chime when the highlight moves to them.
+        boolean alreadyHighlighted = !currentInvestigatorList.isEmpty();
+        for (InvestigatorImage investigatorImage : currentInvestigatorList) {
+            alreadyHighlighted &= investigatorImage.isHighlighted();
+        }
+        InvestigatorUtils.highlightInvestigators(MapStage.getAllActors(getInvestigatorLayer()), false);
         InvestigatorUtils.highlightInvestigators(currentInvestigatorList, true);
+        if (!alreadyHighlighted && !currentInvestigatorList.isEmpty()) {
+            InvestigatorSounds.playHighlight();
+        }
 
         Completable moveCameraToPosition;
         if (currentInvestigator.getLocationId() != null) {

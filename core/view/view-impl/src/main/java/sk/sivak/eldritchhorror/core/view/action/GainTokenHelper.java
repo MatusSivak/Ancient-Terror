@@ -12,11 +12,21 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
  */
 public class GainTokenHelper {
     public static Completable gainTokenAndUpdateHud(int amount, ContainerBar containerBar, String tokenId, String infoText) {
+        return gainTokenAndUpdateHud(amount, containerBar, tokenId, infoText, null);
+    }
+
+    public static Completable gainTokenAndUpdateHud(int amount, ContainerBar containerBar, String tokenId, String infoText,
+                                                    TokenSounds.Cue cue) {
         Completable theBigOne = Completable.complete();
         for (int i = 0; i < amount; i++) {
             Vector2 emptyContainerPosition = containerBar.getEmptyContainerPosition(i);
-            Completable gainToken = gainToken(tokenId, emptyContainerPosition, infoText);
+            int tokenIndex = i;
+            Completable playCue = cue == null ? Completable.complete() : Completable.fromAction(() -> TokenSounds.playGain(cue, tokenIndex));
+            Completable gainToken = playCue.andThen(gainToken(tokenId, emptyContainerPosition, infoText));
             Completable updateHud = gainToken.andThen(Completable.create(onSub -> {
+                if (cue != null) {
+                    TokenSounds.playLand(tokenIndex);
+                }
                 containerBar.increaseCurrentValue();
                 onSub.onCompleted();
             }));

@@ -355,6 +355,11 @@ public class CustomAssetManager extends AssetManager {
             load(path, Sound.class);
             soundPaths.add(path);
         }
+        for (String path : new String[]{TRAVEL_DEPART_SOUND, TRAVEL_ARRIVE_SOUND, INVESTIGATOR_HIGHLIGHT_SOUND,
+                TOKEN_GAIN_SOUND, TOKEN_LOSS_SOUND, TOKEN_LEAVE_SOUND, TOKEN_LAND_SOUND}) {
+            load(path, Sound.class);
+            soundPaths.add(path);
+        }
         load(TICK, Texture.class);
         load("background/gray.jpg", Texture.class);
         load("background/pure_white.png", Texture.class);
@@ -564,6 +569,15 @@ public class CustomAssetManager extends AssetManager {
     public final static String OTHER_WORLD_BACKGROUND = "encounter/background/other_world.jpg";
     public final static String RECKONING = "icon/reckoning.png";
     public final static String TICK = "icon/tick.png";
+    public final static String TRAVEL_DEPART_SOUND = "sounds/travel_depart.wav";
+    public final static String TRAVEL_ARRIVE_SOUND = "sounds/travel_arrive.wav";
+    // "maximize_006" from Kenney Interface Sounds (www.kenney.nl), CC0.
+    public final static String INVESTIGATOR_HIGHLIGHT_SOUND = "sounds/investigator_highlight.ogg";
+    // Shared by Health and Sanity.
+    public final static String TOKEN_GAIN_SOUND = "sounds/health_gain.wav";
+    public final static String TOKEN_LOSS_SOUND = "sounds/health_loss.wav";
+    public final static String TOKEN_LEAVE_SOUND = "sounds/token_leave.wav";
+    public final static String TOKEN_LAND_SOUND = "sounds/token_land.wav";
     public final static String LOCATION_BUTTON_UP = "map/button_2.png";
     public final static String LOCATION_BUTTON_DOWN = "map/button_3.png";
     public final static String CLUE_TOKEN = "token/clue.png";

@@ -9,8 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.widget.VisTable;
 import rx.CompletableSubscriber;
 import rx.SingleSubscriber;
@@ -21,15 +23,17 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.investigator.StatsTabl
 import sk.sivak.eldritchhorror.core.view.components.sheet.investigator.StatsTableData;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
@@ -39,6 +43,9 @@ public class LoseImprovementComponent extends VisTable {
     private Stat onlyAvailableSkill = null;
     private int amountToLose;
     private final DisplayHide displayHide;
+    private boolean readOnly;
+    private final Map<Label, VisTable> statRows = new HashMap<>();
+    private final Map<Label, int[]> statValues = new HashMap<>();
 
     private List<ImageButton> imageButtons = new LinkedList<>();
 
@@ -55,15 +62,15 @@ public class LoseImprovementComponent extends VisTable {
     public void init(StatsTableData statsTableData, Stat skill, int amountToLose) {
         this.onlyAvailableSkill = skill;
         this.amountToLose = amountToLose;
+        readOnly = false;
         init(statsTableData);
 
     }
 
     public void justShow(StatsTableData statsTableData) {
+        onlyAvailableSkill = null;
+        readOnly = true;
         init(statsTableData);
-        for (ImageButton imageButton : labelImageButtonMap.values()) {
-            imageButton.remove();
-        }
     }
 
     public void justHide() {
@@ -73,51 +80,57 @@ public class LoseImprovementComponent extends VisTable {
     private void init(StatsTableData statsTableData) {
         imageButtons.clear();
         labelImageButtonMap.clear();
+        statRows.clear();
+        statValues.clear();
         clear();
+        pad(12);
+        setBackground(SelectionPanelStyle.panel("101D20F5", "8E7953"));
         this.loseImprovementTable = new LoseImprovementTable();
+        loseImprovementTable.pad(0);
         loseImprovementTable.init(statsTableData);
-        TextureRegionDrawable textureRegionDrawable = CustomAssetManager.getTextureRegionDrawable("wooden_background.png");
-        textureRegionDrawable.getRegion().flip(true, false);
-        setBackground(textureRegionDrawable);
-        add(createLabel()).width(200).row();
-        add(loseImprovementTable);
-        setSize(280,350);
+        add(createLabel()).growX().height(28).padBottom(6).row();
+        Image divider = new Image(CustomAssetManager.getTexture(PURE_WHITE_BACKGROUND));
+        divider.setColor(Color.valueOf("8E7953"));
+        add(divider).growX().height(1).padBottom(8).row();
+        add(loseImprovementTable).growX();
+        setSize(210, 328);
         show();
     }
 
 
     private Label createLabel() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.LIGHT_GRAY);
-        labelStyle.background = CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.valueOf("E8D6AD"));
         Label label = new Label(get("skill.loseImprovement"), labelStyle);
         label.setAlignment(Align.center);
         label.setFontScale(0.35f);
         return label;
     }
 
-    @Override
-    protected void drawBackground(Batch batch, float parentAlpha, float x, float y) {
-        Color color = getColor();
-        float intensity = 0.33f;
-        batch.setColor(color.r * intensity, color.g * intensity, color.b * intensity, color.a * parentAlpha);
-        ((TextureRegionDrawable) getBackground()).draw(batch, x + getWidth(), y, 0, 0, getHeight(), getWidth(), 1f, 1f, 90);
-    }
-
     private class LoseImprovementTable extends StatsTable {
         private int statIndex = 0;
 
         protected void addStatPair(Label label, Label value) {
-            add(label).align(Align.right).padRight(5).padBottom(5);
-            add(value).align(Align.left).width(65).padBottom(5);
-
             Stat stat = resolveStatByIndex(statIndex++);
-            if (onlyAvailableSkill == null || onlyAvailableSkill == stat) {
-                ImageButton imageButton = createPlusButton(value, stat);
-                add(imageButton).align(Align.left).padLeft(5).width(50).height(50).padBottom(5);
+            VisTable statRow = new VisTable();
+            statRow.pad(4);
+            statRows.put(value, statRow);
+            Image glyph = new Image(CustomAssetManager.getTexture("glyphs/" + stat.name().toLowerCase(Locale.ROOT) + ".png"));
+            glyph.setScaling(Scaling.fit);
+            glyph.setColor(Color.valueOf("DCC99F"));
+            statRow.add(glyph).size(28).expandX().padRight(12);
+            Label.LabelStyle valueStyle = new Label.LabelStyle(value.getStyle());
+            valueStyle.background = SelectionPanelStyle.panel("0D171B", "384A4B");
+            value.setStyle(valueStyle);
+            value.setAlignment(Align.center);
+            statRow.add(value).width(64).height(36).padRight(8);
+            if (!readOnly && (onlyAvailableSkill == null || onlyAvailableSkill == stat)) {
+                ImageButton imageButton = createMinusButton(value, stat);
+                statRow.add(imageButton).size(40);
                 labelImageButtonMap.put(value, imageButton);
             } else {
-                add().padLeft(5).size(50).padBottom(5);
+                statRow.add().size(40);
             }
+            add(statRow).growX().height(48).padBottom(4);
             row();
         }
 
@@ -140,21 +153,29 @@ public class LoseImprovementComponent extends VisTable {
 
         @Override
         protected void fillStatValue(Label value, int base, int bonus) {
-            super.fillStatValue(value, base, bonus);
-            if (bonus == 0 && labelImageButtonMap.get(value) != null) {
-                labelImageButtonMap.get(value).remove();
+            statValues.put(value, new int[]{base, bonus});
+            renderValue(value);
+            ImageButton button = labelImageButtonMap.get(value);
+            boolean available = button != null && bonus > 0;
+            statRows.get(value).setBackground(SelectionPanelStyle.panel(
+                    available ? "3B2929" : "18272B", available ? "A57568" : "304145"));
+            if (!available && button != null) {
+                button.clearActions();
+                button.setVisible(false);
+                button.setTouchable(Touchable.disabled);
             }
 
         }
 
-        private ImageButton createPlusButton(Label value, Stat stat) {
-            ImageButton imageButton = new ImageButton(
-                    CustomAssetManager.getTextureRegionDrawable("icon/minus_normal.png"),
-                    CustomAssetManager.getTextureRegionDrawable("icon/minus_checked.png"),
-                    CustomAssetManager.getTextureRegionDrawable("icon/minus_checked.png")
-            );
+        private ImageButton createMinusButton(Label value, Stat stat) {
+            ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+            style.up = SelectionPanelStyle.panel("633D37", "BD9680");
+            style.over = SelectionPanelStyle.panel("7A4C42", "DFC3A3");
+            style.down = SelectionPanelStyle.panel("452A28", "E8D6AD");
+            style.imageUp = new MinusGlyph();
+            ImageButton imageButton = new ImageButton(style);
             imageButton.setTransform(true);
-            imageButton.setOrigin(25, 25);
+            imageButton.setOrigin(20, 20);
             RepeatAction repeatAction = Actions.repeat(RepeatAction.FOREVER, Actions.parallel(
                     Actions.sequence(
                             Actions.scaleTo(0.9f, 0.9f, 0.5f, Interpolation.sine),
@@ -168,10 +189,10 @@ public class LoseImprovementComponent extends VisTable {
                         button.clearListeners();
                         repeatAction.finish();
                         float remainingScale = 1 - button.getScaleX();
-                        Vector2 buttonPosition = button.localToParentCoordinates(new Vector2(-10, 44));
+                        Vector2 buttonPosition = value.localToAscendantCoordinates(
+                                LoseImprovementComponent.this, new Vector2(value.getWidth() / 2, value.getHeight() / 2));
                         button.addAction(Actions.sequence(
                                 Actions.parallel(
-                                        Actions.rotateTo(90, 0.25f),
                                         Actions.scaleTo(1, 1, 0.25f* remainingScale/0.1f)
                                 ),
                                 Actions.run(() -> showLight(buttonPosition, value, stat)),
@@ -196,6 +217,7 @@ public class LoseImprovementComponent extends VisTable {
         image.setSize(280,280);
         image.setOrigin(140,140);
         image.setColor(new Color(1f, 0.33f, 0.33f, 1f));
+        image.setTouchable(Touchable.disabled);
         image.setPosition(position.x - 140, position.y - 140);
         addActor(image);
         image.setScale(0);
@@ -220,17 +242,31 @@ public class LoseImprovementComponent extends VisTable {
     }
 
     private void updateLabelValue(Label value) {
-        if (amountToLose == 1) {
-            if (value.getText().toString().contains("+1")) { // +1 -> 0
-                value.setText("[BLACK]" + value.getText().substring(7,8) + "[]");
-            } else { // +2 -> +1
-                value.setText("[BLACK]" + value.getText().substring(7,8) + "[#229B3C] +1[]");
-            }
-        } else {
-            value.setText("[BLACK]" + value.getText().substring(7,8) + "[]");
-        }
+        int[] numbers = statValues.get(value);
+        numbers[1] = amountToLose == 1 ? Math.max(0, numbers[1] - 1) : 0;
+        renderValue(value);
     }
 
+    private void renderValue(Label value) {
+        int[] numbers = statValues.get(value);
+        value.setText("[#EEE6D5]" + numbers[0]
+                + (numbers[1] > 0 ? "[#A8D6A0] +" + numbers[1] : "") + "[]");
+    }
+
+    private static class MinusGlyph extends BaseDrawable {
+        MinusGlyph() {
+            setMinWidth(16);
+            setMinHeight(16);
+        }
+
+        @Override
+        public void draw(Batch batch, float x, float y, float width, float height) {
+            float previous = batch.getPackedColor();
+            batch.setColor(0.94f, 0.91f, 0.76f, batch.getColor().a);
+            batch.draw(CustomAssetManager.getTexture(PURE_WHITE_BACKGROUND), x, y + height / 2 - 1, width, 2);
+            batch.setColor(previous);
+        }
+    }
 
     public void setOnSub(SingleSubscriber<? super Stat> onSub) {
         this.onSub = onSub;

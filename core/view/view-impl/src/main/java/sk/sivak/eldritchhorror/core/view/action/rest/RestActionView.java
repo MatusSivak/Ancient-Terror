@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.action.rest;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -16,11 +17,11 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class RestActionView {
 
     public Completable gainHealth(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, get("rest.healthRestored"));
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, get("rest.healthRestored"), TokenSounds.Cue.GAIN);
     }
 
     public Completable gainSanity(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, get("rest.sanityRestored"));
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, get("rest.sanityRestored"), TokenSounds.Cue.GAIN);
     }
 
     public Completable justRest() {

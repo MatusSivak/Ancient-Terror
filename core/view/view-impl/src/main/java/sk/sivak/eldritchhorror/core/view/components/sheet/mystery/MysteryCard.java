@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -16,15 +15,16 @@ import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
-import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.concurrent.TimeUnit;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.components.sheet.mystery.ProgressTokenBar.ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
@@ -32,9 +32,11 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class MysteryCard extends VisTable {
 
     private static final float CARD_WIDTH = 620f;
-    private static final float SIDE_PADDING = 48f;
+    private static final float SIDE_PADDING = 28f;
     private static final float CONTENT_WIDTH = CARD_WIDTH - SIDE_PADDING * 2;
-    private static final Color INK = new Color(0.18f, 0.16f, 0.12f, 1f);
+    private static final Color TEXT = Color.valueOf("EEE6D5");
+    private static final Color MUTED_TEXT = Color.valueOf("B8C4BE");
+    private static final Color BRASS = Color.valueOf("DCC99F");
 
     private final DisplayHide displayHide;
     private ProgressTokenBar progressTokenBar;
@@ -66,20 +68,22 @@ public class MysteryCard extends VisTable {
 
     public void init(MysteryCardInfo mysteryCardInfo) {
         clear();
+        hitImage = null;
         getColor().a = 1f;
-        setBackground((Drawable) null);
         this.mysteryCardInfo = mysteryCardInfo;
-        TextureRegionDrawable parchment = new TextureRegionDrawable(
-                CustomAssetManager.getTextureRegion(CustomAssetManager.MYSTERY_BACKGROUND));
-        parchment.setMinWidth(0);
-        parchment.setMinHeight(0);
-        setBackground(parchment);
-        pad(32, SIDE_PADDING, 34, SIDE_PADDING);
+        TextureRegionDrawable background = new TextureRegionDrawable(
+                CustomAssetManager.getTextureRegion(CustomAssetManager.RESERVE_BACKGROUND));
+        background.setMinWidth(0);
+        background.setMinHeight(0);
+        setBackground(background);
+        pad(24, SIDE_PADDING, 24, SIDE_PADDING);
         defaults().width(CONTENT_WIDTH).left();
 
-        add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).padBottom(8);
+        add(createSectionLabel(get("mystery.current"))).padBottom(8);
         row();
-        add(createDivider()).height(1).padBottom(9);
+        add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).padBottom(16);
+        row();
+        add(createDivider()).height(1).padBottom(16);
         row();
         String flavorText = resolveLocalizedText(mysteryCardInfo.getFlavorText());
         if (flavorText != null && !flavorText.trim().isEmpty()) {
@@ -87,21 +91,17 @@ public class MysteryCard extends VisTable {
             row();
         }
         Table objective = new Table();
-        objective.setBackground(createTintedBackground(new Color(1f, 0.97f, 0.85f, 0.22f)));
+        objective.setBackground(SelectionPanelStyle.panel("1C302F", "415851"));
         objective.add(createMysteryText(getProcessedMysteryText(mysteryCardInfo)))
-                .width(CONTENT_WIDTH - 28).pad(12, 14, 13, 14);
+                .width(CONTENT_WIDTH - 36).pad(16, 18, 16, 18);
         add(objective);
         row();
 
-        add(createDivider()).height(1).padTop(12).padBottom(7);
+        add(createProgressLabel()).padTop(18).padBottom(8);
         row();
 
         progressTokenBar = createProgressTokenBar(mysteryCardInfo.getMysteryComplexity(), Math.min(mysteryCardInfo.getProgress(), mysteryCardInfo.getMysteryComplexity()));
-        Table progressRow = new Table();
-        progressRow.left();
-        progressRow.add(createProgressLabel()).width(80).padRight(12).left();
-        progressRow.add(progressTokenBar).expandX().left();
-        add(progressRow);
+        add(progressTokenBar).fillX();
 
         // Measure wrapped text at the final width, including localized titles and rules.
         setWidth(CARD_WIDTH);
@@ -126,29 +126,29 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), INK);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), BRASS);
         Label label = new Label(text, labelStyle);
-        label.setAlignment(Align.center);
+        label.setAlignment(Align.left);
         label.setWrap(true);
-        label.setFontScale(0.52f);
+        label.setFontScale(0.65f);
         return label;
     }
 
     private Label createFlavorLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), MUTED_TEXT);
         Label label = new Label(reflowText(text), labelStyle);
-        label.setAlignment(Align.center);
+        label.setAlignment(Align.left);
         label.setWrap(true);
-        label.setFontScale(0.32f);
+        label.setFontScale(0.35f);
         return label;
     }
 
     private Label createMysteryText(String text) {
-        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), INK);
+        Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), TEXT);
         Label label = new Label(reflowText(text), style);
         label.setWrap(true);
-        label.setAlignment(Align.center);
-        label.setFontScale(0.42f);
+        label.setAlignment(Align.left);
+        label.setFontScale(0.46f);
         return label;
     }
 
@@ -159,8 +159,12 @@ public class MysteryCard extends VisTable {
     }
 
     private Label createProgressLabel() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
-        Label label = new Label(get("mystery.progress"), labelStyle);
+        return createSectionLabel(get("mystery.progress"));
+    }
+
+    private Label createSectionLabel(String text) {
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), BRASS);
+        Label label = new Label(text, labelStyle);
         label.setAlignment(Align.left);
         label.setFontScale(0.35f);
         label.setWrap(true);
@@ -169,21 +173,8 @@ public class MysteryCard extends VisTable {
 
     private Image createDivider() {
         Image divider = new Image(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        divider.setColor(0.30f, 0.25f, 0.16f, 0.35f);
+        divider.setColor(Color.valueOf("8E7953"));
         return divider;
-    }
-
-    private Drawable createTintedBackground(Color tint) {
-        return new TextureRegionDrawable(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                float previousColor = batch.getPackedColor();
-                Color current = batch.getColor();
-                batch.setColor(current.r * tint.r, current.g * tint.g, current.b * tint.b, current.a * tint.a);
-                super.draw(batch, x, y, width, height);
-                batch.setColor(previousColor);
-            }
-        };
     }
 
     private String resolveLocalizedText(String text) {
@@ -221,7 +212,6 @@ public class MysteryCard extends VisTable {
         displayHide.setDisplayedY(VIEWPORT_HEIGHT / 2 - getHeight() / 2);
 
         displayHide.setBeforeDisplayAction(() -> {
-            InfoStage.displayTextDontHide(get("mystery.current"));
             if (mysteryCardInfo.getPinLocations() != null && !mysteryCardInfo.getPinLocations().isEmpty() && moveCamera) {
                 int pinLocationIndex = MathUtils.random(0, mysteryCardInfo.getPinLocations().size() - 1);
                 MapUtils.moveCameraToLocation(mysteryCardInfo.getPinLocations().get(pinLocationIndex)).subscribe();
@@ -232,7 +222,6 @@ public class MysteryCard extends VisTable {
         });
 
 
-        displayHide.setBeforeHideAction(() -> InfoStage.hideLabel(get("mystery.current")));
 
         if (advanceActiveMysteryAmount != null) {
             progressTokenBar.init(mysteryCardInfo.getMysteryComplexity(), mysteryCardInfo.getProgress() - advanceActiveMysteryAmount);
