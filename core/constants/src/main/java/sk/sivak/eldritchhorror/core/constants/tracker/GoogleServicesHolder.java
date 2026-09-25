@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.constants.tracker;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.pay.Offer;
 import com.badlogic.gdx.pay.OfferType;
 import com.badlogic.gdx.pay.PurchaseManager;
@@ -96,11 +97,10 @@ public class GoogleServicesHolder {
                 public void showRewardedAd(AdCallbacks callbacks) {
                     AdCallbacks effectiveCallbacks = callbacks == null ? new AdCallbacks() : callbacks;
                     effectiveCallbacks.getOnAdStartedAction().run();
-                    Completable.complete().delay(3, TimeUnit.SECONDS).subscribe(() -> {
+                    Completable.complete().delay(3, TimeUnit.SECONDS).subscribe(() -> runOnRenderThread(() -> {
                         effectiveCallbacks.getOnAdRewardedAction().run();
                         effectiveCallbacks.getOnAdClosedAction().run();
-
-                    });
+                    }));
 
                 }
 
@@ -124,7 +124,7 @@ public class GoogleServicesHolder {
                 @Override
                 public Runnable addOnRewardedAdLoadedAction(Runnable onAdLoadedAction) {
                     onAdLoadedActions.add(onAdLoadedAction);
-                    Completable.complete().delay(3, TimeUnit.SECONDS).subscribe(onAdLoadedAction::run);
+                    Completable.complete().delay(3, TimeUnit.SECONDS).subscribe(() -> runOnRenderThread(onAdLoadedAction));
                     return () -> onAdLoadedActions.remove(onAdLoadedAction);
                 }
 
@@ -136,6 +136,15 @@ public class GoogleServicesHolder {
             };
         }
         return adHandler;
+    }
+
+    // Game logic (command queue, stages) is not thread-safe; callbacks must run on the libGDX thread.
+    private static void runOnRenderThread(Runnable runnable) {
+        if (Gdx.app != null) {
+            Gdx.app.postRunnable(runnable);
+        } else {
+            runnable.run();
+        }
     }
     public static AnalyticsTracker getAnalyticsTracker() {
         if (analyticsTracker == null) {
