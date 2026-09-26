@@ -161,10 +161,10 @@ public class BigActorsManager {
         displayOrHide(BigActorKey.MONSTER_CARD);
     }
 
-    public static void advanceCurrentMystery(MysteryCardInfo currentMysteryCard, Action0 onClickAction, Action0 afterHideAction, int amount) {
+    public static void advanceCurrentMystery(MysteryCardInfo currentMysteryCard, Action0 onClickAction, Action0 afterHideAction, int amount, int mysteryNumber, int mysteriesRequired) {
         if (isLocked()) return;
         getInstance().mysteryCard.advanceActiveMystery(amount);
-        getInstance().mysteryCard.init(currentMysteryCard);
+        getInstance().mysteryCard.init(currentMysteryCard, mysteryNumber, mysteriesRequired);
         addClickListener(getInstance().mysteryCard, onClickAction::call);
         getInstance().mysteryCard.setAfterHideAction(afterHideAction);
     }

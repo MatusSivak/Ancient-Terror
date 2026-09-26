@@ -52,7 +52,7 @@ public interface GameView {
 
     void showDiscard(List<CardInfo> discardedCards);
 
-    Completable showCurrentMysteryCard(MysteryCardInfo currentMysteryCard, boolean moveCamera);
+    Completable showCurrentMysteryCard(MysteryCardInfo currentMysteryCard, boolean moveCamera, int mysteryNumber, int mysteriesRequired);
 
     Completable showRumorCard(RumorCardInfo rumorCardInfo);
 
@@ -68,7 +68,7 @@ public interface GameView {
 
     Completable highlightRumorReckoning();
 
-    Completable advanceCurrentMysteryCard(MysteryCardInfo currentMysteryCard, int amount);
+    Completable advanceCurrentMysteryCard(MysteryCardInfo currentMysteryCard, int amount, int mysteryNumber, int mysteriesRequired);
 
     Completable confirmMonsterSpawn(MonsterInfo monsterInfo);
 

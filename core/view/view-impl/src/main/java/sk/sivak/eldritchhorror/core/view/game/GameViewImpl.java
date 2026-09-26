@@ -368,13 +368,13 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
-    public Completable showCurrentMysteryCard(MysteryCardInfo currentMysteryCard, boolean moveCamera) {
+    public Completable showCurrentMysteryCard(MysteryCardInfo currentMysteryCard, boolean moveCamera, int mysteryNumber, int mysteriesRequired) {
         if (currentMysteryCard == null) {
             return Completable.complete();
         }
         return Completable.create(onSub -> {
             if (BigActorsManager.getMysteryCard().getStage() == null) {
-                BigActorsManager.getMysteryCard().init(currentMysteryCard);
+                BigActorsManager.getMysteryCard().init(currentMysteryCard, mysteryNumber, mysteriesRequired);
                 BigActorsManager.getMysteryCard().setMoveCamera(moveCamera);
             }
             BigActorsManager.getMysteryCard().setAfterHideAction(onSub::onCompleted);
@@ -449,10 +449,10 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
-    public Completable advanceCurrentMysteryCard(MysteryCardInfo currentMysteryCard, int amount) {
+    public Completable advanceCurrentMysteryCard(MysteryCardInfo currentMysteryCard, int amount, int mysteryNumber, int mysteriesRequired) {
         return Completable.create(onSub -> {
             BigActorsManager.advanceCurrentMystery(
-                    currentMysteryCard, BigActorsManager::displayOrHideCurrentMystery, onSub::onCompleted, amount);
+                    currentMysteryCard, BigActorsManager::displayOrHideCurrentMystery, onSub::onCompleted, amount, mysteryNumber, mysteriesRequired);
             BigActorsManager.displayOrHideCurrentMystery();
         });
     }

@@ -184,16 +184,26 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable confirmTestResult(boolean scoreImportant, boolean successful, int score) {
-        return Completable.create(onSub -> {
-            if (!monsterCombatTableStack.isEmpty() && monsterCombatTableStack.peek().isLocked()) {
-                monsterCombatTableStack.peek().setLocked(false);
-            }
+        return restoreCombatAfterTest().andThen(Completable.create(onSub -> {
             if (scoreImportant) {
                 confirmScoreTestResult(score, onSub);
             } else {
                 confirmBinaryTestResult(successful, onSub);
             }
             diceRollerStack.peek().moveUp(testTableStack.peek().getTop() + 5).subscribe();
+        }));
+    }
+
+    Completable restoreCombatAfterTest() {
+        return Completable.defer(() -> {
+            if (monsterCombatTableStack.isEmpty() || !monsterCombatTableStack.peek().isLocked()) {
+                return Completable.complete();
+            }
+            MonsterCombatTable combatTable = monsterCombatTableStack.peek();
+            combatTable.setLocked(false);
+            // Nested spell tests move the panel aside. Auto-confirm has no OK button
+            // to trigger the old button-hide listener, so restore it explicitly.
+            return combatTable.moveLeft();
         });
     }
 

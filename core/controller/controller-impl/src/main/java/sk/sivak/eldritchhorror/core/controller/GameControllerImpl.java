@@ -252,7 +252,8 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public Completable showCurrentMysteryCard(boolean moveCamera) {
-        return view.showCurrentMysteryCard(mysteryDeck.getCurrentMysteryCard(), moveCamera);
+        return view.showCurrentMysteryCard(mysteryDeck.getCurrentMysteryCard(), moveCamera,
+                mysteryDeck.getSolvedMysteriesCount() + 1, ancientOne.getAncientOneInfo().getMysteriesRequired());
     }
 
     @Override
@@ -318,7 +319,8 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public Completable advanceCurrentMysteryCard(int amount) {
-        return view.advanceCurrentMysteryCard(mysteryDeck.getCurrentMysteryCard(), amount);
+        return view.advanceCurrentMysteryCard(mysteryDeck.getCurrentMysteryCard(), amount,
+                mysteryDeck.getSolvedMysteriesCount() + 1, ancientOne.getAncientOneInfo().getMysteriesRequired());
     }
 
     @Override

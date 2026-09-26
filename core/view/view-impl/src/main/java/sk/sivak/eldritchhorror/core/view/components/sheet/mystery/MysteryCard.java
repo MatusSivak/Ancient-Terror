@@ -66,7 +66,7 @@ public class MysteryCard extends VisTable {
         }
     }
 
-    public void init(MysteryCardInfo mysteryCardInfo) {
+    public void init(MysteryCardInfo mysteryCardInfo, int mysteryNumber, int mysteriesRequired) {
         clear();
         hitImage = null;
         getColor().a = 1f;
@@ -79,7 +79,7 @@ public class MysteryCard extends VisTable {
         pad(24, SIDE_PADDING, 24, SIDE_PADDING);
         defaults().width(CONTENT_WIDTH).left();
 
-        add(createSectionLabel(get("mystery.current"))).padBottom(8);
+        add(createSectionLabel(get("mystery.current", Math.min(mysteryNumber, mysteriesRequired), mysteriesRequired))).padBottom(8);
         row();
         add(createNameLabel(resolveLocalizedText(mysteryCardInfo.getName()))).padBottom(16);
         row();

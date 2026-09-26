@@ -19,7 +19,7 @@ service cloud.firestore {
         && (!('saveFile' in request.resource.data)
           || (request.resource.data.saveFile is bytes && request.resource.data.saveFile.size() <= 524288))
         && (!('screenshotPng' in request.resource.data)
-          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 204800));
+          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680));
       allow read, update, delete: if false;
     }
   }
