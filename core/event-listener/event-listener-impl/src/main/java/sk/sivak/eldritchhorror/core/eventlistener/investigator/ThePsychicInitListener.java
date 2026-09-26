@@ -33,8 +33,8 @@ public class ThePsychicInitListener extends AbstractInvestigatorInitListener {
         reenableDisabledAbility = new ReenableDisabledAbility();
         afterConditionGainedListener = new AfterConditionGainedListener();
 
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterConditionGainedListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addAfterEventListener(afterConditionGainedListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
 
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.FLESH_WARD);
@@ -49,15 +49,15 @@ public class ThePsychicInitListener extends AbstractInvestigatorInitListener {
         reenableDisabledAbility = new ReenableDisabledAbility();
         afterConditionGainedListener = new AfterConditionGainedListener();
 
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterConditionGainedListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addAfterEventListener(afterConditionGainedListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(reenableDisabledAbility);
-        ServicePlatform.get().getEventQueue().unregisterListener(afterConditionGainedListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(reenableDisabledAbility);
+        getEventQueue().unregisterListener(afterConditionGainedListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class ReenableDisabledAbility extends EventListenerImpl<Void> {

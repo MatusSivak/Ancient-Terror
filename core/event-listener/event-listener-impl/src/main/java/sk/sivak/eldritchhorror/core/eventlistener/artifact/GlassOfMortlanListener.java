@@ -47,7 +47,7 @@ public class GlassOfMortlanListener extends AbstractArtifactListener<GlassOfMort
         getEventQueue().addDirectEventListener(updateScoreListener, DirectEvent.UPDATE_SCORE_USING_ASSETS);
 
         beforeLoseSanityListener = new BeforeLoseSanityListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
+        getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
     }
 
     @Override

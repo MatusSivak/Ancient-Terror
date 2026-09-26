@@ -35,7 +35,7 @@ public class TheMartialArtistInitListener extends AbstractInvestigatorInitListen
     @Override
     protected void initInvestigator() {
         theMartialArtistPassiveListener = new TheMartialArtistPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theMartialArtistPassiveListener, BeforeAfterEvent.IMPROVE_SKILL);
+        getEventQueue().addAfterEventListener(theMartialArtistPassiveListener, BeforeAfterEvent.IMPROVE_SKILL);
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.LUCKY_RABBITS_FOOT);
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.PROTECTIVE_AMULET);
@@ -47,13 +47,13 @@ public class TheMartialArtistInitListener extends AbstractInvestigatorInitListen
     @Override
     public void justRegisterListeners() {
         theMartialArtistPassiveListener = new TheMartialArtistPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theMartialArtistPassiveListener, BeforeAfterEvent.IMPROVE_SKILL);
+        getEventQueue().addAfterEventListener(theMartialArtistPassiveListener, BeforeAfterEvent.IMPROVE_SKILL);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theMartialArtistPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theMartialArtistPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheMartialArtistPassiveListener extends EventListenerImpl<Stat> {

@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueRead;
+import sk.sivak.eldritchhorror.core.eventlistener.card.InvestigatorCardEventQueue;
 
 import java.util.List;
 
@@ -51,8 +52,13 @@ public abstract class AbstractArtifactListener<T extends ArtifactInfo> implement
         justLoad();
     }
 
+    private EventQueueRead cardEventQueue;
+
     protected EventQueueRead getEventQueue() {
-        return ServicePlatform.get().getEventQueue();
+        if (cardEventQueue == null) {
+            cardEventQueue = new InvestigatorCardEventQueue(ServicePlatform.get().getEventQueue(), () -> investigatorId);
+        }
+        return cardEventQueue;
     }
 
     protected boolean isTestFlavorOfType(TestFlavorType testFlavorType) {

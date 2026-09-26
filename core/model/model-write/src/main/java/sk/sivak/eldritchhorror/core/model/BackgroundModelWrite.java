@@ -9,6 +9,8 @@ public interface BackgroundModelWrite extends BackgroundModelRead{
 
     void popBackground(InvestigatorId investigatorId);
 
+    void removeBackgrounds(InvestigatorId investigatorId, BackgroundType backgroundType);
+
     void setCurrentBackground(BackgroundDataRead backgroundData);
 
     interface BackgroundDataWrite extends BackgroundDataRead {

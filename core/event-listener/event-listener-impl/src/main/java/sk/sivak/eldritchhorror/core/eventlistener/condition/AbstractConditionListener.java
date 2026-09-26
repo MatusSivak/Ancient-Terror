@@ -3,11 +3,13 @@ package sk.sivak.eldritchhorror.core.eventlistener.condition;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.back.condition.AbstractConditionBackListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueRead;
+import sk.sivak.eldritchhorror.core.eventlistener.card.InvestigatorCardEventQueue;
 import sk.sivak.eldritchhorror.core.eventtype.data.card.GainedCardData;
 
 import java.util.List;
@@ -29,8 +31,16 @@ public abstract class AbstractConditionListener<T extends ConditionInfo> impleme
         register();
     }
 
+    private EventQueueRead cardEventQueue;
+
     protected EventQueueRead getEventQueue() {
-        return ServicePlatform.get().getEventQueue();
+        if (conditionInfo.getId() == ConditionId.LOST_IN_TIME_AND_SPACE) {
+            return ServicePlatform.get().getEventQueue();
+        }
+        if (cardEventQueue == null) {
+            cardEventQueue = new InvestigatorCardEventQueue(ServicePlatform.get().getEventQueue(), () -> investigatorId);
+        }
+        return cardEventQueue;
     }
 
     protected abstract void register();

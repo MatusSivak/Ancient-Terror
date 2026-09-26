@@ -42,13 +42,13 @@ public class TheWaitressInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         theWaitressPassiveListener = new TheWaitressPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theWaitressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theWaitressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theWaitressPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theWaitressPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheWaitressPassiveListener extends EventListenerImpl<TestData> {

@@ -42,15 +42,15 @@ public class TheBootleggerInitListener extends AbstractInvestigatorInitListener 
     public void justRegisterListeners() {
         theBootleggerPassiveAssetListener = new TheBootleggerPassiveAssetListener();
         theBootleggerPassiveArtifactListener = new TheBootleggerPassiveArtifactListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theBootleggerPassiveAssetListener, DISCARD_ASSET_FROM_INVESTIGATOR);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theBootleggerPassiveArtifactListener, DISCARD_ARTIFACT_FROM_INVESTIGATOR);
+        getEventQueue().addBeforeEventListener(theBootleggerPassiveAssetListener, DISCARD_ASSET_FROM_INVESTIGATOR);
+        getEventQueue().addBeforeEventListener(theBootleggerPassiveArtifactListener, DISCARD_ARTIFACT_FROM_INVESTIGATOR);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theBootleggerPassiveAssetListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(theBootleggerPassiveArtifactListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theBootleggerPassiveAssetListener);
+        getEventQueue().unregisterListener(theBootleggerPassiveArtifactListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheBootleggerPassiveAssetListener extends EventListenerImpl<DiscardAssetFromInvestigatorData> {

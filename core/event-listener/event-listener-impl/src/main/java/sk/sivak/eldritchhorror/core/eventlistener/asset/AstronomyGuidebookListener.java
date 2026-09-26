@@ -24,7 +24,7 @@ public class AstronomyGuidebookListener extends AbstractAssetListener<AstronomyG
     @Override
     protected void register() {
         afterCloseGateListener = new AfterCloseGateListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterCloseGateListener, CLOSE_GATE);
+        getEventQueue().addAfterEventListener(afterCloseGateListener, CLOSE_GATE);
     }
 
     @Override

@@ -18,6 +18,8 @@ public class ShowLostInTimeAndSpaceAction extends AbstractHookableAction<Investi
     @Override
     protected void onExecute(SingleSubscriber<? super InvestigatorId> ss) {
         ServicePlatform.get().getGameController().showInvestigatorLostInTimeAndSpace(input).subscribe(() -> {
+            ServicePlatform.get().getModel().getBackgroundModel().removeBackgrounds(
+                    input, BackgroundModelRead.BackgroundType.LOST_IN_TIME_AND_SPACE);
             BackgroundData backgroundData = new BackgroundData(BackgroundModelRead.BackgroundType.LOST_IN_TIME_AND_SPACE, null,
                     "encounter/background/lost_in_time_and_space.jpg");
             ServicePlatform.get().getModel().getBackgroundModel().pushBackground(input, backgroundData);

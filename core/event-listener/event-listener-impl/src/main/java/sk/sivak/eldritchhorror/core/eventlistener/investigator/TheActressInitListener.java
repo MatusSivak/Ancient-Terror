@@ -36,13 +36,13 @@ public class TheActressInitListener extends AbstractInvestigatorInitListener {
     @Override
     protected void initInvestigator() {
         improveSkillListener = new ImproveSkillListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(improveSkillListener, BeforeAfterEvent.SHOW_PHASE);
+        getEventQueue().addAfterEventListener(improveSkillListener, BeforeAfterEvent.SHOW_PHASE);
 
         reenableDisabledAbility = new ReenableDisabledAbility();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
 
         theActressPassiveListener = new TheActressPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theActressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theActressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.DOT_18_DERRINGER);
@@ -55,16 +55,16 @@ public class TheActressInitListener extends AbstractInvestigatorInitListener {
     public void justRegisterListeners() {
         reenableDisabledAbility = new ReenableDisabledAbility();
         theActressPassiveListener = new TheActressPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theActressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addDirectEventListener(theActressPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(improveSkillListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(reenableDisabledAbility);
-        ServicePlatform.get().getEventQueue().unregisterListener(theActressPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(improveSkillListener);
+        getEventQueue().unregisterListener(reenableDisabledAbility);
+        getEventQueue().unregisterListener(theActressPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class ReenableDisabledAbility extends EventListenerImpl<Void> {
@@ -97,7 +97,7 @@ public class TheActressInitListener extends AbstractInvestigatorInitListener {
                     ServicePlatform.get().getService().hold();
                     ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
-                    ServicePlatform.get().getEventQueue().unregisterListener(this);
+                    getEventQueue().unregisterListener(this);
                     ServicePlatform.get().getService().convertTo(Void.class, () -> null);
                     ServicePlatform.get().getService().release();
                 });

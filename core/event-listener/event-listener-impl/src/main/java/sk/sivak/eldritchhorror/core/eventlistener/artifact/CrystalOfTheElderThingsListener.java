@@ -40,8 +40,8 @@ public class CrystalOfTheElderThingsListener extends AbstractArtifactListener<Cr
     @Override
     protected void register() {
         beforeLoseHealthOrSanityListener = new BeforeLoseHealthOrSanityListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeLoseHealthOrSanityListener, BeforeAfterEvent.LOSE_SANITY);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeLoseHealthOrSanityListener, BeforeAfterEvent.LOSE_HEALTH);
+        getEventQueue().addBeforeEventListener(beforeLoseHealthOrSanityListener, BeforeAfterEvent.LOSE_SANITY);
+        getEventQueue().addBeforeEventListener(beforeLoseHealthOrSanityListener, BeforeAfterEvent.LOSE_HEALTH);
     }
 
     private class BeforeLoseHealthOrSanityListener extends AbstractArtifactEventListener<LoseTokenData> {

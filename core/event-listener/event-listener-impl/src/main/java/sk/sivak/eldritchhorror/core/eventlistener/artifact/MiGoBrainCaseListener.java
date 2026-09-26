@@ -140,15 +140,15 @@ public class MiGoBrainCaseListener extends AbstractArtifactListener<KhopeshOfThe
                 AfterFindListener afterFindListener = new AfterFindListener();
                 AfterSelectInvestigatorForTradeListener afterSelectInvestigatorForTradeListener = new AfterSelectInvestigatorForTradeListener();
 
-                ServicePlatform.get().getEventQueue().addAfterEventListener(afterFindListener, BeforeAfterEvent.FIND_INVESTIGATORS_FOR_TRADE);
-                ServicePlatform.get().getEventQueue().addAfterEventListener(afterSelectInvestigatorForTradeListener, BeforeAfterEvent.SELECT_INVESTIGATOR_FOR_TRADE);
+                getEventQueue().addAfterEventListener(afterFindListener, BeforeAfterEvent.FIND_INVESTIGATORS_FOR_TRADE);
+                getEventQueue().addAfterEventListener(afterSelectInvestigatorForTradeListener, BeforeAfterEvent.SELECT_INVESTIGATOR_FOR_TRADE);
 
                 InvestigatorId ownerOfTheCase = getOwner();
                 ServicePlatform.get().getBasicActionService().trade();
 
                 ServicePlatform.get().getService().addEventCommand(in -> {
-                    ServicePlatform.get().getEventQueue().unregisterListener(afterFindListener);
-                    ServicePlatform.get().getEventQueue().unregisterListener(afterSelectInvestigatorForTradeListener);
+                    getEventQueue().unregisterListener(afterFindListener);
+                    getEventQueue().unregisterListener(afterSelectInvestigatorForTradeListener);
 
                 });
 

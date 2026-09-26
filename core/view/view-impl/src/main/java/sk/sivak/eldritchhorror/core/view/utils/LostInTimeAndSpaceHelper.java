@@ -62,15 +62,18 @@ public class LostInTimeAndSpaceHelper {
             backgroundUtils.toLostInTimeAndSpaceBackground();
             MapStage.setWorldVisibility(false);
             MapStage.removeDragAndZoomListeners();
+            MapStage.removeActor(InvestigatorUtils.getIdLayerResolver(investigatorId, true));
             InvestigatorImage investigatorImage = createInvestigatorImage(investigatorId);
             investigatorImage.setAsteroidVisible(true);
 
 
             InvestigatorImage otherInvestigatorImage = new InvestigatorImage(investigatorId, controller);
             otherInvestigatorImage.setVisible(false);
+            InvestigatorImage trailingInvestigatorImage = new InvestigatorImage(investigatorId, controller);
+            trailingInvestigatorImage.setVisible(false);
             MapStage.addToLayer(otherInvestigatorImage, InvestigatorUtils.getIdLayerResolver(investigatorId, true));
             MapStage.addToLayer(investigatorImage, InvestigatorUtils.getIdLayerResolver(investigatorId, true));
-            MapStage.addToLayer(otherInvestigatorImage, InvestigatorUtils.getIdLayerResolver(investigatorId, true));
+            MapStage.addToLayer(trailingInvestigatorImage, InvestigatorUtils.getIdLayerResolver(investigatorId, true));
         });
     }
 
@@ -134,13 +137,13 @@ public class LostInTimeAndSpaceHelper {
     }
 
     public Completable hideInvestigatorLostInTimeAndSpace(InvestigatorId investigatorId) {
-        return Completable.create(onSub -> {
+        Completable removeToken = Completable.create(onSub -> {
             InfoStage.hideLabel(get("lostInTimeAndSpace.title"));
-            backgroundUtils.hideBackground().subscribe();
 
             InvestigatorUtils.InvestigatorIdLayerResolver idLayerResolver = InvestigatorUtils.getIdLayerResolver(investigatorId, true);
             List<Actor> actors = MapStage.getActor(idLayerResolver);
             if (actors.isEmpty()) {
+                MapStage.addDragAndZoomListeners();
                 onSub.onCompleted();
                 return;
             }
@@ -149,11 +152,11 @@ public class LostInTimeAndSpaceHelper {
                     Actions.run(() -> {
                         MapStage.removeActor(idLayerResolver);
                         MapStage.addDragAndZoomListeners();
+                        onSub.onCompleted();
                     })
             )));
 
-            onSub.onCompleted();
         });
-
+        return removeToken.mergeWith(backgroundUtils.hideBackground());
     }
 }

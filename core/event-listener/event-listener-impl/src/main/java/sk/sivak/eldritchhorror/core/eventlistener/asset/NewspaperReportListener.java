@@ -35,7 +35,7 @@ public class NewspaperReportListener extends AbstractAssetListener<NewspaperRepo
     @Override
     protected void register() {
         afterGainClueListener = new AfterGainClueListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterGainClueListener, GAIN_CLUE);
+        getEventQueue().addAfterEventListener(afterGainClueListener, GAIN_CLUE);
     }
 
     @Override

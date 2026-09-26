@@ -35,7 +35,7 @@ public class TheRedeemedCultistInitListener extends AbstractInvestigatorInitList
     @Override
     protected void initInvestigator() {
         reduceHorrorListener = new ReduceHorrorListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
+        getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.WITHER);
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.ARCANE_MANUSCRIPTS);
@@ -47,13 +47,13 @@ public class TheRedeemedCultistInitListener extends AbstractInvestigatorInitList
     @Override
     public void justRegisterListeners() {
         reduceHorrorListener = new ReduceHorrorListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
+        getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(reduceHorrorListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(reduceHorrorListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class ReduceHorrorListener extends EventListenerImpl<CombatData> {

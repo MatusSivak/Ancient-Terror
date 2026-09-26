@@ -35,8 +35,8 @@ public class TheSoldierInitListener extends AbstractInvestigatorInitListener {
         beforeDelayedListener = new BeforeDelayedListener();
         beforeGainDetainedListener = new BeforeGainDetainedListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeDelayedListener, BeforeAfterEvent.BECOME_DELAYED);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeGainDetainedListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
+        getEventQueue().addBeforeEventListener(beforeDelayedListener, BeforeAfterEvent.BECOME_DELAYED);
+        getEventQueue().addBeforeEventListener(beforeGainDetainedListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.DOT_38_REVOLVER);
@@ -51,15 +51,15 @@ public class TheSoldierInitListener extends AbstractInvestigatorInitListener {
         beforeDelayedListener = new BeforeDelayedListener();
         beforeGainDetainedListener = new BeforeGainDetainedListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeDelayedListener, BeforeAfterEvent.BECOME_DELAYED);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeGainDetainedListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
+        getEventQueue().addBeforeEventListener(beforeDelayedListener, BeforeAfterEvent.BECOME_DELAYED);
+        getEventQueue().addBeforeEventListener(beforeGainDetainedListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeDelayedListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeGainDetainedListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(beforeDelayedListener);
+        getEventQueue().unregisterListener(beforeGainDetainedListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class BeforeGainDetainedListener extends EventListenerImpl<GainCardData> {

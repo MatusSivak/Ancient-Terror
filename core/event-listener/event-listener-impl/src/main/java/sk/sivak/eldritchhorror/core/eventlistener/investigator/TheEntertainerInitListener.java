@@ -37,8 +37,8 @@ public class TheEntertainerInitListener extends AbstractInvestigatorInitListener
         beforeSpendListener = new BeforeSpendListener();
         beforeLoseSanityListener = new BeforeLoseSanityListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeSpendListener, BeforeAfterEvent.SPEND);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
+        getEventQueue().addBeforeEventListener(beforeSpendListener, BeforeAfterEvent.SPEND);
+        getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.RITUAL_DAGGER);
@@ -53,16 +53,16 @@ public class TheEntertainerInitListener extends AbstractInvestigatorInitListener
         beforeSpendListener = new BeforeSpendListener();
         beforeLoseSanityListener = new BeforeLoseSanityListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeSpendListener, BeforeAfterEvent.SPEND);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
+        getEventQueue().addBeforeEventListener(beforeSpendListener, BeforeAfterEvent.SPEND);
+        getEventQueue().addBeforeEventListener(beforeLoseSanityListener, BeforeAfterEvent.LOSE_SANITY);
 
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeSpendListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeLoseSanityListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(beforeSpendListener);
+        getEventQueue().unregisterListener(beforeLoseSanityListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class BeforeSpendListener extends EventListenerImpl<SpendData> {

@@ -48,10 +48,10 @@ public class ThePoliticianInitListener extends AbstractInvestigatorInitListener 
         afterGainListener = new AfterGainListener();
         afterRegisteringListener = new AfterRegisteringListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeGainListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterGainListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
+        getEventQueue().addBeforeEventListener(beforeRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
+        getEventQueue().addBeforeEventListener(beforeGainListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
+        getEventQueue().addAfterEventListener(afterGainListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
+        getEventQueue().addAfterEventListener(afterRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.PERSONAL_ASSISTANT);
@@ -67,20 +67,20 @@ public class ThePoliticianInitListener extends AbstractInvestigatorInitListener 
         afterGainListener = new AfterGainListener();
         afterRegisteringListener = new AfterRegisteringListener();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeGainListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterGainListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
+        getEventQueue().addBeforeEventListener(beforeRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
+        getEventQueue().addBeforeEventListener(beforeGainListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
+        getEventQueue().addAfterEventListener(afterGainListener, BeforeAfterEvent.REGISTER_GAINED_CARD);
+        getEventQueue().addAfterEventListener(afterRegisteringListener, BeforeAfterEvent.REGISTER_SELECTED_ASSETS);
 
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeRegisteringListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeGainListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(afterGainListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(afterRegisteringListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(beforeRegisteringListener);
+        getEventQueue().unregisterListener(beforeGainListener);
+        getEventQueue().unregisterListener(afterGainListener);
+        getEventQueue().unregisterListener(afterRegisteringListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class BeforeRegisteringListener extends EventListenerImpl<ShowReserveDragAndDropOutput> {

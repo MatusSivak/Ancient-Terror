@@ -40,8 +40,8 @@ public class DeliveryServiceListener extends AbstractAssetListener<DeliveryServi
             afterFindListener = new AfterFindListener();
             afterCollectItemsListener = new AfterCollectItemsListener();
 
-            ServicePlatform.get().getEventQueue().addAfterEventListener(afterFindListener, BeforeAfterEvent.FIND_INVESTIGATORS_FOR_TRADE);
-            ServicePlatform.get().getEventQueue().addAfterEventListener(afterCollectItemsListener, BeforeAfterEvent.COLLECT_ITEMS_FOR_TRADE);
+            getEventQueue().addAfterEventListener(afterFindListener, BeforeAfterEvent.FIND_INVESTIGATORS_FOR_TRADE);
+            getEventQueue().addAfterEventListener(afterCollectItemsListener, BeforeAfterEvent.COLLECT_ITEMS_FOR_TRADE);
 
             displayCard(input);
         });
@@ -63,8 +63,8 @@ public class DeliveryServiceListener extends AbstractAssetListener<DeliveryServi
         ServicePlatform.get().getService().discardAssetFromInvestigator(investigatorId, getAssetInfo(), false);
         ServicePlatform.get().getBasicActionService().trade();
         ServicePlatform.get().getService().addEventCommand(in -> {
-            ServicePlatform.get().getEventQueue().unregisterListener(afterFindListener);
-            ServicePlatform.get().getEventQueue().unregisterListener(afterCollectItemsListener);
+            getEventQueue().unregisterListener(afterFindListener);
+            getEventQueue().unregisterListener(afterCollectItemsListener);
 
         });
         ServicePlatform.get().getService().convertTo(Object.class, () -> input);

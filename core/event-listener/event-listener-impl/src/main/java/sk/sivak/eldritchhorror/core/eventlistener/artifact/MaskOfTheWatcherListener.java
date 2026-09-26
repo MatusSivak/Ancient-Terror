@@ -32,10 +32,10 @@ public class MaskOfTheWatcherListener extends AbstractArtifactListener<MaskOfThe
     @Override
     protected void register() {
         reduceHorrorListener = new ReduceHorrorListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
+        getEventQueue().addBeforeEventListener(reduceHorrorListener, BeforeAfterEvent.UPDATE_MONSTER_HORROR);
 
         afterHorrorTestListener = new AfterHorrorTestListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterHorrorTestListener, BeforeAfterEvent.AFTER_HORROR_CHECK);
+        getEventQueue().addAfterEventListener(afterHorrorTestListener, BeforeAfterEvent.AFTER_HORROR_CHECK);
     }
 
     private class ReduceHorrorListener extends AbstractArtifactEventListener<CombatData> {

@@ -35,7 +35,7 @@ public class TheSailorInitListener extends AbstractInvestigatorInitListener {
     @Override
     protected void initInvestigator() {
         theSailorPassiveListener = new TheSailorPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theSailorPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theSailorPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.FISHING_NET);
         getService().convertTo(InvestigatorId.class, () -> eventData);
@@ -46,13 +46,13 @@ public class TheSailorInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         theSailorPassiveListener = new TheSailorPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theSailorPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theSailorPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theSailorPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theSailorPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheSailorPassiveListener extends EventListenerImpl<TestData> {

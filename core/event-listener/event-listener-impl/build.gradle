@@ -5,4 +5,6 @@ dependencies {
   api project(':eldritch-horror-core:service:service-interface')
   api project(':eldritch-horror-core:model:model-read')
   api 'ch.qos.reload4j:reload4j:1.2.26'
+  testImplementation 'junit:junit:4.12'
+  testImplementation project(':eldritch-horror-core:event-queue:event-queue-impl')
 }

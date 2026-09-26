@@ -43,13 +43,13 @@ public class TheViolinistInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         theViolinistPassiveListener = new TheViolinistPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theViolinistPassiveListener, BeforeAfterEvent.CLOSE_GATE);
+        getEventQueue().addAfterEventListener(theViolinistPassiveListener, BeforeAfterEvent.CLOSE_GATE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theViolinistPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theViolinistPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheViolinistPassiveListener extends EventListenerImpl<CloseGateData> {

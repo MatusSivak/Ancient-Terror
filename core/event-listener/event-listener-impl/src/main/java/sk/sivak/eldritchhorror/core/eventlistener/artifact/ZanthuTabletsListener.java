@@ -257,14 +257,14 @@ public class ZanthuTabletsListener extends AbstractArtifactListener<ZanthuTablet
                     disable = true;
                 }
                 addUsableAsset(input, getArtifactInfo(), 3, 0);
-                ServicePlatform.get().getEventQueue().addDirectEventListener(new EventListener<TestData>() {
+                getEventQueue().addDirectEventListener(new EventListener<TestData>() {
 
                     @Override
                     public void onNotify(TestData eventData) {
                         if (disable) {
                             getArtifactInfo().disable();
                         }
-                        ServicePlatform.get().getEventQueue().unregisterListener(this);
+                        getEventQueue().unregisterListener(this);
                     }
 
                     @Override

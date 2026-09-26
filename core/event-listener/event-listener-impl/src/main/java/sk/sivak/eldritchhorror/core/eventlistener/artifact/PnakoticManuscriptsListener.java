@@ -68,14 +68,14 @@ public class PnakoticManuscriptsListener extends AbstractArtifactListener<Pnakot
                 }
 
                 addUsableArtifact(input, getArtifactInfo(), 1);
-                ServicePlatform.get().getEventQueue().addDirectEventListener(new EventListener<TestData>() {
+                getEventQueue().addDirectEventListener(new EventListener<TestData>() {
 
                     @Override
                     public void onNotify(TestData eventData) {
                         if (disable) {
                             getArtifactInfo().disable();
                         }
-                        ServicePlatform.get().getEventQueue().unregisterListener(this);
+                        getEventQueue().unregisterListener(this);
                     }
 
                     @Override

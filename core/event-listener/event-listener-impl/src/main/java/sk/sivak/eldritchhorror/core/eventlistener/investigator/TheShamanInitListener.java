@@ -41,7 +41,7 @@ public class TheShamanInitListener extends AbstractInvestigatorInitListener {
     @Override
     protected void initInvestigator() {
         theShamanPassiveListener = new TheShamanPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theShamanPassiveListener, BeforeAfterEvent.CLOSE_GATE);
+        getEventQueue().addAfterEventListener(theShamanPassiveListener, BeforeAfterEvent.CLOSE_GATE);
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.MISTS_OF_RELEH);
         ServicePlatform.get().getTokenService().gainClueFromPool(InvestigatorId.THE_SHAMAN);
@@ -53,13 +53,13 @@ public class TheShamanInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         theShamanPassiveListener = new TheShamanPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theShamanPassiveListener, BeforeAfterEvent.CLOSE_GATE);
+        getEventQueue().addAfterEventListener(theShamanPassiveListener, BeforeAfterEvent.CLOSE_GATE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theShamanPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theShamanPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheShamanPassiveListener extends EventListenerImpl<CloseGateData> {

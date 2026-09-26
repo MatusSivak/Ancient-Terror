@@ -70,14 +70,14 @@ public class LightningGunListener extends AbstractArtifactListener<LightningGunA
                 }
 
                 addUsableArtifact(input, getArtifactInfo(), 6);
-                ServicePlatform.get().getEventQueue().addDirectEventListener(new EventListener<TestData>() {
+                getEventQueue().addDirectEventListener(new EventListener<TestData>() {
 
                     @Override
                     public void onNotify(TestData eventData) {
                         if (disable) {
                             getArtifactInfo().disable();
                         }
-                        ServicePlatform.get().getEventQueue().unregisterListener(this);
+                        getEventQueue().unregisterListener(this);
                     }
 
                     @Override

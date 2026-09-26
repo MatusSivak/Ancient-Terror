@@ -37,8 +37,8 @@ public class TheSpyInitListener extends AbstractInvestigatorInitListener {
         theSpyPassiveListener = new TheSpyPassiveListener();
         beforeRerollUsingClue = new BeforeRerollUsingClue();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theSpyPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRerollUsingClue, BeforeAfterEvent.REROLL_USING_CLUE);
+        getEventQueue().addBeforeEventListener(theSpyPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
+        getEventQueue().addBeforeEventListener(beforeRerollUsingClue, BeforeAfterEvent.REROLL_USING_CLUE);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.DOT_45_AUTOMATIC);
@@ -52,15 +52,15 @@ public class TheSpyInitListener extends AbstractInvestigatorInitListener {
         theSpyPassiveListener = new TheSpyPassiveListener();
         beforeRerollUsingClue = new BeforeRerollUsingClue();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theSpyPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRerollUsingClue, BeforeAfterEvent.REROLL_USING_CLUE);
+        getEventQueue().addBeforeEventListener(theSpyPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
+        getEventQueue().addBeforeEventListener(beforeRerollUsingClue, BeforeAfterEvent.REROLL_USING_CLUE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theSpyPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeRerollUsingClue);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theSpyPassiveListener);
+        getEventQueue().unregisterListener(beforeRerollUsingClue);
+        getEventQueue().unregisterListener(this);
     }
 
     private class BeforeRerollUsingClue extends EventListenerImpl<RerollUsingData> {

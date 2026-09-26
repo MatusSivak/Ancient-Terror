@@ -43,8 +43,8 @@ public class TheRookieCopInitListener extends AbstractInvestigatorInitListener {
         improveWillListener = new ImproveWillListener();
         hideCombatEncountersListener = new HideCombatEncountersListener();
 
-        ServicePlatform.get().getEventQueue().addAfterEventListener(improveWillListener, BeforeAfterEvent.SHOW_PHASE);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(hideCombatEncountersListener, BeforeAfterEvent.DISABLE_EPIC_COMBAT_ENCOUNTERS);
+        getEventQueue().addAfterEventListener(improveWillListener, BeforeAfterEvent.SHOW_PHASE);
+        getEventQueue().addBeforeEventListener(hideCombatEncountersListener, BeforeAfterEvent.DISABLE_EPIC_COMBAT_ENCOUNTERS);
 
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.CARBINE_RIFLE);
@@ -56,14 +56,14 @@ public class TheRookieCopInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         hideCombatEncountersListener = new HideCombatEncountersListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(hideCombatEncountersListener, BeforeAfterEvent.DISABLE_EPIC_COMBAT_ENCOUNTERS);
+        getEventQueue().addBeforeEventListener(hideCombatEncountersListener, BeforeAfterEvent.DISABLE_EPIC_COMBAT_ENCOUNTERS);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(improveWillListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(hideCombatEncountersListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(improveWillListener);
+        getEventQueue().unregisterListener(hideCombatEncountersListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class ImproveWillListener extends EventListenerImpl<Void> {
@@ -82,7 +82,7 @@ public class TheRookieCopInitListener extends AbstractInvestigatorInitListener {
                 ServicePlatform.get().getGameService().ask(question).subscribe(answer -> {
                     ServicePlatform.get().getService().hold();
                     ServicePlatform.get().getInvestigatorService().improveSkill(Stat.WILL);
-                    ServicePlatform.get().getEventQueue().unregisterListener(this);
+                    getEventQueue().unregisterListener(this);
                     ServicePlatform.get().getService().convertTo(Void.class, () -> null);
                     ServicePlatform.get().getService().release();
                 });

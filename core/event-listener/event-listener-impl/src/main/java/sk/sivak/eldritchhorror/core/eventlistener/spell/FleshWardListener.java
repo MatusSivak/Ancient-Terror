@@ -62,7 +62,7 @@ public class FleshWardListener extends AbstractSpellListener<FleshWardSpell> {
 
         private Runnable getEventAction(LoseTokenData input) {
             return () -> {
-                if (!enabled) {
+                if (!enabled || ServicePlatform.get().getInvestigators().getInvestigator(spellOwnerId).isLostInTimeAndSpace()) {
                     return;
                 }
                 if (input.getAmount() <= 0) {

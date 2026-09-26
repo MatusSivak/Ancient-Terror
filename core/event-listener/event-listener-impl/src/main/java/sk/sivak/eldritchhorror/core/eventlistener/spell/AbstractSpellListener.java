@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.back.spell.fleshward.FleshWard
 import sk.sivak.eldritchhorror.core.eventlistener.back.spell.fleshward.FleshWardSpellBackListener4;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueRead;
+import sk.sivak.eldritchhorror.core.eventlistener.card.InvestigatorCardEventQueue;
 
 import java.util.List;
 
@@ -32,8 +33,13 @@ public abstract class AbstractSpellListener<T extends SpellInfo> implements Spel
         register();
     }
 
+    private EventQueueRead cardEventQueue;
+
     protected EventQueueRead getEventQueue() {
-        return ServicePlatform.get().getEventQueue();
+        if (cardEventQueue == null) {
+            cardEventQueue = new InvestigatorCardEventQueue(ServicePlatform.get().getEventQueue(), () -> spellOwnerId);
+        }
+        return cardEventQueue;
     }
 
     protected abstract void register();

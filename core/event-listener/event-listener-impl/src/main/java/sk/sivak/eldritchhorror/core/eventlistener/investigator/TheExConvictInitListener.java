@@ -32,8 +32,8 @@ public class TheExConvictInitListener extends AbstractInvestigatorInitListener {
     @Override
     protected void initInvestigator() {
         afterRollListener = new TheExConvictPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.SHOW_ROLLED_DICES);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.REROLL_DIE);
+        getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.SHOW_ROLLED_DICES);
+        getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.REROLL_DIE);
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.AXE);
         getService().convertFromTo(GainAssetFromDeckData.class, InvestigatorId.class, (in) -> eventData);
@@ -44,14 +44,14 @@ public class TheExConvictInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         afterRollListener = new TheExConvictPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.SHOW_ROLLED_DICES);
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.REROLL_DIE);
+        getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.SHOW_ROLLED_DICES);
+        getEventQueue().addAfterEventListener(afterRollListener, BeforeAfterEvent.REROLL_DIE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(afterRollListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(afterRollListener);
+        getEventQueue().unregisterListener(this);
     }
 
 

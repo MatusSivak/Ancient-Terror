@@ -72,7 +72,7 @@ public class StormOfSpiritsListener extends AbstractSpellListener<StormOfSpirits
                     input.setDamageTestType(Stat.LORE);
                     ServicePlatform.get().getService().convertTo(CombatData.class, () -> input);
                     justAfterDamageTestListener = new JustAfterDamageTestListener();
-                    ServicePlatform.get().getEventQueue().addDirectEventListener(justAfterDamageTestListener, DirectEvent.JUST_AFTER_DAMAGE_TEST);
+                    getEventQueue().addDirectEventListener(justAfterDamageTestListener, DirectEvent.JUST_AFTER_DAMAGE_TEST);
                 });
             };
         }
@@ -96,7 +96,7 @@ public class StormOfSpiritsListener extends AbstractSpellListener<StormOfSpirits
             spellBackListener.executeWhole();
             ServicePlatform.get().getInvestigatorService().convertToNull();
             ServicePlatform.get().getService().addEventCommand(in -> {
-                ServicePlatform.get().getEventQueue().unregisterListener(this);
+                getEventQueue().unregisterListener(this);
             });
             ServicePlatform.get().getService().release();
         }

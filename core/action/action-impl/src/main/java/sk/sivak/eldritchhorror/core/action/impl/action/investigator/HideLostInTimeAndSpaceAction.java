@@ -5,6 +5,7 @@ import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
+import sk.sivak.eldritchhorror.core.model.BackgroundModelRead;
 
 public class HideLostInTimeAndSpaceAction extends AbstractHookableAction<InvestigatorId, InvestigatorId> {
 
@@ -14,6 +15,8 @@ public class HideLostInTimeAndSpaceAction extends AbstractHookableAction<Investi
 
     @Override
     protected void onExecute(SingleSubscriber<? super InvestigatorId> ss) {
+        ServicePlatform.get().getModel().getBackgroundModel().removeBackgrounds(
+                input, BackgroundModelRead.BackgroundType.LOST_IN_TIME_AND_SPACE);
         ServicePlatform.get().getGameController().hideInvestigatorLostInTimeAndSpace(input).subscribe(() -> {
             ss.onSuccess(input);
         });

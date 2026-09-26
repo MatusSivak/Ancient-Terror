@@ -55,11 +55,15 @@ public class LostInTimeAndSpaceListener extends AbstractConditionListener<LostIn
 
     }
 
+    private boolean isLost() {
+        return ServicePlatform.get().getInvestigators().getInvestigator(investigatorId).isLostInTimeAndSpace();
+    }
+
     private class PerformActionStartListener extends EventListenerImpl<Object> {
 
         @Override
         public void onNotify(Object eventData) {
-            if (investigatorId != getActiveInvestigatorId()) {
+            if (investigatorId != getActiveInvestigatorId() || !isLost()) {
                 return;
             }
             ShowCardRequest showCardRequest = new ShowCardRequest();
@@ -94,7 +98,7 @@ public class LostInTimeAndSpaceListener extends AbstractConditionListener<LostIn
 
         @Override
         public void onNotify(InvestigatorId eventData) {
-            if (eventData != investigatorId) {
+            if (eventData != investigatorId || !isLost()) {
                 return;
             }
             ServicePlatform.get().getInvestigatorService().showLostInTimeAndSpace(eventData);
@@ -110,7 +114,7 @@ public class LostInTimeAndSpaceListener extends AbstractConditionListener<LostIn
 
         @Override
         public void onNotify(AvailableEncounters eventData) {
-            if (!isOwner()) {
+            if (!isOwner() || !isLost()) {
                 return;
             }
 

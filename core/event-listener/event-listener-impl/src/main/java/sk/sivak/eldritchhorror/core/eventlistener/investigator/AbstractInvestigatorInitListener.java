@@ -10,6 +10,8 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventtype.DirectEvent;
+import sk.sivak.eldritchhorror.core.eventqueue.EventQueueRead;
+import sk.sivak.eldritchhorror.core.eventlistener.card.InvestigatorCardEventQueue;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.AvailableEncounters;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.ConditionEncounter;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.DefeatedInvestigatorEncounter;
@@ -33,6 +35,15 @@ public abstract class AbstractInvestigatorInitListener extends EventListenerImpl
     }
 
     protected abstract InvestigatorId getInvestigatorId();
+
+    private EventQueueRead abilityEventQueue;
+
+    protected EventQueueRead getEventQueue() {
+        if (abilityEventQueue == null) {
+            abilityEventQueue = new InvestigatorCardEventQueue(ServicePlatform.get().getEventQueue(), this::getInvestigatorId);
+        }
+        return abilityEventQueue;
+    }
 
     @Override
     public void onNotify(InvestigatorId eventData) {

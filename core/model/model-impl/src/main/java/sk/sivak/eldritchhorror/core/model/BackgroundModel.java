@@ -36,6 +36,25 @@ public class BackgroundModel implements BackgroundModelWrite{
     }
 
     @Override
+    public void removeBackgrounds(InvestigatorId investigatorId, BackgroundType backgroundType) {
+        Stack<BackgroundDataWrite> backgrounds = backgroundDataMap.get(investigatorId);
+        if (backgrounds == null) {
+            return;
+        }
+        boolean removingCurrent = false;
+        for (int i = backgrounds.size() - 1; i >= 0; i--) {
+            BackgroundDataWrite background = backgrounds.get(i);
+            if (background.getBackgroundType() == backgroundType) {
+                removingCurrent |= currentBackground == background;
+                backgrounds.remove(i);
+            }
+        }
+        if (removingCurrent) {
+            currentBackground = peekBackground(investigatorId);
+        }
+    }
+
+    @Override
     public BackgroundDataWrite peekBackground(InvestigatorId investigatorId) {
         MapUtils.computeIfAbsent(backgroundDataMap, investigatorId, x -> new Stack<>());
         if (backgroundDataMap.get(investigatorId).isEmpty()) {

@@ -35,7 +35,7 @@ public class TheExpeditionLeaderInitListener extends AbstractInvestigatorInitLis
     @Override
     protected void initInvestigator() {
         theExpeditionLeaderPassiveListener = new TheExpeditionLeaderPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theExpeditionLeaderPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theExpeditionLeaderPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.HIRED_MUSCLE);
         getService().convertTo(InvestigatorId.class, () -> eventData);
@@ -46,13 +46,13 @@ public class TheExpeditionLeaderInitListener extends AbstractInvestigatorInitLis
     @Override
     public void justRegisterListeners() {
         theExpeditionLeaderPassiveListener = new TheExpeditionLeaderPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theExpeditionLeaderPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theExpeditionLeaderPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theExpeditionLeaderPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theExpeditionLeaderPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheExpeditionLeaderPassiveListener extends EventListenerImpl<TestData> {

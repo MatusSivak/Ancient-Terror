@@ -45,9 +45,9 @@ public class ClairvoyanceListener extends AbstractSpellListener<ClairvoyanceSpel
     @Override
     protected void register() {
         encounterClueListener = new EncounterClueListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(encounterClueListener, DirectEvent.COLLECT_COMMON_ENCOUNTERS);
+        getEventQueue().addDirectEventListener(encounterClueListener, DirectEvent.COLLECT_COMMON_ENCOUNTERS);
         removeResearchEncounterListener = new RemoveResearchEncounterListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(removeResearchEncounterListener, DirectEvent.INVESTIGATOR_FINISHED_ENCOUNTER);
+        getEventQueue().addDirectEventListener(removeResearchEncounterListener, DirectEvent.INVESTIGATOR_FINISHED_ENCOUNTER);
     }
 
     private class EncounterClueListener extends EventListenerImpl<AvailableEncounters> {

@@ -50,7 +50,7 @@ public class SatchelOfTheVoidListener extends AbstractArtifactListener<SatchelOf
         getEventQueue().addDirectEventListener(enableCardListener, DirectEvent.REENABLE_DISABLED_ABILITIES);
 
         beforeGainLostInTimeAndSpaceListener = new BeforeGainLostInTimeAndSpaceListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeGainLostInTimeAndSpaceListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
+        getEventQueue().addBeforeEventListener(beforeGainLostInTimeAndSpaceListener, BeforeAfterEvent.SELECT_CARD_TO_GAIN);
     }
 
     private class ActionListener extends AbstractActionPhaseListener<ActionListener.SatchelOfTheVoidAction> {

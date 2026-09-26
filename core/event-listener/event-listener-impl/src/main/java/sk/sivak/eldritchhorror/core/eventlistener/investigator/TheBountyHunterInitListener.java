@@ -27,7 +27,7 @@ public class TheBountyHunterInitListener extends AbstractInvestigatorInitListene
     @Override
     protected void initInvestigator() {
         theBountyHunterPassiveListener = new TheBountyHunterPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theBountyHunterPassiveListener, BeforeAfterEvent.DEFEAT_MONSTER);
+        getEventQueue().addAfterEventListener(theBountyHunterPassiveListener, BeforeAfterEvent.DEFEAT_MONSTER);
         getService().hold();
         getService().gainAssetFromDeck(getInvestigatorId(), AssetId.HANDCUFFS);
         getService().convertTo(Object.class, () -> eventData);
@@ -38,13 +38,13 @@ public class TheBountyHunterInitListener extends AbstractInvestigatorInitListene
     @Override
     public void justRegisterListeners() {
         theBountyHunterPassiveListener = new TheBountyHunterPassiveListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(theBountyHunterPassiveListener, BeforeAfterEvent.DEFEAT_MONSTER);
+        getEventQueue().addAfterEventListener(theBountyHunterPassiveListener, BeforeAfterEvent.DEFEAT_MONSTER);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theBountyHunterPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theBountyHunterPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheBountyHunterPassiveListener extends EventListenerImpl<DefeatMonsterData> {

@@ -34,8 +34,8 @@ public class TheHandymanInitListener extends AbstractInvestigatorInitListener {
         theHandymanPassiveListener = new TheHandymanPassiveListener();
         beforeRerollUsingFocus = new BeforeRerollUsingFocus();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theHandymanPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRerollUsingFocus, BeforeAfterEvent.REROLL_USING_FOCUS);
+        getEventQueue().addBeforeEventListener(theHandymanPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
+        getEventQueue().addBeforeEventListener(beforeRerollUsingFocus, BeforeAfterEvent.REROLL_USING_FOCUS);
 
         getService().hold();
         getService().gainAssetFromDeck(InvestigatorId.THE_HANDYMAN, AssetId.BLUNDERBUSS);
@@ -49,15 +49,15 @@ public class TheHandymanInitListener extends AbstractInvestigatorInitListener {
         theHandymanPassiveListener = new TheHandymanPassiveListener();
         beforeRerollUsingFocus = new BeforeRerollUsingFocus();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(theHandymanPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(beforeRerollUsingFocus, BeforeAfterEvent.REROLL_USING_FOCUS);
+        getEventQueue().addBeforeEventListener(theHandymanPassiveListener, BeforeAfterEvent.COUNT_REROLL_DICE);
+        getEventQueue().addBeforeEventListener(beforeRerollUsingFocus, BeforeAfterEvent.REROLL_USING_FOCUS);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theHandymanPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(beforeRerollUsingFocus);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theHandymanPassiveListener);
+        getEventQueue().unregisterListener(beforeRerollUsingFocus);
+        getEventQueue().unregisterListener(this);
     }
 
     private class BeforeRerollUsingFocus extends EventListenerImpl<RerollUsingData> {

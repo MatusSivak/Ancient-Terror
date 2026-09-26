@@ -42,7 +42,7 @@ public class GateBoxListener extends AbstractArtifactListener<GateBoxArtifact> {
         getEventQueue().addDirectEventListener(registerUsableAssetListener, DirectEvent.REGISTER_USABLE_ASSETS);
 
         afterCloseGateListener = new AfterCloseGateListener();
-        ServicePlatform.get().getEventQueue().addAfterEventListener(afterCloseGateListener, CLOSE_GATE);
+        getEventQueue().addAfterEventListener(afterCloseGateListener, CLOSE_GATE);
     }
 
     @Override

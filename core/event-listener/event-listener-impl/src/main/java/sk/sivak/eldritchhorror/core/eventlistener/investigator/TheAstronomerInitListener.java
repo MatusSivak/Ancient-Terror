@@ -36,13 +36,13 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
     @Override
     protected void initInvestigator() {
         spendOneLessClueListener = new SpendOneLessClueListener();
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(spendOneLessClueListener, BeforeAfterEvent.SPEND);
+        getEventQueue().addBeforeEventListener(spendOneLessClueListener, BeforeAfterEvent.SPEND);
 
         useSanityInsteadOfClueListener = new UseSanityInsteadOfClueListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(useSanityInsteadOfClueListener, DirectEvent.REROLL_USING_ASSETS_2);
+        getEventQueue().addDirectEventListener(useSanityInsteadOfClueListener, DirectEvent.REROLL_USING_ASSETS_2);
 
         reenableDisabledAbility = new ReenableDisabledAbility();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
 
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.FEED_THE_MIND);
@@ -57,17 +57,17 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
         useSanityInsteadOfClueListener = new UseSanityInsteadOfClueListener();
         reenableDisabledAbility = new ReenableDisabledAbility();
 
-        ServicePlatform.get().getEventQueue().addBeforeEventListener(spendOneLessClueListener, BeforeAfterEvent.SPEND);
-        ServicePlatform.get().getEventQueue().addDirectEventListener(useSanityInsteadOfClueListener, DirectEvent.REROLL_USING_ASSETS_2);
-        ServicePlatform.get().getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addBeforeEventListener(spendOneLessClueListener, BeforeAfterEvent.SPEND);
+        getEventQueue().addDirectEventListener(useSanityInsteadOfClueListener, DirectEvent.REROLL_USING_ASSETS_2);
+        getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(spendOneLessClueListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(reenableDisabledAbility);
-        ServicePlatform.get().getEventQueue().unregisterListener(useSanityInsteadOfClueListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(spendOneLessClueListener);
+        getEventQueue().unregisterListener(reenableDisabledAbility);
+        getEventQueue().unregisterListener(useSanityInsteadOfClueListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class ReenableDisabledAbility extends EventListenerImpl<Void> {

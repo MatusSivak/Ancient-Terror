@@ -35,7 +35,7 @@ public class TheMusicianInitListener extends AbstractInvestigatorInitListener {
     @Override
     protected void initInvestigator() {
         theMusicianPassiveListener = new TheMusicianPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theMusicianPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theMusicianPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.SHRIVELING);
         ServicePlatform.get().getTokenService().gainClueFromPool(InvestigatorId.THE_MUSICIAN);
@@ -48,13 +48,13 @@ public class TheMusicianInitListener extends AbstractInvestigatorInitListener {
     @Override
     public void justRegisterListeners() {
         theMusicianPassiveListener = new TheMusicianPassiveListener();
-        ServicePlatform.get().getEventQueue().addDirectEventListener(theMusicianPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
+        getEventQueue().addDirectEventListener(theMusicianPassiveListener, DirectEvent.REGISTER_BONUS_DICE);
     }
 
     @Override
     public void unregisterInvestigator() {
-        ServicePlatform.get().getEventQueue().unregisterListener(theMusicianPassiveListener);
-        ServicePlatform.get().getEventQueue().unregisterListener(this);
+        getEventQueue().unregisterListener(theMusicianPassiveListener);
+        getEventQueue().unregisterListener(this);
     }
 
     private class TheMusicianPassiveListener extends EventListenerImpl<TestData> {
