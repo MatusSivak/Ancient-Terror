@@ -38,6 +38,8 @@ import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import java.util.Collection;
 import java.util.List;
 
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MAXIMIZE_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MINIMIZE_SOUND;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class BigActorsManager {
@@ -80,7 +82,8 @@ public class BigActorsManager {
         monsterCard = new MonsterCard();
         selectEncounterTable = new SelectEncounterTable();
         selectActionComponent = new SelectActionComponent();
-        omenTrack = new MaxMinComponent(HudButtons.getOmenTrack(), BigActorKey.OMEN_TRACK);
+        omenTrack = new MaxMinComponent(HudButtons.getOmenTrack(), BigActorKey.OMEN_TRACK)
+                .withSounds(OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND);
         doomTrack = new MaxMinComponent(HudButtons.getDoomTrack(), BigActorKey.DOOM_TRACK);
     }
 

@@ -18,6 +18,11 @@ public class AdvanceDoomAction extends AbstractHookableAction<Integer, Void> {
 
     @Override
     protected void onExecute(SingleSubscriber<? super Void> ss) {
+        if (input == null || input <= 0) {
+            // e.g. "Doom advances for each Orb" with no Orbs: nothing to show.
+            ss.onSuccess(null);
+            return;
+        }
         int previousDoom = ServicePlatform.get().getDoomTrack().getCurrentDoom();
         for (int i = 0; i < input; i++) {
             ServicePlatform.get().getDoomTrack().advanceDoom();

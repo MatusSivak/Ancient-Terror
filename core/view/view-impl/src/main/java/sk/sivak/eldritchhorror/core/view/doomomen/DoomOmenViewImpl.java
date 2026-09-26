@@ -21,6 +21,8 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.DOOM_CHANGED;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.HUD_BUTTON;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MAXIMIZE_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MINIMIZE_SOUND;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class DoomOmenViewImpl implements DoomOmenView {
@@ -67,7 +69,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
             String label = get("omen.addingToken");
             InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
-            ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
+            ClickZoomListener clickZoomListener = omenZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
                 boolean hasTokens = omenTrack.getTokens(omenId) > 0;
                 omenTrack.addAction(Actions.sequence(
@@ -96,7 +98,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
             String label = get("omen.removingToken");
             InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
-            ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
+            ClickZoomListener clickZoomListener = omenZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
                 omenTrack.addAction(Actions.sequence(
                         new FastForwardAction<>(Actions.delay(0.25f)),
@@ -124,7 +126,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
             String label = get("omen.advancing");
             InfoStage.displayTextDontHide(label);
             OmenTrack omenTrack = HudButtons.getOmenTrack();
-            ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
+            ClickZoomListener clickZoomListener = omenZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> {
                 omenTrack.addAction(Actions.sequence(
                         new FastForwardAction<>(Actions.delay(0.25f)),
@@ -151,10 +153,14 @@ public class DoomOmenViewImpl implements DoomOmenView {
         return Single.create(onSub -> {
             InfoStage.displayTextDontHide(get("omen.selectNew"));
             OmenTrack omenTrack = HudButtons.getOmenTrack();
-            ClickZoomListener clickZoomListener = new ClickZoomListener(omenTrack);
+            ClickZoomListener clickZoomListener = omenZoomListener(omenTrack);
             clickZoomListener.setOnCompletedListener(() -> selectNewOmen(onSub, omenTrack, clickZoomListener));
             clickZoomListener.maximize();
         });
+    }
+
+    private static ClickZoomListener omenZoomListener(OmenTrack omenTrack) {
+        return new ClickZoomListener(omenTrack).withSounds(OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND);
     }
 
     private void selectNewOmen(SingleSubscriber<? super OmenId> onSub, OmenTrack omenTrack, ClickZoomListener clickZoomListener) {

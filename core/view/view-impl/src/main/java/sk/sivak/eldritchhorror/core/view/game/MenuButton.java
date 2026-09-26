@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
 import com.badlogic.gdx.Gdx;
+import sk.sivak.eldritchhorror.core.view.firebase.BugReportScreenshot;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -52,6 +53,7 @@ public class MenuButton extends ImageButton {
         if (!menuButtonClickable) {
             return;
         }
+        final byte[] reportScreenshot = BugReportScreenshot.capture();
         getColor().a = 0f;
         menuButtonClickable = false;
         MapStage.darkenWorld(0.85f);
@@ -197,7 +199,7 @@ public class MenuButton extends ImageButton {
 
         ButtonUtils.addClickListener(reportBugButton, () -> {
             dialog.hide(Actions.run(() -> {
-                new ReportBugDialog(MenuButton.this, skin).show(InfoStage.getStageSafe());
+                new ReportBugDialog(MenuButton.this, skin, reportScreenshot).show(InfoStage.getStageSafe());
             }));
         });
 

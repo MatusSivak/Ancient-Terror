@@ -1,6 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.components.track;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -8,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.SoundPlayer;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
@@ -63,6 +66,10 @@ public class DoomTrackWidget extends Group {
         }
         float actionDuration = Math.abs(currentDoom - newDoom) * fiveMinuteRotationDuration;
         if (actionDuration == 0) {
+            // Nothing to animate (e.g. advancing by 0 Orbs); still notify, otherwise callers wait forever.
+            if (onCompletedListener != null) {
+                onCompletedListener.call();
+            }
             return;
         }
         minuteHand.addAction(new FastForwardAction<>(Actions.rotateBy((newDoom - currentDoom) * MINUTE_MIN_ROTATION,
@@ -71,6 +78,13 @@ public class DoomTrackWidget extends Group {
         hourHand.addAction(new FastForwardAction<>(Actions.rotateBy((newDoom - currentDoom) * HOUR_MIN_ROTATION,
                 actionDuration,
                 Interpolation.linear)));
+        if (currentDoom != 0 && newDoom < currentDoom) {
+            for (int step = 0; step < currentDoom - newDoom; step++) {
+                addAction(new FastForwardAction<>(Actions.sequence(
+                        Actions.delay(step * fiveMinuteRotationDuration),
+                        Actions.run(DoomTrackWidget::playAdvanceToll))));
+            }
+        }
 
         if (onCompletedListener != null) {
             addAction(new FastForwardAction<>(Actions.sequence(
@@ -78,6 +92,18 @@ public class DoomTrackWidget extends Group {
                     Actions.run(() -> onCompletedListener.call()))));
         }
         this.currentDoom = newDoom;
+    }
+
+    private static void playAdvanceToll() {
+        // Fast-forward shrinks the steps to a few frames; skip the toll instead of stacking it.
+        if (FastForwardAction.isOn()) {
+            return;
+        }
+        Sound sound = getLoadedSound(DOOM_ADVANCE_SOUND);
+        if (sound == null) {
+            sound = getSound(DOOM_ADVANCE_SOUND);
+        }
+        SoundPlayer.play(sound, 0.4f, MathUtils.random(0.98f, 1.02f), 0f);
     }
 
     public void addOnCompletedListener(Action0 onCompletedListener) {

@@ -100,7 +100,7 @@ public final class AzathothEndingDialog extends Group {
         if (Gdx.audio == null) return;
         try {
             openingSound = CustomAssetManager.getSound("sounds/azathoth_ending.wav");
-            openingSoundId = openingSound.play(0.7f);
+            openingSoundId = openingSound.play(1f);
         } catch (RuntimeException failure) {
             // A missing audio device must not block the end-of-game controls.
             Gdx.app.error("AzathothEndingDialog", "Could not play ending sound", failure);

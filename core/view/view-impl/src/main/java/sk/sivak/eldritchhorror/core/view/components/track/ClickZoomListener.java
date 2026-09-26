@@ -28,9 +28,17 @@ public class ClickZoomListener extends ClickListener {
     private float actorX;
     private float actorY;
     private Action0 onCompletedListener;
+    private String maximizeSound;
+    private String minimizeSound;
 
     public ClickZoomListener(Actor actor) {
         this.actor = actor;
+    }
+
+    public ClickZoomListener withSounds(String maximizeSound, String minimizeSound) {
+        this.maximizeSound = maximizeSound;
+        this.minimizeSound = minimizeSound;
+        return this;
     }
 
     public void setOnCompletedListener(Action0 onCompletedListener) {
@@ -67,6 +75,7 @@ public class ClickZoomListener extends ClickListener {
     public void maximize() {
         moving = true;
         minimized = false;
+        TrackZoomSounds.play(maximizeSound);
         float viewportHeightRatio = 0.65f;
         actorScaleY = actor.getScaleY();
         actorScaleX = actor.getScaleX();
@@ -97,6 +106,7 @@ public class ClickZoomListener extends ClickListener {
     public void minimize() {
         moving = true;
         minimized = true;
+        TrackZoomSounds.play(minimizeSound);
         ParallelAction toBackAction = Actions.parallel(
                 Actions.scaleTo(actorScaleX, actorScaleY, DURATION),
                 Actions.moveTo(actorX,

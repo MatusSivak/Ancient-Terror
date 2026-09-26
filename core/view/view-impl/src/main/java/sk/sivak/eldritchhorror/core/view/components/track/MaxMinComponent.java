@@ -23,6 +23,8 @@ public class MaxMinComponent {
     private boolean displayed = false;
 
     private Actor actor;
+    private String maximizeSound;
+    private String minimizeSound;
 
     public MaxMinComponent(Actor actor, BigActorsManager.BigActorKey bigActorKey) {
         this.actor = actor;
@@ -31,6 +33,12 @@ public class MaxMinComponent {
         this.actorScaleY = this.actor.getScaleY();
         this.actorX = this.actor.getX();
         this.actorY = this.actor.getY();
+    }
+
+    public MaxMinComponent withSounds(String maximizeSound, String minimizeSound) {
+        this.maximizeSound = maximizeSound;
+        this.minimizeSound = minimizeSound;
+        return this;
     }
 
     public void maximizeOrMinimize() {
@@ -42,6 +50,7 @@ public class MaxMinComponent {
     }
 
     private void maximize() {
+        TrackZoomSounds.play(maximizeSound);
         float viewportHeightRatio = 0.65f;
         Vector2 stageCoordinates = actor.localToStageCoordinates(new Vector2());
         Vector2 difference = new Vector2(actor.getX(), actor.getY()).sub(stageCoordinates);
@@ -67,6 +76,7 @@ public class MaxMinComponent {
     }
 
     private void minimize() {
+        TrackZoomSounds.play(minimizeSound);
         ParallelAction toBackAction = Actions.parallel(
                 Actions.scaleTo(actorScaleX, actorScaleY, DURATION),
                 Actions.moveTo(actorX,
