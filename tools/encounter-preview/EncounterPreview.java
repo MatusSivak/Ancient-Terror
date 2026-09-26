@@ -120,6 +120,10 @@ public class EncounterPreview extends ApplicationAdapter {
             longest.add(shambler);
             render(table, longest, "encounters-longest");
             assertSingleLines(table);
+            EncounterButtonData lost = typed(option("lost", "card/condition/LOST_IN_TIME_AND_SPACE.jpg",
+                    "lostInTimeAndSpace.title", null), EncounterType.CONDITION);
+            lost.setNeedsMask(true);
+            render(table, Collections.singletonList(lost), "encounters-lost-in-time-and-space");
             System.out.println("PASS: encounter layout, selection, disabled option, overflow and single option");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }

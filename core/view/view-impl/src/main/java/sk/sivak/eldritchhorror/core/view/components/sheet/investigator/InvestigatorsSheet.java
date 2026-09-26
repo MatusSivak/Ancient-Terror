@@ -118,15 +118,20 @@ public class InvestigatorsSheet extends Table {
         frame.setMinHeight(0);
         Container<Image> framedPortrait = new Container<>(portrait);
         framedPortrait.background(frame).pad(3);
-        tile.add(framedPortrait).size(162, 146).padBottom(3).row();
+        tile.add(framedPortrait).size(162, 132).padBottom(3).row();
         tile.add(text(active ? get("investigator.overview.active") : "", 15, highlight))
                 .height(20).padBottom(2).row();
         Label name = text(investigator.getInvestigatorName(), 20, INK);
         name.setWrap(true);
         tile.add(name).width(TILE_WIDTH).minHeight(46).row();
+        String statusText = investigator.isLostInTimeAndSpace() ? get("lostInTimeAndSpace.title")
+                : investigator.isDelayed() ? get("investigator.overview.delayed") : "";
+        Label status = text(statusText, 14, highlight);
+        status.setWrap(true);
+        tile.add(status).width(TILE_WIDTH).minHeight(22).padBottom(3).row();
         Label job = text(get("investigator.profession." + investigator.getInvestigatorId().name().toLowerCase(Locale.ROOT)), 16, SECONDARY_INK);
         job.setWrap(true);
-        tile.add(job).width(TILE_WIDTH).minHeight(38).padBottom(7).row();
+        tile.add(job).width(TILE_WIDTH).minHeight(26).padBottom(7).row();
         tile.add(vital(HEALTH_ICON, investigator.getCurrentHealth(), investigator.getMaxHealth(), new Color(0xf16b60ff)))
                 .width(TILE_WIDTH).padBottom(5).row();
         tile.add(vital(SANITY_ICON, investigator.getCurrentSanity(), investigator.getMaxSanity(), new Color(0x7eafffff)))
@@ -137,11 +142,6 @@ public class InvestigatorsSheet extends Table {
         tokens.add(counter(TICKET_TRAIN_DOWN, Collections.frequency(investigator.getTickets(), PathType.TRAIN))).expandX();
         tokens.add(counter(TICKET_SHIP_DOWN, Collections.frequency(investigator.getTickets(), PathType.SHIP))).expandX();
         tile.add(tokens).width(TILE_WIDTH).row();
-        if (investigator.isLostInTimeAndSpace()) {
-            Label status = text(get("lostInTimeAndSpace.title"), 14, SECONDARY_INK);
-            status.setWrap(true);
-            tile.add(status).width(TILE_WIDTH).padTop(5);
-        }
         return tile;
     }
 

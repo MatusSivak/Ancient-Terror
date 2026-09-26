@@ -77,8 +77,7 @@ public class InvestigatorImage extends Image {
     private void createAsteroid() {
         asteroid = new Image(CustomAssetManager.getTexture(CustomAssetManager.ASTEROID));
         asteroid.setScaling(Scaling.fit);
-        asteroid.setRotation(30);
-        asteroid.setSize(950 * 0.2f,841 * 0.2f);
+        asteroid.setSize(120, 60);
         asteroid.setOrigin(Align.center);
     }
 
@@ -154,7 +153,7 @@ public class InvestigatorImage extends Image {
             asteroid.getColor().a = getColor().a;
             asteroid.setPosition(
                     getX() - asteroid.getWidth() / 2 + getWidth() / 2f,
-                    getY() - asteroid.getHeight() / 2 - getHeight() / 4f);
+                    getY() - asteroid.getHeight() * 0.7f);
             asteroid.act(delta);
         }
         borderImage.act(delta);

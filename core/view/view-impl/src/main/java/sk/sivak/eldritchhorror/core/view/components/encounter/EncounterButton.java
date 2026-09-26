@@ -172,14 +172,14 @@ public class EncounterButton extends Table {
         } else if ("VORTEX".equals(encounterButtonData.getButtonIcon())) {
             actionButton = VortexEncounterButton.build(actionButtonData);
         } else if ("token/compass.png".equals(encounterButtonData.getButtonIcon())) {
-            actionButton = ActionButton.build(actionButtonData);
+            actionButton = ActionButton.build(actionButtonData, true);
             int direction = MathUtils.random(360);
             actionButton.getIcon().addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
                     Actions.rotateTo(direction - 15, 1f, Interpolation.sine),
                     Actions.rotateTo(direction + 15, 1f, Interpolation.sine)
             )));
         } else {
-            actionButton = ActionButton.build(actionButtonData);
+            actionButton = ActionButton.build(actionButtonData, true);
         }
         if (EncounterIconStyle.isSkip(encounterButtonData)) {
             actionButton.getIcon().setDrawable(new TextureRegionDrawable(EncounterIconStyle.skipGlyph()));

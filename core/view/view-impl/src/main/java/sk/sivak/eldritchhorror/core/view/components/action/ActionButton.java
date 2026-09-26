@@ -26,19 +26,23 @@ public class ActionButton extends ImageButton {
     private Vector2 iconOffset = new Vector2();
 
     public static ActionButton build(ActionButtonData actionButtonData) {
+        return build(actionButtonData, false);
+    }
+
+    public static ActionButton build(ActionButtonData actionButtonData, boolean circularMask) {
         if (actionButtonData.isEnabled()) {
-            return buildEnabled(actionButtonData);
+            return buildEnabled(actionButtonData, circularMask);
         } else {
-            return buildDisabled(actionButtonData);
+            return buildDisabled(actionButtonData, circularMask);
         }
     }
 
-    private static ActionButton buildEnabled(ActionButtonData actionButtonData) {
+    private static ActionButton buildEnabled(ActionButtonData actionButtonData, boolean circularMask) {
         ActionButton actionButton = new ActionButton(
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_NORMAL),
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_ENABLED_CHECKED));
-        actionButton.initIcon(actionButtonData);
+        actionButton.initIcon(actionButtonData, circularMask);
         actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = false;
@@ -47,12 +51,12 @@ public class ActionButton extends ImageButton {
         return actionButton;
     }
 
-    private static ActionButton buildDisabled(ActionButtonData actionButtonData) {
+    private static ActionButton buildDisabled(ActionButtonData actionButtonData, boolean circularMask) {
         ActionButton actionButton = new ActionButton(
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_NORMAL),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_PRESSED),
                 getTextureRegionDrawable(ACTION_BUTTON_DISABLED_CHECKED));
-        actionButton.initIcon(actionButtonData);
+        actionButton.initIcon(actionButtonData, circularMask);
         actionButton.setIconOffset(actionButtonData.getOffset());
 
         actionButton.disabled = true;
@@ -85,12 +89,13 @@ public class ActionButton extends ImageButton {
         icon.act(delta);
     }
 
-    private void initIcon(ActionButtonData actionButtonData) {
+    private void initIcon(ActionButtonData actionButtonData, boolean circularMask) {
         String texturePath = actionButtonData.getTexturePath();
         if (actionButtonData.getActionButtonId() == ActionButtonData.ActionButtonId.INVESTIGATOR) {
             icon = new Image(buildMaskedInvestigatorTextureRegion(getTexture(texturePath)));
         } else if (actionButtonData.needsMask()) {
-            icon = new Image(buildMaskedTextureRegion(getTexture(texturePath)));
+            icon = new Image(circularMask ? buildCircularMaskedTextureRegion(getTexture(texturePath))
+                    : buildMaskedTextureRegion(getTexture(texturePath)));
         } else {
             icon = new Image(getTextureRegion(texturePath));
         }

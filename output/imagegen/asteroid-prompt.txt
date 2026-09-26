@@ -1,0 +1,6 @@
+Tool: built-in image_gen
+Final asset: assets/map/asteroid.png
+Integration: reduced to 256 x 128 RGBA PNG; displayed at 120 x 60 game units.
+
+Prompt:
+Create a single production-ready transparent PNG game sprite: a small isolated floating asteroid ledge for an investigator to stand on in a 1920s Lovecraftian board game, Lost in Time and Space scene. A compact flattened irregular chunk of ancient charcoal-grey stone, broad shallow walkable top viewed slightly from above, jagged tapered underside, approximately 2:1 width to height silhouette. Painterly realistic board-game illustration, clearly readable big rock facets rather than noisy photographic texture, muted slate and desaturated earthy-grey colors with a restrained cool blue-violet rim light, softly lit upper-left edges, dark underside with visible detail. Center the complete rock in frame with minimal transparent padding. No person, no buildings, no runes, no lava, no fiery tail, no halo, no stars, no dust cloud, no ground shadow, no text or border. Genuine alpha transparency outside the silhouette, not a checkerboard illustration. Intended displayed size roughly 110 by 60 pixels: keep silhouette simple and handsome, suitable for a small game sprite. Output a compact 512 by 256 pixel PNG if supported.

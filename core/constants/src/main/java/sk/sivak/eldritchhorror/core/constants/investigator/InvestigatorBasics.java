@@ -19,4 +19,6 @@ public interface InvestigatorBasics extends InvestigatorInfo {
     int getBonusStat(Stat stat);
 
     boolean isLostInTimeAndSpace();
+
+    boolean isDelayed();
 }

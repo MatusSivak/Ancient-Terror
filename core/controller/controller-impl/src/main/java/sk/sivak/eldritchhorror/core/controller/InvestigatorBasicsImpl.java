@@ -32,6 +32,7 @@ public class InvestigatorBasicsImpl implements InvestigatorBasics {
     private String abilityText;
     private String bio;
     private boolean lostInTimeAndSpace;
+    private boolean delayed;
 
     public InvestigatorBasicsImpl(InvestigatorId investigatorId, LocationId locationId) {
         this.investigatorId = investigatorId;
@@ -129,6 +130,15 @@ public class InvestigatorBasicsImpl implements InvestigatorBasics {
 
     public void setLostInTimeAndSpace(boolean lostInTimeAndSpace) {
         this.lostInTimeAndSpace = lostInTimeAndSpace;
+    }
+
+    @Override
+    public boolean isDelayed() {
+        return delayed;
+    }
+
+    public void setDelayed(boolean delayed) {
+        this.delayed = delayed;
     }
 
     public void setStatValue(Stat stat, int baseValue, int bonusValue) {

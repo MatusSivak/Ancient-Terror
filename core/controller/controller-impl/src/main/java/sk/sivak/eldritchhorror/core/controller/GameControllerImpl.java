@@ -208,6 +208,7 @@ public class GameControllerImpl implements GameController {
         investigatorBasics.setActionText(investigator.getInfo().getActionText());
         investigatorBasics.setAbilityText(investigator.getInfo().getAbilityText());
         investigatorBasics.setLostInTimeAndSpace(investigator.isLostInTimeAndSpace());
+        investigatorBasics.setDelayed(investigator.isDelayed());
         investigatorBasics.setBio(investigator.getInfo().getBio());
         fillBaseAndBonusStats(investigator, investigatorBasics);
         for (int i = 0; i < investigator.getTrainTickets(); i++) {
