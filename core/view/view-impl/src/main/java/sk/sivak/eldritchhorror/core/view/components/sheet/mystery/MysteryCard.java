@@ -3,6 +3,8 @@ package sk.sivak.eldritchhorror.core.view.components.sheet.mystery;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -44,10 +46,13 @@ public class MysteryCard extends VisTable {
     private MysteryCardInfo mysteryCardInfo;
     private boolean moveCamera = false;
     private Action0 beforeDisplayAction;
+    private boolean awaitingAcknowledgement;
+    private float acknowledgementPulseTime;
 
     public MysteryCard() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.MYSTERY_CARD);
         displayHide.setActorKey(OnScreenActors.ActorKey.MYSTERY_CARD);
+        displayHide.setBeforeHideAction(this::stopAcknowledgementPulse);
         setTransform(true);
     }
 
@@ -67,6 +72,8 @@ public class MysteryCard extends VisTable {
     }
 
     public void init(MysteryCardInfo mysteryCardInfo, int mysteryNumber, int mysteriesRequired) {
+        stopAcknowledgementPulse();
+        advanceActiveMysteryAmount = null;
         clear();
         hitImage = null;
         getColor().a = 1f;
@@ -111,6 +118,7 @@ public class MysteryCard extends VisTable {
         setHeight(getPrefHeight());
         validate();
 
+        addActor(new AcknowledgementOutline());
         addHitImage();
     }
 
@@ -206,6 +214,61 @@ public class MysteryCard extends VisTable {
 
     public void advanceActiveMystery(int amount) {
         this.advanceActiveMysteryAmount = amount;
+        awaitingAcknowledgement = true;
+        acknowledgementPulseTime = 0f;
+    }
+
+    private void stopAcknowledgementPulse() {
+        awaitingAcknowledgement = false;
+        acknowledgementPulseTime = 0f;
+    }
+
+    @Override
+    public boolean remove() {
+        stopAcknowledgementPulse();
+        return super.remove();
+    }
+
+    /** Separate overlay leaves the card's text and display/hide transforms untouched. */
+    private class AcknowledgementOutline extends Actor {
+        AcknowledgementOutline() {
+            setTouchable(Touchable.disabled);
+        }
+
+        private boolean isWaitingForClick() {
+            return awaitingAcknowledgement && displayHide.isDisplayed()
+                    && MysteryCard.this.getTouchable() == Touchable.enabled;
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            if (isWaitingForClick()) acknowledgementPulseTime = (acknowledgementPulseTime + delta) % 1.6f;
+        }
+
+        @Override
+        public void draw(Batch batch, float parentAlpha) {
+            if (!isWaitingForClick()) return;
+            float pulse = 0.5f - 0.5f * MathUtils.cos(acknowledgementPulseTime * MathUtils.PI2 / 1.6f);
+            float previous = batch.getPackedColor();
+            try {
+                batch.setColor(BRASS.r, BRASS.g, BRASS.b, parentAlpha * (0.08f + 0.12f * pulse));
+                drawFrame(batch, 8f);
+                batch.setColor(BRASS.r, BRASS.g, BRASS.b, parentAlpha * (0.35f + 0.6f * pulse));
+                drawFrame(batch, 2f);
+            } finally {
+                batch.setColor(previous);
+            }
+        }
+
+        private void drawFrame(Batch batch, float thickness) {
+            float width = MysteryCard.this.getWidth(), height = MysteryCard.this.getHeight();
+            com.badlogic.gdx.graphics.Texture white = CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND);
+            batch.draw(white, 0, 0, width, thickness);
+            batch.draw(white, 0, height - thickness, width, thickness);
+            batch.draw(white, 0, thickness, thickness, height - thickness * 2);
+            batch.draw(white, width - thickness, thickness, thickness, height - thickness * 2);
+        }
     }
 
     public void displayOrHide() {
