@@ -23,18 +23,24 @@ DOCUMENT = {'name': 'projects/test/databases/(default)/documents/bugReports/test
                        'unknownField': {'integerValue': '9007199254740993'}}}
 
 
-class FakeStore:
-    def set_status(self, report_id, status, update_time):
-        return {**DOCUMENT, 'fields': {**DOCUMENT['fields'], 'status': {'stringValue': status}}}
+CRASH = {**DOCUMENT, 'name': DOCUMENT['name'].replace('/bugReports/', '/crashReports/'),
+         'fields': {**DOCUMENT['fields'], 'description': {'stringValue': 'TEST crash\nStack trace'},
+                    'saveFile': {'bytesValue': base64.b64encode(b'crash save').decode()}}}
 
-    def delete(self, report_id, update_time):
+
+class FakeStore:
+    def set_status(self, report_id, status, update_time, collection="bugReports"):
+        document = self.report(report_id, collection)
+        return {**document, 'fields': {**document['fields'], 'status': {'stringValue': status}}}
+
+    def delete(self, report_id, update_time, collection="bugReports"):
         pass
 
-    def list(self, token):
-        return {'reports': [summarize(DOCUMENT)], 'nextPageToken': ''}
+    def list(self, token, collection="bugReports"):
+        return {'reports': [summarize(self.report('test-id', collection))], 'nextPageToken': ''}
 
-    def report(self, report_id):
-        return DOCUMENT
+    def report(self, report_id, collection="bugReports"):
+        return CRASH if collection == "crashReports" else DOCUMENT
 
 
 class ViewerTests(unittest.TestCase):
@@ -67,7 +73,65 @@ class ViewerTests(unittest.TestCase):
         with patch.object(FakeStore, 'delete') as delete:
             with self.request('/api/report?id=test-id', method='DELETE', body={'confirmId': 'test-id', 'updateTime': DOCUMENT['updateTime']}) as response:
                 self.assertEqual(json.load(response), {'deleted': 'test-id'})
-            delete.assert_called_once_with('test-id', DOCUMENT['updateTime'])
+            delete.assert_called_once_with('test-id', DOCUMENT['updateTime'], 'bugReports')
+
+    def test_both_collections_with_same_id_remain_distinct(self):
+        for collection, document, save in [('bugReports', DOCUMENT, SAVE), ('crashReports', CRASH, b'crash save')]:
+            with self.subTest(collection=collection):
+                with self.request('/api/reports?collection=' + collection) as response:
+                    reports = json.load(response)['reports']
+                self.assertEqual(reports[0]['collection'], collection)
+                self.assertEqual(reports[0]['id'], 'test-id')
+                path = '/api/report?id=test-id&collection=' + collection
+                with self.request(path) as response:
+                    self.assertEqual(json.load(response)['name'], document['name'])
+                for attachment, expected in [('saveFile', save), ('screenshotPng', PNG)]:
+                    with self.request(path + '&attachment=' + attachment) as response:
+                        self.assertEqual(response.read(), expected)
+                with self.request(path + '&attachment=raw') as response:
+                    self.assertEqual(json.load(response), document)
+                with self.request(path, method='PATCH', body={'status': 'fixed', 'updateTime': document['updateTime']}) as response:
+                    updated = json.load(response)
+                self.assertEqual(updated['collection'], collection)
+                self.assertEqual(updated['fields']['status'], 'fixed')
+                with patch.object(FakeStore, 'delete') as delete:
+                    self.request(path, method='DELETE', body={'confirmId': 'test-id', 'updateTime': document['updateTime']}).close()
+                    delete.assert_called_once_with('test-id', document['updateTime'], collection)
+
+    def test_invalid_collections_never_reach_store(self):
+        with patch.object(FakeStore, 'list') as listing, patch.object(FakeStore, 'report') as report, \
+                patch.object(FakeStore, 'set_status') as update, patch.object(FakeStore, 'delete') as delete:
+            for collection in ['other', '../crashReports', 'bugReports/test-id']:
+                for path, method in [('/api/reports', 'GET'), ('/api/report?id=test-id', 'GET'),
+                                     ('/api/report?id=test-id', 'PATCH'), ('/api/report?id=test-id', 'DELETE')]:
+                    url = path + ('&' if '?' in path else '?') + 'collection=' + collection
+                    with self.assertRaises(HTTPError) as error:
+                        self.request(url, method=method, body=None if method == 'GET' else {
+                            'status': 'fixed', 'confirmId': 'test-id', 'updateTime': DOCUMENT['updateTime']})
+                    self.assertEqual(error.exception.code, 400)
+                    error.exception.close()
+            for operation in [listing, report, update, delete]:
+                operation.assert_not_called()
+
+    def test_firestore_routes_every_operation_to_selected_collection(self):
+        client = Firestore('test', '(default)')
+        for collection in ['bugReports', 'crashReports']:
+            with patch.object(client, 'token', return_value='token'), patch('viewer.urlopen') as fetch:
+                def response(value):
+                    fetch.return_value.__enter__.return_value = io.BytesIO(json.dumps(value).encode())
+                response({'documents': [], 'nextPageToken': 'next'})
+                self.assertEqual(client.list('previous', collection)['nextPageToken'], 'next')
+                url = urlsplit(fetch.call_args.args[0].full_url)
+                self.assertTrue(url.path.endswith('/documents/' + collection))
+                self.assertEqual(parse_qs(url.query)['pageToken'], ['previous'])
+                for operation in [lambda: client.report('test-id', collection),
+                                  lambda: client.set_status('test-id', 'fixed', DOCUMENT['updateTime'], collection),
+                                  lambda: client.delete('test-id', DOCUMENT['updateTime'], collection)]:
+                    response(DOCUMENT)
+                    operation()
+                    self.assertTrue(urlsplit(fetch.call_args.args[0].full_url).path.endswith('/documents/' + collection + '/test-id'))
+        with self.assertRaises(ValueError):
+            client.report('test-id', 'other')
 
     def test_invalid_mutations_never_reach_firestore(self):
         cases = [('PATCH', {'status': 'invalid', 'updateTime': 'time'}),

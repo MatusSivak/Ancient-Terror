@@ -6,15 +6,26 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import java.util.Map;
 
-/** Authenticated create-only REST client; callbacks are always delivered on the render thread. */
+/** Authenticated create-only REST client. Manual report callbacks use the render thread. */
 public final class FirebaseBugReports {
+    private final String collection;
+    private final boolean renderCallbacks;
+
+    public FirebaseBugReports() { this("bugReports", true); }
+
+    private FirebaseBugReports(String collection, boolean renderCallbacks) {
+        this.collection = collection;
+        this.renderCallbacks = renderCallbacks;
+    }
+
+    public static FirebaseBugReports crashes() { return new FirebaseBugReports("crashReports", false); }
     public interface Callback {
         void success();
         void failed(String reason);
     }
-    private static String token;
-    private static String uid;
-    private static long tokenExpires;
+    private String token;
+    private String uid;
+    private long tokenExpires;
 
     public void send(String id, String description, byte[] save, byte[] screenshot,
                      Map<String, String> metadata, long capturedAt, Callback callback) {
@@ -48,7 +59,7 @@ public final class FirebaseBugReports {
                         Map<String, String> metadata, long capturedAt, Callback callback) {
         String payload = BugReportPayload.document(description, save, screenshot, metadata, uid, capturedAt);
         Net.HttpRequest request = request("https://firestore.googleapis.com/v1/projects/" + project
-                + "/databases/(default)/documents/bugReports?documentId=" + id, payload);
+                + "/databases/(default)/documents/" + collection + "?documentId=" + id, payload);
         request.setHeader("Authorization", "Bearer " + token);
         Gdx.net.sendHttpRequest(request, new Listener(callback) {
             @Override void received(int status, String body) {
@@ -71,19 +82,24 @@ public final class FirebaseBugReports {
         return request;
     }
 
-    private abstract static class Listener implements Net.HttpResponseListener {
+    private void dispatch(Runnable runnable) {
+        if (renderCallbacks) Gdx.app.postRunnable(runnable);
+        else runnable.run();
+    }
+
+    private abstract class Listener implements Net.HttpResponseListener {
         final Callback callback;
         Listener(Callback callback) { this.callback = callback; }
         abstract void received(int status, String body);
         @Override public void handleHttpResponse(Net.HttpResponse response) {
             int status = response.getStatus().getStatusCode();
             String body = response.getResultAsString();
-            Gdx.app.postRunnable(() -> {
+            dispatch(() -> {
                 try { received(status, body); }
                 catch (Exception e) { callback.failed("network"); }
             });
         }
-        @Override public void failed(Throwable error) { Gdx.app.postRunnable(() -> callback.failed("network")); }
-        @Override public void cancelled() { Gdx.app.postRunnable(() -> callback.failed("network")); }
+        @Override public void failed(Throwable error) { dispatch(() -> callback.failed("network")); }
+        @Override public void cancelled() { dispatch(() -> callback.failed("network")); }
     }
 }

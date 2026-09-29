@@ -1,4 +1,4 @@
-"""Local Firestore bug report manager. Run with --help for options."""
+"""Local Firestore bug and crash report manager. Run with --help for options."""
 import argparse
 import base64
 import json
@@ -14,6 +14,7 @@ import webbrowser
 
 ROOT = Path(__file__).resolve().parent
 PROJECT = "ancient-terror-hall-of-fame"
+COLLECTIONS = {"bugReports": "Bug reports", "crashReports": "Crash reports"}
 STATUSES = {"new": "New", "investigating": "Investigating", "fixed": "Fixed", "closed": "Closed"}
 
 
@@ -31,6 +32,7 @@ def decode(value):
 def summarize(document):
     fields = document.get("fields", {})
     return {"id": document["name"].rsplit("/", 1)[-1],
+            "collection": document["name"].rsplit("/", 2)[-2],
             "name": document["name"], "createTime": document.get("createTime"),
             "updateTime": document.get("updateTime"),
             "fields": {k: decode(v) for k, v in fields.items()}}
@@ -39,7 +41,7 @@ def summarize(document):
 class Firestore:
     def __init__(self, project, database):
         self.base = ("https://firestore.googleapis.com/v1/projects/" + quote(project, safe="")
-                     + "/databases/" + quote(database, safe="") + "/documents/bugReports")
+                     + "/databases/" + quote(database, safe="") + "/documents")
         self.credentials = None
         self.lock = threading.Lock()
 
@@ -65,11 +67,13 @@ class Firestore:
                 raise RuntimeError("Google credentials unavailable. Run gcloud auth application-default login "
                                    "or configure GOOGLE_APPLICATION_CREDENTIALS. The account needs Firestore read access.") from None
 
-    def get(self, suffix="", params=None):
-        return self.request("GET", suffix, params)
+    def get(self, suffix="", params=None, collection="bugReports"):
+        return self.request("GET", suffix, params, collection=collection)
 
-    def request(self, method, suffix="", params=None, body=None):
-        url = self.base + suffix + ("?" + urlencode(params, doseq=True) if params else "")
+    def request(self, method, suffix="", params=None, body=None, collection="bugReports"):
+        if collection not in COLLECTIONS:
+            raise ValueError("Unknown report collection")
+        url = self.base + "/" + collection + suffix + ("?" + urlencode(params, doseq=True) if params else "")
         request = Request(url, method=method,
                           data=json.dumps(body).encode() if body is not None else None,
                           headers={"Authorization": "Bearer " + self.token(), "Content-Type": "application/json"})
@@ -91,27 +95,27 @@ class Firestore:
                         412: "This report changed since you opened it. Refresh and try again."}
             raise RuntimeError(messages.get(error.code, f"Firestore returned HTTP {error.code}. Try again.")) from None
 
-    def list(self, page_token):
+    def list(self, page_token, collection="bugReports"):
         params = {"pageSize": 100, "mask.fieldPaths": ["description", "status", "capturedAt", "metadata", "reporterUid", "schemaVersion"]}
         if page_token:
             params["pageToken"] = page_token
-        result = self.get(params=params)
+        result = self.get(params=params, collection=collection)
         return {"reports": [summarize(d) for d in result.get("documents", [])],
                 "nextPageToken": result.get("nextPageToken", "")}
 
-    def report(self, report_id):
-        return self.get("/" + quote(report_id, safe=""))
+    def report(self, report_id, collection="bugReports"):
+        return self.get("/" + quote(report_id, safe=""), collection=collection)
 
-    def set_status(self, report_id, status, update_time):
+    def set_status(self, report_id, status, update_time, collection="bugReports"):
         if status not in STATUSES:
             raise ValueError("Unknown status")
         return self.request("PATCH", "/" + quote(report_id, safe=""),
                             {"updateMask.fieldPaths": "status", "currentDocument.updateTime": update_time},
-                            {"fields": {"status": {"stringValue": status}}})
+                            {"fields": {"status": {"stringValue": status}}}, collection=collection)
 
-    def delete(self, report_id, update_time):
+    def delete(self, report_id, update_time, collection="bugReports"):
         self.request("DELETE", "/" + quote(report_id, safe=""),
-                     {"currentDocument.updateTime": update_time})
+                     {"currentDocument.updateTime": update_time}, collection=collection)
 
 
 def handler_for(store, session, project):
@@ -150,14 +154,17 @@ def handler_for(store, session, project):
                 return
             try:
                 query = parse_qs(url.query)
+                collection = query.get("collection", ["bugReports"])[0]
+                if collection not in COLLECTIONS:
+                    raise ValueError("Unknown report collection")
                 if url.path == "/api/reports":
-                    self.send(200, {**store.list(query.get("pageToken", [""])[0]), "project": project, "statuses": STATUSES})
+                    self.send(200, {**store.list(query.get("pageToken", [""])[0], collection), "project": project, "statuses": STATUSES})
                 elif url.path == "/api/report":
                     report_id = query.get("id", [""])[0]
                     if not report_id or "/" in report_id or report_id in (".", ".."):
                         self.send(400, {"error": "Invalid report ID"})
                         return
-                    document = store.report(report_id)
+                    document = store.report(report_id, collection)
                     attachment = query.get("attachment", [""])[0]
                     if attachment:
                         if attachment not in ("screenshotPng", "saveFile", "raw"):
@@ -177,6 +184,8 @@ def handler_for(store, session, project):
                         self.send(200, summarize(document))
                 else:
                     self.send(404, {"error": "Not found"})
+            except ValueError as error:
+                self.send(400, {"error": str(error)})
             except RuntimeError as error:
                 self.send(502, {"error": str(error)})
             except Exception:
@@ -200,7 +209,11 @@ def handler_for(store, session, project):
                 self.send(404, {"error": "Not found"})
                 return
             try:
-                report_id = parse_qs(url.query).get("id", [""])[0]
+                query = parse_qs(url.query)
+                collection = query.get("collection", ["bugReports"])[0]
+                if collection not in COLLECTIONS:
+                    raise ValueError("Unknown report collection")
+                report_id = query.get("id", [""])[0]
                 if not report_id or "/" in report_id or report_id in (".", ".."):
                     raise ValueError("Invalid report ID")
                 length = int(self.headers.get("Content-Length", "0"))
@@ -216,11 +229,11 @@ def handler_for(store, session, project):
                     status = body.get("status")
                     if not isinstance(status, str) or status not in STATUSES:
                         raise ValueError("Unknown status")
-                    self.send(200, summarize(store.set_status(report_id, status, update_time)))
+                    self.send(200, summarize(store.set_status(report_id, status, update_time, collection)))
                 else:
                     if body.get("confirmId") != report_id:
                         raise ValueError("Deletion confirmation does not match the report ID")
-                    store.delete(report_id, update_time)
+                    store.delete(report_id, update_time, collection)
                     self.send(200, {"deleted": report_id})
             except (ValueError, UnicodeDecodeError) as error:
                 self.send(400, {"error": str(error)})
@@ -241,7 +254,7 @@ def main():
     session = secrets.token_urlsafe(32)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler_for(Firestore(args.project, args.database), session, args.project))
     url = f"http://127.0.0.1:{server.server_port}/#session={session}"
-    print(f"Bug report viewer: {url}\nPress Ctrl+C to stop.", flush=True)
+    print(f"Bug and crash report viewer: {url}\nPress Ctrl+C to stop.", flush=True)
     if not args.no_browser:
         webbrowser.open(url)
     try:

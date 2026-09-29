@@ -9,6 +9,9 @@ public class GameDesktop {
 
     public static void main(String[] args) {
         for (String arg : args) {
+            if ("--crash-report-test".equals(arg)) {
+                System.setProperty("ancientterror.crashReportTest", "true");
+            }
             if ("--grid-test-prototype".equals(arg)) {
                 System.setProperty("ancientterror.gridtest.prototype", "true");
             }

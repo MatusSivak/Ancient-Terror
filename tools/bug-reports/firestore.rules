@@ -22,5 +22,26 @@ service cloud.firestore {
           || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680));
       allow read, update, delete: if false;
     }
+    // Automatic crash reports use the same create-only payload contract.
+    match /crashReports/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'description', 'reporterUid', 'capturedAt', 'schemaVersion', 'status',
+          'metadata', 'saveFile', 'screenshotPng'])
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 4000
+        && request.resource.data.capturedAt is int
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.status == 'new'
+        && request.resource.data.metadata is map
+        && request.resource.data.metadata.size() <= 12
+        && (!('saveFile' in request.resource.data)
+          || (request.resource.data.saveFile is bytes && request.resource.data.saveFile.size() <= 524288))
+        && (!('screenshotPng' in request.resource.data)
+          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680));
+      allow read, update, delete: if false;
+    }
   }
 }

@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.pay.PurchaseManager;
 import rx.plugins.RxJavaHooks;
@@ -18,6 +19,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.combat.FireballSmokeBuilder;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
+import sk.sivak.eldritchhorror.core.view.firebase.CrashReports;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
@@ -29,6 +31,16 @@ public class Game extends com.badlogic.gdx.Game {
 
     @Override
     public void create() {
+        CrashReports.install();
+        try {
+            createGame();
+        } catch (RuntimeException | Error error) {
+            CrashReports.report(error);
+            throw error;
+        }
+    }
+
+    private void createGame() {
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
         }
@@ -122,12 +134,21 @@ public class Game extends com.badlogic.gdx.Game {
     public void render() {
         try {
             super.render();
+            if (Gdx.app.getType() == Application.ApplicationType.Desktop
+                    && Boolean.getBoolean("ancientterror.crashReportTest")
+                    && Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
+                throw new IllegalStateException("TEST crash report: intentional F8 failure");
+            }
             CommandQueueImpl.get().tick();
             if (playTimeTracker != null) {
                 playTimeTracker.accept(Gdx.graphics.getDeltaTime());
             }
         } catch (Exception e) {
+            CrashReports.report(e);
             ServiceLocator.getGlobalThrowableHandler().handleThrowable(e);
+        } catch (Error error) {
+            CrashReports.report(error);
+            throw error;
         }
     }
 
@@ -143,6 +164,7 @@ public class Game extends com.badlogic.gdx.Game {
 
     @Override
     public void resume() {
+        CrashReports.retryPending();
         super.resume();
         GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.GAME_STATE, "resume");
     }
@@ -161,6 +183,7 @@ public class Game extends com.badlogic.gdx.Game {
         CommandQueueImpl.nullifyInstance();
         CustomAssetManager.nullifyInstance();
         ServiceLocator.nullifyInstance();
+        CrashReports.uninstall();
     }
 
     public void setAdHandler(AdHandler adHandler) {

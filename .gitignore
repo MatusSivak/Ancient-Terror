@@ -4,6 +4,7 @@ core/initializer/target/
 target/
 *.iml
 build/
+pending-crash-reports/
 output/audio-tools/
 *-logcat.txt
 *-logcat-*.txt

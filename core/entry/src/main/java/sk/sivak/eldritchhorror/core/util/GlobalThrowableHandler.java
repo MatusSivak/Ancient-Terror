@@ -19,6 +19,7 @@ public class GlobalThrowableHandler {
     }
 
     public void handleThrowable(Throwable t) {
+        sk.sivak.eldritchhorror.core.view.firebase.CrashReports.report(t);
         if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
             t.printStackTrace(System.err);
             return;

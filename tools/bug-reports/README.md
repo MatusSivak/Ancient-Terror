@@ -1,5 +1,65 @@
 # Bug reports
 
+## Automatic crash reports
+
+The game sends its first handled or uncaught Java failure per session to
+`crashReports/{uuid}` in the same Firebase project. It uses the manual bug-report
+payload and authentication: the latest saved game, capture timestamp, app/platform
+version, language, framebuffer dimensions, density, and attachment status. The
+description contains the exception stack trace (limited to 4,000 characters), and
+metadata also includes the failing thread name. The save is never overwritten.
+
+Screenshot capture is best-effort on the render thread; background-thread crashes
+or an unavailable GL context have `screenshotStatus: unavailable`. Missing,
+unreadable, or oversized saves do not prevent a crash report; their status is
+recorded and the attachment is omitted. Existing attachment limits still apply.
+
+Reports are written to local `pending-crash-reports/` before the first upload.
+Uploads do not require the render loop. Failed/interrupted uploads retry on the
+next launch or resume with the original ID, capture time and attachments, and
+local records are removed only after Firebase acknowledges them. Existing crash
+handling still runs. Native crashes, OS process kills, and failures before game
+initialization cannot be captured by this Java handler; exhausted memory or
+unwritable storage can also prevent capture.
+
+Before releasing, merge the **crashReports** block from `firestore.rules` into
+the deployed Firestore rules, preserving other rules, and exempt `saveFile` and
+`screenshotPng` from indexing for this collection too. No cloud rules are deployed
+by this code change. The local viewer displays both `bugReports` and `crashReports` together; use
+**Report type** to show all reports, only bug reports, or only crash reports.
+
+### Testing crash uploads on desktop
+
+From the repository root, run:
+
+```powershell
+.\gradlew.bat :desktop:run --args="--crash-report-test"
+```
+
+Wait for the game to finish loading, then press **F8** with the game window
+focused. This throws an intentional exception through the normal render error
+handler. Desktop's existing handler logs the error and lets the game continue;
+the test does not need to close the process. F8 is only enabled by this launch
+argument (or the `-Dancientterror.crashReportTest=true` desktop VM option).
+
+The console should show `[CrashReports] Uploaded crashReports/<uuid>`. In Firebase
+Console > Firestore Database > Data > `crashReports`, open that UUID and check:
+
+- `description` contains `TEST crash report: intentional F8 failure` and a stack trace.
+- `status` is `new`, `schemaVersion` is `1`, and `reporterUid` is populated.
+- `metadata` has platform, app version, language, screen, density, and thread.
+- `saveFile` contains the existing save (if present and within the size limit).
+- `screenshotPng` contains the game screenshot if capture succeeded.
+
+For an offline/restart test, start a **fresh test session**, disconnect networking,
+press F8, and check `assets/pending-crash-reports/<uuid>.json`. Close the game,
+reconnect, then launch normally with `.\gradlew.bat :desktop:run`. Verify the same
+UUID uploads and the pending file disappears. Only the first failure per session
+is captured, so restart before each separate test. A `configuration` failure means
+checking the Firebase project configuration, anonymous authentication and rules;
+a `network` failure indicates a transport/server failure. These tests create real
+documents in the configured Firebase project. They do not deploy rules.
+
 ## Local report viewer
 
 If `gcloud` is not recognized on Windows, install Google Cloud CLI first:
@@ -41,8 +101,13 @@ if needed; it includes a local session token. The server listens only on
 Options: `--project PROJECT_ID`, `--database DATABASE_ID`, `--port 8765`,
 and `--no-browser`. Defaults target `ancient-terror-hall-of-fame` / `(default)`.
 
-The viewer loads all report summary pages, then supports text search, status and
-platform filters, and date sorting. Select a report for its description, full-size
+The viewer loads all summary pages from both `bugReports` and `crashReports`.
+Use **Report type** to choose All reports, Bug reports, or Crash reports; each entry
+also displays its type. Text search, status/platform filters, and date sorting
+work across both collections. Crash details show the exception and stack trace.
+Screenshots, downloads, status changes, and deletion operate on the selected
+report in its original collection. If one collection fails to load, reports from
+the other remain available with an explicit incomplete-results warning. Select a report for its description, full-size
 screenshot, timestamps, reporter UID, all metadata, and attachment sizes. Download
 the original save, PNG, or complete Firestore JSON including base64 attachments.
 Unknown fields are available under **All fields**. Missing attachments, empty
@@ -72,6 +137,11 @@ Run the offline integration tests:
 ```powershell
 python -m unittest discover -s tools/bug-reports -p 'test_*.py' -v
 ```
+
+Offline browser checks are in `test_app.cjs`. With Node.js, Playwright, and its
+Chromium browser available, run `node --test tools/bug-reports/test_app.cjs`.
+Alternatively, set `VIEWER_TEST_BROWSER` to an installed Chrome/Chromium executable.
+These checks mock both collections; they do not read or modify live reports.
 
 Authentication and pagination follow the official
 [Firestore REST authentication](https://firebase.google.com/docs/firestore/use-rest-api)

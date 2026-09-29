@@ -92,4 +92,18 @@ public class FirebaseBugReportsTest {
         assertEquals(0, successes);
         assertEquals("network", failure);
     }
+
+    @Test public void crashUploadCompletesWithoutRenderThreadAndPreservesAttachments() {
+        Gdx.app = (Application) Proxy.newProxyInstance(Application.class.getClassLoader(), new Class[]{Application.class},
+                (proxy, method, args) -> { throw new AssertionError("Crash upload must not post to render thread"); });
+        FirebaseBugReports.crashes().send("crash-id", "Exception stack trace", new byte[]{1, 2}, new byte[]{3, 4},
+                Collections.singletonMap("platform", "Desktop"), 123, callback);
+        Net.HttpRequest request = requests.get(requests.size() - 1);
+        assertTrue(request.getUrl().endsWith("/documents/crashReports?documentId=crash-id"));
+        com.badlogic.gdx.utils.JsonValue fields = new com.badlogic.gdx.utils.JsonReader().parse(request.getContent()).get("fields");
+        assertEquals("AQI=", fields.get("saveFile").getString("bytesValue"));
+        assertEquals("AwQ=", fields.get("screenshotPng").getString("bytesValue"));
+        assertEquals("123", fields.get("capturedAt").getString("integerValue"));
+        assertEquals(1, successes);
+    }
 }

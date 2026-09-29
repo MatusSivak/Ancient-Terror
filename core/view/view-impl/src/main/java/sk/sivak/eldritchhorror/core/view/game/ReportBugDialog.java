@@ -1,20 +1,18 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.JsonReader;
 import sk.sivak.eldritchhorror.core.view.firebase.BugReportPayload;
+import sk.sivak.eldritchhorror.core.view.firebase.BugReportSnapshot;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseBugReports;
 import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
-import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -112,27 +110,15 @@ public class ReportBugDialog extends Dialog {
         if (description.getText().trim().isEmpty()) { status.setText(get("reportBug.required")); return; }
         try {
             if (frozenDescription == null) {
-                FileHandle file = Gdx.files.local("save.json");
-                if (file.exists()) {
-                    if (file.length() > BugReportPayload.MAX_SAVE_BYTES) {
-                        status.setText(get("reportBug.saveTooLarge")); return;
-                    }
-                    save = file.readBytes();
-                    metadata.put("saveModifiedAt", Long.toString(file.lastModified()));
-                }
-                metadata.put("platform", Gdx.app.getType().name());
-                metadata.put("platformVersion", Integer.toString(Gdx.app.getVersion()));
-                metadata.put("language", UiText.getLanguage());
-                metadata.put("screen", Gdx.graphics.getBackBufferWidth() + "x" + Gdx.graphics.getBackBufferHeight());
-                metadata.put("density", Float.toString(Gdx.graphics.getDensity()));
-                metadata.put("saveStatus", save == null ? "missing" : "attached");
-                metadata.put("appVersion", new JsonReader().parse(Gdx.files.internal("bug-report-firebase.json")).getString("appVersion", "unknown"));
-                capturedAt = System.currentTimeMillis();
                 frozenScreenshot = includeScreenshot.isChecked() ? screenshot : null;
-                metadata.put("screenshotStatus", frozenScreenshot != null ? "attached" : screenshot == null ? "unavailable" : "excluded");
+                BugReportSnapshot snapshot = BugReportSnapshot.capture(frozenScreenshot,
+                        frozenScreenshot != null ? "attached" : screenshot == null ? "unavailable" : "excluded", false);
+                save = snapshot.save;
+                metadata.putAll(snapshot.metadata);
+                capturedAt = snapshot.capturedAt;
                 frozenDescription = description.getText().trim();
             }
-        } catch (Exception e) { status.setText(get("reportBug.attachError")); return; }
+        } catch (Exception e) { status.setText(get("saveTooLarge".equals(e.getMessage()) ? "reportBug.saveTooLarge" : "reportBug.attachError")); return; }
         sending = true;
         send.setDisabled(true);
         close.setDisabled(true);
