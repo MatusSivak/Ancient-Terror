@@ -27,15 +27,21 @@ public class TokenInFrameBar extends HorizontalGroup {
 
     private final int count;
     private final Texture tokenTexture;
+    private final Float tokenSize;
     private final List<TokenInFrame> tokenInFrameList = new LinkedList<>();
     private int coveredByDice;
     private List<Actor> detachedList = new LinkedList<>();
     private Map<Actor, Vector2> previousPositions = new HashMap<>();
 
     public TokenInFrameBar(int count, Texture tokenTexture) {
+        this(count, tokenTexture, null);
+    }
+
+    public TokenInFrameBar(int count, Texture tokenTexture, Float tokenSize) {
         align(Align.left);
         this.count = count;
         this.tokenTexture = tokenTexture;
+        this.tokenSize = tokenSize;
         init();
     }
 
@@ -61,10 +67,11 @@ public class TokenInFrameBar extends HorizontalGroup {
 
     private void init() {
         if (count == 0) {
-            addActor(new Container<>().size(ACTUAL_TOKEN_SIZE));
+            addActor(new Container<>().size(tokenSize == null ? ACTUAL_TOKEN_SIZE : tokenSize));
         }
         for (int i = 0; i < count; i++) {
-            TokenInFrame tokenInFrame = new TokenInFrame(tokenTexture);
+            TokenInFrame tokenInFrame = tokenSize == null ? new TokenInFrame(tokenTexture)
+                    : new TokenInFrame(tokenTexture, tokenSize);
             tokenInFrameList.add(tokenInFrame);
             addActor(tokenInFrame);
         }
@@ -96,10 +103,15 @@ public class TokenInFrameBar extends HorizontalGroup {
 
     public void highlightRemainingTokens() {
         float duration = 1f;
-        float scale = 3.4f;
         int notCovered = count - coveredByDice;
         float shakeDuration = notCovered * 1.25f;
         detachedList.clear();
+        if (notCovered == 0) return;
+        float tokenWidth = tokenInFrameList.get(0).getImage().getWidth();
+        float gap = 12f;
+        float rowWidth = notCovered * tokenWidth + (notCovered - 1) * gap;
+        float scale = Math.min(1.6f, (ViewProperties.VIEWPORT_WIDTH - 200f) / rowWidth);
+        float lengthOfTokens = rowWidth * scale;
         for (int i = 0; i < notCovered; i++) {
             Image image = detachImage(i);
             float previousX = image.getX();
@@ -113,11 +125,9 @@ public class TokenInFrameBar extends HorizontalGroup {
             float scaleHeightDifference = image.getHeight() * (scale-1);
             float scaleWidthDifference = image.getWidth() * (scale-1);
 
-            float lengthOfTokens = notCovered * image.getWidth() * scale - (notCovered-1) *0.25f * image.getWidth() * scale ;
-
             Vector2 localCoordinates = new Vector2(
-                    (ViewProperties.VIEWPORT_WIDTH - lengthOfTokens)/2 + i * image.getWidth() * 0.75f * scale + scaleWidthDifference/2,
-                    ViewProperties.VIEWPORT_HEIGHT - image.getHeight() - scaleHeightDifference/2 - 5
+                    (ViewProperties.VIEWPORT_WIDTH - lengthOfTokens)/2 + i * (tokenWidth + gap) * scale + scaleWidthDifference/2,
+                    ViewProperties.VIEWPORT_HEIGHT - image.getHeight() - scaleHeightDifference/2 - 16
             );
 
             image.addAction(new FastForwardAction<>(

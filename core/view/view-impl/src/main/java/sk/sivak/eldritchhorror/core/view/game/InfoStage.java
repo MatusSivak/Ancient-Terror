@@ -18,6 +18,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.action.SelectActionComponent;
 import sk.sivak.eldritchhorror.core.view.components.hud.InvestigatorHud;
 import sk.sivak.eldritchhorror.core.view.components.skill.ImproveSkillComponent;
+import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.SourceTargetGroup;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -410,6 +411,18 @@ public class InfoStage {
 
     public static float getBottomHeight() {
         return get().bottomHeight;
+    }
+
+    /** Actual prompt bounds, including standalone buttons that do not reserve bottomHeight. */
+    public static float getBottomPromptTop() {
+        float top = 0f;
+        for (Actor actor : get().buttonLayer.getChildren()) {
+            if (actor instanceof Button && actor.isVisible()) top = Math.max(top, actor.getTop());
+        }
+        for (Actor actor : get().smallActors.getChildren()) {
+            if (actor instanceof LabelTable && actor.isVisible()) top = Math.max(top, actor.getTop());
+        }
+        return top;
     }
 
     public static void setBottomHeight(float bottomHeight) {

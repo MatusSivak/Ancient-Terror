@@ -18,6 +18,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
+import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
@@ -272,7 +273,7 @@ public class MysteryCard extends VisTable {
     }
 
     public void displayOrHide() {
-        displayHide.setDisplayedY(VIEWPORT_HEIGHT / 2 - getHeight() / 2);
+        displayHide.setDisplayedY(getPromptAwareY());
 
         displayHide.setBeforeDisplayAction(() -> {
             if (mysteryCardInfo.getPinLocations() != null && !mysteryCardInfo.getPinLocations().isEmpty() && moveCamera) {
@@ -299,6 +300,21 @@ public class MysteryCard extends VisTable {
 
     public void setMoveCamera(boolean moveCamera) {
         this.moveCamera = moveCamera;
+    }
+
+    private float getPromptAwareY() {
+        float centeredY = (VIEWPORT_HEIGHT - getHeight()) / 2f;
+        float promptTop = InfoStage.getBottomPromptTop();
+        return promptTop > 0f ? Math.max(centeredY, promptTop + 10f) : centeredY;
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        // Prompts may appear after the card is already open. Leave entry/exit animations alone.
+        if (displayHide.isDisplayed() && getTouchable() == Touchable.enabled) {
+            setY(getPromptAwareY());
+        }
     }
 
     public void setBeforeDisplayAction(Action0 beforeDisplayAction) {

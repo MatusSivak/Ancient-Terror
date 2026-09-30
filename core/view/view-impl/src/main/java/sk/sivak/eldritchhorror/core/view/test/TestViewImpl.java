@@ -57,7 +57,6 @@ import static java8.features.stream.Stream.collectToList;
 import static java8.features.stream.Stream.map;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable.X_POSITION;
 import static sk.sivak.eldritchhorror.core.view.test.RollResultTable.createNotSuccessfulTable;
 import static sk.sivak.eldritchhorror.core.view.test.RollResultTable.createSuccessfulTable;
 import static sk.sivak.eldritchhorror.core.view.test.TestResultTable.*;
@@ -186,11 +185,14 @@ public class TestViewImpl implements TestView {
     public Completable confirmTestResult(boolean scoreImportant, boolean successful, int score) {
         return restoreCombatAfterTest().andThen(Completable.create(onSub -> {
             if (scoreImportant) {
-                confirmScoreTestResult(score, onSub);
+                confirmScoreTestResult(score);
             } else {
-                confirmBinaryTestResult(successful, onSub);
+                confirmBinaryTestResult(successful);
             }
-            diceRollerStack.peek().moveUp(testTableStack.peek().getTop() + 5).subscribe();
+            // Zero-success combat skips the hit animation, so cleanup can start immediately.
+            // Finish positioning first to prevent that movement fighting the hide animation.
+            diceRollerStack.peek().moveUp(testTableStack.peek().getTop() + 5)
+                    .subscribe(() -> autoConfirm(onSub), onSub::onError);
         }));
     }
 
@@ -211,8 +213,6 @@ public class TestViewImpl implements TestView {
     public Completable confirmRollResult(int score) {
         return Completable.create(onSub -> {
             hideDicesAfterConfirm = true;
-            autoConfirm(onSub);
-
             if (score == 0) {
                 testTableStack.push(createFailedTable());
             } else if (score == 1) {
@@ -224,6 +224,7 @@ public class TestViewImpl implements TestView {
             testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2,
                     InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
             InfoStage.showActor(testTableStack.peek());
+            autoConfirm(onSub);
         });
     }
 
@@ -237,9 +238,7 @@ public class TestViewImpl implements TestView {
         return diceRollerStack.peek().rollDice(diceNumbers);
     }
 
-    private void confirmBinaryTestResult(boolean successful, CompletableSubscriber onSub) {
-        autoConfirm(onSub);
-
+    private void confirmBinaryTestResult(boolean successful) {
         if (successful) {
             testTableStack.push(createPassedTable());
         } else {
@@ -250,9 +249,7 @@ public class TestViewImpl implements TestView {
         InfoStage.showActor(testTableStack.peek());
     }
 
-    private void confirmScoreTestResult(int score, CompletableSubscriber onSub) {
-        autoConfirm(onSub);
-
+    private void confirmScoreTestResult(int score) {
         testTableStack.push(createScoreTable(score));
         testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2, RESULT_TABLE_Y);
         InfoStage.showActor(testTableStack.peek());
@@ -428,11 +425,11 @@ public class TestViewImpl implements TestView {
             monsterCombatTableSubscriptions.add(subscription2);
             InfoStage.addSmallActorToInfoStage(monsterCombatTableStack.peek());
             monsterCombatTableStack.peek().init(data);
-            monsterCombatTableStack.peek().setPosition(
-                    X_POSITION, VIEWPORT_HEIGHT);
+            float centeredX = monsterCombatTableStack.peek().getCenteredX();
+            float centeredY = monsterCombatTableStack.peek().getTopY();
+            monsterCombatTableStack.peek().setPosition(centeredX, VIEWPORT_HEIGHT);
             monsterCombatTableStack.peek().addAction(new FastForwardAction<>(Actions.sequence(
-                    moveTo(X_POSITION,
-                            VIEWPORT_HEIGHT - monsterCombatTableStack.peek().getHeight(), 1f, Interpolation.sine
+                    moveTo(centeredX, centeredY, 1f, Interpolation.sine
                     ),
                     Actions.run(() -> {
                         monsterCombatTableStack.peek().setCentered();
@@ -604,7 +601,7 @@ public class TestViewImpl implements TestView {
                 monsterCombatTableSubscriptions.clear();
                 monsterCombatTableStack.peek().addAction(new FastForwardAction<>(
                         Actions.after(Actions.sequence(
-                                moveTo(X_POSITION, VIEWPORT_HEIGHT, 1f, Interpolation.sine),
+                                moveTo(monsterCombatTableStack.peek().getCenteredX(), VIEWPORT_HEIGHT, 1f, Interpolation.sine),
                                 Actions.run(() -> {
                                     monsterCombatTableStack.peek().remove();
                                     monsterCombatTableStack.pop();

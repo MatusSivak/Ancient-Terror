@@ -20,19 +20,28 @@ public class TokenInFrame extends Group {
     public static final int ACTUAL_TOKEN_SIZE = 43;
 
     public TokenInFrame(Texture tokenTexture) {
-        setWidth(ACTUAL_TOKEN_SIZE);
-        setHeight(ACTUAL_TOKEN_SIZE);
+        this(tokenTexture, ACTUAL_TOKEN_SIZE, ACTUAL_TOKEN_SIZE + 10);
+    }
+
+    public TokenInFrame(Texture tokenTexture, float size) {
+        this(tokenTexture, size, size);
+    }
+
+    private TokenInFrame(Texture tokenTexture, float size, float imageSize) {
+        setSize(size, size);
         setOrigin(Align.center);
-        background = new Image(CustomAssetManager.getTexture(CustomAssetManager.GRAY_BACKGROUND));
+        // Compact combat rows have a shared highlight instead of a box behind every icon.
+        background = size == imageSize ? new Image()
+                : new Image(CustomAssetManager.getTexture(CustomAssetManager.GRAY_BACKGROUND));
         background.getColor().a =0.8f;
-        background.setSize(ACTUAL_TOKEN_SIZE, ACTUAL_TOKEN_SIZE);
+        background.setSize(size, size);
         addActor(background);
 
         image = new Image(tokenTexture);
         image.getColor().a = 0.75f;
         image.setScaling(Scaling.fit);
-        image.setSize(ACTUAL_TOKEN_SIZE+10, ACTUAL_TOKEN_SIZE+10);
-        image.setPosition(-5,-5);
+        image.setSize(imageSize, imageSize);
+        image.setPosition((size - imageSize) / 2, (size - imageSize) / 2);
         addActor(image);
     }
 

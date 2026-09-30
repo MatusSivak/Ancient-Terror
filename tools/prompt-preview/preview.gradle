@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('promptPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/prompt-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewPrompts', JavaExec) {
+        dependsOn desktop.tasks.named('promptPreviewClasses')
+        classpath = desktop.sourceSets.promptPreview.runtimeClasspath
+        mainClass.set('PromptPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

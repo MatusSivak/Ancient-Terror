@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -18,13 +17,12 @@ import rx.Completable;
 import rx.CompletableSubscriber;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
-import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
-import sk.sivak.eldritchhorror.core.view.components.lightning.CompositeBoltAnimationActor;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,15 +31,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class MonsterCombatTable extends VisTable {
 
     public static final int X_POSITION = 405;
     public static final int COLUMNS_WIDTH = 170;
+    private static final float TOKEN_ROW_WIDTH = 140f;
+    private static final Color BRASS = Color.valueOf("DCC99F");
+    private Table horrorRow;
+    private Table damageRow;
+    private Table healthRow;
     private TokenInFrameBar horrorBar;
     private TokenInFrameBar damageBar;
     private ToughnessBar toughnessBar;
@@ -60,18 +62,16 @@ public class MonsterCombatTable extends VisTable {
     }
 
     public void init(MonsterCombatTableData data) {
+        clear();
         this.data = data;
         Table iconAndNameTable = createIconAndNameTable(data);
         Table horrorDamageToughnessTable = createHorrorDamageToughnessTable(data);
 
-        add(iconAndNameTable).pad(5).width(COLUMNS_WIDTH).height(horrorDamageToughnessTable.getHeight());
-        addSeparator(true).padTop(0).padBottom(0);
-        add(horrorDamageToughnessTable).pad(5).width(horrorDamageToughnessTable.getWidth()).height(horrorDamageToughnessTable.getHeight());
-
-
-        setWidth(COLUMNS_WIDTH + horrorDamageToughnessTable.getWidth() + 20);
-        setHeight(horrorDamageToughnessTable.getHeight() + 10);
-        setBackground(CustomAssetManager.getTextureRegionDrawable(WHITE_BACKGROUND));
+        setBackground(SelectionPanelStyle.panel("121B1D", "87734E"));
+        pad(10);
+        add(iconAndNameTable).width(COLUMNS_WIDTH).height(horrorDamageToughnessTable.getHeight()).padRight(12);
+        add(horrorDamageToughnessTable);
+        pack();
 
         fireballService = new FireballService(getStage());
 
@@ -149,7 +149,7 @@ public class MonsterCombatTable extends VisTable {
     public Completable moveRight() {
         return Completable.create(onSub -> {
             centered = false;
-            if (getX() > 700) { // just a stupid bug for bootlegger
+            if (getX() > getCenteredX() + 1f) {
                 moveLeft().subscribe(onSub::onCompleted);
                 return;
             }
@@ -169,9 +169,9 @@ public class MonsterCombatTable extends VisTable {
             }
             movingLeft = true;
             addAction(new FastForwardAction<>(Actions.sequence(
-                    Actions.moveTo(X_POSITION, getY(), 1f, Interpolation.sine),
+                    Actions.moveTo(getCenteredX(), getY(), 1f, Interpolation.sine),
                     Actions.run(() -> {
-                        centered = X_POSITION == getX();
+                        centered = Math.abs(getCenteredX() - getX()) < 0.5f;
                         movingLeft = false;
                         onSub.onCompleted();
                     })
@@ -272,29 +272,27 @@ public class MonsterCombatTable extends VisTable {
     }
 
     public void highlightHorror() {
+        setRowActive(horrorRow, true);
+        setRowActive(damageRow, false);
+        setRowActive(healthRow, false);
         horrorBar.showBackground(1f);
         damageBar.hideBackground(1f);
 
         horrorBar.addAction(new FastForwardAction<>(Actions.alpha(1, 1f)));
-        damageBar.addAction(new FastForwardAction<>(Actions.alpha(0.25f, 1f)));
-        toughnessBar.addAction(new FastForwardAction<>(Actions.alpha(0.25f, 1f)));
+        damageBar.addAction(new FastForwardAction<>(Actions.alpha(0.55f, 1f)));
+        toughnessBar.addAction(new FastForwardAction<>(Actions.alpha(0.55f, 1f)));
     }
 
     public void highlightDamageAndToughness() {
+        setRowActive(horrorRow, false);
+        setRowActive(damageRow, true);
+        setRowActive(healthRow, true);
         horrorBar.hideBackground(1f);
         damageBar.showBackground(1f);
 
-        horrorBar.addAction(new FastForwardAction<>(Actions.alpha(0.25f, 1f)));
+        horrorBar.addAction(new FastForwardAction<>(Actions.alpha(0.55f, 1f)));
         damageBar.addAction(new FastForwardAction<>(Actions.alpha(1, 1f)));
         toughnessBar.addAction(new FastForwardAction<>(Actions.alpha(1f, 1f)));
-    }
-
-    @Override
-    protected void drawBackground(Batch batch, float parentAlpha, float x, float y) {
-        Color colorBefore = new Color(getColor());
-        setColor(new Color(0f, 0f, 0f, colorBefore.a));
-        super.drawBackground(batch, parentAlpha * 0.8f, x, y);
-        setColor(colorBefore);
     }
 
     private Table createIconAndNameTable(MonsterCombatTableData data) {
@@ -307,42 +305,79 @@ public class MonsterCombatTable extends VisTable {
             monsterImage = new Image(CustomAssetManager.getNonEpicMonsterTexture(data.getMonsterClassName()));
         }
         monsterImage.setScaling(Scaling.fit);
-        iconAndNameTable.add(monsterImage).padTop(5).grow().row();
-        iconAndNameTable.add(createNameLabel(data.getMonsterName())).width(COLUMNS_WIDTH).row();
-
-        iconAndNameTable.setBackground(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND));
+        iconAndNameTable.setBackground(SelectionPanelStyle.panel("1C2525", "45504A"));
+        iconAndNameTable.add(monsterImage).pad(8).grow().row();
+        Table namePlate = new Table();
+        namePlate.setBackground(SelectionPanelStyle.panel("182020", "655B43"));
+        namePlate.add(createNameLabel(data.getMonsterName())).width(COLUMNS_WIDTH - 16).pad(7, 8, 7, 8);
+        iconAndNameTable.add(namePlate).growX().row();
         iconAndNameTable.pack();
         return iconAndNameTable;
     }
 
     private Table createHorrorDamageToughnessTable(MonsterCombatTableData data) {
-        horrorBar = new TokenInFrameBar(data.getHorror()!=null?data.getHorror():0, CustomAssetManager.getTexture("combat/horror.png"));
-        damageBar = new TokenInFrameBar(data.getDamage()!=null?data.getDamage():0, CustomAssetManager.getTexture("combat/damage.png"));
+        horrorBar = createCombatBar(data.getHorror(), "combat/horror.png");
+        damageBar = createCombatBar(data.getDamage(), "combat/damage.png");
 
-        float toughnessBarScale = 0.51f;
+        float toughnessBarScale = Math.min(0.60f, TOKEN_ROW_WIDTH / (42.3f * Math.max(1, data.getToughness() == null ? 0 : data.getToughness())));
         toughnessBar = new ToughnessBar();
         toughnessBar.init(
                 data.getToughness() == null ? 0 : data.getToughness(),
                 data.getCurrentHealth() == null ? 0 : data.getCurrentHealth(), toughnessBarScale);
 
         Table horrorDamageToughnessTable = new Table();
-        horrorDamageToughnessTable.align(Align.left);
-        horrorBarCell = horrorDamageToughnessTable.add(horrorBar).align(Align.left);
-        horrorBarCell.row();
-        damageBarCell = horrorDamageToughnessTable.add(damageBar).align(Align.left);
-        damageBarCell.row();
-        horrorDamageToughnessTable.add(toughnessBar).height(53 * toughnessBarScale).padTop(5).align(Align.left);
+        horrorRow = createStatRow("combat.horrorLabel", "AEC2C9");
+        damageRow = createStatRow("combat.damageLabel", "D9AF9E");
+        healthRow = createStatRow("investigator.label.health", "C8B995");
+        horrorBarCell = horrorRow.add(horrorBar).width(TOKEN_ROW_WIDTH).left();
+        damageBarCell = damageRow.add(damageBar).width(TOKEN_ROW_WIDTH).left();
+        healthRow.add(toughnessBar).width(TOKEN_ROW_WIDTH).height(53 * toughnessBarScale).left();
+        horrorDamageToughnessTable.add(horrorRow).height(52).padBottom(5).row();
+        horrorDamageToughnessTable.add(damageRow).height(52).padBottom(5).row();
+        horrorDamageToughnessTable.add(healthRow).height(52).row();
 
         horrorDamageToughnessTable.pack();
         return horrorDamageToughnessTable;
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.LIGHT_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), BRASS);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
-        label.setFontScale(0.35f);
+        label.setFontScale(0.45f);
+        label.setWrap(true);
         return label;
+    }
+
+    private TokenInFrameBar createCombatBar(Integer amount, String texture) {
+        int count = amount == null ? 0 : amount;
+        float slot = Math.min(40f, TOKEN_ROW_WIDTH / Math.max(1, count));
+        TokenInFrameBar bar = new TokenInFrameBar(count, CustomAssetManager.getTexture(texture), slot * 0.9f);
+        bar.space(slot * 0.1f);
+        if (count == 0) {
+            Label zero = new Label("0", new Label.LabelStyle(
+                    getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf("9AA9A3")));
+            zero.setFontScale(0.35f);
+            ((Container) bar.getChildren().first()).setActor(zero);
+        }
+        return bar;
+    }
+
+    private Table createStatRow(String labelKey, String color) {
+        Table row = new Table();
+        row.pad(5, 8, 5, 8);
+        setRowActive(row, false);
+        Label label = new Label(get(labelKey).replace(":", "").trim(),
+                new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf(color)));
+        label.setFontScale(0.30f);
+        label.setWrap(true);
+        row.add(label).width(56).padRight(8).left();
+        return row;
+    }
+
+    private void setRowActive(Table row, boolean active) {
+        if (row != null) row.setBackground(SelectionPanelStyle.panel(
+                active ? "293530" : "192324", active ? "A99260" : "34433F"));
     }
 
     public int getRemainingDamage() {
@@ -353,6 +388,16 @@ public class MonsterCombatTable extends VisTable {
         this.centered = true;
     }
 
+    /** Horizontal center for this table's measured width. */
+    public float getCenteredX() {
+        return (ViewProperties.VIEWPORT_WIDTH - getWidth()) / 2f;
+    }
+
+    /** Top aligned Y position for this table's measured height. */
+    public float getTopY() {
+        return ViewProperties.VIEWPORT_HEIGHT - getHeight();
+    }
+
     public Completable updateDamage(Integer damage) {
         if (damage.equals(data.getDamage())) {
             return Completable.complete();
@@ -361,7 +406,7 @@ public class MonsterCombatTable extends VisTable {
             data.setDamage(damage);
             damageBar.hideTokens(damage).subscribe(() -> {
                 damageBar.remove();
-                damageBar = new TokenInFrameBar(data.getDamage()!=null?data.getDamage():0, CustomAssetManager.getTexture("combat/damage.png"));
+                damageBar = createCombatBar(data.getDamage(), "combat/damage.png");
                 damageBarCell.setActor(damageBar);
                 onSub.onCompleted();
             });
@@ -376,7 +421,7 @@ public class MonsterCombatTable extends VisTable {
             data.setHorror(horror);
             horrorBar.hideTokens(horror).subscribe(() -> {
                 horrorBar.remove();
-                horrorBar = new TokenInFrameBar(data.getHorror()!=null?data.getHorror():0, CustomAssetManager.getTexture("combat/horror.png"));
+                horrorBar = createCombatBar(data.getHorror(), "combat/horror.png");
                 horrorBarCell.setActor(horrorBar);
                 onSub.onCompleted();
             });

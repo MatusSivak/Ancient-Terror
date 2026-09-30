@@ -155,6 +155,8 @@ public class DiceRoller {
     }
 
     private void onRollEnd() {
+        // Every die returns to its sorted position, even when only one was rerolled.
+        dicesFinished = dices.size();
         Collections.sort(dices, (o1, o2) -> {
             if (o1.getDiceValue() == o2.getDiceValue()) {
                 return o1.getDiceNumber() - o2.getDiceNumber();
@@ -182,6 +184,7 @@ public class DiceRoller {
     }
 
     private void onAddOneEnd(int diceNumber) {
+        dicesFinished = dices.size();
         Collections.sort(dices, (o1, o2) -> {
             if (o1.getDiceValue() == o2.getDiceValue()) {
                 return o1.getDiceNumber() - o2.getDiceNumber();
@@ -267,6 +270,11 @@ public class DiceRoller {
 
     public Completable moveUp(float bottomY) {
         return Completable.create(onSub -> {
+            if (dices.isEmpty()) {
+                onSub.onCompleted();
+                return;
+            }
+            int[] remaining = {dices.size()};
             float sourceX = dices.get(0).getX();
             float targetX = ViewProperties.VIEWPORT_WIDTH/2 - (ACTUAL_DICE_SIZE * dices.size()) / 2f - (DICE_SIZE - ACTUAL_DICE_SIZE)/2f;
             forEach(dices, diceImageOld -> {
@@ -275,7 +283,9 @@ public class DiceRoller {
                 moveToAction.setPosition(diceImageOld.getX() + (targetX - sourceX), bottomY - (DICE_SIZE - ACTUAL_DICE_SIZE)/2f);
                 moveToAction.setDuration(0.5f);
                 moveToAction.setInterpolation(Interpolation.sine);
-                diceImageOld.addAction(new FastForwardAction<>(Actions.sequence(moveToAction, Actions.run(onSub::onCompleted))));
+                diceImageOld.addAction(new FastForwardAction<>(Actions.sequence(moveToAction, Actions.run(() -> {
+                    if (--remaining[0] == 0) onSub.onCompleted();
+                }))));
             });
         });
     }
@@ -288,6 +298,11 @@ public class DiceRoller {
             diceImage.setDiceValue(diceRoll.getDiceValue());
             diceImage.setScore(diceRoll.getScore());
         }
+    }
+
+    /** Hide a pending roll behind a prompt without interrupting its animation or losing its values. */
+    public void setDiceVisible(boolean visible) {
+        for (DiceImage dice : dices) dice.setVisible(visible);
     }
 
     public void hideDices() {
@@ -364,13 +379,20 @@ public class DiceRoller {
 
     public Completable showHiddenDice() {
         return Completable.create(onSub -> {
+            if (dices.isEmpty()) {
+                onSub.onCompleted();
+                return;
+            }
+            int[] remaining = {dices.size()};
             for (int i = 0; i < dices.size(); i++) {
                 dices.get(i).addAction(
                         new FastForwardAction<>(
                                 Actions.sequence(
                                         Actions.moveTo(dicePositionsBeforeHide.get(i).x, dicePositionsBeforeHide.get(i).y, 0.25f, Interpolation.sine),
                                         Actions.delay(0.25f),
-                                        Actions.run(onSub::onCompleted)
+                                        Actions.run(() -> {
+                                            if (--remaining[0] == 0) onSub.onCompleted();
+                                        })
                                 )
                         )
                 );
