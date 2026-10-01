@@ -29,6 +29,8 @@ public class CombatOverviewTable extends VisTable {
     private static final float CARD_PAD = 6f;
     private static final float HEALTH_SCALE = 0.44f;
     private static final float HEALTH_HEIGHT = 53 * HEALTH_SCALE;
+    /** Width of one heart at scale 1 (ToughnessBar token width 282 * 0.15). */
+    private static final float HEART_WIDTH = 42.3f;
     private static final Color BRASS = Color.valueOf("DCC99F");
     private static final Color TEXT = Color.valueOf("E6E1D3");
     private static final Color MUTED = Color.valueOf("8E978F");
@@ -68,6 +70,10 @@ public class CombatOverviewTable extends VisTable {
 
     private VisTable createMonsterTable(CombatOverviewTableData data) {
         VisTable monsterTable = createSideCard();
+        if (data.isMonsterEpic()) {
+            // Epic monsters get a gold card.
+            monsterTable.setBackground(SelectionPanelStyle.panel("1F1A0E", "D4AF37", CARD_PAD, 8));
+        }
         Image monsterImage;
         if (data.isMonsterEpic()) {
             monsterImage = new Image(CustomAssetManager.getEpicMonsterTexture(data.getMonsterClassName()));
@@ -76,12 +82,13 @@ public class CombatOverviewTable extends VisTable {
         }
         monsterImage.setScaling(Scaling.fit);
 
+        int toughness = data.getToughness() == null ? 0 : data.getToughness();
+        // Tough monsters get smaller hearts, so the whole row always fits inside the card.
+        float healthScale = Math.min(HEALTH_SCALE, (SIDE_WIDTH - 2 * CARD_PAD - 4f) / (HEART_WIDTH * Math.max(1, toughness)));
         ToughnessBar toughnessBar = new ToughnessBar();
-        toughnessBar.init(
-                data.getToughness() == null ? 0 : data.getToughness(),
-                data.getCurrentHealth() == null ? 0 : data.getCurrentHealth(), HEALTH_SCALE);
+        toughnessBar.init(toughness, data.getCurrentHealth() == null ? 0 : data.getCurrentHealth(), healthScale);
         monsterTable.add(monsterImage).height(PORTRAIT_HEIGHT).growX().row();
-        addNameAndDivider(monsterTable, data.getMonsterName());
+        addNameAndDivider(monsterTable, data.isMonsterEpic() ? get("combat.epic") + " \u2022 " + data.getMonsterName() : data.getMonsterName());
         monsterTable.add(createHorrorOrDamageTable(data.getHorror(), CustomAssetManager.HORROR))
                 .height(STATS_ROW_HEIGHT).growX().row();
         monsterTable.add(createHorrorOrDamageTable(data.getDamage(), CustomAssetManager.DAMAGE))

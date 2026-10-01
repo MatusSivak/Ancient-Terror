@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.test;
 
+import sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
@@ -26,6 +28,7 @@ import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscription;
 import rx.functions.Action0;
+import rx.functions.Func0;
 import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
@@ -41,6 +44,9 @@ import sk.sivak.eldritchhorror.core.view.components.combat.CombatOverviewTable;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRoller;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRollerStack;
+import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
+import sk.sivak.eldritchhorror.core.view.action.focus.TokenView;
 import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.DragAndDropBinder;
@@ -102,6 +108,7 @@ public class TestViewImpl implements TestView {
     private Stack<MonsterCombatTable> monsterCombatTableStack = new Stack<>();
     /** The fighting investigator, whose stand on the map the monster's fireballs aim at. */
     private InvestigatorId combatInvestigatorId;
+    private final TokenView impactTokenView = new TokenView();
     private List<Subscription> monsterCombatTableSubscriptions = new LinkedList<>();
     private boolean hideDicesAfterConfirm;
 
@@ -114,6 +121,9 @@ public class TestViewImpl implements TestView {
                                                  List<UsableAsset> usableAssets, int additionalDicesCount, boolean isCombat) {
 
         return Single.create(onSub -> {
+            if (isCombat) {
+                CombatInterruption.resume();
+            }
             MapStage.darkenWorld();
             if (isCombat) {
                 hideDicesAfterConfirm = false;
@@ -121,6 +131,8 @@ public class TestViewImpl implements TestView {
                 hideDicesAfterConfirm = true;
                 InfoStage.displayText(get("test.testPrefix", stat.prettyString()));
                 if (!monsterCombatTableStack.isEmpty()) {
+                    // A test inside the combat (e.g. casting Flesh Ward) - the monster steps away meanwhile.
+                    CombatInterruption.suspend();
                     monsterCombatTableStack.peek().moveRight().subscribe();
                     monsterCombatTableStack.peek().setLocked(true);
                 }
@@ -466,6 +478,7 @@ public class TestViewImpl implements TestView {
             monsterCombatTableSubscriptions.add(subscription2);
             InfoStage.addSmallActorToInfoStage(monsterCombatTableStack.peek());
             monsterCombatTableStack.peek().init(data);
+            CombatInterruption.start(monsterCombatTableStack.peek(), combatInvestigatorId);
             float centeredX = monsterCombatTableStack.peek().getCenteredX();
             float centeredY = monsterCombatTableStack.peek().getTopY();
             monsterCombatTableStack.peek().setPosition(centeredX, VIEWPORT_HEIGHT);
@@ -493,6 +506,7 @@ public class TestViewImpl implements TestView {
 
     private Completable highlightCombat(Consumer<MonsterCombatTable> highlightAction) {
         return Completable.create(onSub -> {
+            CombatInterruption.resume();
             if (monsterCombatTableStack.isEmpty()) {
                 onSub.onCompleted();
                 return;
@@ -553,6 +567,7 @@ public class TestViewImpl implements TestView {
     }
 
     private Completable destroyHorrorOrDamage(List<DiceRoll> diceRolls, Function<List<Vector2>, Completable> destroyFunction, Action0 onEndAction) {
+        CombatInterruption.resume();
         List<Vector2> result = successfulDiceSources(diceRolls);
         if (result.isEmpty()) {
             onEndAction.call();
@@ -569,20 +584,36 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroySanity(int sanityLost) {
-        return destroySanityOrHealth(sanityLost, InfoStage.getInvestigatorHud().getSanityBar(),
-                positions -> monsterCombatTableStack.peek().destroySanity(positions));
+        ContainerBar bar = InfoStage.getInvestigatorHud().getSanityBar();
+        return destroySanityOrHealth(sanityLost, bar,
+                positions -> monsterCombatTableStack.peek().destroySanity(positions,
+                        () -> loseTokenOnImpact(bar, PrePlayedTokenLoss::recordSanity, () -> impactTokenView.loseSanity(0))));
     }
 
     @Override
     public Completable destroyHealth(int healthLost) {
-        return destroySanityOrHealth(healthLost, InfoStage.getInvestigatorHud().getHealthBar(),
-                positions -> monsterCombatTableStack.peek().destroyHealth(positions));
+        ContainerBar bar = InfoStage.getInvestigatorHud().getHealthBar();
+        return destroySanityOrHealth(healthLost, bar,
+                positions -> monsterCombatTableStack.peek().destroyHealth(positions,
+                        () -> loseTokenOnImpact(bar, PrePlayedTokenLoss::recordHealth, () -> impactTokenView.loseHealth(0))));
+    }
+
+    /** One token leaves the bar and tears per fireball impact; the later model-driven loss skips it. */
+    private Completable loseTokenOnImpact(ContainerBar bar, Runnable record, Func0<Completable> loseToken) {
+        if (bar.getCurrentValue() <= 0) {
+            return Completable.complete();
+        }
+        record.run();
+        TokenSounds.playLeave();
+        return loseToken.call().doOnCompleted(() -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, 1));
     }
 
     private Completable destroySanityOrHealth(int tokensCount, ContainerBar containerBar, Function<List<Vector2>, Completable> destroyFunction) {
+        PrePlayedTokenLoss.reset();
         if (tokensCount == 0) {
             return Completable.complete();
         }
+        CombatInterruption.resume();
         List<Vector2> endPositions = new LinkedList<>();
         Vector2 stand = investigatorStandPosition();
         if (stand != null) {
@@ -594,7 +625,12 @@ public class TestViewImpl implements TestView {
         }
         for (int i = 0; i < tokensCount; i++) {
             Vector2 position = containerBar.getFullContainerPosition(i);
-            endPositions.add(new Vector2(position.x + 11, position.y + 13.5f));
+            Vector2 end = new Vector2(position.x + 11, position.y + 13.5f);
+            // Fireball callbacks are keyed by target, so every target must be distinct.
+            while (endPositions.contains(end)) {
+                end.x += 1f;
+            }
+            endPositions.add(end);
         }
         Collections.reverse(endPositions);
         return destroyFunction.apply(endPositions);
@@ -639,6 +675,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroyMonsterHealth(List<DiceRoll> diceRolls) {
+        CombatInterruption.resume();
         boolean anyDiceWithGoodScore = Stream.anyMatch(diceRolls, diceRoll -> diceRoll.getScore() != DiceRoll.Score.BAD);
         if (!anyDiceWithGoodScore) {
             diceRollerStack.pop().hideDices();
@@ -678,6 +715,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable hideCombatTable() {
+        CombatInterruption.finish();
         return Completable.create(onSub -> {
             monsterCombatTableStack.peek().addAction(new AfterCenteredAction(() -> {
                 MapStage.brightenWorld();
@@ -701,11 +739,13 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable updateMonsterHorror(Integer actualHorror) {
+        CombatInterruption.resume();
         return monsterCombatTableStack.peek().updateHorror(actualHorror);
     }
 
     @Override
     public Completable updateMonsterDamage(Integer actualDamage) {
+        CombatInterruption.resume();
         return monsterCombatTableStack.peek().updateDamage(actualDamage);
     }
 

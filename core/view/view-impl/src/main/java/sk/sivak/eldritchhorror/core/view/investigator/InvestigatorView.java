@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.investigator;
 
+import sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -54,6 +56,8 @@ public class InvestigatorView {
 
     public Completable showActiveInvestigator(boolean displayTransition, boolean lostInTimeAndSpace) {
         InvestigatorBasics currentInvestigator = controller.getInvestigatorBasics();
+        // Another investigator stepping into a fight interrupts it.
+        CombatInterruption.onActiveInvestigatorShown(currentInvestigator.getInvestigatorId());
         InfoStage.displayText(get("investigator.activePrefix", currentInvestigator.getInvestigatorId().toString()));
         Completable updateHudCompletable = updateHud(currentInvestigator);
 

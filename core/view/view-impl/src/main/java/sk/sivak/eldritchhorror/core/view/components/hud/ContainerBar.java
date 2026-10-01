@@ -89,6 +89,10 @@ public class ContainerBar extends Table {
     }
 
 
+    public int getCurrentValue() {
+        return currentValue;
+    }
+
     public void decreaseCurrentValue() {
         setCurrentValue(currentValue - 1);
     }

@@ -38,6 +38,7 @@ public class Fireball extends Image {
     private Group smokeGroup;
     private float midpointDisplacementDirection;
     private boolean blue;
+    private float sizeMultiplier = 1f;
     private static ShaderProgram blueShader;
 
     public Fireball() {
@@ -88,6 +89,10 @@ public class Fireball extends Image {
 
     public void setBlue(boolean blue) {
         this.blue = blue;
+    }
+
+    public void setSizeMultiplier(float sizeMultiplier) {
+        this.sizeMultiplier = sizeMultiplier;
     }
 
     /** Swaps the red and blue channels of the orange flame art, turning it into a cold blue fire. */
@@ -152,7 +157,7 @@ public class Fireball extends Image {
         Vector2 tangent = new Vector2(destination).sub(origin);
         float duration = tangent.len() / velocity;
 
-        float scale = MathUtils.random(0.4f, 0.6f);
+        float scale = MathUtils.random(0.4f, 0.6f) * sizeMultiplier;
         setColor(Color.DARK_GRAY);
         float midpointDisplacement = midpointDisplacementDirection * tangent.len() / 10;//MathUtils.random(-tangent.len() / 10, tangent.len() / 10);
         TweenMoveToAction tweenMoveToAction = new TweenMoveToAction(

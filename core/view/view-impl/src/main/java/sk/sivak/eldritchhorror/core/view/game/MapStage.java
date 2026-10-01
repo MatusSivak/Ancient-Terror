@@ -305,7 +305,14 @@ public class MapStage {
         darkenWorld(0.5f);
     }
 
+    private static boolean worldDarkened;
+
+    public static boolean isWorldDarkened() {
+        return worldDarkened;
+    }
+
     public static void darkenWorld(float alpha) {
+        worldDarkened = true;
         Image curtain;
         if (get().curtainLayer.getChildren().size > 0) {
             curtain = (Image) get().curtainLayer.getChildren().get(0);
@@ -323,6 +330,7 @@ public class MapStage {
     }
 
     public static void brightenWorld() {
+        worldDarkened = false;
         if (get().curtainLayer.getChildren().size == 0) {
             return;
         }

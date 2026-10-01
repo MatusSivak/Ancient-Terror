@@ -48,6 +48,7 @@ import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.constants.trade.TradeData;
 import sk.sivak.eldritchhorror.core.controller.GameController;
+import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
 import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 import sk.sivak.eldritchhorror.core.view.GameView;
 import sk.sivak.eldritchhorror.core.view.action.SelectActionView;
@@ -554,13 +555,16 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable loseHealth(Integer input) {
-        return loseHealthOrSanity(input, offset -> tokenView.loseHealth(offset),         TokenSounds.Cue.LOSS);
+        // Tokens already torn one by one by the monster's fireballs are not animated again.
+        int remaining = input - PrePlayedTokenLoss.consumeHealth(input);
+        return loseHealthOrSanity(remaining, offset -> tokenView.loseHealth(offset), TokenSounds.Cue.LOSS);
     }
 
 
     @Override
     public Completable loseSanity(Integer input) {
-                return loseHealthOrSanity(input, offset -> tokenView.loseSanity(offset), TokenSounds.Cue.LOSS);
+        int remaining = input - PrePlayedTokenLoss.consumeSanity(input);
+        return loseHealthOrSanity(remaining, offset -> tokenView.loseSanity(offset), TokenSounds.Cue.LOSS);
     }
 
     private Completable loseHealthOrSanity(Integer amount, Function<Float, Completable> function, TokenSounds.Cue cue) {

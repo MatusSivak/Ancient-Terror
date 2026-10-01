@@ -50,6 +50,7 @@ public class EpicMonsterImage extends Image {
     private float reckoningPulseTime = 0f;
 
     private boolean drawShadow = true;
+    private final MonsterWalkAnimator walkAnimator = new MonsterWalkAnimator();
 
     public EpicMonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
         this(monsterInfo, gameController, hasReckoning, LocationPositionResolver.resolve(location), texture);
@@ -83,6 +84,7 @@ public class EpicMonsterImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
+        walkAnimator.update(this, delta);
         if (drawReckoningPulse) {
             reckoningPulseTime += delta;
         }
@@ -93,6 +95,14 @@ public class EpicMonsterImage extends Image {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
+        // While walking, the body and its shadow bounce and waddle together.
+        boolean walking = walkAnimator.isActive() && drawShadow;
+        float groundY = getY();
+        float rotation = getRotation();
+        if (walking) {
+            setY(groundY + walkAnimator.getBob(getHeight()));
+            setRotation(rotation + walkAnimator.getTilt());
+        }
         // Draw blurred shadow using Gaussian blur shader
         if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
             TextureRegionDrawable trd = (TextureRegionDrawable) getDrawable();
@@ -115,10 +125,15 @@ public class EpicMonsterImage extends Image {
             batch.setShader(prevShader);
         }
 
+
         super.draw(batch, parentAlpha);
 
         if (drawReckoningPulse) {
             drawReckoningPulse(batch, parentAlpha);
+        }
+        if (walking) {
+            setY(groundY);
+            setRotation(rotation);
         }
 
 

@@ -24,6 +24,7 @@ import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.*;
 import sk.sivak.eldritchhorror.core.view.components.combat.Fireball;
+import sk.sivak.eldritchhorror.core.view.components.combat.CombatPhaseIndicator;
 import sk.sivak.eldritchhorror.core.view.components.combat.TokenInFrame;
 import sk.sivak.eldritchhorror.core.view.components.combat.TokenInFrameBar;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
@@ -36,6 +37,8 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.mystery.MysteryCard;
 import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
+import com.badlogic.gdx.graphics.Texture;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -86,6 +89,10 @@ public class PromptPreview extends ApplicationAdapter {
             previewMonsterHealthHit();
             previewMonsterAttack();
             previewMonsterAttackOnStand();
+        previewCombatInterruption();
+        previewSurplusSuccesses();
+            previewEpicMonsterAndPhases();
+            previewMapMonsterWalk();
             previewCombatOverview();
             System.out.println("PASS: mystery prompt bounds/restoration; dice reroll completion, prompt visibility and cleanup at normal/fast-forward speed");
         } catch (Throwable failure) {
@@ -415,28 +422,219 @@ public class PromptPreview extends ApplicationAdapter {
         tick(120);
 
         for (boolean sanity : new boolean[]{true, false}) {
+            sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar bar = sanity
+                    ? InfoStage.getInvestigatorHud().getSanityBar() : InfoStage.getInvestigatorHud().getHealthBar();
+            bar.setTotalEmptyContainers(7);
+            bar.setCurrentValue(5);
             AtomicInteger completed = new AtomicInteger();
-            (sanity ? view.destroySanity(2) : view.destroyHealth(2)).subscribe(completed::incrementAndGet);
+            (sanity ? view.destroySanity(3) : view.destroyHealth(3)).subscribe(completed::incrementAndGet);
             Map<Actor, Vector2> landing = new HashMap<>();
-            for (int i = 0; i < 900 && completed.get() == 0; i++) {
+            Map<Actor, Integer> thrownAt = new HashMap<>();
+            List<Integer> lossFrames = new ArrayList<>();
+            int lastValue = 5;
+            for (int i = 0; i < 1200 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
                 for (Actor actor : descendants(stage.getRoot())) {
                     if (actor instanceof Fireball && actor.getActions().size > 0) {
+                        if (!thrownAt.containsKey(actor)) thrownAt.put(actor, i);
                         landing.put(actor, new Vector2(actor.getX() + actor.getWidth() / 2f, actor.getY() + actor.getHeight() / 2f));
                     }
                 }
+                if (bar.getCurrentValue() != lastValue) {
+                    require(lastValue - bar.getCurrentValue() == 1, "several tokens lost in one frame: " + lastValue + " -> " + bar.getCurrentValue());
+                    lastValue = bar.getCurrentValue();
+                    lossFrames.add(i);
+                }
+                if (i == 70) draw("monster-attack-stand-" + (sanity ? "sanity" : "health"));
             }
             require(completed.get() == 1, "attack on the stand did not complete (sanity=" + sanity + ")");
-            require(landing.size() == 2, "expected 2 fireballs at the stand, saw " + landing.size());
+            require(landing.size() == 3, "expected 3 fireballs at the stand, saw " + landing.size());
             for (Vector2 end : landing.values()) {
                 require(end.dst(expected) < 30f, "fireball landed at " + end + ", stand centre is " + expected);
             }
+            List<Integer> throwFrames = new ArrayList<>(thrownAt.values());
+            Collections.sort(throwFrames);
+            for (int k = 1; k < throwFrames.size(); k++) {
+                require(throwFrames.get(k) - throwFrames.get(k - 1) >= 24, "fireballs thrown together, frames " + throwFrames);
+            }
+            require(lossFrames.size() == 3, "expected 3 separate token losses, saw " + lossFrames);
+            for (int k = 1; k < lossFrames.size(); k++) {
+                require(lossFrames.get(k) - lossFrames.get(k - 1) >= 24, "tokens lost together, frames " + lossFrames);
+            }
+            // The model-driven loss afterwards must not animate those tokens again.
+            int skipped = sanity ? sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.consumeSanity(3)
+                    : sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.consumeHealth(3);
+            require(skipped == 3, "expected 3 pre-played tokens, got " + skipped);
             tick(60);
         }
         table.remove();
         MapStage.removeActor(InvestigatorUtils.getIdLayerResolver(id, false));
         tick(60);
         System.out.println("PASS: monster fireballs hit the on-screen copy of the investigator stand");
+    }
+    /**
+     * Flesh Ward style interruption: the monster fades away (and torn tokens go back on the bar),
+     * then returns with the darkened world when the fight continues.
+     */
+    @SuppressWarnings("unchecked")
+    private void previewCombatInterruption() throws Exception {
+        TestViewImpl view = new TestViewImpl();
+        MonsterCombatTable table = new MonsterCombatTable();
+        InfoStage.addSmallActorToInfoStage(table);
+        MonsterCombatTableData data = new MonsterCombatTableData();
+        data.setMonsterClassName("SkeletonMonster"); data.setMonsterName("Skeleton");
+        data.setHorror(2); data.setDamage(2); data.setToughness(3); data.setCurrentHealth(3);
+        table.init(data);
+        ((Stack<MonsterCombatTable>) field(view, "monsterCombatTableStack")).push(table);
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.start(table, InvestigatorId.values()[0]);
+        tick(120);
+        Actor image = table.getMonsterImage();
+        require(image.isVisible() && image.getColor().a > 0.9f, "monster not shown before the interruption");
+
+        sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar bar = InfoStage.getInvestigatorHud().getHealthBar();
+        bar.setTotalEmptyContainers(7);
+        bar.setCurrentValue(5);
+        AtomicInteger completed = new AtomicInteger();
+        view.destroyHealth(2).subscribe(completed::incrementAndGet);
+        for (int i = 0; i < 1200 && completed.get() == 0; i++) stage.act(1f / 60);
+        require(completed.get() == 1 && bar.getCurrentValue() == 3, "impacts should tear 2 tokens, bar=" + bar.getCurrentValue());
+
+        sk.sivak.eldritchhorror.core.view.game.MapStage.brightenWorld();
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.onActiveInvestigatorShown(InvestigatorId.values()[1]);
+        tick(90);
+        draw("combat-interrupted");
+        require(!image.isVisible() && !table.getStatusPlate().isVisible() && !table.getPhaseIndicator().isVisible(),
+                "monster still shown during the interruption");
+        require(bar.getCurrentValue() == 5, "torn tokens should go back on the bar, bar=" + bar.getCurrentValue());
+        require(sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.consumeHealth(2) == 0, "ledger not cleared on interruption");
+
+        view.updateMonsterDamage(2).subscribe();
+        tick(90);
+        require(image.isVisible() && image.getColor().a > 0.9f && table.getStatusPlate().isVisible(), "monster did not come back");
+        require(sk.sivak.eldritchhorror.core.view.game.MapStage.isWorldDarkened(), "world not darkened again after the interruption");
+        draw("combat-resumed");
+
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.finish();
+        table.remove();
+        sk.sivak.eldritchhorror.core.view.game.MapStage.brightenWorld();
+        tick(60);
+        System.out.println("PASS: combat interruption hides the monster and brings it back");
+    }
+
+    /** More successes than icons / hearts: every success still fires, and each icon / heart goes only once. */
+    private void previewSurplusSuccesses() throws Exception {
+        MonsterCombatTable table = new MonsterCombatTable();
+        InfoStage.addSmallActorToInfoStage(table);
+        MonsterCombatTableData data = new MonsterCombatTableData();
+        data.setMonsterClassName("SkeletonMonster"); data.setMonsterName("Skeleton");
+        data.setHorror(1); data.setDamage(1); data.setToughness(1); data.setCurrentHealth(1);
+        table.init(data);
+        table.highlightHorror();
+        tick(150);
+        List<Vector2> dice = Arrays.asList(new Vector2(380, 90), new Vector2(430, 90), new Vector2(480, 90), new Vector2(530, 90));
+        String[] phases = {"horror", "damage", "health"};
+        for (String phase : phases) {
+            AtomicInteger completed = new AtomicInteger();
+            Completable attack = phase.equals("horror") ? table.destroyHorror(dice)
+                    : phase.equals("damage") ? table.destroyDamage(dice) : table.destroyMonsterHealth(dice);
+            attack.subscribe(completed::incrementAndGet);
+            Set<Actor> fireballs = new HashSet<>();
+            for (int i = 0; i < 900 && completed.get() == 0; i++) {
+                stage.act(1f / 60);
+                collectFireballs(fireballs);
+            }
+            require(completed.get() == 1, phase + " with surplus successes did not complete");
+            require(fireballs.size() == dice.size(), phase + ": expected one fireball per success (" + dice.size() + "), saw " + fireballs.size());
+            tick(60);
+        }
+        table.remove();
+        tick(60);
+        System.out.println("PASS: every success fires even beyond the monster's horror / damage / health");
+    }
+
+    /** Epic monster: bigger portrait, gold rim drawn behind it, gold plate, bigger fireballs; the phase pill follows the fight. */
+    private void previewEpicMonsterAndPhases() throws Exception {
+        MonsterCombatTable table = new MonsterCombatTable();
+        InfoStage.addSmallActorToInfoStage(table);
+        MonsterCombatTableData data = new MonsterCombatTableData();
+        data.setMonsterClassName("DunwichHorrorMonster"); data.setMonsterName("Dunwich Horror"); data.setMonsterEpic(true);
+        data.setHorror(3); data.setDamage(3); data.setToughness(6); data.setCurrentHealth(6);
+        table.init(data);
+        tick(90);
+        CombatPhaseIndicator phases = table.getPhaseIndicator();
+        Actor image = table.getMonsterImage();
+        Actor glow = table.getEpicGlow();
+        require(phases.getStage() != null && phases.getPhase() == CombatPhaseIndicator.Phase.NONE, "phase pill missing before the fight");
+        require(image.getWidth() > 250, "epic portrait should be bigger, is " + image.getWidth());
+        require(glow != null && glow.getParent() == image.getParent()
+                && glow.getParent().getChildren().indexOf(glow, true) < image.getParent().getChildren().indexOf(image, true),
+                "epic glow must be drawn right behind the portrait");
+        Rectangle pill = new Rectangle(phases.getX(), phases.getY(), phases.getWidth(), phases.getHeight());
+        require(pill.x >= 0 && pill.y + pill.height <= 540, "phase pill off screen " + pill);
+
+        table.highlightHorror();
+        tick(70);
+        require(phases.isActive(CombatPhaseIndicator.Phase.HORROR), "horror phase not shown");
+        draw("epic-monster-horror-phase");
+        Group plate = table.getStatusPlate();
+        for (int i = 0; i < 600; i++) {
+            stage.act(1f / 60);
+            Rectangle plateBox = new Rectangle(plate.getX(), plate.getY(), plate.getWidth(), plate.getHeight());
+            require(!plateBox.overlaps(pill), "status plate runs into the phase pill at " + plateBox);
+        }
+        table.highlightDamageAndToughness();
+        tick(70);
+        require(phases.isActive(CombatPhaseIndicator.Phase.DAMAGE), "damage phase not shown");
+
+        AtomicInteger completed = new AtomicInteger();
+        table.destroyHealth(Arrays.asList(new Vector2(110, 40), new Vector2(150, 40))).subscribe(completed::incrementAndGet);
+        boolean drawn = false;
+        float biggest = 0f;
+        for (int i = 0; i < 900 && completed.get() == 0; i++) {
+            stage.act(1f / 60);
+            for (Actor actor : descendants(stage.getRoot())) {
+                if (actor instanceof Fireball) biggest = Math.max(biggest, actor.getScaleX());
+            }
+            if (!drawn && biggest > 0.5f) { draw("epic-monster-attack"); drawn = true; }
+        }
+        require(completed.get() == 1, "epic attack did not complete");
+        require(biggest > 0.6f, "epic fireballs should be bigger, max scale " + biggest);
+        tick(60);
+        table.remove();
+        tick(60);
+        require(phases.getStage() == null && glow.getStage() == null, "phase pill / glow left behind");
+        System.out.println("PASS: epic monster look and combat phase pill");
+    }
+    /** Map monsters bounce and waddle while they move, keep still when they stop, and their real position is untouched. */
+    private void previewMapMonsterWalk() throws Exception {
+        Texture texture = CustomAssetManager.getNonEpicMonsterTexture("SkeletonMonster");
+        MonsterImage monster = new MonsterImage(null, null, true, false, null, texture);
+        monster.setPosition(200, 200);
+        stage.addActor(monster);
+        tick(30);
+        Object walker = field(monster, "walkAnimator");
+        java.lang.reflect.Method bob = walker.getClass().getDeclaredMethod("getBob", float.class);
+        java.lang.reflect.Method tilt = walker.getClass().getDeclaredMethod("getTilt");
+        bob.setAccessible(true); tilt.setAccessible(true);
+        require((float) bob.invoke(walker, monster.getHeight()) == 0f, "monster bounces while standing");
+
+        monster.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.moveBy(400, 60, 2f));
+        float maxBob = 0f, minTilt = 0f, maxTilt = 0f;
+        for (int i = 0; i < 120; i++) {
+            stage.act(1f / 60);
+            float x = monster.getX(), y = monster.getY();
+            if (i == 40) draw("map-monster-walk-1");
+            if (i == 47) draw("map-monster-walk-2");
+            require(monster.getX() == x && monster.getY() == y && monster.getRotation() == 0f, "drawing moved the real monster");
+            maxBob = Math.max(maxBob, (float) bob.invoke(walker, monster.getHeight()));
+            float t = (float) tilt.invoke(walker);
+            minTilt = Math.min(minTilt, t); maxTilt = Math.max(maxTilt, t);
+        }
+        require(maxBob > 2f && minTilt < -3f && maxTilt > 3f, "monster did not walk: bob " + maxBob + " tilt " + minTilt + ".." + maxTilt);
+        tick(30);
+        require((float) bob.invoke(walker, monster.getHeight()) == 0f && (float) tilt.invoke(walker) == 0f, "monster keeps walking after it stopped");
+        monster.remove();
+        System.out.println("PASS: map monsters walk while moving");
     }
     /** Tokens may shake (a few px) and scale in place, but never leave their slot on the plate. */
     /** Unscaled position (scaling around the centre is allowed) of a token relative to the plate. */
@@ -547,9 +745,12 @@ public class PromptPreview extends ApplicationAdapter {
                         float travelled = 0;
                         Rectangle area = new Rectangle(panel.getWanderArea());
                         area.setHeight(area.height + 8); // stepping bounce
-                        for (int i = 0; i < 1200; i++) {
+                        for (int i = 0; i < 3600; i++) {
                             stage.act(1f / 60);
                             require(area.contains(image.getX(), image.getY()), "monster image left wander area at " + image.getX() + "," + image.getY());
+                            // Stays away from the investigator's bottom-left corner (a few px slack for the shake).
+                            require(!new Rectangle(image.getX() + 6, image.getY() + 6, image.getWidth() - 12, image.getHeight() - 12)
+                                    .overlaps(MonsterCombatTable.INVESTIGATOR_KEEP_OUT), "monster wandered near the investigator at " + image.getX() + "," + image.getY());
                             travelled = Math.max(travelled, start.dst(image.getX(), image.getY()));
                         }
                         require(travelled > 90, "monster image did not wander (" + travelled + ")");
@@ -635,6 +836,26 @@ public class PromptPreview extends ApplicationAdapter {
         require(box.y >= InfoStage.getInvestigatorHud().getPrefHeight() && box.y + box.height <= 500, "combat overview overlaps HUD/title " + box);
         draw("combat-overview");
         overview.remove();
+        data.setMonsterClassName("DunwichHorrorMonster"); data.setMonsterName("Dunwich Horror"); data.setMonsterEpic(true);
+        data.setToughness(10); data.setCurrentHealth(10);
+        CombatOverviewTable epicOverview = new CombatOverviewTable();
+        epicOverview.init(data);
+        epicOverview.setPosition(480 - epicOverview.getWidth() / 2, 120);
+        stage.addActor(epicOverview);
+        tick(30);
+        for (Actor actor : descendants(epicOverview)) {
+            if (actor instanceof sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar) {
+                Group card = actor.getParent();
+                Vector2 left = actor.localToAscendantCoordinates(card, new Vector2(0, 0));
+                float heartsWidth = 0;
+                for (Actor heart : ((Group) actor).getChildren()) heartsWidth += heart.getWidth();
+                require(left.x >= 0 && left.x + heartsWidth <= card.getWidth(), "10 hearts overflow the monster card: " + left.x + " + " + heartsWidth + " > " + card.getWidth());
+            }
+        }
+        require(Math.abs(epicOverview.getWidth() - box.width) < 1, "epic name widened the overview: " + epicOverview.getWidth() + " vs " + box.width);
+        draw("combat-overview-epic");
+        epicOverview.remove();
+        data.setMonsterEpic(false);
         InfoStage.hideLabel(UiText.get("combat.title"));
         for (Actor actor : descendants(stage.getRoot())) {
             if (actor instanceof Button && actor.getParent() != null && actor.getParent().getParent() == stage.getRoot()

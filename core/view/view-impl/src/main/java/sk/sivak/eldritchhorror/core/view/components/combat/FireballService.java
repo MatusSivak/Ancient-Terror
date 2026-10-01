@@ -38,6 +38,8 @@ public class FireballService {
     private Runnable onLandLastAction;
     private Runnable onLandFirstAction;
     private boolean blue;
+    private float fireballScale = 1f;
+    private float staggerDelay;
 
     public FireballService(Stage stage) {
         this.stage = stage;
@@ -68,6 +70,8 @@ public class FireballService {
         onLandLastAction = null;
         onLandFirstAction = null;
         blue = false;
+        fireballScale = 1f;
+        staggerDelay = 0f;
         midpointDisplacementDirection = 0f;
         targetHealth = 3;
         minDelay = 0.3f;
@@ -165,15 +169,21 @@ public class FireballService {
 
     private Map<Vector2, List<Fireball>> createFireballs(Map<Vector2, List<Vector2>> sourceTargetsMap, Map<Vector2, Explosion> targetExplosionMap, Group smokeGroup, Group fireballGroup) {
         HashMap<Vector2, List<Fireball>> fireballsMap = new HashMap<>();
+        int sourceIndex = 0;
         for (Map.Entry<Vector2, List<Vector2>> entry : sourceTargetsMap.entrySet()) {
             List<Vector2> targets = entry.getValue();
             Iterator<Vector2> targetsIterator = targets.iterator();
             SequenceAction sequenceAction = new SequenceAction();
-            sequenceAction.addAction(new VariableDelayAction(() -> MathUtils.random(0, (minDelay + maxDelay)/2f)));
+            if (staggerDelay > 0f) {
+                sequenceAction.addAction(Actions.delay(sourceIndex++ * staggerDelay));
+            } else {
+                sequenceAction.addAction(new VariableDelayAction(() -> MathUtils.random(0, (minDelay + maxDelay)/2f)));
+            }
             while (targetsIterator.hasNext()) {
                 Vector2 target = targetsIterator.next();
                 Fireball fireball = new Fireball();
                 fireball.setBlue(blue);
+                fireball.setSizeMultiplier(fireballScale);
                 Vector2 source = entry.getKey();
                 if (fireballsMap.get(target) == null) {
                     fireballsMap.put(target, new LinkedList<>());
@@ -240,9 +250,19 @@ public class FireballService {
         return allTargets;
     }
 
+    /** When positive, sources throw one after another, this many seconds apart, instead of at random. Reset by {@link #weakReset()}. */
+    public void setStaggerDelay(float staggerDelay) {
+        this.staggerDelay = staggerDelay;
+    }
+
     /** Horror / sanity fireballs burn blue. Reset by {@link #weakReset()}. */
     public void setBlue(boolean blue) {
         this.blue = blue;
+    }
+
+    /** Size multiplier of the next fireballs (epic monsters throw bigger ones). Reset by {@link #weakReset()}. */
+    public void setFireballScale(float fireballScale) {
+        this.fireballScale = fireballScale;
     }
 
     public void setTargetHealth(int targetHealth) {
