@@ -32,9 +32,6 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 
 public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> extends VisTable {
 
-    // TODO set to false before release; dev-only flag to preview every card in the collection.
-    private static final boolean DEV_SHOW_ALL_CARDS = true;
-
     private List<E> unlocked = new LinkedList<>();
     private List<E> discovered = new LinkedList<>();
     private Supplier<E[]> enumValuesSupplier;
@@ -99,10 +96,6 @@ public class CardsCollectionTable<E extends Enum<?>, C extends CardInfo, O> exte
         O previousInitValue = this.previousInitValue;
         if (Gdx.app.getPreferences("AncientTerror.xml").getBoolean(InAppPurchaseManager.FULL_GAME, false)) {
             unlocked = new LinkedList<>(Arrays.asList(enumValuesSupplier.get()));
-        }
-        if (DEV_SHOW_ALL_CARDS) {
-            unlocked = new LinkedList<>(Arrays.asList(enumValuesSupplier.get()));
-            discovered = new LinkedList<>(Arrays.asList(enumValuesSupplier.get()));
         }
         List<C> cards = new LinkedList<>();
         for (E enumValue : enumValuesSupplier.get()) {
