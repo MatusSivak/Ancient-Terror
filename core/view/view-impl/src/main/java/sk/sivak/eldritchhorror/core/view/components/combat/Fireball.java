@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
@@ -35,6 +37,8 @@ public class Fireball extends Image {
 
     private Group smokeGroup;
     private float midpointDisplacementDirection;
+    private boolean blue;
+    private static ShaderProgram blueShader;
 
     public Fireball() {
         List<Texture> textures = new LinkedList<>();
@@ -82,11 +86,59 @@ public class Fireball extends Image {
 
     }
 
+    public void setBlue(boolean blue) {
+        this.blue = blue;
+    }
+
+    /** Swaps the red and blue channels of the orange flame art, turning it into a cold blue fire. */
+    private static ShaderProgram getBlueShader() {
+        if (blueShader == null) {
+            String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n"
+                    + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n"
+                    + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
+                    + "uniform mat4 u_projTrans;\n"
+                    + "varying vec4 v_color;\n"
+                    + "varying vec2 v_texCoords;\n"
+                    + "void main() {\n"
+                    + "  v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n"
+                    + "  v_color.a = v_color.a * (255.0/254.0);\n"
+                    + "  v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
+                    + "  gl_Position = u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n"
+                    + "}\n";
+            String fragment = "#ifdef GL_ES\nprecision mediump float;\n#endif\n"
+                    + "varying vec4 v_color;\n"
+                    + "varying vec2 v_texCoords;\n"
+                    + "uniform sampler2D u_texture;\n"
+                    + "void main() {\n"
+                    + "  vec4 c = texture2D(u_texture, v_texCoords);\n"
+                    + "  gl_FragColor = v_color * vec4(c.b, c.g * 0.85 + c.r * 0.1, c.r, c.a);\n"
+                    + "}\n";
+            blueShader = new ShaderProgram(vertex, fragment);
+            if (!blueShader.isCompiled()) {
+                Gdx.app.error("Fireball", "Blue fireball shader failed: " + blueShader.getLog());
+            }
+        }
+        return blueShader;
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        if (!blue || !getBlueShader().isCompiled()) {
+            super.draw(batch, parentAlpha);
+            return;
+        }
+        ShaderProgram previous = batch.getShader();
+        batch.setShader(blueShader);
+        super.draw(batch, parentAlpha);
+        batch.setShader(previous);
+    }
+
     public void setMidpointDisplacementDirection(float direction) {
         this.midpointDisplacementDirection = direction;
     }
 
     public void throwIt(Vector2 origin, Vector2 destination) {
+
         Vector2 destinationFixed = new Vector2(destination);
         fireballSmoke = FireballSmokeBuilder.get();
         smokeGroup.addActor(fireballSmoke);
@@ -130,7 +182,8 @@ public class Fireball extends Image {
                     }
 
                     fireballSmoke.getParticleEffect().allowCompletion();
-                    explosion.start(new Explosion.ExplosionConfig(destinationFixed, new Color(1f, 0.3f, 0.12f,1f)));
+                    explosion.start(new Explosion.ExplosionConfig(destinationFixed,
+                            blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f,1f)));
                 }),
                 Actions.removeActor()
         )));

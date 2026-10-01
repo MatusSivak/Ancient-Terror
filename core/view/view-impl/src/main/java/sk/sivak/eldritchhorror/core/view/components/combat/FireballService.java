@@ -37,6 +37,7 @@ public class FireballService {
     private Map<Vector2, Runnable> onLandLastActions = new HashMap<>();
     private Runnable onLandLastAction;
     private Runnable onLandFirstAction;
+    private boolean blue;
 
     public FireballService(Stage stage) {
         this.stage = stage;
@@ -66,6 +67,7 @@ public class FireballService {
         onLandLastActions.clear();
         onLandLastAction = null;
         onLandFirstAction = null;
+        blue = false;
         midpointDisplacementDirection = 0f;
         targetHealth = 3;
         minDelay = 0.3f;
@@ -171,6 +173,7 @@ public class FireballService {
             while (targetsIterator.hasNext()) {
                 Vector2 target = targetsIterator.next();
                 Fireball fireball = new Fireball();
+                fireball.setBlue(blue);
                 Vector2 source = entry.getKey();
                 if (fireballsMap.get(target) == null) {
                     fireballsMap.put(target, new LinkedList<>());
@@ -235,6 +238,11 @@ public class FireballService {
         }
         Collections.shuffle(allTargets);
         return allTargets;
+    }
+
+    /** Horror / sanity fireballs burn blue. Reset by {@link #weakReset()}. */
+    public void setBlue(boolean blue) {
+        this.blue = blue;
     }
 
     public void setTargetHealth(int targetHealth) {

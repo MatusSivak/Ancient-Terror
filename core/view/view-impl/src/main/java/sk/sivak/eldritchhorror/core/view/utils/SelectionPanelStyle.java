@@ -10,6 +10,16 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 public final class SelectionPanelStyle {
     private SelectionPanelStyle() { }
 
+    /** Panel whose drawable insets act as table padding (Table.setBackground replaces padding with them). */
+    public static Drawable panel(String fill, String edge, float padVertical, float padHorizontal) {
+        Drawable drawable = panel(fill, edge);
+        drawable.setTopHeight(padVertical);
+        drawable.setBottomHeight(padVertical);
+        drawable.setLeftWidth(padHorizontal);
+        drawable.setRightWidth(padHorizontal);
+        return drawable;
+    }
+
     public static Drawable panel(String fill, String edge) {
         final Color surface = Color.valueOf(fill);
         final Color border = Color.valueOf(edge);

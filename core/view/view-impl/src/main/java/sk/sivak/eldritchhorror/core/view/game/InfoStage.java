@@ -40,6 +40,8 @@ public class InfoStage {
     private final MenuButton menuButton;
     private final Group smallActors;
     private final Group diceLayer;
+    /** Roaming combat creatures: above the HUD, below panels, cards, dice, full-screen cards and buttons. */
+    private final Group creatureLayer;
     private final Group bigActors;
     private final Group buttonLayer;
     private final Group chalkboardLayer;
@@ -65,6 +67,7 @@ public class InfoStage {
         touchBlockerLayer = new Group();
         hudButtonsLayer = new Group();
         diceLayer = new Group();
+        creatureLayer = new Group();
         noiseEffectLayer = new Group();
         bigActors = new Group() {
             @Override
@@ -90,6 +93,8 @@ public class InfoStage {
         stage.addActor(grayBackground);
         stage.addActor(label);
         stage.addActor(investigatorHud);
+        // The roaming combat monster sits behind panels, cards and dice so it never hides what the player works with.
+        stage.addActor(creatureLayer);
         stage.addActor(smallActors);
         stage.addActor(diceLayer);
         stage.addActor(bigActors);
@@ -127,7 +132,7 @@ public class InfoStage {
         }
         showingSmallActors = true;
         hidingSmallActors = false;
-        Group[] groups = new Group[] {smallActors, buttonLayer};
+        Group[] groups = new Group[] {smallActors, buttonLayer, creatureLayer};
         for (Group group : groups) {
             group.clearActions();
             group.addAction(Actions.sequence(
@@ -143,7 +148,7 @@ public class InfoStage {
         }
         hidingSmallActors = true;
         showingSmallActors = false;
-        Group[] groups = new Group[] {smallActors, buttonLayer};
+        Group[] groups = new Group[] {smallActors, buttonLayer, creatureLayer};
         for (Group group : groups) {
             group.clearActions();
             group.addAction(Actions.sequence(
@@ -190,6 +195,10 @@ public class InfoStage {
 
     public static void addActorToButtonLayer(Actor actor) {
         get().buttonLayer.addActor(actor);
+    }
+
+    public static Group getCreatureLayer() {
+        return get().creatureLayer;
     }
 
     public static Group getDiceLayer() {

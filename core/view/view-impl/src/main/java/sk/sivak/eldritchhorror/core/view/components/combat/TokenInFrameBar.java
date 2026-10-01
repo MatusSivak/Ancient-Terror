@@ -141,6 +141,19 @@ public class TokenInFrameBar extends HorizontalGroup {
         }
     }
 
+    /** Token images not cancelled by dice, still in their slots on the bar. */
+    public List<Image> getRemainingTokenImages() {
+        List<Image> images = new LinkedList<>();
+        for (int i = 0; i < count - coveredByDice; i++) {
+            images.add(tokenInFrameList.get(i).getImage());
+        }
+        return images;
+    }
+
+    public Image getTokenImage(int i) {
+        return tokenInFrameList.get(i).getImage();
+    }
+
     public void returnTokenToPlace(Actor image) {
         float duration = 1f;
         image.addAction(new FastForwardAction<>(

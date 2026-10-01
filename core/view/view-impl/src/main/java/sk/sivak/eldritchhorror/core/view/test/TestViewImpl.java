@@ -2,14 +2,18 @@ package sk.sivak.eldritchhorror.core.view.test;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -24,6 +28,7 @@ import rx.Subscription;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
@@ -42,6 +47,8 @@ import sk.sivak.eldritchhorror.core.view.draganddrop.impl.DragAndDropBinder;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.SourceTargetGroup;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -62,6 +69,8 @@ import static sk.sivak.eldritchhorror.core.view.test.RollResultTable.createSucce
 import static sk.sivak.eldritchhorror.core.view.test.TestResultTable.*;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /**
@@ -73,6 +82,15 @@ public class TestViewImpl implements TestView {
     /** Result table sits in the bottom strip formerly used by the OK button; dice line up right above it. */
     private static final float RESULT_TABLE_Y = 5f;
 
+    /* Test-setup layout keeps clear of the HUD: side menu + clock on the left, menu/fast-forward on the right. */
+    static final float SAFE_LEFT = 150f;
+    static final float SAFE_RIGHT = MonsterCombatTable.SAFE_RIGHT;
+    static final float SAFE_TOP = VIEWPORT_HEIGHT - 8f;
+    static final float LAYOUT_GAP = 12f;
+    private static final float MAX_CARD_SCALE = 0.155f;
+    private static final float MIN_CARD_SCALE = 0.11f;
+    private static final float CARD_PANEL_PAD = 6f;
+
     private TestController controller;
     private TestInfoTable testInfoTable;
     private Actor selectAssetsToUseActor;
@@ -82,6 +100,8 @@ public class TestViewImpl implements TestView {
     private Button[] buttons;
     private DiceRollerStack diceRollerStack = new DiceRollerStack();
     private Stack<MonsterCombatTable> monsterCombatTableStack = new Stack<>();
+    /** The fighting investigator, whose stand on the map the monster's fireballs aim at. */
+    private InvestigatorId combatInvestigatorId;
     private List<Subscription> monsterCombatTableSubscriptions = new LinkedList<>();
     private boolean hideDicesAfterConfirm;
 
@@ -112,58 +132,75 @@ public class TestViewImpl implements TestView {
             }
             testInfoTable = new TestInfoTable(stat, modifier, baseStatValue, bonusStatValue, usableAssets, additionalDicesCount);
 
-            String buttonTitle = get("test.button");
-
-            testButton = buildButton(buttonTitle);
+            // Cards and summary sit side by side, centred between the side menu and the right-hand buttons.
+            // (In combat the monster roams above everything, so there is no panel to make room for.)
+            testButton = buildButton(get("test.button"));
             testButton.addListener(new ConfirmTestListener(onSub));
-            InfoStage.showButton(testButton);
-            testInfoTable.setX(VIEWPORT_WIDTH / 2 - testInfoTable.getWidth() / 2);
-            testInfoTable.setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
+
+            float infoColumnWidth = Math.max(testInfoTable.getWidth(), testButton.getWidth());
+            float sideColumnLeft = SAFE_RIGHT - infoColumnWidth - LAYOUT_GAP * 2;
+            VisTable cardsPanel = createDragAndDrop(usableAssets, testInfoTable, sideColumnLeft - LAYOUT_GAP - SAFE_LEFT);
+            float totalWidth = cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth;
+            float cardsX = SAFE_LEFT + (SAFE_RIGHT - SAFE_LEFT - totalWidth) / 2f;
+            float sideColumnCenter = cardsX + cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth / 2f;
+            float zoneBottom = getHudTop();
+            cardsPanel.setPosition(cardsX, zoneBottom + Math.max(0, (SAFE_TOP - zoneBottom - cardsPanel.getHeight()) / 2f));
+
+            InfoStage.showButton(testButton, sideColumnCenter - testButton.getWidth() / 2f, 5);
+            testInfoTable.setX(sideColumnCenter - testInfoTable.getWidth() / 2);
+            testInfoTable.setY(Math.max(testButton.getTop() + LAYOUT_GAP, zoneBottom));
             InfoStage.addSmallActorToInfoStage(testInfoTable);
 
-            createDragAndDrop(usableAssets, testInfoTable);
+            InfoStage.showActor(cardsPanel);
+            selectAssetsToUseActor = cardsPanel;
         });
     }
+    private static float getHudTop() {
+        return InfoStage.getInvestigatorHud().getPrefHeight() + 8f;
+    }
 
-    private void createDragAndDrop(List<UsableAsset> usableAssets, TestInfoTable testInfoTable) {
+    private VisTable createDragAndDrop(List<UsableAsset> usableAssets, TestInfoTable testInfoTable, float maxWidth) {
 
+        // Largest card size that fits every card side by side and both rows (use / available) vertically.
+        float maxInnerWidth = maxWidth - CARD_PANEL_PAD * 2;
+        float hintHeight = 24f;
+        float maxGroupHeight = SAFE_TOP - getHudTop() - CARD_PANEL_PAD * 3 - hintHeight;
+        float scaleForHeight = (maxGroupHeight - VIEWPORT_HEIGHT * 0.1f) / 2f / CardTemplate.CARD_HEIGHT;
+        float scaleForWidth = maxInnerWidth / (usableAssets.size() * (float) CardTemplate.CARD_WIDTH);
+        float cardScale = Math.max(MIN_CARD_SCALE, Math.min(MAX_CARD_SCALE, Math.min(scaleForHeight, scaleForWidth)));
         CardTemplate[] cardTemplates = collectToList(map(usableAssets, it -> {
             CardTemplate cardTemplate = CardTemplate.buildCard(it.getCardInfo());
-            cardTemplate.setScale(0.16f);
+            cardTemplate.setScale(cardScale);
             return cardTemplate;
         })).toArray(new CardTemplate[usableAssets.size()]);
         DragAndDropBinder dragAndDropBinder = new DragAndDropBinder(InfoStage.getStageSafe(), testInfoTable);
         dragAndDropBinder.init(cardTemplates);
         SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();
-        ScrollPane scrollPane = new ScrollPane(sourceTargetGroup) {
-            @Override
-            public void act(float delta) {
-                super.act(delta);
-            }
-        };
-        Container<ScrollPane> scrollPaneContainer = new Container<>(scrollPane);
-        float maxWidth = 320;
-        if (sourceTargetGroup.getWidth() < maxWidth) {
-            scrollPaneContainer.setPosition(460 - sourceTargetGroup.getWidth(), 260);
-            scrollPane.setScrollingDisabled(true, true);
-            scrollPaneContainer
-                    .width(sourceTargetGroup.getWidth())
-                    .height(sourceTargetGroup.getHeight())
-                    .maxWidth(maxWidth);
-        } else {
-            scrollPaneContainer.setPosition(80 + maxWidth/2f,260);
-            scrollPane.setScrollingDisabled(false, true);
-            scrollPaneContainer
-                    .width(sourceTargetGroup.getWidth())
-                    .height(sourceTargetGroup.getHeight())
-                    .maxWidth(maxWidth);
+        ScrollPane scrollPane = new ScrollPane(sourceTargetGroup);
+        scrollPane.setOverscroll(false, false);
+
+        boolean scrolling = sourceTargetGroup.getWidth() > maxInnerWidth;
+        float innerWidth = Math.min(sourceTargetGroup.getWidth(), maxInnerWidth);
+        scrollPane.setScrollingDisabled(!scrolling, true);
+
+        VisTable cardsPanel = new VisTable();
+        cardsPanel.setBackground(SelectionPanelStyle.panel("121B1DEE", "87734E"));
+        cardsPanel.pad(CARD_PANEL_PAD);
+        Label hint = new Label(get("test.dragCards"), new Label.LabelStyle(
+                getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf("C8B995")));
+        hint.setFontScale(0.32f);
+        hint.setAlignment(Align.center);
+        hint.setWrap(true);
+        cardsPanel.add(hint).width(innerWidth).padBottom(CARD_PANEL_PAD).row();
+        cardsPanel.add(scrollPane).width(innerWidth).height(sourceTargetGroup.getHeight());
+        cardsPanel.pack();
+
+        if (scrolling) {
             scrollPane.layout();
             scrollPane.setScrollPercentX(100);
+            scrollPane.updateVisualScroll();
         }
-
-
-        InfoStage.showActor(scrollPaneContainer);
-        selectAssetsToUseActor = scrollPaneContainer;
+        return cardsPanel;
     }
 
     @Override
@@ -381,6 +418,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable showCombatOverview(CombatOverviewTableData data) {
+        combatInvestigatorId = data.getInvestigatorId();
         return Completable.create(onSub -> {
             MapStage.darkenWorld();
             InfoStage.displayTextDontHide(get("combat.title"));
@@ -388,8 +426,11 @@ public class TestViewImpl implements TestView {
 
             CombatOverviewTable combatOverviewTable = new CombatOverviewTable();
             combatOverviewTable.init(data);
-            combatOverviewTable.setX(VIEWPORT_WIDTH - combatOverviewTable.getWidth() - 65);
-            combatOverviewTable.setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
+            // Centred horizontally, and vertically between the HUD and the "Combat" title.
+            float overviewBottom = getHudTop();
+            float overviewTop = VIEWPORT_HEIGHT - 48f;
+            combatOverviewTable.setX(VIEWPORT_WIDTH / 2f - combatOverviewTable.getWidth() / 2f);
+            combatOverviewTable.setY(overviewBottom + Math.max(0, (overviewTop - overviewBottom - combatOverviewTable.getHeight()) / 2f));
             InfoStage.addSmallActorToInfoStage(combatOverviewTable);
 
             TextButton combatButton = buildButton(buttonTitle);
@@ -543,12 +584,57 @@ public class TestViewImpl implements TestView {
             return Completable.complete();
         }
         List<Vector2> endPositions = new LinkedList<>();
+        Vector2 stand = investigatorStandPosition();
+        if (stand != null) {
+            // The monster aims at the investigator's stand on the map; points are spread so every fireball is distinct.
+            for (int i = 0; i < tokensCount; i++) {
+                endPositions.add(new Vector2(stand.x + (i - (tokensCount - 1) / 2f) * 12f, stand.y + MathUtils.random(-8f, 8f)));
+            }
+            return destroyFunction.apply(endPositions);
+        }
         for (int i = 0; i < tokensCount; i++) {
             Vector2 position = containerBar.getFullContainerPosition(i);
             endPositions.add(new Vector2(position.x + 11, position.y + 13.5f));
         }
         Collections.reverse(endPositions);
         return destroyFunction.apply(endPositions);
+    }
+
+    /**
+     * Centre of the fighting investigator's stand, in info-stage coordinates; null when it is not on screen.
+     * The map wraps horizontally, so each stand exists in several copies - the one on screen is used.
+     */
+    private Vector2 investigatorStandPosition() {
+        Vector2 best = null;
+        for (InvestigatorImage stand : findInvestigatorStands()) {
+            Vector2 mapCoordinates = stand.localToStageCoordinates(new Vector2(stand.getWidth() / 2f, stand.getHeight() / 2f));
+            Vector2 screen = MapStage.getStage().stageToScreenCoordinates(mapCoordinates);
+            Vector2 info = InfoStage.getStageSafe().screenToStageCoordinates(screen);
+            boolean onScreen = info.x >= 0 && info.x <= VIEWPORT_WIDTH && info.y >= 0 && info.y <= VIEWPORT_HEIGHT;
+            if (onScreen && (best == null || Math.abs(info.x - VIEWPORT_WIDTH / 2f) < Math.abs(best.x - VIEWPORT_WIDTH / 2f))) {
+                best = info;
+            }
+        }
+        return best;
+    }
+
+    private List<InvestigatorImage> findInvestigatorStands() {
+        List<InvestigatorImage> stands = new LinkedList<>();
+        if (combatInvestigatorId != null) {
+            List<InvestigatorImage> byId = MapStage.getActor(InvestigatorUtils.getIdLayerResolver(combatInvestigatorId, false));
+            if (byId != null) {
+                stands.addAll(byId);
+            }
+        }
+        if (stands.isEmpty()) {
+            // No known fighter: only the combat location's stands stay visible during combat.
+            for (Actor actor : MapStage.getAllActors(MapStage.getInvestigatorLayer())) {
+                if (actor instanceof InvestigatorImage && actor.isVisible() && actor.getColor().a > 0.5f) {
+                    stands.add((InvestigatorImage) actor);
+                }
+            }
+        }
+        return stands;
     }
 
     @Override

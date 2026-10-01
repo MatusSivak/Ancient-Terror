@@ -3,7 +3,9 @@ package sk.sivak.eldritchhorror.core.view.test;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -13,6 +15,7 @@ import sk.sivak.eldritchhorror.core.constants.test.UsableAsset;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.TargetActorChangedListener;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +45,12 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
     private Cell statBonusCellValue;
     private Cell diceBonusCellTitle;
     private Cell diceBonusCellValue;
-    private Color WHITE = Color.WHITE;
+    private static final Color TEXT = Color.valueOf("E6E1D3");
+    private static final Color MUTED = Color.valueOf("B5BDB4");
+    private static final Color POSITIVE = Color.valueOf("8FD694");
+    private static final Color NEGATIVE = Color.valueOf("E57373");
+    private static final Color ACCENT = Color.valueOf("E9C46A");
+    private static final Drawable BACKGROUND = SelectionPanelStyle.panel("121B1DEE", "87734E", 10, 16);
 
     public TestInfoTable(Stat stat, int modifier, int baseStatValue,
                          int bonusStatValue, List<UsableAsset> allUsableAssets,
@@ -54,44 +62,51 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         this.bonusStatValue = bonusStatValue;
         this.additionalDicesCount = additionalDicesCount;
 
-        pad(VIEWPORT_HEIGHT * 0.02f);
+        setBackground(BACKGROUND);
+        defaults().spaceBottom(4);
 
-        add(createLabel("" + stat.prettyString() + ": ", Color.WHITE)).align(Align.right);
+        defaults().spaceRight(24);
+        add(createTitle(stat.prettyString())).growX();
 
         if (bonusStatValue > 0) {
-            add(createLabel("" + baseStatValue, Color.WHITE)).spaceRight(0).align(Align.right);
-            add(createLabel("+" + bonusStatValue, Color.GREEN)).align(Align.right).row();
+            Table statValue = new Table();
+            statValue.add(createLabel("" + baseStatValue, TEXT)).padRight(2);
+            statValue.add(createLabel("+" + bonusStatValue, POSITIVE));
+            add(statValue).align(Align.right).row();
         } else {
-            add(createLabel("" + baseStatValue, Color.WHITE)).align(Align.right).colspan(2).row();
+            add(createLabel("" + baseStatValue, TEXT)).align(Align.right).row();
         }
 
-        statBonusCellTitle = add(createLabel("", Color.WHITE)).spaceBottom(0).height(0).align(Align.right);
-        statBonusCellValue = add(createLabel("", Color.GREEN)).colspan(2).spaceBottom(0).height(0).align(Align.right);
+        statBonusCellTitle = add(createTitle("")).spaceBottom(0).height(0).growX();
+        statBonusCellValue = add(createLabel("", POSITIVE)).spaceBottom(0).height(0).align(Align.right);
         statBonusCellValue.row();
 
-        diceBonusCellTitle = add(createLabel("", Color.WHITE)).spaceBottom(0).height(0).align(Align.right);
-        diceBonusCellValue = add(createLabel("", Color.GREEN)).colspan(2).spaceBottom(0).height(0).align(Align.right);
+        diceBonusCellTitle = add(createTitle("")).spaceBottom(0).height(0).growX();
+        diceBonusCellValue = add(createLabel("", POSITIVE)).spaceBottom(0).height(0).align(Align.right);
         diceBonusCellValue.row();
 
         if (modifier != 0) {
-            add(createLabel(get("test.modifier"), Color.WHITE)).align(Align.right);
+            add(createTitle(get("test.modifier"))).growX();
         }
         if (modifier < 0) {
-            add(createLabel("" + modifier, Color.RED)).align(Align.right).colspan(2).row();
+            add(createLabel("" + modifier, NEGATIVE)).align(Align.right).row();
         } else if (modifier > 0) {
-            add(createLabel("+" + modifier, Color.GREEN)).align(Align.right).colspan(2).row();
+            add(createLabel("+" + modifier, POSITIVE)).align(Align.right).row();
         }
 
-        addSeparator().colspan(3);
-        add(createLabel(get("test.dicePool"), Color.YELLOW)).align(Align.right);
+        Image separator = new Image(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.PURE_WHITE_BACKGROUND)
+                .tint(Color.valueOf("87734E99")));
+        add(separator).colspan(2).growX().height(1).padTop(4).padBottom(6).row();
+        Label dicePoolTitle = createTitle(get("test.dicePool"));
+        dicePoolTitle.getStyle().fontColor = ACCENT;
+        add(dicePoolTitle).growX();
 
         int dicePool = calculateDicePool();
-        dicePoolLabel = createLabel("" + dicePool, Color.YELLOW);
-        add(dicePoolLabel).align(Align.right).colspan(2).row();
+        dicePoolLabel = createLabel("" + dicePool, ACCENT);
+        dicePoolLabel.setFontScale(0.55f);
+        add(dicePoolLabel).align(Align.right).row();
 
         pack();
-        setBackground(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.GRAY_BACKGROUND));
-
         if (additionalDicesCount != 0) {
             updateBonuses(Collections.emptyList());
         }
@@ -100,7 +115,6 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
     public void updateBonuses(List<AssetId> selectedAssets) {
 
         float widthBefore = getWidth();
-        setBackground((Drawable) null);
         selectedUsableAssets = collectToList(this.allUsableAssets, ua -> selectedAssets.contains(ua.getCardInfo().getId()));
 
         calculateStatBonus(selectedUsableAssets);
@@ -114,8 +128,6 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
 
         pack();
 
-        setBackground(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.GRAY_BACKGROUND));
-
         setX(getX() + (widthBefore - getWidth()) / 2);
     }
 
@@ -125,12 +137,12 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
 
     private void displayStatBonus() {
         if (statBonus > 0) {
-            statBonusCellTitle.spaceBottom(8);
-            statBonusCellTitle.height(24.5f);
-            ((Label) statBonusCellTitle.getActor()).setText(get("test.statBonus"));
+            statBonusCellTitle.spaceBottom(4);
+            statBonusCellTitle.height(22f);
+            ((Label) statBonusCellTitle.getActor()).setText(get("test.statBonus").replace(":", "").trim());
 
-            statBonusCellValue.spaceBottom(8);
-            statBonusCellValue.height(24.5f);
+            statBonusCellValue.spaceBottom(4);
+            statBonusCellValue.height(22f);
             ((Label) statBonusCellValue.getActor()).setText("+" + statBonus);
         }
     }
@@ -139,19 +151,19 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         Color fontColor = null;
         String cellValueText = null;
         if (diceBonus + additionalDicesCount > 0) {
-            fontColor = Color.GREEN;
+            fontColor = POSITIVE;
             cellValueText = "+" + (diceBonus + additionalDicesCount);
         } else if (diceBonus + additionalDicesCount < 0) {
-            fontColor = Color.RED;
+            fontColor = NEGATIVE;
             cellValueText = ""+(diceBonus + additionalDicesCount);
         }
         if (diceBonus + additionalDicesCount != 0) {
-            diceBonusCellTitle.spaceBottom(8);
-            diceBonusCellTitle.height(24.5f);
-            ((Label) diceBonusCellTitle.getActor()).setText(get("test.diceBonus"));
+            diceBonusCellTitle.spaceBottom(4);
+            diceBonusCellTitle.height(22f);
+            ((Label) diceBonusCellTitle.getActor()).setText(get("test.diceBonus").replace(":", "").trim());
 
-            diceBonusCellValue.spaceBottom(8);
-            diceBonusCellValue.height(24.5f);
+            diceBonusCellValue.spaceBottom(4);
+            diceBonusCellValue.height(22f);
             ((Label) diceBonusCellValue.getActor()).setText(cellValueText);
             ((Label) diceBonusCellValue.getActor()).getStyle().fontColor = fontColor;
         }
@@ -196,13 +208,19 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), color);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.45f);
         return label;
     }
 
+    private Label createTitle(String text) {
+        Label label = createLabel(text.replace(":", "").trim(), MUTED);
+        label.setAlignment(Align.left);
+        label.setFontScale(0.42f);
+        return label;
+    }
     @Override
     protected void drawBackground(Batch batch, float parentAlpha, float x, float y) {
-        super.drawBackground(batch, parentAlpha * 0.8f, x, y);
+        super.drawBackground(batch, parentAlpha, x, y);
     }
 
     @Override

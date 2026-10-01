@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.view.draganddrop.impl.ColorUtils.createColorAction;
+import static sk.sivak.eldritchhorror.core.view.draganddrop.impl.ColorUtils.drawZone;
 
 /**
  * @author msivak
@@ -25,7 +26,7 @@ public class TargetActor extends HorizontalGroup {
     public TargetActor() {
         align(Align.left);
         colorActor = new Actor();
-        createColorAction(colorActor, new Color(0x00cc0055), new Color(0x33ff3355));
+        createColorAction(colorActor, new Color(0x5fb98a80), new Color(0x8fe0b0ff));
 
     }
 
@@ -37,12 +38,7 @@ public class TargetActor extends HorizontalGroup {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.setColor(colorActor.getColor().r,
-                colorActor.getColor().g,
-                colorActor.getColor().b,
-                colorActor.getColor().a * parentAlpha);
-        batch.draw(CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND), getX(), getY(), getWidth(), getHeight());
-        batch.setColor(Color.WHITE);
+        drawZone(batch, colorActor.getColor(), parentAlpha, getX(), getY(), getWidth(), getHeight());
         super.draw(batch, parentAlpha);
     }
 

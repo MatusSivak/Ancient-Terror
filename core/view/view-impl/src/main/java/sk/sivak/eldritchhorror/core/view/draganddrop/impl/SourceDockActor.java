@@ -10,6 +10,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 
 import static sk.sivak.eldritchhorror.core.view.draganddrop.impl.ColorUtils.createColorAction;
+import static sk.sivak.eldritchhorror.core.view.draganddrop.impl.ColorUtils.drawZone;
 
 /**
  * @author msivak
@@ -22,7 +23,7 @@ public class SourceDockActor extends HorizontalGroup {
     public SourceDockActor() {
         align(Align.bottomLeft);
         colorActor = new Actor();
-        createColorAction(colorActor, new Color(0xff333355), new Color(0xcc000055));
+        createColorAction(colorActor, new Color(0xb5655a66), new Color(0xd47a6ccc));
     }
 
     public void init(CardTemplate... cardTemplates) {
@@ -53,13 +54,7 @@ public class SourceDockActor extends HorizontalGroup {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.setColor(colorActor.getColor().r,
-                colorActor.getColor().g,
-                colorActor.getColor().b,
-                colorActor.getColor().a * parentAlpha);
-        Texture texture = CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND);
-        batch.draw(texture, getX(), getY(), getWidth(), getHeight());
-        batch.setColor(Color.WHITE);
+        drawZone(batch, colorActor.getColor(), parentAlpha, getX(), getY(), getWidth(), getHeight());
         super.draw(batch, parentAlpha);
     }
 }
