@@ -22,10 +22,9 @@ public class BlessingOfIsisSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore-1. If you pass,\n" +
-                "choose an investigator on your space\n" +
-                "that does not have a Blessed Condition\n" +
-                "to gain a Blessed Condition.\n" +
+        return "ACTION: Test Lore-1.\n" +
+                "Pass → an investigator on your space\n" +
+                "without Blessed gains Blessed.\n" +
                 "Then flip this card.";
     }
 }

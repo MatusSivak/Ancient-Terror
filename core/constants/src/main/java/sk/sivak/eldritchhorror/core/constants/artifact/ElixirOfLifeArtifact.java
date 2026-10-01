@@ -21,9 +21,8 @@ public class ElixirOfLifeArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Will. If you pass,\n" +
-                "you may spend 1 Sanity\n" +
-                "to recover all Health\n" +
+        return "ACTION: Test Will.\n" +
+                "Pass: 1 Sanity → recover all Health\n" +
                 "and discard all Illness, Injury\n" +
                 "and Madness Conditions.";
     }

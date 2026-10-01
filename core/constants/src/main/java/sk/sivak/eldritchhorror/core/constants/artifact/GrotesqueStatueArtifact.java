@@ -20,9 +20,9 @@ public class GrotesqueStatueArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card, gain 5 Clues.\n" +
+        return "When gained → gain 5 Clues.\n" +
                 "\n" +
-                "Once per round, you may spend 1 Clue\n" +
-                "to prevent all Sanity loss from a single effect.";
+                "Once per round: 1 Clue → prevent\n" +
+                "all Sanity loss from 1 effect.";
     }
 }

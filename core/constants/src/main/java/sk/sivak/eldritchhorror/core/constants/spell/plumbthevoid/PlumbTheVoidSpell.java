@@ -22,9 +22,8 @@ public class PlumbTheVoidSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore-1. If you pass,\n" +
-                "an investigator of your choice\n" +
-                "may move to any space.\n" +
-                "Then flip this card.";
+        return "ACTION: Test Lore-1.\n" +
+                "Pass → any investigator may move\n" +
+                "to any space. Then flip this card.";
     }
 }

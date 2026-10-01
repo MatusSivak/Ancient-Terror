@@ -46,9 +46,10 @@ public class FontGlyphEnricherTest {
                 return new TextureRegion(texture);
             });
         }
-        assertEquals(6, loads[0]);
-        assertEquals(7, font.getRegions().size);
-        for (String name : new String[]{"Influence", "Strength", "Observation", "Will", "Lore", "→"}) {
+        assertEquals(13, loads[0]);
+        assertEquals(14, font.getRegions().size);
+        for (String name : new String[]{"Influence", "Strength", "Observation", "Will", "Lore", "→", "RECKONING",
+                "Health", "Sanity", "Clue", "Clues", "Focus", "flip this card", "discard this card"}) {
             assertNotNull(data.getGlyph(FontGlyphEnricher.getGlyph(name)));
         }
         } finally {

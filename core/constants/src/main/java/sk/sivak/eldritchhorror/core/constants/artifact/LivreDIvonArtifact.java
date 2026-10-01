@@ -21,8 +21,7 @@ public class LivreDIvonArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore-1. If you pass,\n" +
-                "you may spend one Sanity\n" +
-                "to move to any space of your choice.";
+        return "ACTION: Test Lore-1.\n" +
+                "Pass: 1 Sanity → move to any space.";
     }
 }

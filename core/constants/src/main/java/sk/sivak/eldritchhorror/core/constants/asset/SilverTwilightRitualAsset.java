@@ -26,8 +26,7 @@ public class SilverTwilightRitualAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately retreat Doom.\n" +
+        return "When gained: retreat Doom.\n" +
                 "Then discard this card.";
     }
 }

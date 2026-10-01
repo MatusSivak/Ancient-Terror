@@ -28,7 +28,6 @@ public class Dot45ColtRevolverAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Once per round\n" +
-                "Combat Strength tests:\n" +
-                "+3 Swaps";
+                "Combat: +3 Strength.";
     }
 }

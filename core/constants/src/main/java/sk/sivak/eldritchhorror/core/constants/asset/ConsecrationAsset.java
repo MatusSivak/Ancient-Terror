@@ -26,8 +26,7 @@ public class ConsecrationAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately gain 1 Boon Condition.\n" +
+        return "When gained: gain 1 Boon Condition.\n" +
                 "Then discard this card.";
     }
 }

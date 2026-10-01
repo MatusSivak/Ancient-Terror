@@ -21,8 +21,8 @@ public class PallidMaskArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "During the Encounter Phase,\n" +
-                "you may choose an encounter as if\n" +
-                "there are no Monsters on your space.";
+        return "Encounter Phase: you may choose\n" +
+                "an encounter as if no Monsters\n" +
+                "are on your space.";
     }
 }

@@ -27,6 +27,6 @@ public class Dot45AutomaticAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +3 Strength during Combat Encounters.";
+        return "Combat: +3 Strength.";
     }
 }

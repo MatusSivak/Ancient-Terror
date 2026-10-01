@@ -26,8 +26,7 @@ public class IntelligenceReportAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately gain 2 Clues.\n" +
+        return "When gained: gain 2 Clues.\n" +
                 "Then discard this card.";
     }
 }

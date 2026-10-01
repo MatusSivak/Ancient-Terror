@@ -26,8 +26,8 @@ public class WitchDoctorAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Investigators on your space may recover 1 additional Health\n" +
-                "or\n" +
-                "discard a Cursed Condition when performing a Rest action.";
+        return "Rest: investigators on your space\n" +
+                "may recover 1 extra Health\n" +
+                "or discard a Cursed Condition.";
     }
 }

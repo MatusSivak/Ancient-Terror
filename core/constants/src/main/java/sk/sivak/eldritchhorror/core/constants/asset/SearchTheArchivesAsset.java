@@ -26,8 +26,7 @@ public class SearchTheArchivesAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately gain one Tome\n" +
+        return "When gained: gain 1 Tome\n" +
                 "from the deck.";
     }
 }

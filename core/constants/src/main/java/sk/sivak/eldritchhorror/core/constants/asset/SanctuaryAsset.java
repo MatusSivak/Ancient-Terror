@@ -26,9 +26,8 @@ public class SanctuaryAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "you may immediately\n" +
-                "discard 1 Condition.\n" +
+        return "When gained: you may discard\n" +
+                "1 Condition.\n" +
                 "Then discard this card.";
     }
 }

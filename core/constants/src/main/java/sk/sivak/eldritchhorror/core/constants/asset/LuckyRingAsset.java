@@ -26,6 +26,6 @@ public class LuckyRingAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may reroll 1 die\nwhen resolving a test.";
+        return "Tests: reroll 1 die.";
     }
 }

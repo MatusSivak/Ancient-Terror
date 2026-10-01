@@ -18,11 +18,10 @@ public class DetainedCondition extends AbstractConditionInfo {
     @Override
     public String getDescription() {
         return "You cannot move or perform actions\n" +
-                "other than the action on this card.\n\n" +
-                "Instead of resolving an encounter,\n" +
-                "flip this card.\n\n" +
+                "except this card's action.\n" +
+                "Instead of an encounter → flip this card.\n" +
                 "LOCAL ACTION: Test Influence.\n" +
-                "If you pass, discard this card.";
+                "Pass → discard this card.";
     }
 
     @Override

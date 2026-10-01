@@ -27,6 +27,6 @@ public class GruesomeTalismanAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Combat Will tests:\n" +
-                "+1 Lift";
+                "add 1 to the result of 1 die.";
     }
 }

@@ -29,6 +29,6 @@ public class ExpeditionMapAsset extends AbstractAssetInfo {
     public String getDescription() {
         return "Once per round\n" +
                 "Expedition tests:\n" +
-                "+1 Lift";
+                "add 1 to the result of 1 die.";
     }
 }

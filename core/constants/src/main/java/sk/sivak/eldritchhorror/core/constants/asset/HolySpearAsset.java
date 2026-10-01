@@ -29,7 +29,6 @@ public class HolySpearAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +4 Strength\n" +
-                "during Combat Encounters.";
+        return "Combat: +4 Strength.";
     }
 }

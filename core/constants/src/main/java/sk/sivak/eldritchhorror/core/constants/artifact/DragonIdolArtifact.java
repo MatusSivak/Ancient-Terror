@@ -22,12 +22,10 @@ public class DragonIdolArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: You lose 1 Sanity\n" +
-                "and 1 Monster on your space or\n" +
-                "an adjacent space loses 2 Health.\n" +
+        return "ACTION: Lose 1 Sanity → 1 Monster on\n" +
+                "or adjacent to your space loses 2 Health.\n" +
                 "\n" +
-                "You may spend 1 Sanity to reroll\n" +
-                "any number of dice when resolving\n" +
-                "a Strength test during a Combat Encounter.";
+                "Combat Strength tests:\n" +
+                "1 Sanity → reroll any dice.";
     }
 }

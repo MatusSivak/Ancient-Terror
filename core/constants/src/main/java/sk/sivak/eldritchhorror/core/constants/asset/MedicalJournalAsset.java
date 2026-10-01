@@ -27,10 +27,9 @@ public class MedicalJournalAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may reroll 1 die when resolving\n" +
-                "a Strength test as part of\n" +
-                "an Illness or Injury Condition effect.\n" +
+        return "Illness and Injury Condition\n" +
+                "Strength tests: reroll 1 die.\n" +
                 "\n" +
-                "When you perform a Rest action, recover 1 additional Health";
+                "Rest: recover 1 extra Health.";
     }
 }

@@ -27,11 +27,9 @@ public class ArcaneTomeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Lore when \n" +
-                "resolving Spell effects.\n" +
+        return "Spell effects: +2 Lore.\n" +
                 "\n" +
-                "When you perform a Rest action,\n" +
-                "you may test Lore.\n" +
-                "If you pass, gain 1 Spell.";
+                "Rest: you may test Lore.\n" +
+                "Pass → gain 1 Spell.";
     }
 }

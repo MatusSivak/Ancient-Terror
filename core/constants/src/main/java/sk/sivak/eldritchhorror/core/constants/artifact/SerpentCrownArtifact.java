@@ -26,9 +26,8 @@ public class SerpentCrownArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Will -1. If you pass,\n" +
-                "you may spend 1 Sanity to\n" +
-                "gain a random Ally.\n" +
+        return "ACTION: Test Will -1.\n" +
+                "Pass: 1 Sanity → gain a random Ally.\n" +
                 "\n" +
                 "RECKONING: Discard 1 Ally.";
     }

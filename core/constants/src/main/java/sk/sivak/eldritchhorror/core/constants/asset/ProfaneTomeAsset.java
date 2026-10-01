@@ -27,7 +27,6 @@ public class ProfaneTomeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Combat Will tests:\n" +
-                "+1 Reroll";
+        return "Combat Will tests: reroll 1 die.";
     }
 }

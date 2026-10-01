@@ -26,8 +26,7 @@ public class CharterFlightAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately move up to 2 spaces.\n" +
+        return "When gained: move up to 2 spaces.\n" +
                 "Then discard this card.";
     }
 }

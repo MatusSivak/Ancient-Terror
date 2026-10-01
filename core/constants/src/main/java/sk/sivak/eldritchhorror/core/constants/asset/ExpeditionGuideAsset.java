@@ -26,9 +26,8 @@ public class ExpeditionGuideAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you spend a Focus to reroll a die\n" +
-                "when resolving an Observation\n" +
-                "or Strength test,\n" +
-                "you may reroll up to 2 dice instead.";
+        return "Observation and Strength tests:\n" +
+                "when you spend Focus to reroll,\n" +
+                "reroll up to 2 dice instead.";
     }
 }

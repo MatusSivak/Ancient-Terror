@@ -17,12 +17,11 @@ public class HeadInjuryCondition extends AbstractConditionInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform a Rest action,\n" +
-                "you cannot recover Sanity.\n" +
-                "Roll 1 die. On a 4, 5, or 6,\n" +
-                "discard this card.\n\n" +
+        return "Rest: you cannot recover Sanity.\n" +
+                "Roll 1 die: 4, 5 or 6 → discard this card.\n" +
+                "\n" +
                 "RECKONING: Test Strength.\n" +
-                "If you fail, flip this card.";
+                "Fail → flip this card.";
     }
 
     @Override

@@ -22,10 +22,9 @@ public class SwordOfYhaTallaArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Will and +3 Strength\n" +
-                "during Combat Encounters.\n" +
+        return "Combat: +2 Will and +3 Strength.\n" +
                 "\n" +
-                "If you defeat a Monster during\n" +
-                "a Combat Encounter, gain 1 Clue.";
+                "Defeat a Monster in combat →\n" +
+                "gain 1 Clue.";
     }
 }

@@ -22,9 +22,8 @@ public class WitherSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "When resolving a Combat Encounter,\n" +
-                "you may test Lore. If you pass,\n" +
-                "gain +3 Strength during that encounter.\n" +
+        return "Combat: you may test Lore.\n" +
+                "Pass → +3 Strength for that combat.\n" +
                 "Then flip this card.";
     }
 }

@@ -26,7 +26,7 @@ public class LuckyRabbitsFootAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round\n" +
-                "+1 Reroll";
+        return "Once per round, on a test:\n" +
+                "reroll 1 die.";
     }
 }

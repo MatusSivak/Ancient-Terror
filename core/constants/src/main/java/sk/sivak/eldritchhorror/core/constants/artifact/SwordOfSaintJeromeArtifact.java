@@ -22,11 +22,9 @@ public class SwordOfSaintJeromeArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Will and +5 Strength\n" +
-                "when resolving Combat Encounters.\n" +
+        return "Combat: +2 Will and +5 Strength.\n" +
                 "\n" +
-                "If you defeat a Monster\n" +
-                "during a Combat Encounter,\n" +
+                "Defeat a Monster in combat →\n" +
                 "recover 1 Sanity.";
     }
 }

@@ -26,7 +26,8 @@ public class HandcuffsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Before resolving the Strength test during a Combat Encounter,\n" +
-                "you may spend 1 Focus to defeat that Monster if it has toughness 2 or less.";
+        return "Before the Combat Strength test:\n" +
+                "1 Focus → defeat the Monster\n" +
+                "if its toughness is 2 or less.";
     }
 }

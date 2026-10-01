@@ -26,11 +26,9 @@ public class HyperboreanCrystalArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "You may discard one Spell\n" +
-                "to reroll any number of dice\n" +
-                "when resolving a test\n" +
-                "except when resolving a Spell effect.\n" +
+        return "Discard 1 Spell → reroll any dice\n" +
+                "on a test (not Spell effects).\n" +
                 "\n" +
-                "RECKONING: Gain one Spell.";
+                "RECKONING: Gain 1 Spell.";
     }
 }

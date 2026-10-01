@@ -22,9 +22,9 @@ public class FeedTheMindSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore-1. If you pass,\n" +
-                "choose an investigator on your space\n" +
-                "to improve 1 skill of his choice.\n" +
+        return "ACTION: Test Lore-1.\n" +
+                "Pass → an investigator on your space\n" +
+                "improves 1 skill of their choice.\n" +
                 "Then flip this card.";
     }
 }

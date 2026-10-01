@@ -21,11 +21,8 @@ public class EltdownShardsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend one Sanity\n" +
-                "to discard one Monster\n" +
-                "of your choice\n" +
-                "with toughness three or less\n" +
-                "on any space";
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → discard 1 Monster\n" +
+                "on any space with toughness 3 or less.";
     }
 }

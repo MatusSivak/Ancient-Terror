@@ -26,8 +26,7 @@ public class FineClothesAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Each 6 you roll when performing\n" +
-                "an Acquire Assets action\n" +
-                "counts as 2 successes.";
+        return "Acquire Assets action:\n" +
+                "each 6 counts as 2 successes.";
     }
 }

@@ -21,11 +21,9 @@ public class GateBoxArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Investigators on your space\n" +
-                "roll 1 additional die when resolving\n" +
-                "tests during Other World Encounters.\n" +
+        return "Investigators on your space roll\n" +
+                "1 extra die in Other World Encounters.\n" +
                 "\n" +
-                "If you close a Gate during\n" +
-                "an Other World Encounter, gain 1 Clue.";
+                "Close a Gate there → gain 1 Clue.";
     }
 }

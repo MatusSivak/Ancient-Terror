@@ -21,11 +21,9 @@ public class MaskOfTheWatcherArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Reduce the horror of\n" +
-                "Monsters you encounter to 1.\n" +
+        return "Monsters you encounter\n" +
+                "have horror 1.\n" +
                 "\n" +
-                "When you pass a Will test\n" +
-                "during a Combat Encounter,\n" +
-                "gain 1 Focus.";
+                "Pass a Combat Will test → gain 1 Focus.";
     }
 }

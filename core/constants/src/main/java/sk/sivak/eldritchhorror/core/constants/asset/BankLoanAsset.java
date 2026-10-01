@@ -26,10 +26,7 @@ public class BankLoanAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When performing\n" +
-                "an Acquire Assets action,\n" +
-                "you may take a Debt Condition\n" +
-                "to immediately add\n" +
-                "two successes to your result.";
+        return "Acquire Assets action:\n" +
+                "take a Debt Condition → +2 successes.";
     }
 }

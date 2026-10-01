@@ -22,9 +22,9 @@ public class PoisonedCondition extends AbstractConditionInfo{
 
     @Override
     public String getDescription() {
-        return "When you perform a Rest action,\n" +
-                "you cannot recover Health nor Sanity.\n" +
-                "Flip this card.\n\n" +
+        return "Rest: you recover no Health or Sanity.\n" +
+                "Then flip this card.\n" +
+                "\n" +
                 "RECKONING: Lose 1 Health.";
     }
 }

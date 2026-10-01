@@ -16,11 +16,10 @@ public class VoiceOfRaSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
-                "during the Action Phase,\n" +
-                "you may spend 1 Health and 1 Sanity\n" +
-                "to perform 1 additional action.\n\n" +
-                "RECKONING: Test Lore and flip this card.";
+        return "Once per round, in the Action Phase:\n" +
+                "1 Health and 1 Sanity → 1 extra action.\n" +
+                "\n" +
+                "RECKONING: Test Lore, then flip this card.";
     }
 
     @Override

@@ -26,10 +26,8 @@ public class PuzzleBoxAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform a Rest action,\n" +
-                "you may attempt to open the puzzle box\n" +
-                "(Test Observation -2).\n" +
-                "If you pass, you may\n" +
-                "discard this card to gain 1 Artifact.";
+        return "Rest: you may test Observation -2.\n" +
+                "Pass: Discard this card →\n" +
+                "gain 1 Artifact.";
     }
 }

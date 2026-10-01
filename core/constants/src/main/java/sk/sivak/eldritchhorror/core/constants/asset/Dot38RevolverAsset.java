@@ -27,7 +27,6 @@ public class Dot38RevolverAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Combat Strength tests:\n" +
-                "+2 Swaps";
+        return "Combat: +2 Strength.";
     }
 }

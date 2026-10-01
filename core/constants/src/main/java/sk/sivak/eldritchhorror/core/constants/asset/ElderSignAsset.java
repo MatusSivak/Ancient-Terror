@@ -27,11 +27,8 @@ public class ElderSignAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may reroll 1 die\n" +
-                "when resolving a Will test\n" +
-                "during a Combat Encounter.\n" +
+        return "Combat Will tests: reroll 1 die.\n" +
                 "\n" +
-                "Reduce the Horror of Monsters\n" +
-                "you encounter by 1 to a minimum of 1.";
+                "greenMinus1 Monster Horror (min. 1)";
     }
 }

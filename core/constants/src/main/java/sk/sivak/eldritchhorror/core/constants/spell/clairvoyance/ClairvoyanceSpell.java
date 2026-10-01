@@ -22,12 +22,9 @@ public class ClairvoyanceSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "During the Encounter Phase,\n" +
-                "you may test Lore.\n" +
-                "If you pass, you may\n" +
-                "choose to encounter a Clue\n" +
-                "as if you are on its space,\n" +
-                "ignoring Monsters on that space.\n" +
+        return "Encounter Phase: you may test Lore.\n" +
+                "Pass → encounter a Clue as if on its\n" +
+                "space, ignoring Monsters there.\n" +
                 "Then flip this card.";
     }
 }

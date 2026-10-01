@@ -22,11 +22,8 @@ public class ArcaneInsightSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "Choose yourself or another investigator\n" +
-                "on any space and test Lore-2.\n" +
-                "Roll one additional die for\n" +
-                "each Tome possession you have.\n" +
-                "If you pass, that investigator gains one Clue.\n" +
+        return "Test Lore-2, +1 die per Tome you have.\n" +
+                "Pass → any investigator gains 1 Clue.\n" +
                 "Then flip this card.";
     }
 }

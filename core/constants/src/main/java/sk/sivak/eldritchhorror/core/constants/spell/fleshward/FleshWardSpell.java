@@ -22,11 +22,9 @@ public class FleshWardSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round,\n" +
-                "when an investigator would lose Health,\n" +
-                "you may test Lore.\n" +
-                "If you pass, prevent that investigator\n" +
-                "from losing up to 2 Health.\n" +
+        return "Once per round, when an investigator\n" +
+                "would lose Health: you may test Lore.\n" +
+                "Pass → prevent up to 2 Health loss.\n" +
                 "Then flip this card.";
     }
 }

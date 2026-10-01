@@ -21,11 +21,9 @@ public class BonePipesArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend 1 Sanity to\n" +
-                "choose 1 Monster on your space\n" +
-                "or an adjacent space.\n" +
-                "The chosen Monster loses\n" +
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → 1 Monster on or\n" +
+                "adjacent to your space loses\n" +
                 "2 Health or moves 1 space.";
     }
 }

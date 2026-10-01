@@ -27,9 +27,8 @@ public class MysteriousTomeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you spend a Focus to reroll a die\n" +
-                "when resolving a Lore\n" +
-                "or Will test,\n" +
-                "you may reroll up to 2 dice instead.";
+        return "Lore and Will tests:\n" +
+                "when you spend Focus to reroll,\n" +
+                "reroll up to 2 dice instead.";
     }
 }

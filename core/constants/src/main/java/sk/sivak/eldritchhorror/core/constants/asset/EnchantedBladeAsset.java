@@ -28,7 +28,6 @@ public class EnchantedBladeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Will and +3 Strength\n" +
-                "during Combat Encounters.";
+        return "Combat: +1 Will and +3 Strength.";
     }
 }

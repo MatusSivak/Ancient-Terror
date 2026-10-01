@@ -26,8 +26,6 @@ public class MuseumCuratorAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round\n" +
-                "Expedition tests:\n" +
-                "+1 Reroll";
+        return "Expedition tests: reroll 1 die.";
     }
 }

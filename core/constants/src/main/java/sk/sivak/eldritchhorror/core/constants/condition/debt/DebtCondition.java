@@ -20,9 +20,10 @@ public class DebtCondition extends AbstractConditionInfo {
     @Override
     public String getDescription() {
         return "LOCAL ACTION: Test Influence.\n" +
-                "If you pass, discard this card.\n\n" +
-                "RECKONING: Some men have come\nto " +
-                "collect on your debt.\nFlip this card.";
+                "Pass → discard this card.\n" +
+                "\n" +
+                "RECKONING: Collectors come\n" +
+                "for your debt → flip this card.";
     }
 
     @Override

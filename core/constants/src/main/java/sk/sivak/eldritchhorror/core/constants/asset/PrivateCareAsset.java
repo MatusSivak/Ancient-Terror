@@ -26,9 +26,8 @@ public class PrivateCareAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately recover\n" +
-                "all Health and Sanity.\n" +
+        return "When gained: recover all Health\n" +
+                "and Sanity.\n" +
                 "Then discard this card.";
     }
 }

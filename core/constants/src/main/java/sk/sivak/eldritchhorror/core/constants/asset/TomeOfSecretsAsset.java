@@ -27,8 +27,9 @@ public class TomeOfSecretsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may spend 1 Focus in place of spending 1 Clue.\n" +
+        return "Once per round: spend 1 Focus\n" +
+                "instead of 1 Clue.\n" +
                 "\n" +
-                "When you perform a Focus action, recover 1 Sanity.";
+                "Focus action: recover 1 Sanity.";
     }
 }

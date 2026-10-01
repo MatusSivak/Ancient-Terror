@@ -22,9 +22,9 @@ public class BanishmentSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "Test Lore+2. If you pass,\n" +
-                "discard one Monster on the nearest Gate\n" +
-                "with toughness <= your test result.\n\n" +
-                "Then flip this card.";
+        return "Test Lore+2.\n" +
+                "Pass → discard 1 Monster on the\n" +
+                "nearest Gate with toughness up to\n" +
+                "your result. Then flip this card.";
     }
 }

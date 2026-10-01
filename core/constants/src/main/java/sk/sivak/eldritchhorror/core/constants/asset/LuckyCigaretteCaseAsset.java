@@ -26,8 +26,7 @@ public class LuckyCigaretteCaseAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may\n" +
-                "add 1 to the result of 1 die\n" +
-                "when resolving a test.";
+        return "Once per round, on a test:\n" +
+                "add 1 to the result of 1 die.";
     }
 }

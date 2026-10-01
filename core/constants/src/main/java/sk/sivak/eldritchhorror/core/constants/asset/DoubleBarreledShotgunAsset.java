@@ -27,11 +27,9 @@ public class DoubleBarreledShotgunAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +4 Strength\n" +
-                "during Combat Encounters.\n" +
+        return "Combat: +4 Strength.\n" +
                 "\n" +
-                "Each 6 you roll when resolving\n" +
-                "a Strength test during a Combat Encounter\n" +
-                "counts as 2 successes.";
+                "Combat Strength tests:\n" +
+                "each 6 counts as 2 successes.";
     }
 }

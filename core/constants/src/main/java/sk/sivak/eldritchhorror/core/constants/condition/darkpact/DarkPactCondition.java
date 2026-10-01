@@ -27,9 +27,8 @@ public class DarkPactCondition extends AbstractConditionInfo{
 
     @Override
     public String getDescription() {
-        return "RECKONING: Roll 1 die. On a 1, \n" +
-                "it is time to fulfill\n" +
-                "your part of the bargain.\n" +
-                "Flip this card.";
+        return "RECKONING: Roll 1 die.\n" +
+                "1 → your bargain comes due:\n" +
+                "flip this card.";
     }
 }

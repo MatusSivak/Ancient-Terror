@@ -4,6 +4,11 @@ package sk.sivak.eldritchhorror.core.view.components.card;
  * @author msivak
  */
 public enum CardKeywords {
+    // Phrases must precede DISCARD so the glyph phrase is matched before the bare word gets coloured.
+    FLIP_THIS_CARD("flip this card"),
+    FLIP_THIS_CARD_CAPITALIZED("Flip this card"),
+    DISCARD_THIS_CARD("discard this card"),
+    DISCARD_THIS_CARD_CAPITALIZED("Discard this card"),
     LOCAL_ACTION("LOCAL ACTION:", "000cb3"),
     ACTION("ACTION:", "000cb3"),
     RECKONING("RECKONING", "9B2C2C"),
@@ -28,6 +33,12 @@ public enum CardKeywords {
     INFLUENCE("Influence"),
     OBSERVATION("Observation"),
     LORE("Lore"),
+    HEALTH("Health"),
+    SANITY("Sanity"),
+    CLUES("Clues"),
+    CLUE("Clue"),
+    FOCUS("Focus"),
+    GREEN_MINUS_ONE("greenMinus1","008000","-1"),
     GREEN_MINUS_TWO("greenMinus2","008000","-2");
 
     private String word;

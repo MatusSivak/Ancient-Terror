@@ -26,10 +26,8 @@ public class PatrollingTheStreetsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you defeat a Monster\n" +
-                "with toughness three or more\n" +
-                "during a Combat Encounter,\n" +
-                "you may discard this card\n" +
-                "to retreat Doom.";
+        return "Defeat a Monster with toughness\n" +
+                "3 or more in combat:\n" +
+                "Discard this card → retreat Doom.";
     }
 }

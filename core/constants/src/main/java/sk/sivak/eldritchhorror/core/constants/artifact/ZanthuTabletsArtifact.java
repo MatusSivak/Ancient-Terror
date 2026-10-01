@@ -21,10 +21,10 @@ public class ZanthuTabletsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend 1 Sanity to gain 2 Spells,\n" +
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → gain 2 Spells,\n" +
                 "then discard 1 Spell.\n" +
                 "\n" +
-                "Gain +3 Lore when resolving Spell effects.\n";
+                "Spell effects: +3 Lore.";
     }
 }

@@ -26,9 +26,7 @@ public class AppealToTheCouncilAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "you may immediately spend 2 Clues\n" +
-                "to retreat Doom.\n" +
+        return "When gained: 2 Clues → retreat Doom.\n" +
                 "Then discard this card.";
     }
 }

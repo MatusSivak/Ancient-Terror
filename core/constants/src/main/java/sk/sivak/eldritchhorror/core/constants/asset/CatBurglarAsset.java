@@ -26,9 +26,9 @@ public class CatBurglarAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Roll 1 die. On a 5 or 6,\n" +
-                "gain 1 Item or Trinket Asset\n" +
-                "from the reserve.\n" +
-                "On a 1, discard this card.";
+        return "ACTION: Roll 1 die.\n" +
+                "5 or 6 → gain 1 Item or Trinket\n" +
+                "Asset from the reserve.\n" +
+                "1 → discard this card.";
     }
 }

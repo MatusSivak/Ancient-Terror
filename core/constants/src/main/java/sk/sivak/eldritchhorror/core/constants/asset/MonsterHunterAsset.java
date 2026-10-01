@@ -26,10 +26,9 @@ public class MonsterHunterAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Strength\n" +
-                "during Combat Encounters.\n" +
+        return "Combat: +2 Strength.\n" +
                 "\n" +
-                "ACTION: A Monster of your choice\n" +
-                "on your space loses one Health.";
+                "ACTION: 1 Monster on your space\n" +
+                "loses 1 Health.";
     }
 }

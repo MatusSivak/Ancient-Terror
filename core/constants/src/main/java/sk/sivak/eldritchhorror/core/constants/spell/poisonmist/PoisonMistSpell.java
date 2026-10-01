@@ -17,11 +17,10 @@ public class PoisonMistSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore +1. If you pass,\n" +
-                "discard Monsters from your space\n" +
-                "with total toughness equal to or less than\n" +
-                "your test result.\n" +
-                "Then flip this card";
+        return "ACTION: Test Lore +1.\n" +
+                "Pass → discard Monsters on your space\n" +
+                "with total toughness up to your result.\n" +
+                "Then flip this card.";
     }
 
     @Override

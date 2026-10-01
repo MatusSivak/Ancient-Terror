@@ -27,9 +27,8 @@ public class TomeOfHorrorsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Will during Combat Encounters.\n" +
+        return "Combat: +2 Will.\n" +
                 "\n" +
-                "Reduce the horror of Monsters\n" +
-                "you encounter by 1, to a minimum of 1.";
+                "greenMinus1 Monster Horror (min. 1)";
     }
 }

@@ -23,8 +23,7 @@ public class MiGoBrainCaseArtifact extends AbstractArtifactInfo {
     @Override
     public String getDescription() {
         return "ACTION: You and another investigator\n" +
-                "may trade possessions.\n" +
-                "In addition, he may move to your space.\n" +
-                "If he does, move to his previous space.";
+                "may trade possessions. They may\n" +
+                "then swap spaces with you.";
     }
 }

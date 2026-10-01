@@ -26,10 +26,8 @@ public class NewspaperReportAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "After resolving a Research Encounter,\n" +
-                "you may spend one Clue\n" +
-                "you gained from that encounter\n" +
-                "and discard this card\n" +
-                "to retreat Doom.";
+        return "After a Research Encounter:\n" +
+                "spend 1 Clue gained there and\n" +
+                "discard this card → retreat Doom.";
     }
 }

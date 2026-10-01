@@ -26,10 +26,8 @@ public class PoliceAssistanceAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately discard 1 Monster\n" +
-                "of your choice on any space\n" +
-                "with toughness 2 or less.\n" +
+        return "When gained: discard 1 Monster with\n" +
+                "toughness 2 or less on any space.\n" +
                 "Then discard this card.";
     }
 }

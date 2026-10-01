@@ -26,11 +26,8 @@ public class FishingNetAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may reroll 1 die\n" +
-                "when resolving a Strength test\n" +
-                "during a Combat Encounter.\n" +
+        return "Combat Strength tests: reroll 1 die.\n" +
                 "\n" +
-                "Reduce the Damage of Monsters\n" +
-                "you encounter by 1 to a minimum of 1.";
+                "greenMinus1 Monster Damage (min. 1)";
     }
 }

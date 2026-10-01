@@ -22,8 +22,7 @@ public class LightningGunArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +6 Strength when\n" +
-                "resolving a Combat Encounter.\n" +
+        return "Combat: +6 Strength.\n" +
                 "\n" +
                 "ACTION: You and each Monster\n" +
                 "on your space lose 1 Health.";

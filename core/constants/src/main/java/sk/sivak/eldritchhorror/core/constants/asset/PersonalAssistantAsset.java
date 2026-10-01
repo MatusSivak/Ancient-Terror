@@ -26,8 +26,8 @@ public class PersonalAssistantAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Influence.\n" +
+        return "+1 Influence.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving an Influence test.";
+                "Influence tests: reroll 1 die.";
     }
 }

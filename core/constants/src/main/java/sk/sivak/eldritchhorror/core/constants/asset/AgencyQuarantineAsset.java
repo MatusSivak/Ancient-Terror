@@ -26,10 +26,8 @@ public class AgencyQuarantineAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately choose a space.\n" +
-                "Each Monster on the chosen space\n" +
-                "loses 4 Health.\n" +
+        return "When gained: choose a space.\n" +
+                "Each Monster there loses 4 Health.\n" +
                 "Then discard this card.";
     }
 }

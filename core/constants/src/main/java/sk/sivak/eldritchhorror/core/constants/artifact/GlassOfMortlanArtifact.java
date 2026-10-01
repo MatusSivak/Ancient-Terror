@@ -21,10 +21,10 @@ public class GlassOfMortlanArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Each 6 you roll when resolving\n" +
-                "a Spell effect counts as 2 successes.\n" +
+        return "Spell effects: each 6 counts\n" +
+                "as 2 successes.\n" +
                 "\n" +
-                "You may prevent the loss of 1 Sanity\n" +
-                "when resolving your Spell effects.";
+                "You may prevent 1 Sanity loss\n" +
+                "from your Spell effects.";
     }
 }

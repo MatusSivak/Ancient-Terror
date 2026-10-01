@@ -27,8 +27,8 @@ public class AstronomyGuidebookAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you close a Gate\n" +
-                "during an Other World Encounter,\n" +
-                "recover one Sanity and gain one Clue.";
+        return "Close a Gate in an Other World\n" +
+                "Encounter → recover 1 Sanity\n" +
+                "and gain 1 Clue.";
     }
 }

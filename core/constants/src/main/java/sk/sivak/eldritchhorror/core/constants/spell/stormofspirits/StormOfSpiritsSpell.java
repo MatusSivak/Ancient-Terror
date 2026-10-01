@@ -22,10 +22,8 @@ public class StormOfSpiritsSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "When resolving a Combat Encounter,\n" +
-                "you may resolve a Lore test\n" +
-                "in place of a Strength test,\n" +
-                "using the same test modifier.\n\n" +
+        return "Combat: you may test Lore instead\n" +
+                "of Strength (same modifier).\n" +
                 "Then flip this card.";
     }
 }

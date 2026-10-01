@@ -21,8 +21,8 @@ public class TtkaHalotArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend 1 Sanity to choose\n" +
-                "1 Monster on your space to lose 3 Health.";
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → 1 Monster on\n" +
+                "your space loses 3 Health.";
     }
 }

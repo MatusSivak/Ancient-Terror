@@ -22,11 +22,10 @@ public class LostInTimeAndSpaceCondition extends AbstractConditionInfo {
 
     @Override
     public String getDescription() {
-        return "Remove your Investigator token\n" +
-                "from the game board.\n\n" +
-                "You are unaffected by other game effects and\n" +
-                "cannot move or perform actions.\n\n" +
-                "Instead of resolving an encounter,\n" +
-                "flip this card.";
+        return "Remove your token from the board.\n" +
+                "You are unaffected by other effects\n" +
+                "and cannot move or perform actions.\n" +
+                "\n" +
+                "Instead of an encounter → flip this card.";
     }
 }

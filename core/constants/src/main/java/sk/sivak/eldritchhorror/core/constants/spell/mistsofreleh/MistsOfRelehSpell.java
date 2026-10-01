@@ -22,11 +22,9 @@ public class MistsOfRelehSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "During the Encounter Phase,\n" +
-                "you may test Lore.\n" +
-                "If you pass, you may\n" +
-                "choose an encounter as if\n" +
-                "there are no Monsters on your space.\n" +
+        return "Encounter Phase: you may test Lore.\n" +
+                "Pass → choose an encounter as if\n" +
+                "no Monsters are on your space.\n" +
                 "Then flip this card.";
     }
 }

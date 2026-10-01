@@ -21,7 +21,7 @@ public class FluteOfTheOuterGodsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Spend 2 Health and 2 Sanity\n" +
-                "to defeat all Monsters on your space.";
+        return "ACTION: 2 Health and 2 Sanity →\n" +
+                "defeat all Monsters on your space.";
     }
 }

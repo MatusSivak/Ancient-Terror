@@ -27,10 +27,9 @@ public class BlunderbussAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When resolving a Combat Encounter,\n" +
-                "you may gain +2 Strength.\n\n" +
-                "If you do, each 6 you roll\n" +
-                "counts as 2 successes\n" +
-                "and each 1 negates 1 success.";
+        return "Combat: you may gain +2 Strength.\n" +
+                "If you do, each 6 counts as\n" +
+                "2 successes and each 1\n" +
+                "cancels 1 success.";
     }
 }

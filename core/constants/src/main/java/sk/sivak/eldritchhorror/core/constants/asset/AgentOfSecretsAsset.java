@@ -26,9 +26,9 @@ public class AgentOfSecretsAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore and +1 Observation.\n" +
+        return "+1 Lore and +1 Observation.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving\n" +
-                "a Lore or Observation test.";
+                "Lore and Observation tests:\n" +
+                "reroll 1 die.";
     }
 }

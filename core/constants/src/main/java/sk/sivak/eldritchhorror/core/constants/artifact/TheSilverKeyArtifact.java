@@ -21,10 +21,10 @@ public class TheSilverKeyArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may spend\n" +
-                "1 less Clue to pay for an effect.\n" +
+        return "Once per round: pay 1 less Clue\n" +
+                "for an effect.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving a test\n" +
-                "during an Other World Encounter.";
+                "Other World Encounter tests:\n" +
+                "reroll 1 die.";
     }
 }

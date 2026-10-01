@@ -26,9 +26,8 @@ public class VaticanMissionaryAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Will.\n" +
+        return "+1 Will.\n" +
                 "\n" +
-                "You may reroll 1 die\n" +
-                "when resolving a Will test.";
+                "Will tests: reroll 1 die.";
     }
 }

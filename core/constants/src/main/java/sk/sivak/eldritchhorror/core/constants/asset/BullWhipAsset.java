@@ -27,6 +27,8 @@ public class BullWhipAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Combat Strength tests:\n+1 Swap, +1 Reroll";
+        return "Combat: +1 Strength.\n" +
+                "\n" +
+                "Combat Strength tests: reroll 1 die.";
     }
 }

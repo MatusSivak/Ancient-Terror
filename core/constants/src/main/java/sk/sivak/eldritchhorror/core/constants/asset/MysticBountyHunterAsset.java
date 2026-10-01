@@ -26,10 +26,7 @@ public class MysticBountyHunterAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Strength during\n" +
-                "Combat Encounters.\n" +
-                "\n" +
-                "Gain +2 Lore when\n" +
-                "resolving Spell effects.";
+        return "Combat: +1 Strength.\n" +
+                "Spell effects: +2 Lore.";
     }
 }

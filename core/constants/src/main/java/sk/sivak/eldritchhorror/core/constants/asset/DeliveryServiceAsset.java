@@ -27,10 +27,9 @@ public class DeliveryServiceAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately give any number\n" +
-                "of Item possessions to another investigator\n" +
-                "on any space.\n" +
+        return "When gained: give any number of\n" +
+                "Item possessions to another\n" +
+                "investigator on any space.\n" +
                 "Then discard this card.";
     }
 }

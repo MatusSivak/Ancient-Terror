@@ -26,9 +26,8 @@ public class LavishFeastAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately recover\n" +
-                "2 Health and 2 Sanity.\n" +
+        return "When gained: recover 2 Health\n" +
+                "and 2 Sanity.\n" +
                 "Then discard this card.";
     }
 }

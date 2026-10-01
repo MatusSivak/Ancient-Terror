@@ -26,11 +26,8 @@ public class SyndicateAgentAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Strength\n" +
-                "during Combat Encounters.\n" +
+        return "Combat: +2 Strength.\n" +
                 "\n" +
-                "You may reroll 1 die when\n" +
-                "resolving a Strength test\n" +
-                "during a Combat Encounter.";
+                "Combat Strength tests: reroll 1 die.";
     }
 }

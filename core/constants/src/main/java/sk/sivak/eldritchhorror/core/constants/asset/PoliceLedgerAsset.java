@@ -26,10 +26,7 @@ public class PoliceLedgerAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform a Rest action,\n" +
-                "you may attempt to decipher the ledger\n" +
-                "(Test Observation).\n" +
-                "If you pass, you may\n" +
-                "discard this card to gain 1 Clue.";
+        return "Rest: you may test Observation.\n" +
+                "Pass: Discard this card → gain 1 Clue.";
     }
 }

@@ -26,6 +26,6 @@ public class HolyCrossAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Will during Combat Encounters.";
+        return "Combat: +2 Will.";
     }
 }

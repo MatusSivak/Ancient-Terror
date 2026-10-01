@@ -26,9 +26,8 @@ public class BodyguardAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Strength.\n" +
+        return "+1 Strength.\n" +
                 "\n" +
-                "Reduce the Damage of Monsters you encounter\n" +
-                "by 1 to a minimum of 1.";
+                "greenMinus1 Monster Damage (min. 1)";
     }
 }

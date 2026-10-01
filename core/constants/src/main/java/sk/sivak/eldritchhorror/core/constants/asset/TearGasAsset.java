@@ -28,7 +28,7 @@ public class TearGasAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "Combat Strength tests:\n" +
-                "Discard → +2 Rerolls\n" +
+                "Discard this card → reroll up to 2 dice\n" +
                 "greenMinus2 Monster Damage (min. 1)";
     }
 }

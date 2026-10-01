@@ -26,10 +26,8 @@ public class SpecializedTrainingAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform a Focus action,\n" +
-                "you may consult experts to train you\n" +
-                "(Test Will).\n" +
-                "If you pass, discard this card\n" +
-                "and improve 1 Skill of your choice.";
+        return "Focus action: you may test Will.\n" +
+                "Pass: Discard this card →\n" +
+                "improve 1 skill of your choice.";
     }
 }

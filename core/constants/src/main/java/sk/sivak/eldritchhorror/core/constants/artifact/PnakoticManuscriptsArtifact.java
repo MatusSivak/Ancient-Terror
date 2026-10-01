@@ -21,10 +21,8 @@ public class PnakoticManuscriptsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore and +1 Will.\n" +
+        return "+1 Lore and +1 Will.\n" +
                 "\n" +
-                "ACTION: If you are on a space\n" +
-                "containing a Gate,\n" +
-                "gain one Clue.";
+                "ACTION: On a Gate space → gain 1 Clue.";
     }
 }

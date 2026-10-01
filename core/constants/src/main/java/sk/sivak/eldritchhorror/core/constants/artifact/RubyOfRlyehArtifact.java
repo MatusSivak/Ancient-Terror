@@ -21,8 +21,7 @@ public class RubyOfRlyehArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, during the Action Phase,\n" +
-                "you may spend 1 Sanity and\n" +
-                "perform 1 additional action.";
+        return "Once per round, in the Action Phase:\n" +
+                "1 Sanity → 1 extra action.";
     }
 }

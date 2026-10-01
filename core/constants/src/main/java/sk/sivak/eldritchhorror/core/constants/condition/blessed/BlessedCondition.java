@@ -16,10 +16,11 @@ public class BlessedCondition extends AbstractConditionInfo {
 
     @Override
     public String getDescription() {
-        return "4, 5, and 6's count as successes on your tests.\n" +
-                "If you would gain another Blessed Condition, flip this card instead.\n" +
-                "If you would gain a Cursed\nCondition, discard this card instead.\n" +
-                "RECKONING: Roll 1 die.\nOn a 1 or 2, discard this card.";
+        return "Your tests succeed on 4, 5 or 6.\n" +
+                "Gain another Blessed → flip this card.\n" +
+                "Gain a Cursed → discard this card.\n" +
+                "RECKONING: Roll 1 die.\n" +
+                "1 or 2 → discard this card.";
     }
 
     @Override

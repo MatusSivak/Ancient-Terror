@@ -27,10 +27,9 @@ public class SecretPageAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore when resolving Spell effects.\n" +
+        return "Spell effects: +1 Lore.\n" +
                 "\n" +
-                "When you gain this card\n" +
-                "from the deck or reserve,\n" +
-                "gain one Spell.";
+                "When gained from the deck\n" +
+                "or reserve → gain 1 Spell.";
     }
 }

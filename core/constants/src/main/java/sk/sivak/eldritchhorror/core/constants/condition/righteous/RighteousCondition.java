@@ -17,11 +17,10 @@ public class RighteousCondition extends AbstractConditionInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform\n" +
-                "a Focus action or a Rest action,\n" +
-                "gain 1 Focus or recover 1 Sanity.\n\n" +
-                "RECKONING:\n" +
-                "You may flip this card.";
+        return "Focus or Rest action:\n" +
+                "gain 1 Focus or recover 1 Sanity.\n" +
+                "\n" +
+                "RECKONING: You may flip this card.";
     }
 
     @Override

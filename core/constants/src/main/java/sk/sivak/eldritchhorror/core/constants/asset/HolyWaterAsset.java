@@ -27,8 +27,10 @@ public class HolyWaterAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: You may discard this card to choose an investigator on your space.\n" +
-                "That investigator gains a Blessed Condition.\n\n" +
-                "You may discard this card to gain +5 Will and +5 Strength during a Combat Encounter.";
+        return "ACTION: Discard this card → 1 investigator\n" +
+                "on your space gains Blessed.\n" +
+                "\n" +
+                "Combat: Discard this card →\n" +
+                "+5 Will and +5 Strength.";
     }
 }

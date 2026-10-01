@@ -27,8 +27,9 @@ public class AxeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Strength during Combat Encounters.\n" +
+        return "Combat: +2 Strength.\n" +
                 "\n" +
-                "You may spend 2 Sanity to reroll any number of dice when resolving a Strength test during a Combat Encounter.";
+                "Combat Strength tests:\n" +
+                "2 Sanity → reroll any dice.";
     }
 }

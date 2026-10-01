@@ -26,9 +26,8 @@ public class WhiskeyAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may discard this card\n" +
-                "to prevent an investigator\n" +
-                "on your space from\n" +
-                "losing up to 2 Sanity.";
+        return "Discard this card → prevent up to\n" +
+                "2 Sanity loss for an investigator\n" +
+                "on your space.";
     }
 }

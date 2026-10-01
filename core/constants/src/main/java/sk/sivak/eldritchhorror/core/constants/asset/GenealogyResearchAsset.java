@@ -26,11 +26,9 @@ public class GenealogyResearchAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you defeat a Monster\n" +
-                "with toughness two or more\n" +
-                "during a Combat Encounter,\n" +
-                "you may examine the creature's remains (Test Observation).\n" +
-                "If you pass, gain 2 Clues\n" +
-                "and discard this card.";
+        return "Defeat a Monster with toughness\n" +
+                "2 or more in combat → you may\n" +
+                "test Observation.\n" +
+                "Pass → gain 2 Clues, discard this card.";
     }
 }

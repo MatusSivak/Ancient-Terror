@@ -23,11 +23,9 @@ public class InterveneSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "When another investigator\n" +
-                "resolves a Combat Encounter,\n" +
-                "you may test Lore. If you pass,\n" +
-                "that investigator gains +3 Strength\n" +
-                "during that encounter.\n" +
+        return "Another investigator's Combat:\n" +
+                "you may test Lore.\n" +
+                "Pass → they gain +3 Strength.\n" +
                 "Then flip this card.";
     }
 }

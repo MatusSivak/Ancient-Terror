@@ -27,8 +27,8 @@ public class DynamiteAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: You may discard this card\n" +
-                "to cause each Monster\n" +
-                "on your space to lose 3 Health.";
+        return "ACTION: Discard this card →\n" +
+                "each Monster on your space\n" +
+                "loses 3 Health.";
     }
 }

@@ -25,11 +25,9 @@ public class AlienDeviceArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +3 Lore when resolving Spell effects.\n" +
+        return "Spell effects: +3 Lore.\n" +
                 "\n" +
-                "You may spend one Sanity\n" +
-                "to reroll any number of dice\n" +
-                "when resolving a Lore test\n" +
-                "as part of a Spell effect.";
+                "Spell effect Lore tests:\n" +
+                "1 Sanity → reroll any dice.";
     }
 }

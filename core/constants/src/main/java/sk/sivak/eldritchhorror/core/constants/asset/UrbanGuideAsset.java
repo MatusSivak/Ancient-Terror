@@ -26,9 +26,8 @@ public class UrbanGuideAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "If you are on a City space, " +
-                "investigators on your space roll 1 additional die " +
-                "when resolving tests " +
-                "except when resolving Other World Encounters.";
+        return "On a City space: investigators on\n" +
+                "your space roll 1 extra die on tests\n" +
+                "(except Other World Encounters).";
     }
 }

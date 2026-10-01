@@ -26,12 +26,9 @@ public class MineralogyResearchAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "After resolving a General Encounter\n" +
-                "or an Expedition Encounter\n" +
-                "on a Wilderness space,\n" +
-                "you may examine the area's soil\n" +
-                "(Test Observation).\n" +
-                "If you pass, gain two Clues\n" +
-                "and discard this card.";
+        return "After a General or Expedition\n" +
+                "Encounter on a Wilderness space:\n" +
+                "you may test Observation.\n" +
+                "Pass → gain 2 Clues, discard this card.";
     }
 }

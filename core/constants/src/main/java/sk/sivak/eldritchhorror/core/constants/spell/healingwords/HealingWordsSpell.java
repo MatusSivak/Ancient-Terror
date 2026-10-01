@@ -23,11 +23,8 @@ public class HealingWordsSpell extends AbstractSpellInfo {
     @Override
     public String getDescription() {
         return "When an investigator on your space\n" +
-                "performs a Rest action,\n" +
-                "you may test Lore. If you pass,\n" +
-                "that investigator recovers\n" +
-                "1 additional Health and\n" +
-                "1 additional Sanity.\n" +
-                "Then flip this card.";
+                "Rests: you may test Lore.\n" +
+                "Pass → they recover 1 extra Health\n" +
+                "and 1 extra Sanity. Then flip this card.";
     }
 }

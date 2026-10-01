@@ -20,8 +20,7 @@ public class CrystalOfTheElderThingsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Mythos card text effects\n" +
-                "cannot cause you\n" +
-                "to lose Health or Sanity.";
+        return "Mythos card effects cannot\n" +
+                "make you lose Health or Sanity.";
     }
 }

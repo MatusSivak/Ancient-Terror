@@ -21,7 +21,7 @@ public class CultesDesGoulesArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend 1 Sanity to gain 2 Clues.";
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → gain 2 Clues.";
     }
 }

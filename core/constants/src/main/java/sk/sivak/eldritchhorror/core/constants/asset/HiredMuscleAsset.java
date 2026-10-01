@@ -26,8 +26,8 @@ public class HiredMuscleAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Strength.\n" +
+        return "+1 Strength.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving a Strength test.";
+                "Strength tests: reroll 1 die.";
     }
 }

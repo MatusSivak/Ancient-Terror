@@ -26,8 +26,7 @@ public class LodgeResearcherAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "If you defeat a Monster\n" +
-                "during a Combat Encounter,\n" +
+        return "Defeat a Monster in combat →\n" +
                 "recover 1 Sanity and gain 1 Clue.";
     }
 }

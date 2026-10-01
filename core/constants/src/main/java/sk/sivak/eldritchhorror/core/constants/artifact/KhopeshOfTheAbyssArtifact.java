@@ -23,11 +23,10 @@ public class KhopeshOfTheAbyssArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +5 Strength during Combat Encounters.\n" +
+        return "Combat: +5 Strength.\n" +
                 "\n" +
-                "Once per round, when you defeat\n" +
-                "a Monster during a Combat Encounter,\n" +
-                "you may move to the nearest space\n" +
-                "containing a Monster.";
+                "Once per round, defeat a Monster in\n" +
+                "combat → you may move to the\n" +
+                "nearest space with a Monster.";
     }
 }

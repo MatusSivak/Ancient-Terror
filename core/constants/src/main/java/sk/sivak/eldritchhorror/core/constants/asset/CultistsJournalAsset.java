@@ -28,7 +28,6 @@ public class CultistsJournalAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Will and +2 Strength\n" +
-                "during Combat Encounters.";
+        return "Combat: +2 Will and +2 Strength.";
     }
 }

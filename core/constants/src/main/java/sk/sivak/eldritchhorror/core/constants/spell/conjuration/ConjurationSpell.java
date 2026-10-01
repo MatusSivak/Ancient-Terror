@@ -22,12 +22,9 @@ public class ConjurationSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore+1. If you pass,\n" +
-                "you may gain\n" +
-                "1 Item or Trinket\n" +
+        return "ACTION: Test Lore+1.\n" +
+                "Pass → gain 1 Item or Trinket\n" +
                 "from the reserve with value\n" +
-                "equal to or less than\n" +
-                "your test result.\n" +
-                "Then flip this card.";
+                "up to your result. Then flip this card.";
     }
 }

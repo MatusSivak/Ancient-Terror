@@ -26,11 +26,10 @@ public class RequiemPerShuggayArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore -1. If you pass,\n" +
-                "you may spend 1 Sanity to discard 1 Monster\n" +
-                "on a space containing a Gate.\n" +
+        return "ACTION: Test Lore -1.\n" +
+                "Pass: 1 Sanity → discard 1 Monster\n" +
+                "on a space with a Gate.\n" +
                 "\n" +
-                "RECKONING: Roll 1 die.\n" +
-                "On a 1, advance Doom by 1.";
+                "RECKONING: Roll 1 die. 1 → Doom advances.";
     }
 }

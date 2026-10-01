@@ -27,10 +27,8 @@ public class KingJamesBibleAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You may reroll 1 die when resolving\n" +
-                "a Will test during a Combat Encounter.\n" +
+        return "Combat Will tests: reroll 1 die.\n" +
                 "\n" +
-                "When you perform a Rest action,\n" +
-                "recover 1 additional Sanity.";
+                "Rest: recover 1 extra Sanity.";
     }
 }

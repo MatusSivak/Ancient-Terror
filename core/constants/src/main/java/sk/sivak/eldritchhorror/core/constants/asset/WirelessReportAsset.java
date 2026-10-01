@@ -27,8 +27,7 @@ public class WirelessReportAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you gain this card,\n" +
-                "immediately give any number of Clues\n" +
+        return "When gained: give any number of Clues\n" +
                 "to another investigator on any space.\n" +
                 "Then discard this card.";
     }

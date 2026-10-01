@@ -21,8 +21,7 @@ public class DeVermisMysteriisArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "you may spend 1 Sanity to\n" +
-                "improve 1 Skill of your choice.";
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → improve any 1 skill.";
     }
 }

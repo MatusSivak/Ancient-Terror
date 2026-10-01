@@ -16,10 +16,9 @@ public class ShrivelingSpell extends AbstractSpellInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Test Lore. If you pass,\n" +
-                "choose a Monster on your space\n" +
-                "to lose 2 Health.\n" +
-                "Then flip this card.";
+        return "ACTION: Test Lore.\n" +
+                "Pass → 1 Monster on your space\n" +
+                "loses 2 Health. Then flip this card.";
     }
 
     @Override

@@ -26,9 +26,10 @@ public class ConspiracyTheoristAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Observation during Research Encounters.\n" +
+        return "Research Encounters: +2 Observation.\n" +
                 "\n" +
-                "RECKONING: Roll 1 die. On a 4, 5, or 6, gain 1 Clue.";
+                "RECKONING: Roll 1 die.\n" +
+                "4, 5 or 6 → gain 1 Clue.";
     }
 
     @Override

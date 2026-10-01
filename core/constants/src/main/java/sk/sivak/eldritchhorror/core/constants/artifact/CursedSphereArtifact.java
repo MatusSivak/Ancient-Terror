@@ -26,9 +26,9 @@ public class CursedSphereArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 to all skills.\n" +
+        return "+2 to all skills.\n" +
                 "\n" +
                 "RECKONING: Roll 1 die.\n" +
-                "On a 1 or 2, gain a Cursed Condition.";
+                "1 or 2 → gain a Cursed Condition.";
     }
 }

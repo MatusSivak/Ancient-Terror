@@ -27,10 +27,9 @@ public class MapOfTheLeyLinesAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore and +1 Will.\n\n" +
-                "Once per round,\n" +
-                "you may reroll one die\n" +
-                "when resolving a test\n" +
-                "during an Other World Encounter.";
+        return "+1 Lore and +1 Will.\n" +
+                "\n" +
+                "Once per round, Other World\n" +
+                "Encounter tests: reroll 1 die.";
     }
 }

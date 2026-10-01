@@ -26,12 +26,9 @@ public class GamblersDiceAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "You roll a minimum of two dice\n" +
-                "when resolving tests.\n" +
+        return "Tests: roll at least 2 dice.\n" +
                 "\n" +
-                "Once per round,\n" +
-                "you may reroll two dice\n" +
-                "with matching results\n" +
-                "when resolving a test.";
+                "Once per round: reroll 2 dice\n" +
+                "with matching results.";
     }
 }

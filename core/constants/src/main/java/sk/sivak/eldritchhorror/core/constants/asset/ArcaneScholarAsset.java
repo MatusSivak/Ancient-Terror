@@ -26,8 +26,8 @@ public class ArcaneScholarAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Lore.\n" +
+        return "+1 Lore.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving a Lore test.";
+                "Lore tests: reroll 1 die.";
     }
 }

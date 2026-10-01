@@ -21,13 +21,10 @@ public class SatchelOfTheVoidArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "ACTION: Look at the top Gate\n" +
-                "in the Gate stack.\n" +
-                "Gain 1 Clue if that Gate\n" +
-                "represents current Omen.\n" +
-                "\n"+
-                "You cannot gain a\n" +
-                "Lost in Time and Space Condition\n" +
+        return "ACTION: Look at the top Gate.\n" +
+                "Matches the Omen → gain 1 Clue.\n" +
+                "\n" +
+                "You cannot gain Lost in Time and Space\n" +
                 "unless you choose to.";
     }
 }

@@ -21,11 +21,8 @@ public class DholChantsArtifact extends AbstractArtifactInfo {
 
     @Override
     public String getDescription() {
-        return "When resolving a Combat Encounter,\n" +
-                "you may test Lore. If you pass,\n" +
-                "you may spend one Sanity\n" +
-                "to roll three additional dice\n" +
-                "when resolving the Strength test\n" +
-                "during that encounter.";
+        return "Combat: you may test Lore.\n" +
+                "Pass: 1 Sanity → roll 3 extra dice\n" +
+                "on the Combat Strength test.";
     }
 }

@@ -28,10 +28,7 @@ public class ArcaneBladeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +2 Strength when\n" +
-                "resolving Combat Encounters.\n" +
-                "\n" +
-                "Gain +2 Lore when\n" +
-                "resolving Spell effects.";
+        return "Combat: +2 Strength.\n" +
+                "Spell effects: +2 Lore.";
     }
 }

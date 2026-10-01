@@ -27,7 +27,7 @@ public class ResearchStudentAsset extends AbstractAssetInfo {
     @Override
     public String getDescription() {
         return "ACTION: Roll 1 die.\n" +
-                "On a 5 or 6, gain 1 Clue.\n" +
-                "On a 1, discard the nearest Clue.";
+                "5 or 6 → gain 1 Clue.\n" +
+                "1 → discard the nearest Clue.";
     }
 }

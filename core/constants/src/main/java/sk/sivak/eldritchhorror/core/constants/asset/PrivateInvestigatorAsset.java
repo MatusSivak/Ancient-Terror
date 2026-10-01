@@ -26,9 +26,8 @@ public class PrivateInvestigatorAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Gain +1 Observation.\n" +
+        return "+1 Observation.\n" +
                 "\n" +
-                "You may reroll 1 die when resolving\n" +
-                "an Observation test.";
+                "Observation tests: reroll 1 die.";
     }
 }

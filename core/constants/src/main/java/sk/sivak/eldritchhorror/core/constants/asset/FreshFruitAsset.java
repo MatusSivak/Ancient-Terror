@@ -26,6 +26,8 @@ public class FreshFruitAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "When you perform a Rest action, you may discard this card to recover 1 additional Health and 1 additional Sanity.";
+        return "Rest: Discard this card →\n" +
+                "recover 1 extra Health\n" +
+                "and 1 extra Sanity.";
     }
 }
