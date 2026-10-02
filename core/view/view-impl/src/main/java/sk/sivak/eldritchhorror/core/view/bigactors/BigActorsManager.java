@@ -191,6 +191,9 @@ public class BigActorsManager {
         }
         getInstance().ancientOneAwaken = awaken;
         switch (ancientOneId) {
+            case YIG:
+                getInstance().ancientOneCard = new sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.YigCard();
+                break;
             case AZATHOTH:
                 getInstance().ancientOneCard = new AzathothCard();
                 break;

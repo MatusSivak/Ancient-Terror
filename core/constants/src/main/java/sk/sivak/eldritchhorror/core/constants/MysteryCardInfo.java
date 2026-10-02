@@ -31,4 +31,10 @@ public interface MysteryCardInfo {
     void setProgressSupplier(Supplier<Integer> progressSupplier);
 
     void setPinLocationsSupplier(Supplier<List<LocationId>> pinLocationsSupplier);
+
+    List<Integer> getSpecialEncounterDeck();
+
+    int getClueCredit();
+
+    void setClueCredit(int clueCredit);
 }

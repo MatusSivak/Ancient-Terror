@@ -2,6 +2,16 @@ package sk.sivak.eldritchhorror.core.constants;
 
 public interface MysteryCardId {
 
+    enum Yig implements MysteryCardId {
+        CROWN_OF_THE_SERPENT,
+        DESCENDANTS_OF_YIG,
+        KN_YAN_UNEARTHED,
+        MIGRATION_OF_SERPENTS,
+        RISE_OF_THE_SERPENT_PEOPLE,
+        THE_WINGED_SERPENT,
+        SERPENTS_NEST
+    }
+
     enum Azathoth implements MysteryCardId {
         SEED_OF_THE_DAEMON_SULTAN,
         OMEN_OF_DEVASTATION,

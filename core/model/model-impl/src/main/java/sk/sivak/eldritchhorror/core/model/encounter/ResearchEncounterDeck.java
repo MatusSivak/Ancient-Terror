@@ -24,6 +24,7 @@ public class ResearchEncounterDeck implements ResearchEncounterDeckWrite {
         cardCountMap.put(AncientOneId.CTHULHU, 18);
         cardCountMap.put(AncientOneId.SHUB_NIGGURATH, 16);
         cardCountMap.put(AncientOneId.YOG_SOTHOTH, 16);
+        cardCountMap.put(AncientOneId.YIG, 24);
     }
 
 

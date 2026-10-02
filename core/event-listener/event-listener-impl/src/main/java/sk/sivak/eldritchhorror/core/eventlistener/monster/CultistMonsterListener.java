@@ -30,7 +30,10 @@ public class CultistMonsterListener extends AbstractMonsterListener {
 
     private void x(Consumer<AbstractMonsterListener> registerFunction) {
         AncientOneInfo ancientOneInfo = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo();
-        if (AncientOneId.AZATHOTH == ancientOneInfo.getAncientOneId()) {
+        if (AncientOneId.YIG == ancientOneInfo.getAncientOneId()) {
+            wrappedMonsterListener = new YigCultistMonsterListener();
+            registerFunction.accept(wrappedMonsterListener);
+        } else if (AncientOneId.AZATHOTH == ancientOneInfo.getAncientOneId()) {
             wrappedMonsterListener = new AzathothCultistMonsterListener();
             registerFunction.accept(wrappedMonsterListener);
         } else if (AncientOneId.CTHULHU == ancientOneInfo.getAncientOneId()) {

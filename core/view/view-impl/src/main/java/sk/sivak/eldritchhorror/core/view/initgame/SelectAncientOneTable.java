@@ -41,6 +41,7 @@ public class SelectAncientOneTable extends Table {
                                  SingleSubscriber<? super AncientOneInfo> subscriber) {
         this.subscriber = subscriber;
         for (AncientOneInfo info : availableAncientOnes) choices.put(info.getAncientOneId(), info);
+        unlocked.put(AncientOneId.YIG, yogPurchased);
         unlocked.put(AncientOneId.AZATHOTH, true);
         unlocked.put(AncientOneId.CTHULHU, cthulhuPurchased);
         unlocked.put(AncientOneId.SHUB_NIGGURATH, shubPurchased);
@@ -58,7 +59,10 @@ public class SelectAncientOneTable extends Table {
             grid.add(card).size(288f, 224f).pad(3f);
             if (++count % 2 == 0) grid.row();
         }
-        gallery.add(grid).expand().top();
+        ScrollPane galleryScroll = new ScrollPane(grid);
+        galleryScroll.setScrollingDisabled(true, false);
+        galleryScroll.setOverscroll(false, false);
+        gallery.add(galleryScroll).grow();
 
         Table details = new Table();
         details.setBackground(panelBackground("07110FEE"));
@@ -173,6 +177,7 @@ public class SelectAncientOneTable extends Table {
     }
 
     private static String[] features(AncientOneId id) {
+        if (id == AncientOneId.YIG) return new String[]{"sixMysteries", "threeEpicMonsters", "yigEncounters"};
         if (id == AncientOneId.CTHULHU) return new String[]{"sixMysteries", "threeEpicMonsters", "eightyEncounters", "exploreRlyeh", "endingRisenFromSea", "priceCoffee"};
         if (id == AncientOneId.SHUB_NIGGURATH) return new String[]{"sixMysteries", "threeEpicMonsters", "seventyEncounters", "combatOriented", "endingBattleInWoods", "priceCoffee"};
         return new String[]{"sixMysteries", "dunwichHorror", "eightyEncounters", "visitVoidBetweenWorlds", "endingKeyAndGate", "priceCoffee"};

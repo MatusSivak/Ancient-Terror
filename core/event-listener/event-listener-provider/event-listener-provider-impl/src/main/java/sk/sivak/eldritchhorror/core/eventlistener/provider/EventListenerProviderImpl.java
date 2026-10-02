@@ -306,6 +306,9 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     public void registerAncientOneListeners(AncientOneInfo ancientOneInfo) {
         AncientOneId ancientOneId = ancientOneInfo.getAncientOneId();
         switch (ancientOneId) {
+            case YIG:
+                new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener().register();
+                break;
             case AZATHOTH:
                 azathothInitListener.register();
                 break;
@@ -339,6 +342,9 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     public void loadAncientOneListeners(AncientOneInfo ancientOneInfo) {
         AncientOneId ancientOneId = ancientOneInfo.getAncientOneId();
         switch (ancientOneId) {
+            case YIG:
+                new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener().load();
+                break;
             case AZATHOTH:
                 azathothInitListener.load();
                 break;
@@ -400,6 +406,9 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     }
 
     private MysteryListener findMysteryListener(MysteryCardInfo mysteryCardInfo) {
+        if (mysteryCardInfo.getMysteryCardId() instanceof MysteryCardId.Yig) {
+            return new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigMysteryListener(mysteryCardInfo);
+        }
         if (mysteryCardInfo.getMysteryCardId() instanceof MysteryCardId.Azathoth) {
             switch ((MysteryCardId.Azathoth) mysteryCardInfo.getMysteryCardId()) {
                 case SEED_OF_THE_DAEMON_SULTAN:
@@ -520,6 +529,8 @@ public class EventListenerProviderImpl implements EventListenerProvider {
         AbstractMonsterListener listener = null;
         if (EpicMonsterId.TULZSCHA == monsterId) {
             listener = new TulzschaMonsterListener();
+        } else if (EpicMonsterId.YIG == monsterId || EpicMonsterId.CHILDREN_OF_YIG == monsterId || EpicMonsterId.WINGED_SERPENT == monsterId) {
+            listener = new sk.sivak.eldritchhorror.core.eventlistener.monster.YigEpicMonsterListener();
         } else if (EpicMonsterId.HYDRA == monsterId) {
             listener = new HydraMonsterListener();
         } else if (EpicMonsterId.YEB == monsterId) {
@@ -673,6 +684,13 @@ public class EventListenerProviderImpl implements EventListenerProvider {
 
     @Override
     public void executeResearchEncounter(Integer page, LocationType locationType, LocationId locationId) {
+        if (ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo().getAncientOneId() == AncientOneId.YIG) {
+            sk.sivak.eldritchhorror.core.eventlistener.encounter.research.yig.YigResearchEncounter encounter =
+                    new sk.sivak.eldritchhorror.core.eventlistener.encounter.research.yig.YigResearchEncounter(page, locationType);
+            encounter.setLocationId(locationId);
+            encounter.executeWhole();
+            return;
+        }
         String ancientOneToLowercase = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo().getAncientOneId().toString().toLowerCase();
 
         try {

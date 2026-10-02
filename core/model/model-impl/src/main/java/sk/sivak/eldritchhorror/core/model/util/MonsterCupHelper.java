@@ -71,6 +71,9 @@ public class MonsterCupHelper {
         epicMonsterCup.add(new NugMonster());
         epicMonsterCup.add(new ShubNiggurathMonster());
 
+        epicMonsterCup.add(new sk.sivak.eldritchhorror.core.constants.monster.epic.ChildrenOfYigMonster());
+        epicMonsterCup.add(new sk.sivak.eldritchhorror.core.constants.monster.epic.WingedSerpentMonster());
+        epicMonsterCup.add(new sk.sivak.eldritchhorror.core.constants.monster.epic.YigMonster());
         return epicMonsterCup;
     }
 }

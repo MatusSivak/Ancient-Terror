@@ -23,7 +23,41 @@ public class AncientOneHelper {
         response.add(createCthulhu());
         response.add(createShubNiggurath());
         response.add(createYogSothoth());
+        response.add(createYig());
         return response;
+    }
+
+    public static AncientOneInfo createYig() {
+        AncientOneInfoImpl info = new AncientOneInfoImpl();
+        info.setAncientOneId(AncientOneId.YIG);
+        info.setStartingDoom(10);
+        info.setMythosCardCount(16);
+        info.setMysteriesRequired(3);
+        info.setName("ancientOne.yig.name");
+        info.setAltName("ancientOne.yig.alt");
+        info.setSetupText("ancientOne.yig.setup");
+        info.setSpecialText("ancientOne.yig.special");
+        info.setReckoningText("ancientOne.yig.reckoning");
+        info.setMidnightText("ancientOne.yig.midnight");
+        info.setWinText("ancientOne.yig.win");
+        info.setFlavorText("ancientOne.yig.flavor");
+        info.setEndGameText("ancientOne.yig.endGame");
+        info.setRemovedMonsters(Arrays.asList(NonEpicMonsterId.CULTIST, NonEpicMonsterId.CULTIST,
+                NonEpicMonsterId.CULTIST, NonEpicMonsterId.CULTIST, NonEpicMonsterId.CULTIST,
+                NonEpicMonsterId.CULTIST, NonEpicMonsterId.SERPENT_PEOPLE));
+        return info;
+    }
+
+    public static AncientOneInfo createAwakenYig() {
+        AncientOneInfoImpl info = (AncientOneInfoImpl) createYig();
+        info.setAwaken(true);
+        info.setStartingDoom(0);
+        info.setMysteriesRequired(4);
+        info.setAltName("ancientOne.yig.awaken.alt");
+        info.setSpecialText("ancientOne.yig.awaken.special");
+        info.setReckoningText("ancientOne.yig.awaken.reckoning");
+        info.setWinText("ancientOne.yig.awaken.win");
+        return info;
     }
 
     public static AncientOneInfo createAzathoth() {

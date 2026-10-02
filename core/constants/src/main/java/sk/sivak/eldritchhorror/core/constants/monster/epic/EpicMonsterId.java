@@ -15,7 +15,10 @@ public enum EpicMonsterId implements MonsterId {
     YEB,
     NUG,
     SHUB_NIGGURATH,
-    DUNWICH_HORROR;
+    DUNWICH_HORROR,
+    CHILDREN_OF_YIG,
+    WINGED_SERPENT,
+    YIG;
 
 
     @Override

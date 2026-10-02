@@ -12,8 +12,8 @@ public class ResearchEncounterTextBuilder extends EncounterTextBuilder {
     public ResearchEncounterTextBuilder(int page, LocationType locationType, AncientOneId ancientOneId) {
         this.ancientOneId = ancientOneId;
         this.page = page;
-        if (propertiesMap.get(EncounterType.RESEARCH.name()) != null) {
-            properties = propertiesMap.get(EncounterType.RESEARCH.name());
+        if (propertiesMap.get(cacheKey()) != null) {
+            properties = propertiesMap.get(cacheKey());
         } else {
             initProperties();
         }
@@ -26,8 +26,10 @@ public class ResearchEncounterTextBuilder extends EncounterTextBuilder {
     private void initProperties() {
         String fileName = "encounter/research_"+ancientOneId.name()+".properties";
         properties = loadPropertiesWithLocale(fileName);
-        propertiesMap.put(EncounterType.RESEARCH.name(), properties);
+        propertiesMap.put(cacheKey(), properties);
     }
+
+    private String cacheKey() { return EncounterType.RESEARCH.name() + ":" + ancientOneId.name(); }
 
     private void withLocationType(LocationType locationType) {
         switch (locationType) {

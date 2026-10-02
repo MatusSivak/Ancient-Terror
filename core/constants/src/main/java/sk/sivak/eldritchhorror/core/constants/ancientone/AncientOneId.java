@@ -7,7 +7,8 @@ public enum AncientOneId {
     AZATHOTH,
     CTHULHU,
     SHUB_NIGGURATH,
-    YOG_SOTHOTH;
+    YOG_SOTHOTH,
+    YIG;
 
     public String toPrettyString() {
         if (this == AZATHOTH) {
@@ -18,6 +19,8 @@ public enum AncientOneId {
             return "Shub-Niggurath";
         } else if (this == YOG_SOTHOTH){
             return "Yog-Sothoth";
+        } else if (this == YIG) {
+            return "Yig";
         } else {
             return "Error";
         }

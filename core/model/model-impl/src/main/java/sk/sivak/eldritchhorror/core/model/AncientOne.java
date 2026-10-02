@@ -31,6 +31,8 @@ public class AncientOne implements AncientOneWrite {
             ancientOneInfo = AncientOneHelper.createAwakenShubNiggurath();
         } else if (ancientOneInfo.getAncientOneId() == AncientOneId.YOG_SOTHOTH) {
             ancientOneInfo = AncientOneHelper.createAwakenYogSothoth();
+        } else if (ancientOneInfo.getAncientOneId() == AncientOneId.YIG) {
+            ancientOneInfo = AncientOneHelper.createAwakenYig();
         }
     }
 
@@ -51,6 +53,10 @@ public class AncientOne implements AncientOneWrite {
     @Override
     public void load(AncientOneSaveDataRead ancientOneSaveData) {
         switch (ancientOneSaveData.getAncientOneId()) {
+            case YIG:
+                ancientOneInfo = ancientOneSaveData.isAwaken()
+                        ? AncientOneHelper.createAwakenYig() : AncientOneHelper.createYig();
+                break;
             case AZATHOTH:
                 ancientOneInfo = AncientOneHelper.createAzathoth();
                 break;

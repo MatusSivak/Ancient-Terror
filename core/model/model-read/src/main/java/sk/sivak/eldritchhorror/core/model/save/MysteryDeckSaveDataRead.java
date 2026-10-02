@@ -9,8 +9,10 @@ public interface MysteryDeckSaveDataRead {
     List<MysteryCardId> getMysteryCards();
 
     int getProgress();
+    int getClueCredit();
 
     int getSolvedMysteries();
 
     List<LocationId> getPinLocations();
+    List<Integer> getSpecialEncounterDeck();
 }

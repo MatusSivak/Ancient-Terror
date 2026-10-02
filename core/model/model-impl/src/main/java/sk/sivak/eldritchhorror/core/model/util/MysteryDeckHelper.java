@@ -45,6 +45,8 @@ public class MysteryDeckHelper {
 
     public List<MysteryCardInfo> initMysteryDeck(AncientOneId ancientOneId, Integer nrOfInvestigators) {
         switch (ancientOneId) {
+            case YIG:
+                return YigMysteryDeck.create(nrOfInvestigators);
             case AZATHOTH:
                 return initAzathothMysteryDeck(nrOfInvestigators);
             case CTHULHU:
@@ -458,7 +460,7 @@ public class MysteryDeckHelper {
         return card;
     }
 
-    private class MysteryCardInfoImpl implements MysteryCardInfo {
+    static class MysteryCardInfoImpl implements MysteryCardInfo {
 
         private AncientOneId ancientOneId;
         private MysteryCardId mysteryCardId;
@@ -468,6 +470,12 @@ public class MysteryDeckHelper {
         private Integer mysteryComplexity;
         private Supplier<Integer> progressSupplier;
         private Supplier<List<LocationId>> pinLocationsSupplier;
+        private final List<Integer> specialEncounterDeck = new java.util.ArrayList<>();
+        private int clueCredit;
+        @Override public int getClueCredit() { return clueCredit; }
+        @Override public void setClueCredit(int clueCredit) { this.clueCredit = clueCredit; }
+
+        @Override public List<Integer> getSpecialEncounterDeck() { return specialEncounterDeck; }
 
         public Integer getMysteryComplexity() {
             return mysteryComplexity;

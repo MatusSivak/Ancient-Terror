@@ -73,6 +73,8 @@ public class MysteryDeck implements MysteryDeckWrite {
         MysteryDeckSaveData mysteryDeckSaveData = new MysteryDeckSaveData();
         mysteryDeckSaveData.setSolvedMysteries(solvedMysteries);
         mysteryDeckSaveData.setProgress(currentMysteryCard.getProgress());
+        mysteryDeckSaveData.setSpecialEncounterDeck(new LinkedList<>(currentMysteryCard.getSpecialEncounterDeck()));
+        mysteryDeckSaveData.setClueCredit(currentMysteryCard.getClueCredit());
         mysteryDeckSaveData.setPinLocations(new LinkedList<>(currentMysteryCard.getPinLocations()));
         List<MysteryCardId> mysteryCards = Stream.collectToList(Stream.map(this.mysteryCards, MysteryCardInfo::getMysteryCardId));
         mysteryCards.add(0, currentMysteryCard.getMysteryCardId());
@@ -90,6 +92,9 @@ public class MysteryDeck implements MysteryDeckWrite {
         }
         mysteryCards = newMysteryCards;
         solvedMysteries = saveData.getSolvedMysteries();
+        mysteryCards.get(0).setClueCredit(saveData.getClueCredit());
+        if (saveData.getSpecialEncounterDeck() != null)
+            mysteryCards.get(0).getSpecialEncounterDeck().addAll(saveData.getSpecialEncounterDeck());
         if (mysteryCards.get(0).getPinLocations() != null && !mysteryCards.get(0).getPinLocations().isEmpty()) {
             mysteryCards.get(0).setPinLocationsSupplier(saveData::getPinLocations);
         }
