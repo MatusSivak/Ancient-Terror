@@ -137,10 +137,10 @@ public final class FullGamePurchaseDialog extends Dialog {
         artwork.setBackground(SelectionPanelStyle.panel("0C1714", "89774B"));
         artwork.pad(5f);
         Table ancientOnes = new Table();
-        for (String id : new String[]{"cthulhu", "shub_niggurath", "yog_sothoth"}) {
+        for (String id : new String[]{"cthulhu", "shub_niggurath", "yog_sothoth", "yig"}) {
             Image ancientOne = new Image(CustomAssetManager.getTexture("ancient_one/button_" + id + ".jpg"));
             ancientOne.setScaling(Scaling.fit);
-            ancientOnes.add(ancientOne).size(82f).pad(1f);
+            ancientOnes.add(ancientOne).size(61f).pad(1f);
         }
         artwork.add(ancientOnes).row();
         Table portraits = new Table();

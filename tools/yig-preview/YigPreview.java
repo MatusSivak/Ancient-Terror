@@ -10,9 +10,11 @@ import sk.sivak.eldritchhorror.core.constants.ancientone.*;
 import sk.sivak.eldritchhorror.core.constants.monster.*;
 import sk.sivak.eldritchhorror.core.constants.monster.epic.*;
 import sk.sivak.eldritchhorror.core.model.util.AncientOneHelper;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.YigCultistMonsterListener;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.YigCard;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
 import sk.sivak.eldritchhorror.core.view.initgame.SelectAncientOneTable;
+import sk.sivak.eldritchhorror.core.view.initgame.FullGamePurchaseDialog;
 
 /** Offscreen production widgets; never opens or writes a saved game. */
 public class YigPreview extends ApplicationAdapter {
@@ -28,7 +30,17 @@ public class YigPreview extends ApplicationAdapter {
             VisUI.load();stage=new Stage(new FitViewport(960,540));
             YigCard card=new YigCard();card.init(AncientOneHelper.createYig());render(card,"yig-sleeping");
             AncientOneInfo awake=AncientOneHelper.createAwakenYig();awake.setPower(5);card.init(awake);render(card,"yig-awake");
-            ScrollPane scroll=findScroll(card);scroll.setScrollPercentY(1);scroll.updateVisualScroll();draw("yig-awake-bottom");
+            if(findScroll(card)!=null)throw new AssertionError("Yig rules should be visible without scrolling");
+            awake.setPower(0);card.init(awake);render(card,"yig-awake-empty");
+            awake.setPower(8);card.init(awake);render(card,"yig-awake-full");
+            card.init(AncientOneHelper.createYig());render(card,"yig-sleeping-reused");
+            for(boolean awakened : new boolean[]{false, true}) {
+                CultistMonster cultist = new CultistMonster();
+                YigCultistMonsterListener.configure(cultist, awakened, true);
+                MonsterCard cultistCard = new MonsterCard();
+                cultistCard.init(cultist, null);
+                render(cultistCard, awakened ? "yig-cultist-awake" : "yig-cultist-sleeping");
+            }
             for(AbstractMonsterInfo monster:new AbstractMonsterInfo[]{new YigMonster(),new ChildrenOfYigMonster(),new WingedSerpentMonster()}) {
                 monster.setToughness(monster instanceof YigMonster?5:4);monster.setCurrentHealth(monster.getToughness());
                 MonsterCard monsterCard=new MonsterCard();monsterCard.init(monster,null);render(monsterCard,monster.getClass().getSimpleName());
@@ -37,13 +49,22 @@ public class YigPreview extends ApplicationAdapter {
             render(selection,"selection-top");
             java.lang.reflect.Method select=SelectAncientOneTable.class.getDeclaredMethod("select",AncientOneId.class);
             select.setAccessible(true);select.invoke(selection,AncientOneId.YIG);
-            scroll=findScroll(selection);scroll.setScrollPercentY(1);scroll.updateVisualScroll();stage.act(0);draw("selection-yig");
-            System.out.println("PASS: sleeping/awake Yig, counter, three epic monsters, and scrollable five-Ancient-One selector rendered.");
+            stage.act(0);draw("selection-yig");
+            SelectAncientOneTable lockedSelection=new SelectAncientOneTable(AncientOneHelper.initAvailableAncientOnes(),false,false,false,null);
+            render(lockedSelection,"selection-locked");
+            select.invoke(lockedSelection,AncientOneId.YIG);stage.act(0);draw("selection-yig-locked");
+            for(int frame=0;frame<110;frame++)stage.act(1f/60f);
+            draw("selection-yig-locked-pulse");
+            stage.clear();
+            FullGamePurchaseDialog.show(stage, () -> {});
+            for(int frame=0;frame<60;frame++)stage.act(1f/60f);
+            draw("full-game-promo");
+            System.out.println("PASS: sleeping/awake Yig, counter, three epic monsters, and single-row five-Ancient-One selector (unlocked and locked) rendered.");
         } catch(Throwable failure) {failure.printStackTrace();System.exit(1);} finally {Gdx.app.exit();}
     }
     private void render(Table card,String name) throws Exception {
         stage.clear();stage.addActor(card);card.validate();
-        if(card.getHeight()>520 || card.getWidth()>950)throw new AssertionError("Offscreen: "+name+" "+card.getWidth()+"x"+card.getHeight());
+        if(card.getHeight()>540 || card.getWidth()>950)throw new AssertionError("Offscreen: "+name+" "+card.getWidth()+"x"+card.getHeight());
         card.setPosition((960-card.getWidth())/2,(540-card.getHeight())/2);stage.act(0);draw(name);
     }
     private ScrollPane findScroll(Group group) {

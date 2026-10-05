@@ -1,6 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
@@ -19,10 +21,13 @@ import java.util.Map;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
-/** Portrait selection and persistent details, matching investigator selection. */
+/** All ancient ones in one visible row, with persistent details below. */
 public class SelectAncientOneTable extends Table {
+    // Extend the chain ends past the 160px portrait into the dark card surround.
+    private static final float LOCK_SIZE = 168f;
     private final Map<AncientOneId, AncientOneInfo> choices = new EnumMap<>(AncientOneId.class);
     private final Map<AncientOneId, Table> cards = new EnumMap<>(AncientOneId.class);
+    private final Map<AncientOneId, Image> portraits = new EnumMap<>(AncientOneId.class);
     private final Map<AncientOneId, Image> locks = new EnumMap<>(AncientOneId.class);
     private final Map<AncientOneId, Boolean> unlocked = new EnumMap<>(AncientOneId.class);
     private final SingleSubscriber<? super AncientOneInfo> subscriber;
@@ -49,41 +54,40 @@ public class SelectAncientOneTable extends Table {
 
         Table gallery = new Table();
         gallery.setBackground(panelBackground("09130FE8"));
-        gallery.add(label(get("init.selectAncientOne"), 0.42f, "E8D9B0")).growX().height(44f).row();
+        gallery.pad(6f);
+        gallery.add(label(get("init.selectAncientOne"), 0.42f, "E8D9B0")).growX().height(36f).row();
         Table grid = new Table();
-        int count = 0;
         for (AncientOneId id : AncientOneId.values()) {
             if (!choices.containsKey(id)) continue;
             Table card = createCard(id);
             cards.put(id, card);
-            grid.add(card).size(288f, 224f).pad(3f);
-            if (++count % 2 == 0) grid.row();
+            grid.add(card).growX().uniformX().minWidth(0f).height(198f).padLeft(3f).padRight(3f);
         }
-        ScrollPane galleryScroll = new ScrollPane(grid);
-        galleryScroll.setScrollingDisabled(true, false);
-        galleryScroll.setOverscroll(false, false);
-        gallery.add(galleryScroll).grow();
+        gallery.add(grid).growX();
 
         Table details = new Table();
         details.setBackground(panelBackground("07110FEE"));
-        details.pad(14f);
-        details.add(name).growX().height(46f).row();
-        details.add(subtitle).growX().height(42f).padBottom(6f).row();
-        details.add(stats).growX().height(52f).padBottom(8f).row();
+        details.pad(12f);
+        Table summary = new Table();
+        summary.add(name).growX().height(34f).row();
+        summary.add(subtitle).growX().height(32f).row();
+        summary.add(stats).growX().height(40f).row();
+        summary.add(status).growX().height(24f).padBottom(6f).row();
         description.setAlignment(Align.topLeft);
         descriptionScroll = new ScrollPane(description);
         descriptionScroll.setScrollingDisabled(true, false);
         descriptionScroll.setOverscroll(false, false);
-        details.add(descriptionScroll).grow().minHeight(100f).padBottom(10f).row();
-        details.add(status).growX().height(30f).padBottom(6f).row();
+        descriptionScroll.setFadeScrollBars(false);
         confirm.getLabel().setFontScale(0.33f);
         confirm.getLabel().setWrap(true);
         AncientTerrorMenuStyles.makeMomentary(confirm);
         AncientTerrorMenuStyles.addFocusHighlight(confirm);
         addClickListener(confirm, this::confirmSelection);
-        details.add(confirm).growX().height(50f);
+        summary.add(confirm).growX().height(44f);
+        details.add(summary).width(280f).growY().padRight(18f);
+        details.add(descriptionScroll).grow().minWidth(0f).minHeight(0f);
 
-        add(gallery).width(600f).growY().padRight(12f);
+        add(gallery).growX().height(246f).padBottom(10f).row();
         add(details).grow();
         setSize(940f, 510f);
         for (AncientOneId id : AncientOneId.values()) {
@@ -94,20 +98,36 @@ public class SelectAncientOneTable extends Table {
 
     private Table createCard(AncientOneId id) {
         Table card = new Table();
-        card.pad(7f);
+        card.pad(6f);
         card.setBackground(panelBackground("17201B"));
         Image portrait = new Image(CustomAssetManager.getTexture("ancient_one/button_" + productId(id) + ".jpg"));
         portrait.setScaling(Scaling.fit);
+        boolean locked = !unlocked.get(id);
+        if (locked) portrait.setColor(0.68f, 0.68f, 0.68f, 1f);
+        portraits.put(id, portrait);
         Image lock = new Image(CustomAssetManager.getTexture("ancient_one/lock.png"));
         lock.setScaling(Scaling.fit);
-        lock.setVisible(!unlocked.get(id));
+        lock.setSize(LOCK_SIZE, LOCK_SIZE);
+        lock.setOrigin(Align.center);
+        lock.setVisible(locked);
+        if (locked) {
+            lock.setColor(0.86f, 0.82f, 0.72f, 1f);
+            lock.addAction(Actions.sequence(
+                    Actions.delay(id.ordinal() * 0.18f),
+                    Actions.forever(Actions.sequence(
+                            Actions.parallel(
+                                    Actions.scaleTo(1.045f, 1.045f, 1.4f, Interpolation.sine),
+                                    Actions.color(Color.WHITE, 1.4f, Interpolation.sine)),
+                            Actions.parallel(
+                                    Actions.scaleTo(1f, 1f, 1.4f, Interpolation.sine),
+                                    Actions.color(new Color(0.86f, 0.82f, 0.72f, 1f), 1.4f, Interpolation.sine))))));
+        }
         locks.put(id, lock);
         Table lockOverlay = new Table();
         lockOverlay.center();
-        lockOverlay.add(lock).size(144f * 0.78f);
-        card.add(new Stack(portrait, lockOverlay)).growX().height(144f).row();
-        card.add(label(get(prefix(id) + ".name"), 0.33f, "E8D9B0")).growX().height(28f).row();
-        card.add(label(get(prefix(id) + ".alt"), 0.25f, "BEB69F")).growX().height(32f);
+        lockOverlay.add(lock).size(LOCK_SIZE);
+        card.add(new Stack(portrait, lockOverlay)).growX().height(160f).row();
+        card.add(label(get(prefix(id) + ".name"), 0.30f, "E8D9B0")).growX().height(26f);
         addClickListener(card, () -> {
             if (completed) return;
             select(id);
@@ -127,8 +147,9 @@ public class SelectAncientOneTable extends Table {
         subtitle.setText(get(prefix(id) + ".alt"));
         stats.setText(get("ancientOne.selection.stats", info.getStartingDoom(), info.getMysteriesRequired()));
         StringBuilder text = new StringBuilder();
-        section(text, get("ancientOne.setup"), info.getSetupText());
-        section(text, get("ancientOne.selection.special"), info.getSpecialText());
+        if (id != AncientOneId.YIG) section(text, get("ancientOne.setup"), info.getSetupText());
+        section(text, get("ancientOne.selection.special"), id == AncientOneId.YIG
+                ? "ancientOne.yig.selection.special" : info.getSpecialText());
         section(text, get("ancientOne.selection.reckoning"), info.getReckoningText());
         section(text, get("ancientOne.victory"), info.getWinText());
         section(text, "", info.getFlavorText());
@@ -163,7 +184,12 @@ public class SelectAncientOneTable extends Table {
             for (AncientOneId id : unlocked.keySet()) {
                 unlocked.put(id, true);
                 Image lock = locks.get(id);
-                if (lock != null) lock.setVisible(false);
+                if (lock != null) {
+                    lock.clearActions();
+                    lock.setVisible(false);
+                }
+                Image portrait = portraits.get(id);
+                if (portrait != null) portrait.setColor(Color.WHITE);
             }
             if (selected != null) select(selected);
         });
@@ -178,9 +204,9 @@ public class SelectAncientOneTable extends Table {
 
     private static String[] features(AncientOneId id) {
         if (id == AncientOneId.YIG) return new String[]{"sixMysteries", "threeEpicMonsters", "yigEncounters"};
-        if (id == AncientOneId.CTHULHU) return new String[]{"sixMysteries", "threeEpicMonsters", "eightyEncounters", "exploreRlyeh", "endingRisenFromSea", "priceCoffee"};
-        if (id == AncientOneId.SHUB_NIGGURATH) return new String[]{"sixMysteries", "threeEpicMonsters", "seventyEncounters", "combatOriented", "endingBattleInWoods", "priceCoffee"};
-        return new String[]{"sixMysteries", "dunwichHorror", "eightyEncounters", "visitVoidBetweenWorlds", "endingKeyAndGate", "priceCoffee"};
+        if (id == AncientOneId.CTHULHU) return new String[]{"sixMysteries", "threeEpicMonsters", "eightyEncounters", "exploreRlyeh", "endingRisenFromSea"};
+        if (id == AncientOneId.SHUB_NIGGURATH) return new String[]{"sixMysteries", "threeEpicMonsters", "seventyEncounters", "combatOriented", "endingBattleInWoods"};
+        return new String[]{"sixMysteries", "dunwichHorror", "eightyEncounters", "visitVoidBetweenWorlds", "endingKeyAndGate"};
     }
 
     private static String prefix(AncientOneId id) {
