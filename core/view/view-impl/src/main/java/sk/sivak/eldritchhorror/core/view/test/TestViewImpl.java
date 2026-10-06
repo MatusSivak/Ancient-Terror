@@ -587,7 +587,10 @@ public class TestViewImpl implements TestView {
         ContainerBar bar = InfoStage.getInvestigatorHud().getSanityBar();
         return destroySanityOrHealth(sanityLost, bar,
                 positions -> monsterCombatTableStack.peek().destroySanity(positions,
-                        () -> loseTokenOnImpact(bar, PrePlayedTokenLoss::recordSanity, () -> impactTokenView.loseSanity(0))));
+                        () -> {
+                            shakeInvestigatorStands(true);
+                            return loseTokenOnImpact(bar, PrePlayedTokenLoss::recordSanity, () -> impactTokenView.loseSanity(0));
+                        }));
     }
 
     @Override
@@ -595,7 +598,17 @@ public class TestViewImpl implements TestView {
         ContainerBar bar = InfoStage.getInvestigatorHud().getHealthBar();
         return destroySanityOrHealth(healthLost, bar,
                 positions -> monsterCombatTableStack.peek().destroyHealth(positions,
-                        () -> loseTokenOnImpact(bar, PrePlayedTokenLoss::recordHealth, () -> impactTokenView.loseHealth(0))));
+                        () -> {
+                            shakeInvestigatorStands(false);
+                            return loseTokenOnImpact(bar, PrePlayedTokenLoss::recordHealth, () -> impactTokenView.loseHealth(0));
+                        }));
+    }
+
+    /** The fireball hits the fighting investigator: every visible copy of the stand flinches. */
+    private void shakeInvestigatorStands(boolean sanity) {
+        for (InvestigatorImage stand : findInvestigatorStands()) {
+            stand.playHitReaction(sanity);
+        }
     }
 
     /** One token leaves the bar and tears per fireball impact; the later model-driven loss skips it. */
@@ -718,20 +731,19 @@ public class TestViewImpl implements TestView {
         CombatInterruption.finish();
         return Completable.create(onSub -> {
             monsterCombatTableStack.peek().addAction(new AfterCenteredAction(() -> {
-                MapStage.brightenWorld();
                 for (Subscription monsterCombatTableSubscription : monsterCombatTableSubscriptions) {
                     monsterCombatTableSubscription.unsubscribe();
                 }
                 monsterCombatTableSubscriptions.clear();
-                monsterCombatTableStack.peek().addAction(new FastForwardAction<>(
-                        Actions.after(Actions.sequence(
-                                moveTo(monsterCombatTableStack.peek().getCenteredX(), VIEWPORT_HEIGHT, 1f, Interpolation.sine),
-                                Actions.run(() -> {
-                                    monsterCombatTableStack.peek().remove();
-                                    monsterCombatTableStack.pop();
-                                    onSub.onCompleted();
-                                })))
-                ));
+                MonsterCombatTable table = monsterCombatTableStack.pop();
+                // The monster fades out first; only then does the combat curtain lift.
+                table.remove();
+                InfoStage.addActionToInfoStage(new FastForwardAction<>(Actions.sequence(
+                        Actions.delay(MonsterCombatTable.HIDE_DURATION),
+                        Actions.run(() -> {
+                            MapStage.brightenWorld();
+                            onSub.onCompleted();
+                        }))));
             }));
         });
     }

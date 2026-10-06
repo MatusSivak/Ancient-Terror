@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -68,6 +69,8 @@ public class MonsterCombatTable extends VisTable {
     /** Bottom-left corner around the investigator's portrait; the monster keeps its distance. */
     public static final Rectangle INVESTIGATOR_KEEP_OUT = new Rectangle(0f, 0f, 340f, 230f);
     private static final float FADE_DURATION = 0.6f;
+    /** How long {@link #remove()} takes to fade the monster away. */
+    public static final float HIDE_DURATION = FADE_DURATION / 2f;
     private static final Color BRASS = Color.valueOf("DCC99F");
     private Table horrorRow;
     private Table damageRow;
@@ -97,6 +100,7 @@ public class MonsterCombatTable extends VisTable {
     private boolean centered = false;
     private Cell<TokenInFrameBar> damageBarCell;
     private Cell<TokenInFrameBar> horrorBarCell;
+    private Cell<Table> horrorRowCell;
     private FireballService fireballService;
     private Image monsterImage;
     private float imageSize = IMAGE_SIZE;
@@ -110,6 +114,21 @@ public class MonsterCombatTable extends VisTable {
     private float wanderElapsed;
     private float wanderDuration;
     private float wanderPause;
+    /** Bend of the current stroll; the monster walks a gentle arc instead of a ruler-straight line. */
+    private final Vector2 wanderControl = new Vector2();
+    private static final float STEP_LENGTH = 34f;
+    private static final float MAX_STEPS_PER_SECOND = 3.5f;
+    private static final float STEP_BOB = 6f;
+    private static final float STEP_TILT = 3.5f;
+    private static final float MAX_LEAN = 5f;
+    /** Horizontal speed (px/s) at which the lean is strongest. */
+    private static final float FULL_LEAN_SPEED = 110f;
+    private static final float GAIT_BLEND_IN = 0.15f;
+    private static final float GAIT_BLEND_OUT = 0.35f;
+    private float stepPhase;
+    private float walkBlend;
+    private float walkLean;
+    private float idleBlend = 1f;
 
     public boolean isCentered() {
         return centered;
@@ -139,15 +158,17 @@ public class MonsterCombatTable extends VisTable {
         imageSize = data.isMonsterEpic() ? EPIC_IMAGE_SIZE : IMAGE_SIZE;
         phaseIndicator = new CombatPhaseIndicator(data.isMonsterEpic());
         statusPlate = createStatusPlate(data);
-        ButtonUtils.addClickListener(statusPlate, () -> {
-            BigActorsManager.initMonsterCard(data.getMonsterInfo(), BigActorsManager::displayOrHideMonsterCard, () -> {});
-            BigActorsManager.displayOrHideMonsterCard();
-        });
+        ButtonUtils.addClickListener(statusPlate, () -> displayMonsterCard(data));
         holdStill = false;
+        stepPhase = 0f;
+        walkBlend = 0f;
+        walkLean = 0f;
+        idleBlend = 1f;
         presence = 0f;
         monsterImage = createMonsterImage(data);
-        // Drawn above cards and dice, so it must never swallow touches meant for them.
-        monsterImage.setTouchable(Touchable.disabled);
+        // Panels, cards and dice are layered above the creature layer, so they still get their touches first.
+        monsterImage.setTouchable(Touchable.enabled);
+        ButtonUtils.addClickListener(monsterImage, () -> displayMonsterCard(data));
         if (data.isMonsterEpic()) {
             epicGlow = new SilhouetteImage(monsterImage.getDrawable());
             epicGlow.setScaling(Scaling.fit);
@@ -228,10 +249,17 @@ public class MonsterCombatTable extends VisTable {
         if (epicGlow != null) {
             epicGlow.setVisible(shown);
         }
+        float previousX = wanderPosition.x;
+        float previousY = wanderPosition.y;
         boolean walking = !holdStill && updateWander(delta);
-        // Waddle with a stepping bounce while walking; breathe gently while standing; keep still while fighting.
-        float bob = walking ? Math.abs(MathUtils.sin(hoverTime * 8f)) * 6f : holdStill ? 0f : MathUtils.sin(hoverTime * 2f) * 2f;
-        float tilt = walking ? MathUtils.sin(hoverTime * 8f) * 4f : MathUtils.sin(hoverTime * 1.3f) * 1.5f;
+        updateGait(delta, walking, wanderPosition.x - previousX, wanderPosition.y - previousY);
+        // Waddle with a stepping bounce while walking; breathe gently while standing; settle down while fighting.
+        // Gaits cross-fade, so starting and stopping never snaps.
+        float breathing = (1f - walkBlend) * idleBlend;
+        float bob = Math.abs(MathUtils.sin(stepPhase)) * STEP_BOB * walkBlend
+                + MathUtils.sin(hoverTime * 2f) * 2f * breathing;
+        float tilt = (MathUtils.sin(stepPhase) * STEP_TILT + walkLean) * walkBlend
+                + MathUtils.sin(hoverTime * 1.3f) * 1.5f * breathing;
         float shake = 0f;
         if (hitShake > 0f) {
             hitShake = Math.max(0f, hitShake - delta);
@@ -321,6 +349,26 @@ public class MonsterCombatTable extends VisTable {
                 Actions.scaleTo(1.08f, 1.08f, 0.08f, Interpolation.sineOut),
                 Actions.scaleTo(1f, 1f, 0.2f, Interpolation.sineIn))));
     }
+    /** Steps follow the distance actually covered, so the feet never skate while the stroll speeds up or slows down. */
+    private void updateGait(float delta, boolean walking, float movedX, float movedY) {
+        if (delta <= 0f) {
+            return;
+        }
+        float moved = (float) Math.sqrt(movedX * movedX + movedY * movedY);
+        float targetLean = 0f;
+        if (walking) {
+            stepPhase += Math.min(moved / STEP_LENGTH, MAX_STEPS_PER_SECOND * delta) * MathUtils.PI;
+            // Positive rotation is counter-clockwise, so walking right leans the top to the right.
+            targetLean = -MathUtils.clamp(movedX / delta / FULL_LEAN_SPEED, -1f, 1f) * MAX_LEAN;
+        }
+        walkLean += (targetLean - walkLean) * Math.min(1f, delta * 5f);
+        walkBlend = MathUtils.clamp(walkBlend + (walking ? delta / GAIT_BLEND_IN : -delta / GAIT_BLEND_OUT), 0f, 1f);
+        idleBlend = MathUtils.clamp(idleBlend + (holdStill ? -delta : delta) / GAIT_BLEND_OUT, 0f, 1f);
+        if (walkBlend == 0f) {
+            stepPhase = 0f;
+        }
+    }
+
     /** Random walk: stroll to a random spot, linger a moment, pick the next one. Returns true while moving. */
     private boolean updateWander(float delta) {
         if (wanderPause > 0f) {
@@ -335,13 +383,33 @@ public class MonsterCombatTable extends VisTable {
         }
         wanderElapsed += delta;
         float progress = Math.min(1f, wanderElapsed / wanderDuration);
-        wanderPosition.set(wanderFrom).lerp(wanderTo, Interpolation.sine.apply(progress));
+        pointOnStroll(Interpolation.smooth.apply(progress), wanderPosition);
         if (progress >= 1f) {
             wanderDuration = 0f;
             wanderPause = MathUtils.random(0.8f, 2.5f);
             return false;
         }
         return true;
+    }
+
+    /** Quadratic Bézier from {@link #wanderFrom} through {@link #wanderControl} to {@link #wanderTo}. */
+    private void pointOnStroll(float t, Vector2 out) {
+        float u = 1f - t;
+        out.set(
+                u * u * wanderFrom.x + 2f * u * t * wanderControl.x + t * t * wanderTo.x,
+                u * u * wanderFrom.y + 2f * u * t * wanderControl.y + t * t * wanderTo.y);
+    }
+
+    /** Pushes the arc's control point sideways; inside the wander area, so the whole arc stays inside it too. */
+    private void bendStroll() {
+        float length = wanderTo.dst(wanderFrom);
+        float bend = MathUtils.random(-0.3f, 0.3f) * length;
+        wanderControl.set(wanderFrom).lerp(wanderTo, 0.5f);
+        if (length > 0f) {
+            wanderControl.add(-(wanderTo.y - wanderFrom.y) / length * bend, (wanderTo.x - wanderFrom.x) / length * bend);
+        }
+        wanderControl.x = MathUtils.clamp(wanderControl.x, wanderArea.x, wanderArea.x + wanderArea.width);
+        wanderControl.y = MathUtils.clamp(wanderControl.y, wanderArea.y, wanderArea.y + wanderArea.height);
     }
 
     /**
@@ -351,11 +419,20 @@ public class MonsterCombatTable extends VisTable {
     private void pickWanderTarget() {
         wanderFrom.set(wanderPosition);
         Vector2 fallback = null;
+        Vector2 fallbackControl = null;
         boolean found = false;
         for (int attempt = 0; attempt < 40; attempt++) {
             wanderTo.set(wanderArea.x + MathUtils.random(wanderArea.width), wanderArea.y + MathUtils.random(wanderArea.height));
-            if (wanderTo.dst(wanderFrom) < MIN_STEP || pathEntersKeepOut(wanderFrom, wanderTo)) {
+            if (wanderTo.dst(wanderFrom) < MIN_STEP) {
                 continue;
+            }
+            bendStroll();
+            if (strollEntersKeepOut()) {
+                // The arc may swing into the corner where the straight line would not.
+                wanderControl.set(wanderFrom).lerp(wanderTo, 0.5f);
+                if (strollEntersKeepOut()) {
+                    continue;
+                }
             }
             if (!coversOtherActor(wanderTo)) {
                 found = true;
@@ -363,22 +440,25 @@ public class MonsterCombatTable extends VisTable {
             }
             if (fallback == null) {
                 fallback = new Vector2(wanderTo);
+                fallbackControl = new Vector2(wanderControl);
             }
         }
         if (!found) {
             // No good spot: settle for one behind a panel, or stay put for a moment.
             wanderTo.set(fallback != null ? fallback : wanderFrom);
+            wanderControl.set(fallbackControl != null ? fallbackControl : wanderFrom);
         }
         wanderElapsed = 0f;
         wanderDuration = Math.max(0.5f, wanderTo.dst(wanderFrom) / MathUtils.random(45f, 80f));
     }
 
-    /** The monster's box anywhere along the straight stroll from {@code from} to {@code to} touches the investigator's corner. */
-    private boolean pathEntersKeepOut(Vector2 from, Vector2 to) {
+    /** The monster's box anywhere along the current stroll touches the investigator's corner. */
+    private boolean strollEntersKeepOut() {
         Rectangle box = new Rectangle(0, 0, imageSize, imageSize);
+        Vector2 point = new Vector2();
         for (int i = 0; i <= 24; i++) {
-            float t = i / 24f;
-            box.setPosition(MathUtils.lerp(from.x, to.x, t), MathUtils.lerp(from.y, to.y, t));
+            pointOnStroll(i / 24f, point);
+            box.setPosition(point.x, point.y);
             if (box.overlaps(INVESTIGATOR_KEEP_OUT)) {
                 return true;
             }
@@ -408,27 +488,41 @@ public class MonsterCombatTable extends VisTable {
     public boolean remove() {
         settleTokenShakes();
         if (monsterImage != null && monsterImage.getParent() != null) {
-            monsterImage.addAction(Actions.sequence(Actions.alpha(0f, FADE_DURATION / 2f), Actions.removeActor()));
+            monsterImage.setTouchable(Touchable.disabled);
+            monsterImage.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
         for (Actor extra : new Actor[]{epicGlow, phaseIndicator}) {
             if (extra != null && extra.getParent() != null) {
-                extra.addAction(Actions.sequence(Actions.alpha(0f, FADE_DURATION / 2f), Actions.removeActor()));
+                extra.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
             }
         }
         if (statusPlate != null && statusPlate.getParent() != null) {
             statusPlate.setTouchable(Touchable.disabled);
-            statusPlate.addAction(Actions.sequence(Actions.alpha(0f, FADE_DURATION / 2f), Actions.removeActor()));
+            statusPlate.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
         return super.remove();
     }
 
+    private void displayMonsterCard(MonsterCombatTableData data) {
+        BigActorsManager.initMonsterCard(data.getMonsterInfo(), BigActorsManager::displayOrHideMonsterCard, () -> {});
+        BigActorsManager.displayOrHideMonsterCard();
+    }
+
     private Image createMonsterImage(MonsterCombatTableData data) {
-        Image image;
-        if (data.isMonsterEpic()) {
-            image = new Image(CustomAssetManager.getEpicMonsterTexture(data.getMonsterClassName()));
-        } else {
-            image = new Image(CustomAssetManager.getNonEpicMonsterTexture(data.getMonsterClassName()));
-        }
+        Texture texture = data.isMonsterEpic()
+                ? CustomAssetManager.getEpicMonsterTexture(data.getMonsterClassName())
+                : CustomAssetManager.getNonEpicMonsterTexture(data.getMonsterClassName());
+        Image image = new Image(texture) {
+            /** Only the drawn artwork is tappable, not the empty margin the fit scaling leaves around it. */
+            @Override
+            public Actor hit(float x, float y, boolean touchable) {
+                if (touchable && getTouchable() != Touchable.enabled || !isVisible() || getColor().a < 0.5f) {
+                    return null;
+                }
+                return x >= getImageX() && x < getImageX() + getImageWidth()
+                        && y >= getImageY() && y < getImageY() + getImageHeight() ? this : null;
+            }
+        };
         image.setScaling(Scaling.fit);
         image.setSize(imageSize, imageSize);
         image.setOrigin(Align.center);
@@ -691,12 +785,23 @@ public class MonsterCombatTable extends VisTable {
         plate.setBackground(epic ? SelectionPanelStyle.panel("1A1408E6", "D4AF37") : SelectionPanelStyle.panel("121B1DDD", "87734E"));
         plate.pad(3, 5, 4, 5);
         plate.add(createNameLabel(data.getMonsterName(), epic)).colspan(2).padBottom(2).row();
-        plate.add(horrorRow).height(ROW_HEIGHT).padRight(3);
+        horrorRowCell = plate.add(horrorRow).height(ROW_HEIGHT);
+        updateHorrorRowVisibility();
         plate.add(damageRow).height(ROW_HEIGHT).row();
         plate.add(toughnessBar).colspan(2).height(53 * toughnessBarScale).padTop(2);
         plate.pack();
         plate.setTouchable(Touchable.enabled);
         return plate;
+    }
+
+    /** Monsters without horror (e.g. Children of Yig) show no horror section at all. */
+    private void updateHorrorRowVisibility() {
+        boolean hasHorror = data.getHorror() != null && data.getHorror() > 0;
+        if (hasHorror) {
+            horrorRowCell.setActor(horrorRow).padRight(3);
+        } else {
+            horrorRowCell.setActor(null).padRight(0);
+        }
     }
 
     private Label createNameLabel(String text, boolean epic) {
@@ -782,6 +887,7 @@ public class MonsterCombatTable extends VisTable {
                 horrorBar.remove();
                 horrorBar = createCombatBar(data.getHorror(), "combat/horror.png");
                 horrorBarCell.setActor(horrorBar);
+                updateHorrorRowVisibility();
                 statusPlate.pack();
                 onSub.onCompleted();
             });

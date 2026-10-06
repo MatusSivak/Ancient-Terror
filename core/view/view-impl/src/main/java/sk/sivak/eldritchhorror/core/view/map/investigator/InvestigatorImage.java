@@ -59,6 +59,18 @@ public class InvestigatorImage extends Image {
     private boolean defeatedByHealth;
     private boolean highlighted;
 
+    private static final float HIT_SHAKE_DURATION = 0.3f;
+    private static final float HIT_SHAKE_DISTANCE = 5f;
+    private static final float HIT_FLASH_IN = 0.06f;
+    private static final float HIT_FLASH_OUT = 0.35f;
+    private static final Color HEALTH_HIT_TINT = new Color(1f, 0.4f, 0.4f, 1f);
+    private static final Color SANITY_HIT_TINT = new Color(0.45f, 0.55f, 1f, 1f);
+    private float hitShake;
+    private float hitTime;
+    private float hitFlashElapsed = -1f;
+    private final Color hitTint = new Color();
+    private final Color savedColor = new Color();
+
 
     public InvestigatorImage(InvestigatorId investigatorId, GameController gameController) {
         super(CustomAssetManager.getInvestigatorTexture(investigatorId));
@@ -149,6 +161,16 @@ public class InvestigatorImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
+        if (hitShake > 0f) {
+            hitShake = Math.max(0f, hitShake - delta);
+            hitTime += delta;
+        }
+        if (hitFlashElapsed >= 0f) {
+            hitFlashElapsed += delta;
+            if (hitFlashElapsed > HIT_FLASH_IN + HIT_FLASH_OUT) {
+                hitFlashElapsed = -1f;
+            }
+        }
         if (asteroidVisible) {
             asteroid.getColor().a = getColor().a;
             asteroid.setPosition(
@@ -174,6 +196,43 @@ public class InvestigatorImage extends Image {
     }
     @Override
     public void draw(Batch batch, float parentAlpha) {
+        // The hit shake and flash only affect drawing, so moves and offsets in progress are left alone.
+        float groundX = getX();
+        boolean shaking = hitShake > 0f;
+        boolean flashing = hitFlashElapsed >= 0f;
+        if (shaking) {
+            setX(groundX + (float) Math.sin(hitTime * 70f) * HIT_SHAKE_DISTANCE * (hitShake / HIT_SHAKE_DURATION));
+        }
+        if (flashing) {
+            savedColor.set(getColor());
+            float flash = hitFlashElapsed < HIT_FLASH_IN
+                    ? hitFlashElapsed / HIT_FLASH_IN
+                    : 1f - (hitFlashElapsed - HIT_FLASH_IN) / HIT_FLASH_OUT;
+            flash = Math.max(0f, Math.min(1f, flash));
+            getColor().set(
+                    savedColor.r * (1f + (hitTint.r - 1f) * flash),
+                    savedColor.g * (1f + (hitTint.g - 1f) * flash),
+                    savedColor.b * (1f + (hitTint.b - 1f) * flash),
+                    savedColor.a);
+        }
+        drawStand(batch, parentAlpha);
+        if (flashing) {
+            getColor().set(savedColor);
+        }
+        if (shaking) {
+            setX(groundX);
+        }
+    }
+
+    /** Shakes the stand and flashes it red (health) or blue (sanity), like a monster taking damage. */
+    public void playHitReaction(boolean sanity) {
+        hitShake = HIT_SHAKE_DURATION;
+        hitTime = 0f;
+        hitFlashElapsed = 0f;
+        hitTint.set(sanity ? SANITY_HIT_TINT : HEALTH_HIT_TINT);
+    }
+
+    private void drawStand(Batch batch, float parentAlpha) {
         if (asteroidVisible) {
             asteroid.draw(batch, parentAlpha);
         }

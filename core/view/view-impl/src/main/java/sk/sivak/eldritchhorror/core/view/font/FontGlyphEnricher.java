@@ -23,6 +23,15 @@ public class FontGlyphEnricher {
 	private static final char GLYPH_FOCUS = '\uE00B';
 	private static final char GLYPH_FLIP = '\uE00C';
 	private static final char GLYPH_DISCARD = '\uE00D';
+	// Dice faces 1-6 occupy \uE00E-\uE013.
+	private static final char GLYPH_DIE_1 = '\uE00E';
+
+	private static final String DICE_SHEET = "dice_sheet.png";
+	private static final int DICE_SHEET_COLUMNS = 16;
+	// Straight-on face cells (column, row) in the dice sheet for values 1-6.
+	private static final int[][] DICE_FACE_CELLS = {{0, 4}, {4, 4}, {0, 8}, {0, 0}, {12, 4}, {8, 4}};
+	// Fraction of the cell around the die that is transparent padding.
+	private static final float DICE_FACE_PADDING = 12f / 92f;
 
 	private static final Map<String, Character> glyphMap = new HashMap<>();
 	static {
@@ -53,6 +62,13 @@ public class FontGlyphEnricher {
 		return glyphMap.get(glyphName);
 	}
 
+	public static char getDiceGlyph(int value) {
+		if (value < 1 || value > 6) {
+			throw new IllegalArgumentException("Dice value must be 1-6: " + value);
+		}
+		return (char) (GLYPH_DIE_1 + value - 1);
+	}
+
 
 
 	public static void enrich(BitmapFont bitmapFont) {
@@ -78,6 +94,19 @@ public class FontGlyphEnricher {
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("token/focus.png"), GLYPH_FOCUS, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/flip.png"), GLYPH_FLIP, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/discard.png"), GLYPH_DISCARD, renderWidth, renderHeight);
+		addDiceGlyphs(bitmapFont, icons.apply(DICE_SHEET), 80);
+	}
+
+	private static void addDiceGlyphs(BitmapFont bitmapFont, TextureRegion sheet, int renderSize) {
+		int cellSize = sheet.getRegionWidth() / DICE_SHEET_COLUMNS;
+		int padding = Math.round(cellSize * DICE_FACE_PADDING);
+		int faceSize = cellSize - 2 * padding;
+		for (int value = 1; value <= 6; value++) {
+			int[] cell = DICE_FACE_CELLS[value - 1];
+			TextureRegion face = new TextureRegion(sheet,
+					cell[0] * cellSize + padding, cell[1] * cellSize + padding, faceSize, faceSize);
+			addIconGlyph(bitmapFont, face, getDiceGlyph(value), renderSize, renderSize);
+		}
 	}
 
 	private static void addIconGlyph(

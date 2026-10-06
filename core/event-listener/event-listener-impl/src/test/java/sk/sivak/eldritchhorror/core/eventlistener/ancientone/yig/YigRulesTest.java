@@ -111,7 +111,13 @@ public class YigRulesTest {
         assertEquals(4,(int)monster.getToughness());
         events.fireAfterEvent(BeforeAfterEvent.AFTER_HORROR_CHECK,combat(monster,0,0,1));drain();assertTrue(effects.isEmpty());
         events.fireAfterEvent(BeforeAfterEvent.AFTER_HORROR_CHECK,combat(monster,0,0,0));drain();
-        assertEquals(Arrays.asList("moveMonster","skipBeforeEvent"),effects);
+        assertEquals(Arrays.asList("highlightSpecialText","skipBeforeEvent"),effects);
+        // The escape is shown on the map only after the combat screen is gone.
+        effects.clear();
+        events.fireAfterEvent(BeforeAfterEvent.HIDE_COMBAT_TABLE,null);drain();
+        assertEquals(Arrays.asList("moveMonster"),effects);
+        effects.clear();
+        events.fireAfterEvent(BeforeAfterEvent.HIDE_COMBAT_TABLE,null);drain();assertTrue(effects.isEmpty());
     }
     @Test public void wingedSerpentRespectsPreventionAndYigCursesSanityLoss() {
         WingedSerpentMonster wing=new WingedSerpentMonster();new YigEpicMonsterListener().register(wing);

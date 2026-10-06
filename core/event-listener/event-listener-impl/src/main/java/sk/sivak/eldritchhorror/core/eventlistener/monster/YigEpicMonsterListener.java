@@ -9,6 +9,8 @@ import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import static sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigEffects.*;
 public class YigEpicMonsterListener extends AbstractMonsterListener {
     private EventListenerImpl<CombatData> horror, damage;
+    private EventListenerImpl<Void> escape;
+    private boolean escaping;
     @Override public void register(MonsterInfo info) { setup(info, true); }
     @Override public void justRegisterListeners(MonsterInfo info) { setup(info, false); }
     private void setup(MonsterInfo info, boolean resetHealth) {
@@ -22,7 +24,9 @@ public class YigEpicMonsterListener extends AbstractMonsterListener {
                 if (data.getMonsterInfo() != monsterInfo) return;
                 sequence(() -> {
                     if (monsterInfo.getMonsterId() == EpicMonsterId.CHILDREN_OF_YIG && data.getHorrorTestResult().getScore() == 0) {
-                        p().getMonsterService().moveMonster(monsterInfo, LocationId.getRandomLocations(1).get(0));
+                        // The combat screen closes first; the escape is then shown on the map.
+                        escaping = true;
+                        p().getMonsterService().highlightSpecialText(monsterInfo);
                         p().getService().skipBeforeEvent(BeforeAfterEvent.HIDE_COMBAT_TABLE, null);
                     } else if (monsterInfo.getMonsterId() == EpicMonsterId.YIG && data.getSanityLost() > 0) {
                         p().getGameService().gainCondition(ConditionId.CURSED);
@@ -38,10 +42,20 @@ public class YigEpicMonsterListener extends AbstractMonsterListener {
                     sequence(() -> { p().getGameService().gainCondition(ConditionId.POISONED); p().getService().convertTo(CombatData.class, () -> data); });
             }
         };
+        escape = new EventListenerImpl<Void>() {
+            public Class<Void> getDataClass() { return Void.class; }
+            public void onNotify(Void ignored) {
+                if (!escaping) return;
+                escaping = false;
+                sequence(() -> p().getMonsterService().moveMonster(monsterInfo, LocationId.getRandomLocations(1).get(0)));
+            }
+        };
         p().getEventQueue().addAfterEventListener(horror, BeforeAfterEvent.AFTER_HORROR_CHECK);
         p().getEventQueue().addBeforeEventListener(damage, BeforeAfterEvent.DESTROY_MONSTER_HEALTH);
+        p().getEventQueue().addAfterEventListener(escape, BeforeAfterEvent.HIDE_COMBAT_TABLE);
     }
     @Override public void unregister() {
         p().getEventQueue().unregisterListener(horror); p().getEventQueue().unregisterListener(damage);
+        p().getEventQueue().unregisterListener(escape);
     }
 }

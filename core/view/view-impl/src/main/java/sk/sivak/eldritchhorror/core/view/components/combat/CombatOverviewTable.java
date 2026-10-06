@@ -89,7 +89,9 @@ public class CombatOverviewTable extends VisTable {
         toughnessBar.init(toughness, data.getCurrentHealth() == null ? 0 : data.getCurrentHealth(), healthScale);
         monsterTable.add(monsterImage).height(PORTRAIT_HEIGHT).growX().row();
         addNameAndDivider(monsterTable, data.isMonsterEpic() ? get("combat.epic") + " \u2022 " + data.getMonsterName() : data.getMonsterName());
-        monsterTable.add(createHorrorOrDamageTable(data.getHorror(), CustomAssetManager.HORROR))
+        // A monster without horror leaves its row empty; the row itself keeps the "vs" lines aligned.
+        Integer horror = data.getHorror() != null && data.getHorror() > 0 ? data.getHorror() : null;
+        monsterTable.add(createHorrorOrDamageTable(horror, CustomAssetManager.HORROR))
                 .height(STATS_ROW_HEIGHT).growX().row();
         monsterTable.add(createHorrorOrDamageTable(data.getDamage(), CustomAssetManager.DAMAGE))
                 .height(STATS_ROW_HEIGHT).growX().row();

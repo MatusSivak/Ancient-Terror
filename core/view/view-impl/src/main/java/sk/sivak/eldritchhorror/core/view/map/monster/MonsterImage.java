@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
@@ -80,13 +81,10 @@ public class MonsterImage extends Image {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        // While walking, the body and its shadow bounce and waddle together.
-        boolean walking = walkAnimator.isActive() && drawShadow;
-        float groundY = getY();
-        float rotation = getRotation();
+        // While walking, the body and its shadow bounce, waddle and lean together.
+        boolean walking = drawShadow;
         if (walking) {
-            setY(groundY + walkAnimator.getBob(getHeight()));
-            setRotation(rotation + walkAnimator.getTilt());
+            walkAnimator.apply(this);
         }
         // Draw blurred shadow using Gaussian blur shader
         if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
@@ -117,8 +115,7 @@ public class MonsterImage extends Image {
             drawReckoningPulse(batch, parentAlpha);
         }
         if (walking) {
-            setY(groundY);
-            setRotation(rotation);
+            walkAnimator.restore(this);
         }
     }
 
@@ -149,11 +146,15 @@ public class MonsterImage extends Image {
     private void addSquishStretchAnimation() {
         float baseScaleX = getScaleX();
         float baseScaleY = getScaleY();
-        addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                Actions.scaleTo(baseScaleX + SQUISH_STRETCH_SCALE_DELTA, baseScaleY - SQUISH_STRETCH_SCALE_DELTA,
-                        SQUISH_STRETCH_DURATION),
-                Actions.scaleTo(baseScaleX - SQUISH_STRETCH_SCALE_DELTA, baseScaleY + SQUISH_STRETCH_SCALE_DELTA,
-                        SQUISH_STRETCH_DURATION)
-        )));
+        // Each monster breathes at its own pace and phase, so a crowd never pulses in lockstep.
+        float duration = SQUISH_STRETCH_DURATION * MathUtils.random(0.85f, 1.2f);
+        addAction(Actions.sequence(
+                Actions.delay(MathUtils.random(0f, 2f * duration)),
+                Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
+                        Actions.scaleTo(baseScaleX + SQUISH_STRETCH_SCALE_DELTA, baseScaleY - SQUISH_STRETCH_SCALE_DELTA,
+                                duration, Interpolation.sine),
+                        Actions.scaleTo(baseScaleX - SQUISH_STRETCH_SCALE_DELTA, baseScaleY + SQUISH_STRETCH_SCALE_DELTA,
+                                duration, Interpolation.sine)
+                ))));
     }
 }

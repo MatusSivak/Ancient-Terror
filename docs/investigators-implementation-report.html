@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ancient Terror – Investigator implementation difficulty</title>
+<style>
+  body { font-family: Segoe UI, Arial, sans-serif; background: #15191a; color: #e6e1d3; max-width: 1100px; margin: 2em auto; padding: 0 1em; line-height: 1.45; }
+  h1, h2, h3 { color: #d4af37; }
+  h1 { border-bottom: 1px solid #87734e; padding-bottom: .3em; }
+  table { border-collapse: collapse; width: 100%; margin: .8em 0 1.6em; }
+  th, td { border: 1px solid #45504a; padding: .4em .6em; text-align: left; vertical-align: top; }
+  th { background: #232c2d; color: #d4af37; }
+  tr:nth-child(even) td { background: #1a2324; }
+  .tier1 h2 { color: #7fcf7f; } .tier2 h2 { color: #b5d66b; } .tier3 h2 { color: #e0c055; }
+  .tier4 h2 { color: #e09a55; } .tier5 h2 { color: #e06a5a; }
+  .missing { color: #e88; } .have { color: #8d8; }
+  code { background: #232c2d; padding: 0 .3em; border-radius: 3px; }
+  .note { background: #1f2a2b; border-left: 4px solid #d4af37; padding: .6em 1em; }
+  a { color: #9cc3e6; }
+</style>
+</head>
+<body>
+<h1>Investigator implementation difficulty</h1>
+<p>Generated 2026-10-02. Source: <a href="https://eldritchhorror.fandom.com/wiki/Investigators">Eldritch Horror wiki – Investigators</a> (55 investigators),
+compared with the codebase (<code>InvestigatorId</code>, <code>AssetId</code>, <code>SpellId</code>, <code>ArtifactId</code>, <code>ConditionId</code>, traits and existing listeners).</p>
+
+<h2>Already implemented (20)</h2>
+<p><a href="https://eldritchhorror.fandom.com/wiki/Tony_Morgan">Tony Morgan</a> (Bounty Hunter), <a href="https://eldritchhorror.fandom.com/wiki/Trish_Scarborough">Trish Scarborough</a> (Spy), <a href="https://eldritchhorror.fandom.com/wiki/Silas_Marsh">Silas Marsh</a> (Sailor), <a href="https://eldritchhorror.fandom.com/wiki/Norman_Withers">Norman Withers</a> (Astronomer), <a href="https://eldritchhorror.fandom.com/wiki/Marie_Lambeau">Marie Lambeau</a> (Entertainer),
+<a href="https://eldritchhorror.fandom.com/wiki/Mark_Harrigan">Mark Harrigan</a> (Soldier), <a href="https://eldritchhorror.fandom.com/wiki/Diana_Stanley">Diana Stanley</a> (Redeemed Cultist), <a href="https://eldritchhorror.fandom.com/wiki/%22Skids%22_O'Toole">Skids O'Toole</a> (Ex-Convict), <a href="https://eldritchhorror.fandom.com/wiki/Leo_Anderson">Leo Anderson</a> (Expedition Leader), <a href="https://eldritchhorror.fandom.com/wiki/Jim_Culver">Jim Culver</a> (Musician),
+<a href="https://eldritchhorror.fandom.com/wiki/Charlie_Kane">Charlie Kane</a> (Politician), <a href="https://eldritchhorror.fandom.com/wiki/Jacqueline_Fine">Jacqueline Fine</a> (Psychic), <a href="https://eldritchhorror.fandom.com/wiki/Lily_Chen">Lily Chen</a> (Martial Artist), <a href="https://eldritchhorror.fandom.com/wiki/Akachi_Onyele">Akachi Onyele</a> (Shaman), <a href="https://eldritchhorror.fandom.com/wiki/Tommy_Muldoon">Tommy Muldoon</a> (Rookie Cop),
+<a href="https://eldritchhorror.fandom.com/wiki/Lola_Hayes">Lola Hayes</a> (Actress), <a href="https://eldritchhorror.fandom.com/wiki/Finn_Edwards">Finn Edwards</a> (Bootlegger), <a href="https://eldritchhorror.fandom.com/wiki/Wilson_Richards">Wilson Richards</a> (Handyman), <a href="https://eldritchhorror.fandom.com/wiki/Patrice_Hathaway">Patrice Hathaway</a> (Violinist), <a href="https://eldritchhorror.fandom.com/wiki/Agnes_Baker">Agnes Baker</a> (Waitress).</p>
+
+<h2>Engine gaps</h2>
+<div class="note">
+<p class="missing"><b>Missing systems:</b> Unique Assets (no card type, although the <code>RELIC</code>/<code>TASK</code> traits exist), Talent conditions
+(Composed, Rugged, Elusive, Headstrong, Quick Study), Resource tokens, Impairment tokens,
+Wanted and Corruption conditions. (Uncharted paths are walk paths, which the game already has.)</p>
+<p class="missing"><b>Missing starting cards:</b> Winchester Rifle, .25 Automatic, Fine Jewelry, .32 Colt Pocket, Tommy Gun, Magnifying Glass, Camera,
+Seek the Truth, Dream Box, Dream Diary, Ancient Tome, Sledgehammer, Investment, Lucky Talisman, Treasured Memento, Mauser C96,
+Arcane Assistant and Alchemical Concoction (assets), plus the spells Call the Storm, Binding and Find Gate.</p>
+<p class="have"><b>Already supported:</b> focus, travel tickets, Blessed/Cursed, Madness, Debt/Detained, reserve operations,
+"1 additional action" effects, and the Trade, Rest, Acquire Assets and ticket actions.</p>
+</div>
+<p>The tiers below are estimates from reading the abilities, not measurements.</p>
+
+<div class="tier1">
+<h2>Tier 1 – Easy (every starting card already exists)</h2>
+<table>
+<tr><th>#</th><th>Investigator</th><th>Starting possessions</th><th>What's needed</th></tr>
+<tr><td>1</td><td><a href="https://eldritchhorror.fandom.com/wiki/Carson_Sinclair">Carson Sinclair</a> (Butler)</td><td class="have">Lucky Cigarette Case, Clue</td><td>A Trade action plus 1 extra action. Getting travel tickets gives 1 extra ticket to him or another investigator on his space.</td></tr>
+<tr><td>2</td><td><a href="https://eldritchhorror.fandom.com/wiki/Father_Mateo">Father Mateo</a> (Priest)</td><td class="have">King James Bible</td><td>Give a Boon to another investigator on any space. Gain a Boon when closing a gate, if he has none.</td></tr>
+<tr><td>3</td><td><a href="https://eldritchhorror.fandom.com/wiki/Sister_Mary">Sister Mary</a> (Nun)</td><td class="have">Holy Water, Ship Ticket, Clue</td><td>A Will test; each success discards 1 Madness from any investigator. Needs a hook that adds +1 to dice rolled by Boon/Bane conditions.</td></tr>
+<tr><td>4</td><td><a href="https://eldritchhorror.fandom.com/wiki/Ursula_Downs">Ursula Downs</a> (Explorer)</td><td class="have">Mineralogy Research, 1 improvement of choice</td><td>Move 1 space along a walk (uncharted) path, then 1 extra action. Once per round, she or another investigator on her space spends 1 less focus to pay for an effect.</td></tr>
+</table>
+</div>
+
+<div class="tier2">
+<h2>Tier 2 – One new simple asset, simple abilities</h2>
+<table>
+<tr><th>#</th><th>Investigator</th><th>Missing</th><th>Notes</th></tr>
+<tr><td>5</td><td><a href="https://eldritchhorror.fandom.com/wiki/Harvey_Walters">Harvey Walters</a> (Professor)</td><td class="missing">Ancient Tome</td><td>Another investigator improves a skill if Harvey's value is equal or higher. The research-clue hook is the same pattern Yig's Migration of Serpents uses.</td></tr>
+<tr><td>6</td><td><a href="https://eldritchhorror.fandom.com/wiki/Joe_Diamond">Joe Diamond</a> (Private Eye)</td><td class="missing">.32 Colt Pocket</td><td>Swap a reserve card for a random one with a chosen trait. When he improves a skill, he improves a second one.</td></tr>
+<tr><td>7</td><td><a href="https://eldritchhorror.fandom.com/wiki/Jenny_Barnes">Jenny Barnes</a> (Dilettante)</td><td class="missing">.25 Automatic, Fine Jewelry</td><td>Acquire Assets with +2 Influence (on a City space). Discard Debt when gained.</td></tr>
+<tr><td>8</td><td><a href="https://eldritchhorror.fandom.com/wiki/Bob_Jenkins">Bob Jenkins</a> (Salesman)</td><td class="missing">Winchester Rifle</td><td>Trade Items/Trinkets at any distance. Needs a hook that lowers reserve card values by 1.</td></tr>
+<tr><td>9</td><td><a href="https://eldritchhorror.fandom.com/wiki/Rex_Murphy">Rex Murphy</a> (Reporter)</td><td class="missing">Lucky Talisman</td><td>Needs a screen to pick several reserve cards. Passive gives a Clue, an improvement and Cursed. Starts with 14 Health + Sanity in total.</td></tr>
+</table>
+</div>
+
+<div class="tier3">
+<h2>Tier 3 – Moderate (new assets or spells, or harder hooks)</h2>
+<table>
+<tr><th>#</th><th>Investigator</th><th>Missing / hard part</th></tr>
+<tr><td>10</td><td><a href="https://eldritchhorror.fandom.com/wiki/Vincent_Lee">Vincent Lee</a> (Doctor)</td><td>The Composed Talent; the rest is easy (discard Injury/Illness, Rest +1 Health). Could be done now if he starts without the Talent.</td></tr>
+<tr><td>11</td><td><a href="https://eldritchhorror.fandom.com/wiki/Wendy_Adams">Wendy Adams</a> (Urchin)</td><td>The Elusive Talent; the rest is easy (gain a Trinket, ignore one Condition per round).</td></tr>
+<tr><td>12</td><td><a href="https://eldritchhorror.fandom.com/wiki/Luke_Robinson">Luke Robinson</a> (Dreamer)</td><td>Dream Box. He starts on a space with a gate, and can encounter a gate despite Monsters there.</td></tr>
+<tr><td>13</td><td><a href="https://eldritchhorror.fandom.com/wiki/George_Barnaby">George Barnaby</a> (Lawyer)</td><td>Investment. Needs a "+1 to one die" option when spending focus.</td></tr>
+<tr><td>14</td><td><a href="https://eldritchhorror.fandom.com/wiki/Darrell_Simmons">Darrell Simmons</a> (Photographer)</td><td>Camera, Seek the Truth. Needs a screen to look at and reorder the top 5 asset cards.</td></tr>
+<tr><td>15</td><td><a href="https://eldritchhorror.fandom.com/wiki/Dexter_Drake">Dexter Drake</a> (Magician)</td><td>Binding spell, Arcane Assistant.</td></tr>
+<tr><td>16</td><td><a href="https://eldritchhorror.fandom.com/wiki/Agatha_Crane">Agatha Crane</a> (Parapsychologist)</td><td>Call the Storm spell. Needs a "Ritual" possession type and a hook for passing a Lore test during a spell.</td></tr>
+<tr><td>17</td><td><a href="https://eldritchhorror.fandom.com/wiki/Hank_Samson">Hank Samson</a> (Farmhand)</td><td>Sledgehammer. His passive changes combat itself: he only takes the Will test if the Strength test cost him Health.</td></tr>
+<tr><td>18</td><td><a href="https://eldritchhorror.fandom.com/wiki/Carolyn_Fern">Carolyn Fern</a> (Psychologist)</td><td>Dream Diary, Death XIII (a Unique Asset). Her abilities mirror Vincent's.</td></tr>
+</table>
+</div>
+
+<div class="tier4">
+<h2>Tier 4 – Needs the Unique Asset system first</h2>
+<table>
+<tr><th>#</th><th>Investigator</th><th>Unique Asset / other missing</th></tr>
+<tr><td>19</td><td><a href="https://eldritchhorror.fandom.com/wiki/%22Ashcan%22_Pete">Ashcan Pete</a> (Drifter)</td><td>Duke</td></tr>
+<tr><td>20</td><td><a href="https://eldritchhorror.fandom.com/wiki/Minh_Thi_Phan">Minh Thi Phan</a> (Secretary)</td><td>Cryptic Text</td></tr>
+<tr><td>21</td><td><a href="https://eldritchhorror.fandom.com/wiki/Mandy_Thompson">Mandy Thompson</a> (Researcher)</td><td>Know Thy Enemy, Magnifying Glass</td></tr>
+<tr><td>22</td><td><a href="https://eldritchhorror.fandom.com/wiki/Kate_Winthrop">Kate Winthrop</a> (Scientist)</td><td>Dimensional Study; also needs a hook that cancels gate spawns</td></tr>
+<tr><td>23</td><td><a href="https://eldritchhorror.fandom.com/wiki/William_Yorick">William Yorick</a> (Gravedigger)</td><td>Bury Them Deep, Alchemical Concoction</td></tr>
+<tr><td>24</td><td><a href="https://eldritchhorror.fandom.com/wiki/Daisy_Walker">Daisy Walker</a> (Librarian)</td><td>Old Journal</td></tr>
+<tr><td>25</td><td><a href="https://eldritchhorror.fandom.com/wiki/Gloria_Goldberg">Gloria Goldberg</a> (Author)</td><td>Mythos Codex, Find Gate spell</td></tr>
+<tr><td>26</td><td><a href="https://eldritchhorror.fandom.com/wiki/Roland_Banks">Roland Banks</a> (Fed)</td><td>Agency Secrets, Mauser C96; also needs a "set aside" area</td></tr>
+<tr><td>27</td><td><a href="https://eldritchhorror.fandom.com/wiki/Zoey_Samaras">Zoey Samaras</a> (Chef)</td><td>Task Unique Assets</td></tr>
+<tr><td>28</td><td><a href="https://eldritchhorror.fandom.com/wiki/Monterey_Jack">Monterey Jack</a> (Archaeologist)</td><td>Treasure Map, plus Relic Unique Assets</td></tr>
+</table>
+</div>
+
+<div class="tier5">
+<h2>Tier 5 – Needs other new systems</h2>
+<table>
+<tr><th>#</th><th>Investigator</th><th>Missing systems</th></tr>
+<tr><td>29</td><td><a href="https://eldritchhorror.fandom.com/wiki/Michael_McGlen">Michael McGlen</a> (Gangster)</td><td>Tommy Gun and the Wanted condition, with its Pursuit rolls</td></tr>
+<tr><td>30</td><td><a href="https://eldritchhorror.fandom.com/wiki/Preston_Fairmont">Preston Fairmont</a> (Millionaire)</td><td>Resources. He could ship without the Gather Resources part.</td></tr>
+<tr><td>31</td><td><a href="https://eldritchhorror.fandom.com/wiki/Sefina_Rousseau">Sefina Rousseau</a> (Painter)</td><td>Resources, Treasured Memento</td></tr>
+<tr><td>32</td><td><a href="https://eldritchhorror.fandom.com/wiki/Rita_Young">Rita Young</a> (Athlete)</td><td>Talents</td></tr>
+<tr><td>33</td><td><a href="https://eldritchhorror.fandom.com/wiki/Daniela_Reyes">Daniela Reyes</a> (Mechanic)</td><td>Resources, Talents</td></tr>
+<tr><td>34</td><td><a href="https://eldritchhorror.fandom.com/wiki/Calvin_Wright">Calvin Wright</a> (Damned)</td><td>Resources, Corruption, Impairment</td></tr>
+<tr><td>35</td><td><a href="https://eldritchhorror.fandom.com/wiki/Amanda_Sharpe">Amanda Sharpe</a> (Student)</td><td>Talents, Unique Assets, Impairment</td></tr>
+</table>
+</div>
+
+<h2>Recommendation</h2>
+<p>Start with Carson, Mateo, Mary and Ursula, then the Tier 2 group. Adding Unique Asset support unlocks 10 more investigators, so it's the most valuable
+engine feature. Talents come next: they would finish Vincent and Wendy fully and unlock Rita, plus Amanda and Daniela once Resources and Impairment exist.</p>
+</body>
+</html>

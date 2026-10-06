@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.components.investigator;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -17,7 +16,6 @@ import java8.features.function.Consumer;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
 import sk.sivak.eldritchhorror.core.view.initgame.FullGamePurchaseDialog;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
@@ -31,7 +29,7 @@ public class SelectInvestigatorComponent extends Table {
 
     private final InvestigatorSketches sketches;
     private final Label titleLabel;
-    private final Table sketchesAndUnlockNewTable;
+    private final Table sketchesTable;
     private InvestigatorId selectedInvestigatorId;
     private Runnable updateAvailableInvestigatorsAction;
     private final Table teamStrip = new Table();
@@ -51,15 +49,15 @@ public class SelectInvestigatorComponent extends Table {
         teamCell = add(teamStrip).height(0f);
         row();
 
-        sketchesAndUnlockNewTable = new Table();
-        sketchesAndUnlockNewTable.add(sketches);
+        sketchesTable = new Table();
+        sketchesTable.add(sketches);
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
         scrollStyle.hScroll = getTextureRegionDrawable(PURE_WHITE_BACKGROUND).tint(new Color(0.12f, 0.16f, 0.14f, 1f));
         scrollStyle.hScrollKnob = getTextureRegionDrawable(PURE_WHITE_BACKGROUND).tint(new Color(0.65f, 0.55f, 0.32f, 1f));
         scrollStyle.hScroll.setMinHeight(5f);
         scrollStyle.hScrollKnob.setMinHeight(5f);
         scrollStyle.hScrollKnob.setMinWidth(35f);
-        scrollPane = new ScrollPane(sketchesAndUnlockNewTable, scrollStyle);
+        scrollPane = new ScrollPane(sketchesTable, scrollStyle);
         scrollPane.setScrollingDisabled(false, true);
         scrollPane.setOverscroll(false, false);
         scrollPane.setFadeScrollBars(false);
@@ -85,20 +83,6 @@ public class SelectInvestigatorComponent extends Table {
         sketches.showLockedInvestigators(() ->
                 FullGamePurchaseDialog.show(getStage(), updateAvailableInvestigatorsAction));
         pack();
-    }
-
-    public void showUnlockNewImage() {
-        Image unlockNewImage = new Image(CustomAssetManager.getTexture("investigator/unlock_new.jpg"));
-        unlockNewImage.setScaling(Scaling.fit);
-        sketchesAndUnlockNewTable.add(unlockNewImage).size(372).align(Align.left);
-        ButtonUtils.addClickListener(unlockNewImage, () -> {
-            new InAppPurchaseManager().purchaseProduct("investigators_1").subscribe(purchaseResult -> {
-                if (purchaseResult) {
-                    Gdx.app.postRunnable(updateAvailableInvestigatorsAction);
-
-                }
-            });
-        });
     }
 
     public void disable(InvestigatorId investigatorId) {
