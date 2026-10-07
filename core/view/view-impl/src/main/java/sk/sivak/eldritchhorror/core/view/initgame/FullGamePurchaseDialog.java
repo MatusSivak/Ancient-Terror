@@ -144,10 +144,13 @@ public final class FullGamePurchaseDialog extends Dialog {
         }
         artwork.add(ancientOnes).row();
         Table portraits = new Table();
-        for (String id : new String[]{"THE_BOOTLEGGER", "THE_HANDYMAN", "THE_VIOLINIST", "THE_WAITRESS"}) {
+        int portraitIndex = 0;
+        for (String id : new String[]{"THE_BOOTLEGGER", "THE_HANDYMAN", "THE_VIOLINIST", "THE_WAITRESS",
+                "THE_BUTLER", "THE_PRIEST", "THE_NUN", "THE_EXPLORER"}) {
             Image portrait = new Image(CustomAssetManager.getTexture("investigator/" + id + ".png"));
             portrait.setScaling(Scaling.fit);
             portraits.add(portrait).size(59f, 90f).pad(2f);
+            if (++portraitIndex % 4 == 0) portraits.row();
         }
         artwork.add(portraits).padTop(5f);
         return artwork;

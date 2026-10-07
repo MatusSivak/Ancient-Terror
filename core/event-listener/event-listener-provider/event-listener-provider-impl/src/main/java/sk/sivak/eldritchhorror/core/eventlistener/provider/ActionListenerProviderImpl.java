@@ -34,6 +34,10 @@ public class ActionListenerProviderImpl implements ActionListenerProvider {
     private TheHandymanActionListener theHandymanActionListener;
     private TheViolinistActionListener theViolinistActionListener;
     private TheWaitressActionListener theWaitressActionListener;
+    private TheButlerActionListener theButlerActionListener;
+    private ThePriestActionListener thePriestActionListener;
+    private TheNunActionListener theNunActionListener;
+    private TheExplorerActionListener theExplorerActionListener;
 
 
     private FocusActionListener focusActionListener;
@@ -74,6 +78,10 @@ public class ActionListenerProviderImpl implements ActionListenerProvider {
         theHandymanActionListener = new TheHandymanActionListener();
         theViolinistActionListener = new TheViolinistActionListener();
         theWaitressActionListener = new TheWaitressActionListener();
+        theButlerActionListener = new TheButlerActionListener();
+        thePriestActionListener = new ThePriestActionListener();
+        theNunActionListener = new TheNunActionListener();
+        theExplorerActionListener = new TheExplorerActionListener();
     }
 
     @Override
@@ -156,6 +164,10 @@ public class ActionListenerProviderImpl implements ActionListenerProvider {
                 return theViolinistActionListener;
             case THE_WAITRESS:
                 return theWaitressActionListener;
+            case THE_BUTLER: return theButlerActionListener;
+            case THE_PRIEST: return thePriestActionListener;
+            case THE_NUN: return theNunActionListener;
+            case THE_EXPLORER: return theExplorerActionListener;
         }
         logger.warn("Action listener not found for " + investigatorId);
         return null;

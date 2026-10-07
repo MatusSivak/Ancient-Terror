@@ -33,7 +33,8 @@ public class InvestigatorSketches extends Table {
     }
 
     private static final InvestigatorId[] PREMIUM = {InvestigatorId.THE_BOOTLEGGER,
-            InvestigatorId.THE_HANDYMAN, InvestigatorId.THE_VIOLINIST, InvestigatorId.THE_WAITRESS};
+            InvestigatorId.THE_HANDYMAN, InvestigatorId.THE_VIOLINIST, InvestigatorId.THE_WAITRESS,
+            InvestigatorId.THE_BUTLER, InvestigatorId.THE_PRIEST, InvestigatorId.THE_NUN, InvestigatorId.THE_EXPLORER};
 
     public void showLockedInvestigators(Runnable lockedClick) {
         this.lockedClick = lockedClick;

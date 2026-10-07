@@ -14,6 +14,8 @@ import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
  * @author msivak
  */
 public interface ActionProvider {
+    Action<Object, Void> transferCondition(InvestigatorId source, InvestigatorId target,
+            sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo condition);
 
     <InOut> BeforeEventAction<InOut> getBeforeEventAction(BeforeAfterEvent beforeAfterEvent);
 

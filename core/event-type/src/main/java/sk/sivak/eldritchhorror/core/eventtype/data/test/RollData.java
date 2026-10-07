@@ -6,6 +6,9 @@ package sk.sivak.eldritchhorror.core.eventtype.data.test;
  * @author msivak
  */
 public class RollData {
+    private sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo condition;
+    public sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo getCondition() { return condition; }
+    public void setCondition(sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo condition) { this.condition = condition; }
     private Integer minSuccessful;
     private Integer maxFailed;
 

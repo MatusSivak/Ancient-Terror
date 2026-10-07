@@ -89,6 +89,10 @@ import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheSoldierInitLis
 import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheSpyInitListener;
 import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheViolinistInitListener;
 import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheWaitressInitListener;
+import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheButlerInitListener;
+import sk.sivak.eldritchhorror.core.eventlistener.investigator.ThePriestInitListener;
+import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheNunInitListener;
+import sk.sivak.eldritchhorror.core.eventlistener.investigator.TheExplorerInitListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.AbstractMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.ByakheeMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.ColourOutOfSpaceMonsterListener;
@@ -173,6 +177,10 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     private TheHandymanInitListener theHandymanInitListener;
     private TheViolinistInitListener theViolinistInitListener;
     private TheWaitressInitListener theWaitressInitListener;
+    private TheButlerInitListener theButlerInitListener;
+    private ThePriestInitListener thePriestInitListener;
+    private TheNunInitListener theNunInitListener;
+    private TheExplorerInitListener theExplorerInitListener;
 
     private TheActressInitListener theActressInitListener;
     private TheExConvictInitListener theExConvictInitListener;
@@ -186,6 +194,10 @@ public class EventListenerProviderImpl implements EventListenerProvider {
         theHandymanInitListener = new TheHandymanInitListener();
         theViolinistInitListener = new TheViolinistInitListener();
         theWaitressInitListener = new TheWaitressInitListener();
+        theButlerInitListener = new TheButlerInitListener();
+        thePriestInitListener = new ThePriestInitListener();
+        theNunInitListener = new TheNunInitListener();
+        theExplorerInitListener = new TheExplorerInitListener();
         theBountyHunterInitListener = new TheBountyHunterInitListener();
         theAstronomerInitListener = new TheAstronomerInitListener();
         theSpyInitListener = new TheSpyInitListener();
@@ -295,6 +307,18 @@ public class EventListenerProviderImpl implements EventListenerProvider {
                 break;
             case THE_WAITRESS:
                 eventListener = theWaitressInitListener;
+                break;
+            case THE_BUTLER:
+                eventListener = theButlerInitListener;
+                break;
+            case THE_PRIEST:
+                eventListener = thePriestInitListener;
+                break;
+            case THE_NUN:
+                eventListener = theNunInitListener;
+                break;
+            case THE_EXPLORER:
+                eventListener = theExplorerInitListener;
                 break;
             default:
                 throw new IllegalArgumentException(investigator.name());
@@ -785,6 +809,19 @@ public class EventListenerProviderImpl implements EventListenerProvider {
             case THE_WAITRESS:
                 data.setCrippledTestStat(Stat.INFLUENCE);
                 data.setInsaneTestStat(Stat.LORE);
+                break;
+            case THE_BUTLER:
+                data.setCrippledTestStat(Stat.INFLUENCE);
+                data.setInsaneTestStat(Stat.OBSERVATION);
+                break;
+            case THE_PRIEST:
+            case THE_NUN:
+                data.setCrippledTestStat(Stat.WILL);
+                data.setInsaneTestStat(Stat.INFLUENCE);
+                break;
+            case THE_EXPLORER:
+                data.setCrippledTestStat(Stat.INFLUENCE);
+                data.setInsaneTestStat(Stat.WILL);
                 break;
 
         }

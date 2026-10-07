@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.model.save.ConditionsDeckSaveDataRead;
 import sk.sivak.eldritchhorror.core.model.save.SaveDataWrite;
 
 public interface ConditionsDeckWrite extends ConditionsDeckRead {
+    boolean transfer(InvestigatorId source, InvestigatorId target, ConditionInfo condition);
 
     void createDeck();
 

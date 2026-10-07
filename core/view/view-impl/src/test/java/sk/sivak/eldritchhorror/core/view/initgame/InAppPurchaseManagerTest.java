@@ -116,7 +116,8 @@ public class InAppPurchaseManagerTest {
     private List<InvestigatorInfo> bonusRoster() {
         List<InvestigatorInfo> roster = new ArrayList<>();
         for (InvestigatorId id : new InvestigatorId[]{InvestigatorId.THE_HANDYMAN,
-                InvestigatorId.THE_BOOTLEGGER, InvestigatorId.THE_VIOLINIST, InvestigatorId.THE_WAITRESS}) {
+                InvestigatorId.THE_BOOTLEGGER, InvestigatorId.THE_VIOLINIST, InvestigatorId.THE_WAITRESS,
+                InvestigatorId.THE_BUTLER, InvestigatorId.THE_PRIEST, InvestigatorId.THE_NUN, InvestigatorId.THE_EXPLORER}) {
             roster.add((InvestigatorInfo) Proxy.newProxyInstance(getClass().getClassLoader(),
                     new Class[]{InvestigatorInfo.class}, (proxy, method, args) -> id));
         }

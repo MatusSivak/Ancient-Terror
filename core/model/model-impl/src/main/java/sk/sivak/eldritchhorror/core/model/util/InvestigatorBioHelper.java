@@ -9,6 +9,14 @@ public class InvestigatorBioHelper
 
     public static String getBio(InvestigatorId investigatorId) {
         switch (investigatorId) {
+            case THE_BUTLER:
+                return "A lifetime of tending a household has taught Carson to notice what others overlook.\nWhen uncanny threats endanger the people in his care,\nhe brings a steady hand and a carefully packed case.";
+            case THE_PRIEST:
+                return "Strange violence has shaken Mateo's community and his certainty.\nHe travels to Rome in search of answers,\ncarrying his Bible and a resolve to protect those left behind.";
+            case THE_NUN:
+                return "Mary has faced things that no prayer book describes.\nShe ventures far from the convent to comfort troubled minds\nand confront the horrors that prey upon them.";
+            case THE_EXPLORER:
+                return "Ursula follows forgotten trails into places most scholars know only from maps.\nAt an excavation deep in Africa, curiosity becomes a race\nto uncover what an ancient civilization tried to bury.";
             case THE_BOUNTY_HUNTER:
                 return createForBountyHunter();
             case THE_SPY:

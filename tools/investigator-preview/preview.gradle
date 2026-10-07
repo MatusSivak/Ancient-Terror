@@ -1,0 +1,15 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('investigatorPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/investigator-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewInvestigators', JavaExec) {
+        dependsOn desktop.tasks.named('investigatorPreviewClasses')
+        classpath = desktop.sourceSets.investigatorPreview.runtimeClasspath
+        mainClass.set('InvestigatorPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}
+

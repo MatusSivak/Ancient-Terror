@@ -46,6 +46,11 @@ public class TradeActionListener extends AbstractActionPhaseListener<TradeAction
 
     @Override
     protected boolean isDisabled() {
+        if (getInvestigators().getActiveInvestigatorId() == InvestigatorId.THE_BUTLER
+                && sk.sivak.eldritchhorror.core.eventlistener.action.character.TheButlerActionListener.hasTraded()) {
+            disabledReason = "You already performed a Trade action this round.";
+            return true;
+        }
         if (findOtherInvestigatorsOnThisSpace().isEmpty()) {
             disabledReason = "No other investigator on this space.";
             return true;

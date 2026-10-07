@@ -64,6 +64,10 @@ public class DefeatedInvestigatorEncounterTemplate {
                 gainTwoSpells();
             } else if (data.getInvestigatorId() == InvestigatorId.THE_ROOKIE_COP && !data.isHealth()) {
                 gainCarbineRifle();
+            } else if (data.getInvestigatorId() == InvestigatorId.THE_EXPLORER && !data.isHealth()) {
+                ServicePlatform.get().getGameService().gainArtifact();
+            } else if (data.getInvestigatorId() == InvestigatorId.THE_PRIEST && data.isHealth()) {
+                ServicePlatform.get().getGameService().gainCondition(sk.sivak.eldritchhorror.core.constants.condition.ConditionId.BLESSED);
             } else {
                 ServicePlatform.get().getDoomOmenService().retreatDoom();
             }

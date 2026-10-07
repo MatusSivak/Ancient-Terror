@@ -24,7 +24,8 @@
 <p>Generated 2026-10-02. Source: <a href="https://eldritchhorror.fandom.com/wiki/Investigators">Eldritch Horror wiki – Investigators</a> (55 investigators),
 compared with the codebase (<code>InvestigatorId</code>, <code>AssetId</code>, <code>SpellId</code>, <code>ArtifactId</code>, <code>ConditionId</code>, traits and existing listeners).</p>
 
-<h2>Already implemented (20)</h2>
+<h2>Already implemented (24)</h2>
+<p class="have">Added 2026-10-07: Carson Sinclair, Father Mateo, Sister Mary, and Ursula Downs. These four use the existing full-game unlock alongside the other bonus investigators.</p>
 <p><a href="https://eldritchhorror.fandom.com/wiki/Tony_Morgan">Tony Morgan</a> (Bounty Hunter), <a href="https://eldritchhorror.fandom.com/wiki/Trish_Scarborough">Trish Scarborough</a> (Spy), <a href="https://eldritchhorror.fandom.com/wiki/Silas_Marsh">Silas Marsh</a> (Sailor), <a href="https://eldritchhorror.fandom.com/wiki/Norman_Withers">Norman Withers</a> (Astronomer), <a href="https://eldritchhorror.fandom.com/wiki/Marie_Lambeau">Marie Lambeau</a> (Entertainer),
 <a href="https://eldritchhorror.fandom.com/wiki/Mark_Harrigan">Mark Harrigan</a> (Soldier), <a href="https://eldritchhorror.fandom.com/wiki/Diana_Stanley">Diana Stanley</a> (Redeemed Cultist), <a href="https://eldritchhorror.fandom.com/wiki/%22Skids%22_O'Toole">Skids O'Toole</a> (Ex-Convict), <a href="https://eldritchhorror.fandom.com/wiki/Leo_Anderson">Leo Anderson</a> (Expedition Leader), <a href="https://eldritchhorror.fandom.com/wiki/Jim_Culver">Jim Culver</a> (Musician),
 <a href="https://eldritchhorror.fandom.com/wiki/Charlie_Kane">Charlie Kane</a> (Politician), <a href="https://eldritchhorror.fandom.com/wiki/Jacqueline_Fine">Jacqueline Fine</a> (Psychic), <a href="https://eldritchhorror.fandom.com/wiki/Lily_Chen">Lily Chen</a> (Martial Artist), <a href="https://eldritchhorror.fandom.com/wiki/Akachi_Onyele">Akachi Onyele</a> (Shaman), <a href="https://eldritchhorror.fandom.com/wiki/Tommy_Muldoon">Tommy Muldoon</a> (Rookie Cop),
@@ -44,13 +45,13 @@ Arcane Assistant and Alchemical Concoction (assets), plus the spells Call the St
 <p>The tiers below are estimates from reading the abilities, not measurements.</p>
 
 <div class="tier1">
-<h2>Tier 1 – Easy (every starting card already exists)</h2>
+<h2>Tier 1 – Implemented (locked bonus investigators)</h2>
 <table>
-<tr><th>#</th><th>Investigator</th><th>Starting possessions</th><th>What's needed</th></tr>
-<tr><td>1</td><td><a href="https://eldritchhorror.fandom.com/wiki/Carson_Sinclair">Carson Sinclair</a> (Butler)</td><td class="have">Lucky Cigarette Case, Clue</td><td>A Trade action plus 1 extra action. Getting travel tickets gives 1 extra ticket to him or another investigator on his space.</td></tr>
-<tr><td>2</td><td><a href="https://eldritchhorror.fandom.com/wiki/Father_Mateo">Father Mateo</a> (Priest)</td><td class="have">King James Bible</td><td>Give a Boon to another investigator on any space. Gain a Boon when closing a gate, if he has none.</td></tr>
-<tr><td>3</td><td><a href="https://eldritchhorror.fandom.com/wiki/Sister_Mary">Sister Mary</a> (Nun)</td><td class="have">Holy Water, Ship Ticket, Clue</td><td>A Will test; each success discards 1 Madness from any investigator. Needs a hook that adds +1 to dice rolled by Boon/Bane conditions.</td></tr>
-<tr><td>4</td><td><a href="https://eldritchhorror.fandom.com/wiki/Ursula_Downs">Ursula Downs</a> (Explorer)</td><td class="have">Mineralogy Research, 1 improvement of choice</td><td>Move 1 space along a walk (uncharted) path, then 1 extra action. Once per round, she or another investigator on her space spends 1 less focus to pay for an effect.</td></tr>
+<tr><th>#</th><th>Investigator</th><th>Starting possessions</th><th>Implementation</th></tr>
+<tr><td>1</td><td><a href="https://eldritchhorror.fandom.com/wiki/Carson_Sinclair">Carson Sinclair</a> (Butler)</td><td class="have">Lucky Cigarette Case, Clue</td><td class="have">Implemented: Trade plus an extra action. When anyone on Carson's space prepares for travel, that investigator receives an extra ticket of their choice.</td></tr>
+<tr><td>2</td><td><a href="https://eldritchhorror.fandom.com/wiki/Father_Mateo">Father Mateo</a> (Priest)</td><td class="have">King James Bible</td><td class="have">Implemented: transfer an owned Boon to another investigator anywhere. Gain a Boon after an Other World gate closure when he owns none.</td></tr>
+<tr><td>3</td><td><a href="https://eldritchhorror.fandom.com/wiki/Sister_Mary">Sister Mary</a> (Nun)</td><td class="have">Holy Water, Ship Ticket, Clue</td><td class="have">Implemented: Will successes remove Madness across the board. Boon/Bane dice receive +1, including tests, rerolls and standalone rolls.</td></tr>
+<tr><td>4</td><td><a href="https://eldritchhorror.fandom.com/wiki/Ursula_Downs">Ursula Downs</a> (Explorer)</td><td class="have">Mineralogy Research, 1 improvement of choice</td><td class="have">Implemented: walk (uncharted) movement plus an extra action. Her shared, optional Focus discount refreshes each round, can reduce a cost to zero, and is consumed only when payment occurs.</td></tr>
 </table>
 </div>
 
@@ -114,7 +115,7 @@ Arcane Assistant and Alchemical Concoction (assets), plus the spells Call the St
 </div>
 
 <h2>Recommendation</h2>
-<p>Start with Carson, Mateo, Mary and Ursula, then the Tier 2 group. Adding Unique Asset support unlocks 10 more investigators, so it's the most valuable
+<p>The first four are implemented. Continue with the Tier 2 group. Adding Unique Asset support unlocks 10 more investigators, so it's the most valuable
 engine feature. Talents come next: they would finish Vincent and Wendy fully and unlock Rita, plus Amanda and Daniela once Resources and Impairment exist.</p>
 </body>
 </html>

@@ -71,6 +71,11 @@ import sk.sivak.eldritchhorror.core.eventtype.data.spell.ResolvedSpellData;
  * @author msivak
  */
 public class ActionProviderImpl extends AbstractActionProvider implements ActionProvider {
+    @Override
+    public Action<Object, Void> transferCondition(InvestigatorId source, InvestigatorId target,
+            sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo condition) {
+        return new sk.sivak.eldritchhorror.core.action.impl.investigator.TransferConditionAction(source, target, condition);
+    }
 
     @Override
     public <InOut> BeforeEventAction<InOut> getBeforeEventAction(BeforeAfterEvent beforeAfterEvent) {

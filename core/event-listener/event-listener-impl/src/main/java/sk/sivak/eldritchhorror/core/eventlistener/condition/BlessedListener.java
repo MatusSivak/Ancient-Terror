@@ -191,6 +191,7 @@ public class BlessedListener extends AbstractConditionListener<BlessedCondition>
 
         private void onConfirm() {
             RollData rollData = new RollData();
+            rollData.setCondition(conditionInfo);
             rollData.setMinSuccessful(3);
             rollData.setMaxFailed(2);
             Single<Integer> singleDieResult = ServicePlatform.get().getTestService().rollDie(rollData);

@@ -27,7 +27,7 @@ public class RollDicesAction extends AbstractHookableAction<TestData, TestData> 
         int calculatedDicePool = input.getCalculatedDicePool();
         input.setDiceRolls(new ArrayList<>(calculatedDicePool));
         for (int i = 0; i < calculatedDicePool; i++) {
-            int diceValue =  ServicePlatform.get().getModel().rollDie();
+            int diceValue = InvestigatorDiceModifiers.roll(null);
             DiceRoll diceRoll = new DiceRoll();
             diceRoll.setDiceNr(i);
             diceRoll.setDiceValue(diceValue);

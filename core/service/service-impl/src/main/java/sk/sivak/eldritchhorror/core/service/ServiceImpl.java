@@ -20,6 +20,10 @@ import sk.sivak.eldritchhorror.core.service.command.ActionCommand;
  * @author msivak
  */
 public class ServiceImpl extends AbstractCommonService implements Service {
+    @Override
+    public void transferCondition(InvestigatorId source, InvestigatorId target, ConditionInfo condition) {
+        execute(new ActionCommand<>(actionProvider.transferCondition(source, target, condition), "TRANSFER_CONDITION"));
+    }
 
     @Override
     public void gainArtifactFromDeck(InvestigatorId investigatorId, ArtifactId artifactId) {

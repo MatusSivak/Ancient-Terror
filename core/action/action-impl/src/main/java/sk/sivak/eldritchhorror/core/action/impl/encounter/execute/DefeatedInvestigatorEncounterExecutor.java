@@ -48,7 +48,18 @@ public class DefeatedInvestigatorEncounterExecutor {
         DefeatedInvestigatorEncounterData data = new DefeatedInvestigatorEncounterData();
         data.setInvestigatorId(input.getInvestigatorId());
         data.setHealth(input.isHealth());
-        if (!data.isHealth() && data.getInvestigatorId() == THE_ROOKIE_COP) {
+        if (data.isHealth() && data.getInvestigatorId() == InvestigatorId.THE_PRIEST) {
+            data.setTransferItemsAction(() -> {
+                ServicePlatform.get().getService().hold();
+                ServicePlatform.get().getGameService().gainCondition(sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait.BOON);
+                discardAssets(InvestigatorId.THE_PRIEST);
+                discardArtifacts(InvestigatorId.THE_PRIEST);
+                discardConditions(InvestigatorId.THE_PRIEST);
+                discardSpells(InvestigatorId.THE_PRIEST);
+                discardClues(InvestigatorId.THE_PRIEST);
+                ServicePlatform.get().getService().release();
+            });
+        } else if (!data.isHealth() && data.getInvestigatorId() == THE_ROOKIE_COP) {
             data.setTransferItemsAction(() -> {
                 ServicePlatform.get().getService().hold();
                 discardAssets(THE_ROOKIE_COP);

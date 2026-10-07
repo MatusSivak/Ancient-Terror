@@ -39,7 +39,7 @@ public class RerollDiceAction extends AbstractHookableAction<CountRerollDiceData
         int minSuccessDiceValue = input.getTestData().getMinSuccessDiceValue();
         for (DiceRoll diceRoll : dicesToReroll) {
             if (input.getRerolledValues().isEmpty()) {
-                diceRoll.setDiceValue(ServicePlatform.get().getModel().rollDie());
+                diceRoll.setDiceValue(InvestigatorDiceModifiers.roll(null));
             } else {
                 diceRoll.setDiceValue(input.getRerolledValues().remove(0));
             }

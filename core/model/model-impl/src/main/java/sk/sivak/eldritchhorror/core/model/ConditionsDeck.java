@@ -170,6 +170,16 @@ public class ConditionsDeck implements ConditionsDeckWrite {
     }
 
     @Override
+    public boolean transfer(InvestigatorId source, InvestigatorId target, ConditionInfo condition) {
+        if (source == target || hasCondition(target, condition.getId()) || !getConditions(source).contains(condition)) return false;
+        investigatorConditionsMap.get(source).remove(condition);
+        List<ConditionInfo> targetCards = getConditions(target);
+        targetCards.add(condition);
+        investigatorConditionsMap.put(target, targetCards);
+        return true;
+    }
+
+    @Override
     public void load(ConditionsDeckSaveDataRead saveData) {
         createDeck();
 

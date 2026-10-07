@@ -192,6 +192,7 @@ public class CursedListener extends AbstractConditionListener<CursedCondition> {
 
         private void onConfirm() {
             RollData rollData = new RollData();
+            rollData.setCondition(conditionInfo);
             rollData.setMinSuccessful(4);
             rollData.setMaxFailed(3);
             Single<Integer> singleDieResult = ServicePlatform.get().getTestService().rollDie(rollData);

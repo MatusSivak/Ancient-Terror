@@ -57,6 +57,10 @@ public class InvestigatorsHelper {
             response.add(createHandyman());
             response.add(createViolinist());
             response.add(createWaitress());
+            response.add(createButler());
+            response.add(createPriest());
+            response.add(createNun());
+            response.add(createExplorer());
         }
 
         for (InvestigatorInfoImpl investigatorInfo : response) {
@@ -73,12 +77,72 @@ public class InvestigatorsHelper {
         response.add(createHandyman());
         response.add(createViolinist());
         response.add(createWaitress());
+        response.add(createButler());
+        response.add(createPriest());
+        response.add(createNun());
+        response.add(createExplorer());
         for (InvestigatorInfoImpl investigatorInfo : response) {
             investigatorInfo.setBio(InvestigatorBioHelper.getBio(investigatorInfo.getInvestigatorId()));
         }
         return response;
     }
 
+
+    private static InvestigatorInfoImpl createButler() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_BUTLER);
+        info.setInvestigatorName("Carson Sinclair");
+        info.setMaxHealth(6);
+        info.setMaxSanity(6);
+        info.setLocationId(LocationId.LONDON);
+        info.setStats(2, 3, 3, 2, 3);
+        info.setActionText("investigator.special.the_butler.action");
+        info.setAbilityText("investigator.special.the_butler.ability");
+        info.setQuote("Every detail matters when lives depend on it.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createPriest() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_PRIEST);
+        info.setInvestigatorName("Father Mateo");
+        info.setMaxHealth(5);
+        info.setMaxSanity(7);
+        info.setLocationId(LocationId.ROME);
+        info.setStats(3, 3, 1, 2, 4);
+        info.setActionText("investigator.special.the_priest.action");
+        info.setAbilityText("investigator.special.the_priest.ability");
+        info.setQuote("Faith means helping when hope seems lost.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createNun() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_NUN);
+        info.setInvestigatorName("Sister Mary");
+        info.setMaxHealth(5);
+        info.setMaxSanity(7);
+        info.setLocationId(LocationId.SPACE_15);
+        info.setStats(2, 2, 3, 2, 4);
+        info.setActionText("investigator.special.the_nun.action");
+        info.setAbilityText("investigator.special.the_nun.ability");
+        info.setQuote("No darkness can excuse us from showing mercy.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createExplorer() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_EXPLORER);
+        info.setInvestigatorName("Ursula Downs");
+        info.setMaxHealth(6);
+        info.setMaxSanity(6);
+        info.setLocationId(LocationId.THE_HEART_OF_AFRICA);
+        info.setStats(3, 2, 3, 3, 2);
+        info.setActionText("investigator.special.the_explorer.action");
+        info.setAbilityText("investigator.special.the_explorer.ability");
+        info.setQuote("There is always another path to explore.");
+        return info;
+    }
 
     private static InvestigatorInfoImpl createExpeditionLeader() {
         InvestigatorInfoImpl investigatorInfo = new InvestigatorInfoImpl();
@@ -369,6 +433,9 @@ public class InvestigatorsHelper {
             investigator.setCurrentHealth(investigatorInfo[i].getMaxHealth());
             investigator.setCurrentSanity(investigatorInfo[i].getMaxSanity());
             investigator.setCurrentLocationId(investigatorInfo[i].getLocationId());
+            if (investigatorInfo[i].getInvestigatorId() == InvestigatorId.THE_NUN) {
+                investigator.setShipTickets(1);
+            }
         }
     }
 

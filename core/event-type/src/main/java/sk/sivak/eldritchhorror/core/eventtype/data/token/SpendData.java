@@ -13,6 +13,9 @@ public class SpendData {
     private boolean silent;
     private boolean hasEnough;
     private Action0 payAction;
+    private final List<Action0> postPayActions = new LinkedList<>();
+
+    public void addPostPayAction(Action0 action) { postPayActions.add(action); }
     private Action0 revertAction;
     private List<Action0> postRevertActions = new LinkedList<>();
 
@@ -23,6 +26,7 @@ public class SpendData {
     public void pay() {
         if (payAction != null) {
             payAction.call();
+            for (Action0 action : postPayActions) action.call();
         }
     }
 

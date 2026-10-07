@@ -36,6 +36,7 @@ public interface Service extends CommonService {
     void discardArtifactFromInvestigator(InvestigatorId investigatorId, ArtifactInfo assetInfo, boolean forced);
 
     void discardConditionFromInvestigator(InvestigatorId investigatorId, ConditionInfo conditionInfo);
+    void transferCondition(InvestigatorId source, InvestigatorId target, ConditionInfo condition);
 
     void discardSpellFromInvestigator(InvestigatorId activeInvestigatorId, SpellInfo spellInfo);
 
