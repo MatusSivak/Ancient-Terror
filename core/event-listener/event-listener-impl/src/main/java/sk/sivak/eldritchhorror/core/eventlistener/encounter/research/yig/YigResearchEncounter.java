@@ -14,6 +14,7 @@ import sk.sivak.eldritchhorror.core.constants.monster.NonEpicMonsterId;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.research.AbstractResearchEncounter;
+import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventtype.data.investigator.LoseImprovementData;
@@ -28,6 +29,7 @@ import static sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigEffec
 public final class YigResearchEncounter extends AbstractResearchEncounter {
     private final int page;
     private boolean gainedClue;
+    private boolean paperVisible;
     private static final Runnable NOTHING = () -> {};
     public YigResearchEncounter(int page, LocationType type) {
         super(page, type, AncientOneId.YIG);
@@ -43,6 +45,8 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             p().getEventQueue().addAfterEventListener(gain, BeforeAfterEvent.GAIN_CLUE);
             super.executeWhole();
             later(() -> {
+                // Keep the encounter paper available across tests, choices, and follow-up effects.
+                p().getEncounterService().finishTypewriterPaper();
                 p().getEventQueue().unregisterListener(gain);
                 if (gainedClue && p().getMysteryDeck().getCurrentMysteryCard().getMysteryCardId() == MysteryCardId.Yig.MIGRATION_OF_SERPENTS
                         && p().getCluePool().getClueCount(investigator()) > 0)
@@ -52,11 +56,19 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         });
     }
     @Override protected void execute() {
-        sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils.confirmInfos(getTextBuilder().withInfo().build())
-                .subscribe(() -> sequence(this::resolve));
+        // AbstractResearchEncounter has already opened the paper.
+        paperVisible = true;
+        String info = getTextBuilder().withInfo().build();
+        if (info.isEmpty()) {
+            resolve();
+        } else {
+            TypewriterUtils.confirmInfos(info).subscribe(() -> sequence(() -> {
+                hidePaper();
+                resolve();
+            }));
+        }
     }
     private void resolve() {
-        p().getEncounterService().finishTypewriterPaper();
         switch (getLocationType()) {
             case CITY: city(); break;
             case WILDERNESS: wilderness(); break;
@@ -65,8 +77,40 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         }
     }
     private void test(Stat stat,int modifier,Runnable pass,Runnable fail) {
-        p().getTestService().test(stat,modifier,1,new TestFlavorRequest(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.RESEARCH))
-            .subscribe(result -> sequence(result.getScore()>0?pass:fail));
+        showPaper();
+        // The shared helper hides and restores the paper before either callback.
+        TypewriterUtils.displayTestResearchButton(stat, modifier,
+                () -> outcome(true, pass), () -> outcome(false, fail));
+    }
+    private void outcome(boolean passed, Runnable effect) {
+        String info = (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withInfo().build();
+        confirmOutcome(info, effect);
+    }
+    private void confirmOutcome(String info, Runnable effect) {
+        sequence(() -> {
+            showPaper();
+            if (info.isEmpty()) {
+                hidePaper();
+                effect.run();
+            } else {
+                TypewriterUtils.confirmInfos(info).subscribe(() -> sequence(() -> {
+                    hidePaper();
+                    effect.run();
+                }));
+            }
+        });
+    }
+    private void showPaper() {
+        if (!paperVisible) {
+            p().getEncounterService().showTypewriterPaper(false);
+            paperVisible = true;
+        }
+    }
+    private void hidePaper() {
+        if (paperVisible) {
+            p().getEncounterService().hideTypewriterPaper();
+            paperVisible = false;
+        }
     }
     private void clue() { gainThisClue(); }
     private void extraClue() { p().getTokenService().gainClueFromPool(); }
@@ -85,11 +129,42 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         }
     }
     private void ambush(NonEpicMonsterId id, Action1<CombatData> next) {
+        hidePaper();
         p().getMonsterService().ambush(id).subscribe(data -> sequence(() -> next.call(data)));
     }
     private boolean defeated(CombatData data) { return data.getMonsterInfo().getCurrentHealth() <= 0; }
-    private void cultist(Runnable pass, Runnable fail) { ambush(NonEpicMonsterId.CULTIST, d -> { if (defeated(d)) pass.run(); else fail.run(); }); }
-    private void serpent(Action1<CombatData> next) { ambush(NonEpicMonsterId.SERPENT_PEOPLE, next); }
+    private void cultist(Runnable pass, Runnable fail) {
+        ambush(NonEpicMonsterId.CULTIST, d -> {
+            boolean rewarded = getLocationType() == LocationType.WILDERNESS && page == 7 ? !has(POISONED) : defeated(d);
+            outcome(rewarded, defeated(d) ? pass : fail);
+        });
+    }
+    private void serpent(Action1<CombatData> next) {
+        ambush(NonEpicMonsterId.SERPENT_PEOPLE, d -> {
+            // These cards award separate results for the two combat tests.
+            if (getLocationType() == LocationType.CITY && page == 16) {
+                String info = (d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() == 0
+                        ? getTextBuilder().withFail().withInfo().build() : "");
+                if (defeated(d)) info += "\n" + getTextBuilder().withPass().withInfo().build();
+                confirmOutcome(info.trim(), () -> next.call(d));
+            } else if (getLocationType() == LocationType.CITY && page == 18) {
+                confirmOutcome(d.getHealthLost() > 0 ? getTextBuilder().withFail().withInfo().build() : "", () -> next.call(d));
+            } else if (getLocationType() == LocationType.WILDERNESS && page == 17) {
+                boolean will = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() > 0;
+                boolean strength = d.getDamageTestResult() != null && d.getDamageTestResult().getScore() > 0;
+                String info = will || strength ? getTextBuilder().withPass().withInfo().build() : "";
+                if (will && strength) info += "\n" + getTextBuilder().withPass().withInfo(2).build();
+                confirmOutcome(info, () -> next.call(d));
+            } else if (getLocationType() == LocationType.SEA && page == 15) {
+                String info = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() > 0
+                        ? getTextBuilder().withPass().withInfo().build() : "";
+                if (d.getHealthLost() > 0) info += "\n" + getTextBuilder().withFail().withInfo().build();
+                confirmOutcome(info.trim(), () -> next.call(d));
+            } else {
+                outcome(defeated(d), () -> next.call(d));
+            }
+        });
+    }
     private void offerCondition(ConditionId id, Runnable yes, Runnable no) {
         if (!p().getConditionsDeck().canGetConditionId(investigator(), id)) { no.run(); return; }
         ask("Gain " + id.toString().replace('_',' ') + "?", () -> { condition(id); later(() -> { if (has(id)) yes.run(); else no.run(); }); }, no);
@@ -139,7 +214,9 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
                 later(() -> { if (awake()) damage(2,0); }); break;
             case 7: cultist(() -> { if (!has(POISONED)) clue(); },() -> { if (!has(POISONED)) clue(); }); break;
             case 8: offerCondition(POISONED,this::clue,() -> { discardClue(); discardPossessions(AssetTrait.ALLY,1,true,NOTHING); }); break;
-            case 9: test(OBSERVATION,-2,this::twoClues,NOTHING); later(() -> { if (expedition()) damage(2,0); }); break;
+            case 9: test(OBSERVATION,-2,this::twoClues,NOTHING); later(() -> {
+                if (expedition()) confirmOutcome(getTextBuilder().withInfo(2).build(), () -> damage(2,0));
+            }); break;
             case 10: if (has(POISONED)) doom(); test(OBSERVATION,-1,this::clue,NOTHING); break;
             case 11: test(OBSERVATION,0,this::clue,() -> condition(LOST_IN_TIME_AND_SPACE)); break;
             case 12: test(OBSERVATION,0,() -> pay("Spend 2 Health to gain this Clue?",0,2,0,this::clue,() -> condition(CURSED)),() -> condition(CURSED)); break;
@@ -171,7 +248,9 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 5: test(INFLUENCE,-1,this::clue,() -> p().getGameService().gainCondition(ConditionTrait.INJURY)); break;
             case 6: test(INFLUENCE,-1,this::clue,() -> condition(POISONED)); break;
             case 7: cultist(this::clue,NOTHING); break;
-            case 8: test(INFLUENCE,-1,this::clue,NOTHING); later(() -> { if (artifactCount()>0) { damage(0,1); condition(PARANOIA); } }); break;
+            case 8: test(INFLUENCE,-1,this::clue,NOTHING); later(() -> {
+                if (artifactCount()>0) confirmOutcome(getTextBuilder().withInfo(2).build(), () -> { damage(0,1); condition(PARANOIA); });
+            }); break;
             case 9: test(LORE,-2,() -> artifact(ArtifactId.ZANTHU_TABLETS),() -> condition(HALLUCINATIONS)); break;
             case 10: rerollTest(2,0,-1,this::clue,() -> { damage(0,2); condition(POISONED); }); break;
             case 11: cultist(this::clue,this::moveClue); break;
@@ -233,9 +312,12 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             }
         };
         p().getEventQueue().addBeforeEventListener(reroll,BeforeAfterEvent.CONFIRM_TEST_RESULT);
-        p().getTestService().test(OBSERVATION,modifier,1,new TestFlavorRequest(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.RESEARCH)).subscribe(result -> sequence(() -> {
+        test(OBSERVATION, modifier, () -> {
             p().getEventQueue().unregisterListener(reroll);
-            if(result.getScore()>0) pass.run(); else fail.run();
-        }));
+            pass.run();
+        }, () -> {
+            p().getEventQueue().unregisterListener(reroll);
+            fail.run();
+        });
     }
 }

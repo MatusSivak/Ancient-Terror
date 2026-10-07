@@ -11,6 +11,7 @@ public class MysteryEncounterExecutor {
     public static void execute(MysteryEncounter input) {
         GoogleServicesHolder.getAnalyticsTracker().trackInteraction(ENCOUNTER, "Mystery", input.getSecondLine());
         ServicePlatform.get().getService().hold();
+        ServicePlatform.get().getService().hideSelectEncounterTable();
         ServicePlatform.get().getEventQueue().fireDirectEvent(DirectEvent.ENCOUNTER_ACTIVE_MYSTERY, input);
         ServicePlatform.get().getEncounterService().endOfEncounter(input);
         ServicePlatform.get().getEncounterService().insertDefeatSequencePoint();

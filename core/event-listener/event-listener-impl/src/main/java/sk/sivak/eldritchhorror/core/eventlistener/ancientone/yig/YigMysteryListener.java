@@ -63,8 +63,13 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                     if(m.getMonsterId()==NonEpicMonsterId.CULTIST)p().getMonsterService().moveMonster(m,LocationId.SPACE_7);
                 spawn(epic(),mysteryCardInfo.getPinLocations().get(0));
             }
-            if(id==MIGRATION_OF_SERPENTS) for(ClueInfo clue:new ArrayList<>(p().getCluePool().getSpawnedClues()))
-                moveClueToExpedition(clue.getSpawnLocationId(),clue.getCurrentLocationId());
+            if(id==MIGRATION_OF_SERPENTS) for(ClueInfo clue:new ArrayList<>(p().getCluePool().getSpawnedClues())) {
+                List<LocationId> destinations=nearest(clue.getCurrentLocationId(),EXPEDITIONS);
+                if(!destinations.isEmpty()) {
+                    // Resolve ties consistently without interrupting mystery setup with a choice.
+                    p().getTokenService().moveClue(clue.getSpawnLocationId(),Collections.min(destinations));
+                }
+            }
         });
     }
     @Override public void justRegisterListeners(int progress) { this.progress=progress; attach(); }

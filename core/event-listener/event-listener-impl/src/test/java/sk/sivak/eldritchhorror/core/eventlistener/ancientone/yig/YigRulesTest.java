@@ -8,6 +8,7 @@ import java8.features.function.Consumer;
 import sk.sivak.eldritchhorror.core.constants.*;
 import sk.sivak.eldritchhorror.core.constants.ancientone.*;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
+import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.*;
 import sk.sivak.eldritchhorror.core.constants.monster.epic.*;
@@ -167,6 +168,34 @@ public class YigRulesTest {
         List<LocationId> before=new ArrayList<>(rise.getPinLocations());
         new YigMysteryListener(rise).advanceActiveMystery();drain();
         assertEquals(1,(int)rise.getProgress());assertEquals(before,rise.getPinLocations());
+    }
+    @Test public void migrationAutomaticallyMovesCluesToNearestExpeditionsIncludingTies() {
+        LocationMap map=new LocationMap();map.initLocations();platform.setLocationMap(map);
+        List<ClueInfo> clues=new ArrayList<>();
+        LocationId[] locations=LocationId.values();
+        for(int i=0;i<locations.length;i++) {
+            LocationId current=locations[i], spawn=locations[(i+1)%locations.length];
+            clues.add(mock(ClueInfo.class,(name,a) -> name.equals("getSpawnLocationId")?spawn:current));
+        }
+        platform.setCluePoolRead(mock(CluePoolRead.class,(name,a) -> clues));
+        Map<LocationId,LocationId> moves=new EnumMap<>(LocationId.class);
+        platform.setTokenService(mock(TokenService.class,(name,a) -> {
+            assertEquals("moveClue",name);
+            queue(() -> assertNull("Each Clue moves only once",moves.put((LocationId)a[0],(LocationId)a[1])));
+            return null;
+        }));
+        MysteryCardInfo migration=YigMysteryDeck.create(2).stream()
+                .filter(c -> c.getMysteryCardId()==MysteryCardId.Yig.MIGRATION_OF_SERPENTS).findFirst().get();
+        new YigMysteryListener(migration).register();drain();
+        assertEquals(clues.size(),moves.size());
+        assertEquals(Collections.singletonList("showCurrentMysteryCard"),effects);
+        boolean coveredTie=false;
+        for(ClueInfo clue:clues) {
+            List<LocationId> nearest=YigEffects.nearest(clue.getCurrentLocationId(),YigEffects.EXPEDITIONS);
+            coveredTie|=nearest.size()>1;
+            assertEquals(Collections.min(nearest),moves.get(clue.getSpawnLocationId()));
+        }
+        assertTrue("Exercise tied destinations as well as single destinations",coveredTie);
     }
     @Test public void mysteryPinsOnlyMarkSpecialEncountersOnSetupAndLoad() {
         platform.setCluePoolRead(mock(CluePoolRead.class,(name,a) ->
