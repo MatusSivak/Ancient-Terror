@@ -20,6 +20,7 @@ import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowLocationBackground
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowLocationTypeBackgroundAction;
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowOtherWorldBackgroundAction;
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowResearchBackgroundAction;
+import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowKnyanBackgroundAction;
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowRlyehRisenBackgroundAction;
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowTheKeyAndTheGateBackgroundAction;
 import sk.sivak.eldritchhorror.core.action.impl.encounter.ShowVoidBetweenWorldsBackgroundAction;
@@ -259,6 +260,11 @@ public class ActionProviderImpl extends AbstractActionProvider implements Action
     @Override
     public Action<Object, Object> showTheKeyAndTheGateBackground() {
         return new ShowTheKeyAndTheGateBackgroundAction();
+    }
+
+    @Override
+    public Action<Object, Object> showKnyanBackground() {
+        return new ShowKnyanBackgroundAction();
     }
 
     @Override

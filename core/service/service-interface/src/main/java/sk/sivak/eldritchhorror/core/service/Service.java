@@ -79,5 +79,7 @@ public interface Service extends CommonService {
 
     void showTheKeyAndTheGateBackground();
 
+    void showKnyanBackground();
+
     void fireSpellResolvedEvent(ResolvedSpellData resolvedSpellData);
 }

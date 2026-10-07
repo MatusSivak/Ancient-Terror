@@ -46,7 +46,7 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
                 p().getEventQueue().unregisterListener(gain);
                 if (gainedClue && p().getMysteryDeck().getCurrentMysteryCard().getMysteryCardId() == MysteryCardId.Yig.MIGRATION_OF_SERPENTS
                         && p().getCluePool().getClueCount(investigator()) > 0)
-                    ask("Spend 1 Clue gained in this encounter to advance Migration of Serpents?",
+                    ask("Spend 1 Clue gained in this encounter to advance the Active Mystery?",
                             () -> spend(1,0,0, () -> p().getGameService().advanceActiveMystery(), NOTHING), NOTHING);
             });
         });

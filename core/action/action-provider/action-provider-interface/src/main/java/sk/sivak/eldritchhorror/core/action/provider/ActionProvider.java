@@ -89,6 +89,8 @@ public interface ActionProvider {
 
     Action<Object, Object> showTheKeyAndTheGateBackground();
 
+    Action<Object, Object> showKnyanBackground();
+
     HookableAction<Object, Void> replaceInvestigators();
 
     DirectEventAction<ResolvedSpellData> fireSpellResolvedEvent(ResolvedSpellData resolvedSpellData);

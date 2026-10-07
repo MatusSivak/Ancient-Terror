@@ -29,6 +29,7 @@ Created with the built-in image generation tool. Final project assets:
 - `assets/ancient_one/button_yig.jpg`: JPEG conversion of the same illustration for the selector.
 - `assets/monster/epic/ChildrenOfYig.png`: original serpent colony illustration.
 - `assets/monster/epic/WingedSerpent.png`: original winged serpent illustration.
+- `assets/encounter/background/knyan.jpg`: original underground K'n-yan encounter background.
 
 Generation prompts:
 

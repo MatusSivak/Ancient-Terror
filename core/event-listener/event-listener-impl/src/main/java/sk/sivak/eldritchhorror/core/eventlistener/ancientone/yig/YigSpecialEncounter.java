@@ -15,6 +15,7 @@ final class YigSpecialEncounter {
     private static final Runnable NOTHING=() -> {};
     YigSpecialEncounter(MysteryCardInfo mystery,Runnable progress){this.mystery=mystery;this.progress=progress;}
     void execute() {
+        p().getService().showKnyanBackground();
         List<Integer> deck=mystery.getSpecialEncounterDeck();
         if(deck.isEmpty()){for(int i=1;i<=8;i++)deck.add(i);Collections.shuffle(deck);}
         int card=deck.remove(0);
@@ -44,6 +45,7 @@ final class YigSpecialEncounter {
             case 8:test(STRENGTH,-1,() -> {p().getInvestigatorService().improveSkill(INFLUENCE);test(LORE,-1,NOTHING,() -> condition(POISONED));},
                     () -> test(OBSERVATION,-1,progress,NOTHING));break;
         }
+        p().getService().addEventCommand(in -> { p().getService().hideBackground(); });
     }
     private static final String[] INTRO={
         "A sealed stairway descends beneath K'n-yan. Beyond it, a carved warning surrounds a pulsing green stone.",

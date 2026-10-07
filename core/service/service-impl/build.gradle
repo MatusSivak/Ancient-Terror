@@ -7,4 +7,7 @@ dependencies {
   api 'ch.qos.reload4j:reload4j:1.2.26'
     testImplementation group: 'junit', name: 'junit', version:'4.12'
     testImplementation group: 'org.mockito', name: 'mockito-core', version:'4.11.0'
+  testImplementation project(':eldritch-horror-core:action:action-impl')
+  testImplementation project(':eldritch-horror-core:command-queue:command-queue-impl')
+  testImplementation project(':eldritch-horror-core:event-queue:event-queue-impl')
 }

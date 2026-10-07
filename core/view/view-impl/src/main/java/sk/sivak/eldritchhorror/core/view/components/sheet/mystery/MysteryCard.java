@@ -126,8 +126,8 @@ public class MysteryCard extends VisTable {
     private String getProcessedMysteryText(MysteryCardInfo mysteryCardInfo) {
         return resolveLocalizedText(mysteryCardInfo.getMysteryText())
                 .replaceAll("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString())
-                + (mysteryCardInfo.getClueCredit() > 0 ? "\n\n" + mysteryCardInfo.getClueCredit()
-                + " Clue(s) on this Mystery can be spent toward its cost." : "");
+                + (mysteryCardInfo.getClueCredit() > 0 ? "\n\nClue cost reduced by "
+                + mysteryCardInfo.getClueCredit() + "." : "");
     }
 
     private ProgressTokenBar createProgressTokenBar(Integer mysteryComplexity, Integer progress) {

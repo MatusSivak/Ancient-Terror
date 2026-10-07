@@ -168,4 +168,32 @@ public class YigRulesTest {
         new YigMysteryListener(rise).advanceActiveMystery();drain();
         assertEquals(1,(int)rise.getProgress());assertEquals(before,rise.getPinLocations());
     }
+    @Test public void mysteryPinsOnlyMarkSpecialEncountersOnSetupAndLoad() {
+        platform.setCluePoolRead(mock(CluePoolRead.class,(name,a) ->
+                name.equals("getClueLocations")?Collections.emptySet():Collections.emptyList()));
+        for(MysteryCardInfo card:YigMysteryDeck.create(2)) {
+            effects.clear();monsters.clear();
+            MysteryCardId id=card.getMysteryCardId();
+            boolean encounter=id==MysteryCardId.Yig.KN_YAN_UNEARTHED
+                    || id==MysteryCardId.Yig.RISE_OF_THE_SERPENT_PEOPLE;
+            boolean epic=id==MysteryCardId.Yig.DESCENDANTS_OF_YIG
+                    || id==MysteryCardId.Yig.THE_WINGED_SERPENT || id==MysteryCardId.Yig.SERPENTS_NEST;
+            List<LocationId> locations=card.getPinLocations()==null?Collections.emptyList():new ArrayList<>(card.getPinLocations());
+            YigMysteryListener listener=new YigMysteryListener(card);
+            listener.register();drain();
+            assertTrue(id.toString(),effects.contains("showCurrentMysteryCard"));
+            assertEquals(id.toString(),encounter,effects.contains("spawnRedPins"));
+            assertEquals(id.toString(),epic,effects.contains("spawn"));
+            if(epic) assertEquals(locations.get(0),monsters.get(0).getCurrentLocation());
+
+            listener.unregister();drain();
+            assertEquals(id.toString(),encounter,effects.contains("clearRedPins"));
+            effects.clear();
+            listener.justRegisterListeners(0);
+            listener.justAddRedPins();drain();
+            assertEquals(id.toString(),encounter,effects.contains("justAddRedPins"));
+            assertFalse(id.toString(),effects.contains("spawn"));
+            listener.unregister();drain();
+        }
+    }
 }

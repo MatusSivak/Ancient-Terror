@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author msivak
@@ -190,8 +191,12 @@ public class CommandQueueImpl implements CommandQueue {
         currentCommand.setInput(lastResponse);
 
             logInput(currentCommand, lastResponse);
+            Command<Object, Object> executingCommand = currentCommand;
+            AtomicBoolean completed = new AtomicBoolean();
             subscription = currentCommand.execute().subscribe(out -> {
-                if (currentCommand == null) {
+                // UI callbacks may arrive again after their command has finished.
+                // They must never complete whichever command is now at the head.
+                if (currentCommand != executingCommand || !completed.compareAndSet(false, true)) {
                     return;
                 }
                 if (queue.isEmpty()) {

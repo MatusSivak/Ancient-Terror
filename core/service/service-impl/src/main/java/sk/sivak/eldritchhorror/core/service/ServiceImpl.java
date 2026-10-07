@@ -67,6 +67,11 @@ public class ServiceImpl extends AbstractCommonService implements Service {
     }
 
     @Override
+    public void showKnyanBackground() {
+        execute(new ActionCommand<>(actionProvider.showKnyanBackground(), "SHOW_KNYAN_BACKGROUND"));
+    }
+
+    @Override
     public void discardAssetFromInvestigator(InvestigatorId investigatorId, AssetInfo assetInfo, boolean forced) {
         executeHookable(new DiscardAssetFromInvestigatorData(investigatorId, assetInfo, forced), actionProvider.discardAssetFromInvestigator());
     }

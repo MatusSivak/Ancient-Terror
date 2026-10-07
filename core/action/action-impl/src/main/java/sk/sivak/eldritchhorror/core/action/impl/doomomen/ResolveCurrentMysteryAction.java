@@ -73,6 +73,9 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
                 confirmSolvedMysteriesCount();
                 ServicePlatform.get().getGameController().showCityInfoLabels();
             });
+            // Nested mystery setup (including monster spawns) replaces the queue result.
+            // Restore our result after that work, before AFTER_RESOLVE_CURRENT_MYSTERY.
+            ServicePlatform.get().getService().convertTo(Boolean.class, () -> true);
             ServicePlatform.get().getService().release();
             ss.onSuccess(true);
         });
@@ -151,6 +154,7 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
             ServicePlatform.get().getGameController().showCityInfoLabels();
             ServicePlatform.get().getService().release();
         });
+        ServicePlatform.get().getService().convertTo(Boolean.class, () -> false);
         ServicePlatform.get().getService().release();
         ss.onSuccess(false);
     }

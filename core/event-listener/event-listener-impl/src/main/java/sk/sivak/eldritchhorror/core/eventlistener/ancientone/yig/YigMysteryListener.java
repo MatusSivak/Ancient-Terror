@@ -49,9 +49,14 @@ public final class YigMysteryListener extends AbstractMysteryListener {
         if(id==MIGRATION_OF_SERPENTS)return new ArrayList<>(p().getCluePool().getClueLocations());
         return Collections.emptyList();
     }
+    private boolean hasEncounterPins() {
+        // Monsters and Clues already mark their locations; Pins identify special encounters.
+        return id==KN_YAN_UNEARTHED || id==RISE_OF_THE_SERPENT_PEOPLE;
+    }
     @Override public void register() {
         sequence(() -> {
-            super.register();
+            if(hasEncounterPins()) super.register();
+            else p().getGameService().showCurrentMysteryCard(true, false);
             attach();
             if(epic()!=null) {
                 if(id==SERPENTS_NEST) for(MonsterInfo m:p().getMonsterCup().getMonsters())
@@ -63,10 +68,12 @@ public final class YigMysteryListener extends AbstractMysteryListener {
         });
     }
     @Override public void justRegisterListeners(int progress) { this.progress=progress; attach(); }
-    @Override public void justAddRedPins() { p().getGameService().justAddRedPins(); }
+    @Override public void justAddRedPins() {
+        if(hasEncounterPins()) p().getGameService().justAddRedPins();
+    }
     @Override public void unregister() {
         for(EventListener listener:listeners)p().getEventQueue().unregisterListener(listener);
-        p().getGameService().clearRedPins();
+        if(hasEncounterPins()) p().getGameService().clearRedPins();
     }
     private void attach() {
         if(epic()!=null) {
@@ -92,7 +99,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                 public Class<MysteryEncounter> getDataClass(){return MysteryEncounter.class;}
                 public void onNotify(MysteryEncounter data) { sequence(() -> {
                     if(id==KN_YAN_UNEARTHED)new YigSpecialEncounter(mysteryCardInfo,() -> addProgress()).execute();
-                    else test(Stat.OBSERVATION,-1,() -> ask("Spend 2 Clues to recover this Eldritch token?",
+                    else test(Stat.OBSERVATION,-1,() -> ask("Spend 2 Clues to advance the Active Mystery?",
                             () -> spend(2,0,0,() -> removeToken(p().getInvestigators().getActiveInvestigator().getCurrentLocationId()),() -> {}),() -> {}),
                             () -> p().getMonsterService().ambush(NonEpicMonsterId.CULTIST).subscribe());
                     p().getService().convertTo(MysteryEncounter.class,() -> data);
@@ -119,7 +126,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
             if(m!=null) { p().getMonsterService().dealDamageToMonster(m,2);return; }
             if(id==CROWN_OF_THE_SERPENT) {
                 mysteryCardInfo.setClueCredit(mysteryCardInfo.getClueCredit()+1);
-                p().getGameService().displayText("Place 1 Clue on this Mystery. It can be spent when resolving the Serpent Crown.");
+                p().getGameService().displayText("Advance the Active Mystery: reduce the Clue cost to solve this Mystery by 1.");
             }
             else addProgress();
         });
