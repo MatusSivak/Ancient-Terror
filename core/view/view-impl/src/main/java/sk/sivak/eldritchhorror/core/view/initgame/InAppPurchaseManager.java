@@ -7,11 +7,18 @@ import com.badlogic.gdx.pay.Transaction;
 import rx.Single;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import sk.sivak.eldritchhorror.core.constants.LocalTesting;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebasePurchase;
 
 public class InAppPurchaseManager {
     public static final String FULL_GAME = "full_game";
+
+    public static boolean areBonusInvestigatorsAvailable() {
+        if (LocalTesting.areAllInvestigatorsUnlocked()) return true;
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        return preferences.getBoolean(FULL_GAME, false) || preferences.getBoolean("investigators_1", false);
+    }
 
     private static void unlockFullGame(Preferences preferences) {
         for (String feature : new String[]{FULL_GAME, "no_ads", "investigators_1", "cthulhu", "shub_niggurath", "yog_sothoth"}) {
@@ -26,6 +33,9 @@ public class InAppPurchaseManager {
 
 
     public Single<Boolean> isProductPurchased(String productName) {
+        if ("investigators_1".equals(productName) && LocalTesting.areAllInvestigatorsUnlocked()) {
+            return Single.just(true);
+        }
         final Action1<Transaction[]>[] restoreActionRef = new Action1[1];
         final Action1<Throwable>[] restoreErrorActionRef = new Action1[1];
 

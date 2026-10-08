@@ -856,8 +856,6 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public boolean hasPurchasedBonusInvestigators() {
-        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
-        return preferences.getBoolean(InAppPurchaseManager.FULL_GAME, false)
-                || preferences.getBoolean("investigators_1", false);
+        return InAppPurchaseManager.areBonusInvestigatorsAvailable();
     }
 }

@@ -7,6 +7,7 @@ import com.kotcrab.vis.ui.VisUI;
 import java8.features.function.Consumer;
 import java8.features.util.IterableUtils;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 import java.util.LinkedList;
@@ -42,7 +43,7 @@ public class InvestigatorSketches extends Table {
     }
 
     public void init(InvestigatorId... investigatorIds) {
-        if (com.badlogic.gdx.Gdx.app.getPreferences("AncientTerror.xml").getBoolean("investigators_1", false)) lockedClick = null;
+        if (InAppPurchaseManager.areBonusInvestigatorsAvailable()) lockedClick = null;
         available = investigatorIds.clone();
         List<InvestigatorId> displayed = new LinkedList<>(java.util.Arrays.asList(investigatorIds));
         if (lockedClick != null) {

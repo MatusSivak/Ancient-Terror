@@ -3,11 +3,14 @@ package sk.sivak.eldritchhorror;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import sk.sivak.eldritchhorror.core.Game;
+import sk.sivak.eldritchhorror.core.constants.LocalTesting;
 import sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager;
 
 public class GameDesktop {
 
     public static void main(String[] args) {
+        // Temporary local playtesting: remove this override when investigator testing is finished.
+        LocalTesting.setAllInvestigatorsUnlocked(true);
         for (String arg : args) {
             if ("--crash-report-test".equals(arg)) {
                 System.setProperty("ancientterror.crashReportTest", "true");

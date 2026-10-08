@@ -6,6 +6,7 @@ import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import main.java.sk.sivak.eldritchhorror.android.JustRateThisGame;
 import sk.sivak.eldritchhorror.core.Game;
+import sk.sivak.eldritchhorror.core.constants.LocalTesting;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsTracker;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 
@@ -37,6 +38,8 @@ public class GameActivity extends AndroidApplication {
         }
         gameCreatedInProcess = true;
 
+        // Temporary local playtesting; release builds retain normal investigator access.
+        LocalTesting.setAllInvestigatorsUnlocked(BuildConfig.DEBUG);
         game = new Game();
         analyticsTracker = new AndroidFirebaseAnalyticsTracker(this);
         game.setAnalyticsTracker(analyticsTracker);

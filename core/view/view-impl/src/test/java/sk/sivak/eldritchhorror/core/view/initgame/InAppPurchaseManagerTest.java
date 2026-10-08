@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.pay.*;
+import sk.sivak.eldritchhorror.core.constants.LocalTesting;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorInfo;
 import org.junit.Before;
@@ -29,6 +30,7 @@ public class InAppPurchaseManagerTest {
     private Application.ApplicationType applicationType = Application.ApplicationType.Android;
 
     @Before public void setup() {
+        LocalTesting.setAllInvestigatorsUnlocked(false);
         oldApp = Gdx.app;
         oldNet = Gdx.net;
         oldStore = GoogleServicesHolder.getPurchaseManager();
@@ -51,6 +53,7 @@ public class InAppPurchaseManagerTest {
     }
 
     @After public void cleanup() {
+        LocalTesting.setAllInvestigatorsUnlocked(false);
         Gdx.app = oldApp;
         Gdx.net = oldNet;
         if (oldStore != null) GoogleServicesHolder.setPurchaseManager(oldStore);
@@ -111,6 +114,31 @@ public class InAppPurchaseManagerTest {
             fail("Free selection must not unlock investigators");
             return bonusRoster();
         }).toBlocking().value());
+    }
+
+    @Test public void localTestingUnlocksInvestigatorsWithoutPersistingOrRestoringPurchases() {
+        LocalTesting.setAllInvestigatorsUnlocked(true);
+        assertTrue(InAppPurchaseManager.areBonusInvestigatorsAvailable());
+        assertTrue(new InAppPurchaseManager().isProductPurchased("investigators_1").toBlocking().value());
+        List<InvestigatorInfo> roster = bonusRoster();
+        assertSame(roster, InitGameViewImpl.refreshPurchasedInvestigators(
+                Collections.emptyList(), () -> roster).toBlocking().value());
+        assertEquals(0, store.restores);
+        assertTrue(values.isEmpty());
+        assertEquals(0, assetCount);
+        assertEquals(0, artifactCount);
+
+        LocalTesting.setAllInvestigatorsUnlocked(false);
+        assertFalse(InAppPurchaseManager.areBonusInvestigatorsAvailable());
+        assertFalse(new InAppPurchaseManager().isProductPurchased("investigators_1").toBlocking().value());
+    }
+
+    @Test public void localInvestigatorOverrideDoesNotUnlockOtherProducts() {
+        LocalTesting.setAllInvestigatorsUnlocked(true);
+        for (String product : new String[]{"full_game", "no_ads", "cthulhu", "shub_niggurath", "yog_sothoth"}) {
+            assertFalse(product, new InAppPurchaseManager().isProductPurchased(product).toBlocking().value());
+        }
+        assertTrue(values.isEmpty());
     }
 
     private List<InvestigatorInfo> bonusRoster() {
@@ -189,12 +217,13 @@ public class InAppPurchaseManagerTest {
         Transaction[] restored = new Transaction[0];
         boolean cancel, fail, unrelated;
         String requested;
+        int restores;
         public String storeName() { return "test"; }
         public void install(PurchaseObserver observer, PurchaseManagerConfig config, boolean fetch) { this.observer = observer; }
         public boolean installed() { return true; }
         public void dispose() { }
         public Information getInformation(String id) { return null; }
-        public void purchaseRestore() { observer.handleRestore(restored); }
+        public void purchaseRestore() { restores++; observer.handleRestore(restored); }
         public void purchase(String id) {
             requested = id;
             if (cancel) observer.handlePurchaseCanceled();
