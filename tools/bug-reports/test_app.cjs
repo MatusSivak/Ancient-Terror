@@ -5,12 +5,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {chromium} = require('playwright');
 
-async function fixture(t, failedCollection) {
+async function fixture(t, failedCollection, options = {}) {
   const browser = await chromium.launch(process.env.VIEWER_TEST_BROWSER
     ? {executablePath: process.env.VIEWER_TEST_BROWSER} : {});
   t.after(() => browser.close());
   const page = await browser.newPage({viewport: {width: 1280, height: 900}});
   const errors = [], requests = [];
+  let viewerSession = 'current-session';
+  if (options.staleStorage) await page.addInitScript(() => sessionStorage.setItem('viewerSession', 'old-session'));
+  if (options.blockStorage) await page.addInitScript(() => {
+    Object.defineProperty(window, 'sessionStorage', {get() { throw new Error('Storage is unavailable'); }});
+  });
   page.on('pageerror', error => errors.push(error));
   const make = (collection, id, time) => ({collection, id, name: `${collection}/${id}`,
     createTime: time, updateTime: time, fields: {status: 'new',
@@ -24,8 +29,11 @@ async function fixture(t, failedCollection) {
     const request = route.request(), url = new URL(request.url());
     const collection = url.searchParams.get('collection');
     requests.push({path: url.pathname, collection, attachment: url.searchParams.get('attachment'),
-      token: url.searchParams.get('pageToken'), method: request.method()});
+      token: url.searchParams.get('pageToken'), method: request.method(), session: request.headers()['x-viewer-session']});
     const json = body => route.fulfill({json: body});
+    if (url.pathname.startsWith('/api/') && request.headers()['x-viewer-session'] !== viewerSession) {
+      return route.fulfill({status: 403, json: {error: 'Viewer session expired or missing. Reload this page to reconnect.'}});
+    }
     if (url.pathname === '/api/reports') {
       if (collection === failedCollection) return route.fulfill({status: 502, json: {error: 'Access denied'}});
       const items = reports.filter(r => r.collection === collection);
@@ -53,12 +61,43 @@ async function fixture(t, failedCollection) {
     const files = {'/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css']};
     if (!files[url.pathname]) return route.fulfill({status: 404, body: ''});
     const [name, contentType] = files[url.pathname];
-    return route.fulfill({contentType, body: fs.readFileSync(path.join(__dirname, name))});
+    let body = fs.readFileSync(path.join(__dirname, name), 'utf8');
+    if (url.pathname === '/') body = body.replace('__VIEWER_SESSION__', viewerSession);
+    return route.fulfill({contentType, body});
   });
-  await page.goto('http://viewer.test/#session=test');
+  await page.goto('http://viewer.test/' + (options.hash || ''));
   await page.waitForFunction(() => !document.getElementById('refresh').disabled);
-  return {page, requests, errors};
+  return {page, requests, errors, restart: () => { viewerSession = 'restarted-session'; }};
 }
+
+test('plain bookmark loads both collections without browser storage', async t => {
+  const {page, requests, errors} = await fixture(t, undefined, {blockStorage: true});
+  assert.equal(await page.locator('#reports .report').count(), 3);
+  assert.ok(requests.filter(r => r.path.startsWith('/api/')).every(r => r.session === 'current-session'));
+  assert.deepEqual(errors, []);
+});
+
+test('stale launch fragment and tab storage cannot override current session', async t => {
+  const {page, requests, errors} = await fixture(t, undefined, {staleStorage: true, hash: '#session=old-session'});
+  assert.equal(await page.locator('#reports .report').count(), 3);
+  assert.equal(page.url(), 'http://viewer.test/');
+  assert.ok(requests.filter(r => r.path.startsWith('/api/')).every(r => r.session === 'current-session'));
+  assert.deepEqual(errors, []);
+});
+
+test('page reload reconnects after viewer restarts', async t => {
+  const {page, requests, errors, restart} = await fixture(t);
+  restart();
+  await page.getByRole('button', {name: 'Refresh reports'}).click();
+  await page.waitForFunction(() => !document.getElementById('refresh').disabled);
+  assert.match(await page.locator('#notice').textContent(), /Reload this page to reconnect/);
+  await page.reload();
+  await page.waitForFunction(() => !document.getElementById('refresh').disabled);
+  assert.equal(await page.locator('#reports .report').count(), 3);
+  assert.ok(requests.some(r => r.collection === 'bugReports' && r.session === 'restarted-session'));
+  assert.ok(requests.some(r => r.collection === 'crashReports' && r.session === 'restarted-session'));
+  assert.deepEqual(errors, []);
+});
 
 test('both collections, pagination, filters, attachments and same-ID mutations', async t => {
   const {page, requests, errors} = await fixture(t);

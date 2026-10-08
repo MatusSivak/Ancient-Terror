@@ -1,6 +1,7 @@
 import base64
 import json
 import io
+import re
 import threading
 import unittest
 from http.server import ThreadingHTTPServer
@@ -9,7 +10,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from urllib.parse import parse_qs, urlsplit
 
-from viewer import Firestore, STATUSES, decode, handler_for, summarize
+from viewer import Firestore, STATUSES, ViewerHTTPServer, decode, handler_for, summarize
 
 SAVE = b'{"exact": "original"}\r\n'
 PNG = base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a4WQAAAAASUVORK5CYII=')
@@ -46,7 +47,7 @@ class FakeStore:
 class ViewerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = ThreadingHTTPServer(('127.0.0.1', 0), handler_for(FakeStore(), 'test-session', 'test'))
+        cls.server = ViewerHTTPServer(('127.0.0.1', 0), handler_for(FakeStore(), 'test-session', 'test'))
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
         cls.url = f'http://127.0.0.1:{cls.server.server_port}'
@@ -205,6 +206,51 @@ class ViewerTests(unittest.TestCase):
             with self.assertRaises(HTTPError) as context:
                 self.request('/api/reports', headers)
             self.assertEqual(context.exception.code, 403)
+
+    def test_plain_page_bootstraps_current_session_for_both_collections(self):
+        with self.request('/', {}) as response:
+            html = response.read().decode()
+            self.assertEqual(response.headers['Cache-Control'], 'no-store')
+            self.assertIn("frame-ancestors 'none'", response.headers['Content-Security-Policy'])
+            self.assertIsNone(response.headers.get('Access-Control-Allow-Origin'))
+        session = re.search(r'name="viewer-session" content="([^"]+)"', html).group(1)
+        self.assertEqual(session, 'test-session')
+        self.assertNotIn('__VIEWER_SESSION__', html)
+        for collection in ['bugReports', 'crashReports']:
+            with self.request('/api/reports?collection=' + collection,
+                              {'X-Viewer-Session': session}) as response:
+                self.assertEqual(json.load(response)['reports'][0]['collection'], collection)
+
+    def test_second_viewer_cannot_share_running_viewers_port(self):
+        with self.assertRaises(OSError):
+            second = ViewerHTTPServer(self.server.server_address,
+                                      handler_for(FakeStore(), 'other-session', 'test'))
+            second.server_close()
+        with self.request('/api/reports') as response:
+            self.assertEqual(response.status, 200)
+
+    def test_reloading_after_server_restart_gets_new_session(self):
+        original_handler = self.server.RequestHandlerClass
+        self.server.RequestHandlerClass = handler_for(FakeStore(), 'restarted-session', 'test')
+        try:
+            with self.assertRaises(HTTPError) as error:
+                self.request('/api/reports')
+            self.assertEqual(error.exception.code, 403)
+            self.assertIn('Reload this page', json.load(error.exception)['error'])
+            with self.request('/', {}) as response:
+                html = response.read().decode()
+            session = re.search(r'name="viewer-session" content="([^"]+)"', html).group(1)
+            self.assertEqual(session, 'restarted-session')
+            with self.request('/api/reports', {'X-Viewer-Session': session}) as response:
+                self.assertEqual(response.status, 200)
+        finally:
+            self.server.RequestHandlerClass = original_handler
+
+    def test_bootstrap_rejects_untrusted_host_without_leaking_session(self):
+        with self.assertRaises(HTTPError) as error:
+            self.request('/', {'Host': 'evil.example'})
+        self.assertEqual(error.exception.code, 403)
+        self.assertNotIn(b'test-session', error.exception.read())
 
     def test_bad_ids_and_attachment_types(self):
         for path in ['/api/report?id=..', '/api/report?id=a%2Fb', '/api/report?id=test&attachment=other']:

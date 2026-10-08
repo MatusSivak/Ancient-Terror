@@ -95,8 +95,14 @@ An existing Google OAuth access token can also be supplied through
 Tokens expire; replace the environment variable and restart when needed.
 Application Default Credentials refresh automatically.
 
-The browser opens automatically. Reopen using the full URL printed in the terminal
-if needed; it includes a local session token. The server listens only on
+The browser opens automatically. Reopen or bookmark the URL printed in the terminal
+(normally `http://127.0.0.1:8765/`). Each page load receives the current local session
+from the running viewer; no special URL fragment or browser storage is required.
+After restarting `viewer.py`, reload any already-open viewer tabs. If a tab says
+its session expired, reload the page rather than just clicking **Refresh reports**.
+Only one viewer can use a port. Stop the existing process before restarting, or
+use `--port` to run another instance at a different address.
+The server listens only on
 `127.0.0.1`; Google credentials never go to the browser. Stop with Ctrl+C.
 Options: `--project PROJECT_ID`, `--database DATABASE_ID`, `--port 8765`,
 and `--no-browser`. Defaults target `ancient-terror-hall-of-fame` / `(default)`.

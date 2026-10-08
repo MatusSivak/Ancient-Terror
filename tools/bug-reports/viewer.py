@@ -5,7 +5,9 @@ import json
 import os
 from pathlib import Path
 import secrets
+import socket
 import threading
+from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
@@ -16,6 +18,16 @@ ROOT = Path(__file__).resolve().parent
 PROJECT = "ancient-terror-hall-of-fame"
 COLLECTIONS = {"bugReports": "Bug reports", "crashReports": "Crash reports"}
 STATUSES = {"new": "New", "investigating": "Investigating", "fixed": "Fixed", "closed": "Closed"}
+
+
+class ViewerHTTPServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # Windows SO_REUSEADDR can let two viewers serve the same address with
+        # different sessions. Reserve the port exclusively before binding.
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.allow_reuse_address = False
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 def decode(value):
@@ -147,10 +159,16 @@ def handler_for(store, session, project):
                 name, mime = {"/": ("index.html", "text/html; charset=utf-8"),
                               "/app.js": ("app.js", "text/javascript"),
                               "/style.css": ("style.css", "text/css")}[url.path]
-                self.send(200, (ROOT / name).read_bytes(), mime)
+                content = (ROOT / name).read_bytes()
+                if url.path == "/":
+                    # Bootstrap from this server instance, not a stale bookmark or tab token.
+                    # The exact loopback Host check, same-origin policy, and no-store/CSP
+                    # headers protect this document; APIs still require the session header.
+                    content = content.replace(b"__VIEWER_SESSION__", escape(session, quote=True).encode())
+                self.send(200, content, mime)
                 return
             if not secrets.compare_digest(self.headers.get("X-Viewer-Session", ""), session):
-                self.send(403, {"error": "Open the viewer using the full URL printed by viewer.py."})
+                self.send(403, {"error": "Viewer session expired or missing. Reload this page to reconnect."})
                 return
             try:
                 query = parse_qs(url.query)
@@ -202,7 +220,7 @@ def handler_for(store, session, project):
             if (self.headers.get("Host") != host
                     or self.headers.get("Origin", "http://" + host) != "http://" + host
                     or not secrets.compare_digest(self.headers.get("X-Viewer-Session", ""), session)):
-                self.send(403, {"error": "Invalid viewer session. Reopen the URL printed by viewer.py."})
+                self.send(403, {"error": "Invalid viewer session. Reload this page to reconnect."})
                 return
             url = urlsplit(self.path)
             if url.path != "/api/report":
@@ -252,8 +270,12 @@ def main():
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args()
     session = secrets.token_urlsafe(32)
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler_for(Firestore(args.project, args.database), session, args.project))
-    url = f"http://127.0.0.1:{server.server_port}/#session={session}"
+    try:
+        server = ViewerHTTPServer(("127.0.0.1", args.port), handler_for(Firestore(args.project, args.database), session, args.project))
+    except OSError as error:
+        parser.exit(1, f"Cannot start viewer on 127.0.0.1:{args.port}: {error}\n"
+                       "Stop the existing viewer or choose another --port.\n")
+    url = f"http://127.0.0.1:{server.server_port}/"
     print(f"Bug and crash report viewer: {url}\nPress Ctrl+C to stop.", flush=True)
     if not args.no_browser:
         webbrowser.open(url)

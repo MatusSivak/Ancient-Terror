@@ -1,7 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const session = new URLSearchParams(location.hash.slice(1)).get('session') || sessionStorage.getItem('viewerSession') || '';
-sessionStorage.setItem('viewerSession', session);
+const session = document.querySelector('meta[name="viewer-session"]').content;
+// Discard legacy launch fragments; fresh page loads always use the running server's session.
 history.replaceState(null, '', location.pathname);
 let reports = [], selected = null, selectionVersion = 0, imageUrl = null;
 let statuses = {}, mutating = false;
