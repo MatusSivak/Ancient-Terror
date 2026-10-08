@@ -33,6 +33,10 @@ public final class YigEffects {
         if (locations.isEmpty()) return;
         List<Question.Option<LocationId>> options = new ArrayList<>();
         for (LocationId l : new LinkedHashSet<>(locations)) options.add(new Question.Option<>(l.toString(), l));
+        if (options.size() == 1) {
+            sequence(() -> action.call(options.get(0).getValue()));
+            return;
+        }
         Question<LocationId> q = new Question<>(); q.setTitle(title); q.setOptions(options);
         p().getGameService().ask(q).subscribe(a -> sequence(() -> action.call(a.getResponseData())));
     }

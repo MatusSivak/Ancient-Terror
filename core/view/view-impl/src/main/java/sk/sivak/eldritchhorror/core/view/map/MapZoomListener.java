@@ -24,8 +24,31 @@ public class MapZoomListener extends ActorGestureListener {
     private float dragStartX;
     private float dragStartY;
 
+    public void reset() {
+        getGestureDetector().reset();
+        clearZoom();
+    }
+
+    private void clearZoom() {
+        previousInitialDistance = null;
+        initialZoom = null;
+        initialDistanceForCalculation = null;
+        initialDistance = null;
+    }
+
+    @Override
+    public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
+        clearZoom();
+    }
+
+    @Override
+    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+        clearZoom();
+    }
+
     @Override
     public void zoom(InputEvent event, float initialDistance, float distance) {
+        if (!Gdx.input.isTouched(0) || !Gdx.input.isTouched(1)) return;
         if (this.initialDistance == null || this.initialDistance != initialDistance) {
             this.initialDistance = initialDistance;
             this.dragStartX = calculateX();
@@ -40,6 +63,7 @@ public class MapZoomListener extends ActorGestureListener {
         float distanceY = Math.abs(Gdx.app.getInput().getY(0) - Gdx.app.getInput().getY(1));
         distanceY *= yMultiplier;
         float newDistance = (float) Math.sqrt(Math.pow(distanceX,2) + Math.pow(distanceY,2));
+        if (newDistance <= 0) return;
 
         if (previousInitialDistance == null || !previousInitialDistance.equals(initialDistance)) {
             initialZoom = MapStage.getCamera().zoom;

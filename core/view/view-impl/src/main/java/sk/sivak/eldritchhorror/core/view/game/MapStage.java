@@ -296,6 +296,9 @@ public class MapStage {
     }
 
     public static void removeDragAndZoomListeners() {
+        get().stage.cancelTouchFocus(get().stage.getRoot());
+        get().mapDragListener.cancel();
+        get().mapZoomListener.reset();
         get().stage.removeListener(get().mapDragListener);
         get().stage.removeListener(get().mapZoomListener);
         get().stage.removeListener(get().mapScrollListener);
@@ -341,18 +344,34 @@ public class MapStage {
         )));
     }
 
-    private static class MapDragListener extends DragListener {
+    static class MapDragListener extends DragListener {
         private float dragStartX;
         private float dragStartY;
+        private int activePointer = -1;
 
         public MapDragListener() {
             setTapSquareSize(0);
         }
 
         @Override
+        public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            // An overlay or another screen can consume the previous touch-up.
+            if (activePointer == pointer || (activePointer >= 0 && !Gdx.input.isTouched(activePointer))) cancel();
+            boolean accepted = super.touchDown(event, x, y, pointer, button);
+            if (accepted) activePointer = pointer;
+            return accepted;
+        }
+
+        @Override
+        public void cancel() {
+            super.cancel();
+            activePointer = -1;
+        }
+
+        @Override
         public void dragStart(InputEvent event, float x, float y, int pointer) {
-            dragStartX = Gdx.input.getX() - MapStage.getStage().getViewport().getLeftGutterWidth();
-            dragStartY = -Gdx.input.getY() - MapStage.getStage().getViewport().getBottomGutterHeight();
+            dragStartX = Gdx.input.getX(pointer) - MapStage.getStage().getViewport().getLeftGutterWidth();
+            dragStartY = -Gdx.input.getY(pointer) - MapStage.getStage().getViewport().getBottomGutterHeight();
         }
 
         @Override
@@ -361,8 +380,8 @@ public class MapStage {
 
         @Override
         public void drag(InputEvent event, float x, float y, int pointer) {
-            int inputX = Gdx.input.getX();
-            int inputY = Gdx.input.getY();
+            int inputX = Gdx.input.getX(pointer);
+            int inputY = Gdx.input.getY(pointer);
             if (getActiveTouches() != 1) {
                 this.dragStartX = inputX - MapStage.getStage().getViewport().getLeftGutterWidth();
                 this.dragStartY = -inputY - MapStage.getStage().getViewport().getBottomGutterHeight();

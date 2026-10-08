@@ -110,6 +110,30 @@ public class YigEncounterPresentationTest {
         assertNotNull(combat);
     }
 
+    @Test public void defeatedGuardianExplainsThatAmbushDoesNotAdvanceMystery() {
+        guardianOutcome(0, "You defeated the Serpent People.");
+    }
+
+    @Test public void survivingGuardianStillExplainsEncounterCompletion() {
+        guardianOutcome(2, "The ambush is over.");
+    }
+
+    private void guardianOutcome(int health, String message) {
+        startSpecial(6); click(); finishTest(false); click();
+        CultistMonster monster = new CultistMonster(); monster.setCurrentHealth(health);
+        CombatData result = new CombatData(); result.setMonsterInfo(monster);
+        resume(() -> combat.onSuccess(result));
+        assertTrue(paperVisible);
+        assertTrue(allInfo().contains(message));
+        assertTrue(allInfo().contains("without advancing the Active Mystery"));
+        assertEquals(1, papers);
+        assertFalse(effects.contains("progress"));
+        click();
+        assertEquals(0, papers);
+        assertFalse(waiting);
+        assertFalse(effects.contains("progress"));
+    }
+
     @Test public void failedStruggleKeepsPaperStillWhileAddingTheNextTest() {
         startSpecial(8); click(); finishTest(false);
         assertEquals(Arrays.asList("show", "hide", "show"), paperTransitions);
@@ -144,10 +168,10 @@ public class YigEncounterPresentationTest {
         assertEquals(1, testCount());
         assertEquals(2, Collections.frequency(effects, "flavor"));
         assertFalse(effects.contains("progress"));
-        assertFalse(allInfo().contains("Eldritch token"));
+        assertFalse(allInfo().contains("Advance the Active Mystery"));
         click(); finishTest(true);
         assertEquals(2, testCount());
-        assertTrue(allInfo().contains("[#GOOD]Place 1 Eldritch token on the Active Mystery.[]"));
+        assertTrue(allInfo().contains("[#GOOD]Advance the Active Mystery by 1.[]"));
         assertFalse(effects.contains("progress"));
         click();
         assertTrue(effects.contains("progress"));

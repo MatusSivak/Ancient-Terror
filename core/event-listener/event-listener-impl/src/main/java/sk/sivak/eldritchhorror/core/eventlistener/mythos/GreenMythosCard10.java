@@ -17,7 +17,10 @@ public class GreenMythosCard10 implements MythosCardEventListener{
     public void execute() {
         List<GateInfo> spawnedGates = ServicePlatform.get().getGateStackRead().getSpawnedGates();
         OmenColor omenColor = ServicePlatform.get().getOmenTrack().getCurrentOmen().getOmenColor();
-        ServicePlatform.get().getGameService().selectSingleGate(new SelectSingleGateData(spawnedGates)).subscribe(selectedGate -> {
+        if (spawnedGates.isEmpty()) return;
+        SelectSingleGateData selection = new SelectSingleGateData(spawnedGates);
+        selection.setTitleText("Choose a Gate to discard.\nIf its color does not match the current Omen, advance Doom by 1.");
+        ServicePlatform.get().getGameService().selectSingleGate(selection).subscribe(selectedGate -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getService().discardGate(selectedGate.getLocationId());
             if (!selectedGate.getGateColor().equals(omenColor.toGateColor())) {

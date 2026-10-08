@@ -54,7 +54,13 @@ public class ResearchSea7Encounter extends AbstractYogSothothResearchEncounter {
 
                                     ServicePlatform.get().getService().hideBackground();
                                     List<GateInfo> spawnedGates = ServicePlatform.get().getGateStackRead().getSpawnedGates();
-                                    ServicePlatform.get().getGameService().selectSingleGate(new SelectSingleGateData(spawnedGates)).subscribe(selectedGate -> {
+                                    if (spawnedGates.isEmpty()) {
+                                        ServicePlatform.get().getService().release();
+                                        return;
+                                    }
+                                    SelectSingleGateData selection = new SelectSingleGateData(spawnedGates);
+                                    selection.setTitleText("Choose a Gate to discard");
+                                    ServicePlatform.get().getGameService().selectSingleGate(selection).subscribe(selectedGate -> {
                                         ServicePlatform.get().getService().hold();
                                         ServicePlatform.get().getService().discardGate(selectedGate.getLocationId());
                                         ServicePlatform.get().getService().release();

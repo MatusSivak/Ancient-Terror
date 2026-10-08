@@ -18,7 +18,7 @@ final class YigSpecialEncounter {
     private final Runnable nothing = outcome("Nothing else happens.", () -> {});
     YigSpecialEncounter(MysteryCardInfo mystery,Runnable progress) {
         this.mystery=mystery;
-        this.progress=outcome("[#GOOD]Place 1 Eldritch token on the Active Mystery.[]", progress);
+        this.progress=outcome("[#GOOD]Advance the Active Mystery by 1.[]", progress);
     }
     void execute() {
         sequence(this::start);
@@ -43,7 +43,7 @@ final class YigSpecialEncounter {
                         }));
                 break;
             case 2:
-                test(LORE,-1,choice("[#BAD]Spend 1 Clue[] to decipher the hidden record and [#GOOD]place 1 Eldritch token on the Active Mystery[]? Otherwise, [#BAD]gain Paranoia.[]",
+                test(LORE,-1,choice("[#BAD]Spend 1 Clue[] to decipher the hidden record and [#GOOD]advance the Active Mystery by 1[]? Otherwise, [#BAD]gain Paranoia.[]",
                         () -> spend(1,0,0,progress,outcome("[#BAD]Gain Paranoia.[]", () -> condition(PARANOIA))),
                         outcome("[#BAD]Gain Paranoia.[]", () -> condition(PARANOIA))),
                         () -> nextTest("The changing script draws you deeper into the record. You search for a way to break its hold.", LORE,0,
@@ -79,7 +79,10 @@ final class YigSpecialEncounter {
             case 6:
                 test(OBSERVATION,0,() -> nextTest("You find the guardian's watchful presence among the carvings. You steady yourself and approach.", WILL,-1,
                         progress, outcome("[#BAD]Lose 2 Sanity.[]", () -> damage(0,2))),
-                        outcome("[#BAD]A Serpent People ambushes you.[]", () -> p().getMonsterService().ambush(NonEpicMonsterId.SERPENT_PEOPLE).subscribe()));
+                        outcome("[#BAD]A Serpent People ambushes you.[]", () -> p().getMonsterService().ambush(NonEpicMonsterId.SERPENT_PEOPLE)
+                                .subscribe(result -> outcome(result.getMonsterInfo().getCurrentHealth() <= 0
+                                        ? "[#GOOD]You defeated the Serpent People.[]\nThe encounter ends without advancing the Active Mystery."
+                                        : "The ambush is over.\nThe encounter ends without advancing the Active Mystery.", () -> {}).run())));
                 break;
             case 7:
                 test(OBSERVATION,0,() -> nextTest("You find the chamber, but the shifting walls are closing its entrance. You force your way through.", STRENGTH,-1,

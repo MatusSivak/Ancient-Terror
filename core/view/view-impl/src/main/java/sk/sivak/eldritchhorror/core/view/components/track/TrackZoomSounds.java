@@ -15,8 +15,12 @@ final class TrackZoomSounds {
     }
 
     static void play(String path) {
+        play(path, true);
+    }
+
+    static void play(String path, boolean followsFastForward) {
         // Fast-forward shrinks the zoom to a few frames; skip the cue instead of stacking it.
-        if (path == null || FastForwardAction.isOn()) {
+        if (path == null || (followsFastForward && FastForwardAction.isOn())) {
             return;
         }
         Sound sound = CustomAssetManager.getLoadedSound(path);

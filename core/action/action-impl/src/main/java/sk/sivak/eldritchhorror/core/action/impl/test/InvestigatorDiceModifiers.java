@@ -12,10 +12,13 @@ public final class InvestigatorDiceModifiers {
     private InvestigatorDiceModifiers() {}
 
     public static int roll(ConditionInfo condition) {
+        int value = ServicePlatform.get().getModel().rollDie();
+        InvestigatorRead investigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
+        // Mythos and other board-wide rolls need no investigator ability.
+        if (investigator == null) return value;
         if (condition == null && ServicePlatform.get().getTestFlavor().getFlavorType() == TestFlavorType.CONDITION)
             condition = ServicePlatform.get().getTestFlavor().getFlavorData();
-        InvestigatorRead investigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
-        return adjust(ServicePlatform.get().getModel().rollDie(), investigator.getInfo().getInvestigatorId(),
+        return adjust(value, investigator.getInfo().getInvestigatorId(),
                 investigator.isLostInTimeAndSpace(), condition);
     }
 

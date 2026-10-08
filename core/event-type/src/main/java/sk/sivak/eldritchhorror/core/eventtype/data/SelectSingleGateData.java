@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SelectSingleGateData {
     private List<GateInfo> gates;
-    private String titleText;
+    private String titleText = "Select a Gate";
     private String hideText = "Display Gates?";
 
     public SelectSingleGateData(List<GateInfo> gates) {

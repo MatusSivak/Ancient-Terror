@@ -50,7 +50,7 @@ public class MaxMinComponent {
     }
 
     private void maximize() {
-        TrackZoomSounds.play(maximizeSound);
+        TrackZoomSounds.play(maximizeSound, false);
         float viewportHeightRatio = 0.65f;
         Vector2 stageCoordinates = actor.localToStageCoordinates(new Vector2());
         Vector2 difference = new Vector2(actor.getX(), actor.getY()).sub(stageCoordinates);
@@ -76,7 +76,7 @@ public class MaxMinComponent {
     }
 
     private void minimize() {
-        TrackZoomSounds.play(minimizeSound);
+        TrackZoomSounds.play(minimizeSound, false);
         ParallelAction toBackAction = Actions.parallel(
                 Actions.scaleTo(actorScaleX, actorScaleY, DURATION),
                 Actions.moveTo(actorX,
