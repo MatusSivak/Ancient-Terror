@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
+import sk.sivak.eldritchhorror.core.eventtype.data.investigator.InvestigatorRestriction;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 /** Shared choices keep all Yig effects on the game's command queue. */
@@ -41,18 +42,23 @@ public final class YigEffects {
         p().getGameService().ask(q).subscribe(a -> sequence(() -> action.call(a.getResponseData())));
     }
     public static void cureCurse() {
-        List<Question.Option<InvestigatorId>> options = new ArrayList<>();
+        List<InvestigatorId> eligible = new ArrayList<>();
         for (InvestigatorRead i : p().getInvestigators().getOnBoardInvestigators()) {
             InvestigatorId id = i.getInfo().getInvestigatorId();
-            if (p().getConditionsDeck().hasCondition(id, ConditionId.CURSED)) options.add(new Question.Option<>(id.toString(), id));
+            if (p().getConditionsDeck().hasCondition(id, ConditionId.CURSED)) eligible.add(id);
         }
-        if (options.isEmpty()) return;
-        options.add(new Question.Option<>("Keep the conditions", null));
-        Question<InvestigatorId> q = new Question<>(); q.setTitle("Choose an investigator who may discard Cursed"); q.setOptions(options);
-        p().getGameService().ask(q).subscribe(a -> {
-            InvestigatorId id = a.getResponseData();
-            if (id != null) p().getService().discardConditionFromInvestigator(id, p().getConditionsDeck().getCondition(id, ConditionId.CURSED));
-        });
+        if (eligible.isEmpty()) return;
+        if (eligible.size() == 1) {
+            discardCurse(eligible.get(0));
+            return;
+        }
+        InvestigatorRestriction restriction = new InvestigatorRestriction(true).addAllowedInvestigators(eligible);
+        restriction.setTitle("Choose an investigator to discard Cursed");
+        p().getInvestigatorService().selectInvestigator(restriction).subscribe(YigEffects::discardCurse);
+    }
+    private static void discardCurse(InvestigatorId id) {
+        sequence(() -> p().getService().discardConditionFromInvestigator(id,
+                p().getConditionsDeck().getCondition(id, ConditionId.CURSED)));
     }
     public static void spawn(MonsterId monster, LocationId location) {
         SpawnMonsterData data = new SpawnMonsterData(); data.setMonsterId(monster); data.setLocationId(location);
@@ -65,6 +71,14 @@ public final class YigEffects {
             if (!assetsOnly || card instanceof AssetInfo) options.add(new Question.Option<>(card.getName(), card));
         }
         if (options.isEmpty()) { done.run(); return; }
+        if (trait == AssetTrait.ALLY) {
+            CardInfo card = options.get(new Random().nextInt(options.size())).getValue();
+            sequence(() -> {
+                EncounterUtils.onSelectCardToDiscard(card);
+                later(() -> discardPossessions(trait, count - 1, assetsOnly, done));
+            });
+            return;
+        }
         Question<CardInfo> q = new Question<>(); q.setTitle("Discard " + count + " " + trait + " possession(s)"); q.setOptions(options);
         p().getGameService().ask(q).subscribe(a -> sequence(() -> {
             EncounterUtils.onSelectCardToDiscard(a.getResponseData());
@@ -81,7 +95,7 @@ public final class YigEffects {
     }
     public static final Set<LocationId> EXPEDITIONS = EnumSet.of(LocationId.THE_AMAZON, LocationId.THE_HEART_OF_AFRICA,
             LocationId.THE_PYRAMIDS, LocationId.ANTARCTICA, LocationId.THE_HIMALAYAS, LocationId.TUNGUSKA);
-    /** Breadth-first search retains every tied nearest space so the player can choose. */
+    /** Breadth-first search retains every tied nearest space for the caller to resolve. */
     public static List<LocationId> nearest(LocationId start, Set<LocationId> targets) {
         Set<LocationId> seen = EnumSet.noneOf(LocationId.class);
         List<LocationId> frontier = Collections.singletonList(start);
@@ -98,8 +112,11 @@ public final class YigEffects {
         return Collections.emptyList();
     }
     public static void moveClueToExpedition(LocationId spawn, LocationId current) {
-        chooseLocation(nearest(current, EXPEDITIONS), "Move the Clue to the nearest Expedition space",
-                destination -> p().getTokenService().moveClue(spawn, destination));
+        List<LocationId> destinations = nearest(current, EXPEDITIONS);
+        if (!destinations.isEmpty()) {
+            LocationId destination = destinations.get(new Random().nextInt(destinations.size()));
+            p().getTokenService().moveClue(spawn, destination);
+        }
     }
     public static void moveInvestigator(LocationId destination) {
         p().getBasicActionService().travelToLocation(new sk.sivak.eldritchhorror.core.constants.location.LocationInfo.Connection() {

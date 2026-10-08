@@ -30,6 +30,7 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
     private final int page;
     private boolean gainedClue;
     private boolean paperVisible;
+    private String openingChoice;
     private static final Runnable NOTHING = () -> {};
     public YigResearchEncounter(int page, LocationType type) {
         super(page, type, AncientOneId.YIG);
@@ -59,7 +60,10 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         // AbstractResearchEncounter has already opened the paper.
         paperVisible = true;
         String info = getTextBuilder().withInfo().build();
-        if (info.isEmpty()) {
+        if (startsWithChoice()) {
+            openingChoice = info;
+            resolve();
+        } else if (info.isEmpty()) {
             resolve();
         } else {
             TypewriterUtils.confirmInfos(info).subscribe(() -> sequence(() -> {
@@ -67,6 +71,29 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
                 resolve();
             }));
         }
+    }
+    private boolean startsWithChoice() {
+        switch (getLocationType()) {
+            case CITY: return page == 23 || (page == 7 && canGain(DARK_PACT));
+            case WILDERNESS: return page == 6 || (page == 8 && canGain(POISONED))
+                    || (page == 21 && canGain(DARK_PACT));
+            case SEA: return (page == 3 || page == 12) && canGain(DARK_PACT);
+            default: return false;
+        }
+    }
+    private boolean canGain(ConditionId id) {
+        return p().getConditionsDeck().canGetConditionId(investigator(), id);
+    }
+    private void openingChoice(String question, Runnable yes, Runnable no) {
+        if (openingChoice == null) {
+            ask(question, yes, no);
+            return;
+        }
+        String info = openingChoice;
+        openingChoice = null;
+        TypewriterUtils.noYesQuestion(info,
+                () -> sequence(() -> { hidePaper(); no.run(); }),
+                () -> sequence(() -> { hidePaper(); yes.run(); }));
     }
     private void resolve() {
         switch (getLocationType()) {
@@ -167,10 +194,10 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
     }
     private void offerCondition(ConditionId id, Runnable yes, Runnable no) {
         if (!p().getConditionsDeck().canGetConditionId(investigator(), id)) { no.run(); return; }
-        ask("Gain " + id.toString().replace('_',' ') + "?", () -> { condition(id); later(() -> { if (has(id)) yes.run(); else no.run(); }); }, no);
+        openingChoice("Gain " + id.toString().replace('_',' ') + "?", () -> { condition(id); later(() -> { if (has(id)) yes.run(); else no.run(); }); }, no);
     }
     private void pay(String question, int clues, int health, int sanity, Runnable yes, Runnable no) {
-        ask(question, () -> spend(clues, health, sanity, yes, no), no);
+        openingChoice(question, () -> spend(clues, health, sanity, yes, no), no);
     }
     private void city() {
         switch (page) {

@@ -171,7 +171,7 @@ public class YigEncounterPresentationTest {
         assertFalse(allInfo().contains("Advance the Active Mystery"));
         click(); finishTest(true);
         assertEquals(2, testCount());
-        assertTrue(allInfo().contains("[#GOOD]Advance the Active Mystery by 1.[]"));
+        assertTrue(allInfo().contains("[#GOOD]Advance the Active Mystery.[]"));
         assertFalse(effects.contains("progress"));
         click();
         assertTrue(effects.contains("progress"));
@@ -301,6 +301,71 @@ public class YigEncounterPresentationTest {
         assertFalse(waiting);
     }
 
+    @Test public void optionalDarkPactStartsWithYesNoAndDecliningDoesNothing() {
+        allowDarkPact(false);
+        start(7, LocationType.CITY);
+        assertTrue(allInfo().contains("Dark Pact"));
+        assertArrayEquals(new String[]{"[#BAD]No[]", "[#GOOD]Yes[]"}, buttons);
+        assertEquals(Collections.singletonList("flavor"), effects);
+        click();
+        assertEquals(Collections.singletonList("flavor"), effects);
+        assertEquals(0, papers);
+        assertFalse(waiting);
+    }
+
+    @Test public void acceptingDarkPactAppliesCostBeforeRewardWithoutAnotherQuestion() {
+        allowDarkPact(true);
+        start(7, LocationType.CITY);
+        assertFalse(effects.contains("gainClueFromSpace"));
+        click(1);
+        assertEquals(Arrays.asList("flavor", "gainCondition:DARK_PACT", "hideBackground", "gainClueFromSpace"), effects);
+        assertEquals(0, papers);
+        assertFalse(waiting);
+    }
+
+    @Test public void missingDarkPactDoesNotGrantRewardAfterAccepting() {
+        allowDarkPact(false);
+        start(7, LocationType.CITY); click(1);
+        assertTrue(effects.contains("gainCondition:DARK_PACT"));
+        assertFalse(effects.contains("gainClueFromSpace"));
+        assertEquals(0, papers);
+    }
+
+    @Test public void allOptionalOpeningChoicesUseYesNoOnTheEncounterPaper() {
+        int[][] cards = {{7, 23}, {6, 8, 21}, {3, 12}};
+        LocationType[] types = {LocationType.CITY, LocationType.WILDERNESS, LocationType.SEA};
+        for (int i = 0; i < types.length; i++) for (int card : cards[i]) {
+            YigEncounterPresentationTest fixture = new YigEncounterPresentationTest();
+            fixture.setup(); fixture.allowDarkPact(false); fixture.start(card, types[i]);
+            assertArrayEquals(types[i] + " " + card,
+                    new String[]{"[#BAD]No[]", "[#GOOD]Yes[]"}, fixture.buttons);
+            assertFalse(fixture.allInfo().isEmpty());
+            assertTrue(fixture.paperVisible);
+            fixture.cleanup();
+        }
+    }
+
+    @Test public void unavailableDarkPactStillExplainsEncounterBeforeEnding() {
+        start(7, LocationType.CITY);
+        assertTrue(allInfo().contains("Dark Pact"));
+        assertArrayEquals(new String[]{"OK"}, buttons);
+        click();
+        assertEquals(0, papers);
+        assertFalse(effects.contains("gainClueFromSpace"));
+    }
+
+    private void allowDarkPact(boolean received) {
+        platform.setConditionsDeck(mock(ConditionsDeckRead.class, (name, args) ->
+                name.equals("canGetConditionId") || (name.equals("hasCondition")
+                        && args[1] == ConditionId.DARK_PACT && received
+                        && effects.contains("gainCondition:DARK_PACT"))));
+        platform.setInvestigators(mock(InvestigatorsRead.class, (name, args) -> {
+            if (name.equals("getOnBoardInvestigators")) return Collections.emptyList();
+            return mock(InvestigatorRead.class, (n, a) -> n.equals("getInfo")
+                    ? mock(InvestigatorInfo.class, (nn, aa) -> InvestigatorId.THE_SAILOR) : LocationId.THE_AMAZON);
+        }));
+    }
+
     private void start(int page, LocationType type) {
         YigResearchEncounter encounter = new YigResearchEncounter(page, type);
         encounter.setLocationId(LocationId.THE_AMAZON);
@@ -320,8 +385,11 @@ public class YigEncounterPresentationTest {
         return count;
     }
     private void click() {
+        click(0);
+    }
+    private void click(int index) {
         SingleSubscriber<? super Integer> current = button; button = null;
-        assertNotNull(current); resume(() -> current.onSuccess(0));
+        assertNotNull(current); resume(() -> current.onSuccess(index));
     }
     private void finishTest(boolean passed) {
         TestData result = new TestData(); result.setDiceRolls(Collections.emptyList());

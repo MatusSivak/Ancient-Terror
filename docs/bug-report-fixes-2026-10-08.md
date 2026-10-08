@@ -28,3 +28,28 @@ Added regression coverage for investigator-free dice rolls, preserved Sister Mar
 bonuses, interrupted touch recovery, single/tied/empty location choices, both
 guardian outcomes, gate prompt consequences and empty gate lists, and manual omen
 audio with fast-forward enabled.
+
+## Follow-up reports
+
+Reviewed all six new reports, their screenshots, and attached saves. These requests
+supersede the earlier nearest-expedition tie behavior and mystery wording above.
+
+| Report ID | Change |
+| --- | --- |
+| `fbc24153-3e9f-4eb7-80c4-637292a04def` | Clues moving to a nearest expedition now choose automatically, including a random selection among equally near destinations. Other travel choices retain their existing rules. |
+| `741f90ae-e482-4e10-8294-a21b700dc4ce` | K'n-yan now says “Advance the Active Mystery” without “by 1,” including the clue-payment question. |
+| `bed09abd-c0a8-4811-b2dd-6edf032de4dd` | Yig's Ally discards randomly select an eligible Ally, including when several are available. The selected card is shown for acknowledgement; no selection question appears. Multiple discards select from the remaining possessions after each discard completes. |
+| `9c05882d-e42f-4c91-be57-44af545d6c5b` | Cursed removal automatically targets the sole eligible investigator. With several eligible investigators it opens the standard investigator picker restricted to those investigators, including delayed or detained investigators. |
+| `f901a906-0ac4-4ef7-a8ba-c4f881a3133c` | Optional opening Yig research encounters present Yes/No directly on the encounter paper. Accepting applies costs before rewards; declining follows the existing refusal outcome. An unavailable condition offer retains its explanatory confirmation. |
+| `b51824ce-c91d-4189-8bbd-0ab2c165d29e` | Replaced the defeated investigator's 49 animated puzzle overlays on each of three map copies with a static red or blue portrait and border tint. Removal uses a short fade that completes the command queue. The separate devouring effect remains intact. |
+
+Follow-up validation: 63 event-listener tests and 242 view tests passed, including
+automatic selection, sequential Ally discards, all seven optional opening choices,
+cost-before-reward ordering, constant draw counts, preserved actor opacity, and
+defeated-actor removal completion. Desktop Java compilation and `git diff --check`
+passed. Android device performance and gameplay still require device verification;
+no Android build was produced because the configured SDK is missing.
+
+The report viewer's pending session fix was also verified: 19 Python tests and
+5 browser tests passed. Opening the bare localhost URL now obtains the active
+server's session, and Windows prevents two viewer processes sharing the same port.

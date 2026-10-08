@@ -18,7 +18,7 @@ final class YigSpecialEncounter {
     private final Runnable nothing = outcome("Nothing else happens.", () -> {});
     YigSpecialEncounter(MysteryCardInfo mystery,Runnable progress) {
         this.mystery=mystery;
-        this.progress=outcome("[#GOOD]Advance the Active Mystery by 1.[]", progress);
+        this.progress=outcome("[#GOOD]Advance the Active Mystery.[]", progress);
     }
     void execute() {
         sequence(this::start);
@@ -43,7 +43,7 @@ final class YigSpecialEncounter {
                         }));
                 break;
             case 2:
-                test(LORE,-1,choice("[#BAD]Spend 1 Clue[] to decipher the hidden record and [#GOOD]advance the Active Mystery by 1[]? Otherwise, [#BAD]gain Paranoia.[]",
+                test(LORE,-1,choice("[#BAD]Spend 1 Clue[] to decipher the hidden record and [#GOOD]advance the Active Mystery[]? Otherwise, [#BAD]gain Paranoia.[]",
                         () -> spend(1,0,0,progress,outcome("[#BAD]Gain Paranoia.[]", () -> condition(PARANOIA))),
                         outcome("[#BAD]Gain Paranoia.[]", () -> condition(PARANOIA))),
                         () -> nextTest("The changing script draws you deeper into the record. You search for a way to break its hold.", LORE,0,

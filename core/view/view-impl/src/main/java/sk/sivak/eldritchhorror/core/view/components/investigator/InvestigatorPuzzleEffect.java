@@ -12,11 +12,8 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import rx.Completable;
@@ -96,57 +93,6 @@ public class InvestigatorPuzzleEffect {
         return publishSubject.toCompletable();
     }
 
-    public static Observable<TextureRegion> prepareTextureRegionsForDefeated() {
-        List<Integer> integers = new LinkedList<>();
-        for (int i = 0; i <= 48; i++) {
-            integers.add(i);
-        }
-        Collections.shuffle(integers);
-
-        return Observable.from(integers).concatMap(value -> Observable.create(onSub -> Gdx.app.postRunnable(() -> {
-            buildTextureRegionSimple(value).subscribe(tr -> {
-                onSub.onNext(tr);
-                onSub.onCompleted();
-            });
-        })));
-    }
-
-    public static Completable defeatInvestigator(Observable<TextureRegion> textureRegionObservable,
-                                  InvestigatorImage investigatorImage,
-                                  boolean health) {
-        PublishSubject<Object> publishSubject = PublishSubject.create();
-        List<Image> puzzleImages = new LinkedList<>();
-        textureRegionObservable.map(textureRegion -> createPuzzleImage(investigatorImage, textureRegion))
-                .subscribe(puzzleImage -> {
-                    puzzleImage.setTouchable(Touchable.disabled);
-                    puzzleImages.add(puzzleImage);
-                    investigatorImage.getParent().addActorAfter(investigatorImage, puzzleImage);
-                    puzzleImage.setColor(health ?
-                            new Color(1f, 0.25f,0.25f,0f) :
-                            new Color(0.25f, 0.25f,1f,0f)
-                    );
-                    puzzleImage.addAction(Actions.sequence(
-                            Actions.alpha(0.75f,1.5f),
-                            Actions.alpha(0f,1.5f)
-                    ));
-                }, err -> {
-
-                }, () -> {
-                    float delay = 0.0f;
-                    for (Image puzzleImage : puzzleImages) {
-                        delay += 3/49f;
-                        puzzleImage.addAction(Actions.after(Actions.delay(delay, Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                                Actions.alpha(0.5f,1.5f),
-                                Actions.alpha(0f,1.5f)
-                        )))));
-                    }
-                    investigatorImage.setPuzzleImages(puzzleImages);
-                    investigatorImage.setDefeatedByHealth(health);
-                    publishSubject.onCompleted();
-                });
-        return publishSubject.toCompletable();
-    }
-
     private static List<Image> createPuzzleImages(InvestigatorImage investigatorImage, List<TextureRegion> textureRegions, Group group) {
         List<Image> puzzleImages = new LinkedList<>();
         for (TextureRegion textureRegion : textureRegions) {
@@ -168,16 +114,6 @@ public class InvestigatorPuzzleEffect {
         return puzzlePiece;
     }
 
-
-    private static Single<TextureRegion> buildTextureRegionSimple(int i) {
-        return Single.create(onSub -> {
-            getTextureAsync("investigator/puzzle/" + String.format(Locale.ENGLISH, "%03d", i) + ".png").subscribe(texture -> {
-                onSub.onSuccess(new TextureRegion(texture));
-            });
-        });
-
-
-    }
 
     private static Single<TextureRegion> buildTextureRegion(SpriteBatch spriteBatch,
                                                                   OrthographicCamera camera,

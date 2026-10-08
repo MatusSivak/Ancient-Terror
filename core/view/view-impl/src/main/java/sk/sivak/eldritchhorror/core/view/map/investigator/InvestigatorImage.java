@@ -2,33 +2,22 @@ package sk.sivak.eldritchhorror.core.view.map.investigator;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ColorAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
-import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import rx.Completable;
-import rx.Single;
-import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.hourglass.HourglassComponent;
-import sk.sivak.eldritchhorror.core.view.components.investigator.InvestigatorPuzzleEffect;
-import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
-
-import java.util.Collections;
-import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
@@ -55,7 +44,7 @@ public class InvestigatorImage extends Image {
 
     private HourglassComponent hourglassComponent;
 
-    private List<Image> puzzleImages = Collections.emptyList();
+    private boolean defeated;
     private boolean defeatedByHealth;
     private boolean highlighted;
 
@@ -73,12 +62,17 @@ public class InvestigatorImage extends Image {
 
 
     public InvestigatorImage(InvestigatorId investigatorId, GameController gameController) {
-        super(CustomAssetManager.getInvestigatorTexture(investigatorId));
+        this(investigatorId, gameController, CustomAssetManager.getInvestigatorDrawable(investigatorId),
+                CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.INVESTIGATOR_BORDER));
+    }
+
+    InvestigatorImage(InvestigatorId investigatorId, GameController gameController, Drawable portrait, Drawable border) {
+        super(portrait);
 
         this.gameController = gameController;
         this.investigatorId = investigatorId;
         setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
-        createBorderImage();
+        createBorderImage(border);
         setOrigin(getWidth() / 2, 10);
 
         setTouchable(Touchable.enabled);
@@ -121,8 +115,8 @@ public class InvestigatorImage extends Image {
         gameController.displayInvestigatorPassport(investigatorId);
     }
 
-    private void createBorderImage() {
-        borderImage = new Image(CustomAssetManager.getTexture(CustomAssetManager.INVESTIGATOR_BORDER)) {
+    private void createBorderImage(Drawable drawable) {
+        borderImage = new Image(drawable) {
 
             @Override
             public float getX() {
@@ -203,8 +197,8 @@ public class InvestigatorImage extends Image {
         if (shaking) {
             setX(groundX + (float) Math.sin(hitTime * 70f) * HIT_SHAKE_DISTANCE * (hitShake / HIT_SHAKE_DURATION));
         }
+        if (flashing || defeated) savedColor.set(getColor());
         if (flashing) {
-            savedColor.set(getColor());
             float flash = hitFlashElapsed < HIT_FLASH_IN
                     ? hitFlashElapsed / HIT_FLASH_IN
                     : 1f - (hitFlashElapsed - HIT_FLASH_IN) / HIT_FLASH_OUT;
@@ -215,8 +209,10 @@ public class InvestigatorImage extends Image {
                     savedColor.b * (1f + (hitTint.b - 1f) * flash),
                     savedColor.a);
         }
+        // Tint the existing portrait; defeated investigators need no extra actors or texture switches.
+        if (defeated) getColor().mul(defeatedByHealth ? HEALTH_HIT_TINT : SANITY_HIT_TINT);
         drawStand(batch, parentAlpha);
-        if (flashing) {
+        if (flashing || defeated) {
             getColor().set(savedColor);
         }
         if (shaking) {
@@ -302,42 +298,22 @@ public class InvestigatorImage extends Image {
                         })
                 )
         ));
-        for (Image puzzleImage : puzzleImages) {
-            MoveToAction puzzleImagemoveToAction = new MoveToAction();
-            puzzleImagemoveToAction.setPosition(puzzleImage.getX() - offsetX + newOffsetX, puzzleImage.getY() - offsetY + newOffsetY);
-            puzzleImagemoveToAction.setDuration(FAST_ACTION_DURATION);
-            puzzleImagemoveToAction.setActor(puzzleImage);
-            puzzleImage.addAction(new FastForwardAction<>(puzzleImagemoveToAction));
-        }
     }
 
-    public void setPuzzleImages(List<Image> puzzleImages) {
-        this.puzzleImages = puzzleImages;
-    }
-
-    public Completable destroyPuzzleImages() {
-        for (Image puzzleImage : puzzleImages) {
-            puzzleImage.clearActions();
-            if (defeatedByHealth) {
-                puzzleImage.getColor().r = 1 * puzzleImage.getColor().a;
-                puzzleImage.getColor().g = 0;
-                puzzleImage.getColor().b = 0;
-            } else {
-                puzzleImage.getColor().r = 0;
-                puzzleImage.getColor().g = 0;
-                puzzleImage.getColor().b = 1f * puzzleImage.getColor().a;
-            }
-        }
-        PublishSubject<Object> objectPublishSubject = PublishSubject.create();
-        addAction(Actions.sequence(
-                Actions.alpha(0, 1.5f),
-                Actions.removeActor()
-                ));
-        InvestigatorPuzzleEffect.destroyPuzzleImages(puzzleImages, objectPublishSubject);
-        return objectPublishSubject.toCompletable();
+    public Completable fadeOutDefeated() {
+        return Completable.create(onSub -> addAction(Actions.sequence(
+                Actions.alpha(0, 0.25f),
+                Actions.run(() -> {
+                    remove();
+                    onSub.onCompleted();
+                }))));
     }
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
+        this.defeated = true;
         this.defeatedByHealth = defeatedByHealth;
+        highlighted = false;
+        borderImage.clearActions();
+        borderImage.setColor(defeatedByHealth ? HEALTH_HIT_TINT : SANITY_HIT_TINT);
     }
 }

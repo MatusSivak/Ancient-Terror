@@ -246,11 +246,9 @@ public class InvestigatorView {
             investigatorImage.setColor(Color.WHITE);
             MapStage.removeActor(idLayerResolver);
             MapStage.addToLayer(investigatorImage, InvestigatorUtils.getDefeatedIdLayerResolver(investigatorId));
+            investigatorImage.setDefeatedByHealth(health);
         }
-        Observable<TextureRegion> textureRegionsForDefeatedObservable = InvestigatorPuzzleEffect.prepareTextureRegionsForDefeated().cache();
-        InvestigatorPuzzleEffect.defeatInvestigator(textureRegionsForDefeatedObservable, investigatorImages.get(0), health).subscribe();;
-        InvestigatorPuzzleEffect.defeatInvestigator(textureRegionsForDefeatedObservable, investigatorImages.get(2), health).subscribe();
-        return InvestigatorPuzzleEffect.defeatInvestigator(textureRegionsForDefeatedObservable, investigatorImages.get(1), health);
+        return Completable.complete();
     }
 
     public Completable loadDefeatedInvestigator(InvestigatorId investigatorId, LocationId locationId, boolean defeatedByHealth) {
@@ -262,9 +260,9 @@ public class InvestigatorView {
     public Completable removeDefeatedInvestigator(InvestigatorId investigatorId, LocationId locationId) {
         InvestigatorUtils.InvestigatorIdLayerResolver idLayerResolver = InvestigatorUtils.getDefeatedIdLayerResolver(investigatorId);
         List<InvestigatorImage> investigatorImages = MapStage.getActor(idLayerResolver);
-        investigatorImages.get(0).destroyPuzzleImages();
-        investigatorImages.get(2).destroyPuzzleImages();
-        return investigatorImages.get(1).destroyPuzzleImages().andThen(Completable.create(onSub -> {
+        investigatorImages.get(0).fadeOutDefeated().subscribe();
+        investigatorImages.get(2).fadeOutDefeated().subscribe();
+        return investigatorImages.get(1).fadeOutDefeated().andThen(Completable.create(onSub -> {
 
             List<InvestigatorId> aliveInvestigators = collectToList(
                     Stream.map(
