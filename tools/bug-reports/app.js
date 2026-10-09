@@ -36,7 +36,7 @@ function renderList() {
   for (const r of visible) {
     const button = node('button', undefined, 'report' + (reportKey(r) === selected ? ' selected' : ''));
     button.setAttribute('aria-pressed', String(reportKey(r) === selected));
-    button.append(node('span', typeLabel(r), 'badge report-type'), node('span', statusLabel(r.fields.status), 'badge'), node('strong', r.fields.description || '(No description)'), node('small', `${r.fields.metadata?.platform || 'Unknown platform'} · ${date(r.createTime || r.fields.capturedAt)}`));
+    button.append(node('span', typeLabel(r), 'badge report-type'), node('span', statusLabel(r.fields.status), 'badge'), node('strong', r.fields.title || r.fields.description || '(No description)'), node('small', `${r.fields.metadata?.platform || 'Unknown platform'} · ${date(r.createTime || r.fields.capturedAt)}`));
     button.onclick = () => show(r); $('reports').append(button);
   }
   if (!visible.length) $('reports').append(node('p', reports.length ? 'No reports match these filters.' : 'No reports loaded.'));
@@ -92,7 +92,7 @@ async function show(report) {
   selected = reportKey(report); const version = ++selectionVersion; clearImage(); renderList(); $('detail').replaceChildren(node('p', 'Loading report…'));
   try {
     const r = await api(reportPath(report)); if (version !== selectionVersion) return;
-    const f = r.fields, detail = $('detail'); detail.replaceChildren(node('span', statusLabel(f.status), 'badge'), node('h2', typeLabel(r) + ' ' + id), node('p', date(r.createTime || f.capturedAt), 'hint'), management(r), node('h3', r.collection === 'crashReports' ? 'Exception and stack trace' : 'Problem description'), node('p', f.description || '(No description)', 'description'));
+    const f = r.fields, detail = $('detail'); detail.replaceChildren(node('span', statusLabel(f.status), 'badge'), node('h2', f.title || typeLabel(r) + ' ' + id), node('p', date(r.createTime || f.capturedAt), 'hint'), management(r), node('h3', r.collection === 'crashReports' ? 'Exception and stack trace' : 'Problem description'), node('p', f.description || '(No description)', 'description'));
     const actions = node('div', undefined, 'actions');
     if (f.saveFile?.type === 'bytes') actions.append(downloadButton(r, 'saveFile', `Download save (${f.saveFile.size.toLocaleString()} bytes)`, id + '-save.json'));
     if (f.screenshotPng?.type === 'bytes') actions.append(downloadButton(r, 'screenshotPng', 'Download screenshot', id + '.png'));
@@ -114,6 +114,11 @@ async function show(report) {
 }
 function management(report) {
   const box = node('div', undefined, 'management'), label = node('label', 'Report status');
+  const titleRow = node('div', undefined, 'title-editor'), titleLabel = node('label', 'Report title');
+  const title = node('input'), saveTitle = node('button', 'Save title');
+  title.type = 'text'; title.maxLength = 200; title.value = report.fields.title || '';
+  title.placeholder = 'Optional title (clear to use the original description)';
+  titleLabel.append(title); titleRow.append(titleLabel, saveTitle);
   const select = node('select');
   for (const [value, title] of Object.entries(statuses)) select.add(new Option(title, value));
   if (!Object.hasOwn(statuses, report.fields.status)) {
@@ -121,11 +126,14 @@ function management(report) {
   } else select.value = report.fields.status;
   label.append(select);
   const save = node('button', 'Save status'), remove = node('button', 'Delete report', 'danger');
-  const sync = () => { save.disabled = !select.value || select.value === report.fields.status; };
-  select.onchange = sync; sync();
+  const sync = () => {
+    save.disabled = !select.value || select.value === report.fields.status;
+    saveTitle.disabled = title.value.trim() === (report.fields.title || '');
+  };
+  select.onchange = sync; title.oninput = sync; sync();
   async function change(method, body) {
     if (mutating || $('refresh').disabled) return;
-    mutating = true; save.disabled = remove.disabled = select.disabled = $('refresh').disabled = true;
+    mutating = true; saveTitle.disabled = title.disabled = save.disabled = remove.disabled = select.disabled = $('refresh').disabled = true;
     let succeeded = false;
     try {
       const result = await api(reportPath(report), false, method, {...body, updateTime: report.updateTime});
@@ -134,18 +142,22 @@ function management(report) {
         $('detail').replaceChildren(node('h2', 'Report deleted'), node('p', 'Select another report from the list.'));
       } else reports = reports.map(r => reportKey(r) === reportKey(report) ? result : r);
       filters(); renderList(); succeeded = true;
-      notice(method === 'DELETE' ? 'Report permanently deleted.' : `Status saved: ${statusLabel(body.status)}.`);
+      notice(method === 'DELETE' ? 'Report permanently deleted.' : Object.hasOwn(body, 'title') ? 'Title saved.' : `Status saved: ${statusLabel(body.status)}.`);
     } catch (error) { notice(error.message, true); }
-    finally { mutating = false; remove.disabled = select.disabled = $('refresh').disabled = false; sync(); }
+    finally { mutating = false; title.disabled = remove.disabled = select.disabled = $('refresh').disabled = false; sync(); }
     if (succeeded && method === 'PATCH') await show(report);
   }
   save.onclick = () => change('PATCH', {status: select.value});
+  saveTitle.onclick = () => change('PATCH', {title: title.value.trim()});
+  title.onkeydown = event => {
+    if (event.key === 'Enter' && !saveTitle.disabled) { event.preventDefault(); saveTitle.click(); }
+  };
   remove.onclick = () => {
     if (confirm(`Permanently delete ${typeLabel(report).toLowerCase()} ${report.id}?\n\nIts description, screenshot, save file, and metadata will be removed. This cannot be undone.`)) {
       change('DELETE', {confirmId: report.id});
     }
   };
-  box.append(label, save, remove); return box;
+  box.append(titleRow, label, save, remove); return box;
 }
 $('refresh').onclick = refresh;
 ['search','type','status','platform','sort'].forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', renderList));

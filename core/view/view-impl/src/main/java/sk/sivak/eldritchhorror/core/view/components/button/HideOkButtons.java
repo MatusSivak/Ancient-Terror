@@ -137,6 +137,11 @@ public class HideOkButtons {
         InfoStage.setBottomHeight(5);
     }
 
+    public void cancel() {
+        onConfirm();
+        if (labelTable != null) InfoStage.hideActor(labelTable);
+    }
+
 
     private Runnable prepareYesButton(TextButton button, boolean instant) {
         return () -> {

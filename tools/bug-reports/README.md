@@ -120,15 +120,20 @@ Unknown fields are available under **All fields**. Missing attachments, empty
 collections, authentication errors, and partial fetch failures are shown explicitly.
 Refresh fetches current reports; there is no background polling.
 
+Use **Report title** and **Save title** (or Enter) to rename a bug or crash report.
+Titles appear in the list and detail heading and are searchable. Titles can contain
+up to 200 characters on one line; clear the title to restore the original display.
+The original problem description or exception stack trace stays unchanged.
+
 Use **Report status** and **Save status** to assign one of:
 - **New**: received, awaiting review.
 - **Investigating**: being reproduced or worked on.
 - **Fixed**: a fix has been implemented.
 - **Closed**: no further work needed (for example duplicate or not reproducible).
 
-Status updates preserve every other field and attachment. **Delete report** asks
+Title and status updates preserve every other field and attachment. **Delete report** asks
 for confirmation, then permanently deletes the document including its screenshot
-and save file. Download anything you want to keep first. Both operations reject
+and save file. Download anything you want to keep first. All changes reject
 stale report versions; refresh before retrying if another editor changed a report.
 
 Editing requires IAM document update/delete permissions (for example

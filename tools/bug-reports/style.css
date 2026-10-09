@@ -3,3 +3,4 @@
 .management{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:16px;background:#191f29;border:1px solid #303743;border-radius:8px;margin:20px 0}.management label{min-width:180px;flex:1}.management select{margin-bottom:0}.danger{border-color:#995859;color:#ffc4bd}.danger:hover{background:#492b30;border-color:#e18683}
 
 .report-type{margin-right:6px;background:#313b54;color:#c9d8ff}
+.title-editor{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;width:100%}.title-editor input{margin-bottom:0}h2{overflow-wrap:anywhere}

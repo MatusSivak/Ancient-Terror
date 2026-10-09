@@ -1,6 +1,9 @@
 package sk.sivak.eldritchhorror.core.view.components.select;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import java8.features.function.Function;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
@@ -18,6 +21,11 @@ public class SelectSingleComponent<Key> {
     private SingleSubscriber<? super Key> subscriber;
     private HideOkButtons hideOkButtons;
     private String hideText;
+    private String cancelText;
+    private TextButton cancelButton;
+    private boolean completed;
+
+    public void setCancelText(String cancelText) { this.cancelText = cancelText; }
 
     public SelectSingleComponent(List<Key> availableKeys,
                                  SingleSubscriber<? super Key> subscriber) {
@@ -55,6 +63,15 @@ public class SelectSingleComponent<Key> {
         hideOkButtons.init(hideText, getOnConfirmAction(), selectComponentsComplexTable);
         hideOkButtons.showButtons();
         hideOkButtons.disableOkButton();
+        if (cancelText != null) {
+            cancelButton = ButtonBuilder.buildButton(cancelText);
+            ButtonUtils.addClickListener(cancelButton, () -> {
+                if (completed) return;
+                hideOkButtons.cancel();
+                onSelect(null);
+            });
+            InfoStage.showButton(cancelButton, VIEWPORT_WIDTH / 2 + 170, 5);
+        }
     }
 
     private Action0 getOnConfirmAction() {
@@ -63,7 +80,10 @@ public class SelectSingleComponent<Key> {
 
 
     private void onSelect(Key key) {
-        selectComponentsComplexTable.disable(key);
+        if (completed) return;
+        completed = true;
+        if (key != null) selectComponentsComplexTable.disable(key);
+        if (cancelButton != null) InfoStage.hideActor(cancelButton);
         InfoStage.hideActor(selectComponentsComplexTable, () -> subscriber.onSuccess(key), 0.25f);
     }
 }

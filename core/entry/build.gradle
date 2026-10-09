@@ -1,6 +1,7 @@
 apply plugin: 'java-library'
 description = 'Entry'
 dependencies {
+  testImplementation 'junit:junit:4.12'
     api group: 'com.badlogicgames.gdx', name: 'gdx', version:'1.9.8'
   api project(':eldritch-horror-core:initializer')
   api project(':eldritch-horror-core:skin-composer')

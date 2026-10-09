@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -30,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
+import java.util.Set;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
@@ -43,6 +45,9 @@ public class ImproveSkillComponent extends VisTable {
     private Stat onlyAvailableSkill = null;
     private final DisplayHide displayHide;
     private boolean readOnly;
+    private Set<Stat> availableChoices;
+    private String choiceTitle, cancelText;
+    private boolean choiceCompleted;
     private final Map<Label, VisTable> statRows = new HashMap<>();
     private final Map<Label, int[]> statValues = new HashMap<>();
 
@@ -59,6 +64,7 @@ public class ImproveSkillComponent extends VisTable {
     }
 
     public void init(StatsTableData statsTableData, Stat skill) {
+        availableChoices = null;
         this.onlyAvailableSkill = skill;
         readOnly = false;
         init(statsTableData);
@@ -66,6 +72,7 @@ public class ImproveSkillComponent extends VisTable {
     }
 
     public void justShow(StatsTableData statsTableData) {
+        availableChoices = null;
         onlyAvailableSkill = null;
         readOnly = true;
         init(statsTableData);
@@ -75,31 +82,63 @@ public class ImproveSkillComponent extends VisTable {
         hide();
     }
 
+    /** Selects a permitted skill; the caller still applies the queued game effect. */
+    public void initChoice(StatsTableData data, Set<Stat> choices, String title, String cancelText) {
+        this.availableChoices = choices;
+        this.choiceTitle = title;
+        this.cancelText = cancelText;
+        this.choiceCompleted = false;
+        this.onlyAvailableSkill = null;
+        this.readOnly = false;
+        init(data);
+    }
+
+    private void choose(Stat stat) {
+        if (choiceCompleted) return;
+        choiceCompleted = true;
+        setTouchable(Touchable.disabled);
+        displayHide.displayOrHide().subscribe(() -> onSub.onSuccess(stat));
+    }
+
     private void init(StatsTableData statsTableData) {
         imageButtons.clear();
         labelImageButtonMap.clear();
         statRows.clear();
         statValues.clear();
         clear();
+        setTouchable(Touchable.enabled);
         pad(12);
         setBackground(SelectionPanelStyle.panel("101D20F5", "8E7953"));
         this.improveSkillTable = new ImproveSkillTable();
         improveSkillTable.pad(0);
         improveSkillTable.init(statsTableData);
-        add(createLabel()).growX().height(28).padBottom(6).row();
+        add(createLabel()).growX().height(availableChoices == null ? 28 : 60).padBottom(6).row();
         Image divider = new Image(CustomAssetManager.getTexture(PURE_WHITE_BACKGROUND));
         divider.setColor(Color.valueOf("8E7953"));
         add(divider).growX().height(1).padBottom(8).row();
         add(improveSkillTable).growX();
-        setSize(210, 328);
+        if (availableChoices != null && cancelText != null) {
+            row();
+            TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+            style.font = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42);
+            style.up = SelectionPanelStyle.panel("263638", "8E7953");
+            TextButton cancel = new TextButton(cancelText, style);
+            cancel.getLabel().setFontScale(0.34f);
+            cancel.getLabel().setWrap(true);
+            ButtonUtils.addClickListener(cancel, () -> choose(null));
+            add(cancel).growX().height(58).padTop(8);
+        }
+        setSize(availableChoices == null ? 210 : 280,
+                availableChoices == null ? 328 : cancelText == null ? 360 : 426);
         show();
     }
 
 
     private Label createLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.valueOf("E8D6AD"));
-        Label label = new Label(get("skill.improve"), labelStyle);
+        Label label = new Label(availableChoices == null ? get("skill.improve") : choiceTitle, labelStyle);
         label.setAlignment(Align.center);
+        label.setWrap(true);
         label.setFontScale(0.44f);
         return label;
     }
@@ -121,7 +160,8 @@ public class ImproveSkillComponent extends VisTable {
             value.setStyle(valueStyle);
             value.setAlignment(Align.center);
             statRow.add(value).width(64).height(36).padRight(8);
-            if (!readOnly && (onlyAvailableSkill == null || onlyAvailableSkill == stat)) {
+            if (!readOnly && (onlyAvailableSkill == null || onlyAvailableSkill == stat)
+                    && (availableChoices == null || availableChoices.contains(stat))) {
                 ImageButton imageButton = createPlusButton(value, stat);
                 statRow.add(imageButton).size(40);
                 labelImageButtonMap.put(value, imageButton);
@@ -154,7 +194,7 @@ public class ImproveSkillComponent extends VisTable {
             statValues.put(value, new int[]{base, bonus});
             renderValue(value);
             ImageButton button = labelImageButtonMap.get(value);
-            boolean available = button != null && bonus < 2;
+            boolean available = button != null && (availableChoices != null || bonus < 2);
             statRows.get(value).setBackground(SelectionPanelStyle.panel(
                     available ? "203B38" : "18272B", available ? "709B83" : "304145"));
             if (!available && button != null) {
@@ -170,7 +210,8 @@ public class ImproveSkillComponent extends VisTable {
             style.up = SelectionPanelStyle.panel("31584B", "9FBC8B");
             style.over = SelectionPanelStyle.panel("426F5C", "D6DBAD");
             style.down = SelectionPanelStyle.panel("1E3C33", "E8D6AD");
-            style.imageUp = new PlusGlyph();
+            style.imageUp = availableChoices == null ? new PlusGlyph()
+                    : CustomAssetManager.getTextureRegionDrawable("icon/tick.png");
             ImageButton imageButton = new ImageButton(style);
             imageButton.setTransform(true);
             imageButton.setOrigin(20, 20);
@@ -182,6 +223,7 @@ public class ImproveSkillComponent extends VisTable {
             ));
             imageButton.addAction(repeatAction);
             ButtonUtils.addClickListener(imageButton, () -> {
+                if (availableChoices != null) { choose(stat); return; }
                 for (ImageButton button : imageButtons) {
                     if (button == imageButton) {
                         button.clearListeners();

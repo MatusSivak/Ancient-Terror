@@ -2,6 +2,12 @@
 
 Generated with the built-in imagegen tool on 2026-10-07. Each portrait is a separate generation, following the existing painted 2:3 investigator art. Runtime PNGs are normalized to 512 x 768.
 
+On 2026-10-09, the four runtime portraits received the exact alpha channel shared
+by the 20 existing investigators (using `THE_ACTRESS.png` as the reference).
+`node tools/apply-investigator-mask.cjs` reapplies that mask without changing RGB
+pixels or dimensions; it requires the `sharp` package. This replaces the incorrect
+partially opaque rectangular edges with the established feathered portrait shape.
+
 ## Carson Sinclair
 
 Asset: `assets/investigator/THE_BUTLER.png`

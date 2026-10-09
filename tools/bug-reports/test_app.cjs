@@ -45,7 +45,11 @@ async function fixture(t, failedCollection, options = {}) {
       const report = reports.find(r => r.collection === collection && r.id === url.searchParams.get('id'));
       assert.ok(report, 'Request must select the correct collection and ID');
       if (request.method() === 'PATCH') {
-        report.fields.status = request.postDataJSON().status;
+        const body = request.postDataJSON();
+        assert.equal(body.updateTime, report.updateTime);
+        if (options.failMutation) return route.fulfill({status: 502, json: {error: 'This report changed. Refresh and try again.'}});
+        for (const field of ['status', 'title']) if (Object.hasOwn(body, field)) report.fields[field] = body[field];
+        report.updateTime = new Date(Date.parse(report.updateTime) + 1000).toISOString();
         return json(report);
       }
       if (request.method() === 'DELETE') {
@@ -140,5 +144,51 @@ test('one failed collection keeps the other available with a warning', async t =
   assert.equal(await page.locator('#reports .report').count(), 1);
   assert.match(await page.locator('#notice').textContent(), /Bug reports: Access denied.*incomplete/);
   await page.getByRole('heading', {name: 'Exception and stack trace'}).waitFor();
+  assert.deepEqual(errors, []);
+});
+
+test('titles persist, are searchable, and preserve descriptions and statuses in both collections', async t => {
+  const {page, errors} = await fixture(t);
+  for (const collection of ['crashReports', 'bugReports']) {
+    await page.selectOption('#type', collection);
+    await page.locator('#reports .report').first().click();
+    const title = page.getByLabel('Report title'), save = page.getByRole('button', {name: 'Save title'});
+    await title.waitFor();
+    const description = await page.locator('.description').textContent();
+    assert.equal(await save.isDisabled(), true);
+    const name = `${collection} <script>alert(1)</script>`;
+    await title.fill('  ' + name + '  ');
+    await title.press('Enter');
+    await page.getByRole('heading', {name, exact: true}).waitFor();
+    assert.equal(await page.locator('.description').textContent(), description);
+    assert.equal(await page.getByLabel('Report status').inputValue(), 'new');
+    await page.getByLabel('Report status').selectOption('fixed');
+    await page.getByRole('button', {name: 'Save status'}).click();
+    await page.waitForFunction(() => document.querySelector('#detail .badge')?.textContent === 'Fixed');
+    assert.equal(await title.inputValue(), name);
+    await page.getByRole('button', {name: 'Refresh reports'}).click();
+    await page.waitForFunction(() => !document.getElementById('refresh').disabled);
+    await page.locator('#search').fill(name);
+    assert.equal(await page.locator('#reports .report').count(), 1);
+    assert.equal(await page.locator('#reports .report strong').textContent(), name);
+    await title.fill(''); await save.click();
+    await page.waitForFunction(() => document.querySelector('#notice').textContent === 'Title saved.');
+    await page.getByRole('heading', {name: /^(Bug|Crash) report same-id$/}).waitFor();
+    await page.locator('#search').fill('');
+    assert.equal(await page.locator('#reports .report strong').first().textContent(), description);
+  }
+  assert.deepEqual(errors, []);
+});
+
+test('failed title save keeps the draft and original list title', async t => {
+  const {page, errors} = await fixture(t, undefined, {failMutation: true});
+  const original = await page.locator('#reports .selected strong').textContent();
+  await page.getByLabel('Report title').fill('Draft title');
+  await page.getByRole('button', {name: 'Save title'}).click();
+  await page.waitForFunction(() => document.querySelector('#notice').className === 'error');
+  assert.match(await page.locator('#notice').textContent(), /Refresh/);
+  assert.equal(await page.getByLabel('Report title').inputValue(), 'Draft title');
+  assert.equal(await page.getByRole('button', {name: 'Save title'}).isEnabled(), true);
+  assert.equal(await page.locator('#reports .selected strong').textContent(), original);
   assert.deepEqual(errors, []);
 });

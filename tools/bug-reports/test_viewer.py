@@ -30,6 +30,10 @@ CRASH = {**DOCUMENT, 'name': DOCUMENT['name'].replace('/bugReports/', '/crashRep
 
 
 class FakeStore:
+    def set_title(self, report_id, title, update_time, collection="bugReports"):
+        document = self.report(report_id, collection)
+        return {**document, 'fields': {**document['fields'], 'title': {'stringValue': title}}}
+
     def set_status(self, report_id, status, update_time, collection="bugReports"):
         document = self.report(report_id, collection)
         return {**document, 'fields': {**document['fields'], 'status': {'stringValue': status}}}
@@ -98,6 +102,38 @@ class ViewerTests(unittest.TestCase):
                 with patch.object(FakeStore, 'delete') as delete:
                     self.request(path, method='DELETE', body={'confirmId': 'test-id', 'updateTime': document['updateTime']}).close()
                     delete.assert_called_once_with('test-id', document['updateTime'], collection)
+
+    def test_title_update_preserves_original_report(self):
+        for collection, document in [('bugReports', DOCUMENT), ('crashReports', CRASH)]:
+            for title in ['  Clearer title <script>  ', '', 'x' * 200]:
+                with self.request('/api/report?id=test-id&collection=' + collection, method='PATCH',
+                                  body={'title': title, 'updateTime': document['updateTime']}) as response:
+                    result = json.load(response)
+                self.assertEqual(result['collection'], collection)
+                self.assertEqual(result['fields'].pop('title'), title.strip())
+                self.assertEqual(result['fields'], summarize(document)['fields'])
+
+    def test_invalid_titles_never_reach_store(self):
+        cases = [{'title': title, 'updateTime': 'time'} for title in
+                 [None, [], 123, 'x' * 201, 'two\nlines', 'tab\there']]
+        cases += [{'title': 'Missing version'}, {'title': 'Both', 'status': 'fixed', 'updateTime': 'time'},
+                  {'title': 'Extra', 'description': 'overwrite', 'updateTime': 'time'}]
+        with patch.object(FakeStore, 'set_title') as update:
+            for body in cases:
+                with self.assertRaises(HTTPError) as error:
+                    self.request('/api/report?id=test-id', method='PATCH', body=body)
+                self.assertEqual(error.exception.code, 400)
+                error.exception.close()
+            update.assert_not_called()
+
+    def test_title_write_mask_and_version_precondition(self):
+        client = Firestore('test', '(default)')
+        for collection in ['bugReports', 'crashReports']:
+            with patch.object(client, 'request', return_value=DOCUMENT) as request:
+                client.set_title('test-id', ' Renamed report ', DOCUMENT['updateTime'], collection)
+                request.assert_called_once_with('PATCH', '/test-id',
+                    {'updateMask.fieldPaths': 'title', 'currentDocument.updateTime': DOCUMENT['updateTime']},
+                    {'fields': {'title': {'stringValue': 'Renamed report'}}}, collection=collection)
 
     def test_invalid_collections_never_reach_store(self):
         with patch.object(FakeStore, 'list') as listing, patch.object(FakeStore, 'report') as report, \
@@ -266,6 +302,7 @@ class ViewerTests(unittest.TestCase):
         with patch.object(client, 'get', return_value={'documents': [DOCUMENT], 'nextPageToken': 'next'}) as get:
             result = client.list('previous')
         params = get.call_args.kwargs['params']
+        self.assertIn('title', params['mask.fieldPaths'])
         self.assertEqual(params['pageToken'], 'previous')
         self.assertNotIn('screenshotPng', params['mask.fieldPaths'])
         self.assertEqual(result['nextPageToken'], 'next')

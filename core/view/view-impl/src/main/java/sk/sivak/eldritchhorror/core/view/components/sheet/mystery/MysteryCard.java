@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 
 import java.util.concurrent.TimeUnit;
 
@@ -156,7 +157,7 @@ public class MysteryCard extends VisTable {
 
     private Label createMysteryText(String text) {
         Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), TEXT);
-        Label label = new Label(reflowText(text), style);
+        Label label = new Label(MarkupText.replaceGlyphKeywords(reflowText(text)), style);
         label.setWrap(true);
         label.setAlignment(Align.left);
         label.setFontScale(0.46f);

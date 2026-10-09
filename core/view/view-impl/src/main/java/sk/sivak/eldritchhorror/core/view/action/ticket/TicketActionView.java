@@ -1,8 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.action.ticket;
 
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import rx.Completable;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -34,24 +33,25 @@ public class TicketActionView {
     private YellowButton.TrainButton trainButton;
     private YellowButton.ShipButton shipButton;
 
-    public Single<PathType> selectTravelTicket() {
+    public Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable) {
         return Single.create(onSub -> {
             InfoStage.displayTextForce(UiText.get("ticket.select"));
-            trainButton = showTrainButton(onSub, 0.4f, () -> InfoStage.hideActor(shipButton));
-            shipButton = showShipButton(onSub, 0.6f, () -> InfoStage.hideActor(trainButton));
-            hideOtherButton(trainButton, shipButton);
-            hideOtherButton(shipButton, trainButton);
+            trainButton = showTrainButton(onSub, 0.4f, this::hideTicketButtons);
+            shipButton = showShipButton(onSub, 0.6f, this::hideTicketButtons);
+            trainButton.setDisabled(!trainAvailable);
+            shipButton.setDisabled(!shipAvailable);
+            if (!trainAvailable) trainButton.setColor(0.3f, 0.3f, 0.3f, 1f);
+            if (!shipAvailable) shipButton.setColor(0.3f, 0.3f, 0.3f, 1f);
         });
 
     }
 
-    private void hideOtherButton(YellowButton mainButton, YellowButton buttonToHide) {
-        mainButton.addListener(new ClickListener() {
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-            }
-        });
+    private void hideTicketButtons() {
+        for (YellowButton button : new YellowButton[]{trainButton, shipButton}) {
+            button.setDisabled(true);
+            button.setTouchable(Touchable.disabled);
+            InfoStage.hideActor(button);
+        }
     }
 
     private YellowButton.TrainButton showTrainButton(SingleSubscriber<? super PathType> onSub, float posX, Action0 beforeSuccessAction) {
@@ -69,6 +69,7 @@ public class TicketActionView {
     private void showButton(YellowButton yellowButton, PathType pathType, SingleSubscriber<? super PathType> onSub, float posX,
                             Action0 beforeSuccessAction) {
         ButtonUtils.addClickListener(yellowButton, () -> {
+            if (yellowButton.isDisabled() || onSub.isUnsubscribed()) return;
             beforeSuccessAction.call();
             onSub.onSuccess(pathType);
         });

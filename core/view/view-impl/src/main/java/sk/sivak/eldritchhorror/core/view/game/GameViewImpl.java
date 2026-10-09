@@ -534,8 +534,8 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
-    public Single<PathType> selectTravelTicket() {
-        return ticketActionView.selectTravelTicket();
+    public Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable) {
+        return ticketActionView.selectTravelTicket(trainAvailable, shipAvailable);
     }
 
     @Override
@@ -648,6 +648,9 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public <RD, AD> Single<Answer<RD, AD>> ask(Question<RD> question) {
+        if (sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView.supports(question)) {
+            return new sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView(controller).ask(question);
+        }
         return questionView.ask(question);
     }
 

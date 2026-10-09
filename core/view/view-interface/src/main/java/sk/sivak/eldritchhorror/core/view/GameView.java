@@ -98,7 +98,7 @@ public interface GameView {
 
     void loseTicket(PathType input);
 
-    Single<PathType> selectTravelTicket();
+    Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable);
 
     Completable gainTravelTicket(PathType ticketType);
 

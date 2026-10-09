@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('reportFixesPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/report-fixes-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewReportFixes', JavaExec) {
+        dependsOn desktop.tasks.named('reportFixesPreviewClasses')
+        classpath = desktop.sourceSets.reportFixesPreview.runtimeClasspath
+        mainClass.set('ReportFixesPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

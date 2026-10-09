@@ -20,6 +20,12 @@ COLLECTIONS = {"bugReports": "Bug reports", "crashReports": "Crash reports"}
 STATUSES = {"new": "New", "investigating": "Investigating", "fixed": "Fixed", "closed": "Closed"}
 
 
+def validate_title(title):
+    if not isinstance(title, str) or len(title) > 200 or any(ord(c) < 32 for c in title):
+        raise ValueError("Title must be a single line of at most 200 characters")
+    return title.strip()
+
+
 class ViewerHTTPServer(ThreadingHTTPServer):
     def server_bind(self):
         # Windows SO_REUSEADDR can let two viewers serve the same address with
@@ -101,14 +107,14 @@ class Firestore:
             if error_status == "FAILED_PRECONDITION":
                 raise RuntimeError("This report changed since you opened it. Refresh and try again.") from None
             messages = {401: "Google authentication expired or was rejected. Refresh your credentials.",
-                        403: "Access denied. Reading requires Firestore read permission; status changes and deletion require update/delete permission (for example roles/datastore.user).",
+                        403: "Access denied. Reading requires Firestore read permission; title/status changes and deletion require update/delete permission (for example roles/datastore.user).",
                         404: "Database or report not found. Refresh the reports and check the project and database options.",
                         409: "This report changed since you opened it. Refresh and try again.",
                         412: "This report changed since you opened it. Refresh and try again."}
             raise RuntimeError(messages.get(error.code, f"Firestore returned HTTP {error.code}. Try again.")) from None
 
     def list(self, page_token, collection="bugReports"):
-        params = {"pageSize": 100, "mask.fieldPaths": ["description", "status", "capturedAt", "metadata", "reporterUid", "schemaVersion"]}
+        params = {"pageSize": 100, "mask.fieldPaths": ["title", "description", "status", "capturedAt", "metadata", "reporterUid", "schemaVersion"]}
         if page_token:
             params["pageToken"] = page_token
         result = self.get(params=params, collection=collection)
@@ -124,6 +130,12 @@ class Firestore:
         return self.request("PATCH", "/" + quote(report_id, safe=""),
                             {"updateMask.fieldPaths": "status", "currentDocument.updateTime": update_time},
                             {"fields": {"status": {"stringValue": status}}}, collection=collection)
+
+    def set_title(self, report_id, title, update_time, collection="bugReports"):
+        title = validate_title(title)
+        return self.request("PATCH", "/" + quote(report_id, safe=""),
+                            {"updateMask.fieldPaths": "title", "currentDocument.updateTime": update_time},
+                            {"fields": {"title": {"stringValue": title}}}, collection=collection)
 
     def delete(self, report_id, update_time, collection="bugReports"):
         self.request("DELETE", "/" + quote(report_id, safe=""),
@@ -244,10 +256,17 @@ def handler_for(store, session, project):
                 if not isinstance(update_time, str) or not update_time.strip():
                     raise ValueError("Refresh this report before changing it")
                 if self.command == "PATCH":
-                    status = body.get("status")
-                    if not isinstance(status, str) or status not in STATUSES:
-                        raise ValueError("Unknown status")
-                    self.send(200, summarize(store.set_status(report_id, status, update_time, collection)))
+                    if set(body) == {"title", "updateTime"}:
+                        title = validate_title(body["title"])
+                        result = store.set_title(report_id, title, update_time, collection)
+                    elif set(body) == {"status", "updateTime"}:
+                        status = body["status"]
+                        if not isinstance(status, str) or status not in STATUSES:
+                            raise ValueError("Unknown status")
+                        result = store.set_status(report_id, status, update_time, collection)
+                    else:
+                        raise ValueError("Change either title or status with the report updateTime")
+                    self.send(200, summarize(result))
                 else:
                     if body.get("confirmId") != report_id:
                         raise ValueError("Deletion confirmation does not match the report ID")

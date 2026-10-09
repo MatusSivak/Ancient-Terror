@@ -448,15 +448,10 @@ public class GameControllerImpl implements GameController {
         LocationInfo locationInfo = locationMap.getLocationInfo(activeInvestigator.getCurrentLocationId());
         boolean trainConnection = locationInfo.getTrainConnections().size() > 0;
         boolean shipConnection = locationInfo.getShipConnections().size() > 0;
-        if (trainConnection && shipConnection) {
-            return view.selectTravelTicket();
-        } else if (trainConnection) {
-            return Single.just(PathType.TRAIN);
-        } else if (shipConnection) {
-            return Single.just(PathType.SHIP);
-        } else {
+        if (!trainConnection && !shipConnection) {
             throw new IllegalArgumentException("This place has no train or ship connections");
         }
+        return view.selectTravelTicket(trainConnection, shipConnection);
     }
 
     @Override

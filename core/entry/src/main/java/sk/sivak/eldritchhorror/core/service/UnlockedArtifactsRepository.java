@@ -42,6 +42,10 @@ public class UnlockedArtifactsRepository {
     }
 
     public void saveData(List<ArtifactId> unlockedArtifacts) {
+        unlockedArtifacts = new LinkedList<>(unlockedArtifacts);
+        for (ArtifactId id : getDefaultUnlockedArtifacts()) {
+            if (!unlockedArtifacts.contains(id)) unlockedArtifacts.add(id);
+        }
         byte[] indexesOfUnlockedArtifacts = new byte[unlockedArtifacts.size()];
         for (int i = 0; i < unlockedArtifacts.size(); i++) {
             indexesOfUnlockedArtifacts[i] = (byte)unlockedArtifacts.get(i).ordinal();
@@ -69,7 +73,13 @@ public class UnlockedArtifactsRepository {
             artifactIds.add(values[index]);
         }
         this.unlockedArtifacts = artifactIds;
-        return artifactIds;
+        for (ArtifactId id : getDefaultUnlockedArtifacts()) {
+            if (!artifactIds.contains(id)) {
+                saveData(artifactIds);
+                break;
+            }
+        }
+        return this.unlockedArtifacts;
     }
 
     public List<ArtifactId> getDefaultUnlockedArtifacts() {
@@ -90,7 +100,8 @@ public class UnlockedArtifactsRepository {
                 ArtifactId.RUBY_OF_RLYEH,
                 ArtifactId.THE_SILVER_KEY,
                 ArtifactId.SWORD_OF_YHA_TALLA,
-                ArtifactId.TTKA_HALOT
+                ArtifactId.TTKA_HALOT,
+                ArtifactId.ZANTHU_TABLETS
         );
     }
 }
