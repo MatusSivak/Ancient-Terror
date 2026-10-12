@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.*;
 import com.kotcrab.vis.ui.VisUI;
 import java.lang.reflect.*;
+import java.lang.StringBuilder;
 import java.util.*;
 import java.util.List;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
@@ -23,6 +24,8 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.mystery.MysteryCard;
 import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView;
+import sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterViewImpl;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 /** Renders and exercises production widgets without loading saves or contacting Firestore. */
 public class ReportFixesPreview extends ApplicationAdapter {
@@ -38,8 +41,8 @@ public class ReportFixesPreview extends ApplicationAdapter {
             Sound silent = proxy(Sound.class, (p,m,a) -> m.getReturnType()==long.class ? 0L : null);
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
-            skillChoices(); investigatorChoices(); ticketChoices(); mystery();
-            System.out.println("PASS: skill restrictions/cancel, investigator cancel, ticket availability/single completion, mystery glyphs.");
+            skillChoices(); investigatorChoices(); ticketChoices(); mystery(); typewriter();
+            System.out.println("PASS: skill restrictions/cancel, investigator cancel, ticket availability/single completion, mystery and typewriter glyphs.");
         } catch(Throwable e) { e.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }
     }
@@ -107,6 +110,38 @@ public class ReportFixesPreview extends ApplicationAdapter {
         require(found,"Mystery is missing the Observation glyph"); draw("mystery-glyphs"); card.remove();
     }
     private <T extends Actor> T find(Class<T> type) { for(Actor a:all(stage.getRoot())) if(type.isInstance(a)) return type.cast(a); throw new AssertionError(type); }
+    private void typewriter() throws Exception {
+        for (boolean fast : new boolean[]{false, true}) {
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            TypewriterViewImpl view = new TypewriterViewImpl();
+            // Mount the production paper without the surrounding game HUD/board.
+            Method createTable = TypewriterViewImpl.class.getDeclaredMethod("createTable");
+            createTable.setAccessible(true); createTable.invoke(view);
+            Table paper = view.getTable();
+            paper.setPosition(960 - paper.getWidth() - 40, 270 - paper.getHeight());
+            stage.addActor(paper);
+            int[] completed = {0};
+            view.typeInfo("Each investigator tests Observation-1 or Will+2. [#BAD]Lose 1 Health and 2 Sanity[].")
+                    .andThen(view.typeInfo("Test Lore, Influence or Strength. Roll 1 die. On a 1 or 2, gain 1 Clue."))
+                    .subscribe(() -> completed[0]++);
+            tick(1800);
+            require(completed[0] == 1, "Typewriter rules did not finish exactly once");
+            StringBuilder rendered = new StringBuilder();
+            for (Actor actor : all(view.getTable())) if (actor instanceof Label) {
+                Label label = (Label) actor;
+                rendered.append(label.getText());
+                label.validate();
+                for (com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run : label.getGlyphLayout().runs)
+                    require(run.y == 0, "Typewriter line wrapped into the next row");
+            }
+            for (String word : new String[]{"Observation", "Will", "Lore", "Influence", "Strength", "Health", "Sanity", "Clue"})
+                require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getGlyph(word))) >= 0, "Missing typewriter glyph: " + word);
+            require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getDiceGlyph(1))) >= 0, "Missing die-result glyph");
+            draw(fast ? "typewriter-glyphs-fast" : "typewriter-glyphs");
+            paper.remove();
+        }
+        FastForwardAction.turnOff();
+    }
     private TextButton textButton(String text) { for(Actor a:all(stage.getRoot())) if(a instanceof TextButton && ((TextButton)a).getText().toString().equals(text)) return (TextButton)a; throw new AssertionError(text); }
     private List<Actor> all(Actor root) { List<Actor> result=new ArrayList<>(); result.add(root); if(root instanceof Group) for(Actor child:((Group)root).getChildren()) result.addAll(all(child)); return result; }
     private void click(Actor actor) { for(EventListener l:actor.getListeners()) if(l instanceof ClickListener) ((ClickListener)l).clicked(new InputEvent(),1,1); }

@@ -29,10 +29,12 @@ public class YigPreview extends ApplicationAdapter {
         try {
             VisUI.load();stage=new Stage(new FitViewport(960,540));
             YigCard card=new YigCard();card.init(AncientOneHelper.createYig());render(card,"yig-sleeping");
-            AncientOneInfo awake=AncientOneHelper.createAwakenYig();awake.setPower(5);card.init(awake);render(card,"yig-awake");
+            AncientOneInfo awake=AncientOneHelper.createAwakenYig();card.init(awake);render(card,"yig-awake");
             if(findScroll(card)!=null)throw new AssertionError("Yig rules should be visible without scrolling");
-            awake.setPower(0);card.init(awake);render(card,"yig-awake-empty");
-            awake.setPower(8);card.init(awake);render(card,"yig-awake-full");
+            String text=labels(card);
+            if(text.contains("Eldritch") || text.contains("investigator") || !text.contains("Spawn one Cultist at a random space.")
+                    || !text.contains("Solve three Mysteries,\nthen defeat Yig to win.")
+                    || !text.contains("The temple stones split beneath"))throw new AssertionError(text);
             card.init(AncientOneHelper.createYig());render(card,"yig-sleeping-reused");
             for(boolean awakened : new boolean[]{false, true}) {
                 CultistMonster cultist = new CultistMonster();
@@ -59,7 +61,8 @@ public class YigPreview extends ApplicationAdapter {
             FullGamePurchaseDialog.show(stage, () -> {});
             for(int frame=0;frame<60;frame++)stage.act(1f/60f);
             draw("full-game-promo");
-            System.out.println("PASS: sleeping/awake Yig, counter, three epic monsters, and single-row five-Ancient-One selector (unlocked and locked) rendered.");
+            checkAwakeningClock();
+            System.out.println("PASS: sleeping/awake Yig with new rules and artwork, three epic monsters, and single-row five-Ancient-One selector (unlocked and locked) rendered.");
         } catch(Throwable failure) {failure.printStackTrace();System.exit(1);} finally {Gdx.app.exit();}
     }
     private void render(Table card,String name) throws Exception {
@@ -74,6 +77,48 @@ public class YigPreview extends ApplicationAdapter {
         }
         return null;
     }
+    private String labels(Group group) {
+        java.lang.StringBuilder text=new java.lang.StringBuilder();
+        for(Actor child:group.getChildren()) {
+            if(child instanceof Label)text.append(((Label)child).getText()).append('\n');
+            if(child instanceof Group)text.append(labels((Group)child));
+        }
+        return text.toString();
+    }
+    private void checkAwakeningClock() throws Exception {
+        Gdx.audio=(Audio)java.lang.reflect.Proxy.newProxyInstance(Audio.class.getClassLoader(),new Class[]{Audio.class},
+                (p,m,a)->java.lang.reflect.Proxy.newProxyInstance(com.badlogic.gdx.audio.Sound.class.getClassLoader(),
+                        new Class[]{com.badlogic.gdx.audio.Sound.class},(s,method,args)->{
+                            if(method.getName().equals("hashCode"))return System.identityHashCode(s);
+                            if(method.getName().equals("equals"))return s==args[0];
+                            return method.getReturnType()==long.class?0L:null;
+                        }));
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(null);
+        sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget clock=
+                sk.sivak.eldritchhorror.core.view.game.HudButtons.getDoomTrack();
+        sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl view=
+                new sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl();
+        stage.clear();stage.addActor(clock);clock.setPosition(450,230);
+        int[] completed={0};
+        for(boolean fast:new boolean[]{false,true}) {
+            if(fast)sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOn();
+            else sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOff();
+            clock.updateDoom(1);tickClock();
+            view.advanceDoom(-1).subscribe(()->{completed[0]++;clock.updateDoom(8);});
+            tickClock();
+            if(completed[0]!=(fast?4:1) || clock.getCurrentDoom()!=8)
+                throw new AssertionError("Awakening clock reset repeated an old completion");
+            view.advanceDoom(-1).subscribe(()->completed[0]++);tickClock();
+            if(clock.getCurrentDoom()!=7)throw new AssertionError("Doom did not move toward midnight");
+            view.retreatDoom(1).subscribe(()->completed[0]++);tickClock();
+            if(completed[0]!=(fast?6:3) || clock.getCurrentDoom()!=8)throw new AssertionError("Doom retreat failed");
+        }
+        sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOff();
+        java.lang.reflect.Field hand=clock.getClass().getDeclaredField("minuteHand");hand.setAccessible(true);
+        if(Math.abs(((Actor)hand.get(clock)).getRotation()-240)>0.01f)throw new AssertionError("Clock must show 40 minutes before midnight");
+        System.out.println("PASS: awakening resets clock to 23:20, advance/retreat and callbacks complete once at both speeds.");
+    }
+    private void tickClock() { for(int frame=0;frame<1500;frame++)stage.act(1f/60f); }
     private void draw(String name) throws Exception {
         Gdx.gl.glClearColor(.06f,.09f,.07f,1);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);stage.draw();
         Pixmap pixels=ScreenUtils.getFrameBufferPixmap(0,0,960,540);PixmapIO.PNG png=new PixmapIO.PNG();png.setFlipY(true);

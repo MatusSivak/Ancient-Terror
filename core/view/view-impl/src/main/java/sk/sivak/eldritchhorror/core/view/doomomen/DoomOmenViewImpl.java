@@ -50,6 +50,8 @@ public class DoomOmenViewImpl implements DoomOmenView {
             ClickZoomListener clickZoomListener = new ClickZoomListener(doomTrackWidget);
             clickZoomListener.setOnCompletedListener(() -> {
                 doomTrackWidget.addOnCompletedListener(() -> {
+                    // A later refresh (including Yig's awakening) must not complete this action again.
+                    doomTrackWidget.addOnCompletedListener(null);
                     clickZoomListener.setOnCompletedListener(() -> {
                         onSub.onCompleted();
                         InfoStage.hideLabel(text);

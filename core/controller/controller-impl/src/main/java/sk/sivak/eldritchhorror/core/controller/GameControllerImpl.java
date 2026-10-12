@@ -384,7 +384,9 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public void updateDoom() {
-        view.updateDoom(doomTrackRead.getCurrentDoom());
+        AncientOneInfo info = ancientOne.getAncientOneInfo();
+        int doom = doomTrackRead.getCurrentDoom();
+        view.updateDoom(info.getAncientOneId() == AncientOneId.YIG && info.isAwaken() ? -doom : doom);
     }
 
     @Override

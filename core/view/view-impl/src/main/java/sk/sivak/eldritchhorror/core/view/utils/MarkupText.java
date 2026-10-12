@@ -41,14 +41,27 @@ public class MarkupText {
     }
 
     public static String replaceGlyphKeywords(String text) {
+        return replaceGlyphKeywords(text, "", "");
+    }
+
+    /** Preserve the icon artwork's colors when the surrounding text is tinted. */
+    public static String replaceColoredGlyphKeywords(String text) {
+        return replaceGlyphKeywords(text, "[#FFFFFFFF]", "[]");
+    }
+
+    private static String replaceGlyphKeywords(String text, String glyphPrefix, String glyphSuffix) {
         if (text == null || text.isEmpty()) {
             return text;
         }
-        text = replaceDiceResults(text);
+        text = replaceDiceResults(text, glyphPrefix, glyphSuffix);
         for (CardKeywords cardKeywords : CardKeywords.values()) {
             String word = cardKeywords.getWord();
             if (FontGlyphEnricher.containsGlyph(word)) {
-                text = text.replace(word, String.valueOf(FontGlyphEnricher.getGlyph(word)));
+                // Match keywords, not fragments of names such as William or Focused.
+                String pattern = "→".equals(word) ? Pattern.quote(word)
+                        : "(?<![\\p{L}\\p{N}_])" + Pattern.quote(word) + "(?![\\p{L}\\p{N}_])";
+                text = text.replaceAll(pattern, Matcher.quoteReplacement(
+                        glyphPrefix + FontGlyphEnricher.getGlyph(word) + glyphSuffix));
             }
         }
         return text;

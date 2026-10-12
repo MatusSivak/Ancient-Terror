@@ -51,9 +51,10 @@ public class AncientOneHelper {
     public static AncientOneInfo createAwakenYig() {
         AncientOneInfoImpl info = (AncientOneInfoImpl) createYig();
         info.setAwaken(true);
-        info.setStartingDoom(0);
+        info.setStartingDoom(-8);
         info.setMysteriesRequired(4);
         info.setAltName("ancientOne.yig.awaken.alt");
+        info.setFlavorText("ancientOne.yig.awaken.flavor");
         info.setSpecialText("ancientOne.yig.awaken.special");
         info.setReckoningText("ancientOne.yig.awaken.reckoning");
         info.setWinText("ancientOne.yig.awaken.win");

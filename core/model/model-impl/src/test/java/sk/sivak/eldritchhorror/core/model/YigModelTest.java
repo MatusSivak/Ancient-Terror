@@ -23,6 +23,12 @@ public class YigModelTest {
         one.awaken();one.increasePower(5);restored.load(one.save());
         assertTrue(restored.getAncientOneInfo().isAwaken());assertEquals(4,restored.getAncientOneInfo().getMysteriesRequired());
         assertEquals(5,restored.getAncientOneInfo().getPower());
+        assertEquals(-8,restored.getAncientOneInfo().getStartingDoom());
+    }
+    @Test public void negativeDoomSurvivesSaveLoadWithoutBeingReset() {
+        DoomTrack track=new DoomTrack();track.initDoomTrack(-5);
+        DoomTrack restored=new DoomTrack();restored.load(track.save());
+        assertEquals(-5,restored.getCurrentDoom());
     }
     @Test public void sixDistinctMysteriesAndFinalBattleScaleForEveryPlayerCount() {
         for(int players=1;players<=8;players++) {

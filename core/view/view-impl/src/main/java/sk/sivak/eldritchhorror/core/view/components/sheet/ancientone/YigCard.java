@@ -28,8 +28,6 @@ public final class YigCard extends VisTable implements AncientOneCard {
     private static final Color DANGER = Color.valueOf("8C292D");
     private final DisplayHide displayHide;
     private AncientOneInfo info;
-    private Label power;
-    private final Image[] tokenMarkers = new Image[8];
     private Action0 beforeDisplay;
 
     public YigCard() {
@@ -41,18 +39,15 @@ public final class YigCard extends VisTable implements AncientOneCard {
     @Override public void init(AncientOneInfo info) {
         this.info = info;
         clear();
-        power = null;
-        java.util.Arrays.fill(tokenMarkers, null);
         pad(16, 36, 12, 36);
         setBackground(getTextureRegionDrawable(ANCIENT_ONE_DIALOG_BACKGROUND));
-        Image art = new Image(getTexture("ancient_one/yig-sheet-art.png"));
+        Image art = new Image(getTexture(info.isAwaken() ? "ancient_one/yig-awakened-sheet-art.png" : "ancient_one/yig-sheet-art.png"));
         art.setScaling(Scaling.fit);
         add(art).colspan(2).width(696).height(220).padBottom(4).row();
         add(createLore()).width(278).top().padRight(18);
         add(createRules()).width(400).top();
         setSize(1067 * AzathothCard.SCALE, 748 * AzathothCard.SCALE);
         AncientOneStyles.addCloseButton(this);
-        updatePower(info.getPower());
     }
 
     private Table createLore() {
@@ -66,19 +61,6 @@ public final class YigCard extends VisTable implements AncientOneCard {
         Label flavor = label(get(info.getFlavorText()), 12, Color.DARK_GRAY);
         flavor.setAlignment(Align.top | Align.center);
         lore.add(flavor).width(278).padBottom(14).row();
-        if (info.isAwaken()) {
-            power = label("", 17, DANGER);
-            power.setAlignment(Align.center);
-            lore.add(power).padTop(4).padBottom(8).row();
-            Table tokens = new Table();
-            for (int i = 0; i < tokenMarkers.length; i++) {
-                Image marker = new Image(getTextureRegionDrawable(COMPASS));
-                marker.setScaling(Scaling.fit);
-                tokenMarkers[i] = marker;
-                tokens.add(marker).size(25).pad(3);
-            }
-            lore.add(tokens).row();
-        }
         return lore;
     }
 
@@ -122,20 +104,11 @@ public final class YigCard extends VisTable implements AncientOneCard {
         return label;
     }
 
-    private void updatePower(int value) {
-        if (power == null) return;
-        power.setText(get("ancientOne.yig.tokens", value));
-        for (int i = 0; i < tokenMarkers.length; i++) {
-            tokenMarkers[i].setColor(i < value ? Color.WHITE : new Color(0.35f, 0.3f, 0.25f, 0.22f));
-        }
-    }
-
     @Override public Actor getActor() { return this; }
     @Override public void setAfterHideAction(Action0 action) { displayHide.setAfterHideAction(action); }
     @Override public void setAfterDisplayAction(Action0 action) { displayHide.setAfterDisplayAction(action); }
     @Override public void setBeforeDisplayAction(Action0 action) { beforeDisplay = action; }
     @Override public void displayOrHide() {
-        updatePower(info.getPower());
         displayHide.setDisplayedY(VIEWPORT_HEIGHT / 2f - getHeight() / 2f);
         displayHide.setBeforeDisplayAction(beforeDisplay != null ? beforeDisplay : () -> {
             InfoStage.getInvestigatorHud().hide().subscribe();
@@ -150,7 +123,6 @@ public final class YigCard extends VisTable implements AncientOneCard {
 
     @Override public Completable increaseAncientOnePower(int increment) {
         return Completable.create(subscriber -> {
-            updatePower(Math.max(0, info.getPower() + increment));
             setAfterHideAction(subscriber::onCompleted);
         });
     }

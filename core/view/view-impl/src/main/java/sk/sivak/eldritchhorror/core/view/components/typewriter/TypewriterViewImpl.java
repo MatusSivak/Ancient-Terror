@@ -46,6 +46,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_AREA_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_LINE_HEIGHT;
 import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceImproveSkillKeywords;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredGlyphKeywords;
 
 public class TypewriterViewImpl implements TypewriterView  {
     private TypewriterTableStack typewriterTableStack;
@@ -118,7 +119,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     }
 
     public Completable typeInfo(String regular) {
-        return typeTextInternal(regular, Color.BLACK);
+        return typeTextInternal(replaceColoredGlyphKeywords(regular), Color.BLACK);
     }
 
     public Completable newLine() {

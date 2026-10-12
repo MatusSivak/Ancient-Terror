@@ -6,6 +6,8 @@ import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
@@ -24,6 +26,16 @@ public class AdvanceDoomAction extends AbstractHookableAction<Integer, Void> {
             return;
         }
         int previousDoom = ServicePlatform.get().getDoomTrack().getCurrentDoom();
+        AncientOneInfo ancient = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo();
+        if (ancient.getAncientOneId() == AncientOneId.YIG && ancient.isAwaken()) {
+            // Awakened Yig counts from -8 toward midnight, clamping at zero.
+            int steps = Math.min(input, Math.max(0, -previousDoom));
+            for (int i = 0; i < steps; i++) ServicePlatform.get().getDoomTrack().retreatDoom();
+            int remaining = -ServicePlatform.get().getDoomTrack().getCurrentDoom();
+            ServicePlatform.get().getDoomOmenController().advanceDoom(remaining, -steps)
+                    .subscribe(() -> ss.onSuccess(null));
+            return;
+        }
         for (int i = 0; i < input; i++) {
             ServicePlatform.get().getDoomTrack().advanceDoom();
         }

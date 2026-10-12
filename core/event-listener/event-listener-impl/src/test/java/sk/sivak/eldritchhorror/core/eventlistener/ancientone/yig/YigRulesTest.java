@@ -3,6 +3,9 @@ package sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.function.BiFunction;
+import rx.Single;
+import sk.sivak.eldritchhorror.core.constants.question.*;
+import sk.sivak.eldritchhorror.core.constants.investigator.*;
 import org.junit.*;
 import java8.features.function.Consumer;
 import sk.sivak.eldritchhorror.core.constants.*;
@@ -137,11 +140,43 @@ public class YigRulesTest {
         events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();assertFalse(effects.contains("advanceDoom"));
         events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();assertEquals("advanceDoom",effects.get(effects.size()-1));
     }
-    @Test public void lastEldritchTokenLosesBeforeTheDoomActionIsSkipped() {
-        ancient.awaken();ancient.increasePower(1);new YigInitListener().load();
-        events.fireBeforeEvent(BeforeAfterEvent.ADVANCE_DOOM,3);drain();
-        assertEquals(0,ancient.getAncientOneInfo().getPower());
-        assertEquals(Arrays.asList("increaseAncientOnePower","displayText","restartGame","skipAfterEvent"),effects);
+    @Test public void awakenedDoomOnlyLosesAtMidnightWithoutUsingTokens() {
+        ancient.awaken();new YigInitListener().load();
+        platform.setDoomTrack(mock(DoomTrackRead.class,(n,a) -> -1));
+        events.fireBeforeEvent(BeforeAfterEvent.ADVANCE_DOOM,1);drain();assertTrue(effects.isEmpty());
+        events.fireAfterEvent(BeforeAfterEvent.ADVANCE_DOOM,null);drain();assertTrue(effects.isEmpty());
+        platform.setDoomTrack(mock(DoomTrackRead.class,(n,a) -> 0));
+        events.fireAfterEvent(BeforeAfterEvent.ADVANCE_DOOM,null);drain();
+        assertEquals(Arrays.asList("displayText","restartGame"),effects);
+    }
+    @Test public void awakenedReckoningSpawnsExactlyOneRandomCultistWithoutAPicker() {
+        ancient.awaken();new YigInitListener().load();
+        events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.CHARGE);drain();assertTrue(monsters.isEmpty());
+        events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();
+        assertEquals(1,monsters.size());assertNotNull(monsters.get(0).getCurrentLocation());
+        assertEquals(Arrays.asList("onTriggeredReckoning","spawn"),effects);
+    }
+    @Test public void retreatChoiceCanKeepDoomRetreatOrReplaceItWithCurseRemoval() {
+        for (boolean discard : new boolean[]{false,true}) {
+            setup();ancient.awaken();new YigInitListener().load();
+            InvestigatorInfo info=mock(InvestigatorInfo.class,(n,a)->InvestigatorId.THE_SAILOR);
+            InvestigatorRead investigator=mock(InvestigatorRead.class,(n,a)->info);
+            platform.setInvestigators(mock(InvestigatorsRead.class,(n,a)->Collections.singletonList(investigator)));
+            platform.setConditionsDeck(mock(ConditionsDeckRead.class,(n,a)->n.equals("hasCondition")?true:null));
+            platform.setGameService(mock(GameService.class,(n,a)->{
+                assertEquals("ask",n);Question<Boolean> q=(Question<Boolean>)a[0];
+                assertEquals(2,q.getOptions().size());assertEquals("Retreat Doom",q.getOptions().get(0).getName());
+                assertEquals("Discard Cursed",q.getOptions().get(1).getName());
+                Answer<Boolean,Object> answer=new Answer<>();answer.setResponseData(discard);return Single.just(answer);
+            }));
+            events.fireBeforeEvent(BeforeAfterEvent.RETREAT_DOOM,null);drain();
+            assertEquals(discard?Arrays.asList("discardConditionFromInvestigator","skipAfterEvent"):Collections.emptyList(),effects);
+        }
+    }
+    @Test public void noCurseAllowsDoomRetreatWithoutAnEmptyChoice() {
+        ancient.awaken();new YigInitListener().load();
+        platform.setInvestigators(mock(InvestigatorsRead.class,(n,a)->Collections.emptyList()));
+        events.fireBeforeEvent(BeforeAfterEvent.RETREAT_DOOM,null);drain();assertTrue(effects.isEmpty());
     }
     @Test public void awakeningDefersUnregistrationUntilEventDispatchCompletes() {
         platform.setDoomTrack(mock(DoomTrackRead.class,(n,a) -> 0));new YigInitListener().load();
