@@ -649,7 +649,7 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public <RD, AD> Single<Answer<RD, AD>> ask(Question<RD> question) {
         if (sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView.supports(question)) {
-            return new sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView(controller).ask(question);
+            return new sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView(controller, ticketActionView).ask(question);
         }
         return questionView.ask(question);
     }

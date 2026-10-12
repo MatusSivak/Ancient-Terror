@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 public class HourglassComponent extends Image {
 
@@ -31,28 +32,29 @@ public class HourglassComponent extends Image {
 
     public void display() {
         addAction(
-                Actions.sequence(
+                new FastForwardAction<>(Actions.sequence(
                         Actions.parallel(
                                 Actions.scaleTo(1f, 1f, 1f, Interpolation.swingOut),
                                 Actions.alpha(1f, 1f)
                         ),
                         Actions.run(this::loopAnimation)
-                )
+                ))
         );
     }
 
     public void hide() {
         if (loopAnimationAction != null) {
-            loopAnimationAction.finish();
+            removeAction(loopAnimationAction);
+            loopAnimationAction = null;
         }
         addAction(
-                Actions.sequence(
+                new FastForwardAction<>(Actions.sequence(
                         Actions.parallel(
                                 Actions.scaleTo(0f, 0f, 1f, Interpolation.swingIn),
                                 Actions.alpha(0f, 1f)
                         ),
                         Actions.run(this::remove)
-                )
+                ))
         );
     }
 

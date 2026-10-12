@@ -134,7 +134,8 @@ public class InvestigatorView {
             ((InvestigatorImage) investigator).hideHourglass();
         }
         return Completable.create(onSub ->
-                InfoStage.addActionToInfoStage(Actions.delay(1f, Actions.run(onSub::onCompleted))));
+                InfoStage.addActionToInfoStage(new FastForwardAction<>(
+                        Actions.delay(1f, Actions.run(onSub::onCompleted)))));
     }
 
     public Completable updateHud(InvestigatorBasics currentInvestigator) {

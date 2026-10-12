@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import rx.Single;
 import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,32 +41,50 @@ public class TypewriterQuestionTyper {
 
     public Single<Integer> typeQuestion(String[] buttonTexts) {
         return Single.create(onSub -> {
-
-            boolean onNewLine = false;
-            for (String buttonText : buttonTexts) {
-                if (buttonText.length() > 35) {
-                    onNewLine = true;
-                    break;
-                }
+            if (FastForwardAction.isOn() && isAutomaticConfirmation(buttonTexts)) {
+                // The paper stays locked, just as it does after a manual confirmation.
+                onSub.onSuccess(0);
+                return;
             }
-
-            List<String> answersModified1 = replacePlaceholdersInAnswers(buttonTexts);
-            if (onNewLine) {
-                List<ButtonData> buttonDatas = createButtonDatas(answersModified1, 350/ FONT_SCALE);
-                List<TextButtonWithValue> buttons = createButtons(buttonDatas);
-                addButtonsToTableOnNewLine(buttons);
-                addClickListenerOnButtons(buttons, onSub);
-            } else {
-
-                BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
-                float buttonWidth = findButtonWidth(answersModified1, bitmapFont);
-                List<ButtonData> buttonDatas = createButtonDatas(answersModified1, buttonWidth);
-                List<TextButtonWithValue> buttons = createButtons(buttonDatas);
-
-                addButtonsToTable(buttonWidth * FONT_SCALE, buttons);
-                addClickListenerOnButtons(buttons, onSub);
-            }
+            displayQuestion(buttonTexts, onSub);
         });
+    }
+
+    private boolean isAutomaticConfirmation(String[] buttonTexts) {
+        if (buttonTexts.length != 1) {
+            return false;
+        }
+        // Test prompts use the skill name, optionally colored and followed by a modifier.
+        String text = buttonTexts[0].replaceAll("\\[[^\\]]*\\]", "").trim();
+        return text.equalsIgnoreCase("OK") || text.equalsIgnoreCase("Test")
+                || text.matches("(Lore|Influence|Observation|Strength|Will)([+-]\\d+)?");
+    }
+
+    void displayQuestion(String[] buttonTexts, SingleSubscriber<? super Integer> onSub) {
+        boolean onNewLine = false;
+        for (String buttonText : buttonTexts) {
+            if (buttonText.length() > 35) {
+                onNewLine = true;
+                break;
+            }
+        }
+
+        List<String> answersModified1 = replacePlaceholdersInAnswers(buttonTexts);
+        if (onNewLine) {
+            List<ButtonData> buttonDatas = createButtonDatas(answersModified1, 350/ FONT_SCALE);
+            List<TextButtonWithValue> buttons = createButtons(buttonDatas);
+            addButtonsToTableOnNewLine(buttons);
+            addClickListenerOnButtons(buttons, onSub);
+        } else {
+
+            BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
+            float buttonWidth = findButtonWidth(answersModified1, bitmapFont);
+            List<ButtonData> buttonDatas = createButtonDatas(answersModified1, buttonWidth);
+            List<TextButtonWithValue> buttons = createButtons(buttonDatas);
+
+            addButtonsToTable(buttonWidth * FONT_SCALE, buttons);
+            addClickListenerOnButtons(buttons, onSub);
+        }
     }
 
     private void addButtonsToTableOnNewLine(List<TextButtonWithValue> buttons) {

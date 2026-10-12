@@ -14,6 +14,7 @@ import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 public class NewGateAnimatedImage extends Group {
 
@@ -55,11 +56,11 @@ public class NewGateAnimatedImage extends Group {
         return Completable.create(onSub -> {
             gateAnimatedImage.clearActions();
             backgroundImage.clearActions();
-            backgroundImage.addAction(Actions.parallel(
+            backgroundImage.addAction(new FastForwardAction<>(Actions.parallel(
                     Actions.scaleTo(0f, 0f, 1.5f, Interpolation.exp5In),
                     Actions.fadeOut(1.5f, Interpolation.exp5In)
-            ));
-            gateAnimatedImage.addAction(Actions.sequence(
+            )));
+            gateAnimatedImage.addAction(new FastForwardAction<>(Actions.sequence(
                     Actions.parallel(
                             Actions.scaleTo(0f, 0f, 1.5f, Interpolation.exp5In),
                             Actions.fadeOut(1.5f, Interpolation.exp5In)
@@ -70,7 +71,7 @@ public class NewGateAnimatedImage extends Group {
                         onSub.onCompleted();
                         remove();
                     })
-            ));
+            )));
         });
     }
 

@@ -34,20 +34,23 @@ public class TicketActionView {
     private YellowButton.ShipButton shipButton;
 
     public Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable) {
+        return selectTravelTicket(trainAvailable, shipAvailable, UiText.get("ticket.select"));
+    }
+
+    public Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable, String title) {
         return Single.create(onSub -> {
-            InfoStage.displayTextForce(UiText.get("ticket.select"));
-            trainButton = showTrainButton(onSub, 0.4f, this::hideTicketButtons);
-            shipButton = showShipButton(onSub, 0.6f, this::hideTicketButtons);
-            trainButton.setDisabled(!trainAvailable);
-            shipButton.setDisabled(!shipAvailable);
-            if (!trainAvailable) trainButton.setColor(0.3f, 0.3f, 0.3f, 1f);
-            if (!shipAvailable) shipButton.setColor(0.3f, 0.3f, 0.3f, 1f);
+            InfoStage.displayTextForce(title);
+            trainButton = trainAvailable
+                    ? showTrainButton(onSub, shipAvailable ? 0.4f : 0.5f, this::hideTicketButtons) : null;
+            shipButton = shipAvailable
+                    ? showShipButton(onSub, trainAvailable ? 0.6f : 0.5f, this::hideTicketButtons) : null;
         });
 
     }
 
     private void hideTicketButtons() {
         for (YellowButton button : new YellowButton[]{trainButton, shipButton}) {
+            if (button == null) continue;
             button.setDisabled(true);
             button.setTouchable(Touchable.disabled);
             InfoStage.hideActor(button);

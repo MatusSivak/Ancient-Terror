@@ -86,10 +86,10 @@ public class ReportFixesPreview extends ApplicationAdapter {
             view.selectTravelTicket(train,true).subscribe(ticket -> { require(ticket==PathType.SHIP,"Wrong ticket"); calls[0]++; });
             tick(100);
             YellowButton trainButton=(YellowButton)field(view,"trainButton"), shipButton=(YellowButton)field(view,"shipButton");
-            require(trainButton.isDisabled()!=train && !shipButton.isDisabled(),"Invalid ticket availability");
+            require((train ? trainButton != null && !trainButton.isDisabled() : trainButton == null)
+                    && !shipButton.isDisabled(),"Invalid ticket availability");
             require(calls[0]==0,"Ticket was selected automatically");
             draw(train?"tickets-both":"tickets-ship-only");
-            if(!train) { click(trainButton); require(calls[0]==0,"Disabled ticket was accepted"); }
             click(shipButton); click(shipButton); tick(100); require(calls[0]==1,"Ticket selection completed more than once");
         }
     }

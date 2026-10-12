@@ -8,19 +8,28 @@ import java.util.Set;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.location.PathType;
 import sk.sivak.eldritchhorror.core.constants.question.Answer;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.controller.GameController;
+import sk.sivak.eldritchhorror.core.view.action.ticket.TicketActionView;
 import sk.sivak.eldritchhorror.core.view.components.select.SelectSingleComponent;
 import sk.sivak.eldritchhorror.core.view.components.sheet.investigator.StatsTableData;
 import sk.sivak.eldritchhorror.core.view.components.skill.ImproveSkillComponent;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
-/** Typed questions use the same selectors as the normal investigator/skill flows. */
+/** Typed questions use the same selectors as the normal investigator, skill and ticket flows. */
 public final class QuestionChoiceView {
     private final GameController controller;
-    public QuestionChoiceView(GameController controller) { this.controller = controller; }
+    private final TicketActionView ticketActionView;
+    public QuestionChoiceView(GameController controller) {
+        this(controller, new TicketActionView(null));
+    }
+    public QuestionChoiceView(GameController controller, TicketActionView ticketActionView) {
+        this.controller = controller;
+        this.ticketActionView = ticketActionView;
+    }
 
     static Class<?> choiceType(Question<?> question) {
         if (question.getOptions() == null || question.getSelectComponentsTableData() != null
@@ -30,11 +39,13 @@ public final class QuestionChoiceView {
         for (Question.Option<?> option : question.getOptions()) {
             Object value = option.getValue();
             if (value == null) { if (++cancellations > 1) return null; continue; }
-            Class<?> current = value instanceof InvestigatorId ? InvestigatorId.class : value instanceof Stat ? Stat.class : null;
+            Class<?> current = value instanceof InvestigatorId ? InvestigatorId.class : value instanceof Stat ? Stat.class
+                    : value == PathType.TRAIN || value == PathType.SHIP ? PathType.class : null;
             if (current == null || (type != null && type != current)) return null;
             type = current;
         }
-        return type;
+        // The ticket picker has no cancel button; optional questions retain their original controls.
+        return type == PathType.class && cancellations > 0 ? null : type;
     }
 
     public static boolean supports(Question<?> question) { return choiceType(question) != null; }
@@ -43,15 +54,20 @@ public final class QuestionChoiceView {
     public <RD, AD> Single<Answer<RD, AD>> ask(Question<RD> question) {
         List<InvestigatorId> investigators = new ArrayList<>();
         Set<Stat> skills = EnumSet.noneOf(Stat.class);
+        Set<PathType> tickets = EnumSet.noneOf(PathType.class);
         String cancel = null;
         for (Question.Option<RD> option : question.getOptions()) {
             if (option.getValue() instanceof InvestigatorId) investigators.add((InvestigatorId) option.getValue());
             else if (option.getValue() instanceof Stat) skills.add((Stat) option.getValue());
+            else if (option.getValue() instanceof PathType) tickets.add((PathType) option.getValue());
             else if (option.getValue() == null) cancel = option.getName();
         }
         final String cancelText = cancel;
         Single<?> selection;
-        if (!investigators.isEmpty()) {
+        if (!tickets.isEmpty()) {
+            selection = ticketActionView.selectTravelTicket(tickets.contains(PathType.TRAIN),
+                    tickets.contains(PathType.SHIP), question.getTitle());
+        } else if (!investigators.isEmpty()) {
             selection = Single.<InvestigatorId>create(sub -> {
                 SelectSingleComponent<InvestigatorId> picker = new SelectSingleComponent<>(investigators, sub);
                 picker.init(get("investigator.displayInvestigators"), question.getTitle(),
