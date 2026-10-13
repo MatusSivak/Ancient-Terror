@@ -39,6 +39,7 @@ public class YigEncounterPresentationTest {
     @Before public void setup() {
         ServicePlatform.nullifyInstance();
         platform = ServicePlatform.get();
+        setYigAwake(false);
         platform.setEventQueue(new EventQueueImpl());
         platform.setService(mock(Service.class, (name, args) -> {
             if (name.equals("addEventCommand")) queue(() -> ((Consumer<Object>) args[0]).accept(null));
@@ -99,6 +100,34 @@ public class YigEncounterPresentationTest {
         platform.setConditionsDeck(mock(ConditionsDeckRead.class, (name, args) -> false));
     }
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
+
+    @Test public void sleepingYigDoesNotShowOrApplyAwakenedHealthLoss() {
+        researchHealthLoss(false);
+    }
+
+    @Test public void awakenedYigShowsDirectHealthLossAndAppliesItAfterChoice() {
+        researchHealthLoss(true);
+    }
+
+    private void researchHealthLoss(boolean awake) {
+        setYigAwake(awake);
+        start(6, LocationType.WILDERNESS);
+        assertTrue(allInfo().contains("spend 2 Health"));
+        assertEquals(awake, allInfo().contains("[#BAD]Lose 2 Health.[]"));
+        assertFalse(allInfo().contains("If Yig is awake"));
+        assertFalse(effects.contains("loseHealth"));
+        click(); // Decline the optional payment; the awakened penalty still applies.
+        assertEquals(awake, effects.contains("loseHealth"));
+        assertFalse(waiting);
+        assertEquals(0, papers);
+    }
+
+    private void setYigAwake(boolean awake) {
+        platform.setModel(mock(ModelRead.class, (name, args) ->
+                mock(AncientOneRead.class, (n, a) ->
+                        mock(sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo.class,
+                                (nn, aa) -> awake))));
+    }
 
     @Test public void failedGuardianTestReturnsPaperOnceAndWaitsForAmbushConfirmation() {
         startSpecial(6); click(); finishTest(false);

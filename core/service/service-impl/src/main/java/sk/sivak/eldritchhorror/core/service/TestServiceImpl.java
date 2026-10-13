@@ -257,7 +257,7 @@ public class TestServiceImpl extends AbstractCommonService implements TestServic
             damageCheck(monsterInfo, combatData);
         }
         encounterService.endOfEncounter(); // END_OF_ENCOUNTER
-        executeHookable(testActionProvider.hideCombatTable());
+        hideCombatTable(combatData);
         service.hideBackground();
         addEventCommand(in -> {
             if (combatData.getDamageTestResult() != null) {
@@ -274,6 +274,18 @@ public class TestServiceImpl extends AbstractCommonService implements TestServic
         });
         convertTo(CombatData.class, () -> combatData);
         release();
+    }
+
+    @Override
+    public void hideCombatTable(CombatData combatData) {
+        addEventCommand(in -> {
+            // A special monster ability can end the presentation before normal cleanup.
+            // Track it per combat so a second cleanup cannot pop an enclosing combat.
+            if (!combatData.isCombatTableHidden()) {
+                combatData.setCombatTableHidden(true);
+                executeHookable(testActionProvider.hideCombatTable());
+            }
+        });
     }
 
     private void horrorCheck(MonsterInfo monsterInfo, CombatData combatData) {

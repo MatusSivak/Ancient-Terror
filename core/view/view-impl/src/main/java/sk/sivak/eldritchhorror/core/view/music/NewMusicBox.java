@@ -1,8 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.music;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -21,10 +21,11 @@ public class NewMusicBox {
     private static final float FADE_OUT_DURATION = 1.5f;
 
     private static NewMusicBox instance;
-    private boolean enabled;
+    private float volume;
+    private final Map<Music, Float> trackVolumes = new HashMap<>();
 
     private Stack<String> musicInfoStack;
-    private Action ongoingFadeAction;
+    private FastForwardAction<?> ongoingFadeAction;
 
     private final Map<String, Music> preloadedMusicMap;
 
@@ -32,7 +33,9 @@ public class NewMusicBox {
         preloadedMusicMap = new HashMap<>();
         musicInfoStack = new Stack<>();
 
-        enabled = !Gdx.app.getPreferences("AncientTerror.xml").getBoolean("music_disabled", false);
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        volume = Math.max(0f, Math.min(1f, preferences.getFloat("music_volume",
+                preferences.getBoolean("music_disabled", false) ? 0f : 1f)));
 
     }
 
@@ -44,14 +47,27 @@ public class NewMusicBox {
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        Music music = findMusic(musicInfoStack.peek());
-        if (enabled) {
-            music.setVolume(1);
-        } else {
-            resetOngoingFadeAction();
-            music.setVolume(0);
+        setVolume(enabled ? 1f : 0f);
+    }
+
+    public float getVolume() {
+        return volume;
+    }
+
+    public void setVolume(float volume) {
+        this.volume = Math.max(0f, Math.min(1f, volume));
+        for (Map.Entry<Music, Float> track : trackVolumes.entrySet()) {
+            track.getKey().setVolume(track.getValue() * this.volume);
         }
+        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
+        preferences.putFloat("music_volume", this.volume);
+        preferences.putBoolean("music_disabled", this.volume == 0f);
+        preferences.flush();
+    }
+
+    void setTrackVolume(Music music, float fadeVolume) {
+        trackVolumes.put(music, fadeVolume);
+        music.setVolume(fadeVolume * volume);
     }
 
     public void changeMusic(String newTrack) {
@@ -82,12 +98,16 @@ public class NewMusicBox {
         if (ongoingFadeAction == null) {
             return;
         }
+        if (ongoingFadeAction.getActor() != null) {
+            ongoingFadeAction.getActor().removeAction(ongoingFadeAction);
+        }
+        InfoStage.getFastForwardButton().unregisterAction(ongoingFadeAction);
         ongoingFadeAction.reset();
-        if (enabled) {
-            findMusic(musicInfoStack.peek()).setVolume(1);
+        if (!musicInfoStack.isEmpty()) {
+            setTrackVolume(findMusic(musicInfoStack.peek()), 1f);
         }
         if (musicInfoStack.size() >= 2) {
-            findMusic(musicInfoStack.get(musicInfoStack.size() - 2)).setVolume(0f);
+            setTrackVolume(findMusic(musicInfoStack.get(musicInfoStack.size() - 2)), 0f);
         }
         ongoingFadeAction = null;
     }
@@ -107,7 +127,7 @@ public class NewMusicBox {
 
         Music newMusic = Gdx.audio.newMusic(Gdx.files.internal(trackName));
         preloadedMusicMap.put(trackName, newMusic);
-        newMusic.setVolume(0);
+        setTrackVolume(newMusic, 0f);
         newMusic.setLooping(true);
         newMusic.play();
 
@@ -129,12 +149,14 @@ public class NewMusicBox {
 
     public void reset() {
         resetOngoingFadeAction();
-        findMusic(musicInfoStack.peek()).setVolume(0);
+        if (!musicInfoStack.isEmpty()) {
+            setTrackVolume(findMusic(musicInfoStack.peek()), 0f);
+        }
         musicInfoStack.clear();
         changeMusic(TRACK_HORROR_GAME_INTRO);
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return volume > 0f;
     }
 }

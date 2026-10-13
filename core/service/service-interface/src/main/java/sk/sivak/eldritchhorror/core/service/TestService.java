@@ -47,6 +47,8 @@ public interface TestService extends CommonService {
 
     void destroyMonsterHealth(List<DiceRoll> diceRolls);
 
+    void hideCombatTable(CombatData combatData);
+
     void updateMonsterDamage(CombatData combatData);
 
     void updateMonsterHorror(CombatData combatData);

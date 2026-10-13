@@ -15,11 +15,7 @@ public class MusicFadeInAction extends TemporalAction {
 
     @Override
     protected void update(float v) {
-        if (NewMusicBox.getInstance().isEnabled()) {
-            music.setVolume(v);
-        } else {
-            music.setVolume(0);
-        }
+        NewMusicBox.getInstance().setTrackVolume(music, v);
 
     }
 

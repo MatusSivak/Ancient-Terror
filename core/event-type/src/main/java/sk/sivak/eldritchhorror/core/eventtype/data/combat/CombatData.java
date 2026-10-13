@@ -17,6 +17,15 @@ public class CombatData {
     private int sanityLost;
     private int healthLost;
     private int damageDealt;
+    private boolean combatTableHidden;
+
+    public boolean isCombatTableHidden() {
+        return combatTableHidden;
+    }
+
+    public void setCombatTableHidden(boolean combatTableHidden) {
+        this.combatTableHidden = combatTableHidden;
+    }
 
     public MonsterInfo getMonsterInfo() {
         return monsterInfo;

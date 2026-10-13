@@ -38,12 +38,14 @@ public class RighteousConditionBackListener2 extends AbstractConditionBackListen
     @Override
     protected void execute() {
         ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
-        ServicePlatform.get().getEncounterService().displayButtons(
-                "[#GOOD]Close one Gate[]",
-                "[#GOOD]Retreat Doom[]").subscribe(choice -> {
+        boolean hasGates = !ServicePlatform.get().getGateStackRead().getSpawnedGates().isEmpty();
+        String[] rewards = hasGates
+                ? new String[]{"[#GOOD]Close one Gate[]", "[#GOOD]Retreat Doom[]"}
+                : new String[]{"[#GOOD]Retreat Doom[]"};
+        ServicePlatform.get().getEncounterService().displayButtons(rewards).subscribe(choice -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().hideTypewriterPaper();
-            if (choice == 0) {
+            if (hasGates && choice == 0) {
                 SelectSingleGateData selectSingleGateData = new SelectSingleGateData(ServicePlatform.get().getGateStackRead().getSpawnedGates());
                 selectSingleGateData.setTitleText("Select Gate");
                 ServicePlatform.get().getGameService().selectSingleGate(selectSingleGateData).subscribe(gateInfo -> {

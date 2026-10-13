@@ -730,6 +730,10 @@ public class TestViewImpl implements TestView {
     public Completable hideCombatTable() {
         CombatInterruption.finish();
         return Completable.create(onSub -> {
+            if (monsterCombatTableStack.isEmpty()) {
+                onSub.onCompleted();
+                return;
+            }
             monsterCombatTableStack.peek().addAction(new AfterCenteredAction(() -> {
                 for (Subscription monsterCombatTableSubscription : monsterCombatTableSubscriptions) {
                     monsterCombatTableSubscription.unsubscribe();

@@ -32,6 +32,7 @@ public class GhostMonsterListener extends AbstractMonsterListener {
             }
             if (eventData.getHorrorTestResult().isSuccessful()) {
                 ServicePlatform.get().getService().hold();
+                ServicePlatform.get().getTestService().hideCombatTable(eventData);
                 ServicePlatform.get().getService().hideBackground();
                 ServicePlatform.get().getMonsterService().dealDamageToMonsterInCombat(monsterInfo, eventData.getHorrorTestResult().getScore(), true);
                 ServicePlatform.get().getService().convertTo(CombatData.class, () -> eventData);

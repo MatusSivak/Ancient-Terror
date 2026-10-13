@@ -6,6 +6,12 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -61,8 +67,6 @@ public class MenuButton extends ImageButton {
         Dialog dialog = createMenuDialog();
 
         ImageTextButton restartGameButton = createNiceButton("icon/restart.png", get("menu.restartGame"));
-        ImageTextButton musicOnButton = createNiceButton("icon/volume_on.png", get("menu.musicOn"));
-        ImageTextButton musicOffButton = createNiceButton("icon/volume_off.png", get("menu.musicOff"));
         ImageTextButton vibrationOnButton = createNiceButton("icon/vibration_on.png", get("menu.vibrationOn"));
         ImageTextButton vibrationOffButton = createNiceButton("icon/vibration_off.png", get("menu.vibrationOff"));
         ImageTextButton strobeOnButton = createNiceButton("icon/migraine_on.png", get("menu.strobeOn"));
@@ -76,13 +80,7 @@ public class MenuButton extends ImageButton {
             dialog.getContentTable().add(restartGameButton).size(280, 50);
             dialog.getContentTable().row();
         }
-        Cell<ImageTextButton> musicToggleButtonCell;
-        if (NewMusicBox.getInstance().isEnabled()) {
-            musicToggleButtonCell = dialog.getContentTable().add(musicOnButton);
-        } else {
-            musicToggleButtonCell = dialog.getContentTable().add(musicOffButton);
-        }
-        musicToggleButtonCell.size(280, 50);
+        dialog.getContentTable().add(createMusicVolumeControl()).size(280, 66);
         dialog.getContentTable().row();
 
         Cell<ImageTextButton> vibrationToggleButtonCell;
@@ -120,26 +118,6 @@ public class MenuButton extends ImageButton {
         dialog.setKeepWithinStage(false);
         dialog.setPosition((InfoStage.getStageSafe().getWidth() - dialog.getWidth() * menuScale) / 2f, 0f);
 
-
-        ButtonUtils.addClickListener(musicOnButton, () -> {
-            musicToggleButtonCell.getActor().remove();
-            musicToggleButtonCell.setActor(musicOffButton).size(280,50);
-            NewMusicBox.getInstance().setEnabled(false);
-            Gdx.app.postRunnable(() -> {
-                preferences.putBoolean("music_disabled", true);
-                preferences.flush();
-            });
-        });
-
-        ButtonUtils.addClickListener(musicOffButton, () -> {
-            musicToggleButtonCell.getActor().remove();
-            musicToggleButtonCell.setActor(musicOnButton).size(280,50);
-            NewMusicBox.getInstance().setEnabled(true);
-            Gdx.app.postRunnable(() -> {
-                preferences.putBoolean("music_disabled", false);
-                preferences.flush();
-            });
-        });
 
         ButtonUtils.addClickListener(vibrationOnButton, () -> {
             vibrationToggleButtonCell.getActor().remove();
@@ -211,6 +189,41 @@ public class MenuButton extends ImageButton {
                 Gdx.app.exit();
             }));
         });
+    }
+
+    private Table createMusicVolumeControl() {
+        NewMusicBox music = NewMusicBox.getInstance();
+        TextButton.TextButtonStyle buttonStyle = createMenuButtonStyle();
+        Label label = new Label(get("menu.musicVolume"),
+                new Label.LabelStyle(buttonStyle.font, buttonStyle.fontColor));
+        Label value = new Label(Math.round(music.getVolume() * 100f) + "%", label.getStyle());
+        label.setFontScale(0.32f);
+        value.setFontScale(0.30f);
+        value.setAlignment(Align.right);
+        Image icon = new Image(getTextureRegionDrawable(music.isEnabled()
+                ? "icon/volume_on.png" : "icon/volume_off.png"));
+        icon.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+        Slider slider = new Slider(0f, 100f, 1f, false, AncientTerrorMenuStyles.volumeSlider());
+        slider.setValue(Math.round(music.getVolume() * 100f));
+        slider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                music.setVolume(slider.getValue() / 100f);
+                value.setText(Math.round(slider.getValue()) + "%");
+                icon.setDrawable(getTextureRegionDrawable(slider.getValue() > 0f
+                        ? "icon/volume_on.png" : "icon/volume_off.png"));
+            }
+        });
+        Table control = new Table();
+        control.setBackground(buttonStyle.up);
+        control.pad(10f, 28f, 10f, 24f);
+        control.add(icon).size(36f).padRight(8f);
+        Table volume = new Table();
+        volume.add(label).expandX().left();
+        volume.add(value).width(40f).right().row();
+        volume.add(slider).colspan(2).growX().height(24f).padTop(2f);
+        control.add(volume).growX();
+        return control;
     }
 
     private Dialog createMenuDialog() {

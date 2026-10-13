@@ -90,6 +90,7 @@ public class HudButtons {
                 availableSpace / 6f + 8,
                 availableSpace + PADDING * 2);
         background.setX(background.getX() - background.getWidth());
+        background.setVisible(false);
         InfoStage.getHudButtonsLayer().addActor(background);
 
         hudButtons = new ButtonGroup<>();
@@ -182,6 +183,7 @@ public class HudButtons {
         button.setBounds(PADDING, InfoStage.getInvestigatorHud().getHeight() + BOTTOM_BONUS_PADDING + PADDING + position * size,
                 size, size);
         button.setX(button.getX() - button.getWidth());
+        button.setVisible(false);
         hudButtons.add(button);
         InfoStage.getHudButtonsLayer().addActor(button);
     }
@@ -214,23 +216,32 @@ public class HudButtons {
             if (show) {
                 moveBackgroundAction.setPosition(0, background.getY()); // 0
             } else {
-                moveBackgroundAction.setPosition(-74, background.getY()); // -74
+                moveBackgroundAction.setPosition(-background.getWidth() - 1f, background.getY());
             }
             moveBackgroundAction.setDuration(FAST_ACTION_DURATION);
             moveBackgroundAction.setTarget(background);
             background.clearActions();
-            background.addAction(sequence(new FastForwardAction(moveBackgroundAction), run(completeWhenDone)));
+            if (show) background.setVisible(true);
+            background.addAction(sequence(new FastForwardAction(moveBackgroundAction), run(() -> {
+                background.setVisible(show);
+                completeWhenDone.run();
+            })));
             for (HudButton hudButton : hudButtons.getButtons()) {
                 MoveToAction action = new MoveToAction();
                 if (show) {
                     action.setPosition(0, hudButton.getY()); // 3
                 } else {
-                    action.setPosition(-64, hudButton.getY()); // -64
+                    // HudButton draws its icon at 150% of the actor's bounds.
+                    action.setPosition(-hudButton.getWidth() * 1.5f - 1f, hudButton.getY());
                 }
                 action.setDuration(FAST_ACTION_DURATION);
                 action.setTarget(hudButton);
                 hudButton.clearActions();
-                hudButton.addAction(sequence(new FastForwardAction(action), run(completeWhenDone)));
+                if (show) hudButton.setVisible(true);
+                hudButton.addAction(sequence(new FastForwardAction(action), run(() -> {
+                    hudButton.setVisible(show);
+                    completeWhenDone.run();
+                })));
             }
         });
     }

@@ -60,6 +60,9 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         // AbstractResearchEncounter has already opened the paper.
         paperVisible = true;
         String info = getTextBuilder().withInfo().build();
+        if (page == 6 && getLocationType() == LocationType.WILDERNESS && awake()) {
+            info += " " + getTextBuilder().withInfo(2).build();
+        }
         if (startsWithChoice()) {
             openingChoice = info;
             resolve();
