@@ -150,7 +150,8 @@ public final class YigMysteryListener extends AbstractMysteryListener {
             public Class<Object> getDataClass(){return Object.class;}
             public void onNotify(Object ignored) {
                 if(progress>=mysteryCardInfo.getMysteryComplexity())return;
-                InvestigatorId previous=investigator();
+                // Mystery resolution can run between turns, with no active investigator.
+                InvestigatorId previous=p().getInvestigators().getActiveInvestigatorId();
                 for(InvestigatorRead inv:p().getInvestigators().getOnBoardInvestigators()) {
                     InvestigatorId owner=inv.getInfo().getInvestigatorId();
                     if(!p().getArtifactsDeck().hasArtifact(owner,ArtifactId.SERPENT_CROWN))continue;
@@ -166,7 +167,8 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                                     addProgress();
                                 }),() -> {}),() -> {});
                         },() -> {}),() -> {}));
-                        p().getInvestigatorService().changeActiveInvestigator(previous);
+                        if(previous==null)p().getInvestigatorService().unsetActiveInvestigator();
+                        else p().getInvestigatorService().changeActiveInvestigator(previous);
                     });
                     break;
                 }

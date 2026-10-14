@@ -7,6 +7,12 @@ Run from the repository root with the JDK configured as described in `BUILDING.m
 ```
 
 Uses an offscreen desktop window and silent audio stubs without loading a saved game.
+To run only the ordinary/epic combat display, phase highlighting, and cleanup checks:
+
+```powershell
+.\gradlew.bat -I tools/prompt-preview/preview.gradle :desktop:previewPrompts --args="--combat-display"
+```
+
 Checks mystery spacing with a standalone button and a label, recentering after prompt
 removal, partial reroll completion, visible dice during Focus/Clue prompts, and failed-roll cleanup
 at normal and fast-forward speed. Screenshots are written to `build/prompt-preview`.
@@ -30,7 +36,7 @@ another, with exactly one sanity/health token lost per impact. `combat-interrupt
 `combat-resumed` check that an interruption (Flesh Ward, another investigator stepping in)
 hides the monster, puts torn tokens back, and that the next combat step brings it back.
 `epic-monster-*` show an epic monster (bigger portrait, gold rim and plate, bigger fireballs)
-and the Horror → Damage phase pill in the top-left corner; `combat-overview-epic` shows the
+through the horror and damage steps, without a separate phase label; `combat-overview-epic` shows the
 gold epic card on the overview. `map-monster-walk-*` show a map monster stepping while it
 moves (body and shadow bounce and waddle together; its real position stays put).
 

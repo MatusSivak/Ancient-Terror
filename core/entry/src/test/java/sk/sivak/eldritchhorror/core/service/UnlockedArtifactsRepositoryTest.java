@@ -6,6 +6,9 @@ import java.lang.reflect.Proxy;
 import java.util.*;
 import org.junit.*;
 import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactId;
+import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.model.ArtifactsDeck;
 import static org.junit.Assert.*;
 
 public class UnlockedArtifactsRepositoryTest {
@@ -35,5 +38,44 @@ public class UnlockedArtifactsRepositoryTest {
     }
     @Test public void freshProfilesIncludeZanthu() {
         assertTrue(new UnlockedArtifactsRepository().loadData().contains(ArtifactId.ZANTHU_TABLETS));
+    }
+
+    @Test public void freshProfilesIncludeTheMysteryRequiredSerpentCrown() {
+        assertTrue(new UnlockedArtifactsRepository().loadData().contains(ArtifactId.SERPENT_CROWN));
+    }
+
+    @Test public void legacyProfilesAndImportedSavesKeepSerpentCrownAvailable() {
+        String old = new String(Base64Coder.encode(new byte[]{(byte) ArtifactId.BONE_PIPES.ordinal()}));
+        data.put("unlockedArtifacts", old);
+        UnlockedArtifactsRepository repository = new UnlockedArtifactsRepository();
+        assertTrue(repository.loadData().contains(ArtifactId.SERPENT_CROWN));
+        assertTrue(repository.loadData().contains(ArtifactId.BONE_PIPES));
+        // Imported saves replace the stored unlock list, then load it again.
+        data.put("unlockedArtifacts", old);
+        assertTrue(repository.loadData().contains(ArtifactId.SERPENT_CROWN));
+        repository.saveData(Collections.singletonList(ArtifactId.BONE_PIPES));
+        List<ArtifactId> restored = new UnlockedArtifactsRepository().loadData();
+        assertEquals(1, Collections.frequency(restored, ArtifactId.SERPENT_CROWN));
+        assertTrue(restored.contains(ArtifactId.BONE_PIPES));
+    }
+
+    @Test public void crownStaysAvailableAfterDeckReloadWithoutDuplicatingOwnedOrDiscardedCard() {
+        UnlockedArtifactsRepository repository = new UnlockedArtifactsRepository();
+        ArtifactsDeck deck = new ArtifactsDeck();
+        deck.setUnlockedArtifactsSupplier(repository::loadData);
+        deck.createDeck();
+        assertTrue(deck.isInDeckOrDiscardPile(ArtifactId.SERPENT_CROWN));
+        deck.load(deck.save());
+        assertTrue(deck.isInDeckOrDiscardPile(ArtifactId.SERPENT_CROWN));
+        ArtifactInfo crown = deck.removeFromDeck(ArtifactId.SERPENT_CROWN);
+        deck.addToInvestigator(InvestigatorId.THE_SAILOR, crown);
+        deck.load(deck.save());
+        assertTrue(deck.hasArtifact(InvestigatorId.THE_SAILOR, ArtifactId.SERPENT_CROWN));
+        assertFalse(deck.isInDeckOrDiscardPile(ArtifactId.SERPENT_CROWN));
+        deck.discard(InvestigatorId.THE_SAILOR, deck.getArtifacts(InvestigatorId.THE_SAILOR).get(0));
+        deck.load(deck.save());
+        assertTrue(deck.isInDeckOrDiscardPile(ArtifactId.SERPENT_CROWN));
+        assertEquals(1, deck.getDiscardPile().size());
+        assertNull(deck.removeFromDeck(ArtifactId.SERPENT_CROWN));
     }
 }

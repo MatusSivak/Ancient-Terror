@@ -98,6 +98,7 @@ public class UnlockedArtifactsRepository {
                 ArtifactId.NECRONOMICON,
                 ArtifactId.PALLID_MASK,
                 ArtifactId.RUBY_OF_RLYEH,
+                ArtifactId.SERPENT_CROWN, // Required to solve Yig's Crown of the Serpent mystery.
                 ArtifactId.THE_SILVER_KEY,
                 ArtifactId.SWORD_OF_YHA_TALLA,
                 ArtifactId.TTKA_HALOT,

@@ -10,6 +10,8 @@ import org.junit.*;
 import java8.features.function.Consumer;
 import sk.sivak.eldritchhorror.core.constants.*;
 import sk.sivak.eldritchhorror.core.constants.ancientone.*;
+import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactId;
+import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
@@ -21,6 +23,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.monster.*;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueImpl;
 import sk.sivak.eldritchhorror.core.eventtype.*;
 import sk.sivak.eldritchhorror.core.eventtype.data.*;
+import sk.sivak.eldritchhorror.core.eventtype.data.card.GainCardData;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventtype.data.monster.DefeatMonsterData;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
@@ -196,6 +199,136 @@ public class YigRulesTest {
         listener.advanceActiveMystery();drain();listener.advanceActiveMystery();drain();
         assertEquals(2,crown.getClueCredit());assertEquals(0,(int)crown.getProgress());
         assertFalse(effects.contains("advanceCurrentMysteryCard"));
+    }
+
+    @Test public void crownResolutionWithoutActiveInvestigatorOrCrownOwnerDoesNothing() {
+        resolveCrown(null, false, false);
+    }
+
+    @Test public void crownArtifactChoiceWorksOnNewAndLoadedMysteryAndRespectsOwnership() {
+        for (boolean loaded : new boolean[]{false, true}) {
+            for (boolean accept : new boolean[]{false, true}) {
+                setup();
+                ArtifactsDeck deck = new ArtifactsDeck();
+                deck.setUnlockedArtifactsSupplier(() -> Collections.singletonList(ArtifactId.SERPENT_CROWN));
+                deck.createDeck();
+                platform.setArtifactsDeck(deck);
+                GainCardData original = new GainCardData(null, true);
+                GainCardData[] selected = {original};
+                platform.setService(mock(Service.class, (n,a) -> {
+                    if (n.equals("convertTo")) {
+                        assertEquals(GainCardData.class, a[0]);
+                        queue(() -> selected[0] = ((java8.features.function.Supplier<GainCardData>) a[1]).get());
+                    } else assertTrue(n.equals("hold") || n.equals("release"));
+                    return null;
+                }));
+                platform.setGameService(mock(GameService.class, (n,a) -> {
+                    if (n.equals("showCurrentMysteryCard")) return null;
+                    assertEquals("ask", n);
+                    assertEquals("Gain the Serpent Crown Artifact instead?", ((Question<?>) a[0]).getTitle());
+                    return Single.create(sub -> queue(() -> {
+                        effects.add("ask");
+                        Answer<Boolean,Object> answer = new Answer<>(); answer.setResponseData(accept);
+                        sub.onSuccess(answer);
+                    }));
+                }));
+                MysteryCardInfo crown = YigMysteryDeck.create(2).stream()
+                        .filter(c -> c.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT).findFirst().get();
+                YigMysteryListener listener = new YigMysteryListener(crown);
+                if (loaded) listener.justRegisterListeners(0); else listener.register();
+                events.fireBeforeEvent(BeforeAfterEvent.SELECT_CARD_TO_GAIN, original); drain();
+                assertEquals(Collections.singletonList("ask"), effects);
+                if (accept) assertEquals(ArtifactId.SERPENT_CROWN, selected[0].getArtifactId());
+                else assertSame(original, selected[0]);
+
+                ArtifactInfo artifact = deck.removeFromDeck(ArtifactId.SERPENT_CROWN);
+                deck.addToInvestigator(InvestigatorId.THE_SAILOR, artifact);
+                effects.clear();
+                events.fireBeforeEvent(BeforeAfterEvent.SELECT_CARD_TO_GAIN, original); drain();
+                assertTrue("An owned Crown must not be offered again", effects.isEmpty());
+                deck.discard(InvestigatorId.THE_SAILOR, artifact);
+                events.fireBeforeEvent(BeforeAfterEvent.SELECT_CARD_TO_GAIN, original); drain();
+                assertEquals(Collections.singletonList("ask"), effects);
+                listener.unregister();
+                effects.clear();
+                events.fireBeforeEvent(BeforeAfterEvent.SELECT_CARD_TO_GAIN, original); drain();
+                assertTrue("The offer ends with the mystery", effects.isEmpty());
+            }
+        }
+    }
+
+    @Test public void crownChoiceAndFailedTestRestoreNoActiveInvestigator() {
+        for (boolean attempt : new boolean[]{false, true}) {
+            setup();
+            resolveCrown(null, true, attempt);
+        }
+    }
+
+    @Test public void crownChoiceAndFailedTestRestorePreviousInvestigator() {
+        for (boolean attempt : new boolean[]{false, true}) {
+            setup();
+            resolveCrown(InvestigatorId.THE_ASTRONOMER, true, attempt);
+        }
+    }
+
+    private void resolveCrown(InvestigatorId previous, boolean hasCrown, boolean attempt) {
+        InvestigatorId owner = InvestigatorId.THE_SAILOR;
+        InvestigatorId[] active = {previous};
+        InvestigatorRead holder = mock(InvestigatorRead.class, (n,a) ->
+                mock(InvestigatorInfo.class, (nn,aa) -> owner));
+        platform.setInvestigators(mock(InvestigatorsRead.class, (n,a) -> {
+            if (n.equals("getActiveInvestigatorId")) return active[0];
+            if (n.equals("getActiveInvestigator")) return active[0] == null ? null
+                    : mock(InvestigatorRead.class, (nn,aa) -> mock(InvestigatorInfo.class, (nnn,aaa) -> active[0]));
+            if (n.equals("getOnBoardInvestigators")) return Collections.singletonList(holder);
+            throw new AssertionError(n);
+        }));
+        platform.setArtifactsDeck(mock(ArtifactsDeckRead.class, (n,a) -> {
+            assertEquals("hasArtifact", n);
+            assertEquals(owner, a[0]);
+            assertEquals(sk.sivak.eldritchhorror.core.constants.artifact.ArtifactId.SERPENT_CROWN, a[1]);
+            return hasCrown;
+        }));
+        platform.setInvestigatorService(mock(InvestigatorService.class, (n,a) -> {
+            assertTrue(n.equals("changeActiveInvestigator") || n.equals("unsetActiveInvestigator"));
+            if (n.equals("changeActiveInvestigator")) assertNotNull("Use unset for an absent investigator", a[0]);
+            queue(() -> {
+                active[0] = n.equals("unsetActiveInvestigator") ? null : (InvestigatorId) a[0];
+                effects.add("active:" + active[0]);
+            });
+            return null;
+        }));
+        platform.setGameService(mock(GameService.class, (n,a) -> {
+            assertEquals("ask", n);
+            return Single.create(sub -> queue(() -> {
+                assertEquals("The Crown holder answers the question", owner, active[0]);
+                effects.add("ask");
+                Answer<Boolean,Object> answer = new Answer<>(); answer.setResponseData(attempt);
+                sub.onSuccess(answer);
+            }));
+        }));
+        platform.setTestService(mock(TestService.class, (n,a) -> {
+            assertEquals("test", n); assertEquals(Stat.WILL, a[0]); assertEquals(-1, a[1]);
+            return Single.create(sub -> queue(() -> {
+                assertEquals("Keep the Crown holder active until the test resolves", owner, active[0]);
+                effects.add("test");
+                TestData result = new TestData(); result.setDiceRolls(Collections.emptyList());
+                sub.onSuccess(result);
+            }));
+        }));
+        MysteryCardInfo crown = YigMysteryDeck.create(2).stream()
+                .filter(c -> c.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT).findFirst().get();
+        YigMysteryListener listener = new YigMysteryListener(crown);
+        listener.justRegisterListeners(0);
+        events.fireBeforeEvent(BeforeAfterEvent.RESOLVE_CURRENT_MYSTERY, null);
+        drain();
+        assertEquals(previous, active[0]);
+        assertEquals(0, (int) crown.getProgress());
+        if (!hasCrown) assertTrue(effects.isEmpty());
+        else assertEquals(attempt
+                ? Arrays.asList("active:" + owner, "ask", "test", "active:" + previous)
+                : Arrays.asList("active:" + owner, "ask", "active:" + previous), effects);
+        listener.unregister();
     }
     @Test public void advancingRiseAddsPoolTokenWithoutRemovingBoardTokens() {
         MysteryCardInfo rise=YigMysteryDeck.create(4).stream()

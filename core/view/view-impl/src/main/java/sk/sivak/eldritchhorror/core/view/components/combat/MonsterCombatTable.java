@@ -106,7 +106,6 @@ public class MonsterCombatTable extends VisTable {
     private float imageSize = IMAGE_SIZE;
     /** Gold rim behind epic monsters; null for ordinary ones. */
     private SilhouetteImage epicGlow;
-    private CombatPhaseIndicator phaseIndicator;
     private float hoverTime;
     private final Vector2 wanderFrom = new Vector2();
     private final Vector2 wanderTo = new Vector2();
@@ -152,11 +151,7 @@ public class MonsterCombatTable extends VisTable {
             epicGlow.remove();
             epicGlow = null;
         }
-        if (phaseIndicator != null) {
-            phaseIndicator.remove();
-        }
         imageSize = data.isMonsterEpic() ? EPIC_IMAGE_SIZE : IMAGE_SIZE;
-        phaseIndicator = new CombatPhaseIndicator(data.isMonsterEpic());
         statusPlate = createStatusPlate(data);
         ButtonUtils.addClickListener(statusPlate, () -> displayMonsterCard(data));
         holdStill = false;
@@ -200,9 +195,6 @@ public class MonsterCombatTable extends VisTable {
                 InfoStage.getCreatureLayer().addActor(epicGlow);
             }
         }
-        if (getStage() != null && phaseIndicator.getParent() == null) {
-            InfoStage.getCreatureLayer().addActor(phaseIndicator);
-        }
         if (getStage() != null && monsterImage.getParent() == null) {
             InfoStage.getCreatureLayer().addActor(monsterImage);
         }
@@ -217,10 +209,6 @@ public class MonsterCombatTable extends VisTable {
 
     public Table getStatusPlate() {
         return statusPlate;
-    }
-
-    public CombatPhaseIndicator getPhaseIndicator() {
-        return phaseIndicator;
     }
 
     public Image getEpicGlow() {
@@ -245,7 +233,6 @@ public class MonsterCombatTable extends VisTable {
         boolean shown = presence > 0f;
         monsterImage.setVisible(shown);
         statusPlate.setVisible(shown);
-        phaseIndicator.setVisible(shown);
         if (epicGlow != null) {
             epicGlow.setVisible(shown);
         }
@@ -275,8 +262,6 @@ public class MonsterCombatTable extends VisTable {
             epicGlow.setScale(monsterImage.getScaleX(), monsterImage.getScaleY());
             epicGlow.getColor().a = presence * getColor().a * (0.55f + 0.3f * MathUtils.sin(hoverTime * 2.4f));
         }
-        phaseIndicator.setPosition(8f, ViewProperties.VIEWPORT_HEIGHT - 8f - phaseIndicator.getHeight());
-        phaseIndicator.getColor().a = presence * getColor().a;
 
         // The plate rides just above the visible part of the (fit-scaled) artwork; it does not tilt with it.
         monsterImage.validate();
@@ -491,10 +476,8 @@ public class MonsterCombatTable extends VisTable {
             monsterImage.setTouchable(Touchable.disabled);
             monsterImage.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
-        for (Actor extra : new Actor[]{epicGlow, phaseIndicator}) {
-            if (extra != null && extra.getParent() != null) {
-                extra.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
-            }
+        if (epicGlow != null && epicGlow.getParent() != null) {
+            epicGlow.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
         if (statusPlate != null && statusPlate.getParent() != null) {
             statusPlate.setTouchable(Touchable.disabled);
@@ -742,7 +725,6 @@ public class MonsterCombatTable extends VisTable {
     }
 
     public void highlightHorror() {
-        phaseIndicator.setPhase(CombatPhaseIndicator.Phase.HORROR);
         setRowActive(horrorRow, true);
         setRowActive(damageRow, false);
         horrorBar.showBackground(1f);
@@ -754,7 +736,6 @@ public class MonsterCombatTable extends VisTable {
     }
 
     public void highlightDamageAndToughness() {
-        phaseIndicator.setPhase(CombatPhaseIndicator.Phase.DAMAGE);
         setRowActive(horrorRow, false);
         setRowActive(damageRow, true);
         horrorBar.hideBackground(1f);
