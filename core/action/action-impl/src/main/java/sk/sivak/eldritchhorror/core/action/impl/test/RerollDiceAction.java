@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.eventtype.data.test.CountRerollDiceData;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -31,9 +32,15 @@ public class RerollDiceAction extends AbstractHookableAction<CountRerollDiceData
     @Override
     protected void onExecute(SingleSubscriber<? super TestData> ss) {
 
-        Collections.sort(input.getTestData().getDiceRolls(), (o1, o2) -> o1.getDiceValue() - o2.getDiceValue());
         if (dicesToReroll == null || dicesToReroll.isEmpty()) {
-            dicesToReroll = input.getTestData().getDiceRolls().subList(0, input.getCount());
+            List<DiceRoll> candidates = new ArrayList<>(input.getTestData().getDiceRolls());
+            Collections.sort(candidates, (o1, o2) -> o1.getDiceValue() - o2.getDiceValue());
+            int count = Math.max(0, Math.min(input.getCount(), candidates.size()));
+            dicesToReroll = new ArrayList<>(candidates.subList(0, count));
+        }
+        if (dicesToReroll.isEmpty()) {
+            ss.onSuccess(input.getTestData());
+            return;
         }
 
         int minSuccessDiceValue = input.getTestData().getMinSuccessDiceValue();

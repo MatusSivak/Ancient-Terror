@@ -131,6 +131,7 @@ public class CombatScreen implements Screen {
         }
 
         TextButton backButton = buildButton(get("combat.back"));
+        AncientTerrorMenuStyles.makeMomentary(backButton);
         ButtonUtils.addClickListener(backButton, () -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME));
         buttonsTable.add(backButton).width(175f).height(50f).align(Align.bottomLeft).expandY();
 

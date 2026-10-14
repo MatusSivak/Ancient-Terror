@@ -12,6 +12,19 @@ import static org.junit.Assert.*;
 import static sk.sivak.eldritchhorror.core.constants.MysteryCardId.Yig.*;
 
 public class YigModelTest {
+    @Test public void crownDisplaysActualClueCostForEveryPlayerCountAndCredit() {
+        for (int players = 1; players <= 8; players++) {
+            for (MysteryCardInfo card : YigMysteryDeck.create(players)) {
+                if (card.getMysteryCardId() != CROWN_OF_THE_SERPENT) continue;
+                assertEquals(players, (int) card.getClueCost());
+                card.setClueCredit(1);
+                assertEquals(players - 1, (int) card.getClueCost());
+                card.setClueCredit(players + 1);
+                assertEquals(0, (int) card.getClueCost());
+                assertEquals(1, (int) card.getMysteryComplexity());
+            }
+        }
+    }
     @Test public void setupAndAwakeningSurviveSaveLoad() {
         AncientOne one=new AncientOne();one.setAncientOneInfo(AncientOneHelper.createYig());
         assertEquals(10,one.getAncientOneInfo().getStartingDoom());
@@ -70,6 +83,8 @@ public class YigModelTest {
         MysteryCardInfo card;do {card=deck.drawNewMystery();}while(card.getMysteryCardId()!=CROWN_OF_THE_SERPENT);
         card.setProgressSupplier(() -> 0);card.setPinLocationsSupplier(Collections::emptyList);card.setClueCredit(2);
         MysteryDeck restored=new MysteryDeck();restored.initMysteryDeck(AncientOneId.YIG,4);restored.load(deck.save());
-        assertEquals(2,restored.drawNewMystery().getClueCredit());
+        MysteryCardInfo loaded = restored.drawNewMystery();
+        assertEquals(2, loaded.getClueCredit());
+        assertEquals(2, (int) loaded.getClueCost());
     }
 }

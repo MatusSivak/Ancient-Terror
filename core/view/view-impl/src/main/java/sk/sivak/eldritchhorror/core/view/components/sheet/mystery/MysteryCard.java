@@ -125,9 +125,12 @@ public class MysteryCard extends VisTable {
     }
 
     private String getProcessedMysteryText(MysteryCardInfo mysteryCardInfo) {
+        Integer clueCost = mysteryCardInfo.getClueCost();
         return resolveLocalizedText(mysteryCardInfo.getMysteryText())
-                .replaceAll("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString())
-                + (mysteryCardInfo.getClueCredit() > 0 ? "\n\nClue cost reduced by "
+                .replace("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString())
+                .replace("CLUE_COST", clueCost == null ? "?"
+                        : get(clueCost == 1 ? "mystery.clueCost.one" : "mystery.clueCost.other", clueCost))
+                + (clueCost == null && mysteryCardInfo.getClueCredit() > 0 ? "\n\nClue cost reduced by "
                 + mysteryCardInfo.getClueCredit() + "." : "");
     }
 

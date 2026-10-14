@@ -5,6 +5,8 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
+import sk.sivak.eldritchhorror.core.constants.displayasset.HideType;
+import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.action.AbstractActionPhaseAction;
@@ -50,16 +52,24 @@ public class TheNunActionListener extends AbstractActionPhaseListener<TheNunActi
             InvestigatorId owner = answer.getResponseData();
             if (owner == null) { ServicePlatform.get().getService().convertToNull(); return; }
             SelectCardData select = new SelectCardData();
-            select.setTitleText("Choose a Madness Condition to discard");
+            String ownerName = getInvestigators().getInvestigator(owner).getInfo().getInvestigatorName();
+            select.setTitleText(ownerName + ": Choose a Madness Condition to discard");
             select.setHideText("Show Madness Conditions");
             select.setAvailableCards(ServicePlatform.get().getConditionsDeck().getCondition(owner, ConditionTrait.MADNESS));
             ServicePlatform.get().getCardService().selectSingleCard(select).subscribe(card -> {
                 if (card == null) { ServicePlatform.get().getService().convertToNull(); return; }
-                ServicePlatform.get().getService().hold();
-                ServicePlatform.get().getService().discardConditionFromInvestigator(owner, (ConditionInfo) card);
-                ServicePlatform.get().getService().addEventCommand(in -> { discardMadness(remaining - 1); });
-                ServicePlatform.get().getService().convertToNull();
-                ServicePlatform.get().getService().release();
+                ShowCardRequest request = new ShowCardRequest();
+                request.setConditionInfo((ConditionInfo) card);
+                request.setTitle(ownerName + ": Discard " + card.getName());
+                request.setPortraitBeforeTitle(owner);
+                request.setHideType(HideType.DISCARD_ALWAYS);
+                ServicePlatform.get().getGameService().showCard(request).subscribe(response -> {
+                    ServicePlatform.get().getService().hold();
+                    ServicePlatform.get().getService().discardConditionFromInvestigator(owner, (ConditionInfo) card);
+                    ServicePlatform.get().getService().addEventCommand(in -> { discardMadness(remaining - 1); });
+                    ServicePlatform.get().getService().convertToNull();
+                    ServicePlatform.get().getService().release();
+                });
             });
         });
     }

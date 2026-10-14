@@ -6,6 +6,8 @@ import java.lang.reflect.Proxy;
 import java.util.*;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetId;
 import sk.sivak.eldritchhorror.core.constants.condition.*;
+import sk.sivak.eldritchhorror.core.constants.card.CardInfo;
+import sk.sivak.eldritchhorror.core.constants.displayasset.*;
 import sk.sivak.eldritchhorror.core.constants.investigator.*;
 import sk.sivak.eldritchhorror.core.constants.location.*;
 import sk.sivak.eldritchhorror.core.constants.question.*;
@@ -38,6 +40,10 @@ public class NewInvestigatorAbilitiesTest {
     private PerformedActions performed;
     private final Map<InvestigatorId, AssetId> assets = new HashMap<>();
     private final Set<InvestigatorId> clues = new HashSet<>();
+    private final List<ShowCardRequest> shownCards = new ArrayList<>();
+    private final List<List<? extends CardInfo>> cardChoices = new ArrayList<>();
+    private boolean chooseLastCard, deferDiscard, finishMadness;
+    private rx.SingleSubscriber<? super ShowCardResponse> pendingDiscard;
 
     @Before public void setup() {
         ServicePlatform.nullifyInstance();
@@ -84,16 +90,26 @@ public class NewInvestigatorAbilitiesTest {
                 Question<?> question=(Question<?>)args[0];
                 if(question.getTitle().startsWith("Carson:"))answer.setResponseData(PathType.TRAIN);
                 else if(question.getTitle().startsWith("Use Ursula"))answer.setResponseData(accept);
+                else if(question.getTitle().startsWith("Discard a Madness") && finishMadness)answer.setResponseData(null);
                 else if(question.getTitle().startsWith("Discard a Madness") && conditions.hasTrait(InvestigatorId.THE_NUN,ConditionTrait.MADNESS))
                     answer.setResponseData(InvestigatorId.THE_NUN);
                 else answer.setResponseData(question.getOptions().get(0).getValue());
                 return Single.just(answer);
             }
             if(method.equals("gainCondition"))boons++;
+            if(method.equals("showCard")) {
+                shownCards.add((ShowCardRequest)args[0]);
+                if(deferDiscard)return Single.create(subscriber -> pendingDiscard=subscriber);
+                return Single.just(ShowCardResponse.OK);
+            }
             return null;
         }));
         ServicePlatform.get().setCardService(proxy(CardService.class,(method,args)-> {
-            if(method.equals("selectSingleCard"))return Single.just(((SelectCardData)args[0]).getAvailableCards().get(0));
+            if(method.equals("selectSingleCard")) {
+                List<? extends CardInfo> cards=((SelectCardData)args[0]).getAvailableCards();
+                cardChoices.add(new ArrayList<>(cards));
+                return Single.just(cards.get(chooseLastCard ? cards.size()-1 : 0));
+            }
             return null;
         }));
         ServicePlatform.get().setTestService(proxy(TestService.class,(method,args)-> {
@@ -193,6 +209,61 @@ public class NewInvestigatorAbilitiesTest {
         assertEquals(2,discarded);
         assertTrue(conditions.hasCondition(InvestigatorId.THE_NUN,ConditionId.DEBT));
         assertEquals(1,conditions.getCondition(InvestigatorId.THE_PRIEST,ConditionTrait.MADNESS).size());
+        assertEquals(2,shownCards.size());
+        assertEquals(ConditionId.AMNESIA,shownCards.get(0).getConditionInfo().getId());
+        assertEquals("investigator/THE_NUN.png",shownCards.get(0).getPortraitTextureName());
+        assertEquals("investigator/THE_PRIEST.png",shownCards.get(1).getPortraitTextureName());
+    }
+    @Test public void maryLetsAnotherInvestigatorChooseWhichMadnessAndShowsItBeforeDiscarding() {
+        investigators.changeActiveInvestigator(InvestigatorId.THE_NUN);
+        ConditionInfo paranoia=conditions.gainCondition(ConditionId.PARANOIA,InvestigatorId.THE_PRIEST);
+        ConditionInfo hallucinations=conditions.gainCondition(ConditionId.HALLUCINATIONS,InvestigatorId.THE_PRIEST);
+        conditions.gainCondition(ConditionId.DEBT,InvestigatorId.THE_PRIEST);
+        chooseLastCard=true; deferDiscard=true; successes=1;
+        action(new TheNunActionListener()).execute();
+
+        assertEquals(1,cardChoices.size());
+        assertEquals(2,cardChoices.get(0).size());
+        assertTrue(cardChoices.get(0).containsAll(Arrays.asList(paranoia,hallucinations)));
+        ConditionInfo chosen=(ConditionInfo)cardChoices.get(0).get(1);
+        ShowCardRequest shown=shownCards.get(0);
+        assertSame(chosen,shown.getConditionInfo());
+        assertEquals(HideType.DISCARD_ALWAYS,shown.getHideType());
+        assertEquals(DisplayAssetResponseType.OK,shown.getDisplayAssetResponseType());
+        assertEquals("investigator/THE_PRIEST.png",shown.getPortraitTextureName());
+        assertTrue(shown.getTitle().contains(chosen.getName()));
+        assertEquals(0,discarded);
+        assertEquals(1,questions);
+
+        pendingDiscard.onSuccess(ShowCardResponse.OK);
+        assertEquals(1,discarded);
+        assertFalse(conditions.hasCondition(InvestigatorId.THE_PRIEST,chosen.getId()));
+        assertEquals(1,conditions.getCondition(InvestigatorId.THE_PRIEST,ConditionTrait.MADNESS).size());
+        assertTrue(conditions.hasCondition(InvestigatorId.THE_PRIEST,ConditionId.DEBT));
+        assertEquals(InvestigatorId.THE_NUN,investigators.getActiveInvestigatorId());
+    }
+    @Test public void maryCanSpendMultipleSuccessesOnOneInvestigatorAndStopsWhenMadnessRunsOut() {
+        investigators.changeActiveInvestigator(InvestigatorId.THE_NUN);
+        conditions.gainCondition(ConditionId.PARANOIA,InvestigatorId.THE_PRIEST);
+        conditions.gainCondition(ConditionId.HALLUCINATIONS,InvestigatorId.THE_PRIEST);
+        successes=3; action(new TheNunActionListener()).execute();
+        assertEquals(2,discarded);
+        assertEquals(2,shownCards.size());
+        assertEquals(2,cardChoices.get(0).size());
+        assertEquals(1,cardChoices.get(1).size());
+        assertNotSame(shownCards.get(0).getConditionInfo(),shownCards.get(1).getConditionInfo());
+        assertEquals(2,questions);
+    }
+    @Test public void maryShowsNoDiscardOnFailedTestOrWhenPlayerChoosesDone() {
+        investigators.changeActiveInvestigator(InvestigatorId.THE_NUN);
+        conditions.gainCondition(ConditionId.AMNESIA,InvestigatorId.THE_NUN);
+        successes=0; action(new TheNunActionListener()).execute();
+        assertEquals(0,questions);
+        successes=2; finishMadness=true; action(new TheNunActionListener()).execute();
+        assertEquals(1,questions);
+        assertEquals(0,discarded);
+        assertTrue(cardChoices.isEmpty());
+        assertTrue(shownCards.isEmpty());
     }
     @Test public void mateoTransfersHisExistingBoonToAnotherSpace() {
         investigators.changeActiveInvestigator(InvestigatorId.THE_PRIEST);

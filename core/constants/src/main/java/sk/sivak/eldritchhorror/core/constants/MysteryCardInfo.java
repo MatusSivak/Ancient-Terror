@@ -37,4 +37,7 @@ public interface MysteryCardInfo {
     int getClueCredit();
 
     void setClueCredit(int clueCredit);
+
+    /** Current total clue payment for a mystery with a fixed clue cost; otherwise absent. */
+    default Integer getClueCost() { return null; }
 }

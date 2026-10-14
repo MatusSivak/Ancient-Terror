@@ -3,10 +3,9 @@ package sk.sivak.eldritchhorror.core.util;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
-import sk.sivak.eldritchhorror.core.view.components.tutorial.Chalkboard;
+import sk.sivak.eldritchhorror.core.view.game.CrashReportDialog;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 
 public class GlobalThrowableHandler {
@@ -34,12 +33,7 @@ public class GlobalThrowableHandler {
     }
 
     private void sendNote(Throwable t) {
-        Chalkboard chalkboard = new Chalkboard(null);
-        chalkboard.setPosition(
-                ViewProperties.VIEWPORT_WIDTH / 2f - chalkboard.getWidth() / 2f,
-                ViewProperties.VIEWPORT_HEIGHT / 2f - chalkboard.getHeight() / 2f);
-        InfoStage.getChalkboardLayer().addActor(chalkboard);
-        chalkboard.display("[RED]Ooops![]\n \nSomething went wrong.\nI will fix it ASAP.\n \nSorry :(")
-                .subscribe(() -> GoogleServicesHolder.getAnalyticsTracker().uncaughtException(Thread.currentThread(), t));
+        new CrashReportDialog(() -> GoogleServicesHolder.getAnalyticsTracker()
+                .uncaughtException(Thread.currentThread(), t)).show(InfoStage.getStageSafe());
     }
 }

@@ -472,6 +472,11 @@ public class MysteryDeckHelper {
         private Supplier<List<LocationId>> pinLocationsSupplier;
         private final List<Integer> specialEncounterDeck = new java.util.ArrayList<>();
         private int clueCredit;
+        private Integer baseClueCost;
+        public void setBaseClueCost(int cost) { baseClueCost = cost; }
+        @Override public Integer getClueCost() {
+            return baseClueCost == null ? null : Math.max(0, baseClueCost - clueCredit);
+        }
         @Override public int getClueCredit() { return clueCredit; }
         @Override public void setClueCredit(int clueCredit) { this.clueCredit = clueCredit; }
 

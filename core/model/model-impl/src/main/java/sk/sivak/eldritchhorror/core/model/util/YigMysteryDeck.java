@@ -17,7 +17,7 @@ public final class YigMysteryDeck {
             int complexity = players;
             List<LocationId> pins = null;
             switch (id) {
-                case CROWN_OF_THE_SERPENT: complexity = 1; break;
+                case CROWN_OF_THE_SERPENT: complexity = 1; card.setBaseClueCost(players); break;
                 case DESCENDANTS_OF_YIG: complexity = players + 2; pins = LocationId.getRandomLocations(1); break;
                 case THE_WINGED_SERPENT: complexity = players + 2; pins = Collections.singletonList(LocationId.TOKYO); break;
                 case KN_YAN_UNEARTHED: complexity = (players + 1) / 2; pins = Collections.singletonList(LocationId.SPACE_6); break;

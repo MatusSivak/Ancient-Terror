@@ -30,7 +30,9 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 /** Renders and exercises production widgets without loading saves or contacting Firestore. */
 public class ReportFixesPreview extends ApplicationAdapter {
     private Stage stage;
+    private static boolean latestOnly;
     public static void main(String[] args) {
+        latestOnly = Arrays.asList(args).contains("--latest");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -41,10 +43,118 @@ public class ReportFixesPreview extends ApplicationAdapter {
             Sound silent = proxy(Sound.class, (p,m,a) -> m.getReturnType()==long.class ? 0L : null);
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (latestOnly) { latestReports(); return; }
             skillChoices(); investigatorChoices(); ticketChoices(); mystery(); typewriter();
             System.out.println("PASS: skill restrictions/cancel, investigator cancel, ticket availability/single completion, mystery and typewriter glyphs.");
         } catch(Throwable e) { e.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }
+    }
+    private void latestReports() throws Exception {
+        hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
+        System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void hallOfFame() throws Exception {
+        // Use the real screen and local records; no network calls or submissions.
+        Net previousNet = Gdx.net;
+        Gdx.net = proxy(Net.class, (p,m,a) -> null);
+        sk.sivak.eldritchhorror.core.view.components.halloffame.HallOfFameScreen screen =
+                new sk.sivak.eldritchhorror.core.view.components.halloffame.HallOfFameScreen();
+        try { screen.show(); } finally { Gdx.net = previousNet; }
+        stage = (Stage) field(screen, "stage");
+        sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData record =
+                new sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData();
+        record.setName("Yep, Yig is coming"); record.setDoom(-4); record.setRounds(14);
+        record.setAncientOneId(sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId.YIG);
+        record.setInvestigatorsCount(2); record.setTimestamp(1791797274700L);
+        record.setInvestigators(Arrays.asList("Nun", "Priest", "Butler", "Explorer", "Bounty Hunter", "Musician", "Ex-Convict", "Rookie Cop"));
+        record.setSolvedMysteries(Arrays.asList("mystery.yig.KN_YAN_UNEARTHED.name", "mystery.yig.MIGRATION_OF_SERPENTS.name",
+                "mystery.yig.SERPENTS_NEST.name", "mystery.yig.DESCENDANTS_OF_YIG.name"));
+        Method populate = screen.getClass().getDeclaredMethod("populateRecords", List.class);
+        populate.setAccessible(true); populate.invoke(screen, Collections.singletonList(record));
+        tick(2); draw("hall-of-fame-legacy-yig");
+        require(labels(stage.getRoot()).contains("23:40"), "Reported Yig clock is incorrect");
+        require(labels(stage.getRoot()).contains("Survival details unavailable"), "Old record invented survival information");
+        record.setName("Survival preview");
+        record.setInvestigators(Arrays.asList("Nun", "Priest", "Butler", "Explorer"));
+        record.setDefeatedInvestigators(Arrays.asList("Priest", "Butler"));
+        populate.invoke(screen, Collections.singletonList(record));
+        tick(2); draw("hall-of-fame-skulls");
+        int skulls = 0;
+        for (Actor actor : all(stage.getRoot())) if (actor.getName() != null && actor.getName().startsWith("defeated-")) skulls++;
+        require(skulls == 2, "Must mark only the two recorded casualties");
+        for (Actor actor : all(stage.getRoot())) if (actor instanceof Label && ((Label) actor).getText().toString().equals("Priest")) {
+            Label name = (Label) actor; name.validate();
+            require(name.getGlyphLayout().runs.size == 1, "Investigator name wrapped beside the skull");
+        }
+        screen.dispose();
+    }
+
+    private void collectionBack() throws Exception {
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatScreen screen =
+                new sk.sivak.eldritchhorror.core.view.components.combat.CombatScreen();
+        int[] exits = {0};
+        screen.setChangeScreenHandler(proxy(sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler.class,
+                (p,m,a) -> { if (m.getName().equals("changeScreen")) exits[0]++; return null; }));
+        screen.show(); screen.resize(960, 540);
+        stage = (Stage) field(screen, "stage");
+        TextButton back = textButton(sk.sivak.eldritchhorror.core.view.utils.UiText.get("combat.back"));
+        click(back); screen.show(); click(back); screen.show();
+        require(exits[0] == 2 && !back.isChecked(), "Back stayed checked or failed navigation on re-entry");
+        require(textButton(sk.sivak.eldritchhorror.core.view.utils.UiText.get("combat.assets")).isChecked(),
+                "The selected collection tab should remain checked");
+        tick(2); draw("collection-back"); stage.dispose();
+    }
+
+    private void crashDialog() throws Exception {
+        stage = new Stage(new com.badlogic.gdx.utils.viewport.FitViewport(960, 540));
+        String language = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String lang : new String[]{"en", "sk"}) {
+            setPreviewLanguage(lang);
+            int[] closed = {0};
+            sk.sivak.eldritchhorror.core.view.game.CrashReportDialog dialog =
+                    new sk.sivak.eldritchhorror.core.view.game.CrashReportDialog(() -> closed[0]++);
+            dialog.show(stage); tick(30);
+            require(dialog.getX() >= 0 && dialog.getY() >= 0 && dialog.getRight() <= 960 && dialog.getTop() <= 540,
+                    "Crash dialog is clipped");
+            draw("crash-dialog-" + lang);
+            TextButton close = textButton(sk.sivak.eldritchhorror.core.view.utils.UiText.get("crash.close"));
+            click(close); click(close); tick(30);
+            require(closed[0] == 1 && !close.isChecked(), "Crash handler must be called exactly once");
+            require(dialog.getStage() == null, "Crash dialog did not close");
+        }
+        setPreviewLanguage(language);
+    }
+
+    private void crownClueCost() throws Exception {
+        for (int credit : new int[]{0, 1, 2}) {
+            MysteryCardInfo info = null;
+            for (MysteryCardInfo card : sk.sivak.eldritchhorror.core.model.util.YigMysteryDeck.create(2)) {
+                if (card.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT) info = card;
+            }
+            info.setClueCredit(credit);
+            MysteryCard card = new MysteryCard(); card.init(info, 2, 3);
+            card.setPosition(480-card.getWidth()/2, 270-card.getHeight()/2); stage.addActor(card);
+            tick(2);
+            String text = labels(card);
+            require(text.contains("spend " + (2-credit)) && !text.contains("per investigator") && !text.contains("CLUE_COST"),
+                    "Crown must show its actual current clue cost");
+            require(card.getY() >= 0 && card.getTop() <= 540, "Crown card clipped");
+            draw("crown-cost-" + (2-credit)); card.remove();
+        }
+        stage.dispose();
+    }
+
+    private String labels(Actor actor) {
+        StringBuilder text = new StringBuilder();
+        for (Actor child : all(actor)) if (child instanceof Label) text.append(((Label) child).getText()).append('\n');
+        return text.toString();
+    }
+
+    private void setPreviewLanguage(String language) {
+        Application app = Gdx.app;
+        try { Gdx.app = null; sk.sivak.eldritchhorror.core.view.utils.UiText.setLanguage(language); }
+        finally { Gdx.app = app; }
     }
     private void skillChoices() throws Exception {
         InvestigatorBasics basics = proxy(InvestigatorBasics.class, (p,m,a) -> m.getName().equals("getBonusStat") ? 2 : 3);

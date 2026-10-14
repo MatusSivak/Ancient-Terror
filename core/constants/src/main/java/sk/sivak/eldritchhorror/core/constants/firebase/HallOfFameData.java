@@ -12,6 +12,8 @@ public class HallOfFameData {
     private int investigatorsCount;
     private AncientOneId ancientOneId;
     private List<String> investigators = new LinkedList<>();
+    // Null means this legacy record did not capture investigator outcomes.
+    private List<String> defeatedInvestigators;
     private int doom;
     private int rounds;
     private List<String> solvedMysteries = new LinkedList<>();
@@ -42,6 +44,14 @@ public class HallOfFameData {
 
     public void setInvestigators(List<String> investigators) {
         this.investigators = investigators;
+    }
+
+    public List<String> getDefeatedInvestigators() {
+        return defeatedInvestigators;
+    }
+
+    public void setDefeatedInvestigators(List<String> defeatedInvestigators) {
+        this.defeatedInvestigators = defeatedInvestigators;
     }
 
     public int getDoom() {

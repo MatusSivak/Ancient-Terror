@@ -79,6 +79,7 @@ public class FirebaseHallOfFame {
                         hallOfFameData.setName(record.getString("name"));
                         hallOfFameData.setDifficulty(record.getString("difficulty"));
                         hallOfFameData.setInvestigators(Arrays.asList(record.get("investigators").get("items").asStringArray()));
+                        hallOfFameData.setDefeatedInvestigators(readDefeatedInvestigators(record));
                         hallOfFameData.setSolvedMysteries(Arrays.asList(record.get("solvedMysteries").get("items").asStringArray()));
                         if (hallOfFameData.getSolvedMysteries().size() < 3) {
                             System.out.println("Hall of Fame: Spy Bug - " + record.name());
@@ -108,6 +109,13 @@ public class FirebaseHallOfFame {
             }
         });
         return publishSubject.toSingle();
+    }
+
+    static List<String> readDefeatedInvestigators(JsonValue record) {
+        JsonValue defeated = record.get("defeatedInvestigators");
+        if (defeated == null || defeated.isNull()) return null;
+        JsonValue items = defeated.isArray() ? defeated : defeated.get("items");
+        return items == null ? Collections.emptyList() : Arrays.asList(items.asStringArray());
     }
 
     private static class HallOfFameResponse {

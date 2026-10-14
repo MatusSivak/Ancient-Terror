@@ -8,6 +8,8 @@ import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
 import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
+import sk.sivak.eldritchhorror.core.model.InvestigatorsRead;
+import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,11 +47,7 @@ public class DisplayVictoryPaperAction implements Action<Object, Void> {
                     hallOfFameData.setName(name);
                     hallOfFameData.setRounds(ServicePlatform.get().getModel().getCurrentRound());
                     hallOfFameData.setInvestigatorsCount(ServicePlatform.get().getModel().getReferenceCard().getPlayers());
-                    List<String> investigators = new LinkedList<>();
-                    for (InvestigatorId investigatorId : ServicePlatform.get().getInvestigators().getPlayedInvestigators()) {
-                        investigators.add(investigatorId.toString());
-                    }
-                    hallOfFameData.setInvestigators(investigators);
+                    recordInvestigators(hallOfFameData, ServicePlatform.get().getInvestigators());
                     AncientOneId ancientOneId = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo().getAncientOneId();
                     hallOfFameData.setAncientOneId(ancientOneId);
                     hallOfFameData.setSolvedMysteries(ServicePlatform.get().getMysteryDeck().getSolvedMysteries(ancientOneId));
@@ -69,6 +67,23 @@ public class DisplayVictoryPaperAction implements Action<Object, Void> {
     @Override
     public void setInput(Object input) {
 
+    }
+
+    static void recordInvestigators(HallOfFameData record, InvestigatorsRead roster) {
+        List<InvestigatorId> survivors = new LinkedList<>();
+        // Selected includes living investigators Lost in Time and Space.
+        for (InvestigatorRead investigator : roster.getSelectedInvestigators()) {
+            survivors.add(investigator.getInfo().getInvestigatorId());
+        }
+        List<String> investigators = new LinkedList<>();
+        List<String> defeated = new LinkedList<>();
+        for (InvestigatorId id : roster.getPlayedInvestigators()) {
+            investigators.add(id.toString());
+            // Also includes devoured investigators and defeated tokens already recovered.
+            if (!survivors.contains(id)) defeated.add(id.toString());
+        }
+        record.setInvestigators(investigators);
+        record.setDefeatedInvestigators(defeated);
     }
 
     private static String loadFlavor(MysteryCardId mysteryCardId) {

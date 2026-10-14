@@ -96,3 +96,60 @@ The red outline pulses smoothly between 40% and 100% opacity every approximately
 The map and combat focused previews both passed and their bright/dim screenshots
 were visually inspected. Logs: `build/epic-red-map-preview.log` and
 `build/epic-red-combat-preview.log`.
+
+## Evening follow-up: Hall of Fame, menus, and reroll crash
+
+Refreshed all Firebase report pages again: three bug reports and one crash report
+remain. The save-only and Healing Words reports were already reviewed. The new
+reports are the Crown clue-cost request and the reroll crash below.
+
+| Issue | Result |
+| --- | --- |
+| Hall of Fame investigator deaths | New victory records store defeated/devoured investigator names. The screen shows a skull directly beside each recorded casualty. The list includes devoured investigators and defeated investigators whose tokens were already recovered; living investigators Lost in Time and Space remain survivors. Older records lack this information and explicitly show that survival details are unavailable. |
+| `Yep, Yig is coming` clock `23:80` | Read the live record and verified Doom is `-4`. Awakened Yig uses negative Doom for time remaining. Hall of Fame now applies the gameplay interpretation and displays `23:40`. The stored record does not need editing. Other clock values are normalized to valid hours/minutes. |
+| Card Collection Back remains checked | Made only the Back button momentary. Category tabs remain selectable. Verified repeated navigation and re-entry. |
+| Crash notice redesign | Replaced the chalkboard with the framed green/brass report style, readable message, recovery guidance and a Close game button. English and Slovak text are included. Acknowledgement calls the existing crash handler exactly once; the existing automatic report capture remains in place. |
+| Bug `c4a6f26a-13e5-4ed4-8e44-ac3b6acd1b85` | Crown of the Serpent now displays the actual total clue payment instead of “1 Clue per investigator.” It includes existing clue-cost reductions and never displays a negative cost; its one-step mystery progress remains unchanged. |
+| Crash `1f8237d6-a11d-43c6-b180-f76904b86e15` | Reproduced `IndexOutOfBoundsException` when a two-die reroll is requested with one available die. Rerolls now select at most the available dice. An empty pool completes without starting an animation. Automatic selection uses a sorted copy, preserving the original test's dice order and identities; explicit selections still work. |
+
+Validation:
+
+- The focused reroll tests reproduced the crash before the fix.
+- All affected unit suites passed: actions 15, model 18, view 263 (296 total).
+- Tests cover the actual Hall of Fame upload JSON shape, legacy/empty casualty
+  records, living off-board survivors, negative Yig Doom, ordinary clock values,
+  reroll bounds/selection/scoring, Crown player counts 1–8, and restored clue credit.
+- Desktop integration compiled. The `--latest` production UI preview passed;
+  visually inspected Hall of Fame, collection, both localized crash dialogs,
+  and the Crown's numeric cost. No live crash was deliberately triggered.
+- `git diff --check` passed.
+
+Logs: `build/oct14-reroll-before.log`, `build/oct14-evening-tests.log`,
+`build/oct14-evening-preview.log`. Screenshots are in
+`build/report-fixes-preview/`. The skull's reproducible vector-shape renderer is
+`tools/ui-assets/create_skull.py` (Pillow).
+
+These changes are local. No release was built, Android gameplay was not tested,
+and no saved games, live report statuses, or Hall of Fame records were modified.
+
+## Nun action follow-up
+
+The Nun's existing passive adds 1 to each die rolled for a Boon or Bane
+condition effect, including rerolls, capped at 6. It does not apply to an
+ordinary test merely because she possesses Blessed or Cursed. For example,
+Blessed's reckoning discards on a raw 1 only (modified to 2), while Cursed's
+reckoning discards on a raw 3–6 (modified to 4–6).
+
+Comfort already supports choosing among all Madness conditions belonging to
+the selected investigator. Its selection title now identifies that investigator,
+and every chosen card is displayed with the owner's portrait and name before
+the discard animation. Only after acknowledgement does the card leave that
+owner's inventory and the next success become available. Multiple successes
+can remove multiple Madness conditions from the same investigator or be split
+between investigators on any space.
+
+Validation: all 93 event-listener and action tests passed. Added coverage for
+choosing the second of two Madness cards, the displayed card and owner,
+waiting for acknowledgement, preserving unrelated conditions, repeated
+discards from one owner, exhausting available Madness, failed tests, and Done.
+Log: `build/oct14-nun-tests.log`. No Android gameplay session was run.

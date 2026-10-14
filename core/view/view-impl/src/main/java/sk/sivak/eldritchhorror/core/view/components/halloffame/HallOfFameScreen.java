@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import sk.sivak.eldritchhorror.core.constants.firebase.HallOfFameData;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
 import sk.sivak.eldritchhorror.core.view.ScreenType;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
@@ -167,28 +168,31 @@ public class HallOfFameScreen implements Screen {
             String timeAsString = timeFormat.format(new Date(hallOfFameData.getTimestamp()));
             detailsTable.add(createDetailsLabel(get("hallOfFame.details.datetime", dateAsString, timeAsString), TEXT)).width(300).padBottom(12).row();
 
-            String investigatorsString = "";
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.investigators",
+                    hallOfFameData.getInvestigatorsCount(), ""), TEXT)).width(300).padBottom(6).row();
+            Table investigators = new Table();
+            investigators.left();
             for (String investigator : hallOfFameData.getInvestigators()) {
-                investigatorsString += "\n - " + investigator;
-            }
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.investigators", hallOfFameData.getInvestigatorsCount(), investigatorsString), TEXT)).width(300).padBottom(12).row();
-
-            int minutes;
-            int hours;
-            if (hallOfFameData.getDoom() == 0) {
-                minutes = 0;
-                hours = 0;
-            } else {
-                minutes = 60 - hallOfFameData.getDoom() * 5;
-                hours = 23;
-                if (minutes < 0) {
-                    hours = 22;
-                    minutes += 60;
+                Table investigatorRow = new Table();
+                investigatorRow.left();
+                Label name = createDetailsLabel(investigator, TEXT);
+                name.setWrap(false);
+                investigatorRow.add(name).left();
+                if (hallOfFameData.getDefeatedInvestigators() != null
+                        && hallOfFameData.getDefeatedInvestigators().contains(investigator)) {
+                    Image skull = new Image(getTexture("icon/skull.png"));
+                    skull.setName("defeated-" + investigator);
+                    investigatorRow.add(skull).size(20).padLeft(8);
                 }
+                investigators.add(investigatorRow).growX().left().row();
             }
+            detailsTable.add(investigators).width(300).padBottom(6).row();
+            detailsTable.add(createDetailsLabel(get(hallOfFameData.getDefeatedInvestigators() == null
+                    ? "hallOfFame.details.outcomesUnknown" : "hallOfFame.details.defeatedLegend"), MUTED))
+                    .width(300).padBottom(12).row();
 
-
-            detailsTable.add(createDetailsLabel(get("hallOfFame.details.doom", String.format(Locale.getDefault(), "%02d",hours), String.format(Locale.getDefault(), "%02d",minutes)), TEXT)).width(300).padBottom(12).row();
+            detailsTable.add(createDetailsLabel(get("hallOfFame.details.doom",
+                    formatDoomClock(hallOfFameData.getAncientOneId(), hallOfFameData.getDoom())), TEXT)).width(300).padBottom(12).row();
             detailsTable.add(createDetailsLabel(get("hallOfFame.details.rounds", hallOfFameData.getRounds()), TEXT)).width(300).padBottom(12).row();
             String mysteriesString = "";
             for (String mystery : hallOfFameData.getSolvedMysteries()) {
@@ -204,6 +208,13 @@ public class HallOfFameScreen implements Screen {
     static String resolveMysteryName(String mystery) {
         String localized = get(mystery);
         return ("!" + mystery + "!").equals(localized) ? mystery : localized;
+    }
+
+    static String formatDoomClock(AncientOneId ancientOne, int doom) {
+        // Awakened Yig stores remaining time as negative Doom, as in GameControllerImpl.
+        long remaining = ancientOne == AncientOneId.YIG ? Math.abs((long) doom) : Math.max(0L, doom);
+        long minutes = Math.floorMod(24 * 60L - remaining * 5L, 24 * 60L);
+        return String.format(Locale.ROOT, "%02d:%02d", minutes / 60, minutes % 60);
     }
 
     private static ScrollPane scroll(com.badlogic.gdx.scenes.scene2d.Actor content) {
