@@ -64,7 +64,7 @@ public class MonsterCombatTable extends VisTable {
     /** Seconds between the monster's attack fireballs. */
     private static final float ATTACK_STAGGER = 0.55f;
     private static final Color EPIC_GOLD = Color.valueOf("F2D27A");
-    private static final Color EPIC_GLOW = Color.valueOf("FFC94A");
+    private static final Color EPIC_GLOW = Color.valueOf("FF3030");
     private static final float MIN_STEP = 90f;
     /** Bottom-left corner around the investigator's portrait; the monster keeps its distance. */
     public static final Rectangle INVESTIGATOR_KEEP_OUT = new Rectangle(0f, 0f, 340f, 230f);
@@ -260,7 +260,7 @@ public class MonsterCombatTable extends VisTable {
             epicGlow.setPosition(wanderPosition.x + shake - glowOffset, wanderPosition.y + bob - glowOffset);
             epicGlow.setRotation(tilt);
             epicGlow.setScale(monsterImage.getScaleX(), monsterImage.getScaleY());
-            epicGlow.getColor().a = presence * getColor().a * (0.55f + 0.3f * MathUtils.sin(hoverTime * 2.4f));
+            epicGlow.getColor().a = presence * getColor().a * (0.7f + 0.3f * MathUtils.sin(hoverTime * 3f));
         }
 
         // The plate rides just above the visible part of the (fit-scaled) artwork; it does not tilt with it.

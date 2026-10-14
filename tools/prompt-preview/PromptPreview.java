@@ -54,9 +54,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PromptPreview extends ApplicationAdapter {
     private Stage stage;
     private static boolean combatDisplayOnly;
+    private static boolean mapReportsOnly;
 
     public static void main(String[] args) {
         combatDisplayOnly = Arrays.asList(args).contains("--combat-display");
+        mapReportsOnly = Arrays.asList(args).contains("--map-reports");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 960; config.height = 540; config.x = -10000; config.y = -10000;
@@ -76,6 +78,10 @@ public class PromptPreview extends ApplicationAdapter {
                     new Class<?>[]{Audio.class}, (proxy, method, args) -> silent);
             VisUI.load();
             stage = InfoStage.getStageSafe();
+            if (mapReportsOnly) {
+                previewMapReports();
+                return;
+            }
             if (combatDisplayOnly) {
                 previewCombatPanel();
                 previewEpicMonsterAndPhases();
@@ -558,7 +564,7 @@ public class PromptPreview extends ApplicationAdapter {
         System.out.println("PASS: every success fires even beyond the monster's horror / damage / health");
     }
 
-    /** Epic monster: bigger portrait, gold rim and plate, bigger fireballs, without an extra phase overlay. */
+    /** Epic monster: bigger portrait, pulsing red rim, gold plate and bigger fireballs. */
     private void previewEpicMonsterAndPhases() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
@@ -573,6 +579,7 @@ public class PromptPreview extends ApplicationAdapter {
         require(glow != null && glow.getParent() == image.getParent()
                 && glow.getParent().getChildren().indexOf(glow, true) < image.getParent().getChildren().indexOf(image, true),
                 "epic glow must be drawn right behind the portrait");
+        checkEpicPulse(table, glow, "combat-epic-pulse");
         table.highlightHorror();
         tick(70);
         require(table.getStatusPlate().isVisible(), "status plate missing during horror");
@@ -603,6 +610,79 @@ public class PromptPreview extends ApplicationAdapter {
                 "combat artwork left behind");
         System.out.println("PASS: epic monster appearance, horror/damage steps and cleanup");
     }
+    private void previewMapReports() throws Exception {
+        com.badlogic.gdx.scenes.scene2d.ui.Image map = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                CustomAssetManager.getTexture(CustomAssetManager.MAP));
+        map.setBounds(0, 0, 960, 540);
+        stage.addActor(map);
+        sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage epic =
+                new sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage(null, null, true,
+                        new Vector2(), CustomAssetManager.getEpicMonsterTexture("WindWalkerMonster"));
+        epic.setPosition(550, 240);
+        stage.addActor(epic);
+        MonsterImage ordinary = new MonsterImage(null, null, true, false, null,
+                CustomAssetManager.getNonEpicMonsterTexture("SkeletonMonster"));
+        ordinary.setPosition(380, 240);
+        stage.addActor(ordinary);
+        InvestigatorImage delayed = new InvestigatorImage(InvestigatorId.THE_SAILOR, null);
+        delayed.setPosition(230, 240);
+        stage.addActor(delayed);
+        delayed.displayHourglass();
+        tick(90);
+        require(field(delayed, "hourglassComponent") != null, "Living delayed investigator lost hourglass");
+        draw("map-reports-delayed");
+        delayed.setDefeatedByHealth(true);
+        require(field(delayed, "hourglassComponent") == null, "Defeat retained delayed hourglass");
+        delayed.displayHourglass();
+        require(field(delayed, "hourglassComponent") == null, "Late delayed notification recreated hourglass");
+        epic.removeReckoningImage();
+        draw("map-reports-defeated");
+        checkEpicPulse(epic, (Actor) field(epic, "epicRim"), "map-epic-pulse");
+        // Also cover defeat during the entrance animation and defeat from sanity loss.
+        InvestigatorImage insane = new InvestigatorImage(InvestigatorId.THE_NUN, null);
+        insane.setPosition(130, 240);
+        stage.addActor(insane);
+        insane.displayHourglass();
+        insane.act(.1f);
+        insane.setDefeatedByHealth(false);
+        require(field(insane, "hourglassComponent") == null, "Sanity defeat retained entering hourglass");
+        epic.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.moveBy(60, 20, 1f));
+        tick(30);
+        float x = epic.getX(), y = epic.getY(), rotation = epic.getRotation();
+        draw("map-reports-moving");
+        require(epic.getX() == x && epic.getY() == y && epic.getRotation() == rotation,
+                "Epic rim drawing changed the map actor transform");
+        epic.getColor().a = 0;
+        draw("map-reports-hidden");
+        require(((Actor) field(epic, "epicRim")).getColor().a == 0, "Epic rim ignored actor fade");
+        epic.remove(); ordinary.remove(); delayed.remove(); insane.remove(); map.remove();
+        draw("map-reports-cleanup");
+        System.out.println("PASS: epic map outline, reckoning removal, walking/fade/cleanup; delayed hourglass removed on both defeat types");
+    }
+
+    private void checkEpicPulse(Actor owner, Actor rim, String filename) throws Exception {
+        require(rim.getColor().r > .9f && rim.getColor().g < .25f && rim.getColor().b < .25f,
+                "Epic outline must be red");
+        float min = 1f, max = 0f;
+        boolean capturedBright = false, capturedDim = false;
+        for (int frame = 0; frame < 150; frame++) {
+            owner.act(1f / 60f);
+            // The map rim follows its owner during draw; combat updates it during act.
+            stage.draw();
+            float alpha = rim.getColor().a;
+            min = Math.min(min, alpha);
+            max = Math.max(max, alpha);
+            if (!capturedBright && alpha > .98f) {
+                draw(filename + "-bright"); capturedBright = true;
+            }
+            if (!capturedDim && alpha < .42f) {
+                draw(filename + "-dim"); capturedDim = true;
+            }
+        }
+        require(min >= .39f && min < .42f && max > .98f && max <= 1f,
+                "Epic outline should pulse without disappearing: " + min + ".." + max);
+    }
+
     /** Map monsters bounce and waddle while they move, keep still when they stop, and their real position is untouched. */
     private void previewMapMonsterWalk() throws Exception {
         Texture texture = CustomAssetManager.getNonEpicMonsterTexture("SkeletonMonster");

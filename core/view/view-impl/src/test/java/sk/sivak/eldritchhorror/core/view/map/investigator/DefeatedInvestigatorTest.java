@@ -11,6 +11,19 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import static org.junit.Assert.*;
 
 public class DefeatedInvestigatorTest {
+    @Test public void delayedNotificationsCannotAddAnHourglassAfterDefeat() {
+        for (boolean health : new boolean[]{true, false}) {
+            InvestigatorImage stand = new InvestigatorImage(InvestigatorId.THE_SAILOR, null,
+                    new BaseDrawable(), new BaseDrawable());
+            stand.setDefeatedByHealth(health);
+            // No assets/GL are installed: creating a new hourglass would fail here.
+            stand.displayHourglass();
+            stand.hideHourglass();
+            stand.act(2f);
+            assertEquals(0, stand.getActions().size);
+        }
+    }
+
     @Test public void defeatedStandsUseOnlyExistingDrawablesAndPreserveActorColor() {
         for (boolean health : new boolean[]{true, false}) {
             List<Color> draws = new ArrayList<>();

@@ -59,3 +59,40 @@ discard, and no offer after the mystery listener is removed. The artifact
 repository tests, full event-listener suite, and full model suite passed.
 Logs: `build/crown-availability-before.log` and
 `build/crown-availability-after.log`. No save files were edited.
+
+## Follow-up: latest map and Healing Words reports
+
+Refreshed both Firebase collections on 14 October. There are now four bug reports
+and no crash reports: three new reports below, plus the previously reviewed
+save-only report `38f7a0f5-f8bf-422c-a7fb-638290ae7c97`.
+
+| Report | Outcome |
+| --- | --- |
+| `2de4aafa-67c7-4ab3-b652-77de27267fac` — highlight epic monsters on the map | Added a persistent silhouette outline. Following the requested style change, both map and combat outlines pulse red. The map outline follows the monster's movement, breathing, rotation and opacity, remains after the reckoning body tint is removed, and leaves no separate map actor behind. |
+| `5e76b331-84da-4ce2-892d-3357ea47b18d` — defeated investigator displays delayed hourglass | Defeat now clears the manually drawn hourglass and its actions immediately. Later delayed notifications cannot recreate it. Covers both health and sanity defeat, including defeat during the hourglass entrance animation. |
+| `5813abaf-6af5-4a39-8c06-2114ff7bfe9f` — Healing Words gives no recovery while Poisoned | Expected behavior under the implemented card rules. Poisoned says resting recovers no Health or Sanity; Healing Words increases recovery from that same rest. `PoisonedListener` disables both recovery channels, so `RestData` returns zero regardless of which listener modifies it first, and `RestActionAction` skips recovery. No gameplay change. |
+
+The Healing Words save contains the spell with back 1 (no additional healing on
+success) but no remaining Poisoned condition. It is a checkpoint, not an action
+history, so it cannot reconstruct the reported roll or the condition's removal.
+The conclusion above is based on the card text and execution path, not a replay
+of that particular turn.
+
+Validation:
+
+- All 259 view tests passed, including a regression for delayed notifications
+  after either type of defeat.
+- The focused `--map-reports` desktop preview passed. Visually inspected living
+  delayed, defeated, moving and faded map actors in its screenshots.
+- Desktop and preview compilation passed; `git diff --check` passed.
+- Log: `build/latest-report-validation.log`. Screenshots:
+  `build/prompt-preview/map-reports-*.png`.
+
+Changes are local source fixes; no release was built and Android rendering was
+not tested. Live report statuses and saved games were not modified.
+
+The red outline pulses smoothly between 40% and 100% opacity every approximately
+2.1 seconds in both views, multiplied by the existing visibility/fade opacity.
+The map and combat focused previews both passed and their bright/dim screenshots
+were visually inspected. Logs: `build/epic-red-map-preview.log` and
+`build/epic-red-combat-preview.log`.

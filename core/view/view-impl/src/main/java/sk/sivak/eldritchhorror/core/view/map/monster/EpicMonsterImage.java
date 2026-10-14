@@ -24,6 +24,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.shader.BlurShadowShader;
+import sk.sivak.eldritchhorror.core.view.components.combat.SilhouetteImage;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,10 @@ public class EpicMonsterImage extends Image {
     private static final float EPIC_MONSTER_SCALE_FACTOR = 0.9f;
     private static final float SQUISH_STRETCH_DURATION = 0.9f;
     private static final float SQUISH_STRETCH_SCALE_DELTA = 0.08f;
+    private static final float EPIC_RIM_SCALE = 1.08f;
+    private static final Color EPIC_RED = Color.valueOf("FF3030");
+    private final SilhouetteImage epicRim;
+    private float epicPulseTime;
 
     private final Vector2 position;
     private MonsterInfo monsterInfo;
@@ -66,6 +71,8 @@ public class EpicMonsterImage extends Image {
         setWidth(EPIC_MONSTER_SIZE * EPIC_MONSTER_SCALE_FACTOR);
         setHeight(EPIC_MONSTER_SIZE * EPIC_MONSTER_SCALE_FACTOR);
         setOrigin(getWidth() / 2, getHeight() / 2);
+        epicRim = new SilhouetteImage(getDrawable());
+        epicRim.setColor(EPIC_RED);
         if (hasReckoning) {
             drawReckoningPulse = true;
         }
@@ -85,6 +92,7 @@ public class EpicMonsterImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
+        epicPulseTime += delta;
         walkAnimator.update(this, delta);
         if (drawReckoningPulse) {
             reckoningPulseTime += delta;
@@ -123,7 +131,14 @@ public class EpicMonsterImage extends Image {
             batch.setShader(prevShader);
         }
 
-
+        // Keep the red epic outline pulsing independently of the reckoning body tint.
+        // Use the same transformed origin so the rim follows breathing and walking.
+        epicRim.setBounds(getX(), getY(), getWidth(), getHeight());
+        epicRim.setOrigin(getOriginX(), getOriginY());
+        epicRim.setScale(getScaleX() * EPIC_RIM_SCALE, getScaleY() * EPIC_RIM_SCALE);
+        epicRim.setRotation(getRotation());
+        epicRim.getColor().a = getColor().a * (0.7f + 0.3f * MathUtils.sin(epicPulseTime * 3f));
+        epicRim.draw(batch, parentAlpha);
         super.draw(batch, parentAlpha);
 
         if (drawReckoningPulse) {

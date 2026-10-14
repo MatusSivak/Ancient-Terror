@@ -92,6 +92,9 @@ public class InvestigatorImage extends Image {
     }
 
     public void displayHourglass() {
+        if (defeated) {
+            return;
+        }
         createHourglassComponent();
         hourglassComponent.display();
         hourglassComponent.setPosition(
@@ -100,8 +103,9 @@ public class InvestigatorImage extends Image {
     }
 
     public void hideHourglass() {
-        createHourglassComponent();
-        hourglassComponent.hide();
+        if (hourglassComponent != null) {
+            hourglassComponent.hide();
+        }
     }
 
     private void createHourglassComponent() {
@@ -312,6 +316,11 @@ public class InvestigatorImage extends Image {
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeated = true;
         this.defeatedByHealth = defeatedByHealth;
+        // This decoration is drawn manually, so remove() alone would not hide it.
+        if (hourglassComponent != null) {
+            hourglassComponent.clearActions();
+            hourglassComponent = null;
+        }
         highlighted = false;
         borderImage.clearActions();
         borderImage.setColor(defeatedByHealth ? HEALTH_HIT_TINT : SANITY_HIT_TINT);

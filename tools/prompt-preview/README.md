@@ -13,6 +13,19 @@ To run only the ordinary/epic combat display, phase highlighting, and cleanup ch
 .\gradlew.bat -I tools/prompt-preview/preview.gradle :desktop:previewPrompts --args="--combat-display"
 ```
 
+For epic monster map highlighting and delayed investigator defeat checks:
+
+```powershell
+.\gradlew.bat -I tools/prompt-preview/preview.gradle :desktop:previewPrompts --args="--map-reports"
+```
+
+This renders ordinary and epic monsters over the map, checks the epic outline
+through reckoning removal, movement, fading and removal, and checks that health
+and sanity defeat clear an existing hourglass and reject later delayed updates.
+Screenshots use the `map-reports-*` prefix in `build/prompt-preview`.
+Both focused previews also verify the red outline's pulse range and capture its
+bright and dim frames as `map-epic-pulse-*` and `combat-epic-pulse-*`.
+
 Checks mystery spacing with a standalone button and a label, recentering after prompt
 removal, partial reroll completion, visible dice during Focus/Clue prompts, and failed-roll cleanup
 at normal and fast-forward speed. Screenshots are written to `build/prompt-preview`.
@@ -35,7 +48,7 @@ across the map and requires the fireballs to land on the on-screen copy, thrown 
 another, with exactly one sanity/health token lost per impact. `combat-interrupted` /
 `combat-resumed` check that an interruption (Flesh Ward, another investigator stepping in)
 hides the monster, puts torn tokens back, and that the next combat step brings it back.
-`epic-monster-*` show an epic monster (bigger portrait, gold rim and plate, bigger fireballs)
+`epic-monster-*` show an epic monster (bigger portrait, pulsing red rim, gold plate, bigger fireballs)
 through the horror and damage steps, without a separate phase label; `combat-overview-epic` shows the
 gold epic card on the overview. `map-monster-walk-*` show a map monster stepping while it
 moves (body and shadow bounce and waddle together; its real position stays put).
