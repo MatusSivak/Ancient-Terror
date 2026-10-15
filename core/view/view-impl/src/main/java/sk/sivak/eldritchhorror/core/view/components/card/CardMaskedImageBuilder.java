@@ -18,6 +18,10 @@ public class CardMaskedImageBuilder {
         return buildMaskedTextureRegion(portraitTexture, true, false);
     }
 
+    public static TextureRegion buildMaskedInvestigatorTextureRegion(Texture portraitTexture, boolean circular) {
+        return buildMaskedTextureRegion(portraitTexture, true, circular);
+    }
+
     public static TextureRegion buildCircularMaskedTextureRegion(Texture cardTexture) {
         return buildMaskedTextureRegion(cardTexture, false, true);
     }
@@ -41,7 +45,9 @@ public class CardMaskedImageBuilder {
         spriteBatch.begin();
         if (investigatorPortrait) {
             // Crop the top of the full-length portrait to show the face and upper body.
-            int cropHeight = Math.min(cardTexture.getHeight(), cardTexture.getWidth() * imageHeight / imageWidth);
+            // Small encounter badges need a closer head-and-shoulders crop.
+            int sourceWidth = circular ? Math.round(cardTexture.getWidth() * 0.6f) : cardTexture.getWidth();
+            int cropHeight = Math.min(cardTexture.getHeight(), sourceWidth * imageHeight / imageWidth);
             int cropWidth = cropHeight * imageWidth / imageHeight;
             TextureRegion portrait = new TextureRegion(cardTexture,
                     (cardTexture.getWidth() - cropWidth) / 2, 0, cropWidth, cropHeight);

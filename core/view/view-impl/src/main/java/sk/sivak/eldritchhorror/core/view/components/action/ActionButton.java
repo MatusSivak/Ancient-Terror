@@ -92,7 +92,7 @@ public class ActionButton extends ImageButton {
     private void initIcon(ActionButtonData actionButtonData, boolean circularMask) {
         String texturePath = actionButtonData.getTexturePath();
         if (actionButtonData.getActionButtonId() == ActionButtonData.ActionButtonId.INVESTIGATOR) {
-            icon = new Image(buildMaskedInvestigatorTextureRegion(getTexture(texturePath)));
+            icon = new Image(buildMaskedInvestigatorTextureRegion(getTexture(texturePath), circularMask));
         } else if (actionButtonData.needsMask()) {
             icon = new Image(circularMask ? buildCircularMaskedTextureRegion(getTexture(texturePath))
                     : buildMaskedTextureRegion(getTexture(texturePath)));

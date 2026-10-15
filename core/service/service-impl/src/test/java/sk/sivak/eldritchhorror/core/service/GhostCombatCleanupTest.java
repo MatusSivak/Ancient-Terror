@@ -44,7 +44,7 @@ public class GhostCombatCleanupTest {
         });
         tests.setActionProvider(actions);
         TestActionProvider testActions = mock(TestActionProvider.class);
-        when(testActions.hideCombatTable()).thenAnswer(call -> new HideCombatTableAction());
+        when(testActions.hideCombatTable(any())).thenAnswer(call -> new HideCombatTableAction(call.getArgument(0)));
         tests.setTestActionProvider(testActions);
         EventQueueImpl eventQueue = new EventQueueImpl();
         ServicePlatform.get().setEventQueue(eventQueue);

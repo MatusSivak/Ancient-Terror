@@ -278,14 +278,9 @@ public class TestServiceImpl extends AbstractCommonService implements TestServic
 
     @Override
     public void hideCombatTable(CombatData combatData) {
-        addEventCommand(in -> {
-            // A special monster ability can end the presentation before normal cleanup.
-            // Track it per combat so a second cleanup cannot pop an enclosing combat.
-            if (!combatData.isCombatTableHidden()) {
-                combatData.setCombatTableHidden(true);
-                executeHookable(testActionProvider.hideCombatTable());
-            }
-        });
+        // Queue the hooks now: monster abilities skip to BEFORE_HIDE_COMBAT_TABLE.
+        // The action itself guards against closing this combat's presentation twice.
+        executeHookable(testActionProvider.hideCombatTable(combatData));
     }
 
     private void horrorCheck(MonsterInfo monsterInfo, CombatData combatData) {

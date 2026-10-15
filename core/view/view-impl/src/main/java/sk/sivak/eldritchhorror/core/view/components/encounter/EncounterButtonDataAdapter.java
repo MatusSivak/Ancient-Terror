@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.components.encounter;
 import com.badlogic.gdx.math.Vector2;
 import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData;
 import sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData;
+import sk.sivak.eldritchhorror.core.constants.encounter.EncounterType;
 
 import static sk.sivak.eldritchhorror.core.constants.action.ActionButtonData.ActionButtonId.NOT_APPLICABLE;
 
@@ -19,7 +20,8 @@ public class EncounterButtonDataAdapter {
 
             @Override
             public ActionButtonId getActionButtonId() {
-                return NOT_APPLICABLE;
+                return encounterButtonData.getEncounterType() == EncounterType.DEFEATED_INVESTIGATOR
+                        ? ActionButtonId.INVESTIGATOR : NOT_APPLICABLE;
             }
 
             @Override

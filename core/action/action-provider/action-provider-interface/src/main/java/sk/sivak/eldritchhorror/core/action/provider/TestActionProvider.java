@@ -85,7 +85,7 @@ public interface TestActionProvider {
 
     HookableAction<CombatData, CombatData> showCombatTable();
 
-    HookableAction<Object, Void> hideCombatTable();
+    HookableAction<Object, Void> hideCombatTable(CombatData combatData);
 
     DirectEventAction<CombatData> beforeDamageTest();
 

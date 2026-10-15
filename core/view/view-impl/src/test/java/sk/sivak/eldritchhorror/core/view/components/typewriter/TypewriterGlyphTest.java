@@ -34,6 +34,15 @@ public class TypewriterGlyphTest {
 
     private static String icon(String keyword) { return "[#FFFFFFFF]" + getGlyph(keyword) + "[]"; }
 
+    @Test public void reckoningUsesGlyphInRulesRegardlessOfCaseButNotFlavorOrLongerWords() {
+        view.typeInfo("[#BAD]Reckoning![] Resolve reckoning and RECKONING; reckonings remain text.").subscribe();
+        assertEquals("[#" + TypewriterConstants.HEX_BAD + "]" + icon("RECKONING")
+                + "![] Resolve " + icon("RECKONING") + " and " + icon("RECKONING")
+                + "; reckonings remain text.", view.text);
+        view.typeFlavor("The day of Reckoning has come.").subscribe();
+        assertEquals("The day of Reckoning has come.\n ", view.text);
+    }
+
     private static class CapturingTypewriter extends TypewriterViewImpl {
         String text;
         @Override void prepareAndRepeatRuns(String text, CompletableSubscriber subscriber) {

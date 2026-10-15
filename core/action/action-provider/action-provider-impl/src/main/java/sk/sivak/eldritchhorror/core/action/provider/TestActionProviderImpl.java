@@ -241,8 +241,8 @@ public class TestActionProviderImpl implements TestActionProvider {
     }
 
     @Override
-    public HookableAction<Object, Void> hideCombatTable() {
-        return new HideCombatTableAction();
+    public HookableAction<Object, Void> hideCombatTable(CombatData combatData) {
+        return new HideCombatTableAction(combatData);
     }
 
     @Override

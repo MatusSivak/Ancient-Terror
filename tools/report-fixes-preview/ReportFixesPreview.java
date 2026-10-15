@@ -31,8 +31,10 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 public class ReportFixesPreview extends ApplicationAdapter {
     private Stage stage;
     private static boolean latestOnly;
+    private static boolean october15;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
+        october15 = Arrays.asList(args).contains("--oct15");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -43,6 +45,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             Sound silent = proxy(Sound.class, (p,m,a) -> m.getReturnType()==long.class ? 0L : null);
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october15) { october15Reports(); return; }
             if (latestOnly) { latestReports(); return; }
             skillChoices(); investigatorChoices(); ticketChoices(); mystery(); typewriter();
             System.out.println("PASS: skill restrictions/cancel, investigator cancel, ticket availability/single completion, mystery and typewriter glyphs.");
@@ -52,6 +55,68 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void october15Reports() throws Exception {
+        String language = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String lang : new String[]{"en", "sk"}) {
+            setPreviewLanguage(lang);
+            sk.sivak.eldritchhorror.core.model.rumor.AbstractRumorCardInfo[] rumors = {
+                new sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard(),
+                new sk.sivak.eldritchhorror.core.model.rumor.FracturedRealityRumorCard(),
+                new sk.sivak.eldritchhorror.core.model.rumor.LostKnowledgeRumorCard(),
+                new sk.sivak.eldritchhorror.core.model.rumor.StarsAlignedRumorCard(),
+                new sk.sivak.eldritchhorror.core.model.rumor.TheWindWalkerRumorCard()
+            };
+            for (sk.sivak.eldritchhorror.core.model.rumor.AbstractRumorCardInfo info : rumors) {
+                info.setCluesRequired(2);
+                sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard card =
+                        new sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard();
+                card.init(info);
+                card.setPosition(480-card.getWidth()/2,270-card.getHeight()/2);
+                stage.addActor(card); tick(3);
+                require(card.getY() >= 4 && card.getTop() <= 536, "Rumor clipped: " + info.getId() + " " + card.getHeight());
+                for (Actor actor : all(card)) if (actor instanceof Label) {
+                    Label label = (Label) actor; label.validate();
+                    require(label.getPrefHeight() <= label.getHeight()+1, "Rumor text clipped: " + label.getText());
+                    require(label.getGlyphLayout().width <= label.getWidth()+1, "Rumor text exceeds its column: " + label.getText());
+                }
+                draw("oct15-rumor-" + info.getId() + "-" + lang);
+                if (info.getId().equals("GrowingMadness")) {
+                    for (String method : new String[]{"highlightRumorObjective", "highlightRumorFailure", "highlightRumorReckoning"}) {
+                        int[] done = {0};
+                        ((rx.Completable)card.getClass().getMethod(method).invoke(card)).subscribe(() -> done[0]++);
+                        tick(40); draw("oct15-rumor-" + method + "-" + lang);
+                        clickOverlay(card); tick(60);
+                        require(done[0] == 1, "Rumor highlight did not finish");
+                    }
+                    int[] done = {0};
+                    card.countdown(1).subscribe(() -> done[0]++);
+                    tick(40); clickOverlay(card); tick(120);
+                    require(done[0] == 1, "Rumor countdown did not finish");
+                    draw("oct15-rumor-countdown-" + lang);
+                }
+                card.remove();
+            }
+        }
+        setPreviewLanguage(language);
+        Table choices = new Table();
+        for (InvestigatorId id : new InvestigatorId[]{InvestigatorId.THE_NUN, InvestigatorId.THE_PRIEST, InvestigatorId.THE_SOLDIER}) {
+            sk.sivak.eldritchhorror.core.constants.encounter.EncounterButtonData data =
+                    new sk.sivak.eldritchhorror.core.eventtype.data.encounter.DefeatedInvestigatorEncounter(id, true).buildButtonData();
+            choices.add(new sk.sivak.eldritchhorror.core.view.components.encounter.EncounterButton(data)).pad(8).row();
+        }
+        choices.pack(); choices.setPosition(480-choices.getWidth()/2,270-choices.getHeight()/2);
+        stage.addActor(choices); tick(3); draw("oct15-defeated-portraits"); choices.remove();
+        typewriter();
+        System.out.println("PASS: rumor cards in EN/SK, highlights/countdown, defeated portraits and Reckoning glyphs at both speeds");
+    }
+
+    private void clickOverlay(Actor card) {
+        for (Actor actor : stage.getActors()) if (actor instanceof Image && actor != card && actor.getListeners().size > 0) {
+            click(actor); return;
+        }
+        throw new AssertionError("Missing rumor acknowledgement overlay");
     }
 
     private void hallOfFame() throws Exception {
@@ -233,6 +298,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             int[] completed = {0};
             view.typeInfo("Each investigator tests Observation-1 or Will+2. [#BAD]Lose 1 Health and 2 Sanity[].")
                     .andThen(view.typeInfo("Test Lore, Influence or Strength. Roll 1 die. On a 1 or 2, gain 1 Clue."))
+                    .andThen(view.typeInfo("[#BAD]Reckoning![] Resolve reckoning effects."))
                     .subscribe(() -> completed[0]++);
             tick(1800);
             require(completed[0] == 1, "Typewriter rules did not finish exactly once");
@@ -244,7 +310,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                 for (com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run : label.getGlyphLayout().runs)
                     require(run.y == 0, "Typewriter line wrapped into the next row");
             }
-            for (String word : new String[]{"Observation", "Will", "Lore", "Influence", "Strength", "Health", "Sanity", "Clue"})
+            for (String word : new String[]{"Observation", "Will", "Lore", "Influence", "Strength", "Health", "Sanity", "Clue", "RECKONING"})
                 require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getGlyph(word))) >= 0, "Missing typewriter glyph: " + word);
             require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getDiceGlyph(1))) >= 0, "Missing die-result glyph");
             draw(fast ? "typewriter-glyphs-fast" : "typewriter-glyphs");

@@ -18,3 +18,9 @@ Screenshots are written to `build/report-fixes-preview/`.
 
 Omit `--latest` for the earlier skill, investigator, ticket, mystery glyph and
 typewriter checks.
+
+Use `--args="--oct15"` for the 15 October reports: all five rumor cards in English
+and Slovak, text bounds, objective/failure/reckoning highlights, countdown
+acknowledgement, defeated-investigator head portraits, and Reckoning glyphs at
+normal and fast-forward speed. Screenshots use the `oct15-*` and
+`typewriter-glyphs*` prefixes.

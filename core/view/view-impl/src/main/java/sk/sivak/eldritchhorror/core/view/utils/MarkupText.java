@@ -60,6 +60,7 @@ public class MarkupText {
                 // Match keywords, not fragments of names such as William or Focused.
                 String pattern = "→".equals(word) ? Pattern.quote(word)
                         : "(?<![\\p{L}\\p{N}_])" + Pattern.quote(word) + "(?![\\p{L}\\p{N}_])";
+                if (cardKeywords == CardKeywords.RECKONING) pattern = "(?i)" + pattern;
                 text = text.replaceAll(pattern, Matcher.quoteReplacement(
                         glyphPrefix + FontGlyphEnricher.getGlyph(word) + glyphSuffix));
             }

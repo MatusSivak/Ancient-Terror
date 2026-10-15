@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -15,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -31,6 +29,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,20 +37,20 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEI
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.MYSTERY_BACKGROUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.VALUE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class RumorCard extends VisTable {
     private static final int CARD_WIDTH = 620;
-    private static final int CONTENT_PADDING = 40;
+    private static final int CONTENT_PADDING = 28;
     private static final int CONTENT_WIDTH = CARD_WIDTH - 2 * CONTENT_PADDING;
     private static final int LABEL_WIDTH = 95;
     private static final int COLUMN_GAP = 10;
     private static final int ROW_GAP = 10;
+    private static final Color TEXT = Color.valueOf("EEE6D5");
+    private static final Color MUTED_TEXT = Color.valueOf("B8C4BE");
+    private static final Color BRASS = Color.valueOf("DCC99F");
     private final DisplayHide displayHide;
     private Image hitImage;
     private RumorCardInfo rumorCardInfo;
@@ -81,13 +80,18 @@ public class RumorCard extends VisTable {
 
     public void init(RumorCardInfo rumorCardInfo) {
         clear();
+        hitImage = null;
         getColor().a = 1f;
         setBackground((Drawable) null);
         this.rumorCardInfo = rumorCardInfo;
 
-        padTop(36);
-        padBottom(36);
+        padTop(26);
+        padBottom(26);
         add(createNameLabel(resolveLocalizedText(rumorCardInfo.getTitleText()))).pad(0, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH).padBottom(12);
+        row();
+        Image divider = new Image(CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
+        divider.setColor(BRASS);
+        add(divider).width(CONTENT_WIDTH).height(1).padBottom(14);
         row();
         Label flavorLabel = createFlavorLabel(resolveLocalizedText(rumorCardInfo.getFlavorText()));
         add(flavorLabel).pad(0, CONTENT_PADDING, 6, CONTENT_PADDING).width(CONTENT_WIDTH);
@@ -99,11 +103,12 @@ public class RumorCard extends VisTable {
         reckoningCell = createReckoningRow(rumorCardInfo.getReckoningText());
         createCountdownRow(rumorCardInfo.getTimeRemaining());
 
-        TextureRegionDrawable background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.MYSTERY_BACKGROUND));
-        setBackground(background);
-
+        TextureRegionDrawable background = new TextureRegionDrawable(CustomAssetManager.getTextureRegion(CustomAssetManager.RESERVE_BACKGROUND));
         background.setMinWidth(0);
         background.setMinHeight(0);
+        setBackground(background);
+        padTop(26);
+        padBottom(26);
         setWidth(CARD_WIDTH);
         setHeight(VIEWPORT_HEIGHT);
         invalidateHierarchy();
@@ -122,6 +127,7 @@ public class RumorCard extends VisTable {
         Label resolveTextLabel = createResolveLabel(replacePlaceholders(resolveLocalizedText(text)));
 
         Table resolveRow = new Table();
+        resolveRow.setBackground(SelectionPanelStyle.panel("1C302F", "415851", 10, 12));
         resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
         resolveRow.add(resolveTextLabel).growX();
         Cell<Table> mysteryLabelCell = add(resolveRow).pad(ROW_GAP, CONTENT_PADDING, 0, CONTENT_PADDING).width(CONTENT_WIDTH);
@@ -136,6 +142,7 @@ public class RumorCard extends VisTable {
         Label resolveLabel = createJustLabel(get("rumor.requires"));
 
         Table resolveRow = new Table();
+        resolveRow.setBackground(SelectionPanelStyle.panel("1C302F", "415851", 10, 12));
         resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
         for (int i = 0; i < cluesRequired; i++) {
             Image actor = new Image(CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
@@ -161,6 +168,7 @@ public class RumorCard extends VisTable {
             Label resolveLabel = createJustLabel(get("rumor.timeLeft"));
 
             Table resolveRow = new Table();
+        resolveRow.setBackground(SelectionPanelStyle.panel("1C302F", "415851", 10, 12));
             resolveRow.add(resolveLabel).width(LABEL_WIDTH).align(Align.right).padRight(COLUMN_GAP);
             for (int i = 0; i < countdown; i++) {
                 Image actor = new Image(texture);
@@ -182,6 +190,7 @@ public class RumorCard extends VisTable {
         Label resolveTextLabel = createResolveLabel(replacePlaceholders(resolveLocalizedText(text)));
 
         Table resolveRow = new Table();
+        resolveRow.setBackground(SelectionPanelStyle.panel("1C302F", "415851", 10, 12));
         Image actor = new Image(CustomAssetManager.getTexture(CustomAssetManager.RECKONING));
         actor.setScaling(Scaling.fit);
         actor.setAlign(Align.right);
@@ -193,74 +202,49 @@ public class RumorCard extends VisTable {
     }
 
     private Label createNameLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 48), BRASS);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
-        label.setFontScale(0.48f);
+        label.setFontScale(0.5f);
         label.setWrap(true);
         return label;
     }
 
     private Label createFlavorLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 44), MUTED_TEXT);
         Label label = new Label(text.replaceAll("\\s*\\n\\s*", " "), labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.4f);
+        label.setFontScale(0.45f);
         return label;
     }
 
     private Label createJustLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), BRASS);
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.right);
-        label.setFontScale(0.4f);
+        label.setWrap(true);
+        label.setFontScale(0.45f);
         return label;
     }
 
     private Label createResolveLabel(String text) {
         BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
         bitmapFont.getData().markupEnabled = true;
-        Label.LabelStyle style = new Label.LabelStyle(bitmapFont, Color.WHITE);
-        style.background = new NinePatchDrawable(new NinePatch(CustomAssetManager.getTexture(VALUE_LABEL), 11, 11, 11, 12) {
-
-            @Override
-            public float getMiddleHeight() {
-                return 0;
-            }
-
-            @Override
-            public float getTopHeight() {
-                return 9;
-            }
-
-            @Override
-            public float getBottomHeight() {
-                return 9;
-            }
-
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(new Color(1f, 1f, 1f, 0.5f * RumorCard.this.getColor().a));
-                super.draw(batch, x, y, width, height);
-            }
-        });
-
-        ((NinePatchDrawable) style.background).setLeftWidth(12);
-        ((NinePatchDrawable) style.background).setRightWidth(12);
+        Label.LabelStyle style = new Label.LabelStyle(bitmapFont, TEXT);
         Label label = new Label(text, style);
         label.setWrap(true);
         label.setAlignment(Align.left);
-        label.setFontScale(0.4f);
+        label.setFontScale(0.45f);
         label.getStyle().font.getData().markupEnabled = true;
         return label;
     }
 
     private Label createProgressLabel() {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.DARK_GRAY);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), BRASS);
         Label label = new Label(get("rumor.progress"), labelStyle);
         label.setAlignment(Align.left);
-        label.setFontScale(0.4f);
+        label.setFontScale(0.45f);
         return label;
     }
 
@@ -301,8 +285,8 @@ public class RumorCard extends VisTable {
 
     private static String replacePlaceholders(String text) {
         return text
-                .replaceAll("\\[#BAD]", "[#e02323]")
-                .replaceAll("\\[#GOOD]", "[#229B3C]");
+                .replaceAll("\\[#BAD]", "[#EF9B8F]")
+                .replaceAll("\\[#GOOD]", "[#A7D8AF]");
     }
 
     private String resolveLocalizedText(String text) {
@@ -399,7 +383,7 @@ public class RumorCard extends VisTable {
     }
 
     private Image addDarkFront() {
-        Image darkFront = new Image(CustomAssetManager.getTexture(MYSTERY_BACKGROUND));
+        Image darkFront = new Image(CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
         darkFront.setColor(new Color(0f, 0f, 0f, 0.0f));
         darkFront.setPosition(getX(), getY());
         darkFront.setSize(getWidth(), getHeight());
@@ -409,34 +393,19 @@ public class RumorCard extends VisTable {
     }
 
     private void highlightLabel(Label label) {
-        Label.LabelStyle labelStyle = label.getStyle();
-
-        getStage().addAction(new FastForwardAction<>(new TemporalAction(0.5f) {
-            @Override
-            protected void update(float percent) {
-
-                float rgb = Color.DARK_GRAY.r;
-                float colorDiff = Color.LIGHT_GRAY.r - Color.DARK_GRAY.r;
-                float v = percent * colorDiff;
-                labelStyle.fontColor = new Color(rgb + v, rgb + v, rgb + v, 1f);
-            }
-        }));
+        animateLabelColor(label, Color.WHITE);
     }
 
     private void darkenLabel(Label label) {
-        Label.LabelStyle labelStyle = label.getStyle();
+        animateLabelColor(label, BRASS);
+    }
 
-        if (getStage() == null) {
-            return;
-        }
-        getStage().addAction(new FastForwardAction<>(new TemporalAction(0.5f) {
-            @Override
-            protected void update(float percent) {
-
-                float rgb = Color.LIGHT_GRAY.r;
-                float colorDiff = Color.DARK_GRAY.r - Color.LIGHT_GRAY.r;
-                float v = percent * colorDiff;
-                labelStyle.fontColor = new Color(rgb + v, rgb + v, rgb + v, 1f);
+    private void animateLabelColor(Label label, Color targetColor) {
+        if (getStage() == null) return;
+        Color from = new Color(label.getStyle().fontColor);
+        label.addAction(new FastForwardAction<>(new TemporalAction(0.5f) {
+            @Override protected void update(float percent) {
+                label.getStyle().fontColor = new Color(from).lerp(targetColor, percent);
             }
         }));
     }
