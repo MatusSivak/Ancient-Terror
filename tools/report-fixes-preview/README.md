@@ -24,3 +24,15 @@ and Slovak, text bounds, objective/failure/reckoning highlights, countdown
 acknowledgement, defeated-investigator head portraits, and Reckoning glyphs at
 normal and fast-forward speed. Screenshots use the `oct15-*` and
 `typewriter-glyphs*` prefixes.
+
+Use `--args="--awakening"` for Yig's midnight and third-mystery confirmations,
+OK acknowledgement, all four awakened Ancient One sheets, and the 23:20 clock
+reset from several starting times at normal and fast-forward speed. It checks
+English and Slovak text, button separation, and sheet text bounds. Screenshots
+use the `awakening-*` and `awakened-*` prefixes.
+
+Use task `:desktop:previewMonsterArtwork` with the same init script for the custom
+Yig Cultist and updated Yig epic sprite. It checks Ancient One switching/fallback,
+matching synchronous/asynchronous textures, and production cards, selections,
+map tokens, combat sprites, and combat overviews. Screenshots use `cultist-yig-*`
+and `yig-epic-*` prefixes.

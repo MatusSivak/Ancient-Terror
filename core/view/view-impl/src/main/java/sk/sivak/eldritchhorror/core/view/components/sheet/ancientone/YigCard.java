@@ -41,7 +41,7 @@ public final class YigCard extends VisTable implements AncientOneCard {
         clear();
         pad(16, 36, 12, 36);
         setBackground(getTextureRegionDrawable(ANCIENT_ONE_DIALOG_BACKGROUND));
-        Image art = new Image(getTexture(info.isAwaken() ? "ancient_one/yig-awakened-sheet-art.png" : "ancient_one/yig-sheet-art.png"));
+        Image art = new Image(getTexture(info.isAwaken() ? "ancient_one/yig-awakened-sheet-art-v2.png" : "ancient_one/yig-sheet-art.png"));
         art.setScaling(Scaling.fit);
         add(art).colspan(2).width(696).height(220).padBottom(4).row();
         add(createLore()).width(278).top().padRight(18);
@@ -54,6 +54,7 @@ public final class YigCard extends VisTable implements AncientOneCard {
         Table lore = new Table();
         lore.defaults().growX();
         lore.add(AncientOneStyles.title(get(info.getName()))).height(46).row();
+        if (info.isAwaken()) lore.add(AncientOneStyles.awakenedLabel()).padBottom(4).row();
         Label subtitle = label(get(info.getAltName()), 17, AncientOneStyles.BRONZE);
         subtitle.setAlignment(Align.center);
         lore.add(subtitle).padBottom(10).row();

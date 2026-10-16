@@ -28,6 +28,7 @@ public class YigPreview extends ApplicationAdapter {
     @Override public void create() {
         try {
             VisUI.load();stage=new Stage(new FitViewport(960,540));
+            sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.setAncientOneSupplier(AncientOneHelper::createYig);
             YigCard card=new YigCard();card.init(AncientOneHelper.createYig());render(card,"yig-sleeping");
             AncientOneInfo awake=AncientOneHelper.createAwakenYig();card.init(awake);render(card,"yig-awake");
             if(findScroll(card)!=null)throw new AssertionError("Yig rules should be visible without scrolling");
@@ -63,7 +64,10 @@ public class YigPreview extends ApplicationAdapter {
             draw("full-game-promo");
             checkAwakeningClock();
             System.out.println("PASS: sleeping/awake Yig with new rules and artwork, three epic monsters, and single-row five-Ancient-One selector (unlocked and locked) rendered.");
-        } catch(Throwable failure) {failure.printStackTrace();System.exit(1);} finally {Gdx.app.exit();}
+        } catch(Throwable failure) {failure.printStackTrace();System.exit(1);} finally {
+            sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.setAncientOneSupplier(null);
+            Gdx.app.exit();
+        }
     }
     private void render(Table card,String name) throws Exception {
         stage.clear();stage.addActor(card);card.validate();

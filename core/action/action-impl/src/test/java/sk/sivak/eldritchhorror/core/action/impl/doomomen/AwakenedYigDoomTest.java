@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import org.junit.*;
 import rx.Completable;
+import rx.subjects.PublishSubject;
+import sk.sivak.eldritchhorror.core.constants.question.*;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.action.impl.saveload.LoadAncientOneHelper;
 import sk.sivak.eldritchhorror.core.constants.ancientone.*;
@@ -20,9 +22,12 @@ public class AwakenedYigDoomTest {
     private AncientOneId id = AncientOneId.YIG;
     private final List<String> calls = new ArrayList<>();
     private ServicePlatform platform;
+    private Question<?> notice;
+    private PublishSubject<Answer<Object,Object>> acknowledgement;
 
     @Before public void setup() {
         ServicePlatform.nullifyInstance(); platform = ServicePlatform.get();
+        acknowledgement = PublishSubject.create();
         AncientOneInfo info = mock(AncientOneInfo.class, (n,a) -> {
             switch(n) {
                 case "isAwaken": return awake;
@@ -52,7 +57,10 @@ public class AwakenedYigDoomTest {
         platform.setDoomOmenController(mock(DoomOmenController.class,(n,a)-> {
             calls.add(n+":"+a[0]+":"+a[1]);return Completable.complete();
         }));
-        platform.setGameController(mock(GameController.class,(n,a)-> {calls.add(n+":"+doom);return null;}));
+        platform.setGameController(mock(GameController.class,(n,a)-> {
+            if(n.equals("ask")) { notice=(Question<?>)a[0]; return acknowledgement.toSingle(); }
+            calls.add(n+":"+doom);return null;
+        }));
         platform.setEventListenerProvider(mock(EventListenerProvider.class,(n,a)-> {calls.add(n);return null;}));
         platform.setResearchEncounterDeck(mock(ResearchEncounterDeckWrite.class,(n,a)->null));
     }
@@ -61,8 +69,34 @@ public class AwakenedYigDoomTest {
     @Test public void awakeningResetsDoomAndRefreshesTheClockBeforeRegisteringRules() {
         awake=false;doom=-2;
         new AncientOneAwakensAction().execute().subscribe(v->completions++);
+        assertFalse(awake);assertEquals(-2,doom);assertEquals(0,completions);assertTrue(calls.isEmpty());
+        assertEquals("ancientOne.yig.awakening",notice.getTitle());
+        assertEquals("OK",notice.getOptions().get(0).getName());
+        acknowledge();
         assertEquals(-8,doom);assertEquals(1,completions);
         assertEquals(Arrays.asList("updateDoom:-8","registerAncientOneListeners"),calls);
+    }
+
+    @Test public void earlyAwakeningAlwaysSetsFortyMinutesBeforeMidnightAfterConfirmation() {
+        for(int startingDoom:new int[]{1,5,8,10}) {
+            setup(); calls.clear(); completions=0; awake=false; doom=startingDoom;
+            new AncientOneAwakensAction().execute().subscribe(v->completions++);
+            assertEquals(startingDoom,doom);assertFalse(awake);assertEquals(0,completions);
+            assertEquals("ancientOne.yig.awakening",notice.getTitle());
+            acknowledge();
+            assertEquals(-8,doom);assertTrue(awake);assertEquals(1,completions);
+            assertEquals(Arrays.asList("updateDoom:-8","registerAncientOneListeners"),calls);
+        }
+    }
+
+    @Test public void repeatedAwakeningDoesNotResetAnOngoingCountdown() {
+        awake=true;doom=-3;
+        new AncientOneAwakensAction().execute().subscribe(v->completions++);
+        assertEquals(-3,doom);assertNull(notice);assertTrue(calls.isEmpty());assertEquals(1,completions);
+    }
+
+    private void acknowledge() {
+        acknowledgement.onNext(new Answer<>()); acknowledgement.onCompleted();
     }
     @Test public void advancesCountTowardMidnightAndClampWithoutOverflow() {
         doom=-8;advance(3);assertEquals(-5,doom);

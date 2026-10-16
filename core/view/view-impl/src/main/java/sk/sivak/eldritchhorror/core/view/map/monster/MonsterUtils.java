@@ -27,14 +27,8 @@ public class MonsterUtils {
 
     public static Completable spawnMonster(MonsterInfo monsterInfo, GameController gameController) {
         return Completable.create(onSub -> {
-            String textureName;
-            String monsterId = monsterInfo.getClass().getSimpleName();
-            String fileName = monsterId.substring(0, monsterId.length() - "Monster".length());
-            if (monsterInfo.isEpic()) {
-                textureName = "monster/epic/" + fileName + ".png";
-            } else {
-                textureName = "monster/" + fileName + ".png";
-            }
+            String textureName = sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.path(
+                    monsterInfo.getClass().getSimpleName(), monsterInfo.isEpic());
             CustomAssetManager.getTextureAsync(textureName).subscribe(texture -> {
 
                 LocationId location = monsterInfo.getCurrentLocation();

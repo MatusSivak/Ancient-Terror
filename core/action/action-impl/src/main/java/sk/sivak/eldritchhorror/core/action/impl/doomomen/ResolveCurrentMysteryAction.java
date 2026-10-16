@@ -6,6 +6,8 @@ import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
+import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
@@ -93,6 +95,17 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
 
 
         completable.subscribe(() -> {
+            AncientOneInfo ancient = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo();
+            if (ancient.getAncientOneId() == AncientOneId.YIG && !ancient.isAwaken()
+                    && solvedMysteries == ancient.getMysteriesRequired()) {
+                ServicePlatform.get().getService().hold();
+                ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+                ServicePlatform.get().getDoomOmenService().ancientOneAwakens();
+                // Yig's fourth card is Serpent's Nest, the final confrontation.
+                drawNewMysteryCard();
+                ServicePlatform.get().getService().release();
+                return;
+            }
             if (solvedMysteries == getMysteriesRequired()) {
                 ServicePlatform.get().getService().hold();
                 if (isMythosPhase()) {

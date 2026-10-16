@@ -152,6 +152,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EventListenerProviderImpl implements EventListenerProvider {
+    private sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener yigInitListener;
 
     private AzathothInitListener azathothInitListener;
     private CthulhuInitListener cthulhuInitListener;
@@ -331,7 +332,9 @@ public class EventListenerProviderImpl implements EventListenerProvider {
         AncientOneId ancientOneId = ancientOneInfo.getAncientOneId();
         switch (ancientOneId) {
             case YIG:
-                new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener().register();
+                if (yigInitListener != null) yigInitListener.unregister();
+                yigInitListener = new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener();
+                yigInitListener.register();
                 break;
             case AZATHOTH:
                 azathothInitListener.register();
@@ -367,7 +370,9 @@ public class EventListenerProviderImpl implements EventListenerProvider {
         AncientOneId ancientOneId = ancientOneInfo.getAncientOneId();
         switch (ancientOneId) {
             case YIG:
-                new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener().load();
+                if (yigInitListener != null) yigInitListener.unregister();
+                yigInitListener = new sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigInitListener();
+                yigInitListener.load();
                 break;
             case AZATHOTH:
                 azathothInitListener.load();

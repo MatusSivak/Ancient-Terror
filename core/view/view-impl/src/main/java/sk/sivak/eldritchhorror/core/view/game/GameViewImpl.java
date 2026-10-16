@@ -136,6 +136,8 @@ public class GameViewImpl implements Screen, GameView {
 
     public void setController(GameController controller) {
         this.controller = controller;
+        sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.setAncientOneSupplier(
+                controller == null ? null : controller::getAncientOneInfo);
     }
 
     public void setDefaultSkin(Skin skin) {

@@ -67,6 +67,7 @@ public class CrashReportsTest {
         CrashReports.report(new IllegalStateException("duplicate"));
         FileHandle[] pending = Gdx.files.local("pending-crash-reports").list(".json");
         assertEquals(1, pending.length);
+        assertTrue(new JsonReader().parse(pending[0]).get("snapshot").has("capturedAt"));
         CrashReports.Report saved = new Json().fromJson(CrashReports.Report.class, pending[0]);
         assertTrue(saved.description.contains("original crash"));
         assertTrue(saved.description.contains("CrashReportsTest"));

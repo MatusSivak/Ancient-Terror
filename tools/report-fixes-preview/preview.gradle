@@ -11,4 +11,10 @@ gradle.projectsEvaluated {
         mainClass.set('ReportFixesPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewMonsterArtwork', JavaExec) {
+        dependsOn desktop.tasks.named('reportFixesPreviewClasses')
+        classpath = desktop.sourceSets.reportFixesPreview.runtimeClasspath
+        mainClass.set('MonsterArtworkPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

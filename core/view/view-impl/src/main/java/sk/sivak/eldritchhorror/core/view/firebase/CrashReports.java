@@ -74,7 +74,11 @@ public final class CrashReports {
             FileHandle file = directory().child(report.id + ".json");
             try {
                 FileHandle temporary = directory().child(report.id + ".tmp");
-                temporary.writeString(new Json().toJson(report), false, "UTF-8");
+                Json json = new Json();
+                // Snapshot defaults include the current time; never omit a value just
+                // because a newly constructed prototype happens to share its timestamp.
+                json.setUsePrototypes(false);
+                temporary.writeString(json.toJson(report), false, "UTF-8");
                 temporary.moveTo(file);
                 log("Saved pending report " + report.id);
             } catch (Throwable ignored) { /* Still try uploading if local storage failed. */ }

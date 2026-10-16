@@ -16,6 +16,10 @@ import static sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigEffec
 public class YigInitListener extends AncientOneInitListener {
     private final List<EventListener> listeners = new ArrayList<>();
     private boolean awakened() { return p().getModel().getAncientOne().getAncientOneInfo().isAwaken(); }
+    public void unregister() {
+        for (EventListener listener : listeners) p().getEventQueue().unregisterListener(listener);
+        listeners.clear();
+    }
     @Override public void register() {
         sequence(() -> {
             if (awakened()) {
@@ -59,7 +63,7 @@ public class YigInitListener extends AncientOneInitListener {
                 public void onNotify(Void ignored) {
                     if (p().getDoomTrack().getCurrentDoom() > 0) return;
                     later(() -> {
-                        for (EventListener listener : listeners) p().getEventQueue().unregisterListener(listener);
+                        unregister();
                         p().getDoomOmenService().ancientOneAwakens();
                     });
                 }
@@ -71,7 +75,10 @@ public class YigInitListener extends AncientOneInitListener {
                 public void onNotify(Void ignored) {
                     if (p().getDoomTrack().getCurrentDoom() < 0) return;
                     sequence(() -> {
-                        p().getGameService().displayText("Midnight has come. Yig has won.");
+                        p().getTutorialService().displayChalkboard(
+                                p().getModel().getAncientOne().getAncientOneInfo().getEndGameText(),
+                                sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH / 2,
+                                sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT / 2, true);
                         p().getGameService().restartGame();
                     });
                 }

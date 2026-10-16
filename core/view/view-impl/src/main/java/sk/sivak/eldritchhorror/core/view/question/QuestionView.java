@@ -142,7 +142,13 @@ public class QuestionView {
     }
 
     private void displayTable(String title, String portraitTextureName) {
-        if (portraitTextureName != null) {
+        if (title != null) {
+            String translated = sk.sivak.eldritchhorror.core.view.utils.UiText.get(title);
+            if (!("!" + title + "!").equals(translated)) title = translated;
+        }
+        if (title != null && title.contains("\n")) {
+            labelTable = LabelTable.createAndShowNotice(title, portraitTextureName);
+        } else if (portraitTextureName != null) {
             labelTable = LabelTable.createAndShowTable(0, title, portraitTextureName, Collections.emptyList(),  0);
         } else {
             labelTable = LabelTable.createAndShowTable(0, title);

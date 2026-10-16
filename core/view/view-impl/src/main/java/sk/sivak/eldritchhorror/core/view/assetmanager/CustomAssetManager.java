@@ -927,13 +927,11 @@ public class CustomAssetManager extends AssetManager {
 
 
     public static Texture getNonEpicMonsterTexture(String monsterId) {
-        String fileName = monsterId.substring(0, monsterId.length() - "Monster".length());
-        return getTexture("monster/" + fileName + ".png");
+        return getTexture(MonsterArtwork.path(monsterId, false));
     }
 
     public static Texture getEpicMonsterTexture(String monsterId) {
-        String fileName = monsterId.substring(0, monsterId.length() - "Monster".length());
-        return getTexture("monster/epic/" + fileName + ".png");
+        return getTexture(MonsterArtwork.path(monsterId, true));
     }
 
     public static Texture getInvestigatorTexture(InvestigatorId investigatorId) {

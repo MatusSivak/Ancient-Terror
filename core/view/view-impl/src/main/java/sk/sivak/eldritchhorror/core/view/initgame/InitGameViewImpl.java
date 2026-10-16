@@ -57,6 +57,8 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
 import sk.sivak.eldritchhorror.core.view.components.table.ActorFrame;
 import sk.sivak.eldritchhorror.core.view.components.tutorial.Chalkboard;
 import sk.sivak.eldritchhorror.core.view.components.tutorial.AzathothEndingDialog;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.AncientOneEndingDialog;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.YigEndingDialog;
 import sk.sivak.eldritchhorror.core.view.components.tutorial.TouchBlocker;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -100,7 +102,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private MonsterCard monsterCard;
     private Image background;
     private Chalkboard chalkboard;
-    private AzathothEndingDialog azathothEndingDialog;
+    private AncientOneEndingDialog ancientOneEndingDialog;
     private boolean screenInitialized;
     private TextButton collectionButton;
     private TextButton hallOfFameButton;
@@ -615,16 +617,17 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public Completable displayChalkboard(String text, int positionX, int positionY) {
-        if (AzathothEndingDialog.TEXT_KEY.equals(text)) {
+        if (AzathothEndingDialog.TEXT_KEY.equals(text) || YigEndingDialog.TEXT_KEY.equals(text)) {
             if (chalkboard != null) {
                 chalkboard.remove();
             }
-            if (azathothEndingDialog != null) {
-                azathothEndingDialog.remove();
+            if (ancientOneEndingDialog != null) {
+                ancientOneEndingDialog.remove();
             }
-            azathothEndingDialog = new AzathothEndingDialog();
-            InfoStage.getChalkboardLayer().addActor(azathothEndingDialog);
-            return azathothEndingDialog.awaitDismissal();
+            ancientOneEndingDialog = YigEndingDialog.TEXT_KEY.equals(text)
+                    ? new YigEndingDialog() : new AzathothEndingDialog();
+            InfoStage.getChalkboardLayer().addActor(ancientOneEndingDialog);
+            return ancientOneEndingDialog.awaitDismissal();
         }
         if (chalkboard == null) {
             chalkboard = new Chalkboard(skin);
@@ -657,9 +660,9 @@ public class InitGameViewImpl implements Screen, InitGameView {
 
     @Override
     public void hideChalkboard() {
-        if (azathothEndingDialog != null) {
-            azathothEndingDialog.remove();
-            azathothEndingDialog = null;
+        if (ancientOneEndingDialog != null) {
+            ancientOneEndingDialog.remove();
+            ancientOneEndingDialog = null;
         }
         if (chalkboard != null) {
             chalkboard.hide();

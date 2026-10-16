@@ -126,6 +126,35 @@ public class YigRulesTest {
         effects.clear();
         events.fireAfterEvent(BeforeAfterEvent.HIDE_COMBAT_TABLE,null);drain();assertTrue(effects.isEmpty());
     }
+
+    @Test public void childrenAlwaysEscapeToADifferentSpace() {
+        ChildrenOfYigMonster monster=new ChildrenOfYigMonster();
+        new YigEpicMonsterListener().register(monster);
+        int[] moves={0};
+        platform.setMonsterService(mock(MonsterService.class,(name,a) -> {
+            if(name.equals("moveMonster")) {
+                assertSame(monster,a[0]);assertNotEquals(monster.getCurrentLocation(),a[1]);
+                monster.setCurrentLocation((LocationId)a[1]);moves[0]++;
+            }
+            return null;
+        }));
+        for(LocationId origin:LocationId.values()) {
+            monster.setCurrentLocation(origin);
+            for(int i=0;i<10;i++) {
+                events.fireAfterEvent(BeforeAfterEvent.AFTER_HORROR_CHECK,combat(monster,0,0,0));drain();
+                events.fireAfterEvent(BeforeAfterEvent.HIDE_COMBAT_TABLE,null);drain();
+            }
+        }
+        assertEquals(LocationId.values().length*10,moves[0]);
+    }
+
+    @Test public void replacingSleepingYigListenersDoesNotDoubleAwakenedReckoning() {
+        YigInitListener sleeping=new YigInitListener();sleeping.load();
+        sleeping.unregister();ancient.awaken();new YigInitListener().load();
+        events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();
+        assertEquals(1,Collections.frequency(effects,"spawn"));
+        assertEquals(1,Collections.frequency(effects,"onTriggeredReckoning"));
+    }
     @Test public void wingedSerpentRespectsPreventionAndYigCursesSanityLoss() {
         WingedSerpentMonster wing=new WingedSerpentMonster();new YigEpicMonsterListener().register(wing);
         events.fireBeforeEvent(BeforeAfterEvent.DESTROY_MONSTER_HEALTH,combat(wing,0,0,0));drain();assertTrue(effects.isEmpty());
@@ -145,12 +174,19 @@ public class YigRulesTest {
     }
     @Test public void awakenedDoomOnlyLosesAtMidnightWithoutUsingTokens() {
         ancient.awaken();new YigInitListener().load();
+        platform.setTutorialService(mock(TutorialService.class,(name,a) -> {
+            assertEquals("displayChalkboard", name);
+            assertEquals("ancientOne.yig.endGame", a[0]);
+            assertEquals(true, a[3]);
+            queue(() -> effects.add("endingDialog"));
+            return null;
+        }));
         platform.setDoomTrack(mock(DoomTrackRead.class,(n,a) -> -1));
         events.fireBeforeEvent(BeforeAfterEvent.ADVANCE_DOOM,1);drain();assertTrue(effects.isEmpty());
         events.fireAfterEvent(BeforeAfterEvent.ADVANCE_DOOM,null);drain();assertTrue(effects.isEmpty());
         platform.setDoomTrack(mock(DoomTrackRead.class,(n,a) -> 0));
         events.fireAfterEvent(BeforeAfterEvent.ADVANCE_DOOM,null);drain();
-        assertEquals(Arrays.asList("displayText","restartGame"),effects);
+        assertEquals(Arrays.asList("endingDialog","restartGame"),effects);
     }
     @Test public void awakenedReckoningSpawnsExactlyOneRandomCultistWithoutAPicker() {
         ancient.awaken();new YigInitListener().load();

@@ -33,6 +33,15 @@ final class AncientOneStyles {
         return line;
     }
 
+    static Label awakenedLabel() {
+        Label label = new Label(UiText.get("ancientOne.awakened"), new Label.LabelStyle(
+                CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 18),
+                Color.valueOf("8C292D")));
+        label.setAlignment(com.badlogic.gdx.utils.Align.center);
+        label.setName("ancient-one-awakened");
+        return label;
+    }
+
     static void addCloseButton(Group card) {
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
         style.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 16);

@@ -32,9 +32,11 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private Stage stage;
     private static boolean latestOnly;
     private static boolean october15;
+    private static boolean awakening;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
+        awakening = Arrays.asList(args).contains("--awakening");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -42,9 +44,14 @@ public class ReportFixesPreview extends ApplicationAdapter {
     }
     @Override public void create() {
         try {
-            Sound silent = proxy(Sound.class, (p,m,a) -> m.getReturnType()==long.class ? 0L : null);
+            Sound silent = proxy(Sound.class, (p,m,a) -> {
+                if (m.getName().equals("hashCode")) return System.identityHashCode(p);
+                if (m.getName().equals("equals")) return p == a[0];
+                return m.getReturnType()==long.class ? 0L : null;
+            });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (awakening) { awakeningReports(); return; }
             if (october15) { october15Reports(); return; }
             if (latestOnly) { latestReports(); return; }
             skillChoices(); investigatorChoices(); ticketChoices(); mystery(); typewriter();
@@ -55,6 +62,77 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void awakeningReports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(null);
+        String language = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String lang : new String[]{"en", "sk"}) {
+            setPreviewLanguage(lang);
+            for (String reason : new String[]{"mysteries", "midnight"}) {
+                Question<Object> question = new Question<>();
+                question.setTitle("ancientOne.yig.awakening");
+                question.setPortraitBeforeTitle(sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId.YIG);
+                question.setOptions(Question.Option.okOption);
+                int[] done = {0};
+                new sk.sivak.eldritchhorror.core.view.question.QuestionView().ask(question).subscribe(a -> done[0]++);
+                tick(120);
+                require(done[0] == 0, "Awakening must wait for OK");
+                String notice = lang.equals("en") ? "Yig awakens!" : "Yig sa prebúdza!";
+                require(labels(stage.getRoot()).contains(notice) && !labels(stage.getRoot()).contains("23:20"), "Awakening notice should contain only the announcement");
+                for (Actor actor : all(stage.getRoot())) if (actor instanceof Label
+                        && ((Label)actor).getText().toString().equals(notice)) {
+                    com.badlogic.gdx.math.Vector2 bottom = actor.localToStageCoordinates(new com.badlogic.gdx.math.Vector2());
+                    require(bottom.y > textButton("OK").getTop(), "Awakening message overlaps OK");
+                }
+                draw("awakening-confirm-" + reason + "-" + lang);
+                click(textButton("OK")); tick(120);
+                require(done[0] == 1, "Awakening acknowledgement failed");
+            }
+            sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo[] infos = {
+                sk.sivak.eldritchhorror.core.model.util.AncientOneHelper.createAwakenYig(),
+                sk.sivak.eldritchhorror.core.model.util.AncientOneHelper.createAwakenCthulhu(),
+                sk.sivak.eldritchhorror.core.model.util.AncientOneHelper.createAwakenShubNiggurath(),
+                sk.sivak.eldritchhorror.core.model.util.AncientOneHelper.createAwakenYogSothoth()
+            };
+            sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.AncientOneCard[] cards = {
+                new sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.YigCard(),
+                new sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.AwakenCthulhuCard(),
+                new sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.AwakenShubNiggurathCard(),
+                new sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.AwakenYogSothothCard()
+            };
+            for(int i=0;i<cards.length;i++) {
+                cards[i].init(infos[i]); Actor card=cards[i].getActor();
+                card.setPosition(480-card.getWidth()/2,270-card.getHeight()/2); stage.addActor(card); tick(5);
+                require(labels(card).contains(sk.sivak.eldritchhorror.core.view.utils.UiText.get("ancientOne.awakened")), "Missing awakened status");
+                require(card.getY() >= 0 && card.getTop() <= 540, "Awakened sheet clipped");
+                for (Actor actor : all(card)) if (actor instanceof Label) {
+                    Label label = (Label) actor; label.validate();
+                    require(label.getPrefHeight() <= label.getHeight()+1, "Awakened sheet text clipped: " + label.getText());
+                }
+                draw("awakened-"+infos[i].getAncientOneId()+"-"+lang); card.remove();
+            }
+            cards[0].init(sk.sivak.eldritchhorror.core.model.util.AncientOneHelper.createYig());
+            require(!labels(cards[0].getActor()).contains(sk.sivak.eldritchhorror.core.view.utils.UiText.get("ancientOne.awakened")), "Sleeping Yig labeled awakened");
+        }
+        setPreviewLanguage(language);
+        for (boolean fast : new boolean[]{false, true}) {
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            for (int initial : new int[]{0, 1, 5, 8, 10}) {
+                sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget clock =
+                        new sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget();
+                clock.setScale(.5f); clock.setPosition(330, 120); stage.addActor(clock);
+                clock.updateDoom(initial); tick(1500); clock.updateDoom(8); tick(1500);
+                require(clock.getCurrentDoom() == 8, "Awakening did not reset to 23:20");
+                require(Math.abs(((Actor)field(clock,"minuteHand")).getRotation()-240) < .01f
+                        && Math.abs(((Actor)field(clock,"hourHand")).getRotation()-20) < .01f,
+                        "Clock hands do not show 23:20 after awakening");
+                if(initial == 5) draw(fast ? "awakening-clock-fast" : "awakening-clock");
+                clock.remove();
+            }
+        }
+        FastForwardAction.turnOff();
+        System.out.println("PASS: awakening confirmation waits for OK, translated notices, all four awakened sheets, and 23:20 clock at both speeds");
     }
 
     private void october15Reports() throws Exception {

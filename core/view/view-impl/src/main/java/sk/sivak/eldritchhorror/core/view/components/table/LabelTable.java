@@ -105,11 +105,32 @@ public class LabelTable extends VisTable {
         }, 0);
     }
 
+    public static LabelTable createAndShowNotice(String text, String portraitTextureName) {
+        return createAndShowTable(0, table -> {
+            Label.LabelStyle style = new Label.LabelStyle(
+                    getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.YELLOW);
+            Label label = new Label(text, style);
+            label.setFontScale(0.5f);
+            label.setAlignment(Align.center);
+            label.setWrap(true);
+            if (portraitTextureName != null) {
+                Image portrait = new Image(CustomAssetManager.getTexture(portraitTextureName));
+                portrait.setScaling(Scaling.fit);
+                table.add(portrait).size(95).pad(10);
+            }
+            table.add(label).width(550).pad(10);
+        }, 0, true);
+    }
+
     private static LabelTable createAndShowTable(float delay, Consumer<Table> prepareTableFunction, int offsetX) {
+        return createAndShowTable(delay, prepareTableFunction, offsetX, false);
+    }
+
+    private static LabelTable createAndShowTable(float delay, Consumer<Table> prepareTableFunction, int offsetX, boolean naturalHeight) {
         if (!VisUI.isLoaded()) {
             VisUI.load();
         }
-        LabelTable table = new LabelTable() {
+        LabelTable table = naturalHeight ? new LabelTable() : new LabelTable() {
             @Override
             public float getHeight() {
                return 32f;

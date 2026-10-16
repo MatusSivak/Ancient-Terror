@@ -6,6 +6,10 @@ import sk.sivak.eldritchhorror.core.constants.monster.epic.EpicMonsterId;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import static sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigEffects.*;
 public class YigEpicMonsterListener extends AbstractMonsterListener {
     private EventListenerImpl<CombatData> horror, damage;
@@ -47,7 +51,10 @@ public class YigEpicMonsterListener extends AbstractMonsterListener {
             public void onNotify(Void ignored) {
                 if (!escaping) return;
                 escaping = false;
-                sequence(() -> p().getMonsterService().moveMonster(monsterInfo, LocationId.getRandomLocations(1).get(0)));
+                List<LocationId> destinations = new ArrayList<>(Arrays.asList(LocationId.values()));
+                destinations.remove(monsterInfo.getCurrentLocation());
+                Collections.shuffle(destinations);
+                sequence(() -> p().getMonsterService().moveMonster(monsterInfo, destinations.get(0)));
             }
         };
         p().getEventQueue().addAfterEventListener(horror, BeforeAfterEvent.AFTER_HORROR_CHECK);

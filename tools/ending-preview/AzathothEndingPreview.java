@@ -11,7 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import sk.sivak.eldritchhorror.core.view.components.tutorial.AzathothEndingDialog;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.AncientOneEndingDialog;
+import sk.sivak.eldritchhorror.core.view.components.tutorial.YigEndingDialog;
+import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.initgame.InitGameViewImpl;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 /** Renders the real dialog without loading or modifying a saved game. */
@@ -45,13 +48,17 @@ public class AzathothEndingPreview extends ApplicationAdapter {
             Gdx.audio = (com.badlogic.gdx.Audio) java.lang.reflect.Proxy.newProxyInstance(
                     getClass().getClassLoader(), new Class<?>[]{com.badlogic.gdx.Audio.class},
                     (proxy, method, args) -> method.getName().equals("newSound") ? sound : null);
-            stage = new Stage(new FitViewport(960, 540));
+            stage = InfoStage.getStageSafe();
+            InitGameViewImpl view = new InitGameViewImpl();
+            for (String ancient : new String[]{"azathoth", "yig"}) {
             for (String language : new String[]{"en", "sk"}) {
-                UiText.setLanguage(language);
-                AzathothEndingDialog dialog = new AzathothEndingDialog();
-                stage.addActor(dialog);
-                boolean[] completed = {false};
-                dialog.awaitDismissal().subscribe(() -> completed[0] = true);
+                setPreviewLanguage(language);
+                int[] completed = {0};
+                view.displayChalkboard("ancientOne." + ancient + ".endGame", 480, 270)
+                        .subscribe(() -> completed[0]++);
+                AncientOneEndingDialog dialog = (AncientOneEndingDialog) InfoStage.getChalkboardLayer().getChildren().peek();
+                if (ancient.equals("yig") && !(dialog instanceof YigEndingDialog))
+                    throw new AssertionError("Yig defeat did not route to its illustrated dialog");
                 int previousPlays = soundPlays;
                 int previousStops = soundStops;
                 stage.act(1f);
@@ -64,30 +71,41 @@ public class AzathothEndingPreview extends ApplicationAdapter {
                 Pixmap pixels = ScreenUtils.getFrameBufferPixmap(0, 0, 960, 540);
                 PixmapIO.PNG png = new PixmapIO.PNG();
                 png.setFlipY(true);
-                png.write(Gdx.files.local("../build/ending-preview/azathoth-" + language + ".png"), pixels);
+                png.write(Gdx.files.local("../build/ending-preview/" + ancient + "-" + language + ".png"), pixels);
                 png.dispose();
                 pixels.dispose();
                 checkLabels(dialog);
                 stage.touchDown(10, 10, 0, 0);
                 stage.touchUp(10, 10, 0, 0);
-                if (completed[0]) throw new AssertionError("Background dismissed the ending");
+                if (completed[0] != 0) throw new AssertionError("Background dismissed the ending");
                 stage.touchDown(675, 465, 0, 0);
                 stage.touchUp(675, 465, 0, 0);
-                if (!completed[0] || dialog.getParent() != null) {
+                if (completed[0] != 1 || dialog.getParent() != null) {
                     throw new AssertionError("Continue did not complete and remove the ending");
                 }
                 if (soundStops != previousStops + 1) throw new AssertionError("Sound must stop on dismissal" );
-                System.out.println("PASS: " + language + " layout, background blocking, Continue and sound lifecycle");
+                stage.touchDown(675, 465, 0, 0);
+                stage.touchUp(675, 465, 0, 0);
+                if (completed[0] != 1) throw new AssertionError("Ending completed twice");
+                view.hideChalkboard();
+                System.out.println("PASS: " + ancient + " " + language + " layout, background blocking, Continue and sound lifecycle");
+            }
             }
         } catch (Throwable failure) {
             failure.printStackTrace();
-            UiText.setLanguage(originalLanguage);
+            setPreviewLanguage(originalLanguage);
             System.exit(1);
         } finally {
-            UiText.setLanguage(originalLanguage);
+            setPreviewLanguage(originalLanguage);
             Gdx.audio = originalAudio;
             Gdx.app.exit();
         }
+    }
+
+    private void setPreviewLanguage(String language) {
+        com.badlogic.gdx.Application app = Gdx.app;
+        try { Gdx.app = null; UiText.setLanguage(language); }
+        finally { Gdx.app = app; }
     }
 
     private void checkLabels(Group group) {

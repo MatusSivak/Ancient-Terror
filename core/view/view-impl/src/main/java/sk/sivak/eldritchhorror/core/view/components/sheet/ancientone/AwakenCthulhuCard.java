@@ -28,7 +28,6 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.ANCIENT_ONE_LABEL;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.GRAY_BACKGROUND;
@@ -70,7 +69,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
         Image splashImage = new Image(CustomAssetManager.getTexture("ancient_one/CTHULHU_AWAKEN.png"));
         splashImage.setAlign(Align.bottom);
         splashImage.setScaling(Scaling.fit);
-        add(splashImage).growX().align(Align.bottom).row();
+        add(splashImage).growX().height(140).align(Align.bottom).row();
         add(createFlavorPart(ancientOneInfo)).colspan(2).growX();
         row();
         addSeparator().colspan(2);
@@ -205,13 +204,11 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
         Label nameLabel = createNameLabel(get(ancientOneInfo.getName()));
         Label altNameLabel = createNiceLabel("-"+get(ancientOneInfo.getAltName())+"-");
 
-        Image ancientOneLabel = new Image(CustomAssetManager.getTexture(ANCIENT_ONE_LABEL));
-        ancientOneLabel.setScaling(Scaling.fit);
 
         float width = 420;
-        table.add(ancientOneLabel).width(width* SCALE).height(171 * (width*SCALE / 896f)).align(Align.bottom);
-        table.row();
         table.add(nameLabel).width(width * SCALE);
+        table.row();
+        table.add(AncientOneStyles.awakenedLabel()).width(width * SCALE).padBottom(4);
         table.row();
         table.add(altNameLabel).width(width * SCALE);
         table.row();
@@ -252,6 +249,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
     private Label createFlavorPart(AncientOneInfo ancientOneInfo) {
         Label flavorLabel = createNiceLabel(get(ancientOneInfo.getFlavorText()));
         flavorLabel.setAlignment(Align.bottom);
+        flavorLabel.setFontScale(0.35f);
         return flavorLabel;
     }
 
@@ -279,7 +277,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
         Label label = new Label(text, labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.5f);
+        label.setFontScale(0.4f);
         return label;
     }
 
