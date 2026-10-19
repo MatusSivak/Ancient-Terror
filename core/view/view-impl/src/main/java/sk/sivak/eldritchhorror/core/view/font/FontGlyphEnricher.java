@@ -99,17 +99,14 @@ public class FontGlyphEnricher {
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/flip.png"), GLYPH_FLIP, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/discard.png"), GLYPH_DISCARD, renderWidth, renderHeight);
 		addDiceGlyphs(bitmapFont, icons.apply(DICE_SHEET), 80);
-		addTicketGlyph(bitmapFont, icons.apply("token/train_ticket_right.png"), GLYPH_TRAIN_TICKET, renderHeight);
-		addTicketGlyph(bitmapFont, icons.apply("token/ship_ticket_right.png"), GLYPH_SHIP_TICKET, renderHeight);
+		addTicketGlyph(bitmapFont, icons.apply("token/train_ticket_down.png"), GLYPH_TRAIN_TICKET, renderHeight);
+		addTicketGlyph(bitmapFont, icons.apply("token/ship_ticket_down.png"), GLYPH_SHIP_TICKET, renderHeight);
 	}
 
 	private static void addTicketGlyph(BitmapFont font, TextureRegion icon, char glyph, int height) {
-		// These are the right-hand stubs of a 500x333 ticket animation sheet.
-		// Exclude its empty canvas so the train/anchor remains legible inline.
-		TextureRegion stub = new TextureRegion(icon,
-				Math.round(icon.getRegionWidth() * 360f / 500), Math.round(icon.getRegionHeight() * 28f / 333),
-				Math.round(icon.getRegionWidth() * 140f / 500), Math.round(icon.getRegionHeight() * 198f / 333));
-		addIconGlyph(font, stub, glyph, Math.round(height * 140f / 198), height);
+		// Use the complete ticket artwork, preserving its landscape proportions.
+		addIconGlyph(font, icon, glyph,
+				Math.round(height * (float) icon.getRegionWidth() / icon.getRegionHeight()), height);
 	}
 
 	private static void addDiceGlyphs(BitmapFont bitmapFont, TextureRegion sheet, int renderSize) {

@@ -33,28 +33,34 @@ public class FontGlyphEnricherTest {
             public Pixmap consumePixmap() { throw new UnsupportedOperationException(); }
             public boolean disposePixmap() { return false; }
             public void consumeCustomData(int target) { }
-            public int getWidth() { return 90; }
-            public int getHeight() { return 90; }
+            public int getWidth() { return 500; }
+            public int getHeight() { return 333; }
             public Pixmap.Format getFormat() { return Pixmap.Format.RGBA8888; }
             public boolean useMipMaps() { return false; }
             public boolean isManaged() { return false; }
         });
         int[] loads = {0};
+        java.util.List<String> loadedPaths = new java.util.ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             FontGlyphEnricher.enrich(font, path -> {
                 loads[0]++;
+                loadedPaths.add(path);
                 return new TextureRegion(texture);
             });
         }
         assertEquals(16, loads[0]);
         assertEquals(22, font.getRegions().size);
+        assertTrue(loadedPaths.contains("token/train_ticket_down.png"));
+        assertTrue(loadedPaths.contains("token/ship_ticket_down.png"));
+        assertFalse(loadedPaths.contains("token/train_ticket_right.png"));
+        assertFalse(loadedPaths.contains("token/ship_ticket_right.png"));
         for (String ticket : new String[]{"Train Ticket", "Ship Ticket"}) {
             BitmapFont.Glyph glyph = data.getGlyph(FontGlyphEnricher.getGlyph(ticket));
-            assertEquals(64, glyph.width);
+            assertEquals(135, glyph.width);
             assertEquals(90, glyph.height);
-            TextureRegion cropped = font.getRegions().get(glyph.page);
-            assertTrue(cropped.getRegionWidth() < texture.getWidth() / 2);
-            assertTrue(cropped.getRegionHeight() < texture.getHeight());
+            TextureRegion artwork = font.getRegions().get(glyph.page);
+            assertEquals(texture.getWidth(), artwork.getRegionWidth());
+            assertEquals(texture.getHeight(), artwork.getRegionHeight());
         }
         for (int value = 1; value <= 6; value++) {
             assertNotNull(data.getGlyph(FontGlyphEnricher.getDiceGlyph(value)));
