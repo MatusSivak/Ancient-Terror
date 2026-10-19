@@ -326,6 +326,11 @@ public class YigRulesTest {
             return hasCrown;
         }));
         platform.setInvestigatorService(mock(InvestigatorService.class, (n,a) -> {
+            if (n.equals("showActiveInvestigator")) {
+                assertEquals(false, a[0]);
+                queue(() -> effects.add("show:" + active[0]));
+                return null;
+            }
             assertTrue(n.equals("changeActiveInvestigator") || n.equals("unsetActiveInvestigator"));
             if (n.equals("changeActiveInvestigator")) assertNotNull("Use unset for an absent investigator", a[0]);
             queue(() -> {
@@ -335,6 +340,12 @@ public class YigRulesTest {
             return null;
         }));
         platform.setGameService(mock(GameService.class, (n,a) -> {
+            if (n.equals("showCurrentMysteryCard")) {
+                assertEquals(false, a[0]);
+                assertEquals(false, a[1]);
+                queue(() -> effects.add("mystery"));
+                return null;
+            }
             assertEquals("ask", n);
             return Single.create(sub -> queue(() -> {
                 assertEquals("The Crown holder answers the question", owner, active[0]);
@@ -361,9 +372,13 @@ public class YigRulesTest {
         assertEquals(previous, active[0]);
         assertEquals(0, (int) crown.getProgress());
         if (!hasCrown) assertTrue(effects.isEmpty());
-        else assertEquals(attempt
-                ? Arrays.asList("active:" + owner, "ask", "test", "active:" + previous)
-                : Arrays.asList("active:" + owner, "ask", "active:" + previous), effects);
+        else {
+            List<String> expected = new ArrayList<>(Arrays.asList("active:" + owner, "mystery", "show:" + owner, "ask"));
+            if (attempt) expected.add("test");
+            expected.add("active:" + previous);
+            if (previous != null) expected.add("show:" + previous);
+            assertEquals(expected, effects);
+        }
         listener.unregister();
     }
     @Test public void advancingRiseAddsPoolTokenWithoutRemovingBoardTokens() {

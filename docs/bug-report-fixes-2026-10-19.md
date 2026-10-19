@@ -42,3 +42,57 @@ Reproduce the focused previews:
 These are source changes, not a released build. Android gameplay and subjective
 audio listening were not tested. Live report statuses and saved games were not
 modified.
+
+## Later review: Crown of the Serpent and clue-loss crash
+
+Refetched all pages of both collections later on 19 October. The current set
+contains four bug reports and one crash report; the three bugs above are already
+fixed in the preceding commits. Two additional reports share the same saved game:
+
+- Bug `09f6c535-8e79-4623-92f1-366852caf66e`: show the Crown mystery before its
+  Will test and focus the investigator carrying the artifact.
+- Crash `3a232aa9-8df7-4794-871a-080c828bfa99`: `ArrayIndexOutOfBoundsException`
+  at `ContainerBar.getFullContainerPosition`, called by `TokenView.loseToken`
+  during `LoseClueAction`.
+
+The save has no active investigator at the end of the Mythos phase. The Spy owns
+the Crown, two Clues and two Ally Assets; the Priest has no Clues. Crown resolution
+previously changed only the model's active investigator, leaving the old HUD in
+place. A reroll or mystery payment could therefore animate a Clue loss against
+an empty displayed bar, accessing index -1.
+
+Resolution now switches to the Crown holder, displays the mystery for
+acknowledgement, and waits for the holder's camera focus and HUD refresh before
+offering the Will test. The holder stays active through tests, payment and Ally
+discards. A previous active investigator is restored together with their HUD;
+an originally absent active investigator is restored to null.
+
+Validation:
+
+- The presentation regression failed before the fix. A real command-queue
+  regression also reproduced the empty-HUD failure at the controller's animation
+  boundary using the real investigator-switch, spend and lose-Clue actions.
+- All 366 tests across services, event listeners and view passed (including
+  unchanged cached view results), with no failures, errors or skipped tests.
+  Desktop compilation passed.
+- New queue coverage verifies that mystery acknowledgement and HUD animation
+  block the test/payment, previous-investigator restoration, two/one/zero-Clue
+  costs, and a reroll that leaves too few Clues to solve the mystery. Existing
+  tests cover declining the test, failing it and having no Crown holder.
+- The `--crown` production preview passed in English and Slovak language settings
+  at both animation speeds. It checks card acknowledgement, camera position at
+  the holder's saved location, actual HUD refresh and two Clue/one Focus discard
+  animations completing exactly once. English/Slovak card screenshots and the
+  holder's HUD screenshot were visually inspected.
+- `git diff --check` passed.
+
+Logs: `build/oct19-crown-before.log`, `build/oct19-crown-crash-before.log`,
+`build/oct19-crown-crash-before.xml`, `build/oct19-crown-validation.log`, and
+`build/oct19-crown-preview.log`. Screenshots: `build/report-fixes-preview/oct19-crown-*`.
+
+```powershell
+.\gradlew.bat -I tools/report-fixes-preview/preview.gradle :desktop:previewReportFixes --args="--crown" --offline --console=plain
+```
+
+Android device gameplay was not tested. Live report statuses and the attached
+saved games were not modified.

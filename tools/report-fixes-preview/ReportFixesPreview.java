@@ -34,11 +34,13 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october15;
     private static boolean awakening;
     private static boolean october19;
+    private static boolean crown;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
         awakening = Arrays.asList(args).contains("--awakening");
         october19 = Arrays.asList(args).contains("--oct19");
+        crown = Arrays.asList(args).contains("--crown");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -53,6 +55,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (crown) { crownResolution(); return; }
             if (october19) { october19Reports(); return; }
             if (awakening) { awakeningReports(); return; }
             if (october15) { october15Reports(); return; }
@@ -65,6 +68,71 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void crownResolution() throws Exception {
+        sk.sivak.eldritchhorror.core.constants.location.LocationId location =
+                sk.sivak.eldritchhorror.core.constants.location.LocationId.SPACE_19;
+        InvestigatorBasics basics = proxy(InvestigatorBasics.class, (p,m,a) -> {
+            switch (m.getName()) {
+                case "getInvestigatorId": return InvestigatorId.THE_SPY;
+                case "getLocationId": return location;
+                case "getClues": return 2;
+                case "getFocusTokens": return 1;
+                case "getCurrentHealth": case "getMaxHealth": return 7;
+                case "getCurrentSanity": case "getMaxSanity": return 5;
+                case "getTickets": return Arrays.asList(PathType.TRAIN, PathType.SHIP);
+                default: throw new AssertionError(m.getName());
+            }
+        });
+        GameController controller = proxy(GameController.class, (p,m,a) -> {
+            if (m.getName().equals("getInvestigatorBasics")) return basics;
+            throw new AssertionError(m.getName());
+        });
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(controller).init();
+        sk.sivak.eldritchhorror.core.view.investigator.InvestigatorView investigators =
+                new sk.sivak.eldritchhorror.core.view.investigator.InvestigatorView(controller);
+        sk.sivak.eldritchhorror.core.view.action.focus.TokenView tokens =
+                new sk.sivak.eldritchhorror.core.view.action.focus.TokenView();
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String language : new String[]{"en", "sk"}) for (boolean fast : new boolean[]{false, true}) {
+            setPreviewLanguage(language);
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            InfoStage.getInvestigatorHud().getClueBar().setCurrentValue(0);
+            InfoStage.getInvestigatorHud().getFocusBar().setCurrentValue(0);
+            MysteryCardInfo mystery = sk.sivak.eldritchhorror.core.model.util.YigMysteryDeck.create(2).stream()
+                    .filter(c -> c.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT).findFirst().get();
+            int[] completed = {0};
+            new sk.sivak.eldritchhorror.core.view.game.GameViewImpl()
+                    .showCurrentMysteryCard(mystery, false, 1, 3).subscribe(() -> completed[0]++);
+            tick(180);
+            require(completed[0] == 0, "Mystery must wait for acknowledgement");
+            MysteryCard card = sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.getMysteryCard();
+            require(card.getY() >= 0 && card.getTop() <= 540, "Crown card clipped");
+            draw("oct19-crown-prompt-" + language + (fast ? "-fast" : ""));
+            click(card); tick(180);
+            require(completed[0] == 1, "Mystery dismissal must complete once");
+            investigators.showActiveInvestigator(false, false).subscribe(() -> completed[0]++);
+            for (int i=0; i<1800; i++) {
+                stage.act(1f/60);
+                sk.sivak.eldritchhorror.core.view.game.MapStage.getStage().act(1f/60);
+            }
+            require(completed[0] == 2, "Holder camera/HUD did not finish");
+            require(InfoStage.getInvestigatorHud().getClueBar().getCurrentValue() == 2, "Holder Clues missing");
+            require(InfoStage.getInvestigatorHud().getFocusBar().getCurrentValue() == 1, "Holder Focus missing");
+            com.badlogic.gdx.math.Vector2 target = sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver.resolve(location);
+            OrthographicCamera camera = sk.sivak.eldritchhorror.core.view.game.MapStage.getCamera();
+            require(Math.abs(camera.position.x-target.x)<.01f && Math.abs(camera.position.y-target.y)<.01f,
+                    "Camera did not focus the holder");
+            draw("oct19-crown-holder-hud-" + language + (fast ? "-fast" : ""));
+            for (int i=0; i<2; i++) { tokens.loseClue().subscribe(() -> completed[0]++); tick(600); }
+            tokens.loseFocus().subscribe(() -> completed[0]++); tick(600);
+            require(completed[0] == 5, "Token animations did not complete exactly once");
+            require(InfoStage.getInvestigatorHud().getClueBar().getCurrentValue() == 0, "Clue payment mismatch");
+            require(InfoStage.getInvestigatorHud().getFocusBar().getCurrentValue() == 0, "Focus payment mismatch");
+        }
+        setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
+        System.out.println("PASS: Crown acknowledgement, holder camera/HUD and Clue/Focus animations in both languages and speeds");
     }
 
     private void october19Reports() throws Exception {

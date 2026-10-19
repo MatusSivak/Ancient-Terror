@@ -157,6 +157,10 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                     if(!p().getArtifactsDeck().hasArtifact(owner,ArtifactId.SERPENT_CROWN))continue;
                     sequence(() -> {
                         p().getInvestigatorService().changeActiveInvestigator(owner);
+                        p().getGameService().showCurrentMysteryCard(false, false);
+                        // Changing the model alone leaves the previous investigator's token bars on screen.
+                        // Wait for the holder's camera/HUD before the test can spend Clues or Focus.
+                        p().getInvestigatorService().showActiveInvestigator(false);
                         later(() -> ask("Attempt a Will (-1) test to break the Serpent Crown's hold?",() -> test(Stat.WILL,-1,() -> {
                             int allies=0;for(CardInfo card:EncounterUtils.getPossession(owner,AssetTrait.ALLY))if(card instanceof AssetInfo)allies++;
                             if(allies<2)return;
@@ -168,7 +172,10 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                                 }),() -> {}),() -> {});
                         },() -> {}),() -> {}));
                         if(previous==null)p().getInvestigatorService().unsetActiveInvestigator();
-                        else p().getInvestigatorService().changeActiveInvestigator(previous);
+                        else {
+                            p().getInvestigatorService().changeActiveInvestigator(previous);
+                            p().getInvestigatorService().showActiveInvestigator(false);
+                        }
                     });
                     break;
                 }

@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--crown"` for the later 19 October reports: production mystery-card
+acknowledgement, camera focus on the Crown holder, refreshing an empty HUD to the
+holder's Clue/Focus counts, and complete token-loss animations in both language
+settings and at normal/fast-forward speed. Screenshots use `oct19-crown-*`.
+
 Use `--args="--oct19"` with the command below for queued camera moves at normal
 and fast-forward speed (including reentrant, wrapped and zero-duration moves),
 ticket glyphs in typewriter rules, and English/Slovak card and investigator
