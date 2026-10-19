@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredTicketKeywords;
 
 public class ActionInfoTable extends VisTable {
 
@@ -89,7 +90,8 @@ public class ActionInfoTable extends VisTable {
             return null;
         }
         Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40, 0.9f), color);
-        Label label = new Label(text, labelStyle);
+        labelStyle.font.getData().markupEnabled = true;
+        Label label = new Label(replaceColoredTicketKeywords(text), labelStyle);
         label.setAlignment(Align.topLeft, Align.left);
         label.setWrap(true);
         label.setFontScale(0.4f);

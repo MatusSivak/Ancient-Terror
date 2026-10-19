@@ -5,6 +5,6 @@ public final class AzathothEndingDialog extends AncientOneEndingDialog {
 
     public AzathothEndingDialog() {
         super("AZATHOTH", TEXT_KEY, "ancientOne.azathoth",
-                "ancient_one/azathoth-ending-art.png", "sounds/azathoth_ending.wav");
+                "ancient_one/azathoth-ending-art.png", "sounds/ancient_one_ending.wav");
     }
 }

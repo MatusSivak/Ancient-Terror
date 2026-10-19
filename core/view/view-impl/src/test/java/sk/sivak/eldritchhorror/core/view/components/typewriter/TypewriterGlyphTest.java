@@ -34,6 +34,14 @@ public class TypewriterGlyphTest {
 
     private static String icon(String keyword) { return "[#FFFFFFFF]" + getGlyph(keyword) + "[]"; }
 
+    @Test public void ticketRulesUseIconsButFlavorKeepsItsWords() {
+        view.typeInfo("[#GOOD]Gain one Ship Ticket[] and 2 train tickets; spend 1 TRAIN TICKET.").subscribe();
+        assertEquals("[#" + TypewriterConstants.HEX_GOOD + "]Gain one " + icon("Ship Ticket")
+                + "[] and 2 " + icon("Train Ticket") + "; spend 1 " + icon("Train Ticket") + ".", view.text);
+        view.typeFlavor("The conductor takes your train ticket.").subscribe();
+        assertEquals("The conductor takes your train ticket.\n ", view.text);
+    }
+
     @Test public void reckoningUsesGlyphInRulesRegardlessOfCaseButNotFlavorOrLongerWords() {
         view.typeInfo("[#BAD]Reckoning![] Resolve reckoning and RECKONING; reckonings remain text.").subscribe();
         assertEquals("[#" + TypewriterConstants.HEX_BAD + "]" + icon("RECKONING")

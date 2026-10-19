@@ -22,6 +22,7 @@ public class AzathothEndingPreview extends ApplicationAdapter {
     private Stage stage;
     private int soundPlays;
     private int soundStops;
+    private String playedSoundPath;
 
     public static void main(String[] args) {
         LwjglApplicationConfiguration.disableAudio = true;
@@ -38,16 +39,19 @@ public class AzathothEndingPreview extends ApplicationAdapter {
         String originalLanguage = UiText.getLanguage();
         com.badlogic.gdx.Audio originalAudio = Gdx.audio;
         try {
-            com.badlogic.gdx.audio.Sound sound = (com.badlogic.gdx.audio.Sound) java.lang.reflect.Proxy.newProxyInstance(
-                    getClass().getClassLoader(), new Class<?>[]{com.badlogic.gdx.audio.Sound.class},
-                    (proxy, method, args) -> {
-                        if (method.getName().equals("play")) { soundPlays++; return 1L; }
-                        if (method.getName().equals("stop")) soundStops++;
-                        return null;
-                    });
             Gdx.audio = (com.badlogic.gdx.Audio) java.lang.reflect.Proxy.newProxyInstance(
                     getClass().getClassLoader(), new Class<?>[]{com.badlogic.gdx.Audio.class},
-                    (proxy, method, args) -> method.getName().equals("newSound") ? sound : null);
+                    (proxy, method, args) -> {
+                        if (!method.getName().equals("newSound")) return null;
+                        String path = ((com.badlogic.gdx.files.FileHandle)args[0]).path();
+                        if (!((com.badlogic.gdx.files.FileHandle)args[0]).exists()) throw new AssertionError("Missing sound: " + path);
+                        return java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
+                                new Class<?>[]{com.badlogic.gdx.audio.Sound.class}, (p,m,a) -> {
+                                    if (m.getName().equals("play")) { playedSoundPath=path; soundPlays++; return 1L; }
+                                    if (m.getName().equals("stop")) soundStops++;
+                                    return null;
+                                });
+                    });
             stage = InfoStage.getStageSafe();
             InitGameViewImpl view = new InitGameViewImpl();
             for (String ancient : new String[]{"azathoth", "yig"}) {
@@ -64,6 +68,8 @@ public class AzathothEndingPreview extends ApplicationAdapter {
                 stage.act(1f);
                 stage.act(1f);
                 if (soundPlays != previousPlays + 1) throw new AssertionError("Opening sound must play once" );
+                if (!"sounds/ancient_one_ending.wav".equals(playedSoundPath))
+                    throw new AssertionError("Defeat played wrong cue: " + playedSoundPath);
                 Gdx.gl.glClearColor(0.18f, 0.2f, 0.19f, 1);
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
                 stage.draw();

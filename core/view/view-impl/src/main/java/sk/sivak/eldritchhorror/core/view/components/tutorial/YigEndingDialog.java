@@ -5,6 +5,6 @@ public final class YigEndingDialog extends AncientOneEndingDialog {
 
     public YigEndingDialog() {
         super("YIG", TEXT_KEY, "ancientOne.yig",
-                "ancient_one/yig-ending-art-v2.png", "sounds/doom_advance.wav");
+                "ancient_one/yig-ending-art-v2.png", "sounds/ancient_one_ending.wav");
     }
 }

@@ -4,8 +4,29 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher.getDiceGlyph;
+import static sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher.getGlyph;
 
 public class MarkupTextTest {
+
+    @Test public void ticketsWorkInRulesCardsAndAbilitiesWithWordBoundaries() {
+        String train = "[#FFFFFFFF]" + getGlyph("Train Ticket") + "[]";
+        String ship = "[#FFFFFFFF]" + getGlyph("Ship Ticket") + "[]";
+        String rule = "Spend 2 Train Tickets or 1 ship ticket.";
+        assertEquals("Spend 2 " + train + " or 1 " + ship + ".", MarkupText.replaceColoredGlyphKeywords(rule));
+        assertEquals("[#30251F]Spend 2 " + train + " or 1 " + ship + ".", MarkupText.markupWithKeywords(rule, "30251F"));
+        assertEquals("Spend 2 " + train + " or 1 " + ship + ".", MarkupText.replaceColoredTicketKeywords(rule));
+        assertEquals("1 " + getGlyph("Train Ticket") + " / 2 " + getGlyph("Ship Ticket"),
+                MarkupText.replaceGlyphKeywords("1 Train Ticket / 2 Ship Tickets"));
+        String prose = "Steamship tickets and train ticketing; ship and train routes; travel tickets.";
+        assertEquals(prose, MarkupText.replaceGlyphKeywords(prose));
+    }
+
+    @Test public void localizedAndWrappedTicketPhrasesKeepTheirQuantities() {
+        assertEquals("1 " + getGlyph("Train Ticket") + ", 2 " + getGlyph("Ship Ticket")
+                        + ", 5 " + getGlyph("Train Ticket"),
+                MarkupText.replaceGlyphKeywords("1 Vlakový lístok, 2 lodné lístky, 5 vlakových lístkov"));
+        assertEquals("Gain one " + getGlyph("Ship Ticket"), MarkupText.replaceGlyphKeywords("Gain one Ship\nTicket"));
+    }
 
     @Test
     public void replacesDiceResultsWithDiceGlyphs() {

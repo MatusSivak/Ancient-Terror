@@ -15,6 +15,17 @@ public class MarkupText {
                     + "|(?<=\\bsucceed on |\\bsucceed only on )" + DICE_LIST + "(?![\\w])"
                     + "|(?<=\\b[Ee]ach )[1-6](?![\\w]| [A-Z])");
     private static final Pattern DICE_VALUE = Pattern.compile("[1-6]");
+    private static final Pattern TRAIN_TICKETS = Pattern.compile("(?iu)(?<![\\p{L}\\p{N}_])(?:train\\s+tickets?|vlakov(?:ý\\s+lístok|é\\s+lístky|ých\\s+lístkov|ého\\s+lístka|ému\\s+lístku|ým\\s+lístkom))(?![\\p{L}\\p{N}_])");
+    private static final Pattern SHIP_TICKETS = Pattern.compile("(?iu)(?<![\\p{L}\\p{N}_])(?:ship\\s+tickets?|lodn(?:ý\\s+lístok|é\\s+lístky|ých\\s+lístkov|ého\\s+lístka|ému\\s+lístku|ým\\s+lístkom))(?![\\p{L}\\p{N}_])");
+
+    private static String replaceTicketKeywords(String text, String prefix, String suffix) {
+        text = TRAIN_TICKETS.matcher(text).replaceAll(Matcher.quoteReplacement(prefix + FontGlyphEnricher.getGlyph("Train Ticket") + suffix));
+        return SHIP_TICKETS.matcher(text).replaceAll(Matcher.quoteReplacement(prefix + FontGlyphEnricher.getGlyph("Ship Ticket") + suffix));
+    }
+
+    public static String replaceColoredTicketKeywords(String text) {
+        return text == null ? null : replaceTicketKeywords(text, "[#FFFFFFFF]", "[]");
+    }
 
     public static String replaceDiceResults(String text) {
         return replaceDiceResults(text, "", "");
@@ -54,6 +65,7 @@ public class MarkupText {
             return text;
         }
         text = replaceDiceResults(text, glyphPrefix, glyphSuffix);
+        text = replaceTicketKeywords(text, glyphPrefix, glyphSuffix);
         for (CardKeywords cardKeywords : CardKeywords.values()) {
             String word = cardKeywords.getWord();
             if (FontGlyphEnricher.containsGlyph(word)) {
@@ -87,6 +99,7 @@ public class MarkupText {
 
     public static String markupWithKeywords(String description, String defaultColor, String markupColor) {
         description = "[#" + defaultColor + "]" + replaceDiceResults(description, "[#FFFFFFFF]", "[]");
+        description = replaceTicketKeywords(description, "[#FFFFFFFF]", "[]");
         for (CardKeywords cardKeywords : CardKeywords.values()) {
             String word = cardKeywords.getWord();
 

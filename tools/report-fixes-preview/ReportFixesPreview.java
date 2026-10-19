@@ -33,10 +33,12 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean latestOnly;
     private static boolean october15;
     private static boolean awakening;
+    private static boolean october19;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
         awakening = Arrays.asList(args).contains("--awakening");
+        october19 = Arrays.asList(args).contains("--oct19");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -51,6 +53,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october19) { october19Reports(); return; }
             if (awakening) { awakeningReports(); return; }
             if (october15) { october15Reports(); return; }
             if (latestOnly) { latestReports(); return; }
@@ -62,6 +65,86 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void october19Reports() throws Exception {
+        cameraQueue();
+        typewriter();
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String language : new String[]{"en", "sk"}) {
+            setPreviewLanguage(language);
+            String rules = language.equals("en") ? "Gain 2 Train Tickets or 1 Ship Ticket."
+                    : "Získaj 2 vlakové lístky alebo 1 lodný lístok.";
+            Table panel = new Table(); panel.setBounds(100, 170, 760, 200);
+            Label.LabelStyle style = new Label.LabelStyle(
+                    sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew(
+                            sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
+            style.font.getData().markupEnabled = true;
+            Label cardRules = new Label(sk.sivak.eldritchhorror.core.view.utils.MarkupText.markupWithKeywords(rules, "FFFFFF"), style);
+            cardRules.setFontScale(.55f); panel.add(cardRules).growX(); panel.row();
+            sk.sivak.eldritchhorror.core.view.components.sheet.investigator.SpecialTable abilities =
+                    new sk.sivak.eldritchhorror.core.view.components.sheet.investigator.SpecialTable();
+            abilities.init(new sk.sivak.eldritchhorror.core.view.components.sheet.investigator.SpecialTableData.Builder()
+                    .action(rules).ability(rules).build());
+            panel.add(abilities).growX(); stage.addActor(panel); tick(3);
+            draw("oct19-ticket-rules-" + language);
+            for (Actor actor : all(panel)) if (actor instanceof Label) {
+                Label label = (Label) actor; label.validate();
+                require(label.getPrefHeight() <= label.getHeight()+1, "Ticket text clipped: " + label.getText()
+                        + " preferred=" + label.getPrefHeight() + " actual=" + label.getHeight());
+            }
+            String text = labels(panel);
+            require(text.indexOf(FontGlyphEnricher.getGlyph("Train Ticket")) >= 0
+                    && text.indexOf(FontGlyphEnricher.getGlyph("Ship Ticket")) >= 0, "Ticket glyphs missing");
+            panel.remove();
+        }
+        setPreviewLanguage(oldLanguage);
+        System.out.println("PASS: queued camera transitions, ticket rules/cards/abilities in English and Slovak");
+    }
+
+    private void cameraQueue() {
+        Stage map = sk.sivak.eldritchhorror.core.view.game.MapStage.getStage();
+        OrthographicCamera camera = sk.sivak.eldritchhorror.core.view.game.MapStage.getCamera();
+        for (boolean fast : new boolean[]{false, true}) {
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            camera.position.set(500, 300, 0); camera.zoom = 4;
+            List<Integer> completed = new ArrayList<>();
+            moveCamera(550, 310, 1, .8f, () -> {
+                require(Math.abs(camera.position.x - 550) < .01f && Math.abs(camera.zoom - 1) < .01f,
+                        "First callback sees stale camera"); completed.add(1);
+            });
+            map.act(.01f);
+            float before = camera.zoom;
+            com.badlogic.gdx.math.Vector2 target = new com.badlogic.gdx.math.Vector2(650, 330);
+            rx.Completable.create(s -> sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper
+                    .moveCameraToPosition(target, s, 2, .6f)).subscribe(() -> completed.add(2));
+            target.set(900, 900); // Queued destinations must be copied.
+            moveCamera(700, 350, 1.5f, .3f, () -> completed.add(3));
+            require(camera.zoom == before, "Queueing a move changed zoom immediately");
+            for (int i=0;i<300;i++) {
+                int writers = 0;
+                for (Actor actor : map.getActors()) if (actor instanceof sk.sivak.eldritchhorror.core.view.map.CameraActor) writers++;
+                require(writers <= 1, "Overlapping camera writers");
+                map.act(1f/60);
+            }
+            require(completed.equals(Arrays.asList(1,2,3)), "Camera completions missing, repeated or out of order: " + completed);
+            require(Math.abs(camera.position.x - 700) < .01f && Math.abs(camera.position.y - 350) < .01f
+                    && Math.abs(camera.zoom - 1.5f) < .01f, "Wrong final camera pose");
+            // Exercise the natural two-phase zoom and a reentrant completion.
+            completed.clear();
+            moveCamera(ViewProperties.MAP_WIDTH - 10, 300, 1.5f, null, () -> {
+                completed.add(1); moveCamera(20, 300, 1, 0f, () -> completed.add(2));
+            });
+            for (int i=0;i<1800;i++) map.act(1f/60);
+            require(completed.equals(Arrays.asList(1,2)), "Reentrant camera move did not complete");
+            require(Math.abs(camera.position.x-20)<.01f && Math.abs(camera.zoom-1)<.01f, "Wrapped/zero-duration camera failed");
+        }
+        FastForwardAction.turnOff();
+    }
+
+    private void moveCamera(float x, float y, float zoom, Float duration, Runnable completed) {
+        rx.Completable.create(s -> sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper
+                .moveCameraToPosition(new com.badlogic.gdx.math.Vector2(x,y), s, zoom, duration)).subscribe(completed::run);
     }
 
     private void awakeningReports() throws Exception {
@@ -377,6 +460,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             view.typeInfo("Each investigator tests Observation-1 or Will+2. [#BAD]Lose 1 Health and 2 Sanity[].")
                     .andThen(view.typeInfo("Test Lore, Influence or Strength. Roll 1 die. On a 1 or 2, gain 1 Clue."))
                     .andThen(view.typeInfo("[#BAD]Reckoning![] Resolve reckoning effects."))
+                    .andThen(view.typeInfo("[#GOOD]Gain one Ship Ticket[] or 2 train tickets."))
                     .subscribe(() -> completed[0]++);
             tick(1800);
             require(completed[0] == 1, "Typewriter rules did not finish exactly once");
@@ -388,7 +472,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                 for (com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run : label.getGlyphLayout().runs)
                     require(run.y == 0, "Typewriter line wrapped into the next row");
             }
-            for (String word : new String[]{"Observation", "Will", "Lore", "Influence", "Strength", "Health", "Sanity", "Clue", "RECKONING"})
+            for (String word : new String[]{"Observation", "Will", "Lore", "Influence", "Strength", "Health", "Sanity", "Clue", "RECKONING", "Ship Ticket", "Train Ticket"})
                 require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getGlyph(word))) >= 0, "Missing typewriter glyph: " + word);
             require(rendered.indexOf(String.valueOf(FontGlyphEnricher.getDiceGlyph(1))) >= 0, "Missing die-result glyph");
             draw(fast ? "typewriter-glyphs-fast" : "typewriter-glyphs");

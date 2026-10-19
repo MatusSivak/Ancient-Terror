@@ -25,6 +25,8 @@ public class FontGlyphEnricher {
 	private static final char GLYPH_DISCARD = '\uE00D';
 	// Dice faces 1-6 occupy \uE00E-\uE013.
 	private static final char GLYPH_DIE_1 = '\uE00E';
+	private static final char GLYPH_TRAIN_TICKET = '\uE014';
+	private static final char GLYPH_SHIP_TICKET = '\uE015';
 
 	private static final String DICE_SHEET = "dice_sheet.png";
 	private static final int DICE_SHEET_COLUMNS = 16;
@@ -47,6 +49,8 @@ public class FontGlyphEnricher {
 		glyphMap.put("Clues", GLYPH_CLUE);
 		glyphMap.put("Clue", GLYPH_CLUE);
 		glyphMap.put("Focus", GLYPH_FOCUS);
+		glyphMap.put("Train Ticket", GLYPH_TRAIN_TICKET);
+		glyphMap.put("Ship Ticket", GLYPH_SHIP_TICKET);
 		glyphMap.put("flip this card", GLYPH_FLIP);
 		glyphMap.put("Flip this card", GLYPH_FLIP);
 		glyphMap.put("discard this card", GLYPH_DISCARD);
@@ -95,6 +99,17 @@ public class FontGlyphEnricher {
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/flip.png"), GLYPH_FLIP, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/discard.png"), GLYPH_DISCARD, renderWidth, renderHeight);
 		addDiceGlyphs(bitmapFont, icons.apply(DICE_SHEET), 80);
+		addTicketGlyph(bitmapFont, icons.apply("token/train_ticket_right.png"), GLYPH_TRAIN_TICKET, renderHeight);
+		addTicketGlyph(bitmapFont, icons.apply("token/ship_ticket_right.png"), GLYPH_SHIP_TICKET, renderHeight);
+	}
+
+	private static void addTicketGlyph(BitmapFont font, TextureRegion icon, char glyph, int height) {
+		// These are the right-hand stubs of a 500x333 ticket animation sheet.
+		// Exclude its empty canvas so the train/anchor remains legible inline.
+		TextureRegion stub = new TextureRegion(icon,
+				Math.round(icon.getRegionWidth() * 360f / 500), Math.round(icon.getRegionHeight() * 28f / 333),
+				Math.round(icon.getRegionWidth() * 140f / 500), Math.round(icon.getRegionHeight() * 198f / 333));
+		addIconGlyph(font, stub, glyph, Math.round(height * 140f / 198), height);
 	}
 
 	private static void addDiceGlyphs(BitmapFont bitmapFont, TextureRegion sheet, int renderSize) {

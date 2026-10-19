@@ -8,6 +8,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredTicketKeywords;
 
 public class SpecialTable extends VisTable {
 
@@ -34,8 +35,8 @@ public class SpecialTable extends VisTable {
     }
 
     public void init(SpecialTableData data) {
-        actionValue.setText(resolveLocalizedText(data.getAction()));
-        abilityValue.setText(resolveLocalizedText(data.getAbility()));
+        actionValue.setText(replaceColoredTicketKeywords(resolveLocalizedText(data.getAction())));
+        abilityValue.setText(replaceColoredTicketKeywords(resolveLocalizedText(data.getAbility())));
 
     }
 
@@ -64,6 +65,7 @@ public class SpecialTable extends VisTable {
 
     private Label createValue() {
         Label.LabelStyle style = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), CharacterSheetWidgets.INK);
+        style.font.getData().markupEnabled = true;
 
         Label label = new Label("0", style);
         label.setWrap(true);

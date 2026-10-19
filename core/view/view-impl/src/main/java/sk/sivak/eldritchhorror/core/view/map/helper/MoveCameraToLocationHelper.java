@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.map.helper;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.FloatAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -42,6 +43,14 @@ public class MoveCameraToLocationHelper {
             subscriber.onCompleted();
             return;
         }
+        for (Actor actor : MapStage.getStage().getActors()) {
+            if (actor instanceof CameraActor) {
+                Vector2 destination = new Vector2(position);
+                ((CameraActor) actor).afterMovement(() ->
+                        moveCameraToPosition(destination, subscriber, targetZoom, duration));
+                return;
+            }
+        }
         OrthographicCamera camera = MapStage.getCamera();
         Vector2 locationPositionLeft = new Vector2(position.x - MAP_WIDTH, position.y);
         Vector2 locationPositionRight = new Vector2(position.x + MAP_WIDTH, position.y);
@@ -66,6 +75,7 @@ public class MoveCameraToLocationHelper {
         CameraActor cameraActor = new CameraActor(camera);
         cameraActor.setPosition(camera.position.x, camera.position.y);
         MapStage.getStage().addActor(cameraActor);
+        cameraActor.afterMovement(subscriber::onCompleted);
 
         if (duration != null) {
             zoomDuration = duration;
@@ -75,22 +85,15 @@ public class MoveCameraToLocationHelper {
             moveToAction.setDuration(zoomDuration);
             ZoomAction zoomAction = new ZoomAction(cameraActor, camera.zoom, targetZoom, zoomDuration);
 
-            cameraActor.addAction(
-                    Actions.sequence(
-                            new FastForwardAction(Actions.parallel(zoomAction, moveToAction)),
-                            Actions.run(() -> {subscriber.onCompleted();}),
-                            Actions.run(cameraActor::remove)));
+            cameraActor.addAction(new FastForwardAction(Actions.parallel(zoomAction, moveToAction)));
         } else {
             float zoomOutDuration = (moveToAction.getDuration() - zoomDuration) / 2;
             float zoomInDuration = moveToAction.getDuration() - zoomOutDuration;
             float zoomOutEnd = camera.zoom + zoomOutDuration * CAMERA_ZOOM_SPEED;
             ZoomAction zoomOutAction = new ZoomAction(cameraActor, camera.zoom, zoomOutEnd, zoomOutDuration);
             ZoomAction zoomInAction = new ZoomAction(cameraActor, zoomOutEnd, targetZoom, zoomInDuration);
-            cameraActor.addAction(
-                    Actions.sequence(
-                            new FastForwardAction(Actions.parallel(Actions.sequence(zoomOutAction, zoomInAction),moveToAction)),
-                            Actions.run(() -> {subscriber.onCompleted();}),
-                            Actions.run(cameraActor::remove)));
+            cameraActor.addAction(new FastForwardAction(
+                    Actions.parallel(Actions.sequence(zoomOutAction, zoomInAction), moveToAction)));
         }
     }
 

@@ -46,13 +46,21 @@ public class FontGlyphEnricherTest {
                 return new TextureRegion(texture);
             });
         }
-        assertEquals(14, loads[0]);
-        assertEquals(20, font.getRegions().size);
+        assertEquals(16, loads[0]);
+        assertEquals(22, font.getRegions().size);
+        for (String ticket : new String[]{"Train Ticket", "Ship Ticket"}) {
+            BitmapFont.Glyph glyph = data.getGlyph(FontGlyphEnricher.getGlyph(ticket));
+            assertEquals(64, glyph.width);
+            assertEquals(90, glyph.height);
+            TextureRegion cropped = font.getRegions().get(glyph.page);
+            assertTrue(cropped.getRegionWidth() < texture.getWidth() / 2);
+            assertTrue(cropped.getRegionHeight() < texture.getHeight());
+        }
         for (int value = 1; value <= 6; value++) {
             assertNotNull(data.getGlyph(FontGlyphEnricher.getDiceGlyph(value)));
         }
         for (String name : new String[]{"Influence", "Strength", "Observation", "Will", "Lore", "→", "RECKONING",
-                "Health", "Sanity", "Clue", "Clues", "Focus", "flip this card", "discard this card"}) {
+                "Health", "Sanity", "Clue", "Clues", "Focus", "flip this card", "discard this card", "Train Ticket", "Ship Ticket"}) {
             assertNotNull(data.getGlyph(FontGlyphEnricher.getGlyph(name)));
         }
         } finally {

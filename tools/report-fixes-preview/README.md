@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--oct19"` with the command below for queued camera moves at normal
+and fast-forward speed (including reentrant, wrapped and zero-duration moves),
+ticket glyphs in typewriter rules, and English/Slovak card and investigator
+ability text. Screenshots use `oct19-ticket-rules-*` and `typewriter-glyphs*`.
+
 From the repository root, using the JDK setup in `BUILDING.md`:
 
 ```powershell
