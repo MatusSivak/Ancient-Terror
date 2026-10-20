@@ -20,6 +20,17 @@ def resolvedAdMobAppId = useTestAdMobIds ? testAdMobAppId : propOrDefault("ADMOB
 def resolvedInterstitialAdUnitId = useTestAdMobIds ? testInterstitialAdUnitId : propOrDefault("ADMOB_INTERSTITIAL_AD_UNIT_ID", testInterstitialAdUnitId)
 def resolvedRewardedAdUnitId = useTestAdMobIds ? testRewardedAdUnitId : propOrDefault("ADMOB_REWARDED_AD_UNIT_ID", testRewardedAdUnitId)
 def androidApplicationId = "sk.sivak.eldritchhorror.android"
+def apkVersionCode = propOrDefault("APP_VERSION_CODE", "1717").toInteger()
+if (apkVersionCode < 1 || apkVersionCode > 2100000000) {
+    throw new GradleException("APP_VERSION_CODE must be between 1 and 2100000000.")
+}
+def apkVersionSuffix = propOrDefault("APP_VERSION_SUFFIX", "")
+// CI restores the original developer debug key outside the checkout. Local
+// Android Studio/installDebug builds continue using their normal debug key.
+def ciDebugKeystore = System.getenv("ANCIENT_TERROR_DEBUG_KEYSTORE")
+if (ciDebugKeystore && !file(ciDebugKeystore).isFile()) {
+    throw new GradleException("ANCIENT_TERROR_DEBUG_KEYSTORE does not point to a file.")
+}
 def firebaseConfigFile = file("google-services.json")
 if (!firebaseConfigFile.exists()) {
     firebaseConfigFile = rootProject.file("google-services.json")
@@ -83,6 +94,17 @@ android {
     namespace "sk.sivak.eldritchhorror.android"
     compileSdkVersion 35
 
+    signingConfigs {
+        debug {
+            if (ciDebugKeystore) {
+                storeFile file(ciDebugKeystore)
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
@@ -119,8 +141,8 @@ android {
         minSdkVersion 26
         multiDexEnabled true
         targetSdkVersion 35
-        versionCode 1717
-        versionName "1.7.17"
+        versionCode apkVersionCode
+        versionName "1.7.17" + (apkVersionSuffix ? "-" + apkVersionSuffix : "")
         manifestPlaceholders = [
                 admobAppId: resolvedAdMobAppId
         ]

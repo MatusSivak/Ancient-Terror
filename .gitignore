@@ -1,5 +1,8 @@
 .idea/
 .gradle/
+*.keystore
+*.jks
+*.p12
 core/initializer/target/
 target/
 *.iml

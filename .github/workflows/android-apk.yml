@@ -1,0 +1,126 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      EXPECTED_SIGNER_SHA256: 31c4643ed46bd725502ea5dc3ebf62f1ab147aea4cbcd8c6e95be2c664328c70
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
+
+      - name: Configure Android SDK and build number
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
+          sdkmanager 'platforms;android-35' 'build-tools;34.0.0' 'build-tools;35.0.0'
+          version_code=$((100000 + GITHUB_RUN_NUMBER))
+          short_sha="${GITHUB_SHA:0:7}"
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+          echo "suffix=ci.${GITHUB_RUN_NUMBER}.${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "artifact=Ancient-Terror-debug-${version_code}-${short_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Run unit tests
+        run: bash ./gradlew test --no-daemon --console=plain -PUSE_TEST_ADMOB_IDS=true
+
+      - name: Restore original debug signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo 'Missing repository secret ANDROID_DEBUG_KEYSTORE_BASE64.' >&2
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ancient-terror-debug.keystore"
+
+      - name: Build update APK
+        env:
+          ANCIENT_TERROR_DEBUG_KEYSTORE: ${{ runner.temp }}/ancient-terror-debug.keystore
+          APP_VERSION_CODE: ${{ steps.build.outputs.version_code }}
+          APP_VERSION_SUFFIX: ${{ steps.build.outputs.suffix }}
+        run: |
+          bash ./gradlew :android:assembleDebug --no-daemon --console=plain \
+            -PUSE_TEST_ADMOB_IDS=true \
+            -PAPP_VERSION_CODE="$APP_VERSION_CODE" \
+            -PAPP_VERSION_SUFFIX="$APP_VERSION_SUFFIX"
+
+      - name: Verify signing identity and package APK
+        env:
+          ARTIFACT_NAME: ${{ steps.build.outputs.artifact }}
+          APP_VERSION_CODE: ${{ steps.build.outputs.version_code }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=android/build/outputs/apk/debug/android-debug.apk
+          tools="$ANDROID_HOME/build-tools/35.0.0"
+          "$tools/apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/apk-signature.txt"
+          signer=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signature.txt")
+          if [ "$signer" != "$EXPECTED_SIGNER_SHA256" ]; then
+            echo 'APK signer does not match the original installed debug build.' >&2
+            exit 1
+          fi
+          "$tools/aapt" dump badging "$apk" > "$RUNNER_TEMP/apk-badging.txt"
+          grep -F "package: name='sk.sivak.eldritchhorror.android' versionCode='$APP_VERSION_CODE'" "$RUNNER_TEMP/apk-badging.txt"
+          mkdir -p build/apk-artifact
+          cp "$apk" "build/apk-artifact/${ARTIFACT_NAME}.apk"
+          (cd build/apk-artifact && sha256sum "${ARTIFACT_NAME}.apk" > SHA256SUMS.txt)
+
+      - name: Upload APK
+        id: upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ${{ steps.build.outputs.artifact }}
+          path: build/apk-artifact/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Download instructions
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+          APP_VERSION_CODE: ${{ steps.build.outputs.version_code }}
+        run: |
+          {
+            echo '### Ancient Terror APK'
+            echo "[Download APK artifact]($ARTIFACT_URL)"
+            echo
+            echo "Version code: $APP_VERSION_CODE. Commit: $GITHUB_SHA."
+            echo
+            echo 'Extract the ZIP and open the APK on your phone. Install it as an update; do not uninstall the game.'
+            echo 'Signed with the original Android debug key. This test build uses test ads.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove signing key
+        if: always()
+        shell: bash
+        run: rm -f -- "$RUNNER_TEMP/ancient-terror-debug.keystore"
