@@ -40,7 +40,8 @@ jobs:
         run: |
           set -euo pipefail
           printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
-          sdkmanager 'platforms;android-35' 'build-tools;34.0.0' 'build-tools;35.0.0'
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            'platforms;android-35' 'build-tools;34.0.0' 'build-tools;35.0.0'
           version_code=$((100000 + GITHUB_RUN_NUMBER))
           short_sha="${GITHUB_SHA:0:7}"
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
