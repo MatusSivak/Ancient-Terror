@@ -22,6 +22,7 @@ public class AzathothEndingPreview extends ApplicationAdapter {
     private Stage stage;
     private int soundPlays;
     private int soundStops;
+    private int soundDisposals;
     private String playedSoundPath;
 
     public static void main(String[] args) {
@@ -42,13 +43,18 @@ public class AzathothEndingPreview extends ApplicationAdapter {
             Gdx.audio = (com.badlogic.gdx.Audio) java.lang.reflect.Proxy.newProxyInstance(
                     getClass().getClassLoader(), new Class<?>[]{com.badlogic.gdx.Audio.class},
                     (proxy, method, args) -> {
-                        if (!method.getName().equals("newSound")) return null;
+                        if (method.getName().equals("newSound"))
+                            throw new AssertionError("Ending must not depend on asynchronous SoundPool loading");
+                        if (!method.getName().equals("newMusic")) return null;
                         String path = ((com.badlogic.gdx.files.FileHandle)args[0]).path();
                         if (!((com.badlogic.gdx.files.FileHandle)args[0]).exists()) throw new AssertionError("Missing sound: " + path);
                         return java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
-                                new Class<?>[]{com.badlogic.gdx.audio.Sound.class}, (p,m,a) -> {
-                                    if (m.getName().equals("play")) { playedSoundPath=path; soundPlays++; return 1L; }
+                                new Class<?>[]{com.badlogic.gdx.audio.Music.class}, (p,m,a) -> {
+                                    if (m.getName().equals("play")) { playedSoundPath=path; soundPlays++; }
                                     if (m.getName().equals("stop")) soundStops++;
+                                    if (m.getName().equals("dispose")) soundDisposals++;
+                                    if (m.getName().equals("setLooping") && (Boolean)a[0])
+                                        throw new AssertionError("Ending cue must not loop");
                                     return null;
                                 });
                     });
@@ -65,6 +71,7 @@ public class AzathothEndingPreview extends ApplicationAdapter {
                     throw new AssertionError("Yig defeat did not route to its illustrated dialog");
                 int previousPlays = soundPlays;
                 int previousStops = soundStops;
+                int previousDisposals = soundDisposals;
                 stage.act(1f);
                 stage.act(1f);
                 if (soundPlays != previousPlays + 1) throw new AssertionError("Opening sound must play once" );
@@ -90,6 +97,7 @@ public class AzathothEndingPreview extends ApplicationAdapter {
                     throw new AssertionError("Continue did not complete and remove the ending");
                 }
                 if (soundStops != previousStops + 1) throw new AssertionError("Sound must stop on dismissal" );
+                if (soundDisposals != previousDisposals + 1) throw new AssertionError("Music must be disposed on dismissal");
                 stage.touchDown(675, 465, 0, 0);
                 stage.touchUp(675, 465, 0, 0);
                 if (completed[0] != 1) throw new AssertionError("Ending completed twice");

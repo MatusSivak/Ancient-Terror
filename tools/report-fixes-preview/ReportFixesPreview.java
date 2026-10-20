@@ -35,12 +35,14 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean awakening;
     private static boolean october19;
     private static boolean crown;
+    private static boolean october20;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
         awakening = Arrays.asList(args).contains("--awakening");
         october19 = Arrays.asList(args).contains("--oct19");
         crown = Arrays.asList(args).contains("--crown");
+        october20 = Arrays.asList(args).contains("--oct20");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -55,6 +57,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october20) { october20Reports(); return; }
             if (crown) { crownResolution(); return; }
             if (october19) { october19Reports(); return; }
             if (awakening) { awakeningReports(); return; }
@@ -68,6 +71,67 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void october20Reports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(
+                proxy(GameController.class, (p,m,a) -> null)).init();
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String language : new String[]{"en", "sk"}) for (boolean fast : new boolean[]{false, true}) {
+            setPreviewLanguage(language);
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            MysteryCardInfo info = sk.sivak.eldritchhorror.core.model.util.YigMysteryDeck.create(2).stream()
+                    .filter(c -> c.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT).findFirst().get();
+            info.setProgressSupplier(info::getMysteryComplexity);
+            new sk.sivak.eldritchhorror.core.view.game.GameViewImpl()
+                    .showCurrentMysteryCard(info, false, 1, 3).subscribe();
+            Question<Object> question = new Question<>();
+            question.setTitle("Mystery was solved!");
+            question.setOptions(Question.Option.okOption);
+            question.displayCurrentMysteryCard();
+            int[] completed = {0};
+            new sk.sivak.eldritchhorror.core.view.question.QuestionView()
+                    .ask(question).subscribe(answer -> completed[0]++);
+            tick(180);
+            MysteryCard card = sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.getMysteryCard();
+            sk.sivak.eldritchhorror.core.view.components.table.LabelTable prompt = null;
+            Button ok = null;
+            for (Actor actor : all(stage.getRoot())) {
+                if (actor instanceof sk.sivak.eldritchhorror.core.view.components.table.LabelTable)
+                    prompt = (sk.sivak.eldritchhorror.core.view.components.table.LabelTable) actor;
+                if (actor instanceof TextButton && actor.getParent() == card.getParent()) ok = (Button) actor;
+            }
+            require(prompt != null && ok != null, "Solved-mystery controls missing");
+            require(prompt.getColor().a > .99f && prompt.getParent().getColor().a > .99f, "Prompt hidden");
+            require(card.getY() >= prompt.getTop() + 9f, "Mystery overlaps solved prompt");
+            require(card.getTop() <= 540, "Mystery clipped above viewport");
+            require(prompt.getY() >= ok.getTop(), "Solved prompt overlaps OK");
+            draw("oct20-mystery-solved-" + language + (fast ? "-fast" : ""));
+            click(ok); tick(180);
+            require(completed[0] == 1, "Solved mystery must acknowledge exactly once");
+            require(card.getParent() == null, "Acknowledged mystery remains open");
+
+            String rules = language.equals("en")
+                    ? "Spend 2 Clues and test Will. Gain 1 Train Ticket or 1 Ship Ticket."
+                    : "Získaj 2 vlakové lístky alebo 1 lodný lístok.";
+            sk.sivak.eldritchhorror.core.view.components.table.LabelTable glyphPrompt =
+                    sk.sivak.eldritchhorror.core.view.components.table.LabelTable.createAndShowTable(0, rules);
+            tick(60);
+            String text = labels(glyphPrompt);
+            require(text.indexOf(FontGlyphEnricher.getGlyph("Train Ticket")) >= 0
+                    && text.indexOf(FontGlyphEnricher.getGlyph("Ship Ticket")) >= 0, "Prompt ticket glyphs missing");
+            if (language.equals("en")) require(text.indexOf(FontGlyphEnricher.getGlyph("Will")) >= 0,
+                    "Prompt skill glyph missing");
+            for (Actor actor : all(glyphPrompt)) if (actor instanceof Label) {
+                Label label = (Label) actor; label.validate();
+                require(label.getPrefHeight() <= label.getHeight() + 1, "Prompt glyph text clipped");
+                require(label.getStyle().fontColor.equals(Color.WHITE), "Prompt style tints icon artwork");
+            }
+            draw("oct20-prompt-glyphs-" + language + (fast ? "-fast" : ""));
+            glyphPrompt.remove(); InfoStage.setBottomHeight(5);
+        }
+        setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
+        System.out.println("PASS: solved-mystery prompt bounds/acknowledgement and gold prompt glyphs, both languages/speeds");
     }
 
     private void crownResolution() throws Exception {

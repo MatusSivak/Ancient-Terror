@@ -14,6 +14,7 @@ import java8.features.function.Consumer;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 
 import java.util.List;
 
@@ -25,14 +26,19 @@ public class LabelTable extends VisTable {
     private LabelTable() {
     }
 
+    private static Label createPromptLabel(String text, Color color) {
+        Label.LabelStyle style = new Label.LabelStyle(
+                getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
+        style.font.getData().markupEnabled = true;
+        // Tint the prose with markup so embedded artwork keeps its own colors.
+        return new Label("[#" + color + "]"
+                + MarkupText.replaceColoredGlyphKeywords(text == null ? "" : text) + "[]", style);
+    }
+
     public static LabelTable createAndShowTable(float delay, String labelText, Texture texture) {
 
         Consumer<Table> consumer = table -> {
-            Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
-            labelStyle.fontColor = Color.YELLOW;
-
-            Label resultLabel = new Label(labelText, labelStyle);
+            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
             resultLabel.setAlignment(Align.center, Align.center);
             resultLabel.setFontScale(0.5f);
 
@@ -50,11 +56,7 @@ public class LabelTable extends VisTable {
     public static LabelTable createAndShowTable(float delay, String labelText, String portraitTextureName, List<Texture> textures, int minWidth) {
 
         Consumer<Table> consumer = table -> {
-            Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
-            labelStyle.fontColor = Color.YELLOW;
-
-            Label resultLabel = new Label(labelText, labelStyle);
+            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
             resultLabel.setAlignment(Align.center, Align.center);
             resultLabel.setFontScale(0.5f);
 
@@ -81,11 +83,7 @@ public class LabelTable extends VisTable {
     public static LabelTable createAndShowTable(float delay, String labelText) {
 
         Consumer<Table> consumer = table -> {
-            Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
-            labelStyle.fontColor = Color.YELLOW;
-
-            Label resultLabel = new Label(labelText, labelStyle);
+            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
             resultLabel.setAlignment(Align.center, Align.center);
             resultLabel.setFontScale(0.5f);
 
@@ -96,9 +94,7 @@ public class LabelTable extends VisTable {
 
     public static LabelTable createAndShowHint(String text) {
         return createAndShowTable(0, table -> {
-            Label.LabelStyle style = new Label.LabelStyle(
-                    getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf("E8D9B0"));
-            Label hint = new Label(text, style);
+            Label hint = createPromptLabel(text, Color.valueOf("E8D9B0"));
             hint.setAlignment(Align.center);
             hint.setFontScale(0.42f);
             table.add(hint).pad(3f, 10f, 3f, 10f);
@@ -107,9 +103,7 @@ public class LabelTable extends VisTable {
 
     public static LabelTable createAndShowNotice(String text, String portraitTextureName) {
         return createAndShowTable(0, table -> {
-            Label.LabelStyle style = new Label.LabelStyle(
-                    getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.YELLOW);
-            Label label = new Label(text, style);
+            Label label = createPromptLabel(text, Color.YELLOW);
             label.setFontScale(0.5f);
             label.setAlignment(Align.center);
             label.setWrap(true);

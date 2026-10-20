@@ -1,7 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.tutorial;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -30,8 +30,7 @@ public class AncientOneEndingDialog extends Group {
     private static final Color BRONZE = Color.valueOf("88704D");
     private static final float CARD_WIDTH = 780;
     private static final float CARD_HEIGHT = 480;
-    private Sound openingSound;
-    private long openingSoundId = -1;
+    private Music openingSound;
     private final AsyncSubject<Void> dismissed = AsyncSubject.create();
 
     protected AncientOneEndingDialog(String name, String textKey, String prefix, String artPath, String soundPath) {
@@ -100,8 +99,12 @@ public class AncientOneEndingDialog extends Group {
     private void playOpeningSound() {
         if (Gdx.audio == null) return;
         try {
-            openingSound = CustomAssetManager.getSound(soundPath);
-            openingSoundId = openingSound.play(1f);
+            // Music is prepared before play on Android. SoundPool can still be
+            // loading a newly created Sound when its first play is requested.
+            openingSound = Gdx.audio.newMusic(Gdx.files.internal(soundPath));
+            openingSound.setLooping(false);
+            openingSound.setVolume(1f);
+            openingSound.play();
         } catch (RuntimeException failure) {
             // A missing audio device must not block the end-of-game controls.
             Gdx.app.error("AncientOneEndingDialog", "Could not play ending sound", failure);
@@ -111,9 +114,10 @@ public class AncientOneEndingDialog extends Group {
     @Override
     public boolean remove() {
         clearActions();
-        if (openingSound != null && openingSoundId != -1) {
-            openingSound.stop(openingSoundId);
-            openingSoundId = -1;
+        if (openingSound != null) {
+            openingSound.stop();
+            openingSound.dispose();
+            openingSound = null;
         }
         return super.remove();
     }

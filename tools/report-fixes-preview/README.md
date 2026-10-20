@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--oct20"` for the 20 October review: the solved-mystery gold prompt
+stays above OK and below the Crown card after moving to the card layer. Also
+checks glyphs in gold-on-black prompts, preserving icon colors, in both language
+settings and at both animation speeds. Screenshots use `oct20-*`.
+
 Use `--args="--crown"` for the later 19 October reports: production mystery-card
 acknowledgement, camera focus on the Crown holder, refreshing an empty HUD to the
 holder's Clue/Focus counts, and complete token-loss animations in both language

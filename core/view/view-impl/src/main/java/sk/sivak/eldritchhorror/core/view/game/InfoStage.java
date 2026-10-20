@@ -431,6 +431,11 @@ public class InfoStage {
         for (Actor actor : get().smallActors.getChildren()) {
             if (actor instanceof LabelTable && actor.isVisible()) top = Math.max(top, actor.getTop());
         }
+        // Card questions move their prompt into this layer to keep it visible.
+        for (Actor actor : get().bigActors.getChildren()) {
+            if ((actor instanceof LabelTable || actor instanceof Button) && actor.isVisible())
+                top = Math.max(top, actor.getTop());
+        }
         return top;
     }
 
