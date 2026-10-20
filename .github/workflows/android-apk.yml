@@ -100,24 +100,34 @@ jobs:
         id: upload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: ${{ steps.build.outputs.artifact }}
-          path: build/apk-artifact/
+          path: build/apk-artifact/${{ steps.build.outputs.artifact }}.apk
+          archive: false
           if-no-files-found: error
           retention-days: 30
-          compression-level: 0
+
+      - name: Upload APK checksum
+        id: checksum
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          path: build/apk-artifact/SHA256SUMS.txt
+          archive: false
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Download instructions
         env:
           ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+          CHECKSUM_URL: ${{ steps.checksum.outputs.artifact-url }}
           APP_VERSION_CODE: ${{ steps.build.outputs.version_code }}
         run: |
           {
             echo '### Ancient Terror APK'
-            echo "[Download APK artifact]($ARTIFACT_URL)"
+            echo "[Download APK directly]($ARTIFACT_URL)"
+            echo "[Download SHA-256 checksum]($CHECKSUM_URL)"
             echo
             echo "Version code: $APP_VERSION_CODE. Commit: $GITHUB_SHA."
             echo
-            echo 'Extract the ZIP and open the APK on your phone. Install it as an update; do not uninstall the game.'
+            echo 'Download and open the APK on your phone; no ZIP extraction is needed. Install it as an update; do not uninstall the game.'
             echo 'Signed with the original Android debug key. This test build uses test ads.'
           } >> "$GITHUB_STEP_SUMMARY"
 

@@ -27,10 +27,19 @@ The desktop distribution JAR is `desktop/build/libs/desktop-1.0-all.jar`.
 The **Android APK** GitHub Actions workflow runs on pushes to `main`, or manually
 from **Actions → Android APK → Run workflow** with the `main` branch selected.
 It runs the unit tests, builds a debug APK with test ads, verifies its application
-ID and signing certificate, and uploads the APK plus SHA-256 checksum for 30 days.
-Open a successful run and download its `Ancient-Terror-debug-...` artifact (also
-linked in the run summary). Extract the ZIP on your phone and open the APK to
+ID and signing certificate, and uploads the APK and SHA-256 checksum as separate
+files for 30 days. Open a successful run and download its
+`Ancient-Terror-debug-....apk` artifact (also linked in the run summary).
+The APK downloads directly, without a ZIP wrapper. Open it on your phone to
 update the game. Keep the existing installation to retain its app data.
+`SHA256SUMS.txt` is a separate optional download. Older runs retain their ZIP artifacts.
+
+For build-completion emails, watch the repository and open
+[GitHub notification settings](https://github.com/settings/notifications).
+Under **System → Actions**, enable **Email**, leave **Only notify for failed
+workflows** unchecked, and save. This is a personal GitHub setting; the workflow
+does not configure your email preferences. See
+[GitHub's Actions notification guide](https://docs.github.com/en/subscriptions-and-notifications/how-tos/managing-github-actions-notifications).
 
 The repository secret `ANDROID_DEBUG_KEYSTORE_BASE64` must contain the base64 of
 the **original computer's** `debug.keystore`. Its alias and passwords are the
