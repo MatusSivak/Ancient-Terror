@@ -1,6 +1,10 @@
 package sk.sivak.eldritchhorror.core.action.impl.test;
 import org.junit.Test;
 import org.junit.After;
+import java.util.Collections;
+import rx.Completable;
+import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
+import sk.sivak.eldritchhorror.core.controller.TestController;
 import java.lang.reflect.Proxy;
 import java.util.function.BiFunction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
@@ -17,26 +21,32 @@ import static org.junit.Assert.*;
 public class InvestigatorDiceModifiersTest {
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
 
-    @Test public void boardRollWithoutActiveInvestigatorReturnsUnmodifiedDie() {
+    @Test public void boardRollWithoutActiveInvestigatorKeepsUnmodifiedDie() {
         ServicePlatform platform = ServicePlatform.get();
-        int[] rolls = {0};
-        platform.setModel(mock(ModelWrite.class, (name, args) -> { rolls[0]++; return 4; }));
         platform.setInvestigators(mock(InvestigatorsWrite.class, (name, args) -> null));
-        assertEquals(4, InvestigatorDiceModifiers.roll(null));
-        assertEquals(4, InvestigatorDiceModifiers.roll(new BlessedCondition()));
-        assertEquals(2, rolls[0]);
+        DiceRoll die = new DiceRoll(); die.setDiceValue(4);
+        InvestigatorDiceModifiers.applyAfterRoll(Collections.singletonList(die), null, 3).await();
+        InvestigatorDiceModifiers.applyAfterRoll(Collections.singletonList(die), new BlessedCondition(), 3).await();
+        assertEquals(4, die.getDiceValue());
     }
 
     @Test public void activeMaryStillGetsConditionFlavorBonus() {
         ServicePlatform platform = ServicePlatform.get();
-        platform.setModel(mock(ModelWrite.class, (name, args) -> 4));
         InvestigatorInfo info = mock(InvestigatorInfo.class, (name, args) -> InvestigatorId.THE_NUN);
         InvestigatorWrite investigator = mock(InvestigatorWrite.class, (name, args) ->
                 name.equals("getInfo") ? info : false);
         platform.setInvestigators(mock(InvestigatorsWrite.class, (name, args) -> investigator));
         platform.setTestFlavor(mock(TestFlavorWrite.class, (name, args) ->
                 name.equals("getFlavorType") ? TestFlavorType.CONDITION : new BlessedCondition()));
-        assertEquals(5, InvestigatorDiceModifiers.roll(null));
+        DiceRoll die = new DiceRoll(); die.setDiceValue(4);
+        platform.setTestController(mock(TestController.class, (name, args) -> {
+            assertEquals("showNunDiceBonus", name);
+            assertEquals(4, die.getDiceValue());
+            return Completable.complete();
+        }));
+        InvestigatorDiceModifiers.applyAfterRoll(Collections.singletonList(die), null, 5).await();
+        assertEquals(5, die.getDiceValue());
+        assertEquals(DiceRoll.Score.GOOD, die.getScore());
     }
 
     private <T> T mock(Class<T> type, BiFunction<String, Object[], Object> handler) {

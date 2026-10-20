@@ -7,6 +7,7 @@ import org.junit.Test;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.controller.TestController;
+import sk.sivak.eldritchhorror.core.model.InvestigatorsWrite;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.*;
 import static org.junit.Assert.*;
@@ -51,6 +52,9 @@ public class RerollDiceActionTest {
         input.setTestData(test); input.setCount(count);
         for (int value : values) input.addRerolledValue(value);
         int[] animations = {0};
+        ServicePlatform.get().setInvestigators((InvestigatorsWrite) Proxy.newProxyInstance(
+                InvestigatorsWrite.class.getClassLoader(), new Class[]{InvestigatorsWrite.class},
+                (p,m,a) -> null));
         ServicePlatform.get().setTestController((TestController) Proxy.newProxyInstance(
                 TestController.class.getClassLoader(), new Class[]{TestController.class}, (p,m,a) -> {
                     assertEquals("rerollDice", m.getName());

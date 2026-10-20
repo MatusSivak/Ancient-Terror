@@ -112,6 +112,23 @@ public class DiceImage extends Image {
         return diceValue;
     }
 
+    /** Change a settled face visibly without throwing another random roll. */
+    public rx.Completable showAdjustedResult(DiceRoll result) {
+        return rx.Completable.create(sub -> {
+            addAction(new FastForwardAction<>(Actions.sequence(
+                    Actions.scaleTo(1.25f, 1.25f, .2f, Interpolation.sine),
+                    Actions.run(() -> {
+                        diceValue = result.getDiceValue();
+                        score = result.getScore();
+                        modelRotation = findModelRotationBasedOnDiceValue(diceValue);
+                        updateTextureRegion();
+                        highlight();
+                    }),
+                    Actions.scaleTo(1f, 1f, .2f, Interpolation.sine),
+                    Actions.run(sub::onCompleted))));
+        });
+    }
+
     public void setDiceNumber(int diceNumber) {
         this.diceNumber = diceNumber;
     }

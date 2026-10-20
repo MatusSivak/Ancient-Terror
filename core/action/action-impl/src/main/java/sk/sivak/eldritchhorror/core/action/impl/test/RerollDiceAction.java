@@ -46,7 +46,7 @@ public class RerollDiceAction extends AbstractHookableAction<CountRerollDiceData
         int minSuccessDiceValue = input.getTestData().getMinSuccessDiceValue();
         for (DiceRoll diceRoll : dicesToReroll) {
             if (input.getRerolledValues().isEmpty()) {
-                diceRoll.setDiceValue(InvestigatorDiceModifiers.roll(null));
+                diceRoll.setDiceValue(ServicePlatform.get().getModel().rollDie());
             } else {
                 diceRoll.setDiceValue(input.getRerolledValues().remove(0));
             }
@@ -54,6 +54,7 @@ public class RerollDiceAction extends AbstractHookableAction<CountRerollDiceData
         }
 
         Completable completable = ServicePlatform.get().getTestController().rerollDice(dicesToReroll);
-        completable.subscribe(() -> ss.onSuccess(input.getTestData()));
+        completable.andThen(InvestigatorDiceModifiers.applyAfterRoll(dicesToReroll, null, minSuccessDiceValue))
+                .subscribe(() -> ss.onSuccess(input.getTestData()), ss::onError);
     }
 }

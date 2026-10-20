@@ -32,12 +32,14 @@ public class RollAndShowDieAction extends AbstractHookableAction<RollData, Integ
     protected void onExecute(SingleSubscriber<? super Integer> ss) {
         diceRoll = new DiceRoll();
         diceRoll.setDiceNr(0);
-        diceRoll.setDiceValue(InvestigatorDiceModifiers.roll(input.getCondition()));
+        diceRoll.setDiceValue(ServicePlatform.get().getModel().rollDie());
         diceRoll.setScore(diceRoll.getDiceValue() >= input.getMinSuccessful() ? DiceRoll.Score.GOOD : DiceRoll.Score.BAD);
         controller = ServicePlatform.get().getTestController();
         Completable showRolledDices = controller.showRolledDices(Collections.singletonList(diceRoll));
 
-        showRolledDices.subscribe(onCompletedRoll(ss));
+        showRolledDices.andThen(InvestigatorDiceModifiers.applyAfterRoll(
+                Collections.singletonList(diceRoll), input.getCondition(), input.getMinSuccessful()))
+                .subscribe(onCompletedRoll(ss), ss::onError);
     }
 
     private Action0 onCompletedRoll(SingleSubscriber<? super Integer> ss) {

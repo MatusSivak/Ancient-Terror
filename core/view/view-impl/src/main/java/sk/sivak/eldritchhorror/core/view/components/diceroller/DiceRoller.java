@@ -138,6 +138,22 @@ public class DiceRoller {
         this.diceLayer = diceLayer;
     }
 
+    public Completable showAdjustedResults(List<DiceRoll> results) {
+        return Completable.defer(() -> {
+            List<Completable> animations = new LinkedList<>();
+            for (DiceRoll result : results) {
+                DiceImage target = null;
+                for (DiceImage die : dices) {
+                    if (die.getDiceNumber() == result.getDiceNr()) { target = die; break; }
+                }
+                if (target == null) return Completable.error(
+                        new IllegalArgumentException("Missing displayed die " + result.getDiceNr()));
+                animations.add(target.showAdjustedResult(result));
+            }
+            return Completable.merge(animations);
+        });
+    }
+
     private void onRollEnd(DiceImage diceImage) {
         dicesFinished++;
         diceImage.highlight();

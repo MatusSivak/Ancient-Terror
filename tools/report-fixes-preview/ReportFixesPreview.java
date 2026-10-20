@@ -36,6 +36,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october19;
     private static boolean crown;
     private static boolean october20;
+    private static boolean nun;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -43,6 +44,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         october19 = Arrays.asList(args).contains("--oct19");
         crown = Arrays.asList(args).contains("--crown");
         october20 = Arrays.asList(args).contains("--oct20");
+        nun = Arrays.asList(args).contains("--nun");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -57,6 +59,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (nun) { nunDiceBonus(); return; }
             if (october20) { october20Reports(); return; }
             if (crown) { crownResolution(); return; }
             if (october19) { october19Reports(); return; }
@@ -71,6 +74,67 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void nunDiceBonus() throws Exception {
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String language : new String[]{"en", "sk"}) for (boolean fast : new boolean[]{false, true}) {
+            setPreviewLanguage(language);
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            InfoStage.setBottomHeight(5);
+            sk.sivak.eldritchhorror.core.view.test.TestViewImpl view =
+                    new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
+            List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> raw = new ArrayList<>();
+            List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> adjusted = new ArrayList<>();
+            int[] values = {1, 4, 6};
+            for (int i = 0; i < values.length; i++) {
+                sk.sivak.eldritchhorror.core.constants.test.DiceRoll die =
+                        new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
+                die.setDiceNr(i); die.setDiceValue(values[i]);
+                die.setScore(values[i] >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
+                        : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
+                raw.add(die);
+                sk.sivak.eldritchhorror.core.constants.test.DiceRoll result =
+                        new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
+                result.setDiceNr(i); result.setDiceValue(Math.min(6, values[i] + 1));
+                result.setScore(result.getDiceValue() >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
+                        : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
+                adjusted.add(result);
+            }
+            int[] finished = {0};
+            view.showRolledTestDices(raw).subscribe(() -> finished[0]++);
+            tick(1200);
+            require(finished[0] == 1, "Raw dice did not settle");
+            view.showNunDiceBonus(adjusted).subscribe(() -> finished[0]++);
+            tick(30);
+            require(finished[0] == 1, "Bonus completed before notice could be read");
+            require(labels(stage.getRoot()).contains("+1"), "Nun explanation missing");
+            for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
+                if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
+                    sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
+                            (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
+                    require(die.getDiceValue() == values[die.getDiceNumber()], "Bonus applied before explanation");
+                }
+            }
+            String suffix = language + (fast ? "-fast" : "");
+            draw("nun-bonus-notice-" + suffix);
+            tick(300);
+            require(finished[0] == 2, "Bonus animation did not complete once");
+            require(!labels(stage.getRoot()).contains("+1"), "Nun explanation was not removed");
+            for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
+                if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
+                    sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
+                            (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
+                    require(die.getDiceValue() == adjusted.get(die.getDiceNumber()).getDiceValue(), "Adjusted face mismatch");
+                    require(die.getScore() == adjusted.get(die.getDiceNumber()).getScore(), "Adjusted highlight mismatch");
+                    require(Math.abs(die.getScaleX() - 1f) < .001f, "Bonus pulse did not finish");
+                }
+            }
+            draw("nun-bonus-adjusted-" + suffix);
+            InfoStage.getDiceLayer().clearChildren();
+        }
+        setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
+        System.out.println("PASS: Nun raw dice, readable +1 notice, adjusted faces/highlights and completion at both speeds/languages");
     }
 
     private void october20Reports() throws Exception {

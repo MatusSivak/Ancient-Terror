@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
+import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
@@ -27,7 +28,7 @@ public class RollDicesAction extends AbstractHookableAction<TestData, TestData> 
         int calculatedDicePool = input.getCalculatedDicePool();
         input.setDiceRolls(new ArrayList<>(calculatedDicePool));
         for (int i = 0; i < calculatedDicePool; i++) {
-            int diceValue = InvestigatorDiceModifiers.roll(null);
+            int diceValue = ServicePlatform.get().getModel().rollDie();
             DiceRoll diceRoll = new DiceRoll();
             diceRoll.setDiceNr(i);
             diceRoll.setDiceValue(diceValue);

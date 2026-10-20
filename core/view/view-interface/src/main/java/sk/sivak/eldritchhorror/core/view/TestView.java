@@ -29,6 +29,8 @@ public interface TestView {
 
     Completable rerollDice(List<DiceRoll> diceRoll);
 
+    Completable showNunDiceBonus(List<DiceRoll> adjustedDice);
+
     Single<Boolean> askRerollUsingFocus(Question question);
 
     Single<Boolean> askRerollUsingClue(Question question);

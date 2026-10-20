@@ -51,3 +51,34 @@ Android device playback was not tested.
 ```powershell
 .\gradlew.bat :eldritch-horror-core:service:service-impl:test :eldritch-horror-core:action:action-impl:test :eldritch-horror-core:view:view-impl:test -I tools/report-fixes-preview/preview.gradle -I tools/ending-preview/preview.gradle :desktop:previewReportFixes --args=--oct20 :desktop:previewAzathothEnding --offline --console=plain
 ```
+
+## Follow-up: show Nun's bonus after the raw roll
+
+At the user's request, Nun's bonus is now presented explicitly. This supersedes
+the earlier presentation described above; the final rule outcomes stay the same.
+
+1. Roll and display the unmodified dice.
+2. Show the localized Nun +1 ability notice for 1.5 seconds, including at
+   fast-forward speed.
+3. Pulse the affected dice and change their faces and success highlights,
+   capped at six. Keep the adjusted result visible briefly.
+4. Commit the adjusted values and resume resolution only after the presentation
+   completes.
+
+This covers condition reckoning rolls, multi-die condition tests and rerolls.
+Only rerolled dice receive the bonus again. Other investigators and unrelated
+conditions continue without this extra presentation.
+
+Validation: all 311 service/action/view tests passed, including deferred
+animation tests proving raw roll → bonus presentation → final resolution ordering,
+multi-die Boon tests, Bane rerolls and Blessed discard behavior. Desktop
+compilation and the production `--nun` preview passed. English and Slovak
+screenshots were inspected; normal and fast-forward checks verify the notice,
+updated faces/colors, cap at six, cleanup and completion once.
+
+Log: `build/oct20-nun-validation.log`. Screenshots:
+`build/report-fixes-preview/nun-bonus-*`.
+
+```powershell
+.\gradlew.bat :eldritch-horror-core:service:service-impl:test :eldritch-horror-core:action:action-impl:test :eldritch-horror-core:view:view-impl:test -I tools/report-fixes-preview/preview.gradle :desktop:previewReportFixes --args=--nun --offline --console=plain
+```

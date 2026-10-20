@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--nun"` for Nun's visible Boon/Bane bonus: raw dice settle, a localized
++1 notice remains readable, then faces and success colors update before completion.
+Checks 1/4/6 → 2/5/6 in both languages and at both animation speeds. Screenshots
+use `nun-bonus-*`.
+
 Use `--args="--oct20"` for the 20 October review: the solved-mystery gold prompt
 stays above OK and below the Crown card after moving to the card layer. Also
 checks glyphs in gold-on-black prompts, preserving icon colors, in both language

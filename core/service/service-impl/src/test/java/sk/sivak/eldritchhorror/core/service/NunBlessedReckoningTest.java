@@ -4,6 +4,7 @@ import java.util.*;
 import org.junit.*;
 import rx.Completable;
 import rx.Single;
+import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.action.*;
 import sk.sivak.eldritchhorror.core.action.impl.action.investigator.ChangeActiveInvestigatorAction;
 import sk.sivak.eldritchhorror.core.action.impl.test.RollAndShowDieAction;
@@ -107,12 +108,20 @@ public class NunBlessedReckoningTest {
         tests.setActionProvider(actions); tests.setCommandQueueFacade(facade);
         tests.setTestActionProvider(rolls); listeners.setTestService(tests);
         TestController controller = mock(TestController.class);
+        PublishSubject<Void> rawAnimation = PublishSubject.create();
+        PublishSubject<Void> bonusAnimation = PublishSubject.create();
         when(controller.showRolledDices(anyList())).thenAnswer(c -> {
             List<DiceRoll> dice = c.getArgument(0);
             assertEquals(1, dice.size());
+            assertEquals(raw, dice.get(0).getDiceValue());
+            assertEquals(raw <= 2 ? DiceRoll.Score.BAD : DiceRoll.Score.GOOD, dice.get(0).getScore());
+            return rawAnimation.toCompletable();
+        });
+        when(controller.showNunDiceBonus(anyList())).thenAnswer(c -> {
+            List<DiceRoll> dice = c.getArgument(0);
             assertEquals(displayed, dice.get(0).getDiceValue());
             assertEquals(discard ? DiceRoll.Score.BAD : DiceRoll.Score.GOOD, dice.get(0).getScore());
-            return Completable.complete();
+            return bonusAnimation.toCompletable();
         });
         when(controller.confirmRollResult(anyInt())).thenReturn(Completable.complete());
         p.setTestController(controller);
@@ -126,6 +135,20 @@ public class NunBlessedReckoningTest {
         listener.register(blessed, owner);
         service.addEventCommand(in -> { events.fireDirectEvent(DirectEvent.RECKONING_CARDS_3, ReckoningFireType.CHARGE); });
         service.addEventCommand(in -> { events.fireDirectEvent(DirectEvent.RECKONING_CARDS_3, ReckoningFireType.FIRE); });
+        for (int i = 0; i < 250 && errors.isEmpty(); i++) queue.tick();
+        assertTrue(errors.toString(), errors.isEmpty());
+        verify(controller, never()).showNunDiceBonus(anyList());
+        verify(controller, never()).confirmRollResult(anyInt());
+        rawAnimation.onCompleted();
+        for (int i = 0; i < 250 && errors.isEmpty(); i++) queue.tick();
+        if (owner == InvestigatorId.THE_NUN) {
+            verify(controller).showNunDiceBonus(anyList());
+            verify(controller, never()).confirmRollResult(anyInt());
+            verify(service, never()).discardConditionFromInvestigator(owner, blessed);
+        } else {
+            verify(controller, never()).showNunDiceBonus(anyList());
+        }
+        bonusAnimation.onCompleted();
         for (int i = 0; i < 250 && errors.isEmpty(); i++) queue.tick();
         assertTrue(errors.toString(), errors.isEmpty());
         verify(model).rollDie();

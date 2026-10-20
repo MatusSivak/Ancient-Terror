@@ -65,6 +65,11 @@ public class TestControllerImpl implements TestController {
     }
 
     @Override
+    public Completable showNunDiceBonus(List<DiceRoll> adjustedDice) {
+        return testView.showNunDiceBonus(adjustedDice);
+    }
+
+    @Override
     public Single<Boolean> askRerollUsingFocus(Question question) {
         return testView.askRerollUsingFocus(question);
     }

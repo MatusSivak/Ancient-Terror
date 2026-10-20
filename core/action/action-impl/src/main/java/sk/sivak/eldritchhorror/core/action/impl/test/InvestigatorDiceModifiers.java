@@ -6,20 +6,41 @@ import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
+import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
+import rx.Completable;
+import java.util.ArrayList;
+import java.util.List;
 
-/** Applies bonuses to each newly rolled die, including rerolls, before it is displayed. */
+/** Presents Nun's bonus after the raw roll, then commits it before resolution. */
 public final class InvestigatorDiceModifiers {
     private InvestigatorDiceModifiers() {}
 
-    public static int roll(ConditionInfo condition) {
-        int value = ServicePlatform.get().getModel().rollDie();
-        InvestigatorRead investigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
-        // Mythos and other board-wide rolls need no investigator ability.
-        if (investigator == null) return value;
-        if (condition == null && ServicePlatform.get().getTestFlavor().getFlavorType() == TestFlavorType.CONDITION)
-            condition = ServicePlatform.get().getTestFlavor().getFlavorData();
-        return adjust(value, investigator.getInfo().getInvestigatorId(),
-                investigator.isLostInTimeAndSpace(), condition);
+    public static Completable applyAfterRoll(List<DiceRoll> dice, ConditionInfo condition, int minSuccess) {
+        final ConditionInfo explicitCondition = condition;
+        return Completable.defer(() -> {
+            InvestigatorRead investigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
+            if (investigator == null || dice.isEmpty()) return Completable.complete();
+            ConditionInfo source = explicitCondition;
+            if (source == null && ServicePlatform.get().getTestFlavor() != null
+                    && ServicePlatform.get().getTestFlavor().getFlavorType() == TestFlavorType.CONDITION)
+                source = ServicePlatform.get().getTestFlavor().getFlavorData();
+            if (adjust(1, investigator.getInfo().getInvestigatorId(), investigator.isLostInTimeAndSpace(), source) == 1)
+                return Completable.complete();
+            List<DiceRoll> adjusted = new ArrayList<>();
+            for (DiceRoll raw : dice) {
+                DiceRoll result = new DiceRoll();
+                result.setDiceNr(raw.getDiceNr());
+                result.setDiceValue(Math.min(6, raw.getDiceValue() + 1));
+                result.setScore(result.getDiceValue() >= minSuccess ? DiceRoll.Score.GOOD : DiceRoll.Score.BAD);
+                adjusted.add(result);
+            }
+            return ServicePlatform.get().getTestController().showNunDiceBonus(adjusted).doOnCompleted(() -> {
+                for (int i = 0; i < dice.size(); i++) {
+                    dice.get(i).setDiceValue(adjusted.get(i).getDiceValue());
+                    dice.get(i).setScore(adjusted.get(i).getScore());
+                }
+            });
+        });
     }
 
     public static int adjust(int value, InvestigatorId investigator, boolean offBoard, ConditionInfo condition) {

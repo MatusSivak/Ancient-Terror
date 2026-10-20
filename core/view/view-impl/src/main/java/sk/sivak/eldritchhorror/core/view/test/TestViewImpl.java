@@ -287,6 +287,28 @@ public class TestViewImpl implements TestView {
         return diceRollerStack.peek().rollDice(diceNumbers);
     }
 
+    @Override
+    public Completable showNunDiceBonus(List<DiceRoll> adjustedDice) {
+        return Completable.defer(() -> {
+            float previousBottom = InfoStage.getBottomHeight();
+            LabelTable notice = LabelTable.createAndShowTable(0, get("test.nunDiceBonus"));
+            DiceRoller roller = diceRollerStack.peek();
+            Completable readNotice = Completable.create(sub -> notice.addAction(Actions.sequence(
+                    // Keep the explanation readable even with fast-forward enabled.
+                    Actions.delay(1.5f), Actions.run(sub::onCompleted))));
+            Completable readAdjustedDice = Completable.create(sub -> notice.addAction(Actions.sequence(
+                    Actions.delay(.6f), Actions.run(sub::onCompleted))));
+            return roller.moveUp(notice.getTop() + 10f)
+                    .andThen(readNotice)
+                    .andThen(roller.showAdjustedResults(adjustedDice))
+                    .andThen(readAdjustedDice)
+                    .doOnTerminate(() -> {
+                        notice.remove();
+                        InfoStage.setBottomHeight(previousBottom);
+                    });
+        });
+    }
+
     private void confirmBinaryTestResult(boolean successful) {
         if (successful) {
             testTableStack.push(createPassedTable());
