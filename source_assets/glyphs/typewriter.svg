@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- A sheet with typed lines emerging from a typewriter: resolve the card's text. -->
+  <g stroke="#30251f" stroke-width="6" stroke-linejoin="round">
+    <path fill="#f3e4bc" d="M33 9h62v52H33z"/>
+    <path fill="none" stroke-width="5" stroke-linecap="round" d="M45 23h38M45 35h38M45 47h24"/>
+    <rect fill="#b39860" x="18" y="56" width="92" height="15" rx="5"/>
+    <path fill="#50443a" d="M23 72h82l14 39q1 7-7 7H16q-8 0-7-7z"/>
+  </g>
+  <g fill="#f3e4bc">
+    <circle cx="35" cy="84" r="5"/><circle cx="54" cy="84" r="5"/><circle cx="73" cy="84" r="5"/><circle cx="92" cy="84" r="5"/>
+    <circle cx="27" cy="99" r="5"/><circle cx="46" cy="99" r="5"/><circle cx="65" cy="99" r="5"/><circle cx="84" cy="99" r="5"/><circle cx="103" cy="99" r="5"/>
+    <rect x="39" y="109" width="50" height="5" rx="2"/>
+  </g>
+</svg>

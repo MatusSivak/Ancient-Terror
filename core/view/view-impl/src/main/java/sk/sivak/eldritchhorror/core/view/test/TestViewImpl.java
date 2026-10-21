@@ -291,18 +291,27 @@ public class TestViewImpl implements TestView {
     public Completable showNunDiceBonus(List<DiceRoll> adjustedDice) {
         return Completable.defer(() -> {
             float previousBottom = InfoStage.getBottomHeight();
+            TextButton ok = buildButton(get("dialog.ok"));
+            InfoStage.setBottomHeight(previousBottom + ok.getHeight() + 5f);
             LabelTable notice = LabelTable.createAndShowTable(0, get("test.nunDiceBonus"));
             DiceRoller roller = diceRollerStack.peek();
-            Completable readNotice = Completable.create(sub -> notice.addAction(Actions.sequence(
-                    // Keep the explanation readable even with fast-forward enabled.
-                    Actions.delay(1.5f), Actions.run(sub::onCompleted))));
+            Completable confirmBonus = Completable.create(sub -> {
+                addClickListener(ok, () -> {
+                    if (ok.isDisabled()) return;
+                    ok.setDisabled(true);
+                    ok.remove();
+                    sub.onCompleted();
+                });
+                InfoStage.showButton(ok, VIEWPORT_WIDTH / 2f - ok.getWidth() / 2f, previousBottom, false);
+            });
             Completable readAdjustedDice = Completable.create(sub -> notice.addAction(Actions.sequence(
                     Actions.delay(.6f), Actions.run(sub::onCompleted))));
             return roller.moveUp(notice.getTop() + 10f)
-                    .andThen(readNotice)
+                    .andThen(confirmBonus)
                     .andThen(roller.showAdjustedResults(adjustedDice))
                     .andThen(readAdjustedDice)
                     .doOnTerminate(() -> {
+                        ok.remove();
                         notice.remove();
                         InfoStage.setBottomHeight(previousBottom);
                     });

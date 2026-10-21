@@ -56,4 +56,19 @@ public class MarkupTextTest {
         String text = "Spend 2 Clues: gain 1 Health. +1 → test. 10 → nothing. Lose 1 Health for each 1 Clue. On a 2nd try";
         assertEquals(text, MarkupText.replaceDiceResults(text));
     }
+
+    @Test public void successThresholdsAndExplicitDiceUseFaces() {
+        assertEquals(getDiceGlyph(4) + ", " + getDiceGlyph(5) + ", and " + getDiceGlyph(6) + " count as successes",
+                MarkupText.replaceDiceResults("4, 5, and 6's count as successes"));
+        assertEquals("Only " + getDiceGlyph(6) + " count as successes",
+                MarkupText.replaceDiceResults("Only 6's count as successes"));
+        assertEquals(getDiceGlyph(4) + "," + getDiceGlyph(5) + " or " + getDiceGlyph(6) + " counts as a success",
+                MarkupText.replaceDiceResults("4,5 or 6 counts as a success"));
+        assertEquals(getDiceGlyph(4) + " " + getDiceGlyph(5) + " " + getDiceGlyph(6),
+                MarkupText.replaceDiceResults("[4] [5] [6]"));
+        assertEquals("[#FFFFFFFF]" + getDiceGlyph(4) + "[] [#GOOD]gain 2 Health[]",
+                MarkupText.replaceDiceResults("[#FFFFFFFF][4][] [#GOOD]gain 2 Health[]"));
+        String quantities = "14 counts as successes; +4 counts as success; [#456789]Gain 4 Clues[]";
+        assertEquals(quantities, MarkupText.replaceDiceResults(quantities));
+    }
 }

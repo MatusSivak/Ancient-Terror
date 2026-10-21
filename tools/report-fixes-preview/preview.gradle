@@ -17,4 +17,10 @@ gradle.projectsEvaluated {
         mainClass.set('MonsterArtworkPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewCardResolution', JavaExec) {
+        dependsOn desktop.tasks.named('reportFixesPreviewClasses')
+        classpath = desktop.sourceSets.reportFixesPreview.runtimeClasspath
+        mainClass.set('CardResolutionPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

@@ -40,6 +40,7 @@ public class InfoStage {
     private final MenuButton menuButton;
     private final Group smallActors;
     private final Group diceLayer;
+    private final Group cardResolutionBackgrounds;
     /** Roaming combat creatures: above the HUD, below panels, cards, dice, full-screen cards and buttons. */
     private final Group creatureLayer;
     private final Group bigActors;
@@ -67,6 +68,7 @@ public class InfoStage {
         touchBlockerLayer = new Group();
         hudButtonsLayer = new Group();
         diceLayer = new Group();
+        cardResolutionBackgrounds = new Group();
         creatureLayer = new Group();
         noiseEffectLayer = new Group();
         bigActors = new Group() {
@@ -90,6 +92,7 @@ public class InfoStage {
         };
 
         grayBackground.setVisible(false);
+        stage.addActor(cardResolutionBackgrounds);
         stage.addActor(grayBackground);
         stage.addActor(label);
         stage.addActor(investigatorHud);
@@ -178,6 +181,10 @@ public class InfoStage {
 
     public static Stage getStageSafe() {
         return get().stage;
+    }
+
+    public static Group getCardResolutionBackgrounds() {
+        return get().cardResolutionBackgrounds;
     }
 
     public static void addSmallActorToInfoStage(Actor actor) {

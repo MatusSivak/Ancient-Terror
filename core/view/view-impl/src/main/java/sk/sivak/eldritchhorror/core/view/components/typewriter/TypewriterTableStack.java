@@ -29,6 +29,11 @@ public class TypewriterTableStack {
         }
 
         private Table table;
+        private com.badlogic.gdx.scenes.scene2d.ui.Image cardBackground;
+
+        public com.badlogic.gdx.scenes.scene2d.ui.Image getCardBackground() { return cardBackground; }
+
+        public void setCardBackground(com.badlogic.gdx.scenes.scene2d.ui.Image background) { cardBackground = background; }
         private float offsetY;
         private Vector2 tablePosition;
 

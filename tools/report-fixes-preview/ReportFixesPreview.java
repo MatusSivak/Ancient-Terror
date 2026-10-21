@@ -86,7 +86,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                     new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
             List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> raw = new ArrayList<>();
             List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> adjusted = new ArrayList<>();
-            int[] values = {1, 4, 6};
+            int[] values = {2, 4, 6};
             for (int i = 0; i < values.length; i++) {
                 sk.sivak.eldritchhorror.core.constants.test.DiceRoll die =
                         new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
@@ -105,22 +105,28 @@ public class ReportFixesPreview extends ApplicationAdapter {
             view.showRolledTestDices(raw).subscribe(() -> finished[0]++);
             tick(1200);
             require(finished[0] == 1, "Raw dice did not settle");
+            float previousBottom = InfoStage.getBottomHeight();
             view.showNunDiceBonus(adjusted).subscribe(() -> finished[0]++);
-            tick(30);
-            require(finished[0] == 1, "Bonus completed before notice could be read");
+            tick(600);
+            require(finished[0] == 1, "Bonus completed without OK");
             require(labels(stage.getRoot()).contains("+1"), "Nun explanation missing");
+            TextButton ok = textButton("OK");
+            require(ok != null && ok.getStage() == stage, "Nun OK button missing");
             for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
                 if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
                     sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
                             (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
-                    require(die.getDiceValue() == values[die.getDiceNumber()], "Bonus applied before explanation");
+                    require(die.getDiceValue() == values[die.getDiceNumber()], "Bonus applied before OK");
                 }
             }
             String suffix = language + (fast ? "-fast" : "");
             draw("nun-bonus-notice-" + suffix);
+            click(ok); click(ok);
             tick(300);
             require(finished[0] == 2, "Bonus animation did not complete once");
             require(!labels(stage.getRoot()).contains("+1"), "Nun explanation was not removed");
+            require(ok.getStage() == null, "Nun OK button was not removed");
+            require(InfoStage.getBottomHeight() == previousBottom, "Nun prompt did not restore layout");
             for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
                 if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
                     sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
@@ -134,7 +140,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             InfoStage.getDiceLayer().clearChildren();
         }
         setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
-        System.out.println("PASS: Nun raw dice, readable +1 notice, adjusted faces/highlights and completion at both speeds/languages");
+        System.out.println("PASS: Nun raw dice wait for OK, adjusted faces/highlights and single completion at both speeds/languages");
     }
 
     private void october20Reports() throws Exception {

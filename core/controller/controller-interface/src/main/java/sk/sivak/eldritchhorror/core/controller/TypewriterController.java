@@ -9,6 +9,8 @@ public interface TypewriterController {
 
     Completable showPaper(boolean newPaper);
 
+    Completable showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card);
+
     Completable finishPaper();
 
     Completable hidePaper();

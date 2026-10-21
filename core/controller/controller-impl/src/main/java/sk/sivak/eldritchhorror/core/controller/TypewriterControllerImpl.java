@@ -19,6 +19,11 @@ public class TypewriterControllerImpl implements TypewriterController{
     }
 
     @Override
+    public Completable showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card) {
+        return typewriterView.showCardResolutionPaper(card);
+    }
+
+    @Override
     public Completable finishPaper() {
         return typewriterView.finishPaper();
     }

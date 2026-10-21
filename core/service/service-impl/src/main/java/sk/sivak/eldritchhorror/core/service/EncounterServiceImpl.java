@@ -101,6 +101,12 @@ public class EncounterServiceImpl extends AbstractCommonService implements Encou
 
     // Typewriter things...
     @Override
+    public void showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card) {
+        execute(new ActionCommand<>(encounterActionProvider.checkDefeatedBeforeShowingPaper(), "CHECK_DEFEATED_BEFORE_SHOWING_PAPER"));
+        execute(new ActionCommand<>(encounterActionProvider.showCardResolutionPaper(card), "TW_SHOW_CARD_RESOLUTION_PAPER"));
+    }
+
+    @Override
     public void showTypewriterPaper(boolean newPaper) {
         execute(new ActionCommand<>(encounterActionProvider.checkDefeatedBeforeShowingPaper(), "CHECK_DEFEATED_BEFORE_SHOWING_PAPER"));
         execute(new ActionCommand<>(encounterActionProvider.showTypewriterPaper(newPaper), "TW_SHOW_TYPEWRITER_PAPER"));

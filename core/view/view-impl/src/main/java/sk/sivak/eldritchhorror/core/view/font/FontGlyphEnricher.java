@@ -96,7 +96,7 @@ public class FontGlyphEnricher {
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("token/sanity.png"), GLYPH_SANITY, 73, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("token/clue.png"), GLYPH_CLUE, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("token/focus.png"), GLYPH_FOCUS, renderWidth, renderHeight);
-		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/flip.png"), GLYPH_FLIP, renderWidth, renderHeight);
+		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/typewriter.png"), GLYPH_FLIP, renderWidth, renderHeight);
 		FontGlyphEnricher.addIconGlyph(bitmapFont, icons.apply("glyphs/discard.png"), GLYPH_DISCARD, renderWidth, renderHeight);
 		addDiceGlyphs(bitmapFont, icons.apply(DICE_SHEET), 80);
 		addTicketGlyph(bitmapFont, icons.apply("token/train_ticket_down.png"), GLYPH_TRAIN_TICKET, renderHeight);

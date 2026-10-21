@@ -7,13 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MarkupText {
-    private static final String DICE_LIST = "[1-6](?:(?:, | or )[1-6])*";
+    private static final String DICE_LIST = "[1-6](?:(?:,\\s*(?:(?:and|or)\\s+)?|\\s+(?:or|and)\\s+)[1-6])*";
     // Die results such as "5 or 6 →", "4, 5 or 6 →", "1 →", "On a 1 or 2:", "each 6 counts as" or "succeed on 4, 5 or 6".
     private static final Pattern DICE_RESULTS = Pattern.compile(
             "(?<![\\w+\\-])" + DICE_LIST + "(?= →)"
                     + "|(?<=\\b[Oo]n an? )" + DICE_LIST + "(?=[,:.])"
                     + "|(?<=\\bsucceed on |\\bsucceed only on )" + DICE_LIST + "(?![\\w])"
-                    + "|(?<=\\b[Ee]ach )[1-6](?![\\w]| [A-Z])");
+                    + "|(?<=\\b[Ee]ach )[1-6](?![\\w]| [A-Z])"
+                    + "|(?<![\\w+\\-#])" + DICE_LIST + "(?:['’]s)?(?=\\s+counts? as (?:a )?success(?:es)?\\b)"
+                    + "|(?<!\\[)\\[[1-6]\\]");
     private static final Pattern DICE_VALUE = Pattern.compile("[1-6]");
     private static final Pattern TRAIN_TICKETS = Pattern.compile("(?iu)(?<![\\p{L}\\p{N}_])(?:train\\s+tickets?|vlakov(?:ý\\s+lístok|é\\s+lístky|ých\\s+lístkov|ého\\s+lístka|ému\\s+lístku|ým\\s+lístkom))(?![\\p{L}\\p{N}_])");
     private static final Pattern SHIP_TICKETS = Pattern.compile("(?iu)(?<![\\p{L}\\p{N}_])(?:ship\\s+tickets?|lodn(?:ý\\s+lístok|é\\s+lístky|ých\\s+lístkov|ého\\s+lístka|ému\\s+lístku|ým\\s+lístkom))(?![\\p{L}\\p{N}_])");
@@ -38,7 +40,9 @@ public class MarkupText {
         Matcher results = DICE_RESULTS.matcher(text);
         StringBuffer out = new StringBuffer();
         while (results.find()) {
-            Matcher values = DICE_VALUE.matcher(results.group());
+            String result = results.group().replaceAll("['’]s$", "");
+            if (result.startsWith("[")) result = result.substring(1, result.length() - 1);
+            Matcher values = DICE_VALUE.matcher(result);
             StringBuffer list = new StringBuffer();
             while (values.find()) {
                 char glyph = FontGlyphEnricher.getDiceGlyph(Integer.parseInt(values.group()));

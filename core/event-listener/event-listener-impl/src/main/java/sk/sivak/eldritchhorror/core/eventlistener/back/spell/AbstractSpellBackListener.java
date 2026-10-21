@@ -52,7 +52,7 @@ public abstract class AbstractSpellBackListener {
             spellBackEffectList.get(getSpellEffectId()).getBeforePaperIsDisplayedAction().run();
         }
         ServicePlatform.get().getTestService().setTestFlavor(new TestFlavorRequest(TestFlavorType.SPELL, spellInfo));
-        ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
+        ServicePlatform.get().getEncounterService().showCardResolutionPaper(spellInfo);
         ServicePlatform.get().getEncounterService().typeHeader(spellInfo.getName());
         ServicePlatform.get().getEncounterService().typeFlavor(
                 spellInfo.getSpellBack().getSpellEffect(testData.getScore()).getFlavorText());

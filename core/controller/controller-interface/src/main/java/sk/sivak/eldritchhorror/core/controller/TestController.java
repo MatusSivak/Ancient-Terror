@@ -28,7 +28,7 @@ public interface TestController {
 
     Completable rerollDice(List<DiceRoll> diceRoll);
 
-    /** Explain Nun's +1, animate adjusted faces, and complete before resolution. */
+    /** Wait for OK on Nun's +1 explanation, animate adjusted faces, then complete before resolution. */
     Completable showNunDiceBonus(List<DiceRoll> adjustedDice);
 
     Single<Boolean> askRerollUsingFocus(Question question);

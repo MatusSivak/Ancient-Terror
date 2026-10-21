@@ -358,7 +358,7 @@ public class CustomAssetManager extends AssetManager {
         for (String path : new String[]{TRAVEL_DEPART_SOUND, TRAVEL_ARRIVE_SOUND, INVESTIGATOR_HIGHLIGHT_SOUND,
                 TOKEN_GAIN_SOUND, TOKEN_LOSS_SOUND, TOKEN_LEAVE_SOUND, TOKEN_LAND_SOUND,
                 FIREBALL_LAUNCH_SOUND, FIREBALL_IMPACT_SOUND, MONSTER_TOKEN_HIT_SOUND,
-                MONSTER_HEALTH_LEAVE_SOUND, MONSTER_HEALTH_TEAR_SOUND, DOOM_ADVANCE_SOUND,
+                MONSTER_HEALTH_LEAVE_SOUND, MONSTER_HEALTH_TEAR_SOUND, DOOM_ADVANCE_SOUND, DOOM_RETREAT_SOUND,
                 OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND}) {
             load(path, Sound.class);
             soundPaths.add(path);
@@ -576,6 +576,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String TRAVEL_ARRIVE_SOUND = "sounds/travel_arrive.wav";
     // Last chime of "German Grandfather Clock Tick & Chime x12" by 3bagbrew (Freesound 609763), CC0.
     public final static String DOOM_ADVANCE_SOUND = "sounds/doom_advance.wav";
+    public final static String DOOM_RETREAT_SOUND = "sounds/doom_retreat.wav";
     // CC0 Freesound whooshes by brktkrgll (856169) and TommasoMotteran (850767).
     public final static String OMEN_MAXIMIZE_SOUND = "sounds/omen_maximize.wav";
     public final static String OMEN_MINIMIZE_SOUND = "sounds/omen_minimize.wav";

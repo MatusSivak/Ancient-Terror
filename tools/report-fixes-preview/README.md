@@ -1,8 +1,15 @@
 # Report fixes preview
 
+Use task `:desktop:previewCardResolution` with the same init script to check
+spell/condition/asset/artifact artwork behind typewriter paper, nested background restoration,
+hide/resume/finish cleanup, flip and success dice glyphs, and doom sound direction.
+It verifies all four card categories' artwork paths and captures `card-resolution-*`
+screenshots at both animation speeds. Audio playback uses a recording double.
+
 Use `--args="--nun"` for Nun's visible Boon/Bane bonus: raw dice settle, a localized
-+1 notice remains readable, then faces and success colors update before completion.
-Checks 1/4/6 → 2/5/6 in both languages and at both animation speeds. Screenshots
++1 notice waits for OK, then faces and success colors update before completion.
+Checks 2/4/6 → 3/5/6 in both languages and at both animation speeds, including a
+10-second wait without confirmation and double-click protection. Screenshots
 use `nun-bonus-*`.
 
 Use `--args="--oct20"` for the 20 October review: the solved-mystery gold prompt

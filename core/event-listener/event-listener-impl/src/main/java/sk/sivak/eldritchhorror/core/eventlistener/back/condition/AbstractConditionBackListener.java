@@ -40,7 +40,7 @@ public abstract class AbstractConditionBackListener {
     protected void onFlip(ShowCardResponse response) {
         ServicePlatform.get().getService().hold();
         ServicePlatform.get().getTestService().setTestFlavor(new TestFlavorRequest(TestFlavorType.CONDITION, conditionInfo));
-        ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
+        ServicePlatform.get().getEncounterService().showCardResolutionPaper(conditionInfo);
         ServicePlatform.get().getEncounterService().typeHeader(conditionInfo.getName());
         ServicePlatform.get().getEncounterService().typeInfo(conditionInfo.getConditionBack().getTitle()+"\n ");
         ServicePlatform.get().getEncounterService().typeFlavor(conditionInfo.getConditionBack().getFlavorText());

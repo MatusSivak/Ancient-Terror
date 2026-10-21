@@ -80,6 +80,11 @@ public class EncounterActionProviderImpl implements EncounterActionProvider {
     }
 
     @Override
+    public Action<Object, Void> showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card) {
+        return new ShowTypewriterPaperAction(card);
+    }
+
+    @Override
     public Action<Object, Void> finishTypewriterPaper() {
         return new FinishTypewriterPaperAction();
     }

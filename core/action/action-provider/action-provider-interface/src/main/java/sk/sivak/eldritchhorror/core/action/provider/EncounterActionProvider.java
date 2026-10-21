@@ -34,6 +34,8 @@ public interface EncounterActionProvider {
     // Typewriter
     Action<Object, Void> showTypewriterPaper(boolean newPaper);
 
+    Action<Object, Void> showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card);
+
     Action<Object, Void> finishTypewriterPaper();
 
     Action<Object, Void> hideTypewriterPaper();

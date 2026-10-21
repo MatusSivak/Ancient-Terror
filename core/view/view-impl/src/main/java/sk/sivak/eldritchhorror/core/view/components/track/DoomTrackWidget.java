@@ -78,11 +78,13 @@ public class DoomTrackWidget extends Group {
         hourHand.addAction(new FastForwardAction<>(Actions.rotateBy((newDoom - currentDoom) * HOUR_MIN_ROTATION,
                 actionDuration,
                 Interpolation.linear)));
-        if (currentDoom != 0 && newDoom < currentDoom) {
-            for (int step = 0; step < currentDoom - newDoom; step++) {
+        // A move from midnight initializes/resets the clock (including Yig's awakening).
+        if (currentDoom != 0) {
+            String stepSound = newDoom < currentDoom ? DOOM_ADVANCE_SOUND : DOOM_RETREAT_SOUND;
+            for (int step = 0; step < Math.abs(currentDoom - newDoom); step++) {
                 addAction(new FastForwardAction<>(Actions.sequence(
                         Actions.delay(step * fiveMinuteRotationDuration),
-                        Actions.run(DoomTrackWidget::playAdvanceToll))));
+                        Actions.run(() -> playStepSound(stepSound)))));
             }
         }
 
@@ -94,14 +96,14 @@ public class DoomTrackWidget extends Group {
         this.currentDoom = newDoom;
     }
 
-    private static void playAdvanceToll() {
+    private static void playStepSound(String soundName) {
         // Fast-forward shrinks the steps to a few frames; skip the toll instead of stacking it.
         if (FastForwardAction.isOn()) {
             return;
         }
-        Sound sound = getLoadedSound(DOOM_ADVANCE_SOUND);
+        Sound sound = getLoadedSound(soundName);
         if (sound == null) {
-            sound = getSound(DOOM_ADVANCE_SOUND);
+            sound = getSound(soundName);
         }
         SoundPlayer.play(sound, 0.4f, MathUtils.random(0.98f, 1.02f), 0f);
     }

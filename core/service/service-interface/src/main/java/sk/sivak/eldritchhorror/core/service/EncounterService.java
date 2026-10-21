@@ -20,6 +20,8 @@ public interface EncounterService extends CommonService {
     // Typewriter things...
     void showTypewriterPaper(boolean newPaper);
 
+    void showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card);
+
     void finishTypewriterPaper();
 
     void hideTypewriterPaper();
