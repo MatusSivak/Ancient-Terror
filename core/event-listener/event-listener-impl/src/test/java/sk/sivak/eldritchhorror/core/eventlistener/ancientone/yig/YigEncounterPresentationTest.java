@@ -383,6 +383,51 @@ public class YigEncounterPresentationTest {
         assertFalse(effects.contains("gainClueFromSpace"));
     }
 
+    @Test public void improvementPaymentWithoutTokensOnlyExplainsAndDetains() {
+        start(15, LocationType.CITY);
+        assertTrue(allInfo().contains("improvement token"));
+        assertArrayEquals(new String[]{"OK"}, buttons);
+        click();
+        assertTrue(effects.contains("gainCondition:DETAINED"));
+        assertEquals(0, papers);
+    }
+
+    @Test public void improvementPaymentUsesShortYesNoButtonsOnThePaper() {
+        for (boolean accept : new boolean[]{false, true}) {
+            YigEncounterPresentationTest fixture = new YigEncounterPresentationTest();
+            fixture.setup();
+            List<String> spent = fixture.withImprovement(Stat.LORE);
+            fixture.start(15, LocationType.CITY);
+            assertArrayEquals(new String[]{"[#BAD]No[]", "[#GOOD]Yes[]"}, fixture.buttons);
+            fixture.click(accept ? 1 : 0);
+            assertEquals(!accept, fixture.effects.contains("gainCondition:DETAINED"));
+            // A single improved skill needs no extra picker or long cancel button.
+            assertEquals(accept ? Collections.singletonList("LORE") : Collections.emptyList(), spent);
+            assertFalse(fixture.effects.stream().anyMatch(e -> e.startsWith("ask:")));
+            assertEquals(0, fixture.papers);
+            fixture.cleanup();
+        }
+    }
+
+    private List<String> withImprovement(Stat improved) {
+        List<String> spent = new ArrayList<>();
+        InvestigatorInfo info = mock(InvestigatorInfo.class, (name, args) -> InvestigatorId.THE_SAILOR);
+        InvestigatorRead investigator = mock(InvestigatorRead.class, (name, args) -> {
+            if (name.equals("getInfo")) return info;
+            if (name.equals("getCurrentLocationId")) return LocationId.THE_AMAZON;
+            if (name.equals("getStatBonus")) return args[0] == improved ? 1 : 0;
+            return 0;
+        });
+        platform.setInvestigators(mock(InvestigatorsRead.class, (name, args) ->
+                name.equals("getOnBoardInvestigators") ? Collections.emptyList() : investigator));
+        platform.setInvestigatorService(mock(InvestigatorService.class, (name, args) -> {
+            if (name.equals("loseImprovement")) queue(() -> spent.add(
+                    ((sk.sivak.eldritchhorror.core.eventtype.data.investigator.LoseImprovementData) args[0]).getStat().name()));
+            return null;
+        }));
+        return spent;
+    }
+
     private void allowDarkPact(boolean received) {
         platform.setConditionsDeck(mock(ConditionsDeckRead.class, (name, args) ->
                 name.equals("canGetConditionId") || (name.equals("hasCondition")

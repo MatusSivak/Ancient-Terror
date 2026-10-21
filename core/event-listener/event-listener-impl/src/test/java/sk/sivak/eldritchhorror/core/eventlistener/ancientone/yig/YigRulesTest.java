@@ -60,6 +60,11 @@ public class YigRulesTest {
                 CultistMonster cultist=new CultistMonster();cultist.setMonsterId(NonEpicMonsterId.CULTIST);
                 cultist.setCurrentLocation(data.getLocationId());monsters.add(cultist);effects.add("spawn");
             });
+            else if(name.equals("ask")) {
+                Question<?> q=(Question<?>)a[0];
+                queue(() -> effects.add("notice:"+q.getTitle()));
+                return Single.just(new Answer<Object,Object>());
+            }
             else queue(() -> effects.add(name+(name.equals("gainCondition")?":"+a[0]:"")));
             return null;
         }));
@@ -170,7 +175,12 @@ public class YigRulesTest {
     @Test public void reckoningCountsMonstersAfterTheNewCultistSpawns() {
         new YigInitListener().load();events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.CHARGE);drain();assertTrue(effects.isEmpty());
         events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();assertFalse(effects.contains("advanceDoom"));
-        events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();assertEquals("advanceDoom",effects.get(effects.size()-1));
+        assertEquals(Arrays.asList("onTriggeredReckoning","notice:ancientOne.yig.reckoning.cultist","spawn"),effects);
+        effects.clear();
+        events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();
+        // Each automatic change is explained before it happens.
+        assertEquals(Arrays.asList("onTriggeredReckoning","notice:ancientOne.yig.reckoning.cultist","spawn",
+                "notice:ancientOne.yig.reckoning.doom","advanceDoom"),effects);
     }
     @Test public void awakenedDoomOnlyLosesAtMidnightWithoutUsingTokens() {
         ancient.awaken();new YigInitListener().load();
@@ -193,7 +203,7 @@ public class YigRulesTest {
         events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.CHARGE);drain();assertTrue(monsters.isEmpty());
         events.fireDirectEvent(DirectEvent.RECKONING_ANCIENT_ONE,ReckoningFireType.FIRE);drain();
         assertEquals(1,monsters.size());assertNotNull(monsters.get(0).getCurrentLocation());
-        assertEquals(Arrays.asList("onTriggeredReckoning","spawn"),effects);
+        assertEquals(Arrays.asList("onTriggeredReckoning","notice:ancientOne.yig.reckoning.cultistRandom","spawn"),effects);
     }
     @Test public void retreatChoiceCanKeepDoomRetreatOrReplaceItWithCurseRemoval() {
         for (boolean discard : new boolean[]{false,true}) {

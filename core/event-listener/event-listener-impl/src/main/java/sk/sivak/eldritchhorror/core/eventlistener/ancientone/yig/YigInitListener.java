@@ -16,6 +16,14 @@ import static sk.sivak.eldritchhorror.core.eventlistener.ancientone.yig.YigEffec
 public class YigInitListener extends AncientOneInitListener {
     private final List<EventListener> listeners = new ArrayList<>();
     private boolean awakened() { return p().getModel().getAncientOne().getAncientOneInfo().isAwaken(); }
+    /** Explains Yig's automatic effects before they change the board, like the awakening notice. */
+    private static void notice(String title, Runnable effect) {
+        Question<Object> notice = new Question<>();
+        notice.setTitle(title);
+        notice.setPortraitBeforeTitle(sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId.YIG);
+        notice.setOptions(Question.Option.okOption);
+        p().getGameService().ask(notice).subscribe(ok -> sequence(effect));
+    }
     public void unregister() {
         for (EventListener listener : listeners) p().getEventQueue().unregisterListener(listener);
         listeners.clear();
@@ -48,10 +56,16 @@ public class YigInitListener extends AncientOneInitListener {
                     p().getDoomOmenService().onTriggeredReckoning();
                     if (!awakened()) {
                         LocationId expedition = p().getExpeditionDeck().getExpeditionTokenLocation();
-                        spawn(NonEpicMonsterId.CULTIST, expedition);
-                        later(() -> { if (p().getMonsterCup().getMonstersAtLocation(expedition).size() >= 2) p().getDoomOmenService().advanceDoom(); });
+                        notice("ancientOne.yig.reckoning.cultist", () -> {
+                            spawn(NonEpicMonsterId.CULTIST, expedition);
+                            later(() -> {
+                                if (p().getMonsterCup().getMonstersAtLocation(expedition).size() >= 2)
+                                    notice("ancientOne.yig.reckoning.doom", () -> p().getDoomOmenService().advanceDoom());
+                            });
+                        });
                     } else {
-                        spawn(NonEpicMonsterId.CULTIST, LocationId.getRandomLocations(1).get(0));
+                        notice("ancientOne.yig.reckoning.cultistRandom",
+                                () -> spawn(NonEpicMonsterId.CULTIST, LocationId.getRandomLocations(1).get(0)));
                     }
                 });
             }

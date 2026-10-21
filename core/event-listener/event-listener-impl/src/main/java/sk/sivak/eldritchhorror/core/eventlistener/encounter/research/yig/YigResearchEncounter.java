@@ -77,7 +77,7 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
     }
     private boolean startsWithChoice() {
         switch (getLocationType()) {
-            case CITY: return page == 23 || (page == 7 && canGain(DARK_PACT));
+            case CITY: return page == 23 || (page == 7 && canGain(DARK_PACT)) || (page == 15 && !improvedSkills().isEmpty());
             case WILDERNESS: return page == 6 || (page == 8 && canGain(POISONED))
                     || (page == 21 && canGain(DARK_PACT));
             case SEA: return (page == 3 || page == 12) && canGain(DARK_PACT);
@@ -304,15 +304,28 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             }); break;
         }
     }
+    private List<Stat> improvedSkills() {
+        List<Stat> skills = new ArrayList<>();
+        for (Stat s : Stat.values()) if (p().getInvestigators().getActiveInvestigator().getStatBonus(s)>0) skills.add(s);
+        return skills;
+    }
     private void spendImprovement() {
+        List<Stat> skills = improvedSkills();
+        if (skills.isEmpty()) { condition(DETAINED); return; }
+        // The card text carries the explanation, so the buttons stay short enough for phones.
+        openingChoice("Spend an improvement token to let an investigator discard Cursed?",
+                () -> chooseImprovement(skills, stat -> {
+                    p().getInvestigatorService().loseImprovement(new LoseImprovementData(stat,1));
+                    cureCurse();
+                }),
+                () -> condition(DETAINED));
+    }
+    private void chooseImprovement(List<Stat> skills, Action1<Stat> spend) {
+        if (skills.size() == 1) { spend.call(skills.get(0)); return; }
         List<Question.Option<Stat>> options = new ArrayList<>();
-        for (Stat s : Stat.values()) if (p().getInvestigators().getActiveInvestigator().getStatBonus(s)>0) options.add(new Question.Option<>(s.prettyString(),s));
-        options.add(new Question.Option<>("Do not spend an improvement; gain Detained",null));
-        Question<Stat> q = new Question<>(); q.setTitle("Spend an improvement token to let an investigator discard Cursed?"); q.setOptions(options);
-        p().getGameService().ask(q).subscribe(a -> sequence(() -> {
-            if(a.getResponseData()==null) condition(DETAINED);
-            else { p().getInvestigatorService().loseImprovement(new LoseImprovementData(a.getResponseData(),1)); cureCurse(); }
-        }));
+        for (Stat s : skills) options.add(new Question.Option<>(s.prettyString(),s));
+        Question<Stat> q = new Question<>(); q.setTitle("Spend which improvement token?"); q.setOptions(options);
+        p().getGameService().ask(q).subscribe(a -> sequence(() -> spend.call(a.getResponseData())));
     }
     private void moveToCity() {
         Set<LocationId> cities=EnumSet.noneOf(LocationId.class);
