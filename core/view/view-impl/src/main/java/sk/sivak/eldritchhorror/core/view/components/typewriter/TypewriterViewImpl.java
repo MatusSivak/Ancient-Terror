@@ -296,7 +296,7 @@ public class TypewriterViewImpl implements TypewriterView  {
             createTable();
         }
         if (typewriterTableStack.peek().getCardBackground() != null) {
-            InfoStage.getCardResolutionBackgrounds().addActor(typewriterTableStack.peek().getCardBackground());
+            CardResolutionArtwork.show(InfoStage.getCardResolutionBackgrounds(), typewriterTableStack.peek().getCardBackground());
         }
         return getTypewriterEffect().showPaper();
     }
@@ -305,17 +305,17 @@ public class TypewriterViewImpl implements TypewriterView  {
     public Completable showCardResolutionPaper(sk.sivak.eldritchhorror.core.constants.card.CardInfo card) {
         return Completable.defer(() -> CustomAssetManager.getTextureAsync(CardResolutionArtwork.textureName(card))
                 .flatMapCompletable(texture -> {
-                    Completable show = showPaper(true);
                     com.badlogic.gdx.scenes.scene2d.ui.Image background = CardResolutionArtwork.create(texture);
+                    Completable show = showPaper(true);
                     typewriterTableStack.peek().setCardBackground(background);
-                    InfoStage.getCardResolutionBackgrounds().addActor(background);
+                    CardResolutionArtwork.show(InfoStage.getCardResolutionBackgrounds(), background);
                     return show;
                 }));
     }
 
     private void removeCardBackground() {
         if (typewriterTableStack.peek().getCardBackground() != null) {
-            typewriterTableStack.peek().getCardBackground().remove();
+            CardResolutionArtwork.hide(typewriterTableStack.peek().getCardBackground());
         }
     }
 
