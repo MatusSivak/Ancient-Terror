@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.investigator;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
+import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
@@ -34,8 +35,16 @@ public class ThePriestInitListener extends AbstractInvestigatorInitListener {
                         || ServicePlatform.get().getInvestigators().getActiveInvestigatorId() != getInvestigatorId()
                         || ServicePlatform.get().getConditionsDeck().hasTrait(getInvestigatorId(), ConditionTrait.BOON)) return;
                 getService().hold();
-                ServicePlatform.get().getGameService().gainCondition(ConditionTrait.BOON);
-                getService().convertTo(CloseGateData.class, () -> data);
+                Question<Object> notice = new Question<>();
+                notice.setTitle("investigator.thePriest.boonNotice");
+                notice.setPortraitBeforeTitle(getInvestigatorId());
+                notice.setOptions(Question.Option.okOption);
+                ServicePlatform.get().getGameService().ask(notice).subscribe(ok -> {
+                    getService().hold();
+                    ServicePlatform.get().getGameService().gainCondition(ConditionTrait.BOON);
+                    getService().convertTo(CloseGateData.class, () -> data);
+                    getService().release();
+                });
                 getService().release();
             }
         };

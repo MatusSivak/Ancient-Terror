@@ -57,6 +57,8 @@ import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
+import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -375,24 +377,7 @@ public class TestViewImpl implements TestView {
                 rerollButtonAction(onSub, true, originalBottomHeight);
             };
             buttons = ButtonUtils.buildNoYesButtons(0, noAction, yesAction);
-            if (question == null) {
-                labelTable = LabelTable.createAndShowTable(0, get("test.rerollFocus"),
-                        CustomAssetManager.getTexture(CustomAssetManager.FOCUS_TOKEN));
-            } else {
-                List<Texture> textures = new LinkedList<>();
-                textures.add(CustomAssetManager.getTexture(CustomAssetManager.FOCUS_TOKEN));
-                for (Object textureName : question.getTextureNameList()) {
-                    textures.add(CustomAssetManager.getTexture((String)textureName)); // W T F ?!?!?!?!
-                }
-                if (question.getPortraitTextureName() != null) {
-                    labelTable = LabelTable.createAndShowTable(0, question.getTitle(),
-                            question.getPortraitTextureName(), textures, 0);
-                } else {
-                    labelTable = LabelTable.createAndShowTable(0, question.getTitle(),
-                            CustomAssetManager.getTexture(CustomAssetManager.FOCUS_TOKEN));
-                }
-
-            }
+            labelTable = createRerollPrompt(question, "test.rerollFocus", "Focus", CustomAssetManager.FOCUS_TOKEN);
         });
     }
 
@@ -410,26 +395,24 @@ public class TestViewImpl implements TestView {
                 rerollButtonAction(onSub, true, originalBottomHeight);
             };
             buttons = ButtonUtils.buildNoYesButtons(0, noAction, yesAction);
-            if (question == null) {
-                labelTable = LabelTable.createAndShowTable(0, get("test.rerollClue"),
-                        CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
-            } else {
-                List<Texture> textures = new LinkedList<>();
-                textures.add(CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
-                for (Object textureName : question.getTextureNameList()) {
-                    textures.add(CustomAssetManager.getTexture((String)textureName));
-                }
-                if (question.getPortraitTextureName() != null) {
-                    labelTable = LabelTable.createAndShowTable(0, question.getTitle(),
-                            question.getPortraitTextureName(), textures, 0);
-                } else {
-                    labelTable = LabelTable.createAndShowTable(0, question.getTitle(),
-                            CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN));
-                }
-
-            }
-
+            labelTable = createRerollPrompt(question, "test.rerollClue", "Clue", CustomAssetManager.CLUE_TOKEN);
         });
+    }
+
+    private LabelTable createRerollPrompt(Question<?> question, String defaultTitle, String tokenKeyword, String tokenTexture) {
+        String title = question == null ? get(defaultTitle) : question.getTitle();
+        boolean inlineToken = title != null && MarkupText.replaceGlyphKeywords(title)
+                .indexOf(FontGlyphEnricher.getGlyph(tokenKeyword)) >= 0;
+        if (question != null && question.getPortraitTextureName() != null) {
+            List<Texture> textures = new LinkedList<>();
+            if (!inlineToken) textures.add(CustomAssetManager.getTexture(tokenTexture));
+            for (String textureName : question.getTextureNameList()) {
+                if (!tokenTexture.equals(textureName)) textures.add(CustomAssetManager.getTexture(textureName));
+            }
+            return LabelTable.createAndShowTable(0, title, question.getPortraitTextureName(), textures, 0);
+        }
+        return inlineToken ? LabelTable.createAndShowTable(0, title)
+                : LabelTable.createAndShowTable(0, title, CustomAssetManager.getTexture(tokenTexture));
     }
 
     @Override

@@ -26,6 +26,12 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.question.QuestionChoiceView;
 import sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterViewImpl;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.constants.asset.*;
+import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
+import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
+import sk.sivak.eldritchhorror.core.view.draganddrop.impl.*;
+import sk.sivak.eldritchhorror.core.view.draganddrop.impl.reserve.ReserveDragAndDropBinder;
+import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 /** Renders and exercises production widgets without loading saves or contacting Firestore. */
 public class ReportFixesPreview extends ApplicationAdapter {
@@ -37,6 +43,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean crown;
     private static boolean october20;
     private static boolean nun;
+    private static boolean october22;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -45,6 +52,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         crown = Arrays.asList(args).contains("--crown");
         october20 = Arrays.asList(args).contains("--oct20");
         nun = Arrays.asList(args).contains("--nun");
+        october22 = Arrays.asList(args).contains("--oct22");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -59,6 +67,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october22) { october22Reports(); return; }
             if (nun) { nunDiceBonus(); return; }
             if (october20) { october20Reports(); return; }
             if (crown) { crownResolution(); return; }
@@ -74,6 +83,120 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void october22Reports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class, (p,m,a) -> null)).init();
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for (String language : new String[]{"en", "sk"}) {
+            setPreviewLanguage(language);
+            Question<Object> notice = new Question<>();
+            notice.setTitle("investigator.thePriest.boonNotice");
+            notice.setPortraitBeforeTitle(InvestigatorId.THE_PRIEST);
+            notice.setOptions(Question.Option.okOption);
+            int[] done = {0};
+            new sk.sivak.eldritchhorror.core.view.question.QuestionView().ask(notice).subscribe(a -> done[0]++);
+            tick(180);
+            require(done[0] == 0, "Priest prompt completed without OK");
+            LabelTable prompt = find(LabelTable.class);
+            for (Actor actor : all(prompt)) if (actor instanceof Label) {
+                Label label = (Label) actor; label.validate();
+                require(label.getPrefHeight() <= label.getHeight() + 1, "Priest explanation clipped");
+            }
+            draw("oct22-priest-" + language);
+            click(textButton("OK")); tick(180);
+            require(done[0] == 1, "Priest OK did not complete once");
+
+            for (boolean focus : new boolean[]{false, true}) for (int variant = 0; variant < 3; variant++) {
+                String keyword = focus ? "Focus" : "Clue";
+                String token = focus ? CustomAssetManager.FOCUS_TOKEN : CustomAssetManager.CLUE_TOKEN;
+                Question<Object> question = null;
+                if (variant > 0) {
+                    question = new Question<>();
+                    question.setTitle(variant == 1 ? "Reroll with " + keyword + " ?" : "Try again ?");
+                    question.setPortraitBeforeTitle(InvestigatorId.THE_PRIEST);
+                    question.addTextureName(token);
+                }
+                sk.sivak.eldritchhorror.core.view.test.TestViewImpl view = new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
+                int[] answered = {0};
+                (focus ? view.askRerollUsingFocus(question) : view.askRerollUsingClue(question)).subscribe(a -> answered[0]++);
+                tick(120);
+                LabelTable reroll = (LabelTable) field(view, "labelTable");
+                int images = 0;
+                for (Actor actor : all(reroll)) if (actor instanceof Image) images++;
+                int glyphs = 0;
+                for (char c : labels(reroll).toCharArray()) if (c == FontGlyphEnricher.getGlyph(keyword)) glyphs++;
+                require(images + glyphs == (variant == 0 ? 1 : 2), "Duplicated/missing reroll token");
+                require(labels(reroll).contains(" ?"), "Question mark touches token");
+                if (variant == 0) draw("oct22-reroll-" + keyword + "-" + language);
+                click(((Button[]) field(view, "buttons"))[0]); tick(120);
+                require(answered[0] == 1, "Reroll answer did not complete once");
+            }
+        }
+        setPreviewLanguage("en");
+        reserveAffordability();
+        preloadCard("card/condition/POISONED.jpg", null);
+        CardTemplate poison = CardTemplate.buildCard(new sk.sivak.eldritchhorror.core.constants.condition.poisoned.PoisonedCondition());
+        poison.setScale(.38f); poison.setPosition(250,30); stage.addActor(poison); tick(120);
+        draw("oct22-poisoned"); poison.remove();
+        setPreviewLanguage(oldLanguage);
+        System.out.println("PASS: Priest notice/OK and single reroll tokens in both languages; reserve affordability through zoom, Debt and selection; Poisoned artwork");
+    }
+
+    private void preloadCard(String picture, Integer cost) {
+        for (String texture : new String[]{picture, "card/card_description_background.png", "card/card_title_background.png",
+                CustomAssetManager.NEW_CARD_TEMPLATE, "card/disabled.png", "card/card_type_asset.png",
+                "card/card_type_condition.png", CustomAssetManager.PURE_WHITE_BACKGROUND}) CustomAssetManager.getTexture(texture);
+        if (cost != null) CustomAssetManager.getTexture("card/asset_value_" + cost + ".png");
+    }
+
+    private void reserveAffordability() throws Exception {
+        // Same reserve and one-success budget as report c2d47867.
+        AssetInfo[] assets = {new HolyCrossAsset(), new HandcuffsAsset(), new SpiritDaggerAsset(), new LuckyCigaretteCaseAsset()};
+        CardTemplate[] cards = new CardTemplate[assets.length];
+        for (int i = 0; i < assets.length; i++) {
+            preloadCard("card/asset/" + assets[i].getId().name() + ".jpg", assets[i].getCost());
+            cards[i] = CardTemplate.buildCard(assets[i]);
+            cards[i].setScale(.133f);
+        }
+        ReserveDragAndDropBinder binder = new ReserveDragAndDropBinder(1, stage);
+        binder.init(cards); stage.addActor(binder.getSourceTargetGroup()); tick(120);
+        Field dndField = DragAndDropBinder.class.getDeclaredField("customDragAndDrop"); dndField.setAccessible(true);
+        CustomDragAndDrop dnd = (CustomDragAndDrop) dndField.get(binder);
+        require(((List<?>) field(dnd, "enabledSources")).isEmpty(), "Unaffordable cards can be dragged");
+        for (CardTemplate card : cards) checkShade(card, true);
+
+        // Reset/drag effects clear the temporary tint. Affordability must remain visible.
+        for (CardTemplate card : cards) card.setForegroundColor(new Color(0,0,0,0));
+        tick(120);
+        for (CardTemplate card : cards) checkShade(card, true);
+        for (EventListener listener : cards[3].getListeners()) if (listener instanceof CardClickListener) {
+            CardClickListener zoom = (CardClickListener) listener;
+            InputEvent event = new InputEvent(); event.setTarget(cards[3].getForeground());
+            zoom.clicked(event, 1, 1); tick(120); require(zoom.isZoomed(), "Card did not zoom");
+            zoom.scaleDownIfZoomed(); tick(120); require(!zoom.isZoomed(), "Card did not close");
+        }
+        for (CardTemplate card : cards) checkShade(card, true);
+        draw("oct22-reserve-one-success");
+        binder.takeBankLoan(); tick(120);
+        require(((List<?>) field(dnd, "enabledSources")).size() == 4, "Debt did not enable affordable cards");
+        for (CardTemplate card : cards) checkShade(card, false);
+        draw("oct22-reserve-after-debt");
+        binder.getSourceTargetGroup().getTargetActor().addActor(cards[0]);
+        binder.getReserveTargetActorChangedListener().onTargetChange(Collections.singletonList(cards[0])); tick(120);
+        for (int i = 1; i < cards.length; i++) checkShade(cards[i], true);
+        require(((List<?>) field(dnd, "enabledSources")).size() == 1, "Remaining reserve exceeds budget");
+        draw("oct22-reserve-debt-selected");
+        binder.getSourceTargetGroup().getSourceDockActor().addActor(cards[0]);
+        binder.getReserveTargetActorChangedListener().onTargetChange(Collections.emptyList()); tick(120);
+        for (CardTemplate card : cards) checkShade(card, false);
+        binder.getSourceTargetGroup().remove();
+    }
+
+    private void checkShade(CardTemplate card, boolean shaded) {
+        Actor shade = card.findActor("unavailable-shade");
+        require(shade != null && Math.abs(shade.getColor().a - (shaded ? .66f : 0f)) < .001f,
+                "Wrong affordability shade for " + card.getAssetInfo().getName());
     }
 
     private void nunDiceBonus() throws Exception {

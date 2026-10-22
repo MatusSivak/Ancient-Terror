@@ -44,6 +44,9 @@ public class NewInvestigatorAbilitiesTest {
     private final List<List<? extends CardInfo>> cardChoices = new ArrayList<>();
     private boolean chooseLastCard, deferDiscard, finishMadness;
     private rx.SingleSubscriber<? super ShowCardResponse> pendingDiscard;
+    private boolean deferNotice;
+    private Question<?> lastQuestion;
+    private rx.SingleSubscriber<? super Answer<Object,Object>> pendingNotice;
 
     @Before public void setup() {
         ServicePlatform.nullifyInstance();
@@ -88,6 +91,8 @@ public class NewInvestigatorAbilitiesTest {
                 questions++;
                 Answer<Object,Object> answer=new Answer<>();
                 Question<?> question=(Question<?>)args[0];
+                lastQuestion=question;
+                if(deferNotice)return Single.<Answer<Object,Object>>create(subscriber -> pendingNotice=subscriber);
                 if(question.getTitle().startsWith("Carson:"))answer.setResponseData(PathType.TRAIN);
                 else if(question.getTitle().startsWith("Use Ursula"))answer.setResponseData(accept);
                 else if(question.getTitle().startsWith("Discard a Madness") && finishMadness)answer.setResponseData(null);
@@ -198,6 +203,19 @@ public class NewInvestigatorAbilitiesTest {
         assertEquals(1,boons);
     }
     private boolean exhausted(){return investigators.getInvestigator(InvestigatorId.THE_EXPLORER).isPassiveAbilityDisabled();}
+    @Test public void priestExplainsHisBoonAndWaitsForOk() {
+        new ThePriestInitListener().justRegisterListeners();
+        investigators.changeActiveInvestigator(InvestigatorId.THE_PRIEST);
+        deferNotice=true;
+        events.fireAfterEvent(BeforeAfterEvent.CLOSE_GATE,new CloseGateData(LocationId.ROME,null,true));
+        assertEquals(0,boons);
+        assertEquals(1,questions);
+        assertEquals("investigator.thePriest.boonNotice",lastQuestion.getTitle());
+        assertEquals("investigator/THE_PRIEST.png",lastQuestion.getPortraitTextureName());
+        assertEquals(Question.Option.okOption,lastQuestion.getOptions());
+        pendingNotice.onSuccess(new Answer<>());
+        assertEquals(1,boons);
+    }
     @Test public void maryDiscardsOneMadnessPerSuccessAcrossTheBoard() {
         investigators.changeActiveInvestigator(InvestigatorId.THE_NUN);
         investigators.getInvestigator(InvestigatorId.THE_PRIEST).setCurrentLocationId(LocationId.ROME);

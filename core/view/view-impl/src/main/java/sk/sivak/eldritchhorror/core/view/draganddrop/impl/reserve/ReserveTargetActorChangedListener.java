@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.view.draganddrop.impl.reserve;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import java8.features.function.Consumer;
@@ -72,7 +71,7 @@ public class ReserveTargetActorChangedListener implements TargetActorChangedList
         for (DragAndDrop.Source source : dragAndDrop.getAllSources()) {
             if (source.getActor().equals(cardTemplate)) {
                 dragAndDrop.enableSource(source);
-                cardTemplate.setForegroundColor(new Color(0f, 0f, 0f, 0));
+                cardTemplate.setUnavailableForSelection(false);
             }
         }
     }
@@ -81,7 +80,7 @@ public class ReserveTargetActorChangedListener implements TargetActorChangedList
         for (DragAndDrop.Source source : dragAndDrop.getAllSources()) {
             if (source.getActor().equals(cardTemplate)) {
                 dragAndDrop.disableSource(source);
-                cardTemplate.setForegroundColor(new Color(0f, 0f, 0f, 0.66f));
+                cardTemplate.setUnavailableForSelection(true);
             }
         }
     }

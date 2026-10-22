@@ -50,6 +50,8 @@ public class CardTemplate extends WidgetGroup {
     private TokenCardInfo tokenCardInfo;
 
     private Image foreground;
+    private Image unavailableShade;
+    private boolean unavailableForSelection;
     private Image disabledImage;
 
     private CardTemplate(String textureId,
@@ -90,6 +92,12 @@ public class CardTemplate extends WidgetGroup {
             foreground.setSize(CARD_WIDTH, CARD_HEIGHT);
             foreground.setColor(new Color(0, 0, 0, 0f));
             addActor(foreground);
+            // Affordability must survive temporary drag and zoom foreground changes.
+            unavailableShade = new Image(getTextureRegionDrawable(PURE_WHITE_BACKGROUND));
+            unavailableShade.setName("unavailable-shade");
+            unavailableShade.setSize(CARD_WIDTH, CARD_HEIGHT);
+            unavailableShade.setColor(0, 0, 0, unavailableForSelection ? 0.66f : 0f);
+            addActor(unavailableShade);
         });
 	}
 
@@ -452,6 +460,13 @@ public class CardTemplate extends WidgetGroup {
         label.setWrap(true);
         label.setAlignment(Align.center, Align.center);
         return label;
+    }
+
+    public void setUnavailableForSelection(boolean unavailable) {
+        unavailableForSelection = unavailable;
+        if (unavailableShade != null) {
+            unavailableShade.setColor(0, 0, 0, unavailable ? 0.66f : 0f);
+        }
     }
 
     public void setForegroundColor(Color color) {
