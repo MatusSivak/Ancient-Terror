@@ -6,7 +6,7 @@ import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 
 public class DebtCondition extends AbstractConditionInfo {
 
-    // TODO LATER add AGREEMENT card back
+    // Backs 1-8 cover base game + Forsaken Lore. Expansion-only backs (e.g. Agreement) are not part of the game content yet.
     public DebtCondition() {
         traits.add(ConditionTrait.DEAL);
         traits.add(ConditionTrait.COMMON);

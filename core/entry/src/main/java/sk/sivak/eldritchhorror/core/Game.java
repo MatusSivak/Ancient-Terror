@@ -44,6 +44,8 @@ public class Game extends com.badlogic.gdx.Game {
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
         }
+        // Screens handle the back key themselves (in-game menu, return to main menu, exit).
+        Gdx.input.setCatchBackKey(true);
         if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
             start();
             return;

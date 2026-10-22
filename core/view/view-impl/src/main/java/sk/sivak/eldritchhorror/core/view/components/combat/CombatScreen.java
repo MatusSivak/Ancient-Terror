@@ -1,5 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
+import com.badlogic.gdx.InputMultiplexer;
+import sk.sivak.eldritchhorror.core.view.utils.BackKeyHandler;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -68,7 +71,7 @@ public class CombatScreen implements Screen {
     @Override
     public void show() {
         if (screenInitialized) {
-            Gdx.input.setInputProcessor(stage);
+            Gdx.input.setInputProcessor(new InputMultiplexer(stage, new BackKeyHandler(() -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME))));
             return;
         }
         screenInitialized = true;
@@ -155,7 +158,7 @@ public class CombatScreen implements Screen {
         fpsLabel.setPosition(0, ViewProperties.VIEWPORT_HEIGHT - fpsLabel.getHeight());
 //        stage.addActor(fpsLabel);
 
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, new BackKeyHandler(() -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME))));
 
         buttonsTable.validate();
         stage.addActor(buttonsTable);

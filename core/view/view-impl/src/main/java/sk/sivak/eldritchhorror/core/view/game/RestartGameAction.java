@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import sk.sivak.eldritchhorror.core.constants.AdHandler;
+import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.ScreenType;
 import sk.sivak.eldritchhorror.core.view.components.RestartConfirmationDialog;
@@ -52,14 +53,29 @@ public class RestartGameAction {
     }
 
     public void justRestartGame() {
-        cleanMapStage();
-        BigActorsManager.reset();
-        InfoStage.reset();
-        clearQueueAction.run();
+        cleanUpGame();
         Gdx.files.local("save.json").delete();
         changeScreenHandler.changeScreen(ScreenType.INIT_GAME);
         changeScreenHandler.resetInitGameView();
         NewMusicBox.getInstance().reset();
+    }
+
+    /**
+     * Leaves the running game and returns to the main menu, keeping the last save so it can be continued.
+     */
+    public void exitToMainMenu() {
+        GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.GAME_STATE, "save_and_exit");
+        cleanUpGame();
+        changeScreenHandler.changeScreen(ScreenType.INIT_GAME);
+        changeScreenHandler.showMainMenu();
+        NewMusicBox.getInstance().reset();
+    }
+
+    private void cleanUpGame() {
+        cleanMapStage();
+        BigActorsManager.reset();
+        InfoStage.reset();
+        clearQueueAction.run();
     }
 
     private void cleanMapStage() {

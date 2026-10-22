@@ -41,6 +41,7 @@ public class MenuButton extends ImageButton {
     private boolean restartButtonDisplayed;
     boolean menuButtonClickable = true;
     private Skin skin;
+    private Runnable closeMenuAction;
 
     public MenuButton() {
         super(getTextureRegionDrawable("icon/menu.png"),
@@ -53,6 +54,22 @@ public class MenuButton extends ImageButton {
         ButtonUtils.addClickListener(this, () -> {
             openMenu();
         });
+    }
+
+    /**
+     * Back key behaviour in game: closes the menu when open, otherwise opens it.
+     */
+    public void handleBackKey() {
+        if (closeMenuAction != null) {
+            Runnable close = closeMenuAction;
+            closeMenuAction = null;
+            close.run();
+            return;
+        }
+        if (getStage() == null || !isVisible()) {
+            return;
+        }
+        openMenu();
     }
 
     private void openMenu() {
@@ -159,6 +176,7 @@ public class MenuButton extends ImageButton {
             if (restartGameAction == null) {
                 return;
             }
+            closeMenuAction = null;
             dialog.hide(Actions.run(() -> {
                 MapStage.brightenWorld();
                 menuButtonClickable = true;
@@ -167,26 +185,35 @@ public class MenuButton extends ImageButton {
             }));
         });
 
-        ButtonUtils.addClickListener(closeButton, () -> {
+        Runnable closeMenu = () -> {
+            closeMenuAction = null;
             dialog.hide(Actions.run(() -> {
                 MapStage.brightenWorld();
                 menuButtonClickable = true;
                 getColor().a = 1f;
             }));
-        });
+        };
+        closeMenuAction = closeMenu;
+        ButtonUtils.addClickListener(closeButton, closeMenu);
 
         ButtonUtils.addClickListener(reportBugButton, () -> {
+            closeMenuAction = null;
             dialog.hide(Actions.run(() -> {
                 new ReportBugDialog(MenuButton.this, skin, reportScreenshot).show(InfoStage.getStageSafe());
             }));
         });
 
         ButtonUtils.addClickListener(saveAndExitButton, () -> {
+            closeMenuAction = null;
             dialog.hide(Actions.run(() -> {
                 MapStage.brightenWorld();
                 menuButtonClickable = true;
                 getColor().a = 1f;
-                Gdx.app.exit();
+                if (restartGameAction != null) {
+                    restartGameAction.exitToMainMenu();
+                } else {
+                    Gdx.app.exit();
+                }
             }));
         });
     }

@@ -20,8 +20,8 @@ public abstract class AbstractCardReckoningListener extends EventListenerImpl<Re
             return;
         }
         charged = false;
-        // TODO if lost in time and space, don't trigger
         ServicePlatform.get().getService().addEventCommand(in -> {
+            // Investigators Lost in Time and Space are not on board; their reckoning effects do not resolve.
             if (!ServicePlatform.get().getInvestigators().isOnBoard(getCardOwnerId())) {
                 return;
             }

@@ -1,5 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.components.halloffame;
 
+import com.badlogic.gdx.InputMultiplexer;
+import sk.sivak.eldritchhorror.core.view.utils.BackKeyHandler;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -64,7 +67,7 @@ public class HallOfFameScreen implements Screen {
             initTable();
         }
         stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, new BackKeyHandler(() -> changeScreenHandler.changeScreen(ScreenType.INIT_GAME))));
     }
 
     private void initTable() {

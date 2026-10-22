@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import sk.sivak.eldritchhorror.core.view.utils.BackKeyHandler;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
@@ -218,7 +220,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
             initLocaleFromPreferences();
             refreshLocalizedTexts();
             refreshLocaleFlagSelection();
-            Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage));
+            Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage, new BackKeyHandler(this::onBackKey)));
             return;
         }
         initLocaleFromPreferences();
@@ -255,7 +257,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
         rebuildLocalizedDialogs();
 
 
-        Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage));
+        Gdx.input.setInputProcessor(new InputMultiplexer(InfoStage.getStageSafe(), stage, new BackKeyHandler(this::onBackKey)));
         NewMusicBox.getInstance().changeMusic(NewMusicBox.TRACK_HORROR_GAME_INTRO);
 
 
@@ -300,6 +302,23 @@ public class InitGameViewImpl implements Screen, InitGameView {
             stage.addActor(replayTutorialButton);
         }
 
+        addSavedGameButtons();
+    }
+
+    /**
+     * Rebuilds the main menu after returning from a game.
+     *
+     * @return false when there is no save to continue
+     */
+    public boolean showSavedGameMenu() {
+        if (stage == null) {
+            return false;
+        }
+        reset();
+        return addSavedGameButtons();
+    }
+
+    private boolean addSavedGameButtons() {
         if (Gdx.files.local("save.json").exists()) {
 
             loadGameButton = createMainMenuButton(get("init.continue"));
@@ -378,8 +397,19 @@ public class InitGameViewImpl implements Screen, InitGameView {
                     });
                 });
             });
+            return true;
         }
+        return false;
+    }
 
+    private void onBackKey() {
+        if (localeOptions != null && localeOptions.isVisible()) {
+            closeLocaleOptions();
+            return;
+        }
+        if (Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android) {
+            Gdx.app.exit();
+        }
     }
 
     private void rebuildLocalizedDialogs() {

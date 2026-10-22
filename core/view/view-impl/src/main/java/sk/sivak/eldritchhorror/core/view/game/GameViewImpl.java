@@ -78,6 +78,7 @@ import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.map.vortex.VortexImageUtils;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
 import sk.sivak.eldritchhorror.core.view.question.QuestionView;
+import sk.sivak.eldritchhorror.core.view.utils.BackKeyHandler;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import sk.sivak.eldritchhorror.core.view.utils.LostInTimeAndSpaceHelper;
@@ -149,7 +150,8 @@ public class GameViewImpl implements Screen, GameView {
         if (screenInitialized) {
             checkIfTutorialWasPassed();
             MapUtils.resetCamera();
-            Gdx.input.setInputProcessor(new InputMultiplexer(getStageSafe(), MapStage.getStage()));
+            Gdx.input.setInputProcessor(new InputMultiplexer(getStageSafe(), MapStage.getStage(),
+                new BackKeyHandler(() -> InfoStage.getMenuButton().handleBackKey())));
             initHudButtonsAndNoiseEffect();
             initOmenAndDoomTrack();
             addCurtainToInfoStage();
@@ -168,7 +170,8 @@ public class GameViewImpl implements Screen, GameView {
         backgroundStage = new Stage(new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
         backgroundUtils = new BackgroundUtils(backgroundStage, controller);
         MapUtils.resetCamera();
-        Gdx.input.setInputProcessor(new InputMultiplexer(getStageSafe(), MapStage.getStage()));
+        Gdx.input.setInputProcessor(new InputMultiplexer(getStageSafe(), MapStage.getStage(),
+                new BackKeyHandler(() -> InfoStage.getMenuButton().handleBackKey())));
         showCurrentMysteryCardDialog = new ShowCurrentMysteryCardDialog(get("game.currentMysteryCard"), skin);
 
         initHudButtonsAndNoiseEffect();

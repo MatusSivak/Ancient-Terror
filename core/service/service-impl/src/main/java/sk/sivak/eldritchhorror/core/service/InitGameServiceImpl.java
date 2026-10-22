@@ -49,6 +49,8 @@ public class InitGameServiceImpl extends AbstractCommonService implements InitGa
 
     @Override
     public void loadGame() {
+        // Start from a clean state; a previous game may have run in this process (Save & Exit to main menu).
+        execute(new ActionCommand<>(initGameActionProvider.basicInitAction(), "BASIC_INIT"));
         execute(new ActionCommand<>(initGameActionProvider.loadGame(), "LOAD_GAME"));
         execute(new ActionCommand<>(initGameActionProvider.loadView(), "LOAD_VIEW"));
     }

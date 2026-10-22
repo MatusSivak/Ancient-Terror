@@ -98,6 +98,13 @@ public class ScreenHolder implements ChangeScreenHandler, StartGameHandler {
     }
 
     @Override
+    public void showMainMenu() {
+        if (!ServiceLocator.getViewProvider().getInitGameView().showSavedGameMenu()) {
+            resetInitGameView();
+        }
+    }
+
+    @Override
     public void startGame() {
         GameServiceImpl gameService = ServiceLocator.getServiceProvider().getGameService();
         int players = ServiceLocator.getModelProvider().getInvestigators().getPlayers();

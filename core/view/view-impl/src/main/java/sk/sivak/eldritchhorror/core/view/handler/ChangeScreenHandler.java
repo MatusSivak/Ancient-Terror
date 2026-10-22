@@ -10,4 +10,9 @@ public interface ChangeScreenHandler {
     void changeScreen(ScreenType screenType);
 
     void resetInitGameView();
+
+    /**
+     * Shows the main menu after leaving a game, offering Continue when a save exists.
+     */
+    void showMainMenu();
 }
