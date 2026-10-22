@@ -5,9 +5,6 @@ import sk.sivak.eldritchhorror.core.constants.location.FindNearestData;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
-
-import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.eventtype.DirectEvent.RECKONING_MONSTER;
 
@@ -26,39 +23,19 @@ public class HoundOfTindalosMonsterListener extends AbstractMonsterListener {
 
         @Override
         void onNotify() {
-            List<? extends InvestigatorRead> investigators = ServicePlatform.get().getInvestigators().getOnBoardInvestigators();
-            if (investigators.isEmpty()) {
-                return;
-            }
-            FindNearestData nearest = ServicePlatform.get().getLocationMap().findNearest(monsterInfo.getCurrentLocation(), locationInfo -> {
-                for (InvestigatorRead investigator : investigators) {
-                    if (investigator.getCurrentLocationId() == locationInfo.getLocationId()) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            if (nearest == null) {
+            FindNearestData nearest = MonsterAbilities.findNearestInvestigator(monsterInfo.getCurrentLocation());
+            if (nearest == null || nearest.getLocationId() == null) {
                 return;
             }
             LocationId nearestLocationId = nearest.getLocationId();
-
-            InvestigatorId nearestInvestigatorId = null;
-            for (InvestigatorRead investigator : investigators) {
-                if (nearestLocationId != investigator.getCurrentLocationId()) {
-                    continue;
-                }
-                nearestInvestigatorId = investigator.getInfo().getInvestigatorId();
-                break;
+            InvestigatorId nearestInvestigatorId = MonsterAbilities.firstInvestigatorAt(nearestLocationId);
+            if (nearestInvestigatorId == null) {
+                return;
             }
 
-            ServicePlatform.get().getDoomOmenService().onTriggeredReckoning();
-            ServicePlatform.get().getService().moveCameraToLocation(monsterInfo.getCurrentLocation());
-            ServicePlatform.get().getMonsterService().highlightReckoningText(monsterInfo);
-            ServicePlatform.get().getMonsterService().moveMonster(monsterInfo, nearestLocationId);
-            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(nearestInvestigatorId);
-            ServicePlatform.get().getInvestigatorService().showActiveInvestigator(false);
+            MonsterAbilities.announceReckoning(monsterInfo);
+            MonsterAbilities.moveMonster(monsterInfo, nearestLocationId);
+            MonsterAbilities.makeActive(nearestInvestigatorId);
             ServicePlatform.get().getTestService().combat(monsterInfo);
         }
     }

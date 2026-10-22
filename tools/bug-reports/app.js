@@ -96,10 +96,11 @@ async function show(report) {
     const actions = node('div', undefined, 'actions');
     if (f.saveFile?.type === 'bytes') actions.append(downloadButton(r, 'saveFile', `Download save (${f.saveFile.size.toLocaleString()} bytes)`, id + '-save.json'));
     if (f.screenshotPng?.type === 'bytes') actions.append(downloadButton(r, 'screenshotPng', 'Download screenshot', id + '.png'));
+    if (f.logsText?.type === 'bytes') actions.append(downloadButton(r, 'logsText', 'Download phase logs', id + '-logs.txt'));
     actions.append(downloadButton(r, 'raw', 'Download full report JSON', id + '-report.json')); detail.append(actions, node('h3', 'Screenshot'));
     const screenshot = node('div'); detail.append(screenshot);
     screenshot.append(node('p', f.screenshotPng?.type === 'bytes' ? 'Loading screenshot…' : `No screenshot attached (${f.metadata?.screenshotStatus || 'unavailable'}).`));
-    detail.append(node('h3', 'Report details'), table({type:typeLabel(r), id:r.id, document:r.name, created:date(r.createTime), updated:date(r.updateTime), captured:date(f.capturedAt), reporterUid:f.reporterUid, status:f.status, schemaVersion:f.schemaVersion}), node('h3', 'Metadata'), table(f.metadata || {}), node('h3', 'Attachments'), table({saveFile:f.saveFile || 'Not attached', screenshotPng:f.screenshotPng || 'Not attached'}));
+    detail.append(node('h3', 'Report details'), table({type:typeLabel(r), id:r.id, document:r.name, created:date(r.createTime), updated:date(r.updateTime), captured:date(f.capturedAt), reporterUid:f.reporterUid, status:f.status, schemaVersion:f.schemaVersion}), node('h3', 'Metadata'), table(f.metadata || {}), node('h3', 'Attachments'), table({saveFile:f.saveFile || 'Not attached', screenshotPng:f.screenshotPng || 'Not attached', logsText:f.logsText || 'Not attached'}));
     const raw = node('details'); raw.append(node('summary', 'All fields (attachment sizes shown; download JSON for original bytes)'), node('pre', JSON.stringify(r, null, 2))); detail.append(raw);
     if (f.screenshotPng?.type === 'bytes') {
       try {

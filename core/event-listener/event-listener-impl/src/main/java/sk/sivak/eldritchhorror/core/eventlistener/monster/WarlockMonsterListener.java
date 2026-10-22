@@ -4,7 +4,6 @@ import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.FindNearestData;
-import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
@@ -80,31 +79,17 @@ public class WarlockMonsterListener extends AbstractMonsterListener {
                 return;
             }
 
-            List<? extends InvestigatorRead> investigators = ServicePlatform.get().getInvestigators().getOnBoardInvestigators();
-
-            FindNearestData nearest = ServicePlatform.get().getLocationMap().findNearest(monsterInfo.getCurrentLocation(), locationInfo -> {
-                for (InvestigatorRead investigator : investigators) {
-                    if (investigator.getCurrentLocationId() == locationInfo.getLocationId()) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            LocationId nearestLocationId = nearest.getLocationId();
-
-            InvestigatorId nearestInvestigatorId = null;
-            for (InvestigatorRead investigator : investigators) {
-                if (nearestLocationId != investigator.getCurrentLocationId()) {
-                    continue;
-                }
-                nearestInvestigatorId = investigator.getInfo().getInvestigatorId();
-                break;
+            FindNearestData nearest = MonsterAbilities.findNearestInvestigator(monsterInfo.getCurrentLocation());
+            if (nearest == null || nearest.getLocationId() == null) {
+                return;
+            }
+            InvestigatorId nearestInvestigatorId = MonsterAbilities.firstInvestigatorAt(nearest.getLocationId());
+            if (nearestInvestigatorId == null) {
+                return;
             }
 
             ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(nearestInvestigatorId);
-            ServicePlatform.get().getInvestigatorService().showActiveInvestigator(false);
+            MonsterAbilities.makeActive(nearestInvestigatorId);
             ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
             ServicePlatform.get().getService().release();
         }

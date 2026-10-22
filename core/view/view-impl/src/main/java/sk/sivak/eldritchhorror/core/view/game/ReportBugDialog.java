@@ -28,6 +28,7 @@ public class ReportBugDialog extends Dialog {
     private final CheckBox includeScreenshot;
     private final byte[] screenshot;
     private byte[] save;
+    private byte[] logs;
     private String frozenDescription;
     private byte[] frozenScreenshot;
     private final String reportId = UUID.randomUUID().toString();
@@ -114,6 +115,7 @@ public class ReportBugDialog extends Dialog {
                 BugReportSnapshot snapshot = BugReportSnapshot.capture(frozenScreenshot,
                         frozenScreenshot != null ? "attached" : screenshot == null ? "unavailable" : "excluded", false);
                 save = snapshot.save;
+                logs = snapshot.logs;
                 metadata.putAll(snapshot.metadata);
                 capturedAt = snapshot.capturedAt;
                 frozenDescription = description.getText().trim();
@@ -127,7 +129,7 @@ public class ReportBugDialog extends Dialog {
         Gdx.input.setOnscreenKeyboardVisible(false);
         status.setColor(Color.valueOf("DCC99F"));
         status.setText(get("reportBug.sending"));
-        new FirebaseBugReports().send(reportId, frozenDescription, save, frozenScreenshot, metadata, capturedAt,
+        new FirebaseBugReports().send(reportId, frozenDescription, save, frozenScreenshot, logs, metadata, capturedAt,
                 new FirebaseBugReports.Callback() {
                     @Override public void success() {
                         sending = false;

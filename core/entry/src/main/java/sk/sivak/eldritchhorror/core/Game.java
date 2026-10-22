@@ -20,6 +20,7 @@ import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.combat.FireballSmokeBuilder;
 import sk.sivak.eldritchhorror.core.view.firebase.FirebaseHallOfFame;
 import sk.sivak.eldritchhorror.core.view.firebase.CrashReports;
+import sk.sivak.eldritchhorror.core.util.PhaseLogCapture;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
@@ -41,6 +42,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     private void createGame() {
+        PhaseLogCapture.install(Gdx.app);
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
         }

@@ -6,7 +6,7 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly([
           'description', 'reporterUid', 'capturedAt', 'schemaVersion', 'status',
-          'metadata', 'saveFile', 'screenshotPng'])
+          'metadata', 'saveFile', 'screenshotPng', 'logsText'])
         && request.resource.data.reporterUid == request.auth.uid
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
@@ -15,11 +15,13 @@ service cloud.firestore {
         && request.resource.data.schemaVersion == 1
         && request.resource.data.status == 'new'
         && request.resource.data.metadata is map
-        && request.resource.data.metadata.size() <= 12
+        && request.resource.data.metadata.size() <= 16
         && (!('saveFile' in request.resource.data)
           || (request.resource.data.saveFile is bytes && request.resource.data.saveFile.size() <= 524288))
         && (!('screenshotPng' in request.resource.data)
-          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680));
+          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680))
+        && (!('logsText' in request.resource.data)
+          || (request.resource.data.logsText is bytes && request.resource.data.logsText.size() <= 131072));
       allow read, update, delete: if false;
     }
     // Automatic crash reports use the same create-only payload contract.
@@ -27,7 +29,7 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly([
           'description', 'reporterUid', 'capturedAt', 'schemaVersion', 'status',
-          'metadata', 'saveFile', 'screenshotPng'])
+          'metadata', 'saveFile', 'screenshotPng', 'logsText'])
         && request.resource.data.reporterUid == request.auth.uid
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
@@ -36,11 +38,13 @@ service cloud.firestore {
         && request.resource.data.schemaVersion == 1
         && request.resource.data.status == 'new'
         && request.resource.data.metadata is map
-        && request.resource.data.metadata.size() <= 12
+        && request.resource.data.metadata.size() <= 16
         && (!('saveFile' in request.resource.data)
           || (request.resource.data.saveFile is bytes && request.resource.data.saveFile.size() <= 524288))
         && (!('screenshotPng' in request.resource.data)
-          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680));
+          || (request.resource.data.screenshotPng is bytes && request.resource.data.screenshotPng.size() <= 327680))
+        && (!('logsText' in request.resource.data)
+          || (request.resource.data.logsText is bytes && request.resource.data.logsText.size() <= 131072));
       allow read, update, delete: if false;
     }
   }

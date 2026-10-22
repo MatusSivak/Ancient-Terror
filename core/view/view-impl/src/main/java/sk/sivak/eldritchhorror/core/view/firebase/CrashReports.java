@@ -102,7 +102,7 @@ public final class CrashReports {
     private synchronized void upload(Report report, FileHandle file) {
         if (!uploading.add(report.id)) return;
         BugReportSnapshot snapshot = report.snapshot;
-        FirebaseBugReports.crashes().send(report.id, report.description, snapshot.save, snapshot.screenshot,
+        FirebaseBugReports.crashes().send(report.id, report.description, snapshot.save, snapshot.screenshot, snapshot.logs,
                 snapshot.metadata, snapshot.capturedAt, new FirebaseBugReports.Callback() {
                     @Override public void success() {
                         synchronized (CrashReports.this) {

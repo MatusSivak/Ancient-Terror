@@ -3,6 +3,8 @@ package sk.sivak.eldritchhorror.core.view.firebase;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 /** Attachments are stored as Firestore bytes, preserving the original save exactly. */
@@ -10,15 +12,32 @@ public final class BugReportPayload {
     public static final int MAX_DESCRIPTION = 4000;
     public static final int MAX_SAVE_BYTES = 512 * 1024;
     public static final int MAX_SCREENSHOT_BYTES = 200 * 1024;
+    public static final int MAX_LOGS_BYTES = 128 * 1024;
 
     private BugReportPayload() { }
 
+    /** UTF-8 log bytes limited to the newest {@link #MAX_LOGS_BYTES}; null when there is nothing to send. */
+    public static byte[] tailLogs(String text) {
+        if (text == null || text.isEmpty()) return null;
+        byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length <= MAX_LOGS_BYTES) return bytes;
+        int start = bytes.length - MAX_LOGS_BYTES;
+        while (start < bytes.length && (bytes[start] & 0xC0) == 0x80) start++;
+        return Arrays.copyOfRange(bytes, start, bytes.length);
+    }
+
     public static String document(String description, byte[] save, byte[] screenshot,
+                                  Map<String, String> metadata, String uid, long capturedAt) {
+        return document(description, save, screenshot, null, metadata, uid, capturedAt);
+    }
+
+    public static String document(String description, byte[] save, byte[] screenshot, byte[] logs,
                                   Map<String, String> metadata, String uid, long capturedAt) {
         String text = description == null ? "" : description.trim();
         if (text.isEmpty() || text.length() > MAX_DESCRIPTION) throw new IllegalArgumentException("description");
         if (save != null && save.length > MAX_SAVE_BYTES) throw new IllegalArgumentException("saveTooLarge");
         if (screenshot != null && screenshot.length > MAX_SCREENSHOT_BYTES) throw new IllegalArgumentException("screenshotTooLarge");
+        if (logs != null && logs.length > MAX_LOGS_BYTES) throw new IllegalArgumentException("logsTooLarge");
         JsonValue fields = object();
         fields.addChild("description", typed("stringValue", text));
         fields.addChild("reporterUid", typed("stringValue", uid));
@@ -36,6 +55,7 @@ public final class BugReportPayload {
         fields.addChild("metadata", value);
         if (save != null) fields.addChild("saveFile", typed("bytesValue", new String(Base64Coder.encode(save))));
         if (screenshot != null) fields.addChild("screenshotPng", typed("bytesValue", new String(Base64Coder.encode(screenshot))));
+        if (logs != null) fields.addChild("logsText", typed("bytesValue", new String(Base64Coder.encode(logs))));
         JsonValue document = object();
         document.addChild("fields", fields);
         return document.toJson(JsonWriter.OutputType.json);

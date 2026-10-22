@@ -70,11 +70,12 @@ public class MiGoMonsterListener extends AbstractMonsterListener {
                 return false;
             });
 
+            if (nearest == null || nearest.getLocationId() == null) {
+                return;
+            }
             LocationId nearestLocationId = nearest.getLocationId();
 
-            ServicePlatform.get().getDoomOmenService().onTriggeredReckoning();
-            ServicePlatform.get().getService().moveCameraToLocation(monsterInfo.getCurrentLocation());
-            ServicePlatform.get().getMonsterService().highlightReckoningText(monsterInfo);
+            MonsterAbilities.announceReckoning(monsterInfo);
             ServicePlatform.get().getMonsterService().moveMonster(monsterInfo, nearestLocationId);
             ServicePlatform.get().getTokenService().discardClue(nearestLocationId);
         }

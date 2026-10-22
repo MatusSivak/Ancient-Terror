@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.model;
 
+import sk.sivak.eldritchhorror.core.constants.log.PhaseLog;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
@@ -18,6 +19,7 @@ public class Phase implements PhaseWrite {
     public void init() {
         phaseStartTime = null;
         currentPhase = null;
+        PhaseLog.clear();
     }
 
     @Override
@@ -30,6 +32,7 @@ public class Phase implements PhaseWrite {
         if (currentPhase == null) {
             phaseStartTime = System.currentTimeMillis();
             currentPhase = PhaseType.ACTION;
+            PhaseLog.startPhase(currentPhase.name());
             return;
         }
         trackPhaseDuration(currentPhase);
@@ -44,6 +47,7 @@ public class Phase implements PhaseWrite {
                 currentPhase = PhaseType.ACTION;
                 break;
         }
+        PhaseLog.startPhase(currentPhase.name());
     }
 
     private void trackPhaseDuration(PhaseType currentPhase) {
@@ -64,5 +68,6 @@ public class Phase implements PhaseWrite {
     public void load(PhaseSaveDataRead saveData) {
         phaseStartTime = System.currentTimeMillis();
         currentPhase = saveData.getCurrentPhase();
+        PhaseLog.startPhase(currentPhase + " (loaded)");
     }
 }

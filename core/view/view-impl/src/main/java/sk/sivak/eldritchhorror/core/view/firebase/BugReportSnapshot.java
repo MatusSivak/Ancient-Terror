@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.firebase;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonReader;
+import sk.sivak.eldritchhorror.core.constants.log.PhaseLog;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Map;
 public final class BugReportSnapshot {
     public byte[] save;
     public byte[] screenshot;
+    public byte[] logs;
     public long capturedAt = System.currentTimeMillis();
     public Map<String, String> metadata = new LinkedHashMap<>();
 
@@ -38,6 +40,13 @@ public final class BugReportSnapshot {
         } catch (RuntimeException error) {
             if (!bestEffort) throw error;
             snapshot.metadata.put("saveStatus", "unavailable");
+        }
+        try {
+            snapshot.logs = BugReportPayload.tailLogs(PhaseLog.snapshot());
+            snapshot.metadata.put("logsStatus", snapshot.logs == null ? "empty" : "attached");
+        } catch (RuntimeException error) {
+            if (!bestEffort) throw error;
+            snapshot.metadata.put("logsStatus", "unavailable");
         }
         detail(snapshot, "platform", () -> Gdx.app.getType().name(), bestEffort);
         detail(snapshot, "platformVersion", () -> Integer.toString(Gdx.app.getVersion()), bestEffort);

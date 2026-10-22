@@ -197,7 +197,7 @@ def handler_for(store, session, project):
                     document = store.report(report_id, collection)
                     attachment = query.get("attachment", [""])[0]
                     if attachment:
-                        if attachment not in ("screenshotPng", "saveFile", "raw"):
+                        if attachment not in ("screenshotPng", "saveFile", "logsText", "raw"):
                             self.send(400, {"error": "Unknown attachment"})
                         elif attachment == "raw":
                             self.send(200, document, filename="report.json")
@@ -206,10 +206,10 @@ def handler_for(store, session, project):
                             if value is None:
                                 self.send(404, {"error": "Attachment is missing"})
                             else:
-                                screenshot = attachment == "screenshotPng"
-                                self.send(200, base64.b64decode(value, validate=True),
-                                          "image/png" if screenshot else "application/octet-stream",
-                                          "screenshot.png" if screenshot else "save.json")
+                                mime, name = {"screenshotPng": ("image/png", "screenshot.png"),
+                                              "logsText": ("text/plain; charset=utf-8", "logs.txt")}.get(
+                                    attachment, ("application/octet-stream", "save.json"))
+                                self.send(200, base64.b64decode(value, validate=True), mime, name)
                     else:
                         self.send(200, summarize(document))
                 else:

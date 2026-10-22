@@ -29,13 +29,18 @@ public final class FirebaseBugReports {
 
     public void send(String id, String description, byte[] save, byte[] screenshot,
                      Map<String, String> metadata, long capturedAt, Callback callback) {
+        send(id, description, save, screenshot, null, metadata, capturedAt, callback);
+    }
+
+    public void send(String id, String description, byte[] save, byte[] screenshot, byte[] logs,
+                     Map<String, String> metadata, long capturedAt, Callback callback) {
         try {
             JsonValue config = new JsonReader().parse(Gdx.files.internal("bug-report-firebase.json"));
             String project = config.getString("projectId");
             String key = config.getString("apiKey");
             if (project.isEmpty() || key.isEmpty()) { callback.failed("configuration"); return; }
             if (token != null && System.currentTimeMillis() < tokenExpires) {
-                create(project, id, description, save, screenshot, metadata, capturedAt, callback);
+                create(project, id, description, save, screenshot, logs, metadata, capturedAt, callback);
                 return;
             }
             Net.HttpRequest auth = request("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + key,
@@ -47,7 +52,7 @@ public final class FirebaseBugReports {
                     token = response.getString("idToken");
                     uid = response.getString("localId");
                     tokenExpires = System.currentTimeMillis() + 50 * 60 * 1000;
-                    create(project, id, description, save, screenshot, metadata, capturedAt, callback);
+                    create(project, id, description, save, screenshot, logs, metadata, capturedAt, callback);
                 }
             });
         } catch (Exception e) {
@@ -55,9 +60,9 @@ public final class FirebaseBugReports {
         }
     }
 
-    private void create(String project, String id, String description, byte[] save, byte[] screenshot,
+    private void create(String project, String id, String description, byte[] save, byte[] screenshot, byte[] logs,
                         Map<String, String> metadata, long capturedAt, Callback callback) {
-        String payload = BugReportPayload.document(description, save, screenshot, metadata, uid, capturedAt);
+        String payload = BugReportPayload.document(description, save, screenshot, logs, metadata, uid, capturedAt);
         Net.HttpRequest request = request("https://firestore.googleapis.com/v1/projects/" + project
                 + "/databases/(default)/documents/" + collection + "?documentId=" + id, payload);
         request.setHeader("Authorization", "Bearer " + token);

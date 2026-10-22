@@ -50,6 +50,7 @@ Console > Firestore Database > Data > `crashReports`, open that UUID and check:
 - `metadata` has platform, app version, language, screen, density, and thread.
 - `saveFile` contains the existing save (if present and within the size limit).
 - `screenshotPng` contains the game screenshot if capture succeeded.
+- `logsText` contains the game log lines from the current phase only (UTF-8 bytes).
 
 For an offline/restart test, start a **fresh test session**, disconnect networking,
 press F8, and check `assets/pending-crash-reports/<uuid>.json`. Close the game,
@@ -190,13 +191,19 @@ Realtime Database. No Cloud Storage or new platform SDK is required.
   edge, stepping down only when needed to fit the Firestore document budget. It is
   the game framebuffer only. Capture
   failure does not prevent reporting; the UI and metadata indicate its absence.
+- Log lines (log4j and `Gdx.app` output) since the current game phase started, as
+  UTF-8 **bytes** (`logsText`, newest 128 KiB). The buffer is cleared whenever a new
+  phase (Action, Encounter, Mythos) begins or a game is loaded; `logsStatus` in
+  metadata records whether they were attached. Deploy the updated `firestore.rules`
+  (which allows `logsText`) before releasing this change.
 - App version, platform and platform version, language, framebuffer dimensions,
   density, attachment status and save modification time. No hardware identifiers,
   account email, filesystem paths or other applications' screenshots are collected.
 
 The combined attachment limits leave room under Firestore's 1 MiB document limit.
 Bytes are base64 in the REST representation. Decode `saveFile.bytesValue` to recover
-the original save and `screenshotPng.bytesValue` to recover the PNG. Exempt these two
+the original save and `screenshotPng.bytesValue` to recover the PNG (`logsText.bytesValue`
+is the UTF-8 log text). Exempt these three
 fields from indexing in the Firestore console. Reports are readable only through
 trusted project administration; clients can only create them.
 

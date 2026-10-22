@@ -49,23 +49,11 @@ public class NightGauntMonsterListener extends AbstractMonsterListener {
                 return;
             }
             // Move this Monster 2 spaces toward the nearest investigator.
-
-            FindNearestData nearest = ServicePlatform.get().getLocationMap().findNearest(monsterInfo.getCurrentLocation(), locationInfo -> {
-                for (InvestigatorRead investigator : investigators) {
-                    if (investigator.getCurrentLocationId() == locationInfo.getLocationId()) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            LocationId targetLocation;
-            if (nearest.getDistance() <= 2) {
-                targetLocation = nearest.getLocationId();
-            } else {
-                targetLocation = nearest.getPreviousLocations().get(2);
+            FindNearestData nearest = MonsterAbilities.findNearestInvestigator(monsterInfo.getCurrentLocation());
+            if (nearest == null || nearest.getLocationId() == null) {
+                return;
             }
-
+            LocationId targetLocation = MonsterAbilities.stepsToward(nearest, 2);
 
             ServicePlatform.get().getService().moveCameraToLocation(monsterInfo.getCurrentLocation());
             ServicePlatform.get().getMonsterService().highlightReckoningText(monsterInfo);

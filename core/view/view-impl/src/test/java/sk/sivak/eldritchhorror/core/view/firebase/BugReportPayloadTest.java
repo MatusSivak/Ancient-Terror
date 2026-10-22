@@ -26,6 +26,32 @@ public class BugReportPayloadTest {
                 Collections.emptyMap(), "player", 123)).get("fields");
         assertFalse(fields.has("saveFile"));
         assertFalse(fields.has("screenshotPng"));
+        assertFalse(fields.has("logsText"));
+    }
+
+    @Test public void attachesLogsAsUtf8Bytes() {
+        byte[] logs = BugReportPayload.tailLogs("=== Phase started: MYTHOS ===\nŽ drew card\n");
+        JsonValue fields = new JsonReader().parse(BugReportPayload.document("Bug", null, null, logs,
+                Collections.emptyMap(), "player", 1)).get("fields");
+        assertEquals("=== Phase started: MYTHOS ===\nŽ drew card\n", new String(
+                Base64Coder.decode(fields.get("logsText").getString("bytesValue")), StandardCharsets.UTF_8));
+    }
+
+    @Test public void tailLogsKeepsNewestBytesOnCharacterBoundary() {
+        StringBuilder text = new StringBuilder();
+        while (text.length() < BugReportPayload.MAX_LOGS_BYTES) text.append("Žold line\n");
+        text.append("newest");
+        byte[] tail = BugReportPayload.tailLogs(text.toString());
+        assertTrue(tail.length <= BugReportPayload.MAX_LOGS_BYTES);
+        String decoded = new String(tail, StandardCharsets.UTF_8);
+        assertTrue(decoded.endsWith("newest"));
+        assertFalse(decoded.contains("\uFFFD"));
+        assertNull(BugReportPayload.tailLogs(""));
+    }
+
+    @Test(expected = IllegalArgumentException.class) public void rejectsOversizedLogs() {
+        BugReportPayload.document("Bug", null, null, new byte[BugReportPayload.MAX_LOGS_BYTES + 1],
+                Collections.emptyMap(), "player", 0);
     }
 
     @Test(expected = IllegalArgumentException.class) public void rejectsBlankDescription() {
