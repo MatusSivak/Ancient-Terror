@@ -121,6 +121,32 @@ import sk.sivak.eldritchhorror.core.eventlistener.monster.NightGauntMonsterListe
 import sk.sivak.eldritchhorror.core.eventlistener.monster.NugMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.RiotMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.SerpentPeopleMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.FormlessSpawnMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.ShanMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.FireVampireMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.HuntingHorrorMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.ProtoShoggothMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.DholeMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.FlyingPolypMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.FirebugMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.CrazedMobMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.GiantPenguinMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.HonoredDeadMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.GhastMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.YoungCthonianMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.HuntingByakheeMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.JiangshiMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.SpawnOfSebakMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.PoltergeistMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.TchoTchoMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.DeepOneHybridMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.RatThingMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.SandDwellerMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.ZoogMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.DimensionalShamblerMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.MoonBeastMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.ChildOfTheGoatMonsterListener;
+import sk.sivak.eldritchhorror.core.eventlistener.monster.CrawlingOneMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.ServitorOfTheOuterGodsMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.ShoggothMonsterListener;
 import sk.sivak.eldritchhorror.core.eventlistener.monster.ShubNiggurathMonsterListener;
@@ -610,6 +636,58 @@ public class EventListenerProviderImpl implements EventListenerProvider {
             listener = new DeepOneMonsterListener();
         } else if (NonEpicMonsterId.SERPENT_PEOPLE == monsterId) {
             listener = new SerpentPeopleMonsterListener();
+        } else if (NonEpicMonsterId.FORMLESS_SPAWN == monsterId) {
+            listener = new FormlessSpawnMonsterListener();
+        } else if (NonEpicMonsterId.SHAN == monsterId) {
+            listener = new ShanMonsterListener();
+        } else if (NonEpicMonsterId.FIRE_VAMPIRE == monsterId) {
+            listener = new FireVampireMonsterListener();
+        } else if (NonEpicMonsterId.HUNTING_HORROR == monsterId) {
+            listener = new HuntingHorrorMonsterListener();
+        } else if (NonEpicMonsterId.PROTO_SHOGGOTH == monsterId) {
+            listener = new ProtoShoggothMonsterListener();
+        } else if (NonEpicMonsterId.DHOLE == monsterId) {
+            listener = new DholeMonsterListener();
+        } else if (NonEpicMonsterId.FLYING_POLYP == monsterId) {
+            listener = new FlyingPolypMonsterListener();
+        } else if (NonEpicMonsterId.FIREBUG == monsterId) {
+            listener = new FirebugMonsterListener();
+        } else if (NonEpicMonsterId.CRAZED_MOB == monsterId) {
+            listener = new CrazedMobMonsterListener();
+        } else if (NonEpicMonsterId.GIANT_PENGUIN == monsterId) {
+            listener = new GiantPenguinMonsterListener();
+        } else if (NonEpicMonsterId.HONORED_DEAD == monsterId) {
+            listener = new HonoredDeadMonsterListener();
+        } else if (NonEpicMonsterId.GHAST == monsterId) {
+            listener = new GhastMonsterListener();
+        } else if (NonEpicMonsterId.YOUNG_CTHONIAN == monsterId) {
+            listener = new YoungCthonianMonsterListener();
+        } else if (NonEpicMonsterId.HUNTING_BYAKHEE == monsterId) {
+            listener = new HuntingByakheeMonsterListener();
+        } else if (NonEpicMonsterId.JIANGSHI == monsterId) {
+            listener = new JiangshiMonsterListener();
+        } else if (NonEpicMonsterId.SPAWN_OF_SEBAK == monsterId) {
+            listener = new SpawnOfSebakMonsterListener();
+        } else if (NonEpicMonsterId.POLTERGEIST == monsterId) {
+            listener = new PoltergeistMonsterListener();
+        } else if (NonEpicMonsterId.TCHO_TCHO == monsterId) {
+            listener = new TchoTchoMonsterListener();
+        } else if (NonEpicMonsterId.DEEP_ONE_HYBRID == monsterId) {
+            listener = new DeepOneHybridMonsterListener();
+        } else if (NonEpicMonsterId.RAT_THING == monsterId) {
+            listener = new RatThingMonsterListener();
+        } else if (NonEpicMonsterId.SAND_DWELLER == monsterId) {
+            listener = new SandDwellerMonsterListener();
+        } else if (NonEpicMonsterId.ZOOG == monsterId) {
+            listener = new ZoogMonsterListener();
+        } else if (NonEpicMonsterId.DIMENSIONAL_SHAMBLER == monsterId) {
+            listener = new DimensionalShamblerMonsterListener();
+        } else if (NonEpicMonsterId.MOON_BEAST == monsterId) {
+            listener = new MoonBeastMonsterListener();
+        } else if (NonEpicMonsterId.CHILD_OF_THE_GOAT == monsterId) {
+            listener = new ChildOfTheGoatMonsterListener();
+        } else if (NonEpicMonsterId.CRAWLING_ONE == monsterId) {
+            listener = new CrawlingOneMonsterListener();
         } else if (NonEpicMonsterId.STAR_SPAWN == monsterId) {
             listener = new StarSpawnMonsterListener();
         } else if (NonEpicMonsterId.ZOMBIE == monsterId) {

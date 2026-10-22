@@ -6,6 +6,7 @@ import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.constants.test.UsableAsset;
 
@@ -100,6 +101,21 @@ public class TestData {
         IterableUtils.removeIf(usableAssets, usableAsset ->
                 usableAsset.getCardInfo() instanceof ArtifactInfo &&
                         !((ArtifactInfo) usableAsset.getCardInfo()).getTraits().contains(AssetTrait.MAGICAL));
+    }
+
+    /** Magical Resistance: no bonuses from Spells or possessions with the Magical trait. */
+    public void removeAllMagicalUsableAssets() {
+        IterableUtils.removeIf(usableAssets, usableAsset -> {
+            Object cardInfo = usableAsset.getCardInfo();
+            if (cardInfo instanceof SpellInfo) {
+                return true;
+            }
+            if (cardInfo instanceof AssetInfo) {
+                return ((AssetInfo) cardInfo).getTraits().contains(AssetTrait.MAGICAL);
+            }
+            return cardInfo instanceof ArtifactInfo
+                    && ((ArtifactInfo) cardInfo).getTraits().contains(AssetTrait.MAGICAL);
+        });
     }
 
     public Stat getStat() {
