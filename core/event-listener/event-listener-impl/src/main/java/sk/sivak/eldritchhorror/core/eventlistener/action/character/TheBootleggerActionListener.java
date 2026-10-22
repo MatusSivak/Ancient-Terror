@@ -42,8 +42,7 @@ public class TheBootleggerActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getGeneralDescription() {
-        return "You and/or another investigator " +
-                "on your space may move one space along a Ship or Train path.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

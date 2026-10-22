@@ -110,10 +110,7 @@ public class FluteOfTheOuterGodsListener extends AbstractArtifactListener<FluteO
 
         @Override
         protected String getGeneralDescription() {
-            return "Spend 2 Health\n" +
-                    "and 2 Sanity\n" +
-                    "to defeat all Monsters\n" +
-                    "on your space.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

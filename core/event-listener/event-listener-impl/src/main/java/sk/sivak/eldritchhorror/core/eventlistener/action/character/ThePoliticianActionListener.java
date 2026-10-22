@@ -28,10 +28,7 @@ public class ThePoliticianActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getGeneralDescription() {
-        return "Another investigator\n" +
-                "of your choice\n" +
-                "may immediately perform\n" +
-                "1 additional action.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

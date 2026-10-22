@@ -33,8 +33,7 @@ public class TheSpyActionListener extends AbstractActionPhaseListener<TheSpyActi
 
     @Override
     protected String getGeneralDescription() {
-        return "If you do not have\n" +
-                "any Clues, gain 1 Clue";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

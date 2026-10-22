@@ -73,13 +73,7 @@ public class BanishmentListener extends AbstractSpellListener<BanishmentSpell> {
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore+2. If you pass,\n" +
-                    "discard one Monster\n" +
-                    "on the nearest Gate\n" +
-                    "with toughness\n" +
-                    "equal to or less than\n" +
-                    "your test result.\n\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

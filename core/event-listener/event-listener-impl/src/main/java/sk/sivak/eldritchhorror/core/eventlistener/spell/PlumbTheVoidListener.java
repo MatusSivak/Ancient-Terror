@@ -70,11 +70,7 @@ public class PlumbTheVoidListener extends AbstractSpellListener<PlumbTheVoidSpel
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore-1. If you pass,\n" +
-                    "an investigator\n" +
-                    "of your choice\n" +
-                    "may move to any space.\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

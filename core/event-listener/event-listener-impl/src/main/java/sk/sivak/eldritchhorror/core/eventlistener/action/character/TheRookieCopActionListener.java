@@ -49,11 +49,7 @@ public class TheRookieCopActionListener extends AbstractActionPhaseListener<TheR
 
     @Override
     protected String getGeneralDescription() {
-        return "Move 1 Monster\n" +
-                "of your choice\n" +
-                "with toughness 3 or less\n" +
-                "from an adjacent space\n" +
-                "to your space.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

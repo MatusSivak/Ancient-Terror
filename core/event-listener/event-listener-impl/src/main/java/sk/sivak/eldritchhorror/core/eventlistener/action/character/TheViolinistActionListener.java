@@ -62,10 +62,7 @@ public class TheViolinistActionListener extends AbstractActionPhaseListener<TheV
 
     @Override
     protected String getGeneralDescription() {
-        return "You may spend\n" +
-                "1 Clue and 1 Focus\n" +
-                "to improve one skill\n" +
-                "of your choice.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

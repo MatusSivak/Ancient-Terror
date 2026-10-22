@@ -29,10 +29,7 @@ public class TheSailorActionListener extends AbstractActionPhaseListener<TheSail
 
     @Override
     protected String getGeneralDescription() {
-        return "Move 1 space\n" +
-                "along a Ship path,\n" +
-                "then perform\n" +
-                "1 additional action.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

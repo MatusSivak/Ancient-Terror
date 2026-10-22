@@ -96,12 +96,7 @@ public class MilkOfShubNiggurathListener extends AbstractArtifactListener<MilkOf
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Will. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to recover all Health\n" +
-                    "and improve Strength twice.\n" +
-                    "Then a Monster\n" +
-                    "ambushes you!";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

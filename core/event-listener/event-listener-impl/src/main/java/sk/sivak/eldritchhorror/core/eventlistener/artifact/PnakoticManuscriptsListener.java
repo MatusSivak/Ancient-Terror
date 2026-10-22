@@ -106,9 +106,7 @@ public class PnakoticManuscriptsListener extends AbstractArtifactListener<Pnakot
 
         @Override
         protected String getGeneralDescription() {
-            return "If you are on a space\n" +
-                    "containing a Gate,\n" +
-                    "gain one Clue.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

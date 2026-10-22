@@ -75,10 +75,7 @@ public class ShrivelingListener extends AbstractSpellListener<ShrivelingSpell> {
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore. If you pass, " +
-                    "choose a Monster on your space " +
-                    "to lose 2 Health.\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

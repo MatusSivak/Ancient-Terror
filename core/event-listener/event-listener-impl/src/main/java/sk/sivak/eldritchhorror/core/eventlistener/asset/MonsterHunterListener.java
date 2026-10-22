@@ -105,9 +105,7 @@ public class MonsterHunterListener extends AbstractAssetListener<MonsterHunterAs
 
         @Override
         protected String getGeneralDescription() {
-            return "A Monster of your choice\n" +
-                    "on your space\n" +
-                    "loses one Health";
+            return cardActionText(getAssetInfo().getDescription());
         }
 
         @Override

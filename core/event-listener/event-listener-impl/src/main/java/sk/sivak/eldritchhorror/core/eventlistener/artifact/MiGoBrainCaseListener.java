@@ -65,12 +65,7 @@ public class MiGoBrainCaseListener extends AbstractArtifactListener<KhopeshOfThe
 
         @Override
         protected String getGeneralDescription() {
-            return "You and another investigator\n" +
-                    "may trade possessions.\n" +
-                    "In addition, he may move\n" +
-                    "to your space.\n" +
-                    "If he does, move\n" +
-                    "to his previous space.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

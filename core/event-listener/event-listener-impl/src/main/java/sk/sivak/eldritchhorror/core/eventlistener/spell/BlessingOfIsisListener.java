@@ -74,13 +74,7 @@ public class BlessingOfIsisListener extends AbstractSpellListener<BlessingOfIsis
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore-1. If you pass,\n" +
-                    "choose an investigator\n" +
-                    "on your space\n" +
-                    "that does not have\n" +
-                    "a Blessed Condition\n" +
-                    "to gain a Blessed Condition.\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

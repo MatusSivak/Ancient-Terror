@@ -44,7 +44,7 @@ public class TheSoldierActionListener extends AbstractActionPhaseListener<TheSol
 
     @Override
     protected String getGeneralDescription() {
-        return "You and 1 Monster on your space each lose 1 Health";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

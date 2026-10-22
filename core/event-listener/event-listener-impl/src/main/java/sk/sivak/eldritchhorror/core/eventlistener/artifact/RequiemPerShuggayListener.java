@@ -120,10 +120,7 @@ public class RequiemPerShuggayListener extends AbstractArtifactListener<RequiemP
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore -1. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to discard 1 Monster\n" +
-                    "on a space containing a Gate.\n";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

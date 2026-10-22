@@ -77,12 +77,7 @@ public class PoisonMistListener extends AbstractSpellListener<PoisonMistSpell> {
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore +1. If you pass,\n" +
-                    "discard Monsters from your space\n" +
-                    "with total toughness\n" +
-                    "equal to or less than\n" +
-                    "your test result.\n" +
-                    "Then flip this card";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

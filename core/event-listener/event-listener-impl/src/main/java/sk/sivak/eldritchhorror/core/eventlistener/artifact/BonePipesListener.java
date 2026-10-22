@@ -116,13 +116,7 @@ public class BonePipesListener extends AbstractArtifactListener<BonePipesArtifac
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore -1. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to choose 1 Monster\n" +
-                    "on your space\n" +
-                    "or an adjacent space.\n" +
-                    "The chosen Monster loses\n" +
-                    "2 Health or moves 1 space.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

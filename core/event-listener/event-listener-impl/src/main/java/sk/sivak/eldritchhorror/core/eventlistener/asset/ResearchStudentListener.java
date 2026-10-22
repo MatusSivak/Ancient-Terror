@@ -62,7 +62,7 @@ public class ResearchStudentListener extends AbstractAssetListener<ResearchStude
 
         @Override
         protected String getGeneralDescription() {
-            return "Roll 1 die.\nOn a 5 or 6, gain 1 Clue.\nOn a 1, discard the nearest Clue on the game board.";
+            return cardActionText(getAssetInfo().getDescription());
         }
 
         @Override

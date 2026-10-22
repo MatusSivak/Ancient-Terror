@@ -95,9 +95,7 @@ public class CultesDesGoulesListener extends AbstractArtifactListener<CultesDesG
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to gain 2 Clues.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

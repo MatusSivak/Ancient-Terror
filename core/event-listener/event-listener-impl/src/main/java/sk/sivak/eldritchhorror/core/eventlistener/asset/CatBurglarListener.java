@@ -80,10 +80,7 @@ public class CatBurglarListener extends AbstractAssetListener<CatBurglarAsset> {
 
         @Override
         protected String getGeneralDescription() {
-            return "Roll 1 die.\n" +
-                    "On a 5 or 6, gain 1 Item or Trinket Asset\n" +
-                    "from the reserve.\n" +
-                    "On a 1, discard this card.";
+            return cardActionText(getAssetInfo().getDescription());
         }
 
         @Override

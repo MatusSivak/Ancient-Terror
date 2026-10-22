@@ -95,9 +95,7 @@ public class NecronomiconListener extends AbstractArtifactListener<NecronomiconA
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore. If you pass,\n" +
-                    "you may spend 1 Sanity to\n" +
-                    "gain 2 Spells.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

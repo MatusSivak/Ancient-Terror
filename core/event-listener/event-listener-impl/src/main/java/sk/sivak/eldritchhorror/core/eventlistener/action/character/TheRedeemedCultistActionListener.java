@@ -43,11 +43,7 @@ public class TheRedeemedCultistActionListener extends AbstractActionPhaseListene
 
     @Override
     protected String getGeneralDescription() {
-        return "If there is a Cultist Monster\n" +
-                "on your space, discard all\n" +
-                "Monsters on your space\n" +
-                "or move the Cultist Monster\n" +
-                "to any other space.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

@@ -109,9 +109,7 @@ public class SerpentCrownListener extends AbstractArtifactListener<SerpentCrownA
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Will-1. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to gain a random Ally.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

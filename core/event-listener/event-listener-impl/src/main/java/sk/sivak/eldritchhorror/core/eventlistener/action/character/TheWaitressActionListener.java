@@ -27,7 +27,7 @@ public class TheWaitressActionListener extends AbstractActionPhaseListener<TheWa
 
     @Override
     protected String getGeneralDescription() {
-        return "Test Lore-1.\nIf you pass,\ngain one Spell.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

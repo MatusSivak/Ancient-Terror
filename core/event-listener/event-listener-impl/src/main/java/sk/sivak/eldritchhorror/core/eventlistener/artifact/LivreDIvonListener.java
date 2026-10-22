@@ -95,9 +95,7 @@ public class LivreDIvonListener extends AbstractArtifactListener<LivreDIvonArtif
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore-1. If you pass,\n" +
-                    "you may spend one Sanity\n" +
-                    "to move to any space.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

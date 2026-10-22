@@ -96,9 +96,7 @@ public class DeVermisMysteriisListener extends AbstractArtifactListener<DeVermis
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore. If you pass,\n" +
-                    "you may spend 1 Sanity to\n" +
-                    "improve 1 Skill of your choice.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

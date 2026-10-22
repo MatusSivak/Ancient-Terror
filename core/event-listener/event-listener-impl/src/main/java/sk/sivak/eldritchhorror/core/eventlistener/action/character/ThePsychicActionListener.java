@@ -48,10 +48,7 @@ public class ThePsychicActionListener extends AbstractActionPhaseListener<ThePsy
 
     @Override
     protected String getGeneralDescription() {
-        return "You may trade\n" +
-                "any number of Clues\n" +
-                "with an investigator\n" +
-                "on any space.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

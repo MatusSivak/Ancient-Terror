@@ -98,11 +98,7 @@ public class ElixirOfLifeListener extends AbstractArtifactListener<ElixirOfLifeA
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Will. If you pass,\n" +
-                    "you may spend 1 Sanity\n" +
-                    "to recover all Health\n" +
-                    "and discard all Illness, Injury\n" +
-                    "and Madness Conditions.";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

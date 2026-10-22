@@ -35,10 +35,7 @@ public class TheBountyHunterActionListener extends AbstractActionPhaseListener<T
 
     @Override
     protected String getGeneralDescription() {
-        return "Test Influence. If you pass,\n" +
-                "you may spend up to\n" +
-                "2 Focus to gain 1 Clue\n" +
-                "for each Focus spent.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

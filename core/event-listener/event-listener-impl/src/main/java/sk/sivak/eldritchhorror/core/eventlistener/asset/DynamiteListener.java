@@ -65,10 +65,7 @@ public class DynamiteListener extends AbstractAssetListener<DynamiteAsset> {
 
         @Override
         protected String getGeneralDescription() {
-            return "You may discard this card\n" +
-                    "to cause each Monster\n" +
-                    "on your space\n" +
-                    "to lose 3 Health.";
+            return cardActionText(getAssetInfo().getDescription());
         }
 
         @Override

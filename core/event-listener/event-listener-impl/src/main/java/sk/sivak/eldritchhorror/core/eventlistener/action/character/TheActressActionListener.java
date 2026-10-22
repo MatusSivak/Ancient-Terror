@@ -42,11 +42,7 @@ public class TheActressActionListener extends AbstractActionPhaseListener<TheAct
 
     @Override
     protected String getGeneralDescription() {
-        return "Spend any number\n" +
-                "of Skill Improvements.\n" +
-                "Then improve 1 Skill\n" +
-                "of your choice\n" +
-                "for each Improvement spent.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

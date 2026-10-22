@@ -10,7 +10,7 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 public class TheButlerActionListener extends AbstractActionPhaseListener<TheButlerActionListener.CharacterAction> {
     public TheButlerActionListener() { name = "Assist"; }
     @Override protected String getAdditionalInfo() { return null; }
-    @Override protected String getGeneralDescription() { return "Trade with another investigator on your space, then perform 1 additional action."; }
+    @Override protected String getGeneralDescription() { return getActiveInvestigator().getInfo().getActionText(); }
     @Override protected CharacterAction createAction() { return new CharacterAction(); }
     @Override protected boolean isVisible() { return getInvestigators().getActiveInvestigatorId() == InvestigatorId.THE_BUTLER; }
     @Override protected boolean isDisabled() {

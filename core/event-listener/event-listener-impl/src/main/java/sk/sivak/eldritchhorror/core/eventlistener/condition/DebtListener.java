@@ -59,7 +59,7 @@ public class DebtListener extends AbstractConditionListener<DebtCondition> {
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Influence.\nIf you pass,\ndiscard this card.";
+            return cardActionText(conditionInfo.getDescription());
         }
 
         @Override

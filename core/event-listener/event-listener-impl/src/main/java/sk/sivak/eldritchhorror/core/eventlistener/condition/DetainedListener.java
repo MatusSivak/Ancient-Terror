@@ -115,7 +115,7 @@ public class DetainedListener extends AbstractConditionListener<DetainedConditio
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Influence.\nIf you pass,\ndiscard this card.";
+            return cardActionText(conditionInfo.getDescription());
         }
 
         @Override

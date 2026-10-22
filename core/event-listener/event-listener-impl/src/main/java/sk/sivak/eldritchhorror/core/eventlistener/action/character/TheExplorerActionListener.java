@@ -14,7 +14,7 @@ import java.util.List;
 public class TheExplorerActionListener extends AbstractActionPhaseListener<TheExplorerActionListener.CharacterAction> {
     public TheExplorerActionListener() { name = "Explore"; }
     @Override protected String getAdditionalInfo() { return null; }
-    @Override protected String getGeneralDescription() { return "Move 1 space along an uncharted path, then perform 1 additional action."; }
+    @Override protected String getGeneralDescription() { return getActiveInvestigator().getInfo().getActionText(); }
     @Override protected CharacterAction createAction() { return new CharacterAction(); }
     @Override protected boolean isVisible() { return getInvestigators().getActiveInvestigatorId() == InvestigatorId.THE_EXPLORER; }
     @Override protected boolean isDisabled() {

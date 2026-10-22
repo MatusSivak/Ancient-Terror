@@ -47,12 +47,7 @@ public class TheHandymanActionListener extends AbstractActionPhaseListener<TheHa
 
     @Override
     protected String getGeneralDescription() {
-        return "Gain one Asset\n" +
-                "of your choice\n" +
-                "with cost 1 from the reserve.\n\n" +
-                "Or discard one card\n" +
-                "from the reserve and\n" +
-                "perform additional action.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

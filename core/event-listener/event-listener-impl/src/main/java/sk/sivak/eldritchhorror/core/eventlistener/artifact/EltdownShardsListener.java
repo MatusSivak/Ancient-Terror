@@ -109,11 +109,7 @@ public class EltdownShardsListener extends AbstractArtifactListener<EltdownShard
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore. If you pass,\n" +
-                    "you may spend one Sanity\n" +
-                    "to discard one Monster\n" +
-                    "with toughness three or less\n" +
-                    "on any space\n";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

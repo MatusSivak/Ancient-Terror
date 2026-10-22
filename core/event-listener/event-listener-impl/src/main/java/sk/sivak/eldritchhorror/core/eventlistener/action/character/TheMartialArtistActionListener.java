@@ -33,11 +33,7 @@ public class TheMartialArtistActionListener extends AbstractActionPhaseListener<
 
     @Override
     protected String getGeneralDescription() {
-        return "Spend any number of\n" +
-                "Health or Sanity,\n" +
-                "then recover\n" +
-                "an equal number of\n" +
-                "Health or Sanity.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

@@ -47,7 +47,7 @@ public class TheEntertainerActionListener extends AbstractActionPhaseListener<Th
 
     @Override
     protected String getGeneralDescription() {
-        return "Perform an action you have already performed this round.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

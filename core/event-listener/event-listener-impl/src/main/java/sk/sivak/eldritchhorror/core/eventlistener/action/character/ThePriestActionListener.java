@@ -16,7 +16,7 @@ import java.util.List;
 public class ThePriestActionListener extends AbstractActionPhaseListener<ThePriestActionListener.CharacterAction> {
     public ThePriestActionListener() { name = "Share Boon"; }
     @Override protected String getAdditionalInfo() { return null; }
-    @Override protected String getGeneralDescription() { return "Give one of your Boon Conditions to another investigator on any space."; }
+    @Override protected String getGeneralDescription() { return getActiveInvestigator().getInfo().getActionText(); }
     @Override protected CharacterAction createAction() { return new CharacterAction(); }
     @Override protected boolean isVisible() { return getInvestigators().getActiveInvestigatorId() == InvestigatorId.THE_PRIEST; }
     @Override protected boolean isDisabled() {

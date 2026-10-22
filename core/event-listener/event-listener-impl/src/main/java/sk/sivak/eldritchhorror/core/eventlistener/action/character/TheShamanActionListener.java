@@ -31,11 +31,7 @@ public class TheShamanActionListener extends AbstractActionPhaseListener<TheSham
 
     @Override
     protected String getGeneralDescription() {
-        return "Look at the top 2 Gates\n" +
-                "in the Gate stack.\n" +
-                "Put 1 Gate on the top\n" +
-                "of the Gate stack,\n" +
-                "and the other on the bottom.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

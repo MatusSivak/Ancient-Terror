@@ -66,10 +66,7 @@ public class SatchelOfTheVoidListener extends AbstractArtifactListener<SatchelOf
 
         @Override
         protected String getGeneralDescription() {
-            return "Look at the top Gate\n" +
-                    "in the Gate stack.\n" +
-                    "Gain 1 Clue if that Gate\n" +
-                    "represents current Omen.\n";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

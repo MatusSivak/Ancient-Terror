@@ -77,13 +77,7 @@ public class ConjurationListener extends AbstractSpellListener<ConjurationSpell>
 
         @Override
         protected String getGeneralDescription() {
-            return "Test Lore+1. If you pass,\n" +
-                    "you may gain\n" +
-                    "1 Item or Trinket\n" +
-                    "from the reserve with value\n" +
-                    "equal to or less than\n" +
-                    "your test result.\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

@@ -120,7 +120,7 @@ public class LightningGunListener extends AbstractArtifactListener<LightningGunA
 
         @Override
         protected String getGeneralDescription() {
-            return "You and each Monster on your space lose 1 Health";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

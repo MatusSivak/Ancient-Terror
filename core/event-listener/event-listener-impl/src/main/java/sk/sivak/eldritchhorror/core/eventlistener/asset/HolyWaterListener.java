@@ -154,8 +154,7 @@ public class HolyWaterListener extends AbstractAssetListener<HolyWaterAsset> {
 
         @Override
         protected String getGeneralDescription() {
-            return "You may discard this card to choose an investigator on your space.\n" +
-                    "That investigator gains a Blessed Condition.";
+            return cardActionText(getAssetInfo().getDescription());
         }
 
         @Override

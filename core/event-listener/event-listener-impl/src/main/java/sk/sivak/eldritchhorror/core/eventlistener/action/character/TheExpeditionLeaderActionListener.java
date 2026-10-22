@@ -65,10 +65,7 @@ public class TheExpeditionLeaderActionListener extends AbstractActionPhaseListen
 
     @Override
     protected String getGeneralDescription() {
-        return "Test Influence. " +
-                "If you pass, gain 1 Ally Asset " +
-                "of your choice from the reserve " +
-                "or the discard pile";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

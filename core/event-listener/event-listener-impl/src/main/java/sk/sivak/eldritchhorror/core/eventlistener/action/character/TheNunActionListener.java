@@ -19,7 +19,7 @@ import java.util.List;
 public class TheNunActionListener extends AbstractActionPhaseListener<TheNunActionListener.CharacterAction> {
     public TheNunActionListener() { name = "Comfort"; }
     @Override protected String getAdditionalInfo() { return null; }
-    @Override protected String getGeneralDescription() { return "Test Will. For each success, you or another investigator on any space may discard 1 Madness Condition."; }
+    @Override protected String getGeneralDescription() { return getActiveInvestigator().getInfo().getActionText(); }
     @Override protected CharacterAction createAction() { return new CharacterAction(); }
     @Override protected boolean isVisible() { return getInvestigators().getActiveInvestigatorId() == InvestigatorId.THE_NUN; }
     @Override protected boolean isDisabled() {

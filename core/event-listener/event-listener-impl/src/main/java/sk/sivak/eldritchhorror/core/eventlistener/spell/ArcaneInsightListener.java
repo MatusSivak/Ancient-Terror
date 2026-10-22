@@ -76,13 +76,7 @@ public class ArcaneInsightListener extends AbstractSpellListener<ArcaneInsightSp
 
         @Override
         protected String getGeneralDescription() {
-            return "Choose yourself or another investigator on any space and test Lore-2.\n" +
-                    "Roll one additional die\n" +
-                    "for each Tome possession\n" +
-                    "you have. If you pass,\n" +
-                    "that investigator\n" +
-                    "gains one Clue.\n" +
-                    "Then flip this card.";
+            return cardActionText(spellInfo.getDescription());
         }
 
         @Override

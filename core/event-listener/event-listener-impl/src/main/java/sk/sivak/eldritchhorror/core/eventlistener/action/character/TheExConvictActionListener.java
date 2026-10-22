@@ -59,13 +59,7 @@ public class TheExConvictActionListener extends AbstractActionPhaseListener<TheE
 
     @Override
     protected String getGeneralDescription() {
-        return "You may discard " +
-                "1 Item or Trinket Asset " +
-                "to gain 1 Item or Trinket " +
-                "of your choice " +
-                "from the reserve " +
-                "with value up to +1 " +
-                "of the discarded Asset.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

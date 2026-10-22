@@ -100,9 +100,7 @@ public class TheAstronomerActionListener extends AbstractActionPhaseListener<The
 
     @Override
     protected String getGeneralDescription() {
-        return "Spend 2 Clues\n" +
-                "to discard 1 Monster\n" +
-                "on a space containing a Gate.\n";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override

@@ -87,12 +87,7 @@ public class DragonIdolListener extends AbstractArtifactListener<DragonIdolArtif
 
         @Override
         protected String getGeneralDescription() {
-            return
-                    "Lose 1 Sanity\n" +
-                    "and 1 Monster\n" +
-                    "on your space\n" +
-                    "or an adjacent space\n" +
-                    "loses 2 health.\n";
+            return cardActionText(getArtifactInfo().getDescription());
         }
 
         @Override

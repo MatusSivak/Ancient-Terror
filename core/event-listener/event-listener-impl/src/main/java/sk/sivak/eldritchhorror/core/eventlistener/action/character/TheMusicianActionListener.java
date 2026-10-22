@@ -45,7 +45,7 @@ public class TheMusicianActionListener extends AbstractActionPhaseListener<TheMu
 
     @Override
     protected String getGeneralDescription() {
-        return "Each investigator on your space recovers 1 sanity.";
+        return getActiveInvestigator().getInfo().getActionText();
     }
 
     @Override
