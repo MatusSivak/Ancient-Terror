@@ -139,6 +139,9 @@ public class MonsterCombatTable extends VisTable {
         setTouchable(Touchable.disabled);
         setSize(0, 0);
 
+        if (fireballService != null) {
+            fireballService.dispose();
+        }
         fireballService = new FireballService(getStage());
 
         if (monsterImage != null) {
@@ -472,6 +475,9 @@ public class MonsterCombatTable extends VisTable {
     @Override
     public boolean remove() {
         settleTokenShakes();
+        if (fireballService != null) {
+            fireballService.dispose();
+        }
         if (monsterImage != null && monsterImage.getParent() != null) {
             monsterImage.setTouchable(Touchable.disabled);
             monsterImage.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));

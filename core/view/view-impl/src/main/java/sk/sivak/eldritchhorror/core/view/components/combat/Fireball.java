@@ -29,7 +29,7 @@ public class Fireball extends Image {
 
     private final FireballAnimation fireballAnimation;
     private float stateTime;
-    private Texture keyFrame;
+    private TextureRegionDrawable keyFrame;
     private List<Runnable> onLandActions = new LinkedList<>();
     private FireballSmokeBuilder.FireballSmoke fireballSmoke;
 
@@ -42,13 +42,13 @@ public class Fireball extends Image {
     private static ShaderProgram blueShader;
 
     public Fireball() {
-        List<Texture> textures = new LinkedList<>();
+        List<TextureRegionDrawable> frames = new LinkedList<>();
         for (int i = 15; i >= 0; i--) {
             Texture texture = CustomAssetManager.getTexture("fireball/" +
                     String.format(Locale.ENGLISH, "%03d", i) + ".png");
-            textures.add(texture);
+            frames.add(new TextureRegionDrawable(new TextureRegion(texture)));
         }
-        fireballAnimation = new FireballAnimation(textures.toArray(new Texture[0]));
+        fireballAnimation = new FireballAnimation(frames.toArray(new TextureRegionDrawable[0]));
         setSize(256, 256);
         setOrigin(Align.center);
         setScaling(Scaling.fit);
@@ -66,9 +66,9 @@ public class Fireball extends Image {
         onLandActions.add(onLandAction);
     }
 
-    private static class FireballAnimation extends Animation<Texture> {
+    private static class FireballAnimation extends Animation<TextureRegionDrawable> {
 
-        private FireballAnimation(Texture... keyFrames) {
+        private FireballAnimation(TextureRegionDrawable... keyFrames) {
             super(1/(float)MathUtils.random(24,30), keyFrames);
             setPlayMode(PlayMode.LOOP);
         }
@@ -78,12 +78,14 @@ public class Fireball extends Image {
     public void act(float delta) {
         super.act(delta);
         stateTime += delta;
-        Texture keyFrame = fireballAnimation.getKeyFrame(stateTime);
+        TextureRegionDrawable keyFrame = fireballAnimation.getKeyFrame(stateTime);
         if (keyFrame != this.keyFrame) {
             this.keyFrame = keyFrame;
-            setDrawable(new TextureRegionDrawable(new TextureRegion(this.keyFrame)));
+            setDrawable(keyFrame);
         }
-        fireballSmoke.getParticleEffect().setPosition(getX() + getWidth()/2f, getY() + getHeight()/2f);
+        if (fireballSmoke != null) {
+            fireballSmoke.moveTo(getX() + getWidth()/2f, getY() + getHeight()/2f);
+        }
 
     }
 

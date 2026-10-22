@@ -78,7 +78,9 @@ public class FastForwardButton extends ImageButton {
     }
 
     public <T extends Action> void unregisterAction(FastForwardAction<T> fastForwardAction) {
-        fastForwardActions.remove(fastForwardAction);
+        if (fastForwardActions.remove(fastForwardAction) == null) {
+            return;
+        }
 
         if (!isAnythingToFastForward()) {
             addAction(Actions.alpha(0.0f, 0.25f));

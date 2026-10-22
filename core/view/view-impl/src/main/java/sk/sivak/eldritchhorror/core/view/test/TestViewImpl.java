@@ -273,7 +273,14 @@ public class TestViewImpl implements TestView {
             testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2,
                     InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
             InfoStage.showActor(testTableStack.peek());
-            autoConfirm(onSub);
+            DiceRoller roller = diceRollerStack.isEmpty() ? null : diceRollerStack.peek();
+            float resultTop = testTableStack.peek().getTop() + 5;
+            // Nun's bonus leaves the die at the screen bottom; lift it above the result instead of covering it.
+            if (roller != null && roller.getBottom() < resultTop) {
+                roller.moveUp(resultTop).subscribe(() -> autoConfirm(onSub), onSub::onError);
+            } else {
+                autoConfirm(onSub);
+            }
         });
     }
 
@@ -291,8 +298,10 @@ public class TestViewImpl implements TestView {
     public Completable showNunDiceBonus(List<DiceRoll> adjustedDice) {
         return Completable.defer(() -> {
             float previousBottom = InfoStage.getBottomHeight();
+            // The stack sits on the screen edge: OK at the very bottom, the notice and the die right above it.
+            float okY = 5f;
             TextButton ok = buildButton(get("dialog.ok"));
-            InfoStage.setBottomHeight(previousBottom + ok.getHeight() + 5f);
+            InfoStage.setBottomHeight(okY + ok.getHeight() + 5f);
             LabelTable notice = LabelTable.createAndShowTable(0, get("test.nunDiceBonus"));
             DiceRoller roller = diceRollerStack.peek();
             Completable confirmBonus = Completable.create(sub -> {
@@ -302,7 +311,7 @@ public class TestViewImpl implements TestView {
                     ok.remove();
                     sub.onCompleted();
                 });
-                InfoStage.showButton(ok, VIEWPORT_WIDTH / 2f - ok.getWidth() / 2f, previousBottom, false);
+                InfoStage.showButton(ok, VIEWPORT_WIDTH / 2f - ok.getWidth() / 2f, okY, false);
             });
             Completable readAdjustedDice = Completable.create(sub -> notice.addAction(Actions.sequence(
                     Actions.delay(.6f), Actions.run(sub::onCompleted))));

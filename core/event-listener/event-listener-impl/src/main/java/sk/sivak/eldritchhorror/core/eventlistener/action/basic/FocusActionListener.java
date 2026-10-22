@@ -32,10 +32,8 @@ public class FocusActionListener extends AbstractActionPhaseListener<FocusAction
 
     @Override
     protected String getGeneralDescription() {
-        return "Gain a Focus token,\n" +
-                "which you can spend\n" +
-                "during a test\n" +
-                "to reroll a die.";
+        return "Gain 1 Focus.\n" +
+                "During a test, spend 1 Focus → reroll 1 die.";
     }
 
     @Override

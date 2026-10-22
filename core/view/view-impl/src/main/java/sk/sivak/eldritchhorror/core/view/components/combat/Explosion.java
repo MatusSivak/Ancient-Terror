@@ -69,6 +69,15 @@ public class Explosion extends Actor {
         }
     }
 
+    /** Returns every running effect to the pool and leaves the stage. */
+    public void dispose() {
+        for (ParticleEffectPool.PooledEffect effect : effects) {
+            effect.free();
+        }
+        effects.clear();
+        remove();
+    }
+
     public static class ExplosionConfig {
         private Vector2 position;
         private Color color;

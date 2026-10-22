@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredGlyphKeywords;
 import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredTicketKeywords;
 
 public class ActionInfoTable extends VisTable {
@@ -39,7 +40,8 @@ public class ActionInfoTable extends VisTable {
 
         Table content = new Table();
         content.top().left();
-        Label descriptionLabel = createLabel(actionPhaseAction.getGeneralDescription(), BODY_COLOR);
+        Label descriptionLabel = createLabel(
+                replaceColoredGlyphKeywords(resolveLocalizedText(actionPhaseAction.getGeneralDescription())), BODY_COLOR);
         if (descriptionLabel != null) {
             content.add(descriptionLabel).growX().padBottom(14f);
             content.row();

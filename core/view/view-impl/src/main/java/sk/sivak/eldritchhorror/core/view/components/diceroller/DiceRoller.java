@@ -284,6 +284,15 @@ public class DiceRoller {
 
     }
 
+    /** Lowest visible die edge, or +infinity without dice. */
+    public float getBottom() {
+        float bottom = Float.POSITIVE_INFINITY;
+        for (DiceImage dice : dices) {
+            bottom = Math.min(bottom, dice.getY() + (DICE_SIZE - ACTUAL_DICE_SIZE) / 2f);
+        }
+        return bottom;
+    }
+
     public Completable moveUp(float bottomY) {
         return Completable.create(onSub -> {
             if (dices.isEmpty()) {

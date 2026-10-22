@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.utils;
 
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.DelegateAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
@@ -21,6 +22,18 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
 
     public T getTypedAction() {
         return (T)getAction();
+    }
+
+    /** Detached before finishing (cleared / discarded actor): stop tracking it, or it would be kept alive forever. */
+    @Override
+    public void setActor(Actor actor) {
+        if (actor == null) {
+            FastForwardButton fastForwardButton = InfoStage.getFastForwardButton();
+            if (fastForwardButton != null) {
+                fastForwardButton.unregisterAction(this);
+            }
+        }
+        super.setActor(actor);
     }
 
     protected boolean delegate (float delta) {

@@ -2,11 +2,14 @@ package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.utils.Array;
 import java8.features.function.Supplier;
 import java8.features.util.MapUtils;
 import rx.Completable;
@@ -51,15 +54,51 @@ public class FireballService {
 
     public void reset() {
         weakReset();
-        explosionGroup.clear();
-        smokeGroup.clear();
-        fireballGroup.clear();
+        discardChildren();
         smokeGroup.remove();
         explosionGroup.remove();
         fireballGroup.remove();
         stage.addActor(smokeGroup);
         stage.addActor(explosionGroup);
         stage.addActor(fireballGroup);
+    }
+
+    /** Frees pooled particle effects and pending actions; a plain {@link Group#clear()} would leak both. */
+    private void discardChildren() {
+        for (Actor actor : new Array<>(fireballGroup.getChildren())) {
+            actor.clearActions();
+        }
+        for (Actor actor : new Array<>(smokeGroup.getChildren())) {
+            if (actor instanceof FireballSmokeBuilder.FireballSmoke) {
+                ((FireballSmokeBuilder.FireballSmoke) actor).dispose();
+            }
+        }
+        for (Actor actor : new Array<>(explosionGroup.getChildren())) {
+            if (actor instanceof Explosion) {
+                ((Explosion) actor).dispose();
+            }
+        }
+        explosionGroup.clear();
+        smokeGroup.clear();
+        fireballGroup.clear();
+    }
+
+    /** The service is no longer needed: its layers leave the stage as soon as the effects in flight have finished. */
+    public void dispose() {
+        weakReset();
+        for (Group group : new Group[]{smokeGroup, explosionGroup, fireballGroup}) {
+            group.clearActions();
+            group.addAction(new Action() {
+                @Override
+                public boolean act(float delta) {
+                    if (group.hasChildren()) {
+                        return false;
+                    }
+                    group.remove();
+                    return true;
+                }
+            });
+        }
     }
 
     public void weakReset() {
@@ -162,8 +201,8 @@ public class FireballService {
         stage.addActor(explosionGroup);
         stage.addActor(fireballGroup);
         for (Explosion explosion : explosions) {
+            // The explosion joins its group when it starts and leaves once done, so unused ones never linger.
             explosion.setHome(explosionGroup);
-            explosionGroup.addActor(explosion);
         }
     }
 

@@ -17,4 +17,8 @@ public class DiceRollerStack {
     public DiceRoller pop() {
         return stack.pop();
     }
+
+    public boolean isEmpty() {
+        return stack.isEmpty();
+    }
 }

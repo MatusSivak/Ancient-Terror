@@ -74,6 +74,24 @@ public abstract class AbstractActionPhaseListener<T extends AbstractActionPhaseA
 
     protected abstract String getGeneralDescription();
 
+    /**
+     * Returns the ACTION ability of a card description so the action panel shows the same text as the card.
+     * Card line breaks inside a sentence are joined because the panel wraps text itself.
+     */
+    public static String cardActionText(String cardDescription) {
+        if (cardDescription == null) {
+            return null;
+        }
+        String marker = "ACTION:";
+        int markerIndex = cardDescription.indexOf(marker);
+        String text = markerIndex >= 0 ? cardDescription.substring(markerIndex + marker.length()) : cardDescription;
+        int paragraphEnd = text.indexOf("\n\n");
+        if (paragraphEnd >= 0) {
+            text = text.substring(0, paragraphEnd);
+        }
+        return text.trim().replaceAll("(?<![.:])[ \\t]*\\n[ \\t]*", " ");
+    }
+
     //
     protected ActionButtonData.ActionButtonId getActionButtonId() {
         return null;

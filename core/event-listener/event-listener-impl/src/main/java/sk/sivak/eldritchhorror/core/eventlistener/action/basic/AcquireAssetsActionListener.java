@@ -50,9 +50,8 @@ public class AcquireAssetsActionListener extends AbstractActionPhaseListener<Acq
         InvestigatorRead investigator = getInvestigators().getActiveInvestigator();
         int influence = investigator.getInfo().getBaseStat(Stat.INFLUENCE)
                 + investigator.getStatBonus(Stat.INFLUENCE);
-        return "Test Influence ("+influence+").\n" +
-                "Gain Assets of your choice from the reserve\n" +
-                "with total value equal to or less than the test result";
+        return "Test Influence (" + influence + ").\n" +
+                "Gain Assets from the reserve with total value up to your result.";
     }
 
     @Override

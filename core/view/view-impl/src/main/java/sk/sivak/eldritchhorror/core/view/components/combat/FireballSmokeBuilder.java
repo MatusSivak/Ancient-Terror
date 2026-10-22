@@ -35,6 +35,7 @@ public class FireballSmokeBuilder {
 
     public static class FireballSmoke extends Actor {
         private ParticleEffectPool.PooledEffect pooledEffect;
+        private boolean freed;
 
         public FireballSmoke(ParticleEffectPool.PooledEffect pooledEffect) {
             this.pooledEffect = pooledEffect;
@@ -43,23 +44,43 @@ public class FireballSmokeBuilder {
         @Override
         public void act(float delta) {
             super.act(delta);
+            if (freed) {
+                return;
+            }
             if (pooledEffect.isComplete()) {
                 // Return the effect to the pool; otherwise every fireball allocates a new particle effect.
-                remove();
-                pooledEffect.free();
+                dispose();
                 return;
             }
             pooledEffect.update(delta);
         }
 
+        /** Leaves the stage and returns the effect to the pool exactly once, even if it is still smoking. */
+        public void dispose() {
+            remove();
+            if (!freed) {
+                freed = true;
+                pooledEffect.free();
+            }
+        }
+
         @Override
         public void draw(Batch batch, float parentAlpha) {
             super.draw(batch, parentAlpha);
-            pooledEffect.draw(batch);
+            if (!freed) {
+                pooledEffect.draw(batch);
+            }
         }
 
         public ParticleEffectPool.PooledEffect getParticleEffect() {
             return pooledEffect;
+        }
+
+        /** Ignored once the effect is back in the pool, where another smoke may already own it. */
+        public void moveTo(float x, float y) {
+            if (!freed) {
+                pooledEffect.setPosition(x, y);
+            }
         }
     }
 }

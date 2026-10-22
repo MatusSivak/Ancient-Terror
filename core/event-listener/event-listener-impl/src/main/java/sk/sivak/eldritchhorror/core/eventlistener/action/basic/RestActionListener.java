@@ -29,9 +29,8 @@ public class RestActionListener extends AbstractActionPhaseListener<RestActionLi
 
     @Override
     protected String getGeneralDescription() {
-        return "If there are no monsters\n" +
-                "on this space,\n" +
-                "recover Health and Sanity";
+        return "No Monsters on your space →\n" +
+                "recover 1 Health and 1 Sanity.";
     }
 
     @Override

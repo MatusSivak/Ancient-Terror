@@ -25,10 +25,9 @@ public class TravelActionListener extends AbstractActionPhaseListener<TravelActi
 
     @Override
     protected String getGeneralDescription() {
-        return "Move to any adjacent space.\n" +
-                "Then you may spend any number of tickets,\n" +
-                "moving one additional space along\n" +
-                "a Train or Ship path.";
+        return "Move to an adjacent space.\n" +
+                "Then each Train Ticket or Ship Ticket you spend →\n" +
+                "move 1 additional space along a matching path.";
     }
 
     @Override

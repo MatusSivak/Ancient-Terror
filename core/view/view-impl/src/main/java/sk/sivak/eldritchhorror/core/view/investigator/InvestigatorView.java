@@ -231,7 +231,7 @@ public class InvestigatorView {
             InvestigatorPuzzleEffect.prepareTextureRegions(new InvestigatorImage(investigatorId, null)).subscribe(devourTextureRegions -> {
                 fireballSmoke.getParticleEffect().allowCompletion();
                 InvestigatorPuzzleEffect.devourInvestigator(investigatorImage, devourTextureRegions, MapStage.getInvestigatorLayer()).subscribe(() -> {
-                    fireballSmoke.remove();
+                    fireballSmoke.dispose();
                     onSub.onCompleted();
                 });
                 MapStage.removeActor(idLayerResolver);

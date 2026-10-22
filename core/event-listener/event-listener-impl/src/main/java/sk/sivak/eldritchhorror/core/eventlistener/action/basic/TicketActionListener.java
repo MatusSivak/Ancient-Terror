@@ -34,9 +34,8 @@ public class TicketActionListener extends AbstractActionPhaseListener<TicketActi
 
     @Override
     protected String getGeneralDescription() {
-        return "On a City space,\n" +
-                "gain 1 Train Ticket or Ship Ticket,\n" +
-                "if City has that connection.";
+        return "On a City space → gain 1 Train Ticket\n" +
+                "or Ship Ticket if your space has that path.";
     }
 
     @Override

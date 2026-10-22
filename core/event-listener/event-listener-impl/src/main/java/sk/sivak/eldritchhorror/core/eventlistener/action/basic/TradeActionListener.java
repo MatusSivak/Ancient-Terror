@@ -31,7 +31,7 @@ public class TradeActionListener extends AbstractActionPhaseListener<TradeAction
 
     @Override
     protected String getGeneralDescription() {
-        return "Trade your possessions\nwith another investigator\non the same space.";
+        return "Trade possessions with another investigator on your space.";
     }
 
     @Override
