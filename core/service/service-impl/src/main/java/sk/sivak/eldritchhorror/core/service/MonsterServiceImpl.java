@@ -115,6 +115,11 @@ public class MonsterServiceImpl extends AbstractCommonService implements Monster
     }
 
     @Override
+    public void moveMonsters(java.util.List<? extends MonsterInfo> monsters, LocationId targetLocation) {
+        if (!monsters.isEmpty()) executeHookable(new MoveMonsterData(monsters, targetLocation), monsterActionProvider.moveMonster());
+    }
+
+    @Override
     public void restoreHealth(MonsterInfo monsterInfo, int amount, boolean highlightSpecialText, boolean highlightReckoningText) {
         execute(new ActionCommand<>(
                 monsterActionProvider.restoreHealth(monsterInfo, amount, highlightSpecialText, highlightReckoningText), "RESTORE_HEALTH"));

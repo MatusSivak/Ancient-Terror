@@ -44,6 +44,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october20;
     private static boolean nun;
     private static boolean october22;
+    private static boolean october23;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -53,6 +54,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         october20 = Arrays.asList(args).contains("--oct20");
         nun = Arrays.asList(args).contains("--nun");
         october22 = Arrays.asList(args).contains("--oct22");
+        october23 = Arrays.asList(args).contains("--oct23");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -67,6 +69,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october23) { october23Reports(); return; }
             if (october22) { october22Reports(); return; }
             if (nun) { nunDiceBonus(); return; }
             if (october20) { october20Reports(); return; }
@@ -83,6 +86,82 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void october23Reports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class, (p,m,a) -> null)).init();
+        String oldLanguage=sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        for(String language:new String[]{"en","sk"}) {
+            setPreviewLanguage(language);
+            for(boolean priest:new boolean[]{true,false}) {
+                Question<Object> notice=new Question<>();
+                notice.setTitle(priest?"investigator.thePriest.boonNotice":"mystery.notEnoughClues");
+                if(priest)notice.setPortraitBeforeTitle(InvestigatorId.THE_PRIEST);
+                notice.setOptions(Question.Option.okOption);
+                int[] done={0};
+                new sk.sivak.eldritchhorror.core.view.question.QuestionView().ask(notice).subscribe(a -> done[0]++);
+                tick(180);require(done[0]==0,"Notice must wait for OK");
+                LabelTable prompt=find(LabelTable.class);
+                for(Actor actor:all(prompt))if(actor instanceof Label) {
+                    Label label=(Label)actor;label.validate();
+                    for(com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run:label.getGlyphLayout().runs)
+                        require(Math.abs(run.y-label.getGlyphLayout().runs.first().y)<.01f,"Notice must fit one line: "+label.getText());
+                    require(label.getPrefHeight()<=label.getHeight()+1,"Clipped notice");
+                }
+                draw("oct23-"+(priest?"priest":"insufficient-clues")+"-"+language);
+                click(textButton("OK"));tick(180);require(done[0]==1,"Notice must complete exactly once");
+            }
+        }
+        setPreviewLanguage(oldLanguage);
+        cultistGroupMovement();
+        System.out.println("PASS: one-line Priest and insufficient-Clue notices in both languages; grouped cultist movement, world wrapping and fast-forward");
+    }
+
+    private void cultistGroupMovement() throws Exception {
+        sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl view=new sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl();
+        Stage map=sk.sivak.eldritchhorror.core.view.game.MapStage.getStage();
+        for(boolean fast:new boolean[]{false,true})for(boolean wrap:new boolean[]{false,true}) {
+            if(fast)FastForwardAction.turnOn();else FastForwardAction.turnOff();
+            sk.sivak.eldritchhorror.core.view.game.MapStage.clearIdActorMap();
+            sk.sivak.eldritchhorror.core.constants.location.LocationId origin=wrap?
+                    sk.sivak.eldritchhorror.core.constants.location.LocationId.ARKHAM:sk.sivak.eldritchhorror.core.constants.location.LocationId.ROME;
+            sk.sivak.eldritchhorror.core.constants.location.LocationId destination=wrap?
+                    sk.sivak.eldritchhorror.core.constants.location.LocationId.SYDNEY:sk.sivak.eldritchhorror.core.constants.location.LocationId.SPACE_7;
+            com.badlogic.gdx.math.Vector2 start=sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver.resolve(origin);
+            com.badlogic.gdx.math.Vector2 end=sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver.resolve(destination);
+            OrthographicCamera camera=sk.sivak.eldritchhorror.core.view.game.MapStage.getCamera();
+            camera.position.set(start.x,start.y,0);camera.zoom=1;camera.update();
+            List<sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo> group=new ArrayList<>();
+            List<Actor> centers=new ArrayList<>();
+            for(int index=0;index<3;index++) {
+                sk.sivak.eldritchhorror.core.constants.monster.CultistMonster monster=new sk.sivak.eldritchhorror.core.constants.monster.CultistMonster();
+                monster.setCurrentLocation(origin);if(index<2)group.add(monster);
+                sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils.MonsterIdLayerResolver resolver=
+                        new sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils.MonsterIdLayerResolver(monster);
+                for(int copy=-1;copy<=1;copy++) {
+                    Image actor=new Image(CustomAssetManager.getTexture("monster/Cultist.png"));actor.setSize(35,35);
+                    actor.setPosition(start.x+copy*ViewProperties.MAP_WIDTH+index*40,start.y);
+                    sk.sivak.eldritchhorror.core.view.game.MapStage.addToLayer(actor,resolver);
+                    if(copy==0)centers.add(actor);
+                }
+            }
+            int[] done={0};
+            view.moveMonsters(group,destination).subscribe(() -> done[0]++);
+            for(int frame=0;frame<1800 && done[0]==0;frame++) {
+                map.act(1f/60);stage.act(1f/60);
+                require(Math.abs(centers.get(1).getX()-centers.get(0).getX()-40)<.05f,"Cultists separated in transit");
+                require(Math.abs(centers.get(1).getY()-centers.get(0).getY())<.05f,"Cultists moved at different speeds");
+                int cameras=0;for(Actor actor:map.getActors())if(actor instanceof sk.sivak.eldritchhorror.core.view.map.CameraActor)cameras++;
+                require(cameras<=1,"Group started multiple camera journeys");
+            }
+            require(done[0]==1,"Group movement did not finish");
+            require(Math.abs(centers.get(0).getX()-end.x)<.05f && Math.abs(centers.get(0).getY()-end.y)<.05f,"Group completed before arrival");
+            require(Math.abs(centers.get(2).getX()-start.x-80)<.05f && centers.get(2).getY()==start.y,"Unrelated monster moved");
+            Gdx.gl.glClearColor(.08f,.12f,.1f,1);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);map.draw();
+            Pixmap pixels=ScreenUtils.getFrameBufferPixmap(0,0,960,540);PixmapIO.PNG png=new PixmapIO.PNG();png.setFlipY(true);
+            png.write(Gdx.files.local("../build/report-fixes-preview/oct23-cultists"+(wrap?"-wrap":"")+(fast?"-fast":"")+".png"),pixels);png.dispose();pixels.dispose();
+        }
+        sk.sivak.eldritchhorror.core.view.game.MapStage.clearIdActorMap();FastForwardAction.turnOff();
     }
 
     private void october22Reports() throws Exception {

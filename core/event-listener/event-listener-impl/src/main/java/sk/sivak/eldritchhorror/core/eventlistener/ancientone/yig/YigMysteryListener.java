@@ -10,6 +10,7 @@ import sk.sivak.eldritchhorror.core.constants.investigator.*;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.*;
 import sk.sivak.eldritchhorror.core.constants.monster.epic.EpicMonsterId;
+import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ancientone.AbstractMysteryListener;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils;
@@ -59,8 +60,15 @@ public final class YigMysteryListener extends AbstractMysteryListener {
             else p().getGameService().showCurrentMysteryCard(true, false);
             attach();
             if(epic()!=null) {
-                if(id==SERPENTS_NEST) for(MonsterInfo m:p().getMonsterCup().getMonsters())
-                    if(m.getMonsterId()==NonEpicMonsterId.CULTIST)p().getMonsterService().moveMonster(m,LocationId.SPACE_7);
+                if(id==SERPENTS_NEST) {
+                    Map<LocationId,List<MonsterInfo>> groups=new LinkedHashMap<>();
+                    for(MonsterInfo m:p().getMonsterCup().getMonsters()) {
+                        if(m.getMonsterId()!=NonEpicMonsterId.CULTIST || m.getCurrentLocation()==LocationId.SPACE_7)continue;
+                        if(!groups.containsKey(m.getCurrentLocation()))groups.put(m.getCurrentLocation(),new ArrayList<>());
+                        groups.get(m.getCurrentLocation()).add(m);
+                    }
+                    for(List<MonsterInfo> group:groups.values())p().getMonsterService().moveMonsters(group,LocationId.SPACE_7);
+                }
                 spawn(epic(),mysteryCardInfo.getPinLocations().get(0));
             }
             if(id==MIGRATION_OF_SERPENTS) for(ClueInfo clue:new ArrayList<>(p().getCluePool().getSpawnedClues())) {
@@ -166,7 +174,15 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                         later(() -> ask("Attempt a Will (-1) test to break the Serpent Crown's hold?",() -> test(Stat.WILL,-1,() -> {
                             int allies=0;for(CardInfo card:EncounterUtils.getPossession(owner,AssetTrait.ALLY))if(card instanceof AssetInfo)allies++;
                             if(allies<2)return;
-                            int clues = Math.max(0,p().getInvestigators().getPlayers()-mysteryCardInfo.getClueCredit());
+                            // The card retains the game's player count; living investigators can shrink before replacement.
+                            int clues = mysteryCardInfo.getClueCost();
+                            if(p().getCluePool().getClueCount(owner)<clues) {
+                                Question<Object> notice=new Question<>();
+                                notice.setTitle("mystery.notEnoughClues");
+                                notice.setOptions(Question.Option.okOption);
+                                p().getGameService().ask(notice).subscribe();
+                                return;
+                            }
                             ask("Spend " + clues + " Clues and discard 2 Ally Assets to solve this Mystery?",
                                 () -> spend(clues,0,0,() -> discardPossessions(AssetTrait.ALLY,2,true,() -> {
                                     mysteryCardInfo.setClueCredit(0);

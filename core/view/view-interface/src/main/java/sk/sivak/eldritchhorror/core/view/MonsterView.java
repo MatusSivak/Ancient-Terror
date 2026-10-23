@@ -33,5 +33,7 @@ public interface MonsterView {
 
     Completable moveMonster(MonsterInfo monsterInfo, LocationId targetLocationId);
 
+    Completable moveMonsters(List<? extends MonsterInfo> monsters, LocationId targetLocationId);
+
 
 }

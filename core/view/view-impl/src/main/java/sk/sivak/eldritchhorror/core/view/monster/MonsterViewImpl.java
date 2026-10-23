@@ -223,4 +223,13 @@ public class MonsterViewImpl implements MonsterView {
     public Completable moveMonster(MonsterInfo monsterInfo, LocationId targetLocationId) {
         return moveActor(monsterInfo.getCurrentLocation(), targetLocationId, new MonsterUtils.MonsterIdLayerResolver(monsterInfo));
     }
+
+    @Override
+    public Completable moveMonsters(List<? extends MonsterInfo> monsters, LocationId targetLocationId) {
+        if(monsters.isEmpty())return Completable.complete();
+        List<MapStage.IdLayerResolver> resolvers=new java.util.ArrayList<>();
+        for(MonsterInfo monster:monsters)resolvers.add(new MonsterUtils.MonsterIdLayerResolver(monster));
+        return sk.sivak.eldritchhorror.core.view.map.helper.MoveActorHelper.moveActors(
+                monsters.get(0).getCurrentLocation(),targetLocationId,resolvers);
+    }
 }

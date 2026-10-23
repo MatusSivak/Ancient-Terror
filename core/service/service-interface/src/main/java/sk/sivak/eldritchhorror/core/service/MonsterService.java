@@ -32,5 +32,7 @@ public interface MonsterService extends CommonService {
 
     void moveMonster(MonsterInfo monsterInfo, LocationId targetLocation);
 
+    void moveMonsters(java.util.List<? extends MonsterInfo> monsters, LocationId targetLocation);
+
     void restoreHealth(MonsterInfo monsterInfo, int amount, boolean highlightSpecialText, boolean highlightReckoningText);
 }

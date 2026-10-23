@@ -85,6 +85,28 @@ public class YigRulesTest {
         platform.setExpeditionDeck(mock(ExpeditionDeckRead.class,(n,a) -> LocationId.THE_AMAZON));
     }
     @After public void tearDown(){ServicePlatform.nullifyInstance();}
+
+    @Test public void serpentsNestMovesCultistsTogetherByOriginBeforeSpawningYig() {
+        for(LocationId origin:Arrays.asList(LocationId.ROME,LocationId.ROME,LocationId.TOKYO,LocationId.SPACE_7)) {
+            CultistMonster cultist=new CultistMonster();cultist.setMonsterId(NonEpicMonsterId.CULTIST);
+            cultist.setCurrentLocation(origin);monsters.add(cultist);
+        }
+        MonsterInfo unrelated=new ChildrenOfYigMonster();monsters.add(unrelated);
+        List<List<MonsterInfo>> groups=new ArrayList<>();
+        platform.setMonsterService(mock(MonsterService.class,(name,a) -> {
+            assertEquals("moveMonsters",name);assertEquals(LocationId.SPACE_7,a[1]);
+            List<MonsterInfo> group=new ArrayList<>((List<MonsterInfo>)a[0]);groups.add(group);
+            queue(() -> effects.add("move:"+group.size()));return null;
+        }));
+        MysteryCardInfo nest=YigMysteryDeck.create(4).stream()
+                .filter(c -> c.getMysteryCardId()==MysteryCardId.Yig.SERPENTS_NEST).findFirst().get();
+        new YigMysteryListener(nest).register();drain();
+        assertEquals(Arrays.asList(monsters.get(0),monsters.get(1)),groups.get(0));
+        assertEquals(Collections.singletonList(monsters.get(2)),groups.get(1));
+        assertEquals(2,groups.size());
+        assertTrue(effects.indexOf("move:2")<effects.indexOf("move:1"));
+        assertTrue(effects.indexOf("move:1")<effects.indexOf("spawn"));
+    }
     private <T>T mock(Class<T> type,BiFunction<String,Object[],Object> handler) {
         return type.cast(Proxy.newProxyInstance(type.getClassLoader(),new Class[]{type},(p,m,a) -> handler.apply(m.getName(),a)));
     }

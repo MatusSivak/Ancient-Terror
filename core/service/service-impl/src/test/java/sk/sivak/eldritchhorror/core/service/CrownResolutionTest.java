@@ -64,9 +64,35 @@ public class CrownResolutionTest {
         resolve(null, 0, true);
     }
 
+    @Test public void defeatedInvestigatorsDoNotDiscountFourPlayerMystery() {
+        resolve(null, 0, false, 4, 2, true);
+    }
+
+    @Test public void fourPlayerMysterySpendsFourCluesWithOnlyTwoSurvivors() {
+        resolve(null, 0, false, 4, 4, true);
+    }
+
+    @Test public void fourPlayerMysteryAppliesOnlyEarnedClueCredit() {
+        resolve(null, 1, false, 4, 3, true);
+    }
+
+    @Test public void decliningAffordablePaymentKeepsCluesAndAllies() {
+        resolve(null, 0, false, 4, 4, false);
+    }
+
     private void resolve(InvestigatorId previous, int credit, boolean reroll) {
+        resolve(previous, credit, reroll, 2, 2, true);
+    }
+
+    private void resolve(InvestigatorId previous, int credit, boolean reroll, int players, int owned, boolean acceptPayment) {
         cleanup();
-        active = previous; clues = 2; hudClues = 0;
+        effects.clear(); errors.clear();
+        active = previous; clues = owned; hudClues = 0;
+        List<Question<?>> questions = new ArrayList<>();
+        int cost = Math.max(0, players - credit);
+        int available = owned - (reroll ? 1 : 0);
+        boolean affordable = available >= cost;
+        boolean paid = affordable && acceptPayment;
         queue = CommandQueueImpl.get(); queue.setThrowableConsumer(errors::add);
         CommandQueueFacadeImpl facade = new CommandQueueFacadeImpl();
         EventQueueImpl events = new EventQueueImpl();
@@ -107,7 +133,7 @@ public class CrownResolutionTest {
         when(pool.getClueCount(owner)).thenAnswer(call -> clues);
         doAnswer(call -> { assertEquals(owner, active); assertTrue(clues > 0); clues--; return null; })
                 .when(pool).loseClue(owner);
-        p.setCluePool(pool);
+        p.setCluePool(pool); listeners.setCluePoolRead(pool);
         ModelWrite model = mock(ModelWrite.class);
         when(model.getBackgroundModel()).thenReturn(mock(BackgroundModelWrite.class));
         p.setModel(model);
@@ -149,6 +175,7 @@ public class CrownResolutionTest {
         MysteryCardInfo mystery = mock(MysteryCardInfo.class);
         when(mystery.getMysteryCardId()).thenReturn(MysteryCardId.Yig.CROWN_OF_THE_SERPENT);
         when(mystery.getMysteryComplexity()).thenReturn(1); when(mystery.getClueCredit()).thenReturn(credit);
+        when(mystery.getClueCost()).thenReturn(cost);
         MysteryDeckWrite mysteries = mock(MysteryDeckWrite.class);
         when(mysteries.getCurrentMysteryCard()).thenReturn(mystery); p.setMysteryDeck(mysteries);
         ArtifactsDeckRead artifacts = mock(ArtifactsDeckRead.class);
@@ -173,7 +200,9 @@ public class CrownResolutionTest {
         }).when(game).showCurrentMysteryCard(anyBoolean(), anyBoolean());
         when(game.ask(any())).thenAnswer(call -> Single.create(sub -> service.addEventCommand(in -> {
             assertEquals(owner, active); effects.add("ask");
-            Answer<Boolean, Object> answer = new Answer<>(); answer.setResponseData(true); sub.onSuccess(answer);
+            Question<?> question = call.getArgument(0); questions.add(question);
+            Answer<Boolean, Object> answer = new Answer<>();
+            answer.setResponseData(!question.getTitle().startsWith("Spend ") || acceptPayment); sub.onSuccess(answer);
         })));
         when(game.showCard(any(ShowCardRequest.class))).thenAnswer(call ->
                 Single.create(sub -> service.addEventCommand(in -> { sub.onSuccess(null); })));
@@ -198,14 +227,23 @@ public class CrownResolutionTest {
         assertEquals(Arrays.asList("active:" + owner, "mystery"), effects);
         mysteryDismissal.onCompleted(); tick();
         assertEquals(Arrays.asList("active:" + owner, "mystery", "show:" + owner), effects);
-        assertEquals("Do not pay before the HUD finishes refreshing", 2, clues);
+        assertEquals("Do not pay before the HUD finishes refreshing", owned, clues);
         hudAnimation.onCompleted(); tick();
         assertEquals(previous, active);
-        assertEquals(reroll ? 1 : credit, clues);
+        assertEquals(available - (paid ? cost : 0), clues);
         assertEquals(previous == null ? clues : 0, hudClues);
-        assertEquals(reroll ? 2 : 0, allies.size());
-        assertEquals(reroll ? 0 : 1, Collections.frequency(effects, "progress"));
-        assertEquals(reroll ? 1 : 2 - credit, Collections.frequency(effects, "clue"));
+        assertEquals(paid ? 0 : 2, allies.size());
+        assertEquals(paid ? 1 : 0, Collections.frequency(effects, "progress"));
+        assertEquals((reroll ? 1 : 0) + (paid ? cost : 0), Collections.frequency(effects, "clue"));
+        assertEquals(2, questions.size());
+        Question<?> payment = questions.get(1);
+        if (affordable) {
+            assertEquals("Spend " + cost + " Clues and discard 2 Ally Assets to solve this Mystery?", payment.getTitle());
+            assertEquals(Question.Option.noYesOptions, payment.getOptions());
+        } else {
+            assertEquals("mystery.notEnoughClues", payment.getTitle());
+            assertEquals(Question.Option.okOption, payment.getOptions());
+        }
         assertTrue(effects.indexOf("test") < effects.indexOf("active:" + previous));
         if (previous != null) assertEquals("show:" + previous, effects.get(effects.size() - 1));
         listener.unregister();

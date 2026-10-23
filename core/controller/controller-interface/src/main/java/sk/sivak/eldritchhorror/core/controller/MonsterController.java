@@ -31,6 +31,8 @@ public interface MonsterController {
 
     Completable moveMonster(MonsterInfo monsterInfo, LocationId targetLocationId);
 
+    Completable moveMonsters(List<? extends MonsterInfo> monsters, LocationId targetLocationId);
+
     Completable restoreHealth(MonsterInfo monsterInfo, int amount, boolean highlightSpecialText, boolean highlightReckoningText);
 
 

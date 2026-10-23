@@ -1,5 +1,11 @@
 # Report fixes preview
 
+Use `--args="--oct23"` for single-line Priest and insufficient-Clue notices in
+English and Slovak, plus grouped Cultist movement. The production movement check
+verifies synchronized token positions, one camera journey, world wrapping,
+normal/fast-forward speed, and that unrelated monsters stay put. Screenshots
+use `oct23-*`.
+
 Use task `:desktop:previewCardResolution` with the same init script to check
 spell/condition/asset/artifact artwork behind typewriter paper, nested background restoration,
 hide/resume/finish cleanup, flip and success dice glyphs, and doom sound direction.

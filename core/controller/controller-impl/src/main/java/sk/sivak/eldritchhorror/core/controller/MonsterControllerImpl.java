@@ -79,6 +79,11 @@ public class MonsterControllerImpl implements MonsterController {
     }
 
     @Override
+    public Completable moveMonsters(List<? extends MonsterInfo> monsters, LocationId targetLocationId) {
+        return monsterView.moveMonsters(monsters, targetLocationId);
+    }
+
+    @Override
     public Completable restoreHealth(MonsterInfo monsterInfo, int amount, boolean highlightSpecialText, boolean highlightReckoningText) {
         return monsterView.restoreHealth(monsterInfo, amount, highlightSpecialText, highlightReckoningText);
     }
