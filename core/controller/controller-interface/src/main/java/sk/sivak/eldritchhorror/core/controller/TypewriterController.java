@@ -15,6 +15,8 @@ public interface TypewriterController {
 
     Completable hidePaper();
 
+    Completable hidePaper(boolean forDiceCheck);
+
     Completable typeHeader(String header);
 
     Completable typeFlavor(String flavor);

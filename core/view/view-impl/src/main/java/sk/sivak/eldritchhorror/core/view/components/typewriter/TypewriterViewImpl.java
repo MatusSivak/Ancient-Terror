@@ -332,8 +332,16 @@ public class TypewriterViewImpl implements TypewriterView  {
 
     @Override
     public Completable hidePaper() {
-        return getTypewriterEffect().hidePaper().doOnCompleted(() -> CardResolutionArtwork.suspend(
-                InfoStage.getCardResolutionBackgrounds(), typewriterTableStack.peek().getCardBackground()));
+        return hidePaper(false);
+    }
+
+    @Override
+    public Completable hidePaper(boolean forDiceCheck) {
+        return Completable.defer(() -> {
+            if (forDiceCheck) CardResolutionArtwork.retainDuringDiceCheck(InfoStage.getCardResolutionBackgrounds());
+            return getTypewriterEffect().hidePaper().doOnCompleted(() -> CardResolutionArtwork.suspend(
+                    InfoStage.getCardResolutionBackgrounds(), typewriterTableStack.peek().getCardBackground()));
+        });
     }
 
     public void displayOrHide() {

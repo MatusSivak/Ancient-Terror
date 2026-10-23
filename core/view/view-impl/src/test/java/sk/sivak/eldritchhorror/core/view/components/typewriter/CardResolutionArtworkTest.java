@@ -30,6 +30,10 @@ public class CardResolutionArtworkTest {
 
         CardResolutionArtwork.releaseAfterDiceCheck();
         layer.act(1.1f);
+        assertSame("Result handoff must not fade the scene", layer, image.getParent());
+        assertEquals(1f, image.getColor().a, 0.001f);
+        CardResolutionArtwork.hide(image);
+        layer.act(1.1f);
         layer.act(0.01f);
         assertNull(image.getParent());
     }
@@ -46,6 +50,27 @@ public class CardResolutionArtworkTest {
         layer.act(2f);
         assertSame(layer, image.getParent());
         assertEquals(1f, image.getColor().a, 0.001f);
+    }
+
+    @Test public void delayedTestSetupAndResultHandoffNeverExposeMap() {
+        Group layer = new Group();
+        Image image = transparentImage();
+        CardResolutionArtwork.show(layer, image); layer.act(1.1f);
+        CardResolutionArtwork.retainDuringDiceCheck(layer);
+        CardResolutionArtwork.suspend(layer, image);
+        for (int frame=0;frame<180;frame++) {
+            layer.act(1f/60);
+            assertSame(layer,image.getParent());assertEquals(1f,image.getColor().a,0.001f);
+        }
+        CardResolutionArtwork.retainDuringDiceCheck(layer);
+        CardResolutionArtwork.releaseAfterDiceCheck();
+        for (int frame=0;frame<180;frame++) {
+            layer.act(1f/60);
+            assertSame(layer,image.getParent());assertEquals(1f,image.getColor().a,0.001f);
+        }
+        CardResolutionArtwork.clearSuspended();CardResolutionArtwork.show(layer,image);
+        layer.act(.5f);assertEquals(1f,image.getColor().a,0.001f);
+        CardResolutionArtwork.hide(image);layer.act(1.1f);layer.act(.01f);assertNull(image.getParent());
     }
 
     @Test

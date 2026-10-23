@@ -90,7 +90,7 @@ public final class TypewriterUtils {
 					Action0 onSuccessWithResult = () -> onWithResult(onSuccess, TEST_PASSED);
 					Action0 onFailWithResult = () -> onWithResult(onFail, TEST_FAILED);
 					ServicePlatform.get().getEncounterService().hold();
-					ServicePlatform.get().getEncounterService().hideTypewriterPaper();
+					ServicePlatform.get().getEncounterService().hideTypewriterPaper(true);
 					test(stat, modifier, testFlavorRequest, onSuccessWithResult, onFailWithResult, withTestDataCallback);
 					ServicePlatform.get().getEncounterService().release();
 				});

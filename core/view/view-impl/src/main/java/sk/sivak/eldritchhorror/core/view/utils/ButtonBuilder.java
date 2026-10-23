@@ -40,6 +40,8 @@ public class ButtonBuilder {
         );
         float buttonHeightRatio = 0.09f;
         style.fontColor = new Color(0x102033ff);
+        // Enable markup before the label measures its text, including on the first prompt.
+        style.font.getData().markupEnabled = true;
 
         TextButton button = new TextButton(title, style) {
 

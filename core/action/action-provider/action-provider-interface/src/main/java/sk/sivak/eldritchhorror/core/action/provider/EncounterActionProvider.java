@@ -40,6 +40,8 @@ public interface EncounterActionProvider {
 
     Action<Object, Void> hideTypewriterPaper();
 
+    Action<Object, Void> hideTypewriterPaper(boolean forDiceCheck);
+
     Action<Object, Void> typeHeader(String header);
 
     Action<Object, Void> typeFlavor(String flavor);

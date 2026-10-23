@@ -95,6 +95,11 @@ public class EncounterActionProviderImpl implements EncounterActionProvider {
     }
 
     @Override
+    public Action<Object, Void> hideTypewriterPaper(boolean forDiceCheck) {
+        return new HideTypewriterPaperAction(forDiceCheck);
+    }
+
+    @Override
     public Action<Object, Void> typeHeader(String header) {
         return new TypeHeaderAction(header);
     }

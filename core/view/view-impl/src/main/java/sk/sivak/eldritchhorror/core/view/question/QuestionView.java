@@ -17,6 +17,7 @@ import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -158,24 +159,46 @@ public class QuestionView {
     private <RD, AD> void displayButtons(List<Question.Option<RD>> options, SingleSubscriber<? super Answer<RD, AD>> subscriber) {
         float bottomHeight = InfoStage.getBottomHeight();
         buttons = new LinkedList<>();
-        int index = 0;
-        float buttonWidth;
-        float buttonHeight;
+        float buttonWidth = 135f;
+        float buttonHeight = 0f;
+        float availableWidth = VIEWPORT_WIDTH - 180f;
+        float gap = 10f;
 
         for (Question.Option<RD> option : options) {
-            TextButton textButton = ButtonBuilder.buildButton(option.getName());
-            textButton.getStyle().fontColor = new Color(option.getColorCode());
-            buttonWidth = textButton.getWidth();
-            buttonHeight = textButton.getHeight();
+            String text = "[#" + new Color(option.getColorCode()) + "]"
+                    + MarkupText.replaceColoredGlyphKeywords(option.getName()) + "[]";
+            TextButton textButton = ButtonBuilder.buildButton(text);
+            // Tint prose with markup so embedded token artwork keeps its own colors.
+            textButton.getStyle().fontColor = Color.WHITE;
+            textButton.getLabel().setColor(Color.WHITE);
+            buttonWidth = Math.max(buttonWidth, textButton.getLabel().getPrefWidth() + 36f);
+            buttonHeight = Math.max(buttonHeight, textButton.getHeight());
             addClickListener(textButton, createOnClickAction(subscriber, option));
-            InfoStage.showButton(textButton,
-                    VIEWPORT_WIDTH / 2 + index * buttonWidth - options.size() * buttonWidth / 2,
-                    bottomHeight);
-            index++;
             buttons.add(textButton);
-            InfoStage.setBottomHeight(bottomHeight + buttonHeight + 5);
         }
-
+        buttonWidth = Math.min(buttonWidth, availableWidth);
+        int columns = Math.max(1, (int)((availableWidth + gap) / (buttonWidth + gap)));
+        if (buttons.size() == 4 && columns == 3) columns = 2;
+        int rows = (buttons.size() + columns - 1) / columns;
+        for (Button button : buttons) {
+            TextButton textButton = (TextButton)button;
+            textButton.getLabel().setWrap(true);
+            textButton.getLabelCell().width(buttonWidth - 36f);
+            textButton.setSize(buttonWidth, buttonHeight);
+            textButton.validate();
+            buttonHeight = Math.max(buttonHeight, textButton.getLabel().getPrefHeight() + 20f);
+        }
+        for (int index = 0; index < buttons.size(); index++) {
+            Button button = buttons.get(index);
+            button.setSize(buttonWidth, buttonHeight);
+            button.setOrigin(buttonWidth / 2, buttonHeight / 2);
+            int row = index / columns;
+            int count = Math.min(columns, buttons.size() - row * columns);
+            float rowWidth = count * buttonWidth + (count - 1) * gap;
+            InfoStage.showButton(button, (VIEWPORT_WIDTH - rowWidth) / 2 + (index % columns) * (buttonWidth + gap),
+                    bottomHeight + (rows - row - 1) * (buttonHeight + gap));
+        }
+        InfoStage.setBottomHeight(bottomHeight + rows * (buttonHeight + gap));
     }
 
 

@@ -26,6 +26,8 @@ public interface EncounterService extends CommonService {
 
     void hideTypewriterPaper();
 
+    void hideTypewriterPaper(boolean forDiceCheck);
+
     void typeHeader(String header);
 
     void typeFlavor(String flavor);

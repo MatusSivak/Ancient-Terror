@@ -31,14 +31,14 @@ public class GreenMythosCard12 implements MythosCardEventListener {
             InvestigatorId investigatorId = investigator.getInfo().getInvestigatorId();
             List<Question.Option<Integer>> options = new ArrayList<>();
             if (investigator.getFocusTokens() < MAX_FOCUS_TOKENS) {
-                options.add(new Question.Option<>("Gain Focus", GAIN_FOCUS));
+                options.add(new Question.Option<>("Gain 1 Focus", GAIN_FOCUS));
             }
             if (investigator.getFocusTokens() > 0) {
-                options.add(new Question.Option<>("Spend Focus, gain Clue", FOCUS_FOR_CLUE));
+                options.add(new Question.Option<>("1 Focus → 1 Clue", FOCUS_FOR_CLUE));
             }
             if (ServicePlatform.get().getCluePool().getClueCount(investigatorId) > 0
                     && ServicePlatform.get().getSpellsDeck().canGetTrait(investigatorId, SpellTrait.GLAMOUR)) {
-                options.add(new Question.Option<>("Spend Clue, gain Glamour", CLUE_FOR_SPELL));
+                options.add(new Question.Option<>("1 Clue → Glamour", CLUE_FOR_SPELL));
             }
             if (options.isEmpty()) {
                 continue;

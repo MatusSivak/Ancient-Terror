@@ -125,6 +125,11 @@ public class EncounterServiceImpl extends AbstractCommonService implements Encou
     }
 
     @Override
+    public void hideTypewriterPaper(boolean forDiceCheck) {
+        execute(new ActionCommand<>(encounterActionProvider.hideTypewriterPaper(forDiceCheck), "TW_HIDE_TYPEWRITER_PAPER"));
+    }
+
+    @Override
     public void typeHeader(String header) {
         execute(new ActionCommand<>(encounterActionProvider.typeHeader(header), "TW_TYPE_HEADER"));
     }

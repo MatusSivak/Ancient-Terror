@@ -34,6 +34,11 @@ public class TypewriterControllerImpl implements TypewriterController{
     }
 
     @Override
+    public Completable hidePaper(boolean forDiceCheck) {
+        return typewriterView.hidePaper(forDiceCheck);
+    }
+
+    @Override
     public Completable typeHeader(String header) {
         return typewriterView.typeHeader(header);
     }

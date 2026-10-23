@@ -62,6 +62,7 @@ public class CardResolutionPreview extends ApplicationAdapter {
             for (AssetId id : AssetId.values()) require(Gdx.files.internal("card/asset/" + id.name() + ".jpg").exists(), "Missing asset art " + id);
             for (ArtifactId id : ArtifactId.values()) require(Gdx.files.internal("card/artifact/" + id.name() + ".jpg").exists(), "Missing artifact art " + id);
             for (boolean fast : new boolean[]{false, true}) {
+                checkDebtTestHandoff(fast);
                 checkCardPaper(fast);
                 checkPossessionPaper(new HolyWaterAsset(), "asset", fast);
                 checkPossessionPaper(new NecronomiconArtifact(), "artifact", fast);
@@ -127,6 +128,35 @@ public class CardResolutionPreview extends ApplicationAdapter {
     }
 
     private Image topBackground() { return (Image) InfoStage.getCardResolutionBackgrounds().getChildren().peek(); }
+
+    private void checkDebtTestHandoff(boolean fast) throws Exception {
+        if(fast)FastForwardAction.turnOn();else FastForwardAction.turnOff();
+        TypewriterViewImpl view=new TypewriterViewImpl();
+        CustomAssetManager.getTexture("card/condition/DEBT.jpg");
+        view.showCardResolutionPaper(new sk.sivak.eldritchhorror.core.constants.condition.debt.DebtCondition()).subscribe();tick(180);
+        Image background=topBackground();
+        int[] hidden={0};view.hidePaper(true).subscribe(() -> hidden[0]++);
+        assertBackdropSteady(background,180);require(hidden[0]==1,"Debt paper did not hide");
+        // Deliberately delay test setup: the background must remain visible before the test view takes over.
+        assertBackdropSteady(background,180);
+        new sk.sivak.eldritchhorror.core.view.test.TestViewImpl().confirmTest(
+                sk.sivak.eldritchhorror.core.constants.investigator.Stat.INFLUENCE,0,3,0,Collections.emptyList(),0,false).subscribe();
+        assertBackdropSteady(background,180);
+        draw("oct23-evening-debt-test"+(fast?"-fast":""));
+        CardResolutionArtwork.releaseAfterDiceCheck();assertBackdropSteady(background,180);
+        view.showPaper(false).subscribe();assertBackdropSteady(background,180);
+        draw("oct23-evening-debt-result"+(fast?"-fast":""));
+        view.finishPaper().subscribe();tick(180);
+        require(background.getParent()==null,"Finished Debt retained artwork");
+        sk.sivak.eldritchhorror.core.view.game.MapStage.brightenWorld();
+        FastForwardAction.turnOff();
+    }
+
+    private void assertBackdropSteady(Image background,int frames) {
+        for(int frame=0;frame<frames;frame++) {
+            tick(1);require(background.getParent()!=null && background.getColor().a==1f,"Debt background flickered");
+        }
+    }
 
     private void checkPossessionPaper(CardInfo card, String category, boolean fast) throws Exception {
         if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();

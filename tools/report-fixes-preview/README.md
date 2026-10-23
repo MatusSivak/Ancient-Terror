@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--oct23-evening"` for production Glimmer of Hope and The World
+Fights Back choices. Checks colored glyphs, compact first-use sizing, wrapping,
+button bounds, every option's result, and restoring the question area.
+Screenshots use `oct23-evening-*`.
+
 Use `--args="--oct23"` for single-line Priest and insufficient-Clue notices in
 English and Slovak, plus grouped Cultist movement. The production movement check
 verifies synchronized token positions, one camera journey, world wrapping,
@@ -11,6 +16,9 @@ spell/condition/asset/artifact artwork behind typewriter paper, nested backgroun
 hide/resume/finish cleanup, flip and success dice glyphs, and doom sound direction.
 It verifies all four card categories' artwork paths and captures `card-resolution-*`
 screenshots at both animation speeds. Audio playback uses a recording double.
+It also verifies that Debt artwork stays opaque through paper hiding, delayed
+dice setup, result handoff, and resumed paper at both speeds, with final cleanup.
+Debt screenshots use `oct23-evening-debt-*`.
 
 Use `--args="--nun"` for Nun's visible Boon/Bane bonus: raw dice settle, a localized
 +1 notice waits for OK, then faces and success colors update before completion.

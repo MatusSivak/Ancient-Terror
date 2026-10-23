@@ -45,6 +45,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean nun;
     private static boolean october22;
     private static boolean october23;
+    private static boolean october23Evening;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -55,6 +56,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         nun = Arrays.asList(args).contains("--nun");
         october22 = Arrays.asList(args).contains("--oct22");
         october23 = Arrays.asList(args).contains("--oct23");
+        october23Evening = Arrays.asList(args).contains("--oct23-evening");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -69,6 +71,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october23Evening) { eveningChoices(); return; }
             if (october23) { october23Reports(); return; }
             if (october22) { october22Reports(); return; }
             if (nun) { nunDiceBonus(); return; }
@@ -86,6 +89,67 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void eveningChoices() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class,(p,m,a)->null)).init();
+        for(boolean glimmer:new boolean[]{true,false}) {
+            Question<?> question=reportedMythosQuestion(glimmer);
+            for(int selected=0;selected<question.getOptions().size();selected++) {
+                float bottom=InfoStage.getBottomHeight();
+                List<Object> answers=new ArrayList<>();
+                new sk.sivak.eldritchhorror.core.view.question.QuestionView().ask(question).subscribe(a -> answers.add(a.getResponseData()));
+                tick(180);List<TextButton> choices=new ArrayList<>();
+                for(Actor actor:all(stage.getRoot()))if(actor instanceof TextButton)choices.add((TextButton)actor);
+                require(choices.size()==question.getOptions().size(),"Wrong number of choices");
+                for(int i=0;i<choices.size();i++) {
+                    TextButton button=choices.get(i);button.validate();Label label=button.getLabel();label.validate();
+                    require(button.getX()>=90 && button.getRight()<=870,"Choice outside safe width");
+                    require(button.getWidth()<390,"Markup was measured as visible text");
+                    require(label.getGlyphLayout().width<=label.getWidth()+1,"Choice text overflows");
+                    require(label.getPrefHeight()<=label.getHeight()+1,"Choice text clipped");
+                    require(!button.getText().toString().matches(".*(Focus|Clue|Health|Sanity).*"),"Token name was not replaced by glyph");
+                    for(int j=0;j<i;j++) {
+                        TextButton previous=choices.get(j);
+                        require(button.getX()>=previous.getRight() || previous.getX()>=button.getRight()
+                                || button.getY()>=previous.getTop() || previous.getY()>=button.getTop(),"Choices overlap");
+                    }
+                }
+                if(selected==0)draw("oct23-evening-"+(glimmer?"glimmer":"world-fights-back"));
+                click(choices.get(selected));tick(180);
+                require(answers.equals(Collections.singletonList(question.getOptions().get(selected).getValue())),"Choice returned wrong result");
+                require(InfoStage.getBottomHeight()==bottom,"Choice leaked layout height");
+            }
+        }
+        sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform.nullifyInstance();
+        System.out.println("PASS: real Glimmer of Hope and World Fights Back choices use glyphs, fit within bounds, and preserve every option result");
+    }
+
+    private Question<?> reportedMythosQuestion(boolean glimmer) {
+        sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform.nullifyInstance();
+        sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform p=sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform.get();
+        sk.sivak.eldritchhorror.core.model.InvestigatorRead investigator=proxy(sk.sivak.eldritchhorror.core.model.InvestigatorRead.class,(o,m,a)-> {
+            if(m.getName().equals("getInfo"))return proxy(InvestigatorInfo.class,(oo,mm,aa)->InvestigatorId.THE_NUN);
+            if(m.getName().equals("getFocusTokens"))return 1;
+            if(m.getName().equals("getCurrentLocationId"))return sk.sivak.eldritchhorror.core.constants.location.LocationId.ROME;
+            throw new AssertionError(m.getName());
+        });
+        p.setInvestigators(proxy(sk.sivak.eldritchhorror.core.model.InvestigatorsRead.class,(o,m,a)->
+                m.getName().equals("getOnBoardInvestigators")?Collections.singletonList(investigator):investigator));
+        p.setCluePoolRead(proxy(sk.sivak.eldritchhorror.core.model.CluePoolRead.class,(o,m,a)->1));
+        p.setSpellsDeck(proxy(sk.sivak.eldritchhorror.core.model.SpellsDeckRead.class,(o,m,a)->true));
+        p.setMonsterCup(proxy(sk.sivak.eldritchhorror.core.model.MonsterCupRead.class,(o,m,a)->
+                Collections.singletonList(new sk.sivak.eldritchhorror.core.constants.monster.CultistMonster())));
+        p.setInvestigatorService(proxy(sk.sivak.eldritchhorror.core.service.InvestigatorService.class,(o,m,a)->null));
+        p.setService(proxy(sk.sivak.eldritchhorror.core.service.Service.class,(o,m,a)-> {
+            if(m.getName().equals("addEventCommand"))((java8.features.function.Consumer<Object>)a[0]).accept(null);
+            return null;
+        }));
+        Question<?>[] captured={null};
+        p.setGameService(proxy(sk.sivak.eldritchhorror.core.service.GameService.class,(o,m,a)-> {captured[0]=(Question<?>)a[0];return rx.Single.create(sub -> {});}));
+        if(glimmer)new sk.sivak.eldritchhorror.core.eventlistener.mythos.GreenMythosCard12().execute();
+        else new sk.sivak.eldritchhorror.core.eventlistener.mythos.YellowMythosCard12().execute();
+        require(captured[0]!=null,"Mythos did not produce a question");return captured[0];
     }
 
     private void october23Reports() throws Exception {

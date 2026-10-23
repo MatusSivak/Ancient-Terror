@@ -96,7 +96,8 @@ public final class CardResolutionArtwork {
     public static void releaseAfterDiceCheck() {
         if (!diceCheckActive) return;
         diceCheckActive = false;
-        if (suspended != null) hide(suspended);
+        // The owning paper resumes with the result (or finishes). Keep its scene
+        // until then instead of fading out and immediately fading back in.
     }
 
     private static Action fadeOf(Image image) {
