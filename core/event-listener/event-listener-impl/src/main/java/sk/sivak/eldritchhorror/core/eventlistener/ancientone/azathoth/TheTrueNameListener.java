@@ -92,6 +92,11 @@ public class TheTrueNameListener extends AbstractMysteryListener implements Even
                 spendData.pay();
                 progress++;
                 ServicePlatform.get().getGameService().advanceCurrentMysteryCard(1);
+                // The Eldritch token moves onto the card, so its Pin can't be used again.
+                LocationId location = ServicePlatform.get().getInvestigators().getActiveInvestigator().getCurrentLocationId();
+                if (mysteryCardInfo.getPinLocations().remove(location)) {
+                    ServicePlatform.get().getGameService().clearRedPin(location);
+                }
                 ServicePlatform.get().getService().release();
             });
         }

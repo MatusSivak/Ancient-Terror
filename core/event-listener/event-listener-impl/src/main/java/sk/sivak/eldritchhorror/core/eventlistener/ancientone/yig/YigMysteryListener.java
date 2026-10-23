@@ -118,7 +118,9 @@ public final class YigMysteryListener extends AbstractMysteryListener {
     }
     private void removeToken(LocationId location) {
         if(!mysteryCardInfo.getPinLocations().remove(location))return;
-        addProgress(); p().getGameService().clearRedPins(); p().getGameService().justAddRedPins();
+        // Clear only this pin: clearing all pins after the removal would miss it, and re-adding the rest
+        // races with their fade-out, which removed the remaining pins instead.
+        addProgress(); p().getGameService().clearRedPin(location);
     }
     private void addProgress() {
         if(progress>=mysteryCardInfo.getMysteryComplexity())return;

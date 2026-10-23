@@ -70,6 +70,35 @@ public final class CardResolutionArtwork {
         image.addAction(new FadeMarker(Actions.sequence(Actions.alpha(0f, FADE_DURATION), Actions.removeActor())));
     }
 
+    private static Group suspendedLayer;
+    private static Image suspended;
+    private static boolean diceCheckActive;
+
+    /** The paper was hidden: drop its artwork unless a dice check needs it as backdrop. */
+    static void suspend(Group layer, Image image) {
+        suspendedLayer = image == null ? null : layer;
+        suspended = image;
+        if (image != null && !diceCheckActive) hide(image);
+    }
+
+    /** A paper is visible again; any previously hidden artwork no longer applies. */
+    static void clearSuspended() {
+        suspendedLayer = null;
+        suspended = null;
+    }
+
+    /** Dice checks hide the paper, but the card scene must stay behind the dice. */
+    public static void retainDuringDiceCheck(Group layer) {
+        diceCheckActive = true;
+        if (suspended != null && suspendedLayer == layer) show(layer, suspended);
+    }
+
+    public static void releaseAfterDiceCheck() {
+        if (!diceCheckActive) return;
+        diceCheckActive = false;
+        if (suspended != null) hide(suspended);
+    }
+
     private static Action fadeOf(Image image) {
         for (Action action : image.getActions()) {
             if (action instanceof FadeMarker) return action;

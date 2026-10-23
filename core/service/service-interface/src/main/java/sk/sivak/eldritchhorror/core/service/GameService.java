@@ -102,6 +102,8 @@ public interface GameService extends CommonService {
 
     void clearRedPins();
 
+    void clearRedPin(LocationId locationId);
+
     void spawnVortex(LocationId locationId);
 
     void removeVortex(LocationId currentLocationId);

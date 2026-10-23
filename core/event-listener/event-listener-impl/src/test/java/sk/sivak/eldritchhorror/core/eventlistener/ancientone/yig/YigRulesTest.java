@@ -398,6 +398,22 @@ public class YigRulesTest {
         new YigMysteryListener(rise).advanceActiveMystery();drain();
         assertEquals(1,(int)rise.getProgress());assertEquals(before,rise.getPinLocations());
     }
+    @Test public void removingRiseTokenClearsOnlyThatPin() throws Exception {
+        MysteryCardInfo rise=YigMysteryDeck.create(4).stream()
+                .filter(c -> c.getMysteryCardId()==MysteryCardId.Yig.RISE_OF_THE_SERPENT_PEOPLE).findFirst().get();
+        List<LocationId> pins=rise.getPinLocations();
+        assertEquals(2,pins.size());
+        LocationId removed=pins.get(0), remaining=pins.get(1);
+        List<String> pinEffects=new ArrayList<>();
+        platform.setGameService(mock(GameService.class,(name,a) -> {
+            queue(() -> pinEffects.add(name+(a==null?"":":"+Arrays.toString(a))));return null;
+        }));
+        java.lang.reflect.Method removeToken=YigMysteryListener.class.getDeclaredMethod("removeToken",LocationId.class);
+        removeToken.setAccessible(true);
+        removeToken.invoke(new YigMysteryListener(rise),removed);drain();
+        assertEquals(Collections.singletonList(remaining),rise.getPinLocations());
+        assertEquals(Arrays.asList("advanceCurrentMysteryCard:[1]","clearRedPin:["+removed+"]"),pinEffects);
+    }
     @Test public void migrationAutomaticallyMovesCluesToNearestExpeditionsIncludingTies() {
         LocationMap map=new LocationMap();map.initLocations();platform.setLocationMap(map);
         List<ClueInfo> clues=new ArrayList<>();

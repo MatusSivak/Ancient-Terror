@@ -96,6 +96,8 @@ public interface GameActionProvider {
 
     Action<Object, Void> clearRedPins();
 
+    Action<Object, Void> clearRedPin(LocationId locationId);
+
     Action<Object, Void> spawnVortex(LocationId locationId);
 
     Action<Object, Void> removeVortex(LocationId currentLocationId);

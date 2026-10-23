@@ -202,6 +202,14 @@ final class MonsterAbilities {
 
     /** Defeats the monster mid-combat and skips the rest of the combat (same flow as Riot). */
     static void defeatDuringCombat(MonsterInfo monsterInfo, CombatData combatData) {
+        // Direct events fire inside a hold; inserting after HIDE_COMBAT_TABLE only works once released,
+        // otherwise the skip below would discard the defeat itself.
+        ServicePlatform.get().getService().addEventCommand(in -> {
+            defeatDuringCombatNow(monsterInfo, combatData);
+        });
+    }
+
+    private static void defeatDuringCombatNow(MonsterInfo monsterInfo, CombatData combatData) {
         ServicePlatform.get().getService().skipAfterEvent(BeforeAfterEvent.AFTER_DAMAGE_CHECK, combatData);
         ServicePlatform.get().getService().startInsertingAfterCommand(BeforeAfterEvent.HIDE_COMBAT_TABLE);
         ServicePlatform.get().getService().hold();

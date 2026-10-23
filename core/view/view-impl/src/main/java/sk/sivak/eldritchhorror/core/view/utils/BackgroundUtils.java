@@ -169,15 +169,16 @@ public class BackgroundUtils {
 
     public Completable hideBackground() {
         return Completable.create(onSub -> {
-            String backgroundName = gameController.getPreviousBackgroundName() == null ? SPACE : gameController.getPreviousBackgroundName();
             currentBackgroundName = currentBackgroundName == null ? SPACE : currentBackgroundName;
+            if (currentBackgroundName.equals(SPACE)) {
+                // The map is already visible; switching back to a stale encounter background
+                // would disable camera movement (e.g. the second of several spawned clues).
+                onSub.onCompleted();
+                return;
+            }
+            String backgroundName = gameController.getPreviousBackgroundName() == null ? SPACE : gameController.getPreviousBackgroundName();
             if (currentBackgroundName.equals(backgroundName)) {
-                if (backgroundName.equals(SPACE)) {
-                    onSub.onCompleted(); // SPACE -> SPACE
-                    return;
-                } else {
-                    backgroundName = SPACE; // investigator1: LONDON -> investigator1: LONDON
-                }
+                backgroundName = SPACE; // investigator1: LONDON -> investigator1: LONDON
             }
             NewMusicBox.getInstance().backToPreviousTrack();
             MoveCameraToLocationHelper.setEnabled(true);

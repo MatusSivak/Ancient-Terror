@@ -216,6 +216,11 @@ public class GameActionProviderImpl extends AbstractActionProvider implements Ga
     }
 
     @Override
+    public Action<Object, Void> clearRedPin(LocationId locationId) {
+        return new ClearRedPinsAction(locationId);
+    }
+
+    @Override
     public Action<Object, Void> spawnVortex(LocationId locationId) {
         return new SpawnVortexAction(locationId);
     }

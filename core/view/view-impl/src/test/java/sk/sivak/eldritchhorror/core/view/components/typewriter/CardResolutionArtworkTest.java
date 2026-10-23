@@ -9,6 +9,60 @@ import static org.junit.Assert.*;
 
 public class CardResolutionArtworkTest {
 
+    @org.junit.Before
+    public void resetDiceCheckState() {
+        CardResolutionArtwork.releaseAfterDiceCheck();
+        CardResolutionArtwork.clearSuspended();
+    }
+
+    @Test
+    public void diceCheckKeepsArtworkOfHiddenPaper() {
+        Group layer = new Group();
+        Image image = transparentImage();
+        CardResolutionArtwork.show(layer, image);
+        layer.act(1.1f);
+
+        CardResolutionArtwork.suspend(layer, image);
+        CardResolutionArtwork.retainDuringDiceCheck(layer);
+        layer.act(2f);
+        assertSame(layer, image.getParent());
+        assertEquals(1f, image.getColor().a, 0.001f);
+
+        CardResolutionArtwork.releaseAfterDiceCheck();
+        layer.act(1.1f);
+        layer.act(0.01f);
+        assertNull(image.getParent());
+    }
+
+    @Test
+    public void hidingPaperDuringDiceCheckKeepsArtwork() {
+        Group layer = new Group();
+        Image image = transparentImage();
+        CardResolutionArtwork.show(layer, image);
+        layer.act(1.1f);
+
+        CardResolutionArtwork.retainDuringDiceCheck(layer);
+        CardResolutionArtwork.suspend(layer, image);
+        layer.act(2f);
+        assertSame(layer, image.getParent());
+        assertEquals(1f, image.getColor().a, 0.001f);
+    }
+
+    @Test
+    public void diceCheckIgnoresArtworkOfPaperShownAgain() {
+        Group layer = new Group();
+        Image image = transparentImage();
+        CardResolutionArtwork.show(layer, image);
+        layer.act(1.1f);
+        CardResolutionArtwork.suspend(layer, image);
+        layer.act(1.2f);
+        layer.act(0.01f);
+        CardResolutionArtwork.clearSuspended();
+
+        CardResolutionArtwork.retainDuringDiceCheck(layer);
+        assertNull(image.getParent());
+    }
+
     @Test
     public void showFadesInInsteadOfPoppingUp() {
         Group layer = new Group();

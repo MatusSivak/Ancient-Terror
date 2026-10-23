@@ -705,6 +705,11 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public void clearRedPin(LocationId locationId) {
+        view.clearRedPins(java.util.Collections.singletonList(locationId));
+    }
+
+    @Override
     public void clearStorm(String rumorId) {
         if (rumors.getActiveRumor(rumorId).isStormSpawned()) {
             view.clearStorm(rumorId);

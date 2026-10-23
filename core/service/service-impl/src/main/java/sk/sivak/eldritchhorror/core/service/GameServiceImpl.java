@@ -339,6 +339,11 @@ public class GameServiceImpl extends AbstractCommonService implements GameServic
     }
 
     @Override
+    public void clearRedPin(LocationId locationId) {
+        execute(new ActionCommand<>(gameActionProvider.clearRedPin(locationId), "CLEAR_RED_PIN"));
+    }
+
+    @Override
     public void spawnVortex(LocationId locationId) {
         execute(new ActionCommand<>(gameActionProvider.spawnVortex(locationId), "SPAWN_VORTEX"));
     }

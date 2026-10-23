@@ -178,6 +178,8 @@ public interface GameController {
 
     void clearRedPins();
 
+    void clearRedPin(LocationId locationId);
+
     void clearStorm(String rumorId);
 
     void displayMonsterCard(MonsterInfo monsterInfo, Action0 onClickAction, Action0 onDisplayAction);

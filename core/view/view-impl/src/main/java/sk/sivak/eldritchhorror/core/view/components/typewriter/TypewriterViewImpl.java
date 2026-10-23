@@ -295,6 +295,7 @@ public class TypewriterViewImpl implements TypewriterView  {
         if (newPaper) {
             createTable();
         }
+        CardResolutionArtwork.clearSuspended();
         if (typewriterTableStack.peek().getCardBackground() != null) {
             CardResolutionArtwork.show(InfoStage.getCardResolutionBackgrounds(), typewriterTableStack.peek().getCardBackground());
         }
@@ -323,6 +324,7 @@ public class TypewriterViewImpl implements TypewriterView  {
     public Completable finishPaper() {
         return getTypewriterEffect().finishPaper().andThen(Completable.create(onSub -> {
             removeCardBackground();
+            CardResolutionArtwork.clearSuspended();
             typewriterTableStack.pop();
             onSub.onCompleted();
         }));
@@ -330,7 +332,8 @@ public class TypewriterViewImpl implements TypewriterView  {
 
     @Override
     public Completable hidePaper() {
-        return getTypewriterEffect().hidePaper().doOnCompleted(this::removeCardBackground);
+        return getTypewriterEffect().hidePaper().doOnCompleted(() -> CardResolutionArtwork.suspend(
+                InfoStage.getCardResolutionBackgrounds(), typewriterTableStack.peek().getCardBackground()));
     }
 
     public void displayOrHide() {

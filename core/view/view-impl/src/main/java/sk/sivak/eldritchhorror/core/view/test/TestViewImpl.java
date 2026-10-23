@@ -40,6 +40,7 @@ import sk.sivak.eldritchhorror.core.controller.TestController;
 import sk.sivak.eldritchhorror.core.view.TestView;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
+import sk.sivak.eldritchhorror.core.view.components.typewriter.CardResolutionArtwork;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatOverviewTable;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRoller;
@@ -131,6 +132,7 @@ public class TestViewImpl implements TestView {
                 hideDicesAfterConfirm = false;
             } else {
                 hideDicesAfterConfirm = true;
+                CardResolutionArtwork.retainDuringDiceCheck(InfoStage.getCardResolutionBackgrounds());
                 InfoStage.displayText(get("test.testPrefix", stat.prettyString()));
                 if (!monsterCombatTableStack.isEmpty()) {
                     // A test inside the combat (e.g. casting Flesh Ward) - the monster steps away meanwhile.
@@ -357,6 +359,7 @@ public class TestViewImpl implements TestView {
                         InfoStage.hideActor(testTableStack.pop());
                         InfoStage.setBottomHeight(5);
                         MapStage.brightenWorld();
+                        CardResolutionArtwork.releaseAfterDiceCheck();
                     }
                     InfoStage.setBottomHeight(5);
                     onSub.onCompleted();
