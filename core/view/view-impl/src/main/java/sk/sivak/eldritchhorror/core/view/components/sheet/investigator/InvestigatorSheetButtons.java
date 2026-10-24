@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.PURE_WHITE_BACKGROUND;
@@ -69,10 +70,15 @@ public class InvestigatorSheetButtons extends Group {
         addActor(cardsClickArea);
         addActor(bioClickArea);
 
-        addClickListener(basicInfoClickArea, this::onBasicInfoTabClick);
-        addClickListener(cardsClickArea, this::onCardsTabClick);
-        addClickListener(bioClickArea, this::onBackgroundTabClick);
+        addClickListener(basicInfoClickArea, () -> switchTab("passport-dossier-top-basic.png", this::onBasicInfoTabClick));
+        addClickListener(cardsClickArea, () -> switchTab("passport-dossier-top-cards.png", this::onCardsTabClick));
+        addClickListener(bioClickArea, () -> switchTab("passport-dossier-top-background.png", this::onBackgroundTabClick));
 
+    }
+
+    private void switchTab(String artwork, Runnable action) {
+        if (!headerPath.equals(artwork)) UiSounds.play(UiSounds.Cue.HUD_CLICK);
+        action.run();
     }
 
     protected void onBasicInfoTabClick() {

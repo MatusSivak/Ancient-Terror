@@ -26,13 +26,18 @@ public class InvestigatorUtils {
 
     public static Completable spawnInvestigator(LocationId location, InvestigatorId investigatorId,
                                                 GameController gameController) {
+        return spawnInvestigator(location, investigatorId, gameController, null);
+    }
+
+    public static Completable spawnInvestigator(LocationId location, InvestigatorId investigatorId,
+                                                GameController gameController, Runnable onSpawn) {
 
         Spawner.SpawnConfig spawnConfig = new Spawner.SpawnConfigImpl(0, 0, 0, 1);
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> new InvestigatorImage(investigatorId, gameController);
 
         Completable spawn = new Spawner().spawn(actorSpawner, spawnConfig,
-                new InvestigatorIdLayerResolver(investigatorId, false, false), location);
+                new InvestigatorIdLayerResolver(investigatorId, false, false), location, onSpawn);
         return spawn.andThen(Completable.create(onSub -> {
             List<InvestigatorBasics> investigatorsAtLocation = gameController.getInvestigatorsAtLocation(location);
             List<InvestigatorId> investigatorIds = Stream.collectToList(Stream.map(investigatorsAtLocation, InvestigatorInfo::getInvestigatorId));

@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -15,7 +17,7 @@ import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /** The single storefront for every full-game entry point. */
-public final class FullGamePurchaseDialog extends Dialog {
+public final class FullGamePurchaseDialog extends SoundDialog {
     private boolean pending;
     private final TextButton buy;
     private final TextButton cancel;

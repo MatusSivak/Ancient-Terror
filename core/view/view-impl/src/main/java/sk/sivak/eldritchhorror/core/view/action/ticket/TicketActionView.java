@@ -102,7 +102,7 @@ public class TicketActionView {
         tokenActor.setHolderLocation(ticketBar.getEmptyContainerPosition());
         Completable gain = GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN, tokenActor.gain());
         return gain.andThen(Completable.create(onSub -> {
-            TokenSounds.playLand(0);
+            TokenSounds.playLand(TokenSounds.Cue.TICKET_GAIN, 0);
             ticketBar.addTicket(ticketType);
             onSub.onCompleted();
         }));

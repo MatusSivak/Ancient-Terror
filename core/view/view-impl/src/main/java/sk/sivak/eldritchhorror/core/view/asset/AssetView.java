@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.asset;
 
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
@@ -86,6 +87,7 @@ public class AssetView {
 
     public Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest) {
         return Single.create(subscriber -> {
+            UiSounds.transition(UiSounds.Cue.CARD_OPEN);
             originalBottomHeight = InfoStage.getBottomHeight();
             displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
                     showCardRequest.getAssetOriginType(), subscriber);
@@ -279,6 +281,7 @@ public class AssetView {
     }
 
     private void returnCard(SingleSubscriber<? super ShowCardResponse> onSub, ShowCardResponse showCardResponse, AssetOriginType assetOriginType) {
+        UiSounds.transition(UiSounds.Cue.CARD_CLOSE);
         MoveToAction moveToAction = null;
         if (CENTER == assetOriginType) {
             moveToAction = moveTo(VIEWPORT_WIDTH / 2 - CARD_ORIGIN_X, VIEWPORT_HEIGHT / 2 - CARD_ORIGIN_Y, FADING_EFFECT_DURATION);

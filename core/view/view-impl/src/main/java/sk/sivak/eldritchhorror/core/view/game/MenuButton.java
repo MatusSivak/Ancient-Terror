@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.Gdx;
 import sk.sivak.eldritchhorror.core.view.firebase.BugReportScreenshot;
 import com.badlogic.gdx.Preferences;
@@ -261,7 +263,7 @@ public class MenuButton extends ImageButton {
         style.background = new NinePatchDrawable(background);
         style.titleFont = CustomAssetManager.getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4);
         style.titleFontColor = new Color(0.91f, 0.85f, 0.69f, 1f);
-        Dialog dialog = new Dialog(get("menu.title"), style);
+        Dialog dialog = new SoundDialog(get("menu.title"), style);
         dialog.getTitleLabel().setAlignment(Align.center);
         dialog.getTitleLabel().setFontScale(0.5f);
         return dialog;

@@ -9,6 +9,8 @@ Each filename owns a stable random seed, so regeneration is deterministic.
 """
 
 import math
+import sys
+sys.dont_write_bytecode = True
 
 from generate_travel_sounds import (SAMPLE_RATE, TAU, finish, seeded_random, smoothstep,
                                     swept_breath, write)
@@ -149,21 +151,20 @@ def token_leave():
 
 
 def token_land():
-    """Shared by Health and Sanity: a gained token settling softly into its HUD slot."""
+    """Shared by Health and Sanity: a short wooden contact as the token reaches its HUD slot."""
     name = "token_land"
     rng = seeded_random(name)
     out = blank(0.22)
-    # Muffled felt-on-wood thud: low damped body, no bright partials or comb reverb (they ring like tin).
-    add(out, lowpass(lowpass(thump(120.0, 0.60, 0.030, 0.2), 700.0), 900.0))
-    add(out, lowpass(thump(240.0, 0.12, 0.012, 0.08), 1000.0), 0.002)
-    # Very short, dark brush of air for the contact.
-    brush_env = lambda p: 0.10 * smoothstep(p / 0.02) * (1.0 - smoothstep(p / 0.35))
-    add(out, lowpass(swept_breath(rng, len(out), 900.0, 500.0, brush_env, q=1.2), 1200.0))
+    # Midrange body and a dry snap remain audible on small speakers; no metallic reverb.
+    add(out, lowpass(thump(340.0, 0.60, 0.030, 0.2), 1800.0))
+    add(out, lowpass(thump(680.0, 0.16, 0.012, 0.08), 2400.0), 0.002)
+    brush_env = lambda p: 0.22 * smoothstep(p / 0.02) * (1.0 - smoothstep(p / 0.35))
+    add(out, lowpass(swept_breath(rng, len(out), 2100.0, 1000.0, brush_env, q=1.2), 3000.0))
     return name, fade_tail(out, 0.5)
 
 
 def main():
-    for build, peak in ((health_gain, 0.48), (health_loss, 0.55), (token_leave, 0.40), (token_land, 0.40)):
+    for build, peak in ((health_gain, 0.80), (health_loss, 0.85), (token_leave, 0.75), (token_land, 0.85)):
         name, samples = build()
         write(name, finish(samples, peak))
 

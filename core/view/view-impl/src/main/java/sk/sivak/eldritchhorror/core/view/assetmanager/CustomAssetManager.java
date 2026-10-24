@@ -26,6 +26,7 @@ import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.font.BitmapFontSizing;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -365,6 +366,10 @@ public class CustomAssetManager extends AssetManager {
             soundPaths.add(path);
         }
         for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) {
+            load(cue.path, Sound.class);
+            soundPaths.add(cue.path);
+        }
+        for (UiSounds.Cue cue : UiSounds.Cue.values()) {
             load(cue.path, Sound.class);
             soundPaths.add(cue.path);
         }

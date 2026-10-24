@@ -108,7 +108,8 @@ public class PrepareBoardView {
             InfoStage.displayText(UiText.get("prepare.spawningInvestigators"));
             MapUtils.moveCameraToLocation(selectedInvestigators.getLocationId()).subscribe(() -> {
                 InvestigatorUtils.spawnInvestigator(selectedInvestigators.getLocationId(),
-                        selectedInvestigators.getInvestigatorId(), gameController)
+                        selectedInvestigators.getInvestigatorId(), gameController,
+                        () -> GameplaySounds.play(INVESTIGATOR_SPAWN))
                         .subscribe(onSub::onCompleted);
             });
         });

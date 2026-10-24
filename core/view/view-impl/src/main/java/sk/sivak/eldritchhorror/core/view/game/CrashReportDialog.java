@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -12,7 +14,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 /** Acknowledges the failure before handing control to the existing crash handler. */
-public final class CrashReportDialog extends Dialog {
+public final class CrashReportDialog extends SoundDialog {
     private final Runnable onClose;
     private boolean closed;
 

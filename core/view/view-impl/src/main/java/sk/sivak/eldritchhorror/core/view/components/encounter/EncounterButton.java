@@ -26,6 +26,7 @@ import sk.sivak.eldritchhorror.core.view.components.action.ActionButton;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
@@ -201,7 +202,7 @@ public class EncounterButton extends Table {
                     return;
                 }
                 backgroundAlpha = OPACITY_3;
-                onClick();
+                UiSounds.userAction(EncounterButton.this::onClick);
             }
 
             @Override
@@ -306,7 +307,7 @@ public class EncounterButton extends Table {
                 actionButton.setPressedOverride(false);
                 actionButton.setChecked(true);
                 backgroundAlpha = OPACITY_3;
-                onClick();
+                UiSounds.userAction(EncounterButton.this::onClick);
             }
 
             @Override
@@ -346,6 +347,7 @@ public class EncounterButton extends Table {
         if (!encounterButtonData.isEnabled()) {
             return;
         }
+        UiSounds.play(UiSounds.Cue.BUTTON_CLICK);
         selectEncounterListener.onSelect(encounterButtonData.getUuid());
         if (encounterButtonData.getButtonIcon().startsWith("card/condition/")) {
             BigActorsManager.displayOrHideEncounterTable();

@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.action;
 
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -116,6 +118,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
     public void displayOrHide() {
         if (getParent() == null) {
+            UiSounds.transition(UiSounds.Cue.POPUP_OPEN);
             InfoStage.displayTextDontHide(selectActionText);
             visible = true;
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
@@ -132,10 +135,12 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             return;
         }
         if (!visible) {
+            UiSounds.transition(UiSounds.Cue.POPUP_OPEN);
             InfoStage.displayTextDontHide(selectActionText);
             hideOkButtons.alphaToValue(1f);
             visible = true;
         } else {
+            UiSounds.transition(UiSounds.Cue.POPUP_CLOSE);
             InfoStage.hideLabel(selectActionText);
             hideOkButtons.alphaToValue(0f);
             visible = false;

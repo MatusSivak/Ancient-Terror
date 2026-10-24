@@ -9,7 +9,7 @@ import sk.sivak.eldritchhorror.core.view.utils.SoundPlayer;
 /** Optional cues played when a HUD track zooms to the center of the screen and back. */
 final class TrackZoomSounds {
 
-    private static final float VOLUME = 0.5f;
+    private static final float VOLUME = 0.75f;
 
     private TrackZoomSounds() {
     }

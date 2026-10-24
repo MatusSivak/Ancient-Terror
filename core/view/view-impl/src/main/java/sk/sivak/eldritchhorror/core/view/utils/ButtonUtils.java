@@ -15,11 +15,12 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class ButtonUtils {
 
     public static ClickListener addClickListener(Actor actor, Runnable action) {
+        if (actor instanceof Button) UiSounds.attachButton((Button) actor);
         ClickListener listener = new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                action.run();
+                UiSounds.userAction(action);
             }
         };
         actor.addListener(listener);

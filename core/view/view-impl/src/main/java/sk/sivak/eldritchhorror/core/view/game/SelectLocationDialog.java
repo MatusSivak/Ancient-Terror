@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -14,7 +16,7 @@ import java.util.List;
 /**
  * @author msivak
  */
-public class SelectLocationDialog extends Dialog {
+public class SelectLocationDialog extends SoundDialog {
 
     private SingleSubscriber<? super LocationId> singleSubscriber;
 

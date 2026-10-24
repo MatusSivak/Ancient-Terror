@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import java8.features.stream.Stream;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -89,6 +90,7 @@ public class CardClickListener extends ClickListener {
         duplicate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
         duplicate.setScale(placement.scaleX, placement.scaleY);
         duplicate.setPosition(placement.x, placement.y);
+        UiSounds.play(UiSounds.Cue.CARD_OPEN);
 
         ScaleToAction scaleToAction = Actions.scaleTo(SCALE_AMOUNT, SCALE_AMOUNT, DURATION, Interpolation.sine);
         MoveToAction moveToAction = Actions.moveTo(
@@ -177,6 +179,9 @@ public class CardClickListener extends ClickListener {
         }
 
         void scaleDown() {
+            if (duplicate == null || duplicate.getParent() == null || duplicate.getTouchable() == Touchable.disabled) return;
+            duplicate.setTouchable(Touchable.disabled);
+            UiSounds.play(UiSounds.Cue.CARD_CLOSE);
             CardZoomPlacement placement = new CardZoomPlacement(original,
                     CARD_WIDTH, CARD_HEIGHT, CARD_ORIGIN_X, CARD_ORIGIN_Y);
             ScaleToAction scaleToAction = Actions.scaleTo(placement.scaleX, placement.scaleY, DURATION);

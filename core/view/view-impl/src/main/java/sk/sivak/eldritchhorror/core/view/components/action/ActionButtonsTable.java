@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.action;
 
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -105,6 +107,7 @@ public class ActionButtonsTable extends Table {
         ActionButtonData actionButtonData = buttonWithText.getActionButton().getActionButtonData();
         buttonWithText.getActionButton().setChecked(true);
         if (actionButtonData.isEnabled()) {
+            UiSounds.play(UiSounds.Cue.BUTTON_CLICK);
             fireEnabledButtonClickedEvent(actionButtonData);
         } else {
             fireDisabledButtonClickedEvent(actionButtonData);

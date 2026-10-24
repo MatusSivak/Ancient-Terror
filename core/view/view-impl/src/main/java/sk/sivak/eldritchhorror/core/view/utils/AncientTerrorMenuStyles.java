@@ -129,6 +129,7 @@ public final class AncientTerrorMenuStyles {
     }
 
     public static void addFocusHighlight(Button button) {
+        UiSounds.attachButton(button);
         Button.ButtonStyle style = button.getStyle();
         Drawable normal = style.up;
         button.addListener(new FocusListener() {

@@ -117,6 +117,7 @@ public class ButtonBuilder {
         button.getLabel().setFontScale(0.62f);
         // The style colors prose; an actor tint would also darken white-marked icon artwork.
         button.getLabel().setColor(Color.WHITE);
+        UiSounds.attachButton(button);
         return button;
     }
 

@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -20,7 +22,7 @@ import java.util.UUID;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
-public class ReportBugDialog extends Dialog {
+public class ReportBugDialog extends SoundDialog {
     private final TextArea description;
     private final TextButton send;
     private final TextButton close;

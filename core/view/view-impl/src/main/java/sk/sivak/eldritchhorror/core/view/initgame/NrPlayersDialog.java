@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -14,7 +16,7 @@ import rx.SingleSubscriber;
 /**
  * @author msivak
  */
-public class NrPlayersDialog extends Dialog {
+public class NrPlayersDialog extends SoundDialog {
 
     public static final int MAX_NUMBER_OF_PLAYERS = 8;
     private static final float INVESTIGATOR_BUTTON_SIZE = 50f;

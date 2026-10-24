@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -27,7 +29,7 @@ public final class RestartConfirmationDialog {
             style.background = new NinePatchDrawable(background);
             style.titleFont = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4);
             style.titleFontColor = Color.valueOf("E8D9B0");
-            Dialog dialog = new Dialog(get("menu.restartGame"), style) {
+            Dialog dialog = new SoundDialog(get("menu.restartGame"), style) {
                 private boolean answered;
 
                 @Override

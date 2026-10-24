@@ -79,7 +79,7 @@ public final class GainClueFromSpaceHelper {
                         Actions.scaleTo(targetScale, targetScale, normalActionDuration, sine)
                 ),
                 Actions.run(() -> {
-                    TokenSounds.playLand(0);
+                    TokenSounds.playLand(TokenSounds.Cue.CLUE_GAIN, 0);
                     InfoStage.getInvestigatorHud().getClueBar().increaseCurrentValue();
                 }),
                 Actions.run(onSub::onCompleted),

@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -15,7 +17,7 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 /**
  * @author msivak
  */
-public class SelectDifficultyDialog extends Dialog {
+public class SelectDifficultyDialog extends SoundDialog {
 
     private SingleSubscriber<? super DifficultyId> subscriber;
 

@@ -6,17 +6,21 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
-/** Health/Sanity cues plus distinct clue and focus pickups; all preloaded during startup. */
+/** Distinct pickup and HUD arrival cues; all preloaded during startup. */
 public final class TokenSounds {
 
     public enum Cue {
         // Health and Sanity share the same cues.
-        GAIN(CustomAssetManager.TOKEN_GAIN_SOUND, 0.55f),
+        GAIN(CustomAssetManager.TOKEN_GAIN_SOUND, 0.90f),
         CLUE_GAIN(GameplaySounds.Cue.CLUE_GAIN.path, GameplaySounds.Cue.CLUE_GAIN.volume),
         FOCUS_GAIN(GameplaySounds.Cue.FOCUS_GAIN.path, GameplaySounds.Cue.FOCUS_GAIN.volume),
-        LOSS(CustomAssetManager.TOKEN_LOSS_SOUND, 0.60f),
-        TOKEN_LEAVE(CustomAssetManager.TOKEN_LEAVE_SOUND, 0.50f),
-        TOKEN_LAND(CustomAssetManager.TOKEN_LAND_SOUND, 0.45f);
+        TICKET_GAIN(GameplaySounds.Cue.TICKET_GAIN.path, GameplaySounds.Cue.TICKET_GAIN.volume),
+        CLUE_LAND(GameplaySounds.Cue.CLUE_LAND.path, GameplaySounds.Cue.CLUE_LAND.volume),
+        FOCUS_LAND(GameplaySounds.Cue.FOCUS_LAND.path, GameplaySounds.Cue.FOCUS_LAND.volume),
+        TICKET_LAND(GameplaySounds.Cue.TICKET_LAND.path, GameplaySounds.Cue.TICKET_LAND.volume),
+        LOSS(CustomAssetManager.TOKEN_LOSS_SOUND, 0.90f),
+        TOKEN_LEAVE(CustomAssetManager.TOKEN_LEAVE_SOUND, 0.85f),
+        TOKEN_LAND(CustomAssetManager.TOKEN_LAND_SOUND, 0.90f);
 
         public final String path;
         private final float volume;
@@ -40,9 +44,12 @@ public final class TokenSounds {
         play(cue, Math.min(1f, cue.volume * (1f + 0.12f * (Math.max(1, amount) - 1))), 1f);
     }
 
-    /** Gained Health/Sanity token reaching its HUD slot; climbs with the gain cue. */
-    public static void playLand(int tokenIndex) {
-        playGain(Cue.TOKEN_LAND, tokenIndex);
+    /** Play only when the token reaches its HUD slot, using a shorter matching contact sound. */
+    public static void playLand(Cue gain, int tokenIndex) {
+        Cue landing = gain == Cue.CLUE_GAIN ? Cue.CLUE_LAND
+                : gain == Cue.FOCUS_GAIN ? Cue.FOCUS_LAND
+                : gain == Cue.TICKET_GAIN ? Cue.TICKET_LAND : Cue.TOKEN_LAND;
+        playGain(landing, tokenIndex);
     }
 
     /** Health/Sanity token(s) leaving the HUD bar; once per loss, not per token. */

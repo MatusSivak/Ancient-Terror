@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.bigactors;
 
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+
 import com.badlogic.gdx.Gdx;
 import com.kotcrab.vis.ui.VisUI;
 import rx.SingleSubscriber;
@@ -84,7 +86,8 @@ public class BigActorsManager {
         selectActionComponent = new SelectActionComponent();
         omenTrack = new MaxMinComponent(HudButtons.getOmenTrack(), BigActorKey.OMEN_TRACK)
                 .withSounds(OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND);
-        doomTrack = new MaxMinComponent(HudButtons.getDoomTrack(), BigActorKey.DOOM_TRACK);
+        doomTrack = new MaxMinComponent(HudButtons.getDoomTrack(), BigActorKey.DOOM_TRACK)
+                .withSounds(UiSounds.Cue.SHEET_OPEN.path, UiSounds.Cue.SHEET_CLOSE.path);
     }
 
     public static void reset() {

@@ -14,6 +14,7 @@ import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 
@@ -77,6 +78,7 @@ public class DisplayHide {
         this.displayed = true;
 
         return Completable.create(onSub -> {
+            UiSounds.transition(UiSounds.sheetCue(bigActorKey, true));
             beforeDisplayAction.call();
             InfoStage.addBigActor(actorKey, actor, () -> hide().subscribe(), null);
             if (bigActorKey == BigActorsManager.BigActorKey.ANCIENT_ONE) {
@@ -125,6 +127,7 @@ public class DisplayHide {
         displayed = false;
         beforeHideAction.call();
         return Completable.create(onSub -> {
+            UiSounds.transition(UiSounds.sheetCue(bigActorKey, false));
             actor.setTouchable(Touchable.disabled);
             actor.setOrigin(actor.getWidth() / 2, actor.getHeight() / 2);
             actor.addAction(Actions.sequence(

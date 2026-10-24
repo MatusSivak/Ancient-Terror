@@ -9,6 +9,7 @@ import org.junit.Test;
 import rx.Completable;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
@@ -116,8 +117,8 @@ public class GameplaySoundsTest {
         Method queue = CustomAssetManager.class.getDeclaredMethod("queueTextures1");
         queue.setAccessible(true);
         queue.invoke(assets);
-        for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) {
-            assertTrue("Not preloaded: " + cue.path, queuedSounds.contains(cue.path));
+        for (String path : cuePaths()) {
+            assertTrue("Not preloaded: " + path, queuedSounds.contains(path));
         }
     }
 
@@ -125,15 +126,53 @@ public class GameplaySoundsTest {
         Path root = Paths.get("").toAbsolutePath();
         while (root != null && !Files.isDirectory(root.resolve("assets/sounds"))) root = root.getParent();
         assertNotNull("Cannot find game assets", root);
-        for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) {
-            Path path = root.resolve("assets").resolve(cue.path);
+        for (String cue : cuePaths()) {
+            Path path = root.resolve("assets").resolve(cue);
             assertTrue("Missing cue: " + path, Files.isRegularFile(path));
             AudioFileFormat wav = AudioSystem.getAudioFileFormat(path.toFile());
-            assertEquals(cue.path, 1, wav.getFormat().getChannels());
-            assertEquals(cue.path, 16, wav.getFormat().getSampleSizeInBits());
-            assertEquals(cue.path, 44100f, wav.getFormat().getSampleRate(), 0f);
-            assertTrue(cue.path, wav.getFrameLength() > 0);
-            assertTrue(cue.path, wav.getFrameLength() * wav.getFormat().getFrameSize() < 1_000_000);
+            assertEquals(cue, 1, wav.getFormat().getChannels());
+            assertEquals(cue, 16, wav.getFormat().getSampleSizeInBits());
+            assertEquals(cue, 44100f, wav.getFormat().getSampleRate(), 0f);
+            assertTrue(cue, wav.getFrameLength() > 0);
+            assertTrue(cue, wav.getFrameLength() * wav.getFormat().getFrameSize() < 1_000_000);
         }
+    }
+
+    private Set<String> cuePaths() {
+        Set<String> paths = new HashSet<>();
+        for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) paths.add(cue.path);
+        for (UiSounds.Cue cue : UiSounds.Cue.values()) paths.add(cue.path);
+        for (TokenSounds.Cue cue : TokenSounds.Cue.values()) paths.add(cue.path);
+        return paths;
+    }
+
+    @Test public void pickupsAndHudArrivalsHaveDistinctMatchingSounds() {
+        TokenSounds.Cue[] pickups = {TokenSounds.Cue.GAIN, TokenSounds.Cue.CLUE_GAIN,
+                TokenSounds.Cue.FOCUS_GAIN, TokenSounds.Cue.TICKET_GAIN};
+        TokenSounds.Cue[] arrivals = {TokenSounds.Cue.TOKEN_LAND, TokenSounds.Cue.CLUE_LAND,
+                TokenSounds.Cue.FOCUS_LAND, TokenSounds.Cue.TICKET_LAND};
+        for (int i = 0; i < pickups.length; i++) {
+            events.clear();
+            TokenSounds.playGain(pickups[i], 0);
+            assertEquals(Arrays.asList(pickups[i].path), events);
+            TokenSounds.playLand(pickups[i], 0);
+            assertNotEquals(pickups[i].path, arrivals[i].path);
+            assertEquals(Arrays.asList(pickups[i].path, arrivals[i].path), events);
+        }
+    }
+
+    @Test public void fastForwardAndMissingAudioSilenceBothTokenPhases() {
+        for (TokenSounds.Cue cue : TokenSounds.Cue.values()) {
+            FastForwardAction.turnOn();
+            TokenSounds.playGain(cue, 0);
+            TokenSounds.playLand(cue, 0);
+            FastForwardAction.turnOff();
+            loaded = false;
+            TokenSounds.playGain(cue, 0);
+            TokenSounds.playLand(cue, 0);
+            loaded = true;
+        }
+        assertTrue(events.isEmpty());
+        assertTrue(queuedSounds.isEmpty());
     }
 }

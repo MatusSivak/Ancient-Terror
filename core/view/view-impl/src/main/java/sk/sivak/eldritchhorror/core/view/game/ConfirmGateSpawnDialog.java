@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
+
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -17,7 +19,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 /**
  * @author msivak
  */
-public class ConfirmGateSpawnDialog extends Dialog {
+public class ConfirmGateSpawnDialog extends SoundDialog {
 
     private CompletableSubscriber completableSubscriber;
 

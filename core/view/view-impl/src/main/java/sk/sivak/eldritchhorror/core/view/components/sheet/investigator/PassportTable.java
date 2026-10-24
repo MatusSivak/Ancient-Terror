@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.investigator;
 
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -179,7 +181,7 @@ public class PassportTable extends Table {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (!isInsideCard(event.getTarget())) {
-                    onClickOutsideCard();
+                    UiSounds.userAction(PassportTable.this::onClickOutsideCard);
                 }
             }
         });

@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.ancientone;
 
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -56,7 +58,7 @@ final class AncientOneStyles {
             }
             @Override public void clicked(InputEvent event, float x, float y) {
                 event.stop();
-                BigActorsManager.displayOrHideAncientOne();
+                UiSounds.userAction(BigActorsManager::displayOrHideAncientOne);
             }
         });
         card.addActor(close);

@@ -25,7 +25,7 @@ public class GainTokenHelper {
             Completable gainToken = playCue.andThen(gainToken(tokenId, emptyContainerPosition, infoText));
             Completable updateHud = gainToken.andThen(Completable.create(onSub -> {
                 if (cue != null) {
-                    TokenSounds.playLand(tokenIndex);
+                    TokenSounds.playLand(cue, tokenIndex);
                 }
                 containerBar.increaseCurrentValue();
                 onSub.onCompleted();

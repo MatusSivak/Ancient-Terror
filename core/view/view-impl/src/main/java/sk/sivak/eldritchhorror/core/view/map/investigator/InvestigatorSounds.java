@@ -12,15 +12,15 @@ public final class InvestigatorSounds {
     }
 
     public static void playDepart() {
-        play(CustomAssetManager.TRAVEL_DEPART_SOUND, 0.25f);
+        play(CustomAssetManager.TRAVEL_DEPART_SOUND, 0.65f);
     }
 
     public static void playArrive() {
-        play(CustomAssetManager.TRAVEL_ARRIVE_SOUND, 0.25f);
+        play(CustomAssetManager.TRAVEL_ARRIVE_SOUND, 0.65f);
     }
 
     public static void playHighlight() {
-        play(CustomAssetManager.INVESTIGATOR_HIGHLIGHT_SOUND, 0.25f);
+        play(CustomAssetManager.INVESTIGATOR_HIGHLIGHT_SOUND, 0.60f);
     }
 
     private static void play(String path, float volume) {
