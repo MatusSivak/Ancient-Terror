@@ -46,6 +46,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october22;
     private static boolean october23;
     private static boolean october23Evening;
+    private static boolean buttonGlyphColors;
     public static void main(String[] args) {
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -57,6 +58,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         october22 = Arrays.asList(args).contains("--oct22");
         october23 = Arrays.asList(args).contains("--oct23");
         october23Evening = Arrays.asList(args).contains("--oct23-evening");
+        buttonGlyphColors = Arrays.asList(args).contains("--button-glyph-colors");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width=960; config.height=540; config.x=-10000; config.y=-10000; config.forceExit=false;
@@ -71,6 +73,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (buttonGlyphColors) { buttonGlyphColors(); eveningChoices(); return; }
             if (october23Evening) { eveningChoices(); return; }
             if (october23) { october23Reports(); return; }
             if (october22) { october22Reports(); return; }
@@ -89,6 +92,52 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
+    }
+
+    private void buttonGlyphColors() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class,(p,m,a)->null)).init();
+        TextButton shared = sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder.buildButton(
+                "Spend 1 [#FFFFFFFF]" + FontGlyphEnricher.getGlyph("Clue") + "[]");
+        shared.clearActions(); shared.setSize(300, 55); shared.setPosition(330, 250); stage.addActor(shared);
+        draw("button-glyph-colors-shared");
+        assertUntintedGlyphs(shared);
+        Pixmap pixels = ScreenUtils.getFrameBufferPixmap(0, 0, 960, 540);
+        int greenPixels = 0;
+        for (int x=330;x<630;x++) for (int y=250;y<305;y++) {
+            int pixel = pixels.getPixel(x,y), r=(pixel>>>24)&255, g=(pixel>>>16)&255, b=(pixel>>>8)&255;
+            if(g>100 && g>r*1.4f && g>b*1.2f) greenPixels++;
+        }
+        pixels.dispose(); require(greenPixels>20,"Rendered Clue has lost its green color"); shared.remove();
+        for (String text : new String[]{"[#GOOD]Spend 1 Clue[]", "Spend 1 Clue to recover 1 Health and 1 Sanity after this test", "Spend 1 Clue\nto recover Health"}) {
+            TypewriterViewImpl view = new TypewriterViewImpl();
+            Method createTable = TypewriterViewImpl.class.getDeclaredMethod("createTable");
+            createTable.setAccessible(true); createTable.invoke(view);
+            Table paper=view.getTable();paper.setPosition(960-paper.getWidth()-40,270-paper.getHeight());stage.addActor(paper);
+            int[] result={-1};view.displayButtons(text,"Decline").subscribe(value->result[0]=value);
+            tick(180);draw("button-glyph-colors-paper"+(text.contains("\n")?"-multiline":text.length()>35?"-wrapped":""));
+            List<TextButton> buttons=new ArrayList<>();
+            for(Actor actor:all(paper)) if(actor instanceof TextButton) {buttons.add((TextButton)actor);assertUntintedGlyphs((TextButton)actor);}
+            require(buttons.size()==2,"Missing paper choices");
+            Label choiceLabel=buttons.get(0).getLabel();
+            Set<Float> baselines=new HashSet<>();
+            for(com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run:choiceLabel.getGlyphLayout().runs) baselines.add(run.y);
+            require(baselines.size()==(text.length()>35 || text.contains("\n")?2:1),"Color changes introduced extra lines or wrapping was lost");
+            require(choiceLabel.getGlyphLayout().width<=choiceLabel.getWidth()+1,"Wrapped choice overflows horizontally");
+            require(choiceLabel.getPrefHeight()<=choiceLabel.getHeight()+1,"Wrapped choice is clipped");
+            click(buttons.get(0));tick(180);require(result[0]==0,"Choice mapping changed");paper.remove();
+        }
+        System.out.println("PASS: shared and short/wrapped/multiline paper buttons preserve glyph colors; Clue renders green");
+    }
+
+    private void assertUntintedGlyphs(TextButton button) {
+        Label label=button.getLabel();label.validate();
+        for(com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun run:label.getGlyphLayout().runs)
+            for(com.badlogic.gdx.graphics.g2d.BitmapFont.Glyph glyph:run.glyphs)
+                if(glyph.id>=0xE000 && glyph.id<=0xF8FF) {
+                    require(run.color.equals(Color.WHITE),"Glyph inherited prose color in "+button.getText());
+                    require(label.getColor().equals(Color.WHITE),"Label actor darkens glyph artwork");
+                    require(label.getStyle().fontColor.equals(Color.WHITE),"Label style darkens glyph artwork");
+                }
     }
 
     private void eveningChoices() throws Exception {
@@ -116,6 +165,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                     }
                 }
                 if(selected==0)draw("oct23-evening-"+(glimmer?"glimmer":"world-fights-back"));
+                for(TextButton button:choices)assertUntintedGlyphs(button);
                 click(choices.get(selected));tick(180);
                 require(answers.equals(Collections.singletonList(question.getOptions().get(selected).getValue())),"Choice returned wrong result");
                 require(InfoStage.getBottomHeight()==bottom,"Choice leaked layout height");

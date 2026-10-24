@@ -27,7 +27,7 @@ import static sk.sivak.eldritchhorror.core.view.components.typewriter.Typewriter
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TABLE_SCALE;
 import static sk.sivak.eldritchhorror.core.view.components.typewriter.TypewriterConstants.TEXT_AREA_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
-import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceGlyphKeywords;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredGlyphKeywords;
 
 public class TypewriterQuestionTyper {
     private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.24f;
@@ -124,7 +124,7 @@ public class TypewriterQuestionTyper {
         for (int i = 0; i < buttonDatas.size(); i++) {
             ButtonData buttonData = buttonDatas.get(i);
             TextButton button = typewriterView.createTextButton(buttonData.buttonText);
-            button.getStyle().fontColor = buttonData.buttonColor;
+            button.getStyle().fontColor = Color.WHITE;
             button.getLabel().setColor(Color.WHITE);
             button.getLabel().setFontScale(FONT_SCALE);
             button.getLabel().setAlignment(Align.center, Align.center);
@@ -146,25 +146,26 @@ public class TypewriterQuestionTyper {
             ButtonData buttonData = new ButtonData();
 
             glyphLayout.reset();
-            glyphLayout.setText(buttonFont, answerModified, Color.WHITE, maxWidth, Align.center, true);
+            glyphLayout.setText(buttonFont, answerModified, Color.valueOf("F4E8C9"), maxWidth, Align.center, true);
 
             StringBuilder stringBuilder = new StringBuilder();
-            buttonData.buttonColor = Color.valueOf("F4E8C9");
-            if (answerModified.contains("\n")) {
-                buttonData.buttonText = answerModified;
-            } else {
-                for (GlyphLayout.GlyphRun run : glyphLayout.runs) {
-                    for (BitmapFont.Glyph glyph : run.glyphs) {
-                        stringBuilder.append((char) glyph.id);
-                    }
-                    if (stringBuilder.charAt(stringBuilder.length() - 1) == ' ') {
-                        stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
-                    }
-                    stringBuilder.append("\n");
+            for (int i = 0; i < glyphLayout.runs.size; i++) {
+                GlyphLayout.GlyphRun run = glyphLayout.runs.get(i);
+                // Color changes create runs too; only a baseline change starts a new line.
+                if (i > 0 && glyphLayout.runs.get(i - 1).y != run.y) stringBuilder.append('\n');
+                stringBuilder.append("[#").append(run.color).append(']');
+                int count = run.glyphs.size;
+                if (i + 1 == glyphLayout.runs.size || glyphLayout.runs.get(i + 1).y != run.y) {
+                    while (count > 0 && buttonFont.getData().isWhitespace((char)run.glyphs.get(count - 1).id)) count--;
                 }
-                stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
-                buttonData.buttonText = stringBuilder.toString();
+                for (int j = 0; j < count; j++) {
+                    char glyph = (char)run.glyphs.get(j).id;
+                    if (glyph == '[') stringBuilder.append('[');
+                    stringBuilder.append(glyph);
+                }
+                stringBuilder.append("[]");
             }
+            buttonData.buttonText = stringBuilder.toString();
             buttonDatas.add(buttonData);
         }
 
@@ -203,7 +204,7 @@ public class TypewriterQuestionTyper {
             String formattedAnswer = typewriterView.replacePlaceholders(answer)
                     .replace("[#" + TypewriterConstants.HEX_GOOD + "]", "[#B9E6A2]")
                     .replace("[#" + TypewriterConstants.HEX_BAD + "]", "[#FFB4A8]");
-            answersModified1.add(replaceGlyphKeywords(formattedAnswer));
+            answersModified1.add(replaceColoredGlyphKeywords(formattedAnswer));
         }
         return answersModified1;
     }
@@ -231,7 +232,6 @@ public class TypewriterQuestionTyper {
     }
 
     private class ButtonData {
-        private Color buttonColor;
         private String buttonText;
     }
 

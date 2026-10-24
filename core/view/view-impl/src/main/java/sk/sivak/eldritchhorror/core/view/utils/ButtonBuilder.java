@@ -43,7 +43,15 @@ public class ButtonBuilder {
         // Enable markup before the label measures its text, including on the first prompt.
         style.font.getData().markupEnabled = true;
 
-        TextButton button = new TextButton(title, style) {
+        String buttonText = title;
+        if (title.matches("(?s).*[\\uE000-\\uF8FF].*")) {
+            // Label.draw also multiplies markup colors by fontColor in this libGDX version.
+            // Keep both tints white and apply the prose color inside the text instead.
+            buttonText = "[#" + style.fontColor + "]"
+                    + title.replaceAll("([\\uE000-\\uF8FF])", "[#FFFFFFFF]$1[]") + "[]";
+            style.fontColor = Color.WHITE;
+        }
+        TextButton button = new TextButton(buttonText, style) {
 
             @Override
             public void setBackground(Drawable background) {
@@ -107,7 +115,8 @@ public class ButtonBuilder {
             button.addAction(createRepeatScaleAction(button));
         }
         button.getLabel().setFontScale(0.62f);
-        button.getLabel().setColor(style.fontColor);
+        // The style colors prose; an actor tint would also darken white-marked icon artwork.
+        button.getLabel().setColor(Color.WHITE);
         return button;
     }
 

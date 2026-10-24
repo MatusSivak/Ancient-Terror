@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `--args="--button-glyph-colors"` to check shared and typewriter button glyph
+colors, including actual green Clue pixels, short and wrapped choices, explicit
+line breaks, and the two evening mythos prompts. Screenshots use
+`button-glyph-colors-*` and `oct23-evening-*`.
+
 Use `--args="--oct23-evening"` for production Glimmer of Hope and The World
 Fights Back choices. Checks colored glyphs, compact first-use sizing, wrapping,
 button bounds, every option's result, and restoring the question area.
