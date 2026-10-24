@@ -61,7 +61,7 @@ public class RighteousConditionBackListener4 extends AbstractConditionBackListen
         }
         ServicePlatform.get().getService().hold();
         ServicePlatform.get().getService().moveCameraToLocation(monsterInfo.getCurrentLocation());
-        ServicePlatform.get().getMonsterService().dealDamageToMonster(monsterInfo, 3);
+        ServicePlatform.get().getMonsterService().dealDamageToMonster(monsterInfo, 5);
         ServicePlatform.get().getService().moveCameraToLocation(ServicePlatform.get().getInvestigators().getActiveInvestigator().getCurrentLocationId());
         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
         TypewriterUtils.confirmInfos("[#BAD]Discard this card[]").subscribe(() -> {
