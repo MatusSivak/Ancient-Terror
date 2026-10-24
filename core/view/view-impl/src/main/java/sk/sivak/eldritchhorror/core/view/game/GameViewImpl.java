@@ -50,6 +50,7 @@ import sk.sivak.eldritchhorror.core.constants.trade.TradeData;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
 import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.GameView;
 import sk.sivak.eldritchhorror.core.view.action.SelectActionView;
 import sk.sivak.eldritchhorror.core.view.action.focus.TokenView;
@@ -1007,7 +1008,11 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable defeatInvestigator(InvestigatorId investigatorId, boolean health) {
-        return investigatorView.defeatInvestigator(investigatorId, health);
+        // Loading defeated investigators calls InvestigatorView directly and remains silent.
+        return Completable.defer(() -> {
+            GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_DEFEAT);
+            return investigatorView.defeatInvestigator(investigatorId, health);
+        });
     }
 
     @Override

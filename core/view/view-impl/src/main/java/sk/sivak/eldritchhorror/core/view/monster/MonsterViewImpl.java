@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.monster;
 
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -104,6 +106,7 @@ public class MonsterViewImpl implements MonsterView {
     }
 
     private void defeatMonster(MonsterInfo monsterInfo, CompletableSubscriber onSub) {
+        GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT);
 
         MonsterUtils.MonsterIdLayerResolver idLayerResolver = new MonsterUtils.MonsterIdLayerResolver(monsterInfo);
         List<Actor> allMonsters = MapStage.getActor(idLayerResolver);
@@ -199,6 +202,7 @@ public class MonsterViewImpl implements MonsterView {
     @Override
     public Completable tearMysteryCardApart(MysteryCardInfo currentMysteryCard) {
         return Completable.create(onSub -> {
+            GameplaySounds.play(GameplaySounds.Cue.MYSTERY_SOLVED);
             MonsterCardEffect.tearAppart(BigActorsManager.getMysteryCard()).subscribe(onSub::onCompleted);
         });
     }
@@ -206,6 +210,7 @@ public class MonsterViewImpl implements MonsterView {
     @Override
     public Completable tearRumorCardApart() {
         return Completable.create(onSub -> {
+            GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD);
             MonsterCardEffect.tearAppart(BigActorsManager.getRumorCard()).subscribe(onSub::onCompleted);
         });
     }

@@ -20,6 +20,10 @@ public class ClueUtils {
     private final static float CLUE_TEXTURE_SCALE = 7;
 
     public static Completable spawnClue(LocationId spawnLocationId, LocationId currentLocationId) {
+        return spawnClue(spawnLocationId, currentLocationId, null);
+    }
+
+    public static Completable spawnClue(LocationId spawnLocationId, LocationId currentLocationId, Runnable onSpawn) {
 
         Texture clueTexture = CustomAssetManager.getTexture(CustomAssetManager.CLUE_TOKEN);
         ClueSpawnConfig spawnConfig = new ClueSpawnConfig(clueTexture.getWidth() / CLUE_TEXTURE_SCALE, clueTexture.getHeight() / CLUE_TEXTURE_SCALE);
@@ -34,7 +38,7 @@ public class ClueUtils {
             return clueImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new ClueIdLayerResolver(spawnLocationId), currentLocationId);
+        return new Spawner().spawn(actorSpawner, spawnConfig, new ClueIdLayerResolver(spawnLocationId), currentLocationId, onSpawn);
     }
 
     public static Completable discardClue(LocationId spawnLocationId) {

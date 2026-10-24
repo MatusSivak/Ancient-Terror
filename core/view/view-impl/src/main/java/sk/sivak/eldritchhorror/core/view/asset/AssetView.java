@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.asset;
 
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
@@ -298,6 +300,7 @@ public class AssetView {
     }
 
     private void discardCard(SingleSubscriber<? super ShowCardResponse> onSub, ShowCardResponse showCardResponse) {
+        GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD);
         Vector2 originalPosition = cardTemplate.localToStageCoordinates(new Vector2());
         float originalX = originalPosition.x;
         float originalY = originalPosition.y;
@@ -381,6 +384,7 @@ public class AssetView {
 
     public Completable gainCard(CardInfo cardInfo) {
         return Completable.create(onSub -> {
+            GameplaySounds.play(GameplaySounds.Cue.CARD_GAIN);
             originalBottomHeight = InfoStage.getBottomHeight();
             displayGainButton(onSub);
             displayTable(get("asset.gained", cardInfo.getName()), null);

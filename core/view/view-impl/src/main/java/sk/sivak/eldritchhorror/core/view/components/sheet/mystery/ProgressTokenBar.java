@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
@@ -55,6 +56,7 @@ public class ProgressTokenBar extends Table {
         // Multiple advances share one animation; interrupted fills resume smoothly.
         final float start = displayedProgress;
         final int targetProgress = ++progress;
+        GameplaySounds.play(GameplaySounds.Cue.MYSTERY_PROGRESS);
         clearActions();
         addAction(new TemporalAction(ACTION_DURATION) {
             @Override

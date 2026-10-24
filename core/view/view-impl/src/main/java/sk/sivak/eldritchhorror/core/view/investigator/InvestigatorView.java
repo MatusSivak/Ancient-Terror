@@ -35,6 +35,7 @@ import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorSounds;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -229,6 +230,7 @@ public class InvestigatorView {
                     investigatorImage.getY() + investigatorImage.getHeight()/6f);
             investigatorImage.getStage().addActor(fireballSmoke);
             InvestigatorPuzzleEffect.prepareTextureRegions(new InvestigatorImage(investigatorId, null)).subscribe(devourTextureRegions -> {
+                GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_DEVOURED);
                 fireballSmoke.getParticleEffect().allowCompletion();
                 InvestigatorPuzzleEffect.devourInvestigator(investigatorImage, devourTextureRegions, MapStage.getInvestigatorLayer()).subscribe(() -> {
                     fireballSmoke.dispose();

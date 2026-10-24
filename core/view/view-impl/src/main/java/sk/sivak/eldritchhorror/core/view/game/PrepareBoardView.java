@@ -22,6 +22,10 @@ import sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils;
 import sk.sivak.eldritchhorror.core.view.map.vortex.VortexImageUtils;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+
+import static sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.Cue.*;
+import static sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.withCue;
 
 import java.util.List;
 
@@ -41,7 +45,7 @@ public class PrepareBoardView {
         return Completable.create(onSub -> {
             InfoStage.displayText(UiText.get("prepare.activeExpedition"));
             MapUtils.moveCameraToLocation(locationId).subscribe(() -> {
-                ExpeditionUtils.spawnExpedition(locationId).subscribe(onSub::onCompleted);
+                withCue(CLUE_SPAWN, ExpeditionUtils.spawnExpedition(locationId)).subscribe(onSub::onCompleted);
             });
         });
     }
@@ -60,7 +64,8 @@ public class PrepareBoardView {
                 Completable.create(onSub -> {
                     InfoStage.displayText(UiText.get("prepare.spawningClues"));
                     MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
-                        ClueUtils.spawnClue(spawnLocationId, currentLocationId).subscribe(onSub::onCompleted);
+                        ClueUtils.spawnClue(spawnLocationId, currentLocationId,
+                                () -> GameplaySounds.play(CLUE_SPAWN)).subscribe(onSub::onCompleted);
                     });
                 })
         );
@@ -74,7 +79,8 @@ public class PrepareBoardView {
         return Completable.create(onSub -> {
             InfoStage.displayText(UiText.get("prepare.spawningGates"));
             MapUtils.moveCameraToLocation(gateInfo.getLocationId()).subscribe(() -> {
-                GateUtils.spawnGate(gateInfo, omenColor).subscribe(onSub::onCompleted);
+                GateUtils.spawnGate(gateInfo, omenColor,
+                        () -> GameplaySounds.play(GATE_OPEN)).subscribe(onSub::onCompleted);
             });
         });
     }
@@ -86,7 +92,9 @@ public class PrepareBoardView {
     public Completable confirmMonsterSpawn(MonsterInfo monsterInfo) {
         return Completable.create(onSub -> {
             MapUtils.moveCameraToLocation(monsterInfo.getCurrentLocation()).subscribe(() -> {
-                MonsterUtils.spawnMonster(monsterInfo, gameController).subscribe(onSub::onCompleted);
+                MonsterUtils.spawnMonster(monsterInfo, gameController,
+                        () -> GameplaySounds.play(monsterInfo.isEpic() ? EPIC_MONSTER_SPAWN : MONSTER_SPAWN))
+                        .subscribe(onSub::onCompleted);
             });
         });
     }
@@ -116,7 +124,7 @@ public class PrepareBoardView {
         return Completable.create(onSub -> {
             InfoStage.displayText(UiText.get("prepare.discardingClue"));
             MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
-                ClueUtils.discardClue(spawnLocationId).subscribe(onSub::onCompleted);
+                withCue(RESOURCE_SPEND, ClueUtils.discardClue(spawnLocationId)).subscribe(onSub::onCompleted);
             });
         });
     }
@@ -138,7 +146,7 @@ public class PrepareBoardView {
     public Completable showStormLocation(String stormId, LocationId locationId) {
         InfoStage.displayTextForce(UiText.get("prepare.rumorLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
-        completable = completable.andThen(StormImageUtils.spawnStorm(stormId, locationId));
+        completable = completable.andThen(withCue(HAZARD_SPAWN, StormImageUtils.spawnStorm(stormId, locationId)));
         return completable;
     }
 
@@ -182,13 +190,13 @@ public class PrepareBoardView {
             MapStage.removeActor(idLayerResolver);
             onSub.onCompleted();
         });
-        return moveCameraToLocation.andThen(closeGate).andThen(removeActorAndSwapLayers);
+        return moveCameraToLocation.andThen(withCue(GATE_CLOSE, closeGate)).andThen(removeActorAndSwapLayers);
     }
 
     public Completable spawnVortex(LocationId locationId) {
         InfoStage.displayTextForce(UiText.get("prepare.vortexLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
-        completable = completable.andThen(VortexImageUtils.spawnVortex(locationId));
+        completable = completable.andThen(withCue(HAZARD_SPAWN, VortexImageUtils.spawnVortex(locationId)));
         return completable;
     }
 

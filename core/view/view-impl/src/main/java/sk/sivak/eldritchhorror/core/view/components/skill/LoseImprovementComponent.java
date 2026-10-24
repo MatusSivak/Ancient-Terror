@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.skill;
 
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
@@ -242,6 +244,7 @@ public class LoseImprovementComponent extends VisTable {
     }
 
     private void updateLabelValue(Label value) {
+        GameplaySounds.play(GameplaySounds.Cue.SKILL_LOSS);
         int[] numbers = statValues.get(value);
         numbers[1] = amountToLose == 1 ? Math.max(0, numbers[1] - 1) : 0;
         renderValue(value);

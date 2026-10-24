@@ -25,6 +25,7 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.font.BitmapFontSizing;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -362,6 +363,10 @@ public class CustomAssetManager extends AssetManager {
                 OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND}) {
             load(path, Sound.class);
             soundPaths.add(path);
+        }
+        for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) {
+            load(cue.path, Sound.class);
+            soundPaths.add(cue.path);
         }
         load(TICK, Texture.class);
         load("background/gray.jpg", Texture.class);

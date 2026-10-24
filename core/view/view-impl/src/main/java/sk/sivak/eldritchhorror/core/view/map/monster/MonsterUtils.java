@@ -26,6 +26,10 @@ import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDis
 public class MonsterUtils {
 
     public static Completable spawnMonster(MonsterInfo monsterInfo, GameController gameController) {
+        return spawnMonster(monsterInfo, gameController, null);
+    }
+
+    public static Completable spawnMonster(MonsterInfo monsterInfo, GameController gameController, Runnable onSpawn) {
         return Completable.create(onSub -> {
             String textureName = sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.path(
                     monsterInfo.getClass().getSimpleName(), monsterInfo.isEpic());
@@ -44,7 +48,7 @@ public class MonsterUtils {
                     actorSpawner = (boolean isCenter) -> new MonsterImage(monsterInfo, gameController, isCenter, hasReckoning, location, texture);
                 }
 
-                new Spawner().spawn(actorSpawner, spawnConfig, new MonsterIdLayerResolver(monsterInfo), location).subscribe(onSub::onCompleted);
+                new Spawner().spawn(actorSpawner, spawnConfig, new MonsterIdLayerResolver(monsterInfo), location, onSpawn).subscribe(onSub::onCompleted);
 
             });
         });

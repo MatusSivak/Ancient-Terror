@@ -9,6 +9,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 /**
  * @author msivak
@@ -36,8 +37,12 @@ public class PhaseView {
                 throw new IllegalArgumentException();
         }
         InfoStage.addSmallActorToInfoStage(phaseLabel);
+        Completable display = phaseLabel.display();
+        if (input == PhaseType.MYTHOS) {
+            display = GameplaySounds.withCue(GameplaySounds.Cue.MYTHOS_PHASE, display);
+        }
         return MapUtils.showWholeWorld()
-                .andThen(phaseLabel.display())
+                .andThen(display)
                 .andThen(HudButtons.getInstance().show());
     }
 }

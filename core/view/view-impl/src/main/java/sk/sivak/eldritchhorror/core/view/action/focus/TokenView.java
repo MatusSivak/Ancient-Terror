@@ -10,6 +10,8 @@ import sk.sivak.eldritchhorror.core.view.components.TokenActor;
 import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
 import static sk.sivak.eldritchhorror.core.view.action.GainTokenHelper.gainTokenAndUpdateHud;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
@@ -21,7 +23,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class TokenView {
 
     public Completable gainClueFromPool() {
-        return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN, get("focus.gainingClue"));
+        return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN,
+                get("focus.gainingClue"), TokenSounds.Cue.CLUE_GAIN);
     }
 
     public Completable gainClueFromSpace(LocationId locationId) {
@@ -29,7 +32,8 @@ public class TokenView {
     }
 
     public Completable gainFocus(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getFocusBar(), CustomAssetManager.FOCUS_TOKEN, get("focus.gainingFocus"));
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getFocusBar(), CustomAssetManager.FOCUS_TOKEN,
+                get("focus.gainingFocus"), TokenSounds.Cue.FOCUS_GAIN);
     }
 
     public Completable justFocus() {
@@ -41,11 +45,13 @@ public class TokenView {
     }
 
     public Completable loseFocus() {
-        return loseToken(FOCUS_TOKEN_LEFT, FOCUS_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getFocusBar(), new Vector2(27,27),0);
+        return GameplaySounds.withCue(GameplaySounds.Cue.RESOURCE_SPEND,
+                loseToken(FOCUS_TOKEN_LEFT, FOCUS_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getFocusBar(), new Vector2(27,27),0));
     }
 
     public Completable loseClue() {
-        return loseToken(CLUE_TOKEN_LEFT, CLUE_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getClueBar(), new Vector2(27,27),0);
+        return GameplaySounds.withCue(GameplaySounds.Cue.RESOURCE_SPEND,
+                loseToken(CLUE_TOKEN_LEFT, CLUE_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getClueBar(), new Vector2(27,27),0));
     }
 
     public Completable loseToken(String leftTexture, String rightTexture, ContainerBar containerBar, Vector2 tokenSize, float offsetX) {

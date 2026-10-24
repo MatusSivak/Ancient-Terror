@@ -13,6 +13,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
 import java.util.concurrent.TimeUnit;
 
@@ -62,6 +63,7 @@ public final class GainClueFromSpaceHelper {
         float targetScale = (VIEWPORT_HEIGHT * getMinSizeRatio()) / clueActor.getHeight();
 
         clueActor.addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.run(() -> TokenSounds.playGain(TokenSounds.Cue.CLUE_GAIN, 0)),
                 Actions.parallel(
                         Actions.rotateTo(360, normalActionDuration, sine),
                         Actions.moveTo(
@@ -76,7 +78,10 @@ public final class GainClueFromSpaceHelper {
                         Actions.rotateTo(0, normalActionDuration, sine),
                         Actions.scaleTo(targetScale, targetScale, normalActionDuration, sine)
                 ),
-                Actions.run(() -> InfoStage.getInvestigatorHud().getClueBar().increaseCurrentValue()),
+                Actions.run(() -> {
+                    TokenSounds.playLand(0);
+                    InfoStage.getInvestigatorHud().getClueBar().increaseCurrentValue();
+                }),
                 Actions.run(onSub::onCompleted),
                 Actions.run(clueActor::remove)
         )));

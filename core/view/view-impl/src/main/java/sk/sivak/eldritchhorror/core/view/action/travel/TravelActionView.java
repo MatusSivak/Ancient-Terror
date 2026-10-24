@@ -27,6 +27,7 @@ import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.helper.TravelHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorSounds;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -189,6 +190,6 @@ public class TravelActionView {
         tokenActor.setHolderLocation(ticketBar.getTicketPosition(input));
         InfoStage.addSmallActorToInfoStage(tokenActor);
         ticketBar.removeTicket(input);
-        return tokenActor.discard(0);
+        return tokenActor.discard(() -> GameplaySounds.play(GameplaySounds.Cue.TICKET_SPEND));
     }
 }

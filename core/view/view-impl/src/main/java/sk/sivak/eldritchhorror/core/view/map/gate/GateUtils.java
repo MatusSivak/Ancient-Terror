@@ -20,6 +20,10 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
 public class GateUtils {
 
     public static Completable spawnGate(GateInfo gateInfo, OmenColor omenColor) {
+        return spawnGate(gateInfo, omenColor, null);
+    }
+
+    public static Completable spawnGate(GateInfo gateInfo, OmenColor omenColor, Runnable onSpawn) {
         Spawner.SpawnConfigImpl spawnConfig = new Spawner.SpawnConfigImpl() {
             @Override
             public void preSpawnConfig(Actor leftActor, Actor centerActor, Actor rigthActor) {
@@ -37,7 +41,7 @@ public class GateUtils {
             return gateAnimatedImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new GateIdLayerResolver(gateInfo.getLocationId()), gateInfo.getLocationId());
+        return new Spawner().spawn(actorSpawner, spawnConfig, new GateIdLayerResolver(gateInfo.getLocationId()), gateInfo.getLocationId(), onSpawn);
 
     }
 

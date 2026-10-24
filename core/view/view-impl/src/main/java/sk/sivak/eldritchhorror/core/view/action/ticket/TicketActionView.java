@@ -14,6 +14,8 @@ import sk.sivak.eldritchhorror.core.view.components.hud.TicketContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
@@ -98,8 +100,9 @@ public class TicketActionView {
         addSmallActorToInfoStage(tokenActor);
         TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
         tokenActor.setHolderLocation(ticketBar.getEmptyContainerPosition());
-        Completable gain = tokenActor.gain();
+        Completable gain = GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN, tokenActor.gain());
         return gain.andThen(Completable.create(onSub -> {
+            TokenSounds.playLand(0);
             ticketBar.addTicket(ticketType);
             onSub.onCompleted();
         }));

@@ -42,6 +42,12 @@ public class Spawner {
     }
 
     public Completable spawn(ActorSpawner actorSpawner, SpawnConfig spawnConfig, MapStage.IdLayerResolver<?> idLayerResolver, LocationId location) {
+        return spawn(actorSpawner, spawnConfig, idLayerResolver, location, null);
+    }
+
+    /** Runs once for the visible spawn, after assets/camera are ready, not once per world copy. */
+    public Completable spawn(ActorSpawner actorSpawner, SpawnConfig spawnConfig, MapStage.IdLayerResolver<?> idLayerResolver,
+                             LocationId location, Runnable onSpawn) {
         return Completable.create(onSub -> {
             Gdx.app.postRunnable(() -> {
                 Vector2 position = LocationPositionResolver.resolve(location);
@@ -64,6 +70,7 @@ public class Spawner {
 
                 centerActor.addAction(Actions.sequence(
                         Actions.run(() -> {
+                            if (onSpawn != null) onSpawn.run();
                             spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
                         }),
                         new FastForwardAction(Actions.parallel(alphaAction, scaleToAction)),

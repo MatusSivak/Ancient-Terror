@@ -24,6 +24,7 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.investigator.StatsTabl
 import sk.sivak.eldritchhorror.core.view.components.sheet.investigator.StatsTableData;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.HashMap;
@@ -283,6 +284,7 @@ public class ImproveSkillComponent extends VisTable {
     }
 
     private void updateLabelValue(Label value) {
+        GameplaySounds.play(GameplaySounds.Cue.SKILL_GAIN);
         statValues.get(value)[1]++;
         renderValue(value);
     }
