@@ -60,9 +60,6 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         // AbstractResearchEncounter has already opened the paper.
         paperVisible = true;
         String info = getTextBuilder().withInfo().build();
-        if (page == 6 && getLocationType() == LocationType.WILDERNESS && awake()) {
-            info += " " + getTextBuilder().withInfo(2).build();
-        }
         if (startsWithChoice()) {
             openingChoice = info;
             resolve();
@@ -113,22 +110,47 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
                 () -> outcome(true, pass), () -> outcome(false, fail));
     }
     private void outcome(boolean passed, Runnable effect) {
-        String info = (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withInfo().build();
-        confirmOutcome(info, effect);
+        confirmOutcome(outcomeText(passed), effect);
     }
-    private void confirmOutcome(String info, Runnable effect) {
+    private Runnable narrated(boolean passed, Runnable effect) {
+        return () -> outcome(passed, effect);
+    }
+    private OutcomeText outcomeText(boolean passed) {
+        return new OutcomeText(
+                (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withFlavor().build(),
+                (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withInfo().build());
+    }
+    private OutcomeText outcomeText(boolean passed, int part) {
+        return new OutcomeText(
+                (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withFlavor(part).build(),
+                (passed ? getTextBuilder().withPass() : getTextBuilder().withFail()).withInfo(part).build());
+    }
+    private void optionOutcome(int option, Runnable effect) {
+        confirmOutcome(new OutcomeText(getTextBuilder().withOption(option).withFlavor().build(),
+                getTextBuilder().withOption(option).withInfo().build()), effect);
+    }
+    private void aftermath(Runnable effect) {
+        confirmOutcome(new OutcomeText(getTextBuilder().withFlavor(2).build(),
+                getTextBuilder().withInfo(2).build()), effect);
+    }
+    private void confirmOutcome(OutcomeText text, Runnable effect) {
         sequence(() -> {
             showPaper();
-            if (info.isEmpty()) {
+            p().getEncounterService().typeFlavor("\n" + text.flavor);
+            // Even a result without a mechanical effect has an ending to acknowledge.
+            TypewriterUtils.confirmInfos(text.info).subscribe(() -> sequence(() -> {
                 hidePaper();
                 effect.run();
-            } else {
-                TypewriterUtils.confirmInfos(info).subscribe(() -> sequence(() -> {
-                    hidePaper();
-                    effect.run();
-                }));
-            }
+            }));
         });
+    }
+    private static final class OutcomeText {
+        private final String flavor, info;
+        private OutcomeText(String flavor, String info) { this.flavor = flavor; this.info = info; }
+        private OutcomeText then(OutcomeText next) {
+            return new OutcomeText(flavor + "\n" + next.flavor,
+                    info.isEmpty() ? next.info : next.info.isEmpty() ? info : info + "\n" + next.info);
+        }
     }
     private void showPaper() {
         if (!paperVisible) {
@@ -173,23 +195,23 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         ambush(NonEpicMonsterId.SERPENT_PEOPLE, d -> {
             // These cards award separate results for the two combat tests.
             if (getLocationType() == LocationType.CITY && page == 16) {
-                String info = (d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() == 0
-                        ? getTextBuilder().withFail().withInfo().build() : "");
-                if (defeated(d)) info += "\n" + getTextBuilder().withPass().withInfo().build();
-                confirmOutcome(info.trim(), () -> next.call(d));
+                OutcomeText text = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() == 0
+                        ? outcomeText(false) : outcomeText(true, 2);
+                text = text.then(defeated(d) ? outcomeText(true) : outcomeText(false, 2));
+                confirmOutcome(text, () -> next.call(d));
             } else if (getLocationType() == LocationType.CITY && page == 18) {
-                confirmOutcome(d.getHealthLost() > 0 ? getTextBuilder().withFail().withInfo().build() : "", () -> next.call(d));
+                outcome(d.getHealthLost() == 0, () -> next.call(d));
             } else if (getLocationType() == LocationType.WILDERNESS && page == 17) {
                 boolean will = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() > 0;
                 boolean strength = d.getDamageTestResult() != null && d.getDamageTestResult().getScore() > 0;
-                String info = will || strength ? getTextBuilder().withPass().withInfo().build() : "";
-                if (will && strength) info += "\n" + getTextBuilder().withPass().withInfo(2).build();
-                confirmOutcome(info, () -> next.call(d));
+                OutcomeText text = outcomeText(will || strength);
+                if (will && strength) text = text.then(outcomeText(true, 2));
+                confirmOutcome(text, () -> next.call(d));
             } else if (getLocationType() == LocationType.SEA && page == 15) {
-                String info = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() > 0
-                        ? getTextBuilder().withPass().withInfo().build() : "";
-                if (d.getHealthLost() > 0) info += "\n" + getTextBuilder().withFail().withInfo().build();
-                confirmOutcome(info.trim(), () -> next.call(d));
+                OutcomeText text = d.getHorrorTestResult() != null && d.getHorrorTestResult().getScore() > 0
+                        ? outcomeText(true) : outcomeText(false, 2);
+                text = text.then(d.getHealthLost() > 0 ? outcomeText(false) : outcomeText(true, 2));
+                confirmOutcome(text, () -> next.call(d));
             } else {
                 outcome(defeated(d), () -> next.call(d));
             }
@@ -210,11 +232,12 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 4: cultist(this::clue,NOTHING); break;
             case 5: test(INFLUENCE,-1,this::clue,this::moveClue); break;
             case 6: test(LORE,-2*artifactCount(),() -> condition(BLESSED),() -> { damage(2,0); condition(POISONED); }); break;
-            case 7: offerCondition(DARK_PACT,() -> { clue(); cureCurse(); },NOTHING); break;
+            case 7: offerCondition(DARK_PACT,narrated(true,() -> { clue(); cureCurse(); }),narrated(false,NOTHING)); break;
             case 8: test(LORE,-1,() -> { clue(); p().getGameService().gainArtifact(AssetTrait.WEAPON); },() -> { damage(0,2); condition(POISONED); }); break;
             case 9: cultist(() -> { clue(); improve(WILL); },NOTHING); break;
             case 10: test(OBSERVATION,-2,this::twoClues,() -> { damage(1,0); condition(LEG_INJURY); }); break;
-            case 11: test(LORE,-2,this::twoClues,() -> offerCondition(CURSED,NOTHING,this::doom)); break;
+            case 11: test(LORE,-2,this::twoClues,() -> offerCondition(CURSED,
+                    () -> optionOutcome(1,NOTHING),() -> optionOutcome(2,this::doom))); break;
             case 12: test(OBSERVATION,-1,this::clue,() -> condition(POISONED)); break;
             case 13: test(WILL,0,this::clue,() -> { damage(0,2); condition(PARANOIA); }); break;
             case 14: test(OBSERVATION,-1,this::clue,() -> condition(LEG_INJURY)); break;
@@ -229,7 +252,7 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 20: if (has(POISONED)) condition(CURSED); test(OBSERVATION,-1,this::clue,NOTHING); break;
             case 21: rerollTest(0,2,0,this::clue,() -> { condition(AMNESIA); condition(HALLUCINATIONS); condition(PARANOIA); }); break;
             case 22: serpent(d -> { if (defeated(d)) { clue(); cureCurse(); } }); break;
-            case 23: pay("Spend 2 Health to gain this Clue?",0,2,0,this::clue,this::moveClue); break;
+            case 23: pay("Spend 2 Health to gain this Clue?",0,2,0,narrated(true,this::clue),narrated(false,this::moveClue)); break;
             case 24: test(OBSERVATION,0,this::clue,() -> { damage(2,0); condition(LEG_INJURY); }); break;
         }
     }
@@ -240,16 +263,18 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 3: clue(); test(OBSERVATION,-2,() -> artifact(ArtifactId.CURSED_SPHERE),() -> condition(CURSED)); break;
             case 4: test(STRENGTH,has(POISONED)?-2:0,this::clue,() -> { damage(1,0); discardPossessions(AssetTrait.ITEM,2,false,NOTHING); }); break;
             case 5: if (expedition()) condition(POISONED); test(OBSERVATION,-2,this::twoClues,NOTHING); break;
-            case 6: pay("Spend 2 Health to gain this Clue and let an investigator discard Cursed?",0,2,0,() -> { clue(); cureCurse(); },NOTHING);
-                later(() -> { if (awake()) damage(2,0); }); break;
+            case 6: pay("Spend 2 Health to gain this Clue and let an investigator discard Cursed?",0,2,0,
+                    narrated(true,() -> { clue(); cureCurse(); }),narrated(false,NOTHING));
+                later(() -> { if (awake()) aftermath(() -> damage(2,0)); }); break;
             case 7: cultist(() -> { if (!has(POISONED)) clue(); },() -> { if (!has(POISONED)) clue(); }); break;
-            case 8: offerCondition(POISONED,this::clue,() -> { discardClue(); discardPossessions(AssetTrait.ALLY,1,true,NOTHING); }); break;
+            case 8: offerCondition(POISONED,narrated(true,this::clue),narrated(false,() -> { discardClue(); discardPossessions(AssetTrait.ALLY,1,true,NOTHING); })); break;
             case 9: test(OBSERVATION,-2,this::twoClues,NOTHING); later(() -> {
-                if (expedition()) confirmOutcome(getTextBuilder().withInfo(2).build(), () -> damage(2,0));
+                if (expedition()) aftermath(() -> damage(2,0));
             }); break;
             case 10: if (has(POISONED)) doom(); test(OBSERVATION,-1,this::clue,NOTHING); break;
             case 11: test(OBSERVATION,0,this::clue,() -> condition(LOST_IN_TIME_AND_SPACE)); break;
-            case 12: test(OBSERVATION,0,() -> pay("Spend 2 Health to gain this Clue?",0,2,0,this::clue,() -> condition(CURSED)),() -> condition(CURSED)); break;
+            case 12: test(OBSERVATION,0,() -> pay("Spend 2 Health to gain this Clue?",0,2,0,
+                    () -> optionOutcome(1,this::clue),() -> optionOutcome(2,() -> condition(CURSED))),() -> condition(CURSED)); break;
             case 13: test(WILL,has(POISONED)?-2:-1,() -> p().getTokenService().gainSanity(2),() -> condition(PARANOIA)); break;
             case 14: test(LORE,0,this::clue,() -> condition(CURSED)); break;
             case 15: serpent(d -> { if (defeated(d)) { clue(); retreat(); } else condition(POISONED); }); break;
@@ -262,7 +287,8 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 18: test(INFLUENCE,-1,this::clue,() -> { moveToCity(); condition(DETAINED); }); break;
             case 19: test(INFLUENCE,-1,() -> { clue(); cureCurse(); },() -> condition(CURSED)); break;
             case 20: clue(); test(OBSERVATION,-2,this::extraClue,() -> condition(POISONED)); break;
-            case 21: offerCondition(DARK_PACT,() -> { discardClue(); artifact(ArtifactId.SERPENT_CROWN); },() -> { damage(0,2); discardPossessions(AssetTrait.ALLY,2,true,NOTHING); }); break;
+            case 21: offerCondition(DARK_PACT,narrated(true,() -> { discardClue(); artifact(ArtifactId.SERPENT_CROWN); }),
+                    narrated(false,() -> { damage(0,2); discardPossessions(AssetTrait.ALLY,2,true,NOTHING); })); break;
             case 22: test(OBSERVATION,-1,this::twoClues,() -> { condition(POISONED); condition(CURSED); }); break;
             case 23: test(OBSERVATION,-2,() -> artifact(ArtifactId.ELIXIR_OF_LIFE),() -> condition(POISONED)); break;
             case 24: if (has(POISONED)) damage(1,1); test(OBSERVATION,-1,this::clue,NOTHING); break;
@@ -272,19 +298,22 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         switch (page) {
             case 1: test(OBSERVATION,-1,this::clue,() -> condition(POISONED)); break;
             case 2: test(OBSERVATION,-1,this::clue,() -> { condition(AMNESIA); moveClue(); }); break;
-            case 3: if (!p().getConditionsDeck().canGetConditionId(investigator(),DARK_PACT)) break;
-                pay("Spend 2 Sanity and gain Dark Pact to improve two skills?",0,0,2,() -> { condition(DARK_PACT); later(() -> { if (has(DARK_PACT)) improveChoice(2,EnumSet.noneOf(Stat.class)); }); },NOTHING); break;
+            case 3: if (!p().getConditionsDeck().canGetConditionId(investigator(),DARK_PACT)) { outcome(false,NOTHING); break; }
+                pay("Spend 2 Sanity and gain Dark Pact to improve two skills?",0,0,2,() -> {
+                    condition(DARK_PACT);
+                    later(() -> outcome(has(DARK_PACT),() -> { if (has(DARK_PACT)) improveChoice(2,EnumSet.noneOf(Stat.class)); }));
+                },narrated(false,NOTHING)); break;
             case 4: test(LORE,0,this::clue,this::doom); break;
             case 5: test(INFLUENCE,-1,this::clue,() -> p().getGameService().gainCondition(ConditionTrait.INJURY)); break;
             case 6: test(INFLUENCE,-1,this::clue,() -> condition(POISONED)); break;
             case 7: cultist(this::clue,NOTHING); break;
             case 8: test(INFLUENCE,-1,this::clue,NOTHING); later(() -> {
-                if (artifactCount()>0) confirmOutcome(getTextBuilder().withInfo(2).build(), () -> { damage(0,1); condition(PARANOIA); });
+                if (artifactCount()>0) aftermath(() -> { damage(0,1); condition(PARANOIA); });
             }); break;
             case 9: test(LORE,-2,() -> artifact(ArtifactId.ZANTHU_TABLETS),() -> condition(HALLUCINATIONS)); break;
             case 10: rerollTest(2,0,-1,this::clue,() -> { damage(0,2); condition(POISONED); }); break;
             case 11: cultist(this::clue,this::moveClue); break;
-            case 12: offerCondition(DARK_PACT,this::clue,() -> { discardClue(); delayed(); }); break;
+            case 12: offerCondition(DARK_PACT,narrated(true,this::clue),narrated(false,() -> { discardClue(); delayed(); })); break;
             case 13: discardDefeated(); later(() -> serpent(d -> { if (defeated(d)) { damage(0,1); clue(); } else doom(); })); break;
             case 14: test(OBSERVATION,-1,this::twoClues,() -> damage(2,2)); break;
             case 15: serpent(d -> { if (d.getHorrorTestResult()!=null && d.getHorrorTestResult().getScore()>0) clue(); if (d.getHealthLost()>0) condition(POISONED); }); break;
@@ -297,7 +326,8 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
             case 22: test(OBSERVATION,0,this::clue,() -> { damage(0,2); condition(HALLUCINATIONS); }); break;
             case 23: test(INFLUENCE,-1,() -> {
                 if (!has(CURSED)) clue(); else ask("Discard your Cursed condition instead of gaining this Clue?",
-                        () -> p().getService().discardConditionFromInvestigator(investigator(),p().getConditionsDeck().getCondition(investigator(),CURSED)),this::clue);
+                        () -> optionOutcome(1,() -> p().getService().discardConditionFromInvestigator(investigator(),p().getConditionsDeck().getCondition(investigator(),CURSED))),
+                        () -> optionOutcome(2,this::clue));
             },() -> damage(1,0)); break;
             case 24: test(STRENGTH,awake()?-3:-1,this::twoClues,() -> {
                 for (Stat s : Stat.values()) { int n=p().getInvestigators().getActiveInvestigator().getStatBonus(s); if(n>0) p().getInvestigatorService().loseImprovement(new LoseImprovementData(s,n)); }
@@ -311,14 +341,14 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
     }
     private void spendImprovement() {
         List<Stat> skills = improvedSkills();
-        if (skills.isEmpty()) { condition(DETAINED); return; }
+        if (skills.isEmpty()) { outcome(false,() -> condition(DETAINED)); return; }
         // The card text carries the explanation, so the buttons stay short enough for phones.
         openingChoice("Spend an improvement token to let an investigator discard Cursed?",
                 () -> chooseImprovement(skills, stat -> {
                     p().getInvestigatorService().loseImprovement(new LoseImprovementData(stat,1));
-                    cureCurse();
+                    outcome(true,() -> cureCurse());
                 }),
-                () -> condition(DETAINED));
+                narrated(false,() -> condition(DETAINED)));
     }
     private void chooseImprovement(List<Stat> skills, Action1<Stat> spend) {
         if (skills.size() == 1) { spend.call(skills.get(0)); return; }

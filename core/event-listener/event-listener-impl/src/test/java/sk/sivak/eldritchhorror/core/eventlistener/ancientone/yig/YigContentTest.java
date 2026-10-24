@@ -17,10 +17,31 @@ public class YigContentTest {
         for(LocationType type:LocationType.values())for(int page=1;page<=24;page++) {
             String key=page+"."+type.name().toLowerCase(Locale.ROOT);
             assertFalse(key,text.getProperty(key+".flavor","").isEmpty());
+            assertFalse(key + " success",text.getProperty(key+".pass.flavor","").trim().isEmpty());
+            assertFalse(key + " failure",text.getProperty(key+".fail.flavor","").trim().isEmpty());
+            assertNotNull(key + " success rules",text.getProperty(key+".pass.info"));
+            assertNotNull(key + " failure rules",text.getProperty(key+".fail.info"));
             assertNotNull(key,text.getProperty(key+".info"));
             assertFalse(key,text.getProperty(key+".info").contains("Pass:"));
             assertFalse(key,text.getProperty(key+".info").contains("Fail:"));
             assertEquals(type,new YigResearchEncounter(page,type).getLocationType());
+        }
+    }
+    @Test public void everyAdditionalOutcomeHasSeparateNarrativeAndRules() throws Exception {
+        Properties text = new Properties();
+        try (Reader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("encounter/research_YIG.properties"), StandardCharsets.UTF_8)) {
+            text.load(reader);
+        }
+        String[] stems = {"11.city.option.1", "11.city.option.2", "12.wilderness.option.1",
+                "12.wilderness.option.2", "23.sea.option.1", "23.sea.option.2"};
+        for (String stem : stems) {
+            assertFalse(stem, text.getProperty(stem + ".flavor", "").trim().isEmpty());
+            assertNotNull(stem, text.getProperty(stem + ".info"));
+        }
+        for (String stem : new String[]{"16.city.pass", "16.city.fail", "17.wilderness.pass",
+                "15.sea.pass", "15.sea.fail", "6.wilderness", "9.wilderness", "8.sea"}) {
+            assertFalse(stem, text.getProperty(stem + ".flavor.2", "").trim().isEmpty());
+            assertNotNull(stem, text.getProperty(stem + ".info.2"));
         }
     }
     @Test public void everyResearchTestHasSeparateColoredOutcomes() throws Exception {

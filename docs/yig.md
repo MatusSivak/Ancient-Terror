@@ -8,6 +8,31 @@ Save/load preserves Yig's remaining Eldritch tokens, mystery progress, remaining
 
 ## Validation
 
+### Research narration refresh — 24 October 2026
+
+All 72 research encounters have new original openings and separate success and
+failure narratives. Optional bargains and payments also have endings, including
+declined or unavailable offers. Results with no additional effect still remain
+on the paper until acknowledged. Mixed combat results show the applicable
+narrative for each independent condition; automatic Clues and subsequent
+conditional penalties retain their original order.
+
+The tests, modifiers, costs, rewards, and penalties were compared card by card
+with the research tables on the [Yig wiki page](https://eldritchhorror.fandom.com/wiki/Yig).
+Every pre-existing rules-text entry is unchanged. Narration does not grant extra
+Clues on cards whose success only grants an Artifact, Blessed, Sanity, or a Doom
+retreat.
+
+Validation: 114 event-listener tests pass, and the desktop build passes. Coverage
+includes every research skill test in both outcomes, conditional modifiers,
+64 mixed combat combinations, poison-dependent Cultist rewards, empty endings,
+and accepted, declined, or unaffordable payments. Five representative paths were
+rendered with the production typewriter and visually checked, including an empty
+failure, a mixed combat result, and the awakened fire penalty. Screenshots are in
+`build/yig-research-preview/`. No Android device playthrough was performed.
+
+### Initial implementation
+
 Run from the repository root with a configured JDK and Gradle cache:
 
 ```powershell
