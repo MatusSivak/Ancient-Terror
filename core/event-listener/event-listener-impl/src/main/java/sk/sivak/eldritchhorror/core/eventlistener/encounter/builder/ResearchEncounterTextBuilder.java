@@ -29,7 +29,7 @@ public class ResearchEncounterTextBuilder extends EncounterTextBuilder {
         propertiesMap.put(cacheKey(), properties);
     }
 
-    private String cacheKey() { return EncounterType.RESEARCH.name() + ":" + ancientOneId.name(); }
+    private String cacheKey() { return EncounterType.RESEARCH.name() + ":" + ancientOneId.name() + ":" + currentLanguage(); }
 
     private void withLocationType(LocationType locationType) {
         switch (locationType) {

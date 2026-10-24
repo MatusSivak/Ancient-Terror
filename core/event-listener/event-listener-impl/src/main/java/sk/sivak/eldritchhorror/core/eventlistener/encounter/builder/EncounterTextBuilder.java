@@ -106,8 +106,8 @@ public class EncounterTextBuilder {
 
     private static URL getLocalizedResource(String fileName) {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String language = Locale.getDefault().getLanguage();
-        if (language != null && !language.trim().isEmpty()) {
+        String language = currentLanguage();
+        if (!language.isEmpty()) {
             int extension = fileName.lastIndexOf('.');
             String localizedName = extension >= 0
                     ? fileName.substring(0, extension) + "_" + language + fileName.substring(extension)
@@ -118,5 +118,15 @@ public class EncounterTextBuilder {
             }
         }
         return classLoader.getResource(fileName);
+    }
+
+    /** Language chosen in the in-game selector (ui.language), falling back to the JVM default locale. */
+    protected static String currentLanguage() {
+        String uiLanguage = System.getProperty("ui.language");
+        Locale locale = uiLanguage != null && !uiLanguage.trim().isEmpty()
+                ? Locale.forLanguageTag(uiLanguage.trim())
+                : Locale.getDefault();
+        String language = locale.getLanguage();
+        return language == null ? "" : language.trim();
     }
 }

@@ -70,4 +70,46 @@ public class YigContentTest {
         assertNotEquals(yig,azathoth);
         assertEquals(yig,new ResearchEncounterTextBuilder(1,LocationType.CITY,AncientOneId.YIG).withFlavor().build());
     }
+    @Test public void slovakTranslationMatchesEnglishKeysAndMarkup() throws Exception {
+        Properties en = load("encounter/research_YIG.properties");
+        Properties sk = load("encounter/research_YIG_sk.properties");
+        assertEquals(en.stringPropertyNames(), sk.stringPropertyNames());
+        for (String key : en.stringPropertyNames()) {
+            String enValue = en.getProperty(key);
+            String skValue = sk.getProperty(key);
+            assertEquals(key, enValue.isEmpty(), skValue.isEmpty());
+            for (String tag : new String[]{"[#GOOD]", "[#BAD]", "[]"}) {
+                assertEquals(key + " " + tag, count(enValue, tag), count(skValue, tag));
+            }
+            if (!enValue.isEmpty() && enValue.matches(".*[A-Za-z]{4,}.*")) {
+                assertNotEquals(key + " untranslated", enValue, skValue);
+            }
+        }
+    }
+    @Test public void researchTextFollowsSelectedUiLanguage() {
+        String previous = System.getProperty("ui.language");
+        try {
+            System.setProperty("ui.language", "en");
+            String english = new ResearchEncounterTextBuilder(1, LocationType.CITY, AncientOneId.YIG).withFlavor().build();
+            System.setProperty("ui.language", "sk");
+            String slovak = new ResearchEncounterTextBuilder(1, LocationType.CITY, AncientOneId.YIG).withFlavor().build();
+            assertNotEquals(english, slovak);
+            System.setProperty("ui.language", "en");
+            assertEquals(english, new ResearchEncounterTextBuilder(1, LocationType.CITY, AncientOneId.YIG).withFlavor().build());
+        } finally {
+            if (previous == null) System.clearProperty("ui.language"); else System.setProperty("ui.language", previous);
+        }
+    }
+    private Properties load(String resource) throws IOException {
+        Properties properties = new Properties();
+        try (Reader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(resource), StandardCharsets.UTF_8)) {
+            properties.load(reader);
+        }
+        return properties;
+    }
+    private static int count(String value, String token) {
+        int count = 0;
+        for (int i = value.indexOf(token); i >= 0; i = value.indexOf(token, i + token.length())) count++;
+        return count;
+    }
 }
