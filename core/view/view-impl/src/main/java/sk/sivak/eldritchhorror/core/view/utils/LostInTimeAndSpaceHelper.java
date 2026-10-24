@@ -112,6 +112,7 @@ public class LostInTimeAndSpaceHelper {
                 if (i==1) {
                     investigatorImages.get(i).addAction(Actions.sequence(
                             Actions.delay(0.5f), // to wait for card to hide
+                            Actions.run(() -> GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_DISAPPEAR)),
                             Actions.alpha(0, FAST_ACTION_DURATION),
                             Actions.run(onSub::onCompleted),
                             Actions.run(() -> {

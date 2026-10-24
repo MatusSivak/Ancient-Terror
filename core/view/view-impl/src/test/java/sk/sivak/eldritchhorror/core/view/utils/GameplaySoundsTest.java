@@ -60,7 +60,7 @@ public class GameplaySoundsTest {
                         }));
             }
             @Override public synchronized <T> void load(String name, Class<T> type) {
-                if (type == Sound.class) queuedSounds.add(name);
+                if (type == Sound.class) assertTrue("Queued twice: " + name, queuedSounds.add(name));
             }
         };
         assetsField = CustomAssetManager.class.getDeclaredField("instance");

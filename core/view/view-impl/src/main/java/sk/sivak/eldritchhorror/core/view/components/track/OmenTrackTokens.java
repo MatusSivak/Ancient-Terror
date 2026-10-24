@@ -20,20 +20,30 @@ public class OmenTrackTokens extends Group {
     private float rotation;
 
     public void init(int tokensCount) {
-        if (tokens != null && tokens.size() > 0) {
+        init(tokensCount, null);
+    }
+
+    public void init(int tokensCount, Runnable onAppear) {
+        if (tokensCount == getTokensCount()) return;
+        clearActions();
+        if (!tokens.isEmpty()) {
             for (OmenTrackToken token : tokens) {
-                token.addAction(Actions.sequence(
-                        new FastForwardAction(Actions.alpha(0f, 0.5f, Interpolation.linear)),
-                        Actions.run(() -> {
-                            clearChildren();
-                            tokens.clear();
-                            justInit(tokensCount);
-                        })
-                ));
+                token.clearActions();
+                token.addAction(new FastForwardAction<>(Actions.alpha(0f, 0.5f, Interpolation.linear)));
             }
+            // Rebuild and announce once for the group, not once for every fading token.
+            addAction(Actions.sequence(new FastForwardAction<>(Actions.delay(0.5f)),
+                    Actions.run(() -> replaceTokens(tokensCount, onAppear))));
         } else {
-            justInit(tokensCount);
+            replaceTokens(tokensCount, onAppear);
         }
+    }
+
+    private void replaceTokens(int count, Runnable onAppear) {
+        clearChildren();
+        tokens.clear();
+        justInit(count);
+        if (onAppear != null) onAppear.run();
     }
 
     public void justInit(int tokensCount) {

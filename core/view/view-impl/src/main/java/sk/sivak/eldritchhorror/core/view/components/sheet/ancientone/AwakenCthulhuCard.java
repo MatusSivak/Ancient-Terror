@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.widget.VisTable;
 import rx.Completable;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -313,6 +314,7 @@ public class AwakenCthulhuCard extends VisTable implements AncientOneCard{
                 ))));
                 n++;
             }
+            if (n > 0) GameplaySounds.play(GameplaySounds.Cue.ANCIENT_POWER);
             setAfterHideAction(onSub::onCompleted);
         });
     }

@@ -16,6 +16,8 @@ import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.button.HideOkButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +86,11 @@ public class OmenTrack extends Group {
         component.activate();
     }
 
+    public void changeOmen(OmenId next) {
+        TrackEventSounds.omenChanged(omenId, next);
+        updateOmen(next);
+    }
+
     public void initSelectNewOmenListeners(SingleSubscriber<? super OmenId> onSub, ClickZoomListener clickZoomListener) {
         HideOkButtons hideOkButtons = new HideOkButtons() {
             @Override
@@ -97,6 +104,7 @@ public class OmenTrack extends Group {
         for (Map.Entry<OmenId, OmenIdComponent> entry : omenIdComponentMap.entrySet()) {
             entry.getValue().deActivate();
             ButtonUtils.addClickListener(entry.getValue(), () -> {
+                if (omenId != entry.getKey()) UiSounds.play(UiSounds.Cue.HUD_CLICK);
                 updateOmen(entry.getKey());
                 hideOkButtons.enableOkButton();
             });
@@ -186,7 +194,8 @@ public class OmenTrack extends Group {
         }
 
         public void addToken() {
-            omenTrackTokens.init(omenTrackTokens.getTokensCount() + 1);
+            omenTrackTokens.init(omenTrackTokens.getTokensCount() + 1,
+                    () -> GameplaySounds.play(GameplaySounds.Cue.OMEN_TOKEN_ADD));
         }
 
         public void justAddTokens(int amount) {
@@ -194,6 +203,8 @@ public class OmenTrack extends Group {
         }
 
         public void removeToken() {
+            if (omenTrackTokens.getTokensCount() == 0) return;
+            GameplaySounds.play(GameplaySounds.Cue.OMEN_TOKEN_REMOVE);
             omenTrackTokens.init(Math.max(0, omenTrackTokens.getTokensCount() - 1));
         }
 

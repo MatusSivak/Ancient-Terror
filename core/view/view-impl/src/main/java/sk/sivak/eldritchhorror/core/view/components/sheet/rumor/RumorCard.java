@@ -29,6 +29,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.concurrent.TimeUnit;
@@ -302,6 +303,7 @@ public class RumorCard extends VisTable {
     }
 
     public Completable countdown(int amount) {
+        if (amount <= 0) return Completable.complete();
         if (countdownCell == null) {
             return Completable.create(onSub -> {
                 Gdx.app.postRunnable(() -> {
@@ -319,6 +321,9 @@ public class RumorCard extends VisTable {
         // minus 2, because last actor is placeholder
 
         addClickListener(darkFront, () -> {
+            // Keep intercepting input while the countdown resolves, without accepting another click.
+            darkFront.clearListeners();
+            GameplaySounds.play(GameplaySounds.Cue.RUMOR_COUNTDOWN);
             for (int i = 0; i < amount; i++) {
                 Image pocketWatch = (Image) countdownTable.getCells().get(countdownTable.getCells().size - 2 - i).getActor();
                 pocketWatch.setOrigin(pocketWatch.getWidth()/2f, pocketWatch.getHeight()/2f);
@@ -342,7 +347,8 @@ public class RumorCard extends VisTable {
     }
 
     public Completable highlightRumorFailure() {
-        return highlightRumorSomething(failureCell);
+        return GameplaySounds.withCue(GameplaySounds.Cue.RUMOR_FAILURE,
+                Completable.defer(() -> highlightRumorSomething(failureCell)));
     }
 
     public Completable highlightRumorObjective() {
@@ -350,7 +356,8 @@ public class RumorCard extends VisTable {
     }
 
     public Completable highlightRumorReckoning() {
-        return highlightRumorSomething(reckoningCell);
+        return GameplaySounds.withCue(GameplaySounds.Cue.RECKONING,
+                Completable.defer(() -> highlightRumorSomething(reckoningCell)));
     }
 
     private Completable highlightRumorSomething(Cell<?> cell) {

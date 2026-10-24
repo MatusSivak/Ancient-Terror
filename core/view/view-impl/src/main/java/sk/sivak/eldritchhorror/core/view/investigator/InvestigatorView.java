@@ -105,6 +105,7 @@ public class InvestigatorView {
 
         return transition.display(Actions.sequence(
                 Actions.run(() -> {
+                    GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_DELAYED);
                     HourglassComponent hourglassComponent = new HourglassComponent(transition.getColor());
                     hourglassComponent.setInternalScale(1f);
                     hourglassComponent.setPosition(
@@ -130,13 +131,17 @@ public class InvestigatorView {
     }
 
     public Completable hideDelayedAnimation(InvestigatorId investigatorId) {
-        List<Actor> investigators = MapStage.getActor(InvestigatorUtils.getIdLayerResolver(investigatorId, false));
-        for (Actor investigator : investigators) {
-            ((InvestigatorImage) investigator).hideHourglass();
-        }
-        return Completable.create(onSub ->
-                InfoStage.addActionToInfoStage(new FastForwardAction<>(
-                        Actions.delay(1f, Actions.run(onSub::onCompleted)))));
+        return Completable.create(onSub -> {
+            List<InvestigatorImage> investigators = MapStage.getActor(InvestigatorUtils.getIdLayerResolver(investigatorId, false));
+            boolean wasDelayed = false;
+            for (InvestigatorImage investigator : investigators) {
+                wasDelayed |= investigator.isHourglassVisible();
+                investigator.hideHourglass();
+            }
+            if (wasDelayed) GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_READY);
+            InfoStage.addActionToInfoStage(new FastForwardAction<>(
+                    Actions.delay(1f, Actions.run(onSub::onCompleted))));
+        });
     }
 
     public Completable updateHud(InvestigatorBasics currentInvestigator) {

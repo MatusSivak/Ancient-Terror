@@ -19,6 +19,7 @@ public class DefeatedInvestigatorTest {
             // No assets/GL are installed: creating a new hourglass would fail here.
             stand.displayHourglass();
             stand.hideHourglass();
+            assertFalse(stand.isHourglassVisible());
             stand.act(2f);
             assertEquals(0, stand.getActions().size);
         }

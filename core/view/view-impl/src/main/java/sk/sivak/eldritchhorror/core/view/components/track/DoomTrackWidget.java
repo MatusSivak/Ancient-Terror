@@ -1,8 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.track;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -10,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
-import sk.sivak.eldritchhorror.core.view.utils.SoundPlayer;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
@@ -57,11 +54,20 @@ public class DoomTrackWidget extends Group {
     }
 
     public void updateDoom(int newDoom) {
+        updateDoom(newDoom, false);
+    }
+
+    /** Live changes announce each clock step; loading and refreshing the HUD stay quiet. */
+    public void changeDoom(int newDoom) {
+        updateDoom(newDoom, true);
+    }
+
+    private void updateDoom(int newDoom, boolean announceChange) {
         if (newDoom < 0) {
             newDoom = 0;
         }
         float fiveMinuteRotationDuration = 1.5f;
-        if (currentDoom == 0) {
+        if (currentDoom == 0 && !announceChange) {
             fiveMinuteRotationDuration = 0.1f;
         }
         float actionDuration = Math.abs(currentDoom - newDoom) * fiveMinuteRotationDuration;
@@ -78,14 +84,8 @@ public class DoomTrackWidget extends Group {
         hourHand.addAction(new FastForwardAction<>(Actions.rotateBy((newDoom - currentDoom) * HOUR_MIN_ROTATION,
                 actionDuration,
                 Interpolation.linear)));
-        // A move from midnight initializes/resets the clock (including Yig's awakening).
-        if (currentDoom != 0) {
-            String stepSound = newDoom < currentDoom ? DOOM_ADVANCE_SOUND : DOOM_RETREAT_SOUND;
-            for (int step = 0; step < Math.abs(currentDoom - newDoom); step++) {
-                addAction(new FastForwardAction<>(Actions.sequence(
-                        Actions.delay(step * fiveMinuteRotationDuration),
-                        Actions.run(() -> playStepSound(stepSound)))));
-            }
+        if (announceChange) {
+            addAction(new FastForwardAction<>(TrackEventSounds.doomSteps(currentDoom, newDoom, fiveMinuteRotationDuration)));
         }
 
         if (onCompletedListener != null) {
@@ -94,18 +94,6 @@ public class DoomTrackWidget extends Group {
                     Actions.run(() -> onCompletedListener.call()))));
         }
         this.currentDoom = newDoom;
-    }
-
-    private static void playStepSound(String soundName) {
-        // Fast-forward shrinks the steps to a few frames; skip the toll instead of stacking it.
-        if (FastForwardAction.isOn()) {
-            return;
-        }
-        Sound sound = getLoadedSound(soundName);
-        if (sound == null) {
-            sound = getSound(soundName);
-        }
-        SoundPlayer.play(sound, 0.4f, MathUtils.random(0.98f, 1.02f), 0f);
     }
 
     public void addOnCompletedListener(Action0 onCompletedListener) {

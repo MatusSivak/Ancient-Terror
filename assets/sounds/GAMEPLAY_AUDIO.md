@@ -1,6 +1,6 @@
 # Gameplay sound effects
 
-Source and event audit: 24 October 2026. All **25 gameplay WAV files** are derived from
+Source and event audit: 24 October 2026. The **37 prepared gameplay WAV files** are derived from
 the following recordings, offered by their authors under
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
 Credit is retained here even though attribution is not required.
@@ -39,6 +39,14 @@ decoded Android SoundPool limit. The script contains exact processing settings.
 | Rumor storm or vortex appears | `hazard_spawn` | rubberduck spell 02, lowered magical burst |
 | Investigator appears during setup or replacement | `investigator_spawn` | rubberduck book 01 + PWL bell + Ogrebane teleport; placement with a short rising swell |
 | Investigator defeated / devoured | `investigator_defeat`, `investigator_devoured` | PWL low dissonant bells / Ogrebane reversed teleport |
+| Investigator becomes delayed / recovers | `investigator_delayed`, `investigator_ready` | rubberduck gem 01 + low / higher PWL bell |
+| Investigator disappears from the map (including becoming lost in time and space) | `investigator_disappear` | short reversed Ogrebane teleport |
+| Omen moves to another position | `omen_change` | rubberduck spell 02 + PWL bell, brief arcane sweep |
+| Token appears on / leaves the Omen track | `omen_token_add`, `omen_token_remove` | rubberduck gem 01 + forward / reversed spell 02 |
+| Rumor countdown tokens disappear | `rumor_countdown` | rubberduck gem 01 + low PWL bell, warning tick |
+| Rumor failure / reckoning text is revealed | `rumor_failure`, `reckoning` | dissonant / double PWL bells; failure also layers rubberduck spell 02 |
+| Awakened Cthulhu or Yog-Sothoth gains visible power runes | `ancient_power` | lowered rubberduck spell 02 + low PWL bell |
+| Action / Encounter phase begins | `action_phase`, `encounter_phase` | rubberduck book 01 / 03 + distinct PWL bell pitches |
 | Mythos phase begins | `mythos_phase` | PWL low bell warning |
 
 Clue, focus, and ticket pickups now have distinct short arrival cues when they
@@ -51,6 +59,16 @@ These four original, sample-free effects are rebuilt by `tools/generate_token_so
 The gameplay mix was raised from the previous 0.35–0.58 playback levels to
 0.70–0.95, alongside louder source normalization. Travel/highlight and HUD track
 zoom levels were also raised. Music volume remains governed by its existing control.
+
+Doom advance and retreat retain the existing [clock toll](DOOM_ADVANCE_AUDIO.md)
+(`doom_advance.wav`) and [original synthesized winding-back chime](DOOM_RETREAT_AUDIO.md)
+(`doom_retreat.wav`), rebuilt by
+`tools/generate_doom_advance_sound.py` and `tools/generate_doom_retreat_sound.py`.
+They now use `GameplaySounds` at 0.85 / 0.90 instead of 0.40 (about +6.5 / +7 dB).
+Each actual clock step sounds once, including a genuine retreat from zero.
+`changeDoom` is the live-event path; `updateDoom` remains silent for initialization,
+HUD refreshes and awakening resets. Missing audio no longer triggers synchronous
+decoding from the clock animation.
 
 ## Existing coverage retained
 
@@ -75,6 +93,18 @@ asset load. The three wrapping map copies produce one cue. Restoration calls
 `justAddVortex`, `justPlaceExpeditionToken`, `loadDefeatedInvestigator`) use silent
 paths. All new cues, including queued ones, honor fast-forward at playback time.
 
+Omen movement uses position rather than color, so moving between the two blue
+spaces also sounds. Initialization via `updateOmen` remains silent; manual Omen
+selection uses the HUD click, and `changeOmen` announces the live event. Omen-token
+appearance announces once after the previous group fades, even with several
+existing tokens. Restoration and removing from an empty track remain silent.
+Rumor countdown sounds when its tokens start shrinking, once per confirmed
+countdown. Repeated countdown clicks are disabled while it resolves. Showing a
+rumor objective does not imply success and therefore has no new reward cue.
+Investigator recovery sounds only if a delay hourglass was present, and map
+disappearance sounds only on the visible center copy. Redisplaying the lost-in-time
+background is silent; returning investigators use the existing spawn cue.
+
 HUD refreshes, decorative monster wandering, repeated highlights, and capped/no-op
 rest and focus actions stay quiet. Opening existing card panels and other UI
 gestures have their own [interface cues](INTERFACE_AUDIO.md). Rumor removal uses
@@ -85,9 +115,17 @@ a neutral paper cue because the same animation can follow success or failure.
 `GameplaySoundsTest` checks queued timing, fast-forward changes, failed preceding
 events, missing audio, token pickup/arrival pairs, startup preloading, and every
 packaged gameplay, token and interface WAV's format/size.
+`TrackEventSoundsTest` checks Doom direction and per-step timing, genuine retreat
+from zero, unchanged/clamped values, queued fast-forward changes, missing audio,
+and Omen movement between same-color spaces. Startup checks also reject duplicate
+sound preloads.
 For an in-game listening pass: spawn clues and both monster types; collect a map
 clue and a pool clue; gain/spend focus and tickets; open/close a gate; gain/discard
 cards; improve/lose a skill; advance/solve a mystery; trigger a storm/vortex and
 investigator placement/defeat/devouring. Listen separately for each pickup and
 HUD arrival. Repeat during fast-forward, then reload a save
 containing these map objects to check restoration stays quiet.
+Also advance/retreat Doom by several steps, change Omen (including blue-to-blue),
+add/remove Omen tokens, trigger rumor countdown/failure/reckoning, delay and recover
+an investigator, disappear from the map, gain Ancient One power, and start each
+phase. Compare against saved-game initialization and ordinary panel opening.

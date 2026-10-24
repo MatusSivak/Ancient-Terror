@@ -43,6 +43,7 @@ public class InvestigatorImage extends Image {
     private boolean asteroidVisible = false;
 
     private HourglassComponent hourglassComponent;
+    private boolean hourglassVisible;
 
     private boolean defeated;
     private boolean defeatedByHealth;
@@ -96,6 +97,7 @@ public class InvestigatorImage extends Image {
             return;
         }
         createHourglassComponent();
+        hourglassVisible = true;
         hourglassComponent.display();
         hourglassComponent.setPosition(
                 getX() + IMAGE_WIDTH / 2 - hourglassComponent.getWidth() / 2,
@@ -103,9 +105,14 @@ public class InvestigatorImage extends Image {
     }
 
     public void hideHourglass() {
+        hourglassVisible = false;
         if (hourglassComponent != null) {
             hourglassComponent.hide();
         }
+    }
+
+    public boolean isHourglassVisible() {
+        return hourglassVisible;
     }
 
     private void createHourglassComponent() {
@@ -315,6 +322,7 @@ public class InvestigatorImage extends Image {
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeated = true;
+        hourglassVisible = false;
         this.defeatedByHealth = defeatedByHealth;
         // This decoration is drawn manually, so remove() alone would not hide it.
         if (hourglassComponent != null) {

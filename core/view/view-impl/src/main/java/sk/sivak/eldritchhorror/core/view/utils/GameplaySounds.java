@@ -30,6 +30,20 @@ public final class GameplaySounds {
         INVESTIGATOR_SPAWN("investigator_spawn", .90f),
         INVESTIGATOR_DEFEAT("investigator_defeat", .90f),
         INVESTIGATOR_DEVOURED("investigator_devoured", .90f),
+        INVESTIGATOR_DELAYED("investigator_delayed", .82f),
+        INVESTIGATOR_READY("investigator_ready", .80f),
+        INVESTIGATOR_DISAPPEAR("investigator_disappear", .85f),
+        OMEN_CHANGE("omen_change", .85f),
+        OMEN_TOKEN_ADD("omen_token_add", .85f),
+        OMEN_TOKEN_REMOVE("omen_token_remove", .82f),
+        DOOM_ADVANCE("doom_advance", .85f),
+        DOOM_RETREAT("doom_retreat", .90f),
+        RUMOR_COUNTDOWN("rumor_countdown", .82f),
+        RUMOR_FAILURE("rumor_failure", .90f),
+        RECKONING("reckoning", .85f),
+        ANCIENT_POWER("ancient_power", .88f),
+        ACTION_PHASE("action_phase", .75f),
+        ENCOUNTER_PHASE("encounter_phase", .78f),
         MYTHOS_PHASE("mythos_phase", .78f);
 
         public final String path;

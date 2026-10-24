@@ -70,6 +70,18 @@ def cues():
                                   (bell(.7, .75), .12, .5), (clip("teleport.wav", 1.8, .65), 0, .2)),
         "investigator_defeat": mix((bell(.4, 1.7), 0, 1), (bell(.37, 1.4), .2, .55)),
         "investigator_devoured": clip("teleport.wav", .6, 1.8, reverse=True),
+        "investigator_delayed": mix((clip("item_gem_01.ogg", .65, .3), 0, .8), (bell(.6, .65), .08, .5)),
+        "investigator_ready": mix((clip("item_gem_01.ogg", 1.2, .18), 0, .6), (bell(1.15, .6), .06, .5)),
+        "investigator_disappear": clip("teleport.wav", 1.35, .8, reverse=True),
+        "omen_change": mix((clip("spell_02.ogg", 1.25, .75), 0, .55), (bell(.72, .85), .12, .7)),
+        "omen_token_add": mix((clip("item_gem_01.ogg", .8, .26), 0, .8), (clip("spell_02.ogg", .9, .6), .02, .5)),
+        "omen_token_remove": mix((clip("item_gem_01.ogg", 1.1, .2), 0, .7), (clip("spell_02.ogg", 1.4, .5, reverse=True), 0, .4)),
+        "rumor_countdown": mix((clip("item_gem_01.ogg", .75, .22), 0, 1), (bell(.48, .7), .05, .5)),
+        "rumor_failure": mix((bell(.42, 1.1), 0, 1), (bell(.39, .9), .16, .6), (clip("spell_02.ogg", .7, .7), 0, .25)),
+        "reckoning": mix((bell(.55, .7), 0, 1), (bell(.52, .8), .23, .6)),
+        "ancient_power": mix((clip("spell_02.ogg", .55, 1.1), 0, .6), (bell(.35, 1.0), .08, .6)),
+        "action_phase": mix((clip("book_01.ogg", 1.2, .35), 0, .7), (bell(1.0, .7), .08, .6)),
+        "encounter_phase": mix((clip("book_03.ogg", 1.1, .45), 0, .7), (bell(.75, .8), .08, .6)),
         "mythos_phase": bell(.5, 1.3),
     }
 

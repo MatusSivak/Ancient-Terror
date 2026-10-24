@@ -37,10 +37,9 @@ public class PhaseView {
                 throw new IllegalArgumentException();
         }
         InfoStage.addSmallActorToInfoStage(phaseLabel);
-        Completable display = phaseLabel.display();
-        if (input == PhaseType.MYTHOS) {
-            display = GameplaySounds.withCue(GameplaySounds.Cue.MYTHOS_PHASE, display);
-        }
+        GameplaySounds.Cue cue = input == PhaseType.ACTION ? GameplaySounds.Cue.ACTION_PHASE
+                : input == PhaseType.ENCOUNTER ? GameplaySounds.Cue.ENCOUNTER_PHASE : GameplaySounds.Cue.MYTHOS_PHASE;
+        Completable display = GameplaySounds.withCue(cue, phaseLabel.display());
         return MapUtils.showWholeWorld()
                 .andThen(display)
                 .andThen(HudButtons.getInstance().show());

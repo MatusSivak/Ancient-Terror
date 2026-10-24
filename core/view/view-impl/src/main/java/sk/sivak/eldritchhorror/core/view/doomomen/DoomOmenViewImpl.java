@@ -59,7 +59,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
                     clickZoomListener.minimize();
                 });
                 GoogleServicesHolder.getAnalyticsTracker().trackNonInteraction(DOOM_CHANGED, "" + (doomTrackWidget.getCurrentDoom() + amount));
-                doomTrackWidget.updateDoom(doomTrackWidget.getCurrentDoom() + amount);
+                doomTrackWidget.changeDoom(doomTrackWidget.getCurrentDoom() + amount);
             });
             clickZoomListener.maximize();
         });
@@ -133,7 +133,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
                 omenTrack.addAction(Actions.sequence(
                         new FastForwardAction<>(Actions.delay(0.25f)),
                         Actions.run(() -> {
-                            omenTrack.updateOmen(omenId);
+                            omenTrack.changeOmen(omenId);
                         }),
                         new FastForwardAction<>(Actions.delay(1)),
                         Actions.run(() -> {
