@@ -70,9 +70,38 @@ public class YigContentTest {
         assertNotEquals(yig,azathoth);
         assertEquals(yig,new ResearchEncounterTextBuilder(1,LocationType.CITY,AncientOneId.YIG).withFlavor().build());
     }
+    @Test public void slovakYigPromptsMatchEnglishKeysAndMarkup() throws Exception {
+        assertParity(load("encounter/yig.properties"), load("encounter/yig_sk.properties"));
+    }
+    @Test public void slovakYigEpiloguesCoverEveryYigMystery() throws Exception {
+        Properties en = load("epilogue.properties");
+        Properties sk = load("epilogue_sk.properties");
+        for (String key : sk.stringPropertyNames()) {
+            if (!key.endsWith(".title")) assertTrue(key, en.containsKey(key));
+        }
+        for (String id : new String[]{"CROWN_OF_THE_SERPENT", "DESCENDANTS_OF_YIG", "KN_YAN_UNEARTHED",
+                "MIGRATION_OF_SERPENTS", "RISE_OF_THE_SERPENT_PEOPLE", "THE_WINGED_SERPENT", "SERPENTS_NEST"}) {
+            assertFalse(id, sk.getProperty(id, "").trim().isEmpty());
+            assertFalse(id, sk.getProperty(id + ".title", "").trim().isEmpty());
+        }
+    }
+    @Test public void specialEncounterTextFollowsSelectedUiLanguage() {
+        String previous = System.getProperty("ui.language");
+        try {
+            System.setProperty("ui.language", "en");
+            assertEquals("Nothing else happens.", YigEffects.text("knyan.nothing"));
+            assertEquals("Spend 3 Clues and discard 2 Ally Assets to solve this Mystery?", YigEffects.text("mystery.crown.solve", 3));
+            System.setProperty("ui.language", "sk");
+            assertEquals("Nič ďalšie sa nestane.", YigEffects.text("knyan.nothing"));
+            assertEquals("K'n-yan", YigEffects.text("knyan.header"));
+        } finally {
+            if (previous == null) System.clearProperty("ui.language"); else System.setProperty("ui.language", previous);
+        }
+    }
     @Test public void slovakTranslationMatchesEnglishKeysAndMarkup() throws Exception {
-        Properties en = load("encounter/research_YIG.properties");
-        Properties sk = load("encounter/research_YIG_sk.properties");
+        assertParity(load("encounter/research_YIG.properties"), load("encounter/research_YIG_sk.properties"));
+    }
+    private void assertParity(Properties en, Properties sk) {
         assertEquals(en.stringPropertyNames(), sk.stringPropertyNames());
         for (String key : en.stringPropertyNames()) {
             String enValue = en.getProperty(key);

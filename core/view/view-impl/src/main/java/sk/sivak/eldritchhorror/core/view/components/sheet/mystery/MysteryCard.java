@@ -129,9 +129,14 @@ public class MysteryCard extends VisTable {
         return resolveLocalizedText(mysteryCardInfo.getMysteryText())
                 .replace("COMPLEXITY", mysteryCardInfo.getMysteryComplexity().toString())
                 .replace("CLUE_COST", clueCost == null ? "?"
-                        : get(clueCost == 1 ? "mystery.clueCost.one" : "mystery.clueCost.other", clueCost))
-                + (clueCost == null && mysteryCardInfo.getClueCredit() > 0 ? "\n\nClue cost reduced by "
-                + mysteryCardInfo.getClueCredit() + "." : "");
+                        : get(clueCostKey(clueCost), clueCost))
+                + (clueCost == null && mysteryCardInfo.getClueCredit() > 0
+                ? "\n\n" + get("mystery.clueCostReduced", mysteryCardInfo.getClueCredit()) : "");
+    }
+
+    private static String clueCostKey(int clueCost) {
+        if (clueCost == 1) return "mystery.clueCost.one";
+        return clueCost >= 5 ? "mystery.clueCost.many" : "mystery.clueCost.other";
     }
 
     private ProgressTokenBar createProgressTokenBar(Integer mysteryComplexity, Integer progress) {

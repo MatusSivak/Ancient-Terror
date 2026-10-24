@@ -26,18 +26,18 @@ public class DisplayVictoryPaperAction implements Action<Object, Void> {
     public Single<Void> execute() {
         return Single.create(onSub -> {
             MysteryCardId mysteryCardId = ServicePlatform.get().getMysteryDeck().getCurrentMysteryCard().getMysteryCardId();
-
+                        Properties epilogue = loadEpilogue();
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
-            ServicePlatform.get().getEncounterService().typeHeader(toString(mysteryCardId) + " ending");
-            ServicePlatform.get().getEncounterService().typeFlavor(loadFlavor(mysteryCardId));
-            TypewriterUtils.confirmInfos("[#GOOD]Congratulations!\nYou banished the Ancient One.[]").subscribe(()-> {
+            ServicePlatform.get().getEncounterService().typeHeader(epilogue.getProperty(mysteryCardId + ".title", toString(mysteryCardId) + " ending"));
+            ServicePlatform.get().getEncounterService().typeFlavor(epilogue.getProperty(mysteryCardId.toString()));
+            TypewriterUtils.confirmInfos(epilogue.getProperty("victory.congratulations", "[#GOOD]Congratulations!\nYou banished the Ancient One.[]")).subscribe(()-> {
                 ServicePlatform.get().getService().hold();
                 ServicePlatform.get().getEncounterService().finishTypewriterPaper();
 
                 ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
-                ServicePlatform.get().getEncounterService().typeHeader(" \nThe Hall of Fame welcomes you!");
-                ServicePlatform.get().getEncounterService().readInput("Your name:").subscribe(name -> {
+                ServicePlatform.get().getEncounterService().typeHeader(" \n" + epilogue.getProperty("victory.hallOfFame", "The Hall of Fame welcomes you!"));
+                ServicePlatform.get().getEncounterService().readInput(epilogue.getProperty("victory.yourName", "Your name:")).subscribe(name -> {
                     ServicePlatform.get().getService().hold();
 
                     HallOfFameData hallOfFameData = new HallOfFameData();
@@ -86,36 +86,46 @@ public class DisplayVictoryPaperAction implements Action<Object, Void> {
         record.setDefeatedInvestigators(defeated);
     }
 
-    private static String loadFlavor(MysteryCardId mysteryCardId) {
+    static Properties loadEpilogue() {
         String fileName = "epilogue.properties";
-
-        URL resource = getLocalizedResource(fileName);
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resource = classLoader.getResource(fileName);
         if (resource == null) {
             throw new IllegalArgumentException("Resource was null");
         }
+        Properties properties = load(resource);
+        // Localized epilogues may cover only some mysteries; missing keys fall back to English.
+        URL localized = getLocalizedResource(fileName);
+        if (localized != null) {
+            properties.putAll(load(localized));
+        }
+        return properties;
+    }
+
+    private static Properties load(URL resource) {
         Properties properties = new Properties();
         try (InputStreamReader reader = new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8)) {
             properties.load(reader);
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }
-        return properties.getProperty(mysteryCardId.toString());
+        return properties;
     }
 
     private static URL getLocalizedResource(String fileName) {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String language = Locale.getDefault().getLanguage();
+        String uiLanguage = System.getProperty("ui.language");
+        String language = uiLanguage != null && !uiLanguage.trim().isEmpty()
+                ? Locale.forLanguageTag(uiLanguage.trim()).getLanguage()
+                : Locale.getDefault().getLanguage();
         if (language != null && !language.trim().isEmpty()) {
             int extension = fileName.lastIndexOf('.');
             String localizedName = extension >= 0
                     ? fileName.substring(0, extension) + "_" + language + fileName.substring(extension)
                     : fileName + "_" + language;
-            URL localizedResource = classLoader.getResource(localizedName);
-            if (localizedResource != null) {
-                return localizedResource;
-            }
+            return classLoader.getResource(localizedName);
         }
-        return classLoader.getResource(fileName);
+        return null;
     }
 
 

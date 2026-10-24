@@ -106,9 +106,9 @@ public class YigInitListener extends AncientOneInitListener {
                         cursed |= p().getConditionsDeck().hasCondition(i.getInfo().getInvestigatorId(), ConditionId.CURSED);
                     if (!cursed) return;
                     Question<Boolean> choice = new Question<>();
-                    choice.setTitle("Retreat Doom or discard Cursed?");
-                    choice.addOption(new Question.Option<>("Retreat Doom", false));
-                    choice.addOption(new Question.Option<>("Discard Cursed", true));
+                    choice.setTitle(YigEffects.text("awaken.retreatOrDiscard.title"));
+                    choice.addOption(new Question.Option<>(YigEffects.text("awaken.retreatOrDiscard.retreat"), false));
+                    choice.addOption(new Question.Option<>(YigEffects.text("awaken.retreatOrDiscard.discard"), true));
                     p().getGameService().ask(choice).subscribe(answer -> sequence(() -> {
                         if (answer.getResponseData()) {
                             cureCurse();

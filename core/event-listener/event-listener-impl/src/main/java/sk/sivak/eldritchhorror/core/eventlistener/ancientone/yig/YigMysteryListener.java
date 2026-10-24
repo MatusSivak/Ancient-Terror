@@ -112,7 +112,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                 public Class<MysteryEncounter> getDataClass(){return MysteryEncounter.class;}
                 public void onNotify(MysteryEncounter data) { sequence(() -> {
                     if(id==KN_YAN_UNEARTHED)new YigSpecialEncounter(mysteryCardInfo,() -> addProgress()).execute();
-                    else test(Stat.OBSERVATION,-1,() -> ask("Spend 2 Clues to advance the Active Mystery?",
+                    else test(Stat.OBSERVATION,-1,() -> ask(YigEffects.text("mystery.rise.question"),
                             () -> spend(2,0,0,() -> removeToken(p().getInvestigators().getActiveInvestigator().getCurrentLocationId()),() -> {}),() -> {}),
                             () -> p().getMonsterService().ambush(NonEpicMonsterId.CULTIST).subscribe());
                     p().getService().convertTo(MysteryEncounter.class,() -> data);
@@ -141,7 +141,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
             if(m!=null) { p().getMonsterService().dealDamageToMonster(m,2);return; }
             if(id==CROWN_OF_THE_SERPENT) {
                 mysteryCardInfo.setClueCredit(mysteryCardInfo.getClueCredit()+1);
-                p().getGameService().displayText("Advance the Active Mystery: reduce the Clue cost to solve this Mystery by 1.");
+                p().getGameService().displayText(YigEffects.text("mystery.crown.advance"));
             }
             else addProgress();
         });
@@ -151,7 +151,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
             public Class<GainCardData> getDataClass(){return GainCardData.class;}
             public void onNotify(GainCardData data) {
                 if(!data.isArtifact() || !p().getArtifactsDeck().isInDeckOrDiscardPile(ArtifactId.SERPENT_CROWN))return;
-                ask("Gain the Serpent Crown Artifact instead?",
+                ask(YigEffects.text("mystery.crown.substitute"),
                     () -> p().getService().convertTo(GainCardData.class,() -> new GainCardData(ArtifactId.SERPENT_CROWN)),
                     () -> p().getService().convertTo(GainCardData.class,() -> data));
             }
@@ -171,7 +171,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                         // Changing the model alone leaves the previous investigator's token bars on screen.
                         // Wait for the holder's camera/HUD before the test can spend Clues or Focus.
                         p().getInvestigatorService().showActiveInvestigator(false);
-                        later(() -> ask("Attempt a Will (-1) test to break the Serpent Crown's hold?",() -> test(Stat.WILL,-1,() -> {
+                        later(() -> ask(YigEffects.text("mystery.crown.test"),() -> test(Stat.WILL,-1,() -> {
                             int allies=0;for(CardInfo card:EncounterUtils.getPossession(owner,AssetTrait.ALLY))if(card instanceof AssetInfo)allies++;
                             if(allies<2)return;
                             // The card retains the game's player count; living investigators can shrink before replacement.
@@ -183,7 +183,7 @@ public final class YigMysteryListener extends AbstractMysteryListener {
                                 p().getGameService().ask(notice).subscribe();
                                 return;
                             }
-                            ask("Spend " + clues + " Clues and discard 2 Ally Assets to solve this Mystery?",
+                            ask(YigEffects.text("mystery.crown.solve", clues),
                                 () -> spend(clues,0,0,() -> discardPossessions(AssetTrait.ALLY,2,true,() -> {
                                     mysteryCardInfo.setClueCredit(0);
                                     addProgress();

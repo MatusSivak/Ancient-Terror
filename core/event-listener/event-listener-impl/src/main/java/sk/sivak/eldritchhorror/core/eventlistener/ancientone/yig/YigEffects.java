@@ -53,7 +53,7 @@ public final class YigEffects {
             return;
         }
         InvestigatorRestriction restriction = new InvestigatorRestriction(true).addAllowedInvestigators(eligible);
-        restriction.setTitle("Choose an investigator to discard Cursed");
+        restriction.setTitle(text("effects.discardCursed.title"));
         p().getInvestigatorService().selectInvestigator(restriction).subscribe(YigEffects::discardCurse);
     }
     private static void discardCurse(InvestigatorId id) {
@@ -79,7 +79,7 @@ public final class YigEffects {
             });
             return;
         }
-        Question<CardInfo> q = new Question<>(); q.setTitle("Discard " + count + " " + trait + " possession(s)"); q.setOptions(options);
+        Question<CardInfo> q = new Question<>(); q.setTitle(text("effects.discardPossessions.title", count, text("trait." + trait.name()))); q.setOptions(options);
         p().getGameService().ask(q).subscribe(a -> sequence(() -> {
             EncounterUtils.onSelectCardToDiscard(a.getResponseData());
             later(() -> discardPossessions(trait, count - 1, assetsOnly, done));
@@ -127,6 +127,9 @@ public final class YigEffects {
     public static void delayed() {
         p().getInvestigatorService().becomeDelayed(new sk.sivak.eldritchhorror.core.eventtype.data.investigator.DelayedData(investigator(), true));
     }
+    public static String text(String key, Object... args) {
+        return sk.sivak.eldritchhorror.core.eventlistener.encounter.builder.LocalizedText.get("encounter/yig.properties", key, args);
+    }
     public static void condition(ConditionId id) { p().getGameService().gainCondition(id); }
     public static void damage(int health, int sanity) {
         if (health > 0) p().getTokenService().loseHealth(health);
@@ -138,7 +141,7 @@ public final class YigEffects {
         for (Stat s : Stat.values()) if (!excluded.contains(s) && p().getInvestigators().getActiveInvestigator().getStatBonus(s) < 2)
             options.add(new Question.Option<>(s.prettyString(), s));
         if (options.isEmpty()) return;
-        Question<Stat> q = new Question<>(); q.setTitle("Choose a skill to improve"); q.setOptions(options);
+        Question<Stat> q = new Question<>(); q.setTitle(text("effects.improve.title")); q.setOptions(options);
         p().getGameService().ask(q).subscribe(a -> sequence(() -> {
             Stat s = a.getResponseData(); p().getInvestigatorService().improveSkill(s); excluded.add(s);
             later(() -> improveChoice(count - 1, excluded));
