@@ -165,6 +165,9 @@ public class MonsterViewImpl implements MonsterView {
                 CustomAssetManager.getNonEpicMonsterTexture(monsterInfo.getClass().getSimpleName());
         MonsterImage monsterImage = new MonsterImage(
                 monsterInfo, gameController, true, monsterInfo.hasReckoning(), monsterInfo.getCurrentLocation(), texture);
+        // The idle squash action must not fight the defeat animation's scale.
+        monsterImage.clearActions();
+        monsterImage.clearListeners();
 
         monsterImage.setPosition(
                 ViewProperties.VIEWPORT_WIDTH/2f - monsterImage.getWidth()/2,

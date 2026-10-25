@@ -93,6 +93,12 @@ public class InvestigatorTransition extends Group {
         @Override
         public boolean act(float delta) {
             List<Actor> allActors = MapStage.getActor(InvestigatorUtils.getIdLayerResolver(investigatorId, false));
+            // Completion can advance the queue and devour the investigator before this exit finishes.
+            // Keep fading at the current position when the map token has disappeared.
+            if (allActors == null || allActors.isEmpty()) {
+                return true;
+            }
+            if (getStage() == null) return true;
             int indexOfClosestActor = findIndexOfClosestActor(allActors);
             Actor actor = allActors.get(indexOfClosestActor);
             Vector2 stageCoords = actor.localToStageCoordinates(new Vector2(actor.getWidth()/2,actor.getHeight()/2));

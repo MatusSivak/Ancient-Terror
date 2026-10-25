@@ -88,19 +88,6 @@ public class ResearchWilderness16Encounter extends AbstractShubNiggurathResearch
     }
 
     private AbstractConditionBackListener findConditionBackListener(ConditionInfo conditionInfo) {
-        String conditionBackClassName = conditionInfo.getId().getBackConditionClassName(conditionInfo.getConditionBack().getConditionBackId());
-        String conditionBackListenerClassName = conditionBackClassName
-                .replace(
-                        "sk.sivak.eldritchhorror.core.constants.condition",
-                        "sk.sivak.eldritchhorror.core.eventlistener.back.condition")
-                .replace(
-                        "ConditionBack",
-                        "ConditionBackListener");
-        try {
-            return (AbstractConditionBackListener) Class.forName(conditionBackListenerClassName)
-                    .getConstructor(ConditionInfo.class).newInstance(conditionInfo);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return sk.sivak.eldritchhorror.core.eventlistener.back.condition.ConditionBackListeners.create(conditionInfo);
     }
 }

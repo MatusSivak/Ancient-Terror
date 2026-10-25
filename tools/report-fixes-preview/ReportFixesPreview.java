@@ -1,3 +1,13 @@
+import sk.sivak.eldritchhorror.core.constants.condition.*;
+import sk.sivak.eldritchhorror.core.constants.condition.blessed.BlessedCondition;
+import sk.sivak.eldritchhorror.core.constants.condition.paranoia.ParanoiaCondition;
+import sk.sivak.eldritchhorror.core.constants.displayasset.*;
+import sk.sivak.eldritchhorror.core.view.asset.AssetView;
+import sk.sivak.eldritchhorror.core.view.components.investigator.InvestigatorTransition;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
+import sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl.*;
@@ -47,7 +57,9 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october23;
     private static boolean october23Evening;
     private static boolean buttonGlyphColors;
+    private static boolean october25;
     public static void main(String[] args) {
+        october25 = Arrays.asList(args).contains("--oct25");
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
         awakening = Arrays.asList(args).contains("--awakening");
@@ -73,6 +85,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october25) { october25Reports(); return; }
             if (buttonGlyphColors) { buttonGlyphColors(); eveningChoices(); return; }
             if (october23Evening) { eveningChoices(); return; }
             if (october23) { october23Reports(); return; }
@@ -89,6 +102,99 @@ public class ReportFixesPreview extends ApplicationAdapter {
         } catch(Throwable e) { e.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }
     }
+    private void october25Reports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class,(p,m,a)->null)).init();
+        cultistGroupMovement();
+        for (boolean fast : new boolean[]{false,true}) {
+            if(fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            investigatorRemovedDuringTransition(fast);
+            ambushDefeat(fast);
+            conditionOffers(fast);
+        }
+        FastForwardAction.turnOff();
+        String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
+        setPreviewLanguage("sk");
+        mystery();
+        setPreviewLanguage(oldLanguage);
+        System.out.println("PASS: report movement directions, removed investigator transition, bounded ambush defeat, visible condition choices and Slovak mystery glyphs");
+    }
+
+    private void investigatorRemovedDuringTransition(boolean fast) throws Exception {
+        for (int mode=0; mode<3; mode++) {
+            MapStage.clearIdActorMap();
+            InvestigatorId id=InvestigatorId.THE_SAILOR;
+            MapStage.IdLayerResolver resolver=InvestigatorUtils.getIdLayerResolver(id,false);
+            if(mode!=0) {
+                Actor token=new Actor();token.setBounds(450,250,40,65);MapStage.addToLayer(token,resolver);
+            }
+            InvestigatorTransition transition=InvestigatorTransition.build(id);stage.addActor(transition);
+            int[] done={0};
+            final int removalMode=mode;
+            transition.display(com.badlogic.gdx.scenes.scene2d.actions.Actions.run(()->{})).subscribe(()->{
+                done[0]++;
+                if(removalMode==1)MapStage.removeActor(resolver);
+            });
+            boolean removedLater=false;
+            for(int frame=0;frame<600 && transition.getParent()!=null;frame++) {
+                MapStage.getStage().act(1f/60);stage.act(1f/60);
+                if(mode==2 && done[0]==1 && !removedLater) {
+                    // Let the dynamic exit track the token for a frame, then devour it.
+                    stage.act(1f/60);MapStage.removeActor(resolver);removedLater=true;
+                }
+                require(Float.isFinite(transition.getX()) && Float.isFinite(transition.getY()),"Invalid transition coordinates");
+            }
+            require(done[0]==1 && transition.getParent()==null,"Removed investigator did not finish fading exactly once");
+        }
+        MapStage.clearIdActorMap();
+    }
+
+    private void ambushDefeat(boolean fast) throws Exception {
+        MapStage.clearIdActorMap();
+        int[] done={0};
+        new MonsterViewImpl().defeatMonster(new sk.sivak.eldritchhorror.core.constants.monster.SerpentPeopleMonster()).subscribe(()->done[0]++);
+        MonsterImage monster=find(MonsterImage.class);
+        require(monster!=null,"Missing ambushing monster");
+        float maxHeight=0; boolean captured=false;
+        for(int frame=0;frame<600 && done[0]==0;frame++) {
+            stage.act(1f/60);
+            if(monster.getColor().a>0 && monster.getWidth()<500) {
+                maxHeight=Math.max(maxHeight,monster.getHeight()*monster.getScaleY());
+                if(!captured && monster.getScaleY()>1.8f) {draw("oct25-ambush"+(fast?"-fast":""));captured=true;}
+            }
+        }
+        require(done[0]==1 && monster.getParent()==null,"Ambush defeat did not finish exactly once");
+        require(maxHeight>100 && maxHeight<=ViewProperties.VIEWPORT_HEIGHT*.45f+1,"Defeat monster grew too large: "+maxHeight);
+        require(captured,"No visible defeat frame");
+    }
+
+    private void conditionOffers(boolean fast) throws Exception {
+        // The preview runs inside create(), before the normal async asset pump starts.
+        preloadCard("card/condition/BLESSED.jpg", null);
+        preloadCard("card/condition/PARANOIA.jpg", null);
+        for(boolean yes:new boolean[]{false,true}) {
+            AssetView view=new AssetView(); ShowCardRequest request=new ShowCardRequest();
+            request.setConditionInfo(new BlessedCondition());request.setTitle("Gain Debt to discard Blessed?");
+            request.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);request.setHideType(HideType.DISCARD_ON_YES);
+            List<ShowCardResponse> responses=new ArrayList<>();view.showCard(request).subscribe(responses::add);
+            tick(180);require(responses.isEmpty(),"Condition accepted without confirmation");
+            CardTemplate card=(CardTemplate)field(view,"cardTemplate");
+            require(card.getParent()!=null && card.getColor().a>0,"Condition is hidden before accepting Debt");
+            require(labels(card).contains("Blessed"),"Condition card text has not loaded");
+            draw("oct25-blessed"+(fast?"-fast":"")+(yes?"-accept":"-decline"));
+            Button[] buttons=(Button[])field(view,"buttons");click(buttons[yes?1:0]);tick(240);
+            require(responses.equals(Collections.singletonList(yes?ShowCardResponse.YES:ShowCardResponse.NO)),"Wrong condition response");
+            require(card.getParent()==null,"Condition card did not close");
+        }
+        Question<Boolean> offer=new Question<>();offer.setTitle("Gain Debt to discard a Condition of your choice?");offer.setOptions(Question.Option.noYesOptions);
+        Question.SelectComponentsTableData<ConditionInfo> data=new Question.SelectComponentsTableData<>();
+        data.setType(Question.SelectComponentsTableType.CARDS);data.setAvailableKeys(Arrays.asList(new BlessedCondition(),new ParanoiaCondition()));
+        offer.setSelectComponentsTableData(data);
+        sk.sivak.eldritchhorror.core.view.question.QuestionView view=new sk.sivak.eldritchhorror.core.view.question.QuestionView();
+        int[] done={0};view.ask(offer).subscribe(a->done[0]++);tick(180);
+        draw("oct25-condition-choices"+(fast?"-fast":""));
+        List<Button> buttons=(List<Button>)field(view,"buttons");click(buttons.get(0));tick(180);require(done[0]==1,"Multi-condition decline failed");
+    }
+
     private void latestReports() throws Exception {
         hallOfFame(); collectionBack(); crashDialog(); crownClueCost();
         System.out.println("PASS: Hall of Fame clock/outcomes, collection Back, crash dialog, Crown clue cost");
@@ -234,13 +340,18 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private void cultistGroupMovement() throws Exception {
         sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl view=new sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl();
         Stage map=sk.sivak.eldritchhorror.core.view.game.MapStage.getStage();
-        for(boolean fast:new boolean[]{false,true})for(boolean wrap:new boolean[]{false,true}) {
+        for(boolean fast:new boolean[]{false,true})for(int route=0;route<4;route++) {
+            boolean wrap=route==1;
             if(fast)FastForwardAction.turnOn();else FastForwardAction.turnOff();
             sk.sivak.eldritchhorror.core.view.game.MapStage.clearIdActorMap();
             sk.sivak.eldritchhorror.core.constants.location.LocationId origin=wrap?
                     sk.sivak.eldritchhorror.core.constants.location.LocationId.ARKHAM:sk.sivak.eldritchhorror.core.constants.location.LocationId.ROME;
             sk.sivak.eldritchhorror.core.constants.location.LocationId destination=wrap?
                     sk.sivak.eldritchhorror.core.constants.location.LocationId.SYDNEY:sk.sivak.eldritchhorror.core.constants.location.LocationId.SPACE_7;
+            if(route>=2) {
+                origin=route==2?sk.sivak.eldritchhorror.core.constants.location.LocationId.BUENOS_AIRES:sk.sivak.eldritchhorror.core.constants.location.LocationId.THE_HIMALAYAS;
+                destination=route==2?sk.sivak.eldritchhorror.core.constants.location.LocationId.THE_HIMALAYAS:sk.sivak.eldritchhorror.core.constants.location.LocationId.BUENOS_AIRES;
+            }
             com.badlogic.gdx.math.Vector2 start=sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver.resolve(origin);
             com.badlogic.gdx.math.Vector2 end=sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver.resolve(destination);
             OrthographicCamera camera=sk.sivak.eldritchhorror.core.view.game.MapStage.getCamera();
@@ -261,8 +372,14 @@ public class ReportFixesPreview extends ApplicationAdapter {
             }
             int[] done={0};
             view.moveMonsters(group,destination).subscribe(() -> done[0]++);
+            float previousMonsterX=centers.get(0).getX(),previousCameraX=camera.position.x;
             for(int frame=0;frame<1800 && done[0]==0;frame++) {
                 map.act(1f/60);stage.act(1f/60);
+                float monsterDx=centers.get(0).getX()-previousMonsterX,cameraDx=camera.position.x-previousCameraX;
+                if(cameraDx>ViewProperties.MAP_WIDTH/2f)cameraDx-=ViewProperties.MAP_WIDTH;
+                if(cameraDx<-ViewProperties.MAP_WIDTH/2f)cameraDx+=ViewProperties.MAP_WIDTH;
+                require(monsterDx*cameraDx>=-.01f,"Monster and camera travel in opposite directions on route "+route);
+                previousMonsterX=centers.get(0).getX();previousCameraX=camera.position.x;
                 require(Math.abs(centers.get(1).getX()-centers.get(0).getX()-40)<.05f,"Cultists separated in transit");
                 require(Math.abs(centers.get(1).getY()-centers.get(0).getY())<.05f,"Cultists moved at different speeds");
                 int cameras=0;for(Actor actor:map.getActors())if(actor instanceof sk.sivak.eldritchhorror.core.view.map.CameraActor)cameras++;
@@ -273,7 +390,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             require(Math.abs(centers.get(2).getX()-start.x-80)<.05f && centers.get(2).getY()==start.y,"Unrelated monster moved");
             Gdx.gl.glClearColor(.08f,.12f,.1f,1);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);map.draw();
             Pixmap pixels=ScreenUtils.getFrameBufferPixmap(0,0,960,540);PixmapIO.PNG png=new PixmapIO.PNG();png.setFlipY(true);
-            png.write(Gdx.files.local("../build/report-fixes-preview/oct23-cultists"+(wrap?"-wrap":"")+(fast?"-fast":"")+".png"),pixels);png.dispose();pixels.dispose();
+            png.write(Gdx.files.local("../build/report-fixes-preview/oct23-cultists-route"+route+(wrap?"-wrap":"")+(fast?"-fast":"")+".png"),pixels);png.dispose();pixels.dispose();
         }
         sk.sivak.eldritchhorror.core.view.game.MapStage.clearIdActorMap();FastForwardAction.turnOff();
     }

@@ -23,6 +23,7 @@ public class MonsterImageEffect {
         return Completable.create(onSub -> {
             monsterImage.setOrigin(monsterImage.getWidth() / 2, monsterImage.getHeight() / 2);
             float normalActionDuration = ViewProperties.NORMAL_ACTION_DURATION;
+            float defeatScale = defeatScale(monsterImage.getWidth(), monsterImage.getHeight());
 
             if (monsterImage instanceof MonsterImage) {
                 MonsterImage monsterImageActor = (MonsterImage) monsterImage;
@@ -39,14 +40,19 @@ public class MonsterImageEffect {
                             Actions.rotateTo(360, normalActionDuration, Interpolation.sine),
                             Actions.moveTo(
                                     ViewProperties.VIEWPORT_WIDTH / 2f - monsterImage.getWidth() / 2,
-                                    ViewProperties.VIEWPORT_HEIGHT / 2f - monsterImage.getWidth() / 2,
+                                    ViewProperties.VIEWPORT_HEIGHT / 2f - monsterImage.getHeight() / 2,
                                     normalActionDuration, Interpolation.sine),
-                            Actions.scaleTo(4, 4,
+                            Actions.scaleTo(defeatScale, defeatScale,
                                     normalActionDuration, Interpolation.sine)
                     ),
                     Actions.run(() -> destroyImage(monsterImage, onSub))
             )));
         });
+    }
+
+    static float defeatScale(float width, float height) {
+        return Math.min(ViewProperties.VIEWPORT_WIDTH * 0.3f / width,
+                ViewProperties.VIEWPORT_HEIGHT * 0.45f / height);
     }
 
     private static void destroyImage(Actor monsterImage, CompletableSubscriber onSub) {

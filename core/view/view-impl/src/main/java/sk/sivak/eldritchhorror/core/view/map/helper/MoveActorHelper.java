@@ -16,7 +16,6 @@ import java.util.Collections;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.CAMERA_MOVE_SPEED;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDistance;
 
 public class MoveActorHelper {
 
@@ -33,34 +32,11 @@ public class MoveActorHelper {
 
             List<Actor> actors = new ArrayList<>();
             for(MapStage.IdLayerResolver resolver:resolvers)actors.addAll(MapStage.getActor(resolver));
-            Actor centerActor = actors.get(1);
-
-
-            double distance = getDistance(
-                    new Vector2(currentLocation.x, currentLocation.y),
-                    new Vector2(targetLocation.x, targetLocation.y)
-            );
-
-            Vector2 moveByVector = new Vector2(targetLocation.x - currentLocation.x, targetLocation.y - currentLocation.y);
-            if (distance > MAP_WIDTH/2f) {
-                if (targetLocation.x > MAP_WIDTH/2f) { // Arkham to Sydney
-                    for (Actor actor : actors) {
-                        actor.setX(actor.getX() + MAP_WIDTH);
-                    }
-                    moveByVector = new Vector2(-currentLocation.x - MAP_WIDTH + targetLocation.x,targetLocation.y - currentLocation.y);
-                } else { // Sydney to arkham
-                    for (Actor actor : actors) {
-                        actor.setX(actor.getX() - MAP_WIDTH);
-                    }
-                    moveByVector = new Vector2(targetLocation.x + MAP_WIDTH-currentLocation.x,targetLocation.y - currentLocation.y);
-                }
-                distance = getDistance(
-                        new Vector2(centerActor.getX() - centerActor.getWidth() / 2, centerActor.getY() - centerActor.getHeight() / 2),
-                        new Vector2(targetLocation.x, targetLocation.y)
-                );
-            }
-
-
+            Vector2 moveByVector = shortestDisplacement(currentLocation, targetLocation);
+            // Rebase the repeated tokens so they finish in their canonical map copies.
+            float wrapOffset = targetLocation.x - currentLocation.x - moveByVector.x;
+            for (Actor actor : actors) actor.setX(actor.getX() + wrapOffset);
+            double distance = moveByVector.len();
             float speed = CAMERA_MOVE_SPEED;
             float duration = (float) Math.sqrt (distance / speed);
 
@@ -79,6 +55,14 @@ public class MoveActorHelper {
             )));
         });
 
+    }
+
+    static Vector2 shortestDisplacement(Vector2 origin, Vector2 destination) {
+        Vector2 delta = new Vector2(destination).sub(origin);
+        // Only horizontal distance determines wrapping; latitude must not reverse the route.
+        if (delta.x > MAP_WIDTH / 2f) delta.x -= MAP_WIDTH;
+        else if (delta.x < -MAP_WIDTH / 2f) delta.x += MAP_WIDTH;
+        return delta;
     }
 
 }

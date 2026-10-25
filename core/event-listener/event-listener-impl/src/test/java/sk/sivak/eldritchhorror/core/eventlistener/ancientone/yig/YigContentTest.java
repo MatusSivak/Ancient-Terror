@@ -101,6 +101,22 @@ public class YigContentTest {
     @Test public void slovakTranslationMatchesEnglishKeysAndMarkup() throws Exception {
         assertParity(load("encounter/research_YIG.properties"), load("encounter/research_YIG_sk.properties"));
     }
+    @Test public void slovakRulesKeepEveryGlyphKeyword() throws Exception {
+        for (String file : new String[]{"encounter/yig", "encounter/research_YIG"}) {
+            Properties en = load(file + ".properties"), sk = load(file + "_sk.properties");
+            for (String key : en.stringPropertyNames()) {
+                if (key.contains(".flavor") || key.contains(".intro") || key.contains(".name")) continue;
+                for (String token : new String[]{"Health", "Sanity", "Clues?", "Focus", "Will", "Strength", "Observation", "Influence", "Lore", "RECKONING"}) {
+                    assertEquals(file + ":" + key + ":" + token, glyphCount(en.getProperty(key), token), glyphCount(sk.getProperty(key), token));
+                }
+            }
+        }
+    }
+    private int glyphCount(String text, String token) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\b" + token + "\\b").matcher(text);
+        int count = 0; while (matcher.find()) count++; return count;
+    }
+
     private void assertParity(Properties en, Properties sk) {
         assertEquals(en.stringPropertyNames(), sk.stringPropertyNames());
         for (String key : en.stringPropertyNames()) {

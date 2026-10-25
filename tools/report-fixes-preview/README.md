@@ -48,6 +48,13 @@ ability text. Screenshots use `oct19-ticket-rules-*` and `typewriter-glyphs*`.
 
 From the repository root, using the JDK setup in `BUILDING.md`:
 
+Use `--args="--oct25"` for condition cards shown before accepting Debt, choosing
+among conditions, ambush defeat size, investigator-token removal during exit,
+and Slovak mystery glyphs. Checks normal and fast-forward animation. Grouped
+movement also covers Buenos Aires–Himalayas in both directions and asserts the
+camera and monsters travel the same way. Screenshots use `oct25-*`,
+`oct23-cultists-route*`, and `mystery-glyphs.png`.
+
 ```powershell
 .\gradlew.bat -I tools/report-fixes-preview/preview.gradle :desktop:previewReportFixes --args="--latest" --console=plain
 ```

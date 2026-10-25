@@ -57,21 +57,7 @@ public abstract class AbstractConditionListener<T extends ConditionInfo> impleme
     }
 
     protected AbstractConditionBackListener findConditionBackListener() {
-        String conditionBackClassName = conditionInfo.getId().getBackConditionClassName(conditionInfo.getConditionBack().getConditionBackId());
-        String conditionBackListenerClassName = conditionBackClassName
-                .replace(
-                        "sk.sivak.eldritchhorror.core.constants.condition",
-                        "sk.sivak.eldritchhorror.core.eventlistener.back.condition")
-                .replace(
-                        "ConditionBack",
-                        "ConditionBackListener");
-        try {
-//            conditionBackListenerClassName = "sk.sivak.eldritchhorror.core.eventlistener.back.condition.poisoned.PoisonedConditionBackListener4";
-            return (AbstractConditionBackListener) Class.forName(conditionBackListenerClassName)
-                    .getConstructor(ConditionInfo.class).newInstance(conditionInfo);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return sk.sivak.eldritchhorror.core.eventlistener.back.condition.ConditionBackListeners.create(conditionInfo);
     }
 
     public void setEventData(GainedCardData gainedCardData) {
