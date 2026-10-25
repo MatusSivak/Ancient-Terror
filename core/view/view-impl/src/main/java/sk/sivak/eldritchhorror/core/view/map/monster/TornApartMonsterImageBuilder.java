@@ -1,84 +1,103 @@
 package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import sk.sivak.eldritchhorror.core.constants.ViewProperties;
-
-import java.util.UUID;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 
+/** Small, owned snapshots: capture without advancing actions or changing the live portrait. */
 public class TornApartMonsterImageBuilder {
+    static final float PADDED_SIZE = 1.12f;
+    private static final int MAX_TEXTURE_SIZE = 512;
+    private static final String[] MASKS = {"mm_left.png", "mm_right.png", "mm_bottom.png"};
 
-    public static TextureRegion buildBottomTextureRegion(Actor monsterImage) {
-        return buildTextureRegion(monsterImage, getTexture("mm_bottom.png"));
+    static Fragments build(Actor monster) {
+        float x = monster.getX(), y = monster.getY(), width = monster.getWidth(), height = monster.getHeight();
+        float scaleX = monster.getScaleX(), scaleY = monster.getScaleY(), rotation = monster.getRotation();
+        float originX = monster.getOriginX(), originY = monster.getOriginY();
+        Color color = new Color(monster.getColor());
+        Viewport viewport = monster.getStage().getViewport();
+        float captureScale = MAX_TEXTURE_SIZE / (Math.max(width, height) * PADDED_SIZE);
+        int bufferWidth = Math.max(1, Math.round(width * captureScale * PADDED_SIZE));
+        int bufferHeight = Math.max(1, Math.round(height * captureScale * PADDED_SIZE));
+        Fragments result = new Fragments();
+        SpriteBatch batch = new SpriteBatch();
+        try {
+            float captureWidth = bufferWidth / PADDED_SIZE, captureHeight = bufferHeight / PADDED_SIZE;
+            monster.setBounds((bufferWidth - captureWidth) / 2, (bufferHeight - captureHeight) / 2,
+                    captureWidth, captureHeight);
+            monster.setOrigin(captureWidth / 2, captureHeight / 2);
+            monster.setScale(1f);
+            monster.setRotation(0f);
+            monster.setColor(Color.WHITE);
+            OrthographicCamera camera = new OrthographicCamera(bufferWidth, bufferHeight);
+            camera.position.set(bufferWidth / 2f, bufferHeight / 2f, 0f);
+            camera.update();
+            batch.setProjectionMatrix(camera.combined);
+            for (int i = 0; i < MASKS.length; i++) {
+                FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGBA8888, bufferWidth, bufferHeight, false);
+                result.buffers[i] = buffer;
+                buffer.begin();
+                try {
+                    Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
+                    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+                    batch.begin();
+                    batch.setColor(Color.WHITE);
+                    batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA,
+                            GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                    monster.draw(batch, 1f);
+                    batch.setColor(Color.WHITE);
+                    batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
+                    batch.draw(getTexture(MASKS[i]), 0, 0, bufferWidth, bufferHeight);
+                    batch.end();
+                } finally {
+                    if (batch.isDrawing()) batch.end();
+                    buffer.end(viewport.getScreenX(), viewport.getScreenY(),
+                            viewport.getScreenWidth(), viewport.getScreenHeight());
+                }
+                buffer.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                result.regions[i] = new TextureRegion(buffer.getColorBufferTexture());
+                result.regions[i].flip(false, true);
+            }
+            return result;
+        } catch (RuntimeException | Error failure) {
+            result.dispose();
+            throw failure;
+        } finally {
+            batch.dispose();
+            monster.setBounds(x, y, width, height);
+            monster.setOrigin(originX, originY);
+            monster.setScale(scaleX, scaleY);
+            monster.setRotation(rotation);
+            monster.setColor(color);
+        }
     }
 
-    public static TextureRegion buildLeftTextureRegion(Actor monsterImage) {
-        return buildTextureRegion(monsterImage, getTexture("mm_left.png"));
-    }
+    static final class Fragments implements Disposable {
+        private final FrameBuffer[] buffers = new FrameBuffer[3];
+        private final TextureRegion[] regions = new TextureRegion[3];
 
-    public static TextureRegion buildRightTextureRegion(Actor monsterImage) {
-        return buildTextureRegion(monsterImage, getTexture("mm_right.png"));
-    }
+        TextureRegion get(int index) {
+            return regions[index];
+        }
 
-    private static TextureRegion buildTextureRegion(Actor monsterImage, Texture maskTexture) {
-
-        float viewportWidth = ViewProperties.VIEWPORT_WIDTH;
-        float viewportHeight = ViewProperties.VIEWPORT_HEIGHT;
-        Viewport viewport = monsterImage.getStage().getViewport();
-        int frameBufferWidth = viewport.getScreenWidth();
-        int frameBufferHeight = viewport.getScreenHeight();
-
-        monsterImage.setPosition(0, 0);
-        monsterImage.setScale(1f);
-        monsterImage.setWidth(512);
-        monsterImage.setHeight(512);
-
-        SpriteBatch spriteBatch = new SpriteBatch();
-        spriteBatch.setColor(Color.WHITE);
-        OrthographicCamera camera = new OrthographicCamera(viewportWidth, viewportHeight);
-        camera.position.x = viewportWidth / 2f;
-        camera.position.y = viewportHeight / 2f;
-        camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
-        FrameBuffer frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, frameBufferWidth, frameBufferHeight, false);
-        frameBuffer.begin();
-        Gdx.gl.glClearColor(0, 0f, 0f, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        spriteBatch.begin();
-        spriteBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
-        monsterImage.act(0);
-        monsterImage.setColor(Color.WHITE);
-        spriteBatch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
-        monsterImage.draw(spriteBatch, 1f);
-        spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        spriteBatch.end();
-        spriteBatch.begin();
-
-        spriteBatch.setColor(Color.WHITE);
-        spriteBatch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
-        spriteBatch.draw(maskTexture, 0, 0, monsterImage.getWidth(), monsterImage.getHeight());
-        spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        spriteBatch.end();
-        frameBuffer.end(
-                viewport.getLeftGutterWidth(),
-                viewport.getBottomGutterHeight(),
-                viewport.getScreenWidth(),
-                viewport.getScreenHeight());
-        TextureRegion textureRegion = new TextureRegion(frameBuffer.getColorBufferTexture(),
-                (int) (monsterImage.getWidth() * (frameBufferWidth / viewportWidth)),
-                (int) (monsterImage.getHeight() * (frameBufferHeight / viewportHeight)));
-        textureRegion.flip(false, true);
-
-        return textureRegion;
+        @Override public void dispose() {
+            for (int i = 0; i < buffers.length; i++) {
+                if (buffers[i] != null) {
+                    buffers[i].dispose();
+                    buffers[i] = null;
+                }
+            }
+        }
     }
 }

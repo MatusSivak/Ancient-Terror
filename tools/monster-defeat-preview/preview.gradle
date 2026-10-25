@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('monsterDefeatPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/monster-defeat-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewMonsterDefeat', JavaExec) {
+        dependsOn desktop.tasks.named('monsterDefeatPreviewClasses')
+        classpath = desktop.sourceSets.monsterDefeatPreview.runtimeClasspath
+        mainClass.set('MonsterDefeatPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

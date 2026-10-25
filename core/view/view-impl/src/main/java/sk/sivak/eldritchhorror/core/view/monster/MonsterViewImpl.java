@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
 import rx.CompletableSubscriber;
 import rx.Single;
@@ -178,10 +177,8 @@ public class MonsterViewImpl implements MonsterView {
 
         InfoStage.addSmallActorToInfoStage(monsterImage);
 
-        monsterImage.addAction(Actions.parallel(
-                Actions.run(() -> MonsterImageEffect.tearAppart(monsterImage).subscribe(onSub::onCompleted)),
-                Actions.alpha(1f, ViewProperties.NORMAL_ACTION_DURATION)
-        ));
+        // The defeat sequence owns the fade too, so ambushes stay visible at fast-forward speed.
+        MonsterImageEffect.tearAppart(monsterImage).subscribe(onSub::onCompleted);
     }
 
     @Override
