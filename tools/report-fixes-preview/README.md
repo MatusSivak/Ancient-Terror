@@ -89,3 +89,9 @@ Yig Cultist and updated Yig epic sprite. It checks Ancient One switching/fallbac
 matching synchronous/asynchronous textures, and production cards, selections,
 map tokens, combat sprites, and combat overviews. Screenshots use `cultist-yig-*`
 and `yig-epic-*` prefixes.
+
+Use `--args="--yig-clue"` for spending a Clue to advance Yig's Active Mystery.
+It finishes a hidden research paper, answers the plain Yes/No question and a
+K'n-yan paper choice, then requires the discarded Clue token to stay visible
+instead of fading out with the small-actor layer. Screenshots use the
+`yig-clue-*` prefix.

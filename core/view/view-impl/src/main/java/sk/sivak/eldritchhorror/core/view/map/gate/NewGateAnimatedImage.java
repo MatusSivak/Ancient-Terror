@@ -14,7 +14,6 @@ import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
-import sk.sivak.eldritchhorror.core.view.animation.BreakApartAnimation;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 
@@ -81,8 +80,8 @@ public class NewGateAnimatedImage extends Group {
             clearActions();
             remove();
             InfoStage.getStageSafe().addActor(portrait);
-            BreakApartAnimation.start(portrait, backgroundImage.getDrawable(),
-                    toLibgdxColor(gateColor).lerp(Color.WHITE, 0.2f), "gate-close", onSub);
+            GateDissipateAnimation.start(portrait, backgroundImage, gateAnimatedImage,
+                    toLibgdxColor(gateColor), "gate-close", onSub);
         });
     }
 

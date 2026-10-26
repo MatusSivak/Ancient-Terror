@@ -17,6 +17,7 @@ public final class UiSounds {
         BUTTON_CLICK("button_click", .75f), HUD_CLICK("hud_click", .80f),
         CARD_OPEN("card_open", .80f), CARD_CLOSE("card_close", .72f),
         SHEET_OPEN("sheet_open", .80f), SHEET_CLOSE("sheet_close", .72f),
+        ENCOUNTER_OPEN("encounter_open", .80f), ENCOUNTER_CLOSE("encounter_close", .72f),
         MYSTERY_OPEN("mystery_open", .82f), MYSTERY_CLOSE("mystery_close", .72f),
         ANCIENT_OPEN("ancient_open", .85f), ANCIENT_CLOSE("ancient_close", .75f),
         POPUP_OPEN("popup_open", .70f), POPUP_CLOSE("popup_close", .65f);
@@ -56,6 +57,7 @@ public final class UiSounds {
         if (key == BigActorKey.MYSTERY_CARD) return opening ? Cue.MYSTERY_OPEN : Cue.MYSTERY_CLOSE;
         if (key == BigActorKey.MONSTER_CARD || key == BigActorKey.RUMOR_CARD)
             return opening ? Cue.CARD_OPEN : Cue.CARD_CLOSE;
+        if (key == BigActorKey.ENCOUNTER_TABLE) return opening ? Cue.ENCOUNTER_OPEN : Cue.ENCOUNTER_CLOSE;
         return opening ? Cue.SHEET_OPEN : Cue.SHEET_CLOSE;
     }
 

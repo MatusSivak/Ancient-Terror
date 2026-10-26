@@ -454,6 +454,7 @@ public class CustomAssetManager extends AssetManager {
         load("hud_button/ancient_one.png", Texture.class);
         load("investigator/border.png", Texture.class);
         load("gate/gate_border.png", Texture.class);
+        load(GATE_SMOKE, Texture.class);
         for (int i = 201; i <= 264; i++) {
             load("gate/portal_7/portal_" + i + ".png", Texture.class);
         }
@@ -617,6 +618,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String WHITE_BACKGROUND = "background/white.jpg";
     public final static String GRAY_BACKGROUND = "background/gray.jpg";
     public final static String PURE_WHITE_BACKGROUND = "background/pure_white.png";
+    public final static String GATE_SMOKE = "particle/smoke.png";
     public final static String CLOCK = "clock/clock.png";
     public final static String CLOCK_HOUR_HAND = "clock/hour_hand.png";
     public final static String CLOCK_MINUTE_HAND = "clock/minute_hand.png";

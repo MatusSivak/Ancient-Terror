@@ -18,7 +18,7 @@ Gate closing and combat perspective use the same offscreen runner:
 .\gradlew.bat -I tools/monster-defeat-preview/preview.gradle :desktop:previewGateCombat --offline
 ```
 
-Checks all three gate colours, the enlarged pause, layered fragment snapshots,
+Checks all three gate colours, the shudder, the vortex collapsing into rising mist,
 fast-forward, early removal, deferred closing, and the visible copy at each map wrap.
 Combat checks ordinary and epic near/far movement, transformed artwork bounds,
 nameplates, aiming, relative attack lunges, ground shadows, interruptions and removal.

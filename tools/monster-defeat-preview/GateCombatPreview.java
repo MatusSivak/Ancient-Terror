@@ -100,27 +100,23 @@ public class GateCombatPreview extends ApplicationAdapter {
         Group effect = stage.getRoot().findActor("gate-close");
         Actor portrait = effect.findActor("closing-gate-portrait");
         require(Math.abs(portrait.getScaleX() - .8f) < .005f, "Gate jumped during stage transfer");
-        boolean split = false;
-        for (int frame = 0; frame < 150 && done.get() == 0; frame++) {
+        boolean misted = effect.findActor("gate-mist") != null;
+        for (int frame = 0; frame < 180 && done.get() == 0; frame++) {
             if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
             stage.act(1f / 60f);
-            if (frame == 44 && !fast) {
-                require(portrait.getScaleY() > 1.2f && portrait.isVisible(), "Gate did not enlarge before tearing");
-                draw("gate-" + color + "-enlarged");
+            if (frame == 20 && !fast) {
+                require(portrait.isVisible() && portrait.getParent() == effect, "Gate vanished before dissipating");
+                draw("gate-" + color + "-shudder");
             }
-            if (effect.findActor("defeat-fragment-0") != null) {
-                split = true;
-                require(buffers() == buffers + (done.get() == 0 ? 3 : 0), "Gate snapshot ownership");
-                if (interrupt) {
-                    effect.remove();
-                    require(done.get() == 0, "Interrupted close completed");
-                    break;
-                }
+            if (interrupt && frame == 40) {
+                effect.remove();
+                require(done.get() == 0, "Interrupted close completed");
+                break;
             }
-            if (frame == 67 && !fast) draw("gate-" + color + "-split");
+            if ((frame == 60 || frame == 95) && !fast) draw("gate-" + color + "-dissipate-" + frame);
             if (color == GateColor.GREEN && !fast && !interrupt && frame % 2 == 0) draw("gate/frame-" + String.format("%03d", frame / 2));
         }
-        require(split && done.get() == (interrupt ? 0 : 1), "Gate close did not finish exactly once");
+        require(misted && done.get() == (interrupt ? 0 : 1), "Gate close did not finish exactly once");
         require(buffers() == buffers && stage.getActors().size == actors && tracked() == 0, "Gate leaked actors, buffers or fast-forward actions");
     }
 
@@ -155,7 +151,7 @@ public class GateCombatPreview extends ApplicationAdapter {
                 Vector2 center = portrait.localToStageCoordinates(new Vector2(portrait.getWidth() / 2, portrait.getHeight() / 2));
                 require(center.dst(480, 270) <= 1.1f, "Closing the wrong map copy: " + center);
                 require(Math.abs(portrait.getScaleX() - .8f) < .005f, "Map zoom lost during transfer");
-                tick(150);
+                tick(180);
                 require(done.get() == 1 && MapStage.getActor(resolver).isEmpty(), "Wrapped gate registry not cleared");
             }
         } finally {

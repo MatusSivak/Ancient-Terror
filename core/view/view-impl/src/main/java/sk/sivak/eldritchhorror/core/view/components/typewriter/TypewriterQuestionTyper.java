@@ -30,7 +30,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListen
 import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredGlyphKeywords;
 
 public class TypewriterQuestionTyper {
-    private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.24f;
+    private static final float BUTTON_FONT_SCALE_MULTIPLIER = 1.24f;
 
     private final TypewriterViewImpl typewriterView;
 
@@ -41,26 +41,42 @@ public class TypewriterQuestionTyper {
 
     public Single<Integer> typeQuestion(String[] buttonTexts) {
         return Single.create(onSub -> {
-            if (FastForwardAction.isOn() && isAutomaticConfirmation(buttonTexts)) {
-                // The paper stays locked, just as it does after a manual confirmation.
-                onSub.onSuccess(0);
-                return;
+            if (FastForwardAction.isOn() && buttonTexts.length == 1) {
+                String text = plainText(buttonTexts[0]);
+                if (isTestButton(text)) {
+                    // Keep the stamped test button on the paper so the performed test stays readable.
+                    displayAutoPressedQuestion(buttonTexts, onSub);
+                    return;
+                }
+                if (text.equalsIgnoreCase("OK")) {
+                    // The paper stays locked, just as it does after a manual confirmation.
+                    onSub.onSuccess(0);
+                    return;
+                }
             }
             displayQuestion(buttonTexts, onSub);
         });
     }
 
-    private boolean isAutomaticConfirmation(String[] buttonTexts) {
-        if (buttonTexts.length != 1) {
-            return false;
-        }
-        // Test prompts use the skill name, optionally colored and followed by a modifier.
-        String text = buttonTexts[0].replaceAll("\\[[^\\]]*\\]", "").trim();
-        return text.equalsIgnoreCase("OK") || text.equalsIgnoreCase("Test")
+    private static String plainText(String buttonText) {
+        return buttonText.replaceAll("\\[[^\\]]*\\]", "").trim();
+    }
+
+    // Test prompts use the skill name, optionally colored and followed by a modifier.
+    private static boolean isTestButton(String text) {
+        return text.equalsIgnoreCase("Test")
                 || text.matches("(Lore|Influence|Observation|Strength|Will)([+-]\\d+)?");
     }
 
     void displayQuestion(String[] buttonTexts, SingleSubscriber<? super Integer> onSub) {
+        displayQuestion(buttonTexts, onSub, false);
+    }
+
+    void displayAutoPressedQuestion(String[] buttonTexts, SingleSubscriber<? super Integer> onSub) {
+        displayQuestion(buttonTexts, onSub, true);
+    }
+
+    private void displayQuestion(String[] buttonTexts, SingleSubscriber<? super Integer> onSub, boolean autoPress) {
         boolean onNewLine = false;
         for (String buttonText : buttonTexts) {
             if (buttonText.length() > 35) {
@@ -75,6 +91,7 @@ public class TypewriterQuestionTyper {
             List<TextButtonWithValue> buttons = createButtons(buttonDatas);
             addButtonsToTableOnNewLine(buttons);
             addClickListenerOnButtons(buttons, onSub);
+            if (autoPress) autoPress(buttons, onSub);
         } else {
 
             BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SPECIAL_ELITE);
@@ -84,7 +101,12 @@ public class TypewriterQuestionTyper {
 
             addButtonsToTable(buttonWidth * FONT_SCALE, buttons);
             addClickListenerOnButtons(buttons, onSub);
+            if (autoPress) autoPress(buttons, onSub);
         }
+    }
+
+    private void autoPress(List<TextButtonWithValue> buttons, SingleSubscriber<? super Integer> onSub) {
+        press(buttons.get(0), buttons, onSub);
     }
 
     private void addButtonsToTableOnNewLine(List<TextButtonWithValue> buttons) {
@@ -211,24 +233,26 @@ public class TypewriterQuestionTyper {
 
     private void addClickListenerOnButtons(List<TextButtonWithValue> buttons, SingleSubscriber<? super Integer> onSub) {
         for (TextButtonWithValue button : buttons) {
-            addClickListener(button.getTextButton(), () -> {
-                BigActorsManager.lock(BigActorsManager.BigActorKey.PAPER);
-                Array<Cell> cells = typewriterView.getTable().getCells();
-                cells.get(cells.size - 1).setActor(button.getTextButton()).height(BUTTON_HEIGHT).width(button.getTextButton().getWidth());
-                for (TextButtonWithValue textButtonWithValue : buttons) {
-                    textButtonWithValue.getTextButton().clearListeners();
-                }
-
-                typewriterView.getTable().addAction(
-                        Actions.sequence(
-                                Actions.moveBy(0,5 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED),
-                                Actions.run( () -> {
-                                    typewriterView.increaseOffset(5 + BUTTON_HEIGHT / 2f);
-                                    onSub.onSuccess(button.getButtonId());
-                                })
-                        ));
-            });
+            addClickListener(button.getTextButton(), () -> press(button, buttons, onSub));
         }
+    }
+
+    private void press(TextButtonWithValue button, List<TextButtonWithValue> buttons, SingleSubscriber<? super Integer> onSub) {
+        BigActorsManager.lock(BigActorsManager.BigActorKey.PAPER);
+        Array<Cell> cells = typewriterView.getTable().getCells();
+        cells.get(cells.size - 1).setActor(button.getTextButton()).height(BUTTON_HEIGHT).width(button.getTextButton().getWidth());
+        for (TextButtonWithValue textButtonWithValue : buttons) {
+            textButtonWithValue.getTextButton().clearListeners();
+        }
+
+        typewriterView.getTable().addAction(
+                Actions.sequence(
+                        Actions.moveBy(0,5 + BUTTON_HEIGHT / 2f, NEW_LINE_SPEED),
+                        Actions.run( () -> {
+                            typewriterView.increaseOffset(5 + BUTTON_HEIGHT / 2f);
+                            onSub.onSuccess(button.getButtonId());
+                        })
+                ));
     }
 
     private class ButtonData {

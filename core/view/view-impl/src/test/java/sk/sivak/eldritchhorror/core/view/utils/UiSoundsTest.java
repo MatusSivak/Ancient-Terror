@@ -155,6 +155,8 @@ public class UiSoundsTest {
         assertEquals(ANCIENT_CLOSE, UiSounds.sheetCue(BigActorKey.ANCIENT_ONE, false));
         assertEquals(CARD_OPEN, UiSounds.sheetCue(BigActorKey.MONSTER_CARD, true));
         assertEquals(SHEET_CLOSE, UiSounds.sheetCue(BigActorKey.PASSPORT, false));
+        assertEquals(ENCOUNTER_OPEN, UiSounds.sheetCue(BigActorKey.ENCOUNTER_TABLE, true));
+        assertEquals(ENCOUNTER_CLOSE, UiSounds.sheetCue(BigActorKey.ENCOUNTER_TABLE, false));
     }
 
     @Test public void dialogAnnouncesEachVisibilityChangeOnlyOnce() {

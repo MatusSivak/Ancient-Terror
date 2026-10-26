@@ -58,7 +58,9 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean october23Evening;
     private static boolean buttonGlyphColors;
     private static boolean october25;
+    private static boolean yigClue;
     public static void main(String[] args) {
+        yigClue = Arrays.asList(args).contains("--yig-clue");
         october25 = Arrays.asList(args).contains("--oct25");
         latestOnly = Arrays.asList(args).contains("--latest");
         october15 = Arrays.asList(args).contains("--oct15");
@@ -93,6 +95,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             if (nun) { nunDiceBonus(); return; }
             if (october20) { october20Reports(); return; }
             if (crown) { crownResolution(); return; }
+            if (yigClue) { yigClueSpend(); return; }
             if (october19) { october19Reports(); return; }
             if (awakening) { awakeningReports(); return; }
             if (october15) { october15Reports(); return; }
@@ -700,6 +703,78 @@ public class ReportFixesPreview extends ApplicationAdapter {
         }
         setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
         System.out.println("PASS: Crown acknowledgement, holder camera/HUD and Clue/Focus animations in both languages and speeds");
+    }
+
+    private void yigClueSpend() throws Exception {
+        sk.sivak.eldritchhorror.core.constants.location.LocationId location =
+                sk.sivak.eldritchhorror.core.constants.location.LocationId.SPACE_19;
+        InvestigatorBasics basics = proxy(InvestigatorBasics.class, (p,m,a) -> {
+            switch (m.getName()) {
+                case "getInvestigatorId": return InvestigatorId.THE_SPY;
+                case "getLocationId": return location;
+                case "getClues": return 2;
+                case "getFocusTokens": return 0;
+                case "getCurrentHealth": case "getMaxHealth": return 7;
+                case "getCurrentSanity": case "getMaxSanity": return 5;
+                case "getTickets": return Arrays.asList(PathType.TRAIN);
+                default: throw new AssertionError(m.getName());
+            }
+        });
+        GameController controller = proxy(GameController.class, (p,m,a) -> {
+            if (m.getName().equals("getInvestigatorBasics")) return basics;
+            throw new AssertionError(m.getName());
+        });
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(controller).init();
+        int[] completed = {0};
+        new sk.sivak.eldritchhorror.core.view.investigator.InvestigatorView(controller)
+                .showActiveInvestigator(false, false).subscribe(() -> completed[0]++);
+        for (int i=0; i<1800; i++) { stage.act(1f/60); MapStage.getStage().act(1f/60); }
+        // Research: paper finished, then a plain question.
+        TypewriterViewImpl paper = new TypewriterViewImpl();
+        sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.setTypewriterView(paper);
+        paper.showPaper(true).subscribe(); tick(120);
+        paper.typeInfo("Research encounter").subscribe(); tick(600);
+        // Yig research outcomes hide the paper before their effect; the encounter then finishes the hidden paper.
+        paper.hidePaper().subscribe(); tick(120);
+        paper.finishPaper().subscribe(); tick(120);
+        require(!sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.isPaperDisplayed(), "Finished hidden paper is still marked as displayed");
+        Question<Boolean> q = new Question<>(); q.setTitle("Spend 1 Clue gained in this encounter to advance the Active Mystery?");
+        q.setOptions(Question.Option.noYesOptions);
+        sk.sivak.eldritchhorror.core.view.question.QuestionView view = new sk.sivak.eldritchhorror.core.view.question.QuestionView();
+        view.ask(q).subscribe(a -> completed[0]++); tick(120);
+        draw("yig-clue-research-question");
+        List<Button> buttons=(List<Button>)field(view,"buttons"); click(buttons.get(1));
+        require(measureClueLoss("research") >= 100, "Spent Clue faded out under the question");
+        // K'n-yan: choice on the paper, paper hidden, then payment.
+        paper.showPaper(true).subscribe(); tick(120);
+        paper.typeInfo("Spend 1 Clue?").subscribe(); tick(600);
+        int[] choice={-1}; paper.displayButtons("No","Yes").subscribe(v -> choice[0]=v); tick(120);
+        List<TextButton> paperButtons=new ArrayList<>();
+        for(Actor actor:all(paper.getTable())) if(actor instanceof TextButton) paperButtons.add((TextButton)actor);
+        click(paperButtons.get(1)); tick(1);
+        boolean[] hidden={false}; paper.hidePaper().subscribe(() -> hidden[0]=true);
+        for(int i=0;i<120 && !hidden[0];i++) tick(1);
+        require(choice[0] == 1 && !sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.isPaperDisplayed(), "Hidden paper is still marked as displayed");
+        require(measureClueLoss("knyan") >= 80, "Spent Clue faded out after the paper choice");
+        System.out.println("PASS: Yig spent Clues stay visible after hidden encounter papers and paper choices");
+    }
+
+    private float measureClueLoss(String name) throws Exception {
+        int[] done={0};
+        new sk.sivak.eldritchhorror.core.view.action.focus.TokenView().loseClue().subscribe(() -> done[0]++);
+        sk.sivak.eldritchhorror.core.view.components.TokenActor token = find(sk.sivak.eldritchhorror.core.view.components.TokenActor.class);
+        Group layer = token.getParent();
+        Group big = (Group) layer.getStage().getRoot().getChildren().get(layer.getZIndex() + 2);
+        float visibleFrames = 0, frames = 0;
+        for (int frame=0; token.getParent()!=null && frame<300; frame++) {
+            float a = token.getColor().a * layer.getColor().a;
+            frames++; if (a > .5f) visibleFrames++;
+            if (frame % 20 == 0) { System.out.println(name + " frame " + frame + " token=" + token.getColor().a + " layer=" + layer.getColor().a + " bigActors=" + big.getChildren().size); draw("yig-clue-" + name + "-" + frame); }
+            stage.act(1f/60);
+        }
+        System.out.println(name + ": visible " + visibleFrames + "/" + frames + " frames");
+        require(done[0] == 1, "Clue loss did not complete");
+        return visibleFrames;
     }
 
     private void october19Reports() throws Exception {

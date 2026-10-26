@@ -9,6 +9,7 @@ import soundfile as sf
 from prepare_gameplay_sounds import ROOT, RATE, OUTPUT, clip, bell, mix
 
 SOURCE = ROOT / "source_assets/sounds/interface"
+PAPER = ROOT / "source_assets/sounds/typewriter/paper.mp3"
 
 
 def interface(name, speed=1.0, duration=.6):
@@ -25,6 +26,11 @@ def cues():
                              (interface("maximize_001"), 0, .2)),
         "ui_sheet_close": mix((clip("book_04.ogg", 1.3, .55), 0, 1),
                               (interface("minimize_001"), 0, .2)),
+        # The encounter table is a paper folio: page turn and paper slide, no synthetic layers.
+        "ui_encounter_open": mix((clip("book_01.ogg", 1.0, .6), 0, 1),
+                                 (clip(PAPER, 1.15, .45), .02, .35)),
+        "ui_encounter_close": mix((clip("book_04.ogg", 1.15, .5), 0, 1),
+                                  (clip(PAPER, 1.3, .35), 0, .3)),
         "ui_mystery_open": mix((clip("book_03.ogg", 1.1, .7), 0, 1), (bell(.85, .7), .06, .12)),
         "ui_mystery_close": clip("book_02.ogg", 1.1, .6),
         "ui_ancient_open": mix((clip("book_04.ogg", .85, .85), 0, 1), (bell(.4, .95), .04, .15)),

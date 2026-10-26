@@ -34,7 +34,8 @@ public class TypewriterEffect {
     }
 
     private SequenceAction createFinishPaperAction(CompletableSubscriber onSub) {
-        if (typewriterView.getTable().getParent() == null) {
+        boolean hidden = typewriterView.getTable().getParent() == null;
+        if (hidden) {
             InfoStage.addBigActor(OnScreenActors.ActorKey.PAPER, typewriterView.getTable(), null, null);
         }
         Table table = typewriterView.getTable();
@@ -43,8 +44,14 @@ public class TypewriterEffect {
                         Actions.moveTo(table.getX(), ViewProperties.VIEWPORT_HEIGHT, .5f, Interpolation.sineIn)),
                 Actions.run(() -> {
                     table.clear();
-                    BigActorsManager.unlock(BigActorsManager.BigActorKey.PAPER);
-                    BigActorsManager.displayOrHidePaper();
+                    if (hidden) {
+                        // Hiding already toggled PAPER off; toggling again would mark the removed paper as displayed,
+                        // so later plain questions would join the big actors and fade out HUD tokens.
+                        BigActorsManager.finishRemoval(BigActorsManager.BigActorKey.PAPER);
+                    } else {
+                        BigActorsManager.unlock(BigActorsManager.BigActorKey.PAPER);
+                        BigActorsManager.displayOrHidePaper();
+                    }
                     BigActorsManager.unlock(BigActorsManager.BigActorKey.PAPER);
                     table.remove();
                     onSub.onCompleted();

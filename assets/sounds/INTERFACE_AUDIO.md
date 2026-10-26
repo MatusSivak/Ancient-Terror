@@ -1,6 +1,6 @@
 # Interface sound effects
 
-Source and event audit: 24 October 2026. The 12 UI cues use CC0 recordings.
+Source and event audit: 24 October 2026. The 14 UI cues use CC0 recordings.
 
 - Kenney, [Interface Sounds](https://kenney.nl/assets/interface-sounds),
   [OpenGameArt release](https://opengameart.org/content/interface-sounds),
@@ -10,6 +10,8 @@ Source and event audit: 24 October 2026. The 12 UI cues use CC0 recordings.
 - rubberduck's book recordings and PWL's bell recording are reused from
   `source_assets/sounds/gameplay/`. See [gameplay audio credits](GAMEPLAY_AUDIO.md)
   for the original source/download URLs and licenses.
+- The encounter table pair also layers craigsmith's CC0 paper recording from
+  `source_assets/sounds/typewriter/paper.mp3`; see its README for the source.
 
 ## Gesture coverage
 
@@ -18,7 +20,8 @@ Source and event audit: 24 October 2026. The 12 UI cues use CC0 recordings.
 | Enabled menu/setup/choice/confirmation button | `ui_button_click` | Kenney `click_003`, dry short click |
 | HUD button or investigator dossier tab | `ui_hud_click` | Kenney `click_001`, slightly deeper click |
 | Card closeup open / close; monster and rumor panels | `ui_card_open`, `ui_card_close` | rubberduck books 01 / 02, paper handling |
-| Investigator, passport, reserve, discard and encounter sheets; Doom zoom | `ui_sheet_open`, `ui_sheet_close` | rubberduck books 03 / 04 + Kenney maximize/minimize 001 |
+| Investigator, passport, reserve and discard sheets; Doom zoom | `ui_sheet_open`, `ui_sheet_close` | rubberduck books 03 / 04 + Kenney maximize/minimize 001 |
+| Encounter table maximize / minimize | `ui_encounter_open`, `ui_encounter_close` | rubberduck books 01 / 04 + typewriter paper slide; no synthetic layers |
 | Mystery sheet open / close | `ui_mystery_open`, `ui_mystery_close` | books 03 / 02; opening has a restrained discovery bell |
 | Ancient One sheet open / close | `ui_ancient_open`, `ui_ancient_close` | books 04 / 02 + low bell layers |
 | Dialog and action panel open / close | `ui_popup_open`, `ui_popup_close` | Kenney open/close 001, short air motion |

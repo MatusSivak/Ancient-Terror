@@ -1,8 +1,10 @@
 package sk.sivak.eldritchhorror.core.view.utils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -22,6 +24,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
+import sk.sivak.eldritchhorror.core.view.map.CameraActor;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
@@ -40,6 +43,7 @@ public class BackgroundUtils {
     private Stage backgroundStage;
     private final GameController gameController;
     private String currentBackgroundName;
+    private Vector3 cameraBeforeBackground;
 
     public BackgroundUtils(Stage backgroundStage, GameController gameController) {
         this.backgroundStage = backgroundStage;
@@ -107,6 +111,7 @@ public class BackgroundUtils {
             NewMusicBox.getInstance().changeMusic(NewMusicBox.TRACK_HORROR_GAME_INTRO);
             MapStage.addDragAndZoomListeners();
             MapUtils.enableCameraPositionFix();
+            restoreMapCamera();
             toBackground(SPACE);
             backgroundStage.addAction(Actions.delay(1f, Actions.run(onSub::onCompleted)));
         });
@@ -137,6 +142,7 @@ public class BackgroundUtils {
             backgroundStage.addAction(new FastForwardAction<>(Actions.sequence(
                     Actions.run(() -> {
                         if (!investigatorsAtLocation.isEmpty()) {
+                            rememberMapCamera();
                             Vector2 centerPosition = LocationPositionResolver.resolve(investigatorsAtLocation.get(0).getLocationId());
                             Vector2 newCameraPosition = new Vector2(
                                     centerPosition.x + 310,
@@ -153,6 +159,30 @@ public class BackgroundUtils {
                     })
             )));
         });
+    }
+
+    private void rememberMapCamera() {
+        if (cameraBeforeBackground != null) return;
+        OrthographicCamera camera = MapStage.getCamera();
+        cameraBeforeBackground = new Vector3(camera.position.x, camera.position.y, camera.zoom);
+    }
+
+    /**
+     * The encounter background moves the hidden map camera; put it back while the map is still
+     * transparent so returning to the board does not pan the view.
+     */
+    private void restoreMapCamera() {
+        Vector3 previous = cameraBeforeBackground;
+        cameraBeforeBackground = null;
+        if (previous == null) return;
+        for (Actor actor : MapStage.getStage().getActors()) {
+            if (actor instanceof CameraActor) return;
+        }
+        OrthographicCamera camera = MapStage.getCamera();
+        camera.position.x = previous.x;
+        camera.position.y = previous.y;
+        camera.zoom = previous.z;
+        camera.update();
     }
 
     private void hideInvestigatorsNotOnThisLocation(List<InvestigatorBasics> investigatorsAtLocation) {
@@ -206,6 +236,7 @@ public class BackgroundUtils {
                 }
                 MapStage.addDragAndZoomListeners();
                 MapUtils.enableCameraPositionFix();
+                restoreMapCamera();
             }
 
             CustomAssetManager.getTextureAsync(backgroundName).subscribe(ok -> {

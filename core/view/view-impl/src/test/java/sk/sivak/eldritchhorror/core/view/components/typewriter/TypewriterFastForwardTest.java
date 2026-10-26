@@ -24,18 +24,20 @@ public class TypewriterFastForwardTest {
         if (previousFastForward) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
     }
 
-    @Test public void okAndTestConfirmWithoutRenderingButtons() {
+    @Test public void okConfirmsWithoutRenderingButtons() {
         assertConfirmed("OK");
-        assertConfirmed("Test");
         assertEquals(0, typer.displayCount);
+        assertEquals(0, typer.autoPressedCount);
     }
 
-    @Test public void skillTestsConfirmWithPositiveAndNegativeModifiers() {
+    @Test public void testButtonsAreShownAndAutoPressed() {
+        typer.typeQuestion(new String[]{"Test"}).subscribe(new TestSubscriber<>());
         for (Stat stat : Stat.values()) {
-            assertConfirmed(stat.prettyString());
-            assertConfirmed("[#GOOD]" + stat.prettyString() + "+2[]");
-            assertConfirmed("[#BAD]" + stat.prettyString() + "-1[]");
+            typer.typeQuestion(new String[]{stat.prettyString()}).subscribe(new TestSubscriber<>());
+            typer.typeQuestion(new String[]{"[#GOOD]" + stat.prettyString() + "+2[]"}).subscribe(new TestSubscriber<>());
+            typer.typeQuestion(new String[]{"[#BAD]" + stat.prettyString() + "-1[]"}).subscribe(new TestSubscriber<>());
         }
+        assertEquals(1 + Stat.values().length * 3, typer.autoPressedCount);
         assertEquals(0, typer.displayCount);
     }
 
@@ -84,11 +86,16 @@ public class TypewriterFastForwardTest {
 
     private static class CapturingQuestionTyper extends TypewriterQuestionTyper {
         int displayCount;
+        int autoPressedCount;
 
         CapturingQuestionTyper() { super(null); }
 
         @Override void displayQuestion(String[] texts, SingleSubscriber<? super Integer> subscriber) {
             displayCount++;
+        }
+
+        @Override void displayAutoPressedQuestion(String[] texts, SingleSubscriber<? super Integer> subscriber) {
+            autoPressedCount++;
         }
     }
 }
