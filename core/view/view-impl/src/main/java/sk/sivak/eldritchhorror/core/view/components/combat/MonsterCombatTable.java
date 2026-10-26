@@ -57,7 +57,7 @@ public class MonsterCombatTable extends VisTable {
     public static final float SAFE_RIGHT = 895f;
     private static final float SAFE_TOP = 532f;
     private static final float IMAGE_SIZE = 200f;
-    /** Epic monsters loom larger, glow gold and throw bigger fireballs. */
+    /** Epic monsters loom larger, glow red and throw bigger fireballs. */
     private static final float EPIC_IMAGE_SIZE = 260f;
     private static final float EPIC_GLOW_SCALE = 1.06f;
     private static final float EPIC_FIREBALL_SCALE = 1.5f;
@@ -103,8 +103,9 @@ public class MonsterCombatTable extends VisTable {
     private Cell<Table> horrorRowCell;
     private FireballService fireballService;
     private Image monsterImage;
+    private Image groundShadow;
     private float imageSize = IMAGE_SIZE;
-    /** Gold rim behind epic monsters; null for ordinary ones. */
+    /** Red rim behind epic monsters; null for ordinary ones. */
     private SilhouetteImage epicGlow;
     private float hoverTime;
     private final Vector2 wanderFrom = new Vector2();
@@ -128,6 +129,12 @@ public class MonsterCombatTable extends VisTable {
     private float walkBlend;
     private float walkLean;
     private float idleBlend = 1f;
+    private float attackTime;
+    private static final float ATTACK_PULSE_DURATION = 0.28f;
+    private static final float FAR_SCALE = 0.72f;
+    private static final float NEAR_SCALE = 1.12f;
+    private final Vector2 artLeft = new Vector2();
+    private final Vector2 artRight = new Vector2();
 
     public boolean isCentered() {
         return centered;
@@ -147,6 +154,9 @@ public class MonsterCombatTable extends VisTable {
         if (monsterImage != null) {
             monsterImage.remove();
         }
+        if (groundShadow != null) {
+            groundShadow.remove();
+        }
         if (statusPlate != null) {
             statusPlate.remove();
         }
@@ -163,7 +173,13 @@ public class MonsterCombatTable extends VisTable {
         walkLean = 0f;
         idleBlend = 1f;
         presence = 0f;
+        attackTime = 0f;
+        hitShake = 0f;
         monsterImage = createMonsterImage(data);
+        groundShadow = new Image(CustomAssetManager.getTexture("dice_shadow.png"));
+        groundShadow.setName("combat-ground-shadow");
+        groundShadow.setTouchable(Touchable.disabled);
+        groundShadow.setColor(0.025f, 0.015f, 0.035f, 0f);
         // Panels, cards and dice are layered above the creature layer, so they still get their touches first.
         monsterImage.setTouchable(Touchable.enabled);
         ButtonUtils.addClickListener(monsterImage, () -> displayMonsterCard(data));
@@ -177,10 +193,13 @@ public class MonsterCombatTable extends VisTable {
         }
         attachMonsterImage();
 
-        wanderArea.set(150f, 60f, SAFE_RIGHT - imageSize - 150f, SAFE_TOP - imageSize - statusPlate.getHeight() - 60f);
+        float margin = motionMargin();
+        wanderArea.set(150f + margin, 60f, SAFE_RIGHT - imageSize - 150f - 2f * margin,
+                Math.max(1f, SAFE_TOP - imageSize - statusPlate.getHeight() - 60f - margin - STEP_BOB));
         // Emerge at the top centre of the screen, then roam.
         wanderPosition.set(
-                MathUtils.clamp(ViewProperties.VIEWPORT_WIDTH / 2f - imageSize / 2f, wanderArea.x, wanderArea.x + wanderArea.width),
+                MathUtils.clamp(Math.max(INVESTIGATOR_KEEP_OUT.width + margin + 5f,
+                        ViewProperties.VIEWPORT_WIDTH / 2f - imageSize / 2f), wanderArea.x, wanderArea.x + wanderArea.width),
                 wanderArea.y + wanderArea.height);
         monsterImage.setPosition(wanderPosition.x, wanderPosition.y);
         wanderPause = MathUtils.random(0.5f, 1.2f);
@@ -188,8 +207,11 @@ public class MonsterCombatTable extends VisTable {
         act(0f);
     }
 
-    /** Portrait and status plate live on the creature layer, above panels, cards and dice. */
+    /** Portrait and status plate live on the creature layer, behind panels, cards and dice. */
     private void attachMonsterImage() {
+        if (getStage() != null && groundShadow != null && groundShadow.getParent() == null) {
+            InfoStage.getCreatureLayer().addActorAt(0, groundShadow);
+        }
         // The glow goes in first, so it is drawn behind the portrait.
         if (getStage() != null && epicGlow != null && epicGlow.getParent() == null) {
             if (monsterImage.getParent() != null) {
@@ -235,6 +257,7 @@ public class MonsterCombatTable extends VisTable {
                 : Math.min(1f, presence + delta / FADE_DURATION);
         boolean shown = presence > 0f;
         monsterImage.setVisible(shown);
+        groundShadow.setVisible(shown);
         statusPlate.setVisible(shown);
         if (epicGlow != null) {
             epicGlow.setVisible(shown);
@@ -257,6 +280,13 @@ public class MonsterCombatTable extends VisTable {
         }
         monsterImage.setPosition(wanderPosition.x + shake, wanderPosition.y + bob);
         monsterImage.setRotation(tilt);
+        // Higher on the floor is farther away. Foreshorten the portrait slightly as it turns into a stroll.
+        float depth = 1f - MathUtils.clamp((wanderPosition.y - wanderArea.y) / wanderArea.height, 0f, 1f);
+        float perspective = MathUtils.lerp(FAR_SCALE, NEAR_SCALE, Interpolation.sine.apply(depth));
+        attackTime = Math.max(0f, attackTime - delta * (FastForwardAction.isOn() ? 20f : 1f));
+        float attackPulse = attackTime > 0f ? 0.12f * MathUtils.sin(MathUtils.PI * attackTime / ATTACK_PULSE_DURATION) : 0f;
+        float scale = perspective * (1f + attackPulse + 0.012f * MathUtils.sin(hoverTime * 2f) * breathing);
+        monsterImage.setScale(scale * (1f - 0.12f * Math.abs(walkLean) / MAX_LEAN * walkBlend), scale);
         monsterImage.getColor().a = presence * getColor().a;
         if (epicGlow != null) {
             float glowOffset = imageSize * (EPIC_GLOW_SCALE - 1f) / 2f;
@@ -268,11 +298,21 @@ public class MonsterCombatTable extends VisTable {
 
         // The plate rides just above the visible part of the (fit-scaled) artwork; it does not tilt with it.
         monsterImage.validate();
-        float artTop = wanderPosition.y + bob + monsterImage.getImageY() + monsterImage.getImageHeight();
+        float left = monsterImage.getImageX(), bottom = monsterImage.getImageY();
+        float right = left + monsterImage.getImageWidth(), top = bottom + monsterImage.getImageHeight();
+        monsterImage.localToParentCoordinates(artLeft.set(left, top));
+        monsterImage.localToParentCoordinates(artRight.set(right, top));
+        float artTop = Math.max(artLeft.y, artRight.y);
         statusPlate.setPosition(
                 Math.round(wanderPosition.x + imageSize / 2f - statusPlate.getWidth() / 2f),
                 Math.round(Math.min(artTop + 2f, SAFE_TOP + 6f - statusPlate.getHeight())));
         statusPlate.getColor().a = presence * getColor().a;
+        monsterImage.localToParentCoordinates(artLeft.set((left + right) / 2f, bottom));
+        float shadowWidth = monsterImage.getImageWidth() * perspective * 0.85f;
+        float shadowHeight = imageSize * perspective * 0.16f;
+        groundShadow.setBounds(artLeft.x - shadowWidth / 2f, artLeft.y - bob - shadowHeight / 2f,
+                shadowWidth, shadowHeight);
+        groundShadow.getColor().a = presence * getColor().a * (0.28f + depth * 0.22f);
         updateTokenShakes(delta);
     }
 
@@ -314,13 +354,14 @@ public class MonsterCombatTable extends VisTable {
     /** Point fireballs aim at / start from: the middle of the drawn artwork. */
     private Vector2 getMonsterBodyCenter() {
         monsterImage.validate();
-        return new Vector2(
-                wanderPosition.x + monsterImage.getImageX() + monsterImage.getImageWidth() / 2f,
-                wanderPosition.y + monsterImage.getImageY() + monsterImage.getImageHeight() / 2f);
+        return monsterImage.localToStageCoordinates(new Vector2(
+                monsterImage.getImageX() + monsterImage.getImageWidth() / 2f,
+                monsterImage.getImageY() + monsterImage.getImageHeight() / 2f));
     }
 
     private Vector2 randomBodyPoint(Vector2 body) {
-        float spread = monsterImage.getImageWidth() * 0.18f;
+        float spread = Math.min(monsterImage.getImageWidth() * monsterImage.getScaleX(),
+                monsterImage.getImageHeight() * monsterImage.getScaleY()) * 0.18f;
         return new Vector2(body.x + MathUtils.random(-spread, spread), body.y + MathUtils.random(-spread, spread));
     }
 
@@ -333,9 +374,8 @@ public class MonsterCombatTable extends VisTable {
     }
 
     private void playAttackReaction() {
-        monsterImage.addAction(new FastForwardAction<>(Actions.sequence(
-                Actions.scaleTo(1.08f, 1.08f, 0.08f, Interpolation.sineOut),
-                Actions.scaleTo(1f, 1f, 0.2f, Interpolation.sineIn))));
+        // A relative lunge preserves the current perspective instead of resetting the monster to full size.
+        attackTime = ATTACK_PULSE_DURATION;
     }
     /** Steps follow the distance actually covered, so the feet never skate while the stroll speeds up or slows down. */
     private void updateGait(float delta, boolean walking, float movedX, float movedY) {
@@ -442,11 +482,12 @@ public class MonsterCombatTable extends VisTable {
 
     /** The monster's box anywhere along the current stroll touches the investigator's corner. */
     private boolean strollEntersKeepOut() {
-        Rectangle box = new Rectangle(0, 0, imageSize, imageSize);
+        float margin = motionMargin();
+        Rectangle box = new Rectangle(0, 0, imageSize + 2f * margin, imageSize + 2f * margin);
         Vector2 point = new Vector2();
         for (int i = 0; i <= 24; i++) {
             pointOnStroll(i / 24f, point);
-            box.setPosition(point.x, point.y);
+            box.setPosition(point.x - margin, point.y - margin);
             if (box.overlaps(INVESTIGATOR_KEEP_OUT)) {
                 return true;
             }
@@ -458,7 +499,9 @@ public class MonsterCombatTable extends VisTable {
         if (getParent() == null) {
             return false;
         }
-        Rectangle spot = new Rectangle(position.x, position.y, imageSize, imageSize);
+        float margin = motionMargin();
+        Rectangle spot = new Rectangle(position.x - margin, position.y - margin,
+                imageSize + 2f * margin, imageSize + 2f * margin);
         Rectangle other = new Rectangle();
         for (Actor actor : getParent().getChildren()) {
             if (actor == monsterImage || !actor.isVisible() || actor.getWidth() <= 0 || actor.getHeight() <= 0) {
@@ -469,6 +512,11 @@ public class MonsterCombatTable extends VisTable {
             }
         }
         return false;
+    }
+
+    private float motionMargin() {
+        // Includes the near-plane scale, turning, recoil and epic outline.
+        return imageSize * 0.2f;
     }
 
     /** The monster fades out instead of vanishing; the invisible combat actor is removed right away. */
@@ -484,6 +532,9 @@ public class MonsterCombatTable extends VisTable {
         }
         if (epicGlow != null && epicGlow.getParent() != null) {
             epicGlow.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
+        }
+        if (groundShadow != null && groundShadow.getParent() != null) {
+            groundShadow.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
         if (statusPlate != null && statusPlate.getParent() != null) {
             statusPlate.setTouchable(Touchable.disabled);

@@ -1,5 +1,7 @@
-package sk.sivak.eldritchhorror.core.view.map.monster;
+package sk.sivak.eldritchhorror.core.view.animation;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -18,37 +20,31 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 
 /** A single clock keeps the zoom, recoil and debris synchronized at any fast-forward speed. */
-final class MonsterDefeatAnimation extends Group {
+public final class BreakApartAnimation extends Group {
     private static final float ZOOM_TIME = 0.72f;
     private static final float HOLD_TIME = 0.26f;
     private static final float BURST_TIME = 0.90f;
     private static final float TOTAL_TIME = ZOOM_TIME + HOLD_TIME + BURST_TIME;
     private static final float[][] DIRECTIONS = {{-0.87f, 0.5f, -32f}, {0.87f, 0.5f, 38f}, {0f, -1f, -18f}};
 
-    private final Actor monster;
+    private final Actor subject;
     private final Image flash;
+    private final Color accent;
     private final float startX, startY, startScaleX, startScaleY, startAlpha, startRotation;
     private final float targetX, targetY, targetScale, extent;
-    private TornApartMonsterImageBuilder.Fragments fragments;
+    private TornApartActorImageBuilder.Fragments fragments;
     private final Image[] pieces = new Image[3];
     private final Image[] sparks = new Image[12];
 
-    static void start(Actor monster, CompletableSubscriber subscriber) {
-        Stage stage = monster.getStage();
-        Vector2 center = monster.localToStageCoordinates(new Vector2(monster.getWidth() / 2, monster.getHeight() / 2));
-        monster.clearActions();
-        monster.clearListeners();
-        monster.setTouchable(Touchable.disabled);
-        monster.setOrigin(monster.getWidth() / 2, monster.getHeight() / 2);
-        monster.setPosition(center.x - monster.getWidth() / 2, center.y - monster.getHeight() / 2);
-        if (monster instanceof MonsterImage) {
-            ((MonsterImage) monster).hideShadow();
-            ((MonsterImage) monster).removeReckoningImage();
-        } else if (monster instanceof EpicMonsterImage) {
-            ((EpicMonsterImage) monster).hideShadow();
-            ((EpicMonsterImage) monster).removeReckoningImage();
-        }
-        MonsterDefeatAnimation animation = new MonsterDefeatAnimation(monster);
+    public static void start(Actor subject, Drawable flashDrawable, Color accent, String name, CompletableSubscriber subscriber) {
+        Stage stage = subject.getStage();
+        Vector2 center = subject.localToStageCoordinates(new Vector2(subject.getWidth() / 2, subject.getHeight() / 2));
+        subject.clearActions();
+        subject.clearListeners();
+        subject.setTouchable(Touchable.disabled);
+        subject.setOrigin(subject.getWidth() / 2, subject.getHeight() / 2);
+        subject.setPosition(center.x - subject.getWidth() / 2, center.y - subject.getHeight() / 2);
+        BreakApartAnimation animation = new BreakApartAnimation(subject, flashDrawable, accent, name);
         // The small-actor layer fades during other UI transitions; defeat owns its visibility.
         stage.addActor(animation);
         animation.addAction(new FastForwardAction<>(new TemporalAction(TOTAL_TIME * ViewProperties.NORMAL_ACTION_DURATION) {
@@ -62,50 +58,57 @@ final class MonsterDefeatAnimation extends Group {
         }));
     }
 
-    private MonsterDefeatAnimation(Actor monster) {
-        this.monster = monster;
-        setName("monster-defeat");
+    private BreakApartAnimation(Actor subject, Drawable flashDrawable, Color accent, String name) {
+        this.subject = subject;
+        this.accent = new Color(accent);
+        setName(name);
         setTransform(false);
         setTouchable(Touchable.disabled);
-        startX = monster.getX();
-        startY = monster.getY();
-        startScaleX = monster.getScaleX();
-        startScaleY = monster.getScaleY();
-        startAlpha = monster.getColor().a;
-        startRotation = monster.getRotation();
-        targetX = ViewProperties.VIEWPORT_WIDTH / 2f - monster.getWidth() / 2;
-        targetY = ViewProperties.VIEWPORT_HEIGHT / 2f - monster.getHeight() / 2;
-        targetScale = MonsterImageEffect.defeatScale(monster.getWidth(), monster.getHeight());
-        extent = Math.max(monster.getWidth(), monster.getHeight()) * targetScale;
-        addActor(monster);
-        flash = monster instanceof Image ? new SilhouetteImage(((Image) monster).getDrawable()) : null;
+        startX = subject.getX();
+        startY = subject.getY();
+        startScaleX = subject.getScaleX();
+        startScaleY = subject.getScaleY();
+        startAlpha = subject.getColor().a;
+        startRotation = subject.getRotation();
+        targetX = ViewProperties.VIEWPORT_WIDTH / 2f - subject.getWidth() / 2;
+        targetY = ViewProperties.VIEWPORT_HEIGHT / 2f - subject.getHeight() / 2;
+        targetScale = presentationScale(subject.getWidth(), subject.getHeight());
+        extent = Math.max(subject.getWidth(), subject.getHeight()) * targetScale;
+        addActor(subject);
+        flash = flashDrawable == null ? null : new SilhouetteImage(flashDrawable);
         if (flash != null) {
             flash.setName("defeat-flash");
-            flash.setBounds(targetX, targetY, monster.getWidth(), monster.getHeight());
-            flash.setOrigin(monster.getOriginX(), monster.getOriginY());
-            flash.setColor(1f, 0.78f, 0.48f, 0f);
+            flash.setBounds(targetX, targetY, subject.getWidth(), subject.getHeight());
+            flash.setOrigin(subject.getOriginX(), subject.getOriginY());
+            flash.setColor(accent.r, accent.g, accent.b, 0f);
             addActor(flash);
         }
+    }
+
+    public static float presentationScale(float width, float height) {
+        // Leave room for recoil and the outline around a much larger portrait.
+        return Math.min(ViewProperties.VIEWPORT_WIDTH * 0.58f / width,
+                ViewProperties.VIEWPORT_HEIGHT * 0.76f / height);
     }
 
     private void animate(float elapsed) {
         if (elapsed < ZOOM_TIME) {
             float progress = Interpolation.sineOut.apply(elapsed / ZOOM_TIME);
-            monster.setPosition(MathUtils.lerp(startX, targetX, progress), MathUtils.lerp(startY, targetY, progress));
-            monster.setScale(MathUtils.lerp(startScaleX, targetScale, progress),
+            subject.setPosition(MathUtils.lerp(startX, targetX, progress), MathUtils.lerp(startY, targetY, progress));
+            subject.setScale(MathUtils.lerp(startScaleX, targetScale, progress),
                     MathUtils.lerp(startScaleY, targetScale, progress));
-            monster.setRotation(MathUtils.lerp(startRotation, 0f, progress) - 8f * MathUtils.sin(progress * MathUtils.PI));
-            monster.getColor().a = MathUtils.lerp(startAlpha, 1f, Math.min(elapsed / 0.22f, 1f));
+            subject.setRotation(MathUtils.lerp(startRotation, 0f, progress) - 8f * MathUtils.sin(progress * MathUtils.PI));
+            subject.getColor().a = MathUtils.lerp(startAlpha, 1f, Math.min(elapsed / 0.22f, 1f));
         } else if (elapsed < ZOOM_TIME + HOLD_TIME) {
             float progress = (elapsed - ZOOM_TIME) / HOLD_TIME;
             float pulse = MathUtils.sin(progress * MathUtils.PI);
-            monster.setPosition(targetX, targetY);
-            monster.setScale(targetScale * (1f + 0.035f * pulse));
-            monster.setRotation(2f * MathUtils.sin(progress * MathUtils.PI * 4f) * pulse);
-            monster.getColor().a = 1f;
+            subject.setPosition(targetX, targetY);
+            subject.setScale(targetScale * (1f + 0.035f * pulse));
+            subject.setRotation(2f * MathUtils.sin(progress * MathUtils.PI * 4f) * pulse);
+            subject.getColor().a = 1f;
             if (flash != null) {
-                flash.setScale(monster.getScaleX());
-                flash.setRotation(monster.getRotation());
+                flash.setScale(subject.getScaleX());
+                flash.setRotation(subject.getRotation());
                 flash.getColor().a = 0.72f * progress;
             }
         } else {
@@ -114,8 +117,8 @@ final class MonsterDefeatAnimation extends Group {
             float travel = Interpolation.pow3Out.apply(progress);
             // Preserve readable pieces briefly, then fade instead of immediately shrinking to zero.
             float opacity = 1f - Interpolation.pow2In.apply(MathUtils.clamp((progress - 0.12f) / 0.88f, 0f, 1f));
-            float paddedWidth = monster.getWidth() * TornApartMonsterImageBuilder.PADDED_SIZE;
-            float paddedHeight = monster.getHeight() * TornApartMonsterImageBuilder.PADDED_SIZE;
+            float paddedWidth = subject.getWidth() * TornApartActorImageBuilder.PADDED_SIZE;
+            float paddedHeight = subject.getHeight() * TornApartActorImageBuilder.PADDED_SIZE;
             for (int i = 0; i < pieces.length; i++) {
                 pieces[i].setPosition(ViewProperties.VIEWPORT_WIDTH / 2f - paddedWidth / 2 + DIRECTIONS[i][0] * extent * 0.52f * travel,
                         ViewProperties.VIEWPORT_HEIGHT / 2f - paddedHeight / 2 + DIRECTIONS[i][1] * extent * 0.48f * travel
@@ -141,17 +144,17 @@ final class MonsterDefeatAnimation extends Group {
     }
 
     private void split() {
-        monster.setPosition(targetX, targetY);
-        monster.setScale(targetScale);
-        monster.setRotation(0f);
-        monster.getColor().a = 1f;
-        fragments = TornApartMonsterImageBuilder.build(monster);
-        monster.setVisible(false);
+        subject.setPosition(targetX, targetY);
+        subject.setScale(targetScale);
+        subject.setRotation(0f);
+        subject.getColor().a = 1f;
+        fragments = TornApartActorImageBuilder.build(subject);
+        subject.setVisible(false);
         for (int i = 0; i < pieces.length; i++) {
             Image piece = new Image(fragments.get(i));
             piece.setName("defeat-fragment-" + i);
-            piece.setSize(monster.getWidth() * TornApartMonsterImageBuilder.PADDED_SIZE,
-                    monster.getHeight() * TornApartMonsterImageBuilder.PADDED_SIZE);
+            piece.setSize(subject.getWidth() * TornApartActorImageBuilder.PADDED_SIZE,
+                    subject.getHeight() * TornApartActorImageBuilder.PADDED_SIZE);
             piece.setOrigin(piece.getWidth() / 2, piece.getHeight() / 2);
             addActor(piece);
             pieces[i] = piece;
@@ -161,7 +164,7 @@ final class MonsterDefeatAnimation extends Group {
             spark.setSize(7f + (i % 3) * 3f, 2f);
             spark.setOrigin(spark.getWidth() / 2f, 1f);
             spark.setRotation(i * 30f + 12f);
-            spark.setColor(1f, 0.62f + (i % 3) * 0.1f, 0.25f, 1f);
+            spark.setColor(new Color(accent).lerp(Color.WHITE, (i % 3) * 0.15f));
             addActor(spark);
             sparks[i] = spark;
         }

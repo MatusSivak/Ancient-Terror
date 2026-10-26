@@ -708,7 +708,8 @@ public class PromptPreview extends ApplicationAdapter {
             float t = (float) tilt.invoke(walker);
             minTilt = Math.min(minTilt, t); maxTilt = Math.max(maxTilt, t);
         }
-        require(maxBob > 2f && minTilt < -3f && maxTilt > 3f, "monster did not walk: bob " + maxBob + " tilt " + minTilt + ".." + maxTilt);
+        // The direction-of-travel lean offsets the whole waddle, so it need not cross +3 degrees.
+        require(maxBob > 2f && minTilt < -3f && maxTilt - minTilt > 8f, "monster did not walk: bob " + maxBob + " tilt " + minTilt + ".." + maxTilt);
         tick(30);
         require((float) bob.invoke(walker, monster.getHeight()) == 0f && (float) tilt.invoke(walker) == 0f, "monster keeps walking after it stopped");
         monster.remove();

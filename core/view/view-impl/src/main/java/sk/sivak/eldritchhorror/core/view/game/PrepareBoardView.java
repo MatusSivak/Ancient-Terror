@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.math.Vector2;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.gate.GateInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorBasics;
@@ -180,13 +181,29 @@ public class PrepareBoardView {
 
     public Completable closeGate(LocationId location) {
         GateUtils.GateIdLayerResolver idLayerResolver = new GateUtils.GateIdLayerResolver(location);
-        List<Actor> actor = MapStage.getActor(idLayerResolver);
-        ((NewGateAnimatedImage) actor.get(0)).closeGate().subscribe();
-        ((NewGateAnimatedImage) actor.get(2)).closeGate().subscribe();
         Completable moveCameraToLocation = Completable.create(onSub -> {
-            MoveCameraToLocationHelper.moveCameraToPosition(LocationPositionResolver.resolve(location), onSub, 0.75f);
+            // Frame the whole halo before the closing effect brings it forward.
+            MoveCameraToLocationHelper.moveCameraToPosition(LocationPositionResolver.resolve(location), onSub, 1.25f);
         });
-        Completable closeGate = ((NewGateAnimatedImage) actor.get(1)).closeGate();
+        Completable closeGate = Completable.defer(() -> {
+            MapStage.getCamera().update();
+            List<Actor> copies = MapStage.getActor(idLayerResolver);
+            Actor visibleGate = null;
+            float nearest = Float.MAX_VALUE;
+            for (Actor copy : copies) {
+                if (copy.getStage() == null) continue;
+                Vector2 center = copy.localToStageCoordinates(new Vector2(copy.getWidth() / 2f, copy.getHeight() / 2f));
+                float distance = center.dst2(MapStage.getCamera().position.x, MapStage.getCamera().position.y);
+                if (distance < nearest) {
+                    nearest = distance;
+                    visibleGate = copy;
+                }
+            }
+            for (Actor copy : copies) {
+                if (copy != visibleGate) copy.remove();
+            }
+            return visibleGate == null ? Completable.complete() : ((NewGateAnimatedImage) visibleGate).closeGate();
+        });
         Completable removeActorAndSwapLayers = Completable.create(onSub -> {
             MapStage.removeActor(idLayerResolver);
             onSub.onCompleted();

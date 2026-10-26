@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.map.gate;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -13,8 +14,9 @@ import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
+import sk.sivak.eldritchhorror.core.view.animation.BreakApartAnimation;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 
 public class NewGateAnimatedImage extends Group {
 
@@ -54,25 +56,39 @@ public class NewGateAnimatedImage extends Group {
 
     public Completable closeGate() {
         return Completable.create(onSub -> {
+            if (getStage() == null) {
+                onSub.onCompleted();
+                return;
+            }
+            // Carry the visible map copy into the UI without jumping when the map is zoomed or wrapped.
+            Vector2 center = toInfoCoordinates(getWidth() / 2f, getHeight() / 2f);
+            Vector2 horizontal = toInfoCoordinates(getWidth() / 2f + 1f, getHeight() / 2f);
+            Vector2 vertical = toInfoCoordinates(getWidth() / 2f, getHeight() / 2f + 1f);
+            Group portrait = new Group();
+            portrait.setName("closing-gate-portrait");
+            // The halo extends beyond the gate's nominal bounds. Include it in the torn snapshots.
+            portrait.setSize(getWidth() * 2.4f, getHeight() * 2.4f);
+            portrait.setOrigin(portrait.getWidth() / 2f, portrait.getHeight() / 2f);
+            portrait.setPosition(center.x - portrait.getWidth() / 2f, center.y - portrait.getHeight() / 2f);
+            portrait.setScale(center.dst(horizontal), center.dst(vertical));
             gateAnimatedImage.clearActions();
             backgroundImage.clearActions();
-            backgroundImage.addAction(new FastForwardAction<>(Actions.parallel(
-                    Actions.scaleTo(0f, 0f, 1.5f, Interpolation.exp5In),
-                    Actions.fadeOut(1.5f, Interpolation.exp5In)
-            )));
-            gateAnimatedImage.addAction(new FastForwardAction<>(Actions.sequence(
-                    Actions.parallel(
-                            Actions.scaleTo(0f, 0f, 1.5f, Interpolation.exp5In),
-                            Actions.fadeOut(1.5f, Interpolation.exp5In)
-                    ),
-                    Actions.run(() -> {
-                        gateAnimatedImage.remove();
-                        backgroundImage.remove();
-                        onSub.onCompleted();
-                        remove();
-                    })
-            )));
+            for (Image layer : new Image[]{backgroundImage, gateAnimatedImage}) {
+                layer.setPosition((portrait.getWidth() - getWidth()) / 2f,
+                        (portrait.getHeight() - getHeight()) / 2f);
+                portrait.addActor(layer);
+            }
+            clearActions();
+            remove();
+            InfoStage.getStageSafe().addActor(portrait);
+            BreakApartAnimation.start(portrait, backgroundImage.getDrawable(),
+                    toLibgdxColor(gateColor).lerp(Color.WHITE, 0.2f), "gate-close", onSub);
         });
+    }
+
+    private Vector2 toInfoCoordinates(float x, float y) {
+        Vector2 point = localToStageCoordinates(new Vector2(x, y));
+        return InfoStage.getStageSafe().screenToStageCoordinates(getStage().stageToScreenCoordinates(point));
     }
 
     public void updateGateTransparency(OmenColor omenColor) {

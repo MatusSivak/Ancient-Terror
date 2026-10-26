@@ -2,7 +2,9 @@ package sk.sivak.eldritchhorror.core.view.map.monster;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import rx.Completable;
-import sk.sivak.eldritchhorror.core.constants.ViewProperties;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import sk.sivak.eldritchhorror.core.view.animation.BreakApartAnimation;
 
 public class MonsterImageEffect {
     private MonsterImageEffect() {
@@ -14,13 +16,20 @@ public class MonsterImageEffect {
                 onSub.onCompleted();
                 return;
             }
-            MonsterDefeatAnimation.start(monsterImage, onSub);
+            if (monsterImage instanceof MonsterImage) {
+                ((MonsterImage) monsterImage).hideShadow();
+                ((MonsterImage) monsterImage).removeReckoningImage();
+            } else if (monsterImage instanceof EpicMonsterImage) {
+                ((EpicMonsterImage) monsterImage).hideShadow();
+                ((EpicMonsterImage) monsterImage).removeReckoningImage();
+            }
+            BreakApartAnimation.start(monsterImage,
+                    monsterImage instanceof Image ? ((Image) monsterImage).getDrawable() : null,
+                    new Color(1f, 0.78f, 0.48f, 1f), "monster-defeat", onSub);
         });
     }
 
     static float defeatScale(float width, float height) {
-        // Leave room for the recoil and epic rim around a much larger portrait.
-        return Math.min(ViewProperties.VIEWPORT_WIDTH * 0.58f / width,
-                ViewProperties.VIEWPORT_HEIGHT * 0.76f / height);
+        return BreakApartAnimation.presentationScale(width, height);
     }
 }

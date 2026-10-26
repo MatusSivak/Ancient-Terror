@@ -11,4 +11,10 @@ gradle.projectsEvaluated {
         mainClass.set('MonsterDefeatPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewGateCombat', JavaExec) {
+        dependsOn desktop.tasks.named('monsterDefeatPreviewClasses')
+        classpath = desktop.sourceSets.monsterDefeatPreview.runtimeClasspath
+        mainClass.set('GateCombatPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

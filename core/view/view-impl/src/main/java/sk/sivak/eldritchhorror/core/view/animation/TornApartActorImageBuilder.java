@@ -1,4 +1,4 @@
-package sk.sivak.eldritchhorror.core.view.map.monster;
+package sk.sivak.eldritchhorror.core.view.animation;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -16,32 +16,32 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 
 /** Small, owned snapshots: capture without advancing actions or changing the live portrait. */
-public class TornApartMonsterImageBuilder {
+final class TornApartActorImageBuilder {
     static final float PADDED_SIZE = 1.12f;
     private static final int MAX_TEXTURE_SIZE = 512;
     private static final String[] MASKS = {"mm_left.png", "mm_right.png", "mm_bottom.png"};
 
-    static Fragments build(Actor monster) {
-        float x = monster.getX(), y = monster.getY(), width = monster.getWidth(), height = monster.getHeight();
-        float scaleX = monster.getScaleX(), scaleY = monster.getScaleY(), rotation = monster.getRotation();
-        float originX = monster.getOriginX(), originY = monster.getOriginY();
-        Color color = new Color(monster.getColor());
-        Viewport viewport = monster.getStage().getViewport();
+    static Fragments build(Actor subject) {
+        float x = subject.getX(), y = subject.getY(), width = subject.getWidth(), height = subject.getHeight();
+        float scaleX = subject.getScaleX(), scaleY = subject.getScaleY(), rotation = subject.getRotation();
+        float originX = subject.getOriginX(), originY = subject.getOriginY();
+        Color color = new Color(subject.getColor());
+        Viewport viewport = subject.getStage().getViewport();
         float captureScale = MAX_TEXTURE_SIZE / (Math.max(width, height) * PADDED_SIZE);
         int bufferWidth = Math.max(1, Math.round(width * captureScale * PADDED_SIZE));
         int bufferHeight = Math.max(1, Math.round(height * captureScale * PADDED_SIZE));
         Fragments result = new Fragments();
         SpriteBatch batch = new SpriteBatch();
         try {
-            float captureWidth = bufferWidth / PADDED_SIZE, captureHeight = bufferHeight / PADDED_SIZE;
-            monster.setBounds((bufferWidth - captureWidth) / 2, (bufferHeight - captureHeight) / 2,
-                    captureWidth, captureHeight);
-            monster.setOrigin(captureWidth / 2, captureHeight / 2);
-            monster.setScale(1f);
-            monster.setRotation(0f);
-            monster.setColor(Color.WHITE);
-            OrthographicCamera camera = new OrthographicCamera(bufferWidth, bufferHeight);
-            camera.position.set(bufferWidth / 2f, bufferHeight / 2f, 0f);
+            float worldWidth = bufferWidth / captureScale, worldHeight = bufferHeight / captureScale;
+            // Keep the actor's size intact: groups may contain independently sized layers.
+            subject.setPosition((worldWidth - width) / 2, (worldHeight - height) / 2);
+            subject.setOrigin(width / 2, height / 2);
+            subject.setScale(1f);
+            subject.setRotation(0f);
+            subject.setColor(Color.WHITE);
+            OrthographicCamera camera = new OrthographicCamera(worldWidth, worldHeight);
+            camera.position.set(worldWidth / 2f, worldHeight / 2f, 0f);
             camera.update();
             batch.setProjectionMatrix(camera.combined);
             for (int i = 0; i < MASKS.length; i++) {
@@ -55,7 +55,7 @@ public class TornApartMonsterImageBuilder {
                     batch.setColor(Color.WHITE);
                     batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA,
                             GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
-                    monster.draw(batch, 1f);
+                    subject.draw(batch, 1f);
                     batch.setColor(Color.WHITE);
                     batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
                     batch.draw(getTexture(MASKS[i]), 0, 0, bufferWidth, bufferHeight);
@@ -75,11 +75,11 @@ public class TornApartMonsterImageBuilder {
             throw failure;
         } finally {
             batch.dispose();
-            monster.setBounds(x, y, width, height);
-            monster.setOrigin(originX, originY);
-            monster.setScale(scaleX, scaleY);
-            monster.setRotation(rotation);
-            monster.setColor(color);
+            subject.setBounds(x, y, width, height);
+            subject.setOrigin(originX, originY);
+            subject.setScale(scaleX, scaleY);
+            subject.setRotation(rotation);
+            subject.setColor(color);
         }
     }
 
