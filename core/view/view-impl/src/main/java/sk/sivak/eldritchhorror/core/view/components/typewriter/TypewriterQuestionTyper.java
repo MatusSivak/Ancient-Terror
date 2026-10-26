@@ -239,8 +239,13 @@ public class TypewriterQuestionTyper {
 
     private void press(TextButtonWithValue button, List<TextButtonWithValue> buttons, SingleSubscriber<? super Integer> onSub) {
         BigActorsManager.lock(BigActorsManager.BigActorKey.PAPER);
+        TextButton textButton = button.getTextButton();
+        // Auto-press can run before layout, so use the cell's width rather than the button's raw preferred size.
+        float width = textButton.getParent() instanceof Table
+                ? ((Table) textButton.getParent()).getCell(textButton).getPrefWidthValue().get(textButton)
+                : textButton.getWidth();
         Array<Cell> cells = typewriterView.getTable().getCells();
-        cells.get(cells.size - 1).setActor(button.getTextButton()).height(BUTTON_HEIGHT).width(button.getTextButton().getWidth());
+        cells.get(cells.size - 1).setActor(textButton).height(BUTTON_HEIGHT).width(width);
         for (TextButtonWithValue textButtonWithValue : buttons) {
             textButtonWithValue.getTextButton().clearListeners();
         }
