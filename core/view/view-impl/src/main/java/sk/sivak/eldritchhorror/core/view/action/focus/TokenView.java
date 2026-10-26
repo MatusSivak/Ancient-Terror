@@ -3,10 +3,12 @@ package sk.sivak.eldritchhorror.core.view.action.focus;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
+import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.VitalityLossEffect;
 import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -67,10 +69,26 @@ public class TokenView {
     }
 
     public Completable loseHealth(float offsetX) {
-        return loseToken(HEALTH_ICON_LEFT, HEALTH_ICON_RIGHT, InfoStage.getInvestigatorHud().getHealthBar(), new Vector2(22,27), offsetX);
+        return loseHealth(offsetX, () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, 1));
     }
 
     public Completable loseSanity(float offsetX) {
-        return loseToken(SANITY_ICON_LEFT, SANITY_ICON_RIGHT, InfoStage.getInvestigatorHud().getSanityBar(), new Vector2(22,27), offsetX);
+        return loseSanity(offsetX, () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, 1));
+    }
+
+    public Completable loseHealth(float offsetX, Action0 onTear) {
+        return loseVitality(InfoStage.getInvestigatorHud().getHealthBar(), offsetX, VitalityLossEffect.Kind.HEALTH, onTear);
+    }
+
+    public Completable loseSanity(float offsetX, Action0 onTear) {
+        return loseVitality(InfoStage.getInvestigatorHud().getSanityBar(), offsetX, VitalityLossEffect.Kind.SANITY, onTear);
+    }
+
+    private Completable loseVitality(ContainerBar bar, float offsetX, VitalityLossEffect.Kind kind, Action0 onTear) {
+        return Completable.defer(() -> {
+            if (bar.getCurrentValue() <= 0) return Completable.complete();
+            return VitalityLossEffect.play(InfoStage.getStageSafe(), bar.getFullContainerPosition(), 22, 27,
+                    offsetX, kind, bar::decreaseCurrentValue, onTear);
+        });
     }
 }

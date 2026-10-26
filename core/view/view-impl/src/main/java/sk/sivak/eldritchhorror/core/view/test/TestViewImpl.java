@@ -644,7 +644,7 @@ public class TestViewImpl implements TestView {
         }
         record.run();
         TokenSounds.playLeave();
-        return loseToken.call().doOnCompleted(() -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, 1));
+        return loseToken.call();
     }
 
     private Completable destroySanityOrHealth(int tokensCount, ContainerBar containerBar, Function<List<Vector2>, Completable> destroyFunction) {

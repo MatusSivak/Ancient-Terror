@@ -753,6 +753,14 @@ public class MonsterCombatTable extends VisTable {
             // Every success fires; one heart is torn off per heart left, surplus fireballs just strike the body.
             fireballService.setTargetHealth(1);
             Set<Actor> torn = new HashSet<>();
+            int[] runningLosses = {0};
+            boolean[] allLanded = {false};
+            Runnable completeWhenDone = () -> {
+                if (allLanded[0] && runningLosses[0] == 0) {
+                    holdStill = false;
+                    onSub.onCompleted();
+                }
+            };
             // The monster stops roaming and every fireball strikes its body; each hit tears a heart off its health bar.
             holdStill = true;
             Vector2 body = getMonsterBodyCenter();
@@ -765,15 +773,19 @@ public class MonsterCombatTable extends VisTable {
                     if (!torn.add(child)) {
                         return;
                     }
-                    float tokenWidth = 100;
+                    float tokenWidth = Math.min(110f, 650f / Math.max(1, healthIcons.size() - 1));
                     float baseOffset = - (healthIcons.size() - 1) * tokenWidth / 2f;
                     float offsetX = baseOffset + healthIcons.indexOf(child) * tokenWidth;
-                    toughnessBar.loseToughnessNew(child, offsetX).subscribe();
+                    runningLosses[0]++;
+                    toughnessBar.loseToughnessNew(child, offsetX).subscribe(() -> {
+                        runningLosses[0]--;
+                        completeWhenDone.run();
+                    });
                 });
             }
             fireballService.setOnLandLastAction(() -> {
-                holdStill = false;
-                onSub.onCompleted();
+                allLanded[0] = true;
+                completeWhenDone.run();
             });
             fireballService.setMidpointDisplacementDirection(-1);
             List<Vector2> sources = targets.isEmpty() ? new LinkedList<>() : new LinkedList<>(dicePositions);

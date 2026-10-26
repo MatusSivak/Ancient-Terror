@@ -336,6 +336,10 @@ public class PromptPreview extends ApplicationAdapter {
             if (i == 25 && !drawnMidFlight) { draw("monster-health-fireballs"); drawnMidFlight = true; }
         }
         require(completed.get() == 1, "monster health destruction did not complete");
+        require(((sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar) field(table, "toughnessBar"))
+                .getCurrentHealth() == 2, "monster health did not update with the impacts");
+        require(stage.getRoot().findActor("vitality-loss-monster") == null,
+                "combat advanced while monster health fragments were still on screen");
         require(fireballs.size() == 2, "expected one fireball per die, saw " + fireballs.size());
         tick(120);
         draw("monster-health-after");
@@ -461,6 +465,8 @@ public class PromptPreview extends ApplicationAdapter {
                 if (i == 70) draw("monster-attack-stand-" + (sanity ? "sanity" : "health"));
             }
             require(completed.get() == 1, "attack on the stand did not complete (sanity=" + sanity + ")");
+            require(stage.getRoot().findActor(sanity ? "vitality-loss-sanity" : "vitality-loss-health") == null,
+                    "combat advanced while investigator fragments were still on screen");
             require(landing.size() == 3, "expected 3 fireballs at the stand, saw " + landing.size());
             for (Vector2 end : landing.values()) {
                 require(end.dst(expected) < 30f, "fireball landed at " + end + ", stand centre is " + expected);
@@ -824,7 +830,8 @@ public class PromptPreview extends ApplicationAdapter {
                         Vector2 start = new Vector2(image.getX(), image.getY());
                         float travelled = 0;
                         Rectangle area = new Rectangle(panel.getWanderArea());
-                        area.setHeight(area.height + 8); // stepping bounce
+                        area.y -= 2; // Idle breathing also moves the portrait slightly below its floor anchor.
+                        area.setHeight(area.height + 10); // stepping bounce above, breathing below
                         for (int i = 0; i < 3600; i++) {
                             stage.act(1f / 60);
                             require(area.contains(image.getX(), image.getY()), "monster image left wander area at " + image.getX() + "," + image.getY());

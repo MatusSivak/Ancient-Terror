@@ -15,11 +15,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import java8.features.function.Function;
 import java8.features.function.Supplier;
 import rx.Completable;
 import rx.Single;
 import rx.functions.Action0;
+import rx.functions.Func2;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.RumorCardInfo;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
@@ -563,31 +563,33 @@ public class GameViewImpl implements Screen, GameView {
     public Completable loseHealth(Integer input) {
         // Tokens already torn one by one by the monster's fireballs are not animated again.
         int remaining = input - PrePlayedTokenLoss.consumeHealth(input);
-        return loseHealthOrSanity(remaining, offset -> tokenView.loseHealth(offset), TokenSounds.Cue.LOSS);
+        return loseHealthOrSanity(remaining, tokenView::loseHealth);
     }
 
 
     @Override
     public Completable loseSanity(Integer input) {
         int remaining = input - PrePlayedTokenLoss.consumeSanity(input);
-        return loseHealthOrSanity(remaining, offset -> tokenView.loseSanity(offset), TokenSounds.Cue.LOSS);
+        return loseHealthOrSanity(remaining, tokenView::loseSanity);
     }
 
-    private Completable loseHealthOrSanity(Integer amount, Function<Float, Completable> function, TokenSounds.Cue cue) {
+    private Completable loseHealthOrSanity(Integer amount,
+            Func2<Float, Action0, Completable> function) {
         List<Completable> completables = new LinkedList<>();
         float tokenWidth = 100;
         float baseOffset = - (amount - 1) * tokenWidth / 2f;
         for (int i = 0; i < amount; i++) {
-            completables.add(function.apply(baseOffset));
+            // Simultaneous losses share one fracture cue; combat impacts each have their own cue.
+            completables.add(function.call(baseOffset, i == 0
+                    ? () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, amount) : null));
             baseOffset += tokenWidth;
         }
         if (completables.isEmpty()) {
-            return Completable.amb(completables);
+            return Completable.complete();
         }
-        // Tokens reach the centre together and complete right before they split apart.
+        // Wait for every fragment to clear before advancing the encounter.
         return Completable.fromAction(TokenSounds::playLeave)
-                .andThen(Completable.amb(completables))
-                .doOnCompleted(() -> TokenSounds.playLoss(cue, amount));
+                .andThen(Completable.merge(completables));
     }
 
 

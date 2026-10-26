@@ -1,26 +1,20 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.monster;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
-import com.badlogic.gdx.utils.Align;
 import rx.Completable;
 import rx.CompletableSubscriber;
-import rx.functions.Action0;
-import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
-import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.VitalityLossEffect;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatSounds;
 
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
 public class ToughnessBar extends HorizontalGroup {
 
@@ -36,6 +30,8 @@ public class ToughnessBar extends HorizontalGroup {
     }
 
     public void init(int toughness, int currentHealth, float scale) {
+        clearChildren();
+        lostActors.clear();
         this.actualScale = scale;
         this.toughness = toughness;
         this.currentHealth = Math.min(currentHealth, this.toughness); // because in PoisonMistSpellBackListener4 on2() I am reducing toughness
@@ -55,48 +51,32 @@ public class ToughnessBar extends HorizontalGroup {
     }
 
     public Completable loseToughness(int amount) {
-        List<Completable> completableList = new LinkedList<>();
-        float tokenWidth = 168;
-        float baseOffset = - (amount - 1) * tokenWidth / 2f;
-        for (int i = amount-1; i >= 0; i--) {
-            Actor healthToken = getChildren().get(currentHealth - 1 - i);
-            TokenActor brokenTokenActor = new TokenActor(getTexture(HEALTH_ICON_LEFT), getTexture(HEALTH_ICON_RIGHT));
-            Vector2 position = healthToken.localToStageCoordinates(new Vector2());
-            brokenTokenActor.setPosition(position.x, position.y);
-            brokenTokenActor.setSize(healthToken.getWidth(), healthToken.getHeight());
-            brokenTokenActor.setOrigin(Align.center);
-            brokenTokenActor.getColor().a = 0f;
-            brokenTokenActor.setHolderLocation(position);
-            getStage().addActor(brokenTokenActor);
-            completableList.add(
-                    brokenTokenActor.discard(((Container<ToughnessToken>) healthToken).getActor()::deplete, baseOffset)
-            );
-            baseOffset += tokenWidth;
-        }
-        return Completable.amb(completableList);
+        return Completable.defer(() -> {
+            List<Completable> losses = new LinkedList<>();
+            int count = Math.min(Math.max(0, amount), currentHealth);
+            float spacing = Math.min(110f, 650f / Math.max(1, count - 1));
+            for (int i = 0; i < count; i++) {
+                Actor token = getChildren().get(currentHealth - 1 - i);
+                losses.add(loseToughnessNew(token, (i - (count - 1) / 2f) * spacing));
+            }
+            return Completable.merge(losses);
+        });
     }
 
-    private Set<Actor> lostActors = new HashSet<>();
+    private final Set<Actor> lostActors = new HashSet<>();
     public Completable loseToughnessNew(Actor healthToken, float offsetX) {
-        if (lostActors.contains(healthToken)) {
-            return Completable.complete();
-        }
-        lostActors.add(healthToken);
-        TokenActor brokenTokenActor = new TokenActor(getTexture(HEALTH_ICON_LEFT), getTexture(HEALTH_ICON_RIGHT));
-        Vector2 position = healthToken.localToStageCoordinates(new Vector2());
-        brokenTokenActor.setPosition(position.x, position.y);
-        brokenTokenActor.setSize(healthToken.getWidth(), healthToken.getHeight());
-        brokenTokenActor.setOrigin(Align.center);
-        brokenTokenActor.getColor().a = 0f;
-        brokenTokenActor.setHolderLocation(position);
-        getStage().addActor(brokenTokenActor);
-
-
-        Action0 deplete = ((Container<ToughnessToken>) healthToken).getActor()::deplete;
-        return brokenTokenActor.discard(() -> {
-            CombatSounds.playMonsterHealthLeave();
-            deplete.call();
-        }, offsetX, CombatSounds::playMonsterHealthTear);
+        return Completable.defer(() -> {
+            if (getStage() == null || currentHealth <= 0 || !lostActors.add(healthToken)) {
+                return Completable.complete();
+            }
+            Vector2 position = healthToken.localToStageCoordinates(new Vector2());
+            return VitalityLossEffect.play(getStage(), position, healthToken.getWidth(), healthToken.getHeight(),
+                    offsetX, VitalityLossEffect.Kind.MONSTER, () -> {
+                        currentHealth--;
+                        ((Container<ToughnessToken>) healthToken).getActor().deplete();
+                        CombatSounds.playMonsterHealthLeave();
+                    }, CombatSounds::playMonsterHealthTear);
+        });
     }
 
     @Override
@@ -142,9 +122,11 @@ public class ToughnessBar extends HorizontalGroup {
                                         .height(TOKEN_HEIGHT * SCALE * actualScale));
                             }
                             for (int j = 0; j < amount; j++) {
-                                getChildren().get(currentHealth + amount).remove();
+                                Actor empty = getChildren().get(currentHealth + amount);
+                                lostActors.remove(empty);
+                                empty.remove();
                             }
-
+                            currentHealth += amount;
                             completableSubscriber.onCompleted();
                         })
                 ));
