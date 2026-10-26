@@ -70,6 +70,18 @@ public class DisplayHide {
         return displayed;
     }
 
+    /** A separate destruction effect has replaced the usual exit animation and owns its completion callback. */
+    public void finishRemoval() {
+        displayed = false;
+        actor.clearActions();
+        actor.remove();
+        actor.setScale(1f);
+        actor.setRotation(0f);
+        actor.getColor().a = 1f;
+        if (backdrop != null) { backdrop.remove(); backdrop = null; }
+        BigActorsManager.finishRemoval(bigActorKey);
+    }
+
     public Completable displayOrHide() {
         if (displayed) {
             return hide();

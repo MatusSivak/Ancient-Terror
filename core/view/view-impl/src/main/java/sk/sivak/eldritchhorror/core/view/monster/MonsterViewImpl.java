@@ -203,7 +203,7 @@ public class MonsterViewImpl implements MonsterView {
     public Completable tearMysteryCardApart(MysteryCardInfo currentMysteryCard) {
         return Completable.create(onSub -> {
             GameplaySounds.play(GameplaySounds.Cue.MYSTERY_SOLVED);
-            MonsterCardEffect.tearAppart(BigActorsManager.getMysteryCard()).subscribe(onSub::onCompleted);
+            BigActorsManager.getMysteryCard().resolveWithEffect().subscribe(onSub::onCompleted, onSub::onError);
         });
     }
 

@@ -31,6 +31,7 @@ import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
+import sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect;
 import sk.sivak.eldritchhorror.core.view.components.card.TornApartCardBuilder;
 import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CardClickListener;
@@ -165,7 +166,7 @@ public class AssetView {
                                    HideType hideType,
                                    AssetOriginType assetOriginType) {
 
-        InfoStage.hideActor(labelTable);
+        if (labelTable != null) InfoStage.hideActor(labelTable);
         for (Button button : buttons) {
             InfoStage.hideActor(button);
         }
@@ -304,85 +305,8 @@ public class AssetView {
 
     private void discardCard(SingleSubscriber<? super ShowCardResponse> onSub, ShowCardResponse showCardResponse) {
         GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD);
-        Vector2 originalPosition = cardTemplate.localToStageCoordinates(new Vector2());
-        float originalX = originalPosition.x;
-        float originalY = originalPosition.y;
-        float originalScaleX = cardTemplate.getScaleX();
-        float originalScaleY = cardTemplate.getScaleY();
-
-        cardTemplate.setPosition(0, 0);
-        cardTemplate.setScale(1);
-        Image leftPart = new Image(TornApartCardBuilder.buildLeftTextureRegion((CardTemplate)cardTemplate));
-        Image rightPart = new Image(TornApartCardBuilder.buildRightTextureRegion((CardTemplate)cardTemplate));
-
-        leftPart.setPosition(originalX, originalY);
-        rightPart.setPosition(originalX, originalY);
-        leftPart.setScale(originalScaleX, originalScaleY);
-        rightPart.setScale(originalScaleX, originalScaleY);
-        if (cardTemplate != null && cardTemplate.getStage() != null && leftPart != null) {
-            cardTemplate.getStage().addActor(leftPart);
-        }
-        if (cardTemplate != null && cardTemplate.getStage() != null && rightPart != null) {
-            cardTemplate.getStage().addActor(rightPart);
-        }
-        if (cardTemplate != null) {
-            cardTemplate.remove();
-        }
-
-        leftPart.setOrigin(leftPart.getWidth() / 2, 0);
-        rightPart.setOrigin(rightPart.getWidth() / 2, 0);
-        leftPart.setX(leftPart.getX() - (1 - leftPart.getScaleX()) * leftPart.getWidth() * 0.5f);
-        rightPart.setX(rightPart.getX() - (1 - rightPart.getScaleX()) * rightPart.getWidth() * 0.5f);
-
-        float actionDuration = ViewProperties.NORMAL_ACTION_DURATION;
-        MoveByAction moveByLeftAction = new MoveByAction();
-        moveByLeftAction.setAmount(-VIEWPORT_WIDTH * 0.2f, -VIEWPORT_HEIGHT * 0.1f);
-        moveByLeftAction.setDuration(actionDuration);
-        moveByLeftAction.setInterpolation(Interpolation.sineIn);
-        moveByLeftAction.setActor(leftPart);
-
-        MoveByAction moveByRightAction = new MoveByAction();
-        moveByRightAction.setAmount(VIEWPORT_WIDTH * 0.2f, -VIEWPORT_HEIGHT * 0.1f);
-        moveByRightAction.setDuration(actionDuration);
-        moveByRightAction.setInterpolation(Interpolation.sineIn);
-        moveByRightAction.setActor(rightPart);
-
-        RotateByAction rotateByLeftAction = new RotateByAction();
-        rotateByLeftAction.setAmount(45);
-        rotateByLeftAction.setDuration(actionDuration);
-        rotateByLeftAction.setInterpolation(Interpolation.sineIn);
-        rotateByLeftAction.setActor(leftPart);
-
-        RotateByAction rotateByRightAction = new RotateByAction();
-        rotateByRightAction.setAmount(-45);
-        rotateByRightAction.setDuration(actionDuration);
-        rotateByRightAction.setInterpolation(Interpolation.sineIn);
-        rotateByRightAction.setActor(rightPart);
-
-        AlphaAction fadeOutLeftAction = new AlphaAction();
-        fadeOutLeftAction.setAlpha(0f);
-        fadeOutLeftAction.setDuration(actionDuration);
-        fadeOutLeftAction.setInterpolation(Interpolation.sineIn);
-        fadeOutLeftAction.setActor(leftPart);
-
-        AlphaAction fadeOutRightAction = new AlphaAction();
-        fadeOutRightAction.setAlpha(0f);
-        fadeOutRightAction.setDuration(actionDuration);
-        fadeOutRightAction.setInterpolation(Interpolation.sineIn);
-        fadeOutRightAction.setActor(rightPart);
-
-        leftPart.addAction(
-                Actions.sequence(
-                        new FastForwardAction(Actions.parallel(fadeOutLeftAction, moveByLeftAction, rotateByLeftAction)),
-                        Actions.run(leftPart::remove)
-                ));
-        rightPart.addAction(
-                Actions.sequence(
-                        new FastForwardAction(Actions.parallel(fadeOutRightAction, moveByRightAction, rotateByRightAction)),
-                        Actions.run(rightPart::remove)
-                ));
-
-        onSub.onSuccess(showCardResponse);
+        CardDestructionEffect.discard(cardTemplate)
+                .subscribe(() -> onSub.onSuccess(showCardResponse), onSub::onError);
     }
 
     public Completable gainCard(CardInfo cardInfo) {

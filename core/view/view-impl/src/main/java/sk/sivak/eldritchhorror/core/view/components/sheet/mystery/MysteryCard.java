@@ -16,6 +16,7 @@ import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
+import sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -233,6 +234,14 @@ public class MysteryCard extends VisTable {
     private void stopAcknowledgementPulse() {
         awaitingAcknowledgement = false;
         acknowledgementPulseTime = 0f;
+    }
+
+    public Completable resolveWithEffect() {
+        return Completable.defer(() -> {
+            stopAcknowledgementPulse();
+            return CardDestructionEffect.resolveMystery(this)
+                    .doOnCompleted(displayHide::finishRemoval);
+        });
     }
 
     @Override

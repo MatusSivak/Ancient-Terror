@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('cardDestructionPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/card-destruction-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewCardDestruction', JavaExec) {
+        dependsOn desktop.tasks.named('cardDestructionPreviewClasses')
+        classpath = desktop.sourceSets.cardDestructionPreview.runtimeClasspath
+        mainClass.set('CardDestructionPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

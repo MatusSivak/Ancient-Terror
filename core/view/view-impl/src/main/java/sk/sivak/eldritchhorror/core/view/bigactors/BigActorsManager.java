@@ -323,6 +323,15 @@ public class BigActorsManager {
         }
     }
 
+    /** Clear a destroyed sheet without toggling it back open or firing its old dismissal callback. */
+    public static void finishRemoval(BigActorKey key) {
+        unlock(key);
+        if (getInstance().currentBigActorKey == key) {
+            getInstance().currentBigActorKey = null;
+            onEmptyScren();
+        }
+    }
+
 
     public static MonsterCard getMonsterCard() {
         return getInstance().monsterCard;
