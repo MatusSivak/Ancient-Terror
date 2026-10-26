@@ -73,12 +73,13 @@ final class GateDissipateAnimation extends Group {
     }
 
     private void animate(float elapsed) {
+        // Both phases share one angular path; the collapse inherits the spin-up velocity.
+        core.setRotation(coreRotation - spinDegrees(elapsed, 260f));
+        halo.setRotation(haloRotation + spinDegrees(elapsed, 90f));
         if (elapsed < SHUDDER_TIME) {
             float progress = elapsed / SHUDDER_TIME;
             float tremor = MathUtils.sin(progress * MathUtils.PI);
             // The vortex spins up and swells as the seal takes hold.
-            core.setRotation(coreRotation - 260f * progress * progress);
-            halo.setRotation(haloRotation + 90f * progress * progress);
             core.setScale(coreScale * (1f + 0.12f * tremor));
             halo.setScale(haloScale * (1f + 0.06f * tremor));
             halo.getColor().a = MathUtils.lerp(haloAlpha, 1f, progress);
@@ -87,14 +88,23 @@ final class GateDissipateAnimation extends Group {
         } else {
             float progress = Math.min((elapsed - SHUDDER_TIME) / FADE_TIME, 1f);
             portrait.setRotation(0f);
-            core.setRotation(coreRotation - 260f - 900f * Interpolation.pow2In.apply(progress));
             core.setScale(coreScale * MathUtils.lerp(1f, 0.08f, Interpolation.pow2In.apply(Math.min(progress / 0.7f, 1f))));
             core.getColor().a = 1f - Interpolation.pow2In.apply(Math.min(progress / 0.7f, 1f));
-            halo.setRotation(haloRotation + 90f + 120f * progress);
             halo.setScale(haloScale * (1f + 0.35f * Interpolation.pow2Out.apply(progress)));
             halo.getColor().a = 1f - Interpolation.pow2Out.apply(Math.min(progress / 0.6f, 1f));
             mist.update(progress);
         }
+    }
+
+    private static float spinDegrees(float elapsed, float spinUpDegrees) {
+        if (elapsed < SHUDDER_TIME) {
+            float progress = elapsed / SHUDDER_TIME;
+            return spinUpDegrees * progress * progress;
+        }
+        float time = MathUtils.clamp(elapsed - SHUDDER_TIME, 0f, FADE_TIME);
+        float entrySpeed = 2f * spinUpDegrees / SHUDDER_TIME;
+        // Integrate a gradual slowdown, keeping position and velocity continuous at the join.
+        return spinUpDegrees + entrySpeed * (time - time * time / (2f * FADE_TIME));
     }
 
     @Override protected void setStage(Stage stage) {

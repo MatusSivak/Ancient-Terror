@@ -12,6 +12,22 @@ snapshots after completion or early removal. Includes ordinary, epic, tall and w
 portraits. PNG animation frames and key screenshots go to `build/monster-defeat-preview/`.
 See `BUILDING.md` for Java setup.
 
+Monster explosions use 32 tumbling shards sharing one GPU snapshot, with a pressure
+ring and embers. The preview checks fragment separation and snapshot cleanup.
+
+Clue, focus, train and ship ticket spending can also be previewed:
+
+```powershell
+.\gradlew.bat -I tools/monster-defeat-preview/preview.gradle :desktop:previewResourceSpend --offline
+```
+
+Checks lazy HUD updates, empty slots, burst/completion timing, normal speed,
+fast-forward, speed changes, large time steps and interruption. Frames are saved
+under `build/resource-spend-preview/`.
+Tickets use their two torn artwork pieces with a gentle pull and fall, without
+flashes or particles. Gate checks also verify spin continuity at the collapse transition.
+Use `:desktop:previewGateClose` with the same init script to check gate closing on its own.
+
 Gate closing and combat perspective use the same offscreen runner:
 
 ```powershell

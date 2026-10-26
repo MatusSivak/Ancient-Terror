@@ -107,10 +107,11 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
                 piecesSeen = true;
                 require(monster.getWidth() == originalWidth && monster.getHeight() == originalHeight,
                         name + ": snapshot changed the original dimensions");
-                Actor right = animation.findActor("defeat-fragment-1");
+                Actor right = animation.findActor("defeat-fragment-7");
+                require(animation.findActor("defeat-fragment-31") != null, name + ": expected 32 shards");
                 require(right.getX() > left.getX(), name + ": fragments do not separate");
                 if (interrupt) {
-                    require(bufferCount() == buffersBefore + 3, "Expected three temporary snapshots");
+                    require(bufferCount() == buffersBefore + 1, "Expected one shared temporary snapshot");
                     animation.remove();
                     require(bufferCount() == buffersBefore, "Early removal leaked GPU snapshots");
                     require(completed.get() == 0, "Interrupted sequence reported a completed defeat");

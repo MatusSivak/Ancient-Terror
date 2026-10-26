@@ -7,19 +7,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
-
-/** Small, owned snapshots: capture without advancing actions or changing the live portrait. */
+/** One padded snapshot shared by every shard; capture never advances the live actor. */
 final class TornApartActorImageBuilder {
     static final float PADDED_SIZE = 1.12f;
     private static final int MAX_TEXTURE_SIZE = 512;
-    private static final String[] MASKS = {"mm_left.png", "mm_right.png", "mm_bottom.png"};
 
     static Fragments build(Actor subject) {
         float x = subject.getX(), y = subject.getY(), width = subject.getWidth(), height = subject.getHeight();
@@ -44,31 +40,23 @@ final class TornApartActorImageBuilder {
             camera.position.set(worldWidth / 2f, worldHeight / 2f, 0f);
             camera.update();
             batch.setProjectionMatrix(camera.combined);
-            for (int i = 0; i < MASKS.length; i++) {
-                FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGBA8888, bufferWidth, bufferHeight, false);
-                result.buffers[i] = buffer;
-                buffer.begin();
-                try {
-                    Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
-                    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-                    batch.begin();
-                    batch.setColor(Color.WHITE);
-                    batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA,
-                            GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
-                    subject.draw(batch, 1f);
-                    batch.setColor(Color.WHITE);
-                    batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
-                    batch.draw(getTexture(MASKS[i]), 0, 0, bufferWidth, bufferHeight);
-                    batch.end();
-                } finally {
-                    if (batch.isDrawing()) batch.end();
-                    buffer.end(viewport.getScreenX(), viewport.getScreenY(),
-                            viewport.getScreenWidth(), viewport.getScreenHeight());
-                }
-                buffer.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-                result.regions[i] = new TextureRegion(buffer.getColorBufferTexture());
-                result.regions[i].flip(false, true);
+            FrameBuffer buffer = result.buffer = new FrameBuffer(Pixmap.Format.RGBA8888, bufferWidth, bufferHeight, false);
+            buffer.begin();
+            try {
+                Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+                batch.begin();
+                batch.setColor(Color.WHITE);
+                batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA,
+                        GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                subject.draw(batch, 1f);
+                batch.end();
+            } finally {
+                if (batch.isDrawing()) batch.end();
+                buffer.end(viewport.getScreenX(), viewport.getScreenY(),
+                        viewport.getScreenWidth(), viewport.getScreenHeight());
             }
+            buffer.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
             return result;
         } catch (RuntimeException | Error failure) {
             result.dispose();
@@ -84,20 +72,12 @@ final class TornApartActorImageBuilder {
     }
 
     static final class Fragments implements Disposable {
-        private final FrameBuffer[] buffers = new FrameBuffer[3];
-        private final TextureRegion[] regions = new TextureRegion[3];
+        private FrameBuffer buffer;
 
-        TextureRegion get(int index) {
-            return regions[index];
-        }
+        Texture texture() { return buffer.getColorBufferTexture(); }
 
         @Override public void dispose() {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
-                    buffers[i].dispose();
-                    buffers[i] = null;
-                }
-            }
+            if (buffer != null) { buffer.dispose(); buffer = null; }
         }
     }
 }

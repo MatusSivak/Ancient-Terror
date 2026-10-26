@@ -31,6 +31,7 @@ public class TicketContainerBar extends ContainerBar {
 
     public void clearTickets() {
         clearChildren();
+        java.util.Arrays.fill(slots, null);
         currentValue = 0;
         setTotalEmptyContainers(MAX_TRAVEL_TICKETS);
     }
@@ -54,14 +55,19 @@ public class TicketContainerBar extends ContainerBar {
     }
 
     public Vector2 getTicketPosition(PathType input) {
+        Image image = getTicketImage(input);
+        if (image == null) throw new IllegalArgumentException();
+        return image.localToStageCoordinates(new Vector2(0, 0));
+    }
+
+    public Image getTicketImage(PathType input) {
         for (int i = 0; i < slots.length; i++) {
             if (slots[i] != input) {
                 continue;
             }
-            Image image = (Image) getCells().get(i).getActor();
-            return image.localToStageCoordinates(new Vector2(0, 0));
+            return (Image) getCells().get(i).getActor();
         }
-        throw new IllegalArgumentException();
+        return null;
     }
 
     public void removeTicket(PathType input) {

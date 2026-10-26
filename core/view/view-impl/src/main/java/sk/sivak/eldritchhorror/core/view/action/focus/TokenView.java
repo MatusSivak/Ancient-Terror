@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.ResourceSpendEffect;
 import sk.sivak.eldritchhorror.core.view.components.VitalityLossEffect;
 import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -47,13 +48,19 @@ public class TokenView {
     }
 
     public Completable loseFocus() {
-        return GameplaySounds.withCue(GameplaySounds.Cue.RESOURCE_SPEND,
-                loseToken(FOCUS_TOKEN_LEFT, FOCUS_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getFocusBar(), new Vector2(27,27),0));
+        return loseResource(InfoStage.getInvestigatorHud().getFocusBar(), ResourceSpendEffect.Kind.FOCUS);
     }
 
     public Completable loseClue() {
-        return GameplaySounds.withCue(GameplaySounds.Cue.RESOURCE_SPEND,
-                loseToken(CLUE_TOKEN_LEFT, CLUE_TOKEN_RIGHT, InfoStage.getInvestigatorHud().getClueBar(), new Vector2(27,27),0));
+        return loseResource(InfoStage.getInvestigatorHud().getClueBar(), ResourceSpendEffect.Kind.CLUE);
+    }
+
+    private Completable loseResource(ContainerBar bar, ResourceSpendEffect.Kind kind) {
+        return Completable.defer(() -> {
+            if (bar.getCurrentValue() <= 0) return Completable.complete();
+            return ResourceSpendEffect.play(InfoStage.getStageSafe(), bar.getFullContainerPosition(), 27, 27, kind,
+                    bar::decreaseCurrentValue, () -> GameplaySounds.play(GameplaySounds.Cue.RESOURCE_SPEND));
+        });
     }
 
     public Completable loseToken(String leftTexture, String rightTexture, ContainerBar containerBar, Vector2 tokenSize, float offsetX) {

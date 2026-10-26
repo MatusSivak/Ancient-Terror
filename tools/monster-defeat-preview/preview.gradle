@@ -17,4 +17,17 @@ gradle.projectsEvaluated {
         mainClass.set('GateCombatPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewResourceSpend', JavaExec) {
+        dependsOn desktop.tasks.named('monsterDefeatPreviewClasses')
+        classpath = desktop.sourceSets.monsterDefeatPreview.runtimeClasspath
+        mainClass.set('ResourceSpendPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+    desktop.tasks.register('previewGateClose', JavaExec) {
+        dependsOn desktop.tasks.named('monsterDefeatPreviewClasses')
+        classpath = desktop.sourceSets.monsterDefeatPreview.runtimeClasspath
+        mainClass.set('GateCombatPreview')
+        systemProperty 'preview.gatesOnly', 'true'
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

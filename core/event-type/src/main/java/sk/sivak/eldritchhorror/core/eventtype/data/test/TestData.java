@@ -192,6 +192,9 @@ public class TestData {
             }
             assetDicePoolBonus += usableAsset.getDicePoolBonus();
         }
+        // Official FAQ, Core Mechanics: include additional dice BEFORE applying the minimum.
+        // Strength 1, modifier -2, and +1 additional die still roll only one die.
+        // A card such as Gambler's Dice can explicitly replace the normal minimum.
         return Math.max(minimumRolledDice, baseStatValue + bonusStatValue + modifier + assetStatBonus + assetDicePoolBonus + additionalDicesCount);
     }
 

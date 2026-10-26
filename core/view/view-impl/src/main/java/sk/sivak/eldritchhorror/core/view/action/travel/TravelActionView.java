@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import java8.features.stream.Stream;
 import rx.Completable;
 import rx.Single;
@@ -16,7 +17,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.ResourceSpendEffect;
 import sk.sivak.eldritchhorror.core.view.components.hud.TicketContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -173,23 +174,14 @@ public class TravelActionView {
     }
 
     public Completable loseTicket(PathType input) {
-        TokenActor tokenActor;
-        if (input == PathType.TRAIN) {
-            tokenActor = new TokenActor(
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_TRAIN_LEFT),
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_TRAIN_RIGHT)
-            );
-        } else {
-            tokenActor = new TokenActor(
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_SHIP_LEFT),
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_SHIP_RIGHT)
-            );
-        }
-
-        TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
-        tokenActor.setHolderLocation(ticketBar.getTicketPosition(input));
-        InfoStage.addSmallActorToInfoStage(tokenActor);
-        ticketBar.removeTicket(input);
-        return tokenActor.discard(() -> GameplaySounds.play(GameplaySounds.Cue.TICKET_SPEND));
+        return Completable.defer(() -> {
+            TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
+            Image ticket = ticketBar.getTicketImage(input);
+            if (ticket == null) return Completable.complete();
+            Vector2 position = ticket.localToStageCoordinates(new Vector2());
+            return ResourceSpendEffect.play(InfoStage.getStageSafe(), position, ticket.getWidth(), ticket.getHeight(),
+                    input == PathType.TRAIN ? ResourceSpendEffect.Kind.TRAIN : ResourceSpendEffect.Kind.SHIP,
+                    () -> ticketBar.removeTicket(input), () -> GameplaySounds.play(GameplaySounds.Cue.TICKET_SPEND));
+        });
     }
 }

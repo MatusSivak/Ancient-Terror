@@ -77,6 +77,8 @@ public class GateCombatPreview extends ApplicationAdapter {
             }
             checkGate(GateColor.GREEN, false, true);
             checkWrappedGates();
+            System.out.println("PASS: gate colours, continuous spin, wrapping/zoom, lazy close, fast-forward and cleanup");
+            if (Boolean.getBoolean("preview.gatesOnly")) return;
             checkCombat(false);
             checkCombat(true);
             System.out.println("PASS: gate colours, layered snapshots, wrapping/zoom, lazy close, fast-forward, cleanup; combat depth, bounds, targets, lunge, shadows and interruption");
@@ -101,9 +103,21 @@ public class GateCombatPreview extends ApplicationAdapter {
         Actor portrait = effect.findActor("closing-gate-portrait");
         require(Math.abs(portrait.getScaleX() - .8f) < .005f, "Gate jumped during stage transfer");
         boolean misted = effect.findActor("gate-mist") != null;
+        Actor[] spinningLayers = {(Actor) field(effect, "core"), (Actor) field(effect, "halo")};
+        float[] previousRotation = {spinningLayers[0].getRotation(), spinningLayers[1].getRotation()};
+        float[] previousStep = new float[2];
         for (int frame = 0; frame < 180 && done.get() == 0; frame++) {
             if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
             stage.act(1f / 60f);
+            for (int layer = 0; layer < spinningLayers.length; layer++) {
+                float step = Math.abs(spinningLayers[layer].getRotation() - previousRotation[layer]);
+                if (!fast && frame >= 24 && frame <= 30) {
+                    require(step > previousStep[layer] * .85f && step < previousStep[layer] * 1.15f,
+                            "Gate spin changed abruptly at the collapse transition");
+                }
+                previousRotation[layer] = spinningLayers[layer].getRotation();
+                previousStep[layer] = step;
+            }
             if (frame == 20 && !fast) {
                 require(portrait.isVisible() && portrait.getParent() == effect, "Gate vanished before dissipating");
                 draw("gate-" + color + "-shudder");
