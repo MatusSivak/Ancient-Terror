@@ -17,6 +17,7 @@ import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -179,6 +180,9 @@ public class DiceRoller {
             }
             return o1.getDiceValue() - o2.getDiceValue();
         });
+        // One gathering sound for the whole group as the thrown dice start sliding into order.
+        diceLayer.addAction(new FastForwardAction<>(Actions.delay(0.25f,
+                Actions.run(() -> GameplaySounds.play(GameplaySounds.Cue.DICE_SORT)))));
         for (int i = 0; i < dices.size(); i++) {
             Vector2 returnArea = diceAreaCalculator.getReturnArea(i);
             float returnDuration = 0.75f;

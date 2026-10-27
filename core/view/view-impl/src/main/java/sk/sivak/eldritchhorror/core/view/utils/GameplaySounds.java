@@ -13,6 +13,7 @@ public final class GameplaySounds {
         FOCUS_GAIN("focus_gain", .78f),
         FOCUS_LAND("focus_land", .80f),
         RESOURCE_SPEND("resource_spend", .70f),
+        DICE_SORT("dice_sort", .75f),
         TICKET_GAIN("ticket_gain", .85f),
         TICKET_LAND("ticket_land", .82f),
         TICKET_SPEND("ticket_spend", .78f),

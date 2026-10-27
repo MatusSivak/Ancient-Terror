@@ -34,6 +34,7 @@ Both collections are CC0 1.0; the original download archives are preserved in
 | Health/sanity token gain, `health_gain` | Kenney `chips-handle-1.ogg` |
 | Clue / focus gain | Kenney `chips-handle-3.ogg` / `chips-handle-2.ogg` |
 | Health/sanity, clue, focus HUD landing | Kenney `chip-lay-1.ogg`, `chip-lay-2.ogg`, `chip-lay-3.ogg` |
+| Thrown dice slide into sorted order, `dice_sort` | Kenney `dice-grab-1.ogg` |
 
 Run `python tools/prepare_tabletop_sounds.py` with `numpy` and `soundfile` installed.
 It reads directly from the ZIPs, removes surrounding silence, converts to 44.1 kHz

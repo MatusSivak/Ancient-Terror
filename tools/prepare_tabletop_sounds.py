@@ -36,6 +36,7 @@ SOURCES = {
     "clue_land": "chip-lay-2.ogg",
     "focus_gain": "chips-handle-2.ogg",
     "focus_land": "chip-lay-3.ogg",
+    "dice_sort": "dice-grab-1.ogg",
 }
 
 
