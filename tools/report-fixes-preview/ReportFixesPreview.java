@@ -59,7 +59,9 @@ public class ReportFixesPreview extends ApplicationAdapter {
     private static boolean buttonGlyphColors;
     private static boolean october25;
     private static boolean yigClue;
+    private static boolean october27;
     public static void main(String[] args) {
+        october27 = Arrays.asList(args).contains("--oct27");
         yigClue = Arrays.asList(args).contains("--yig-clue");
         october25 = Arrays.asList(args).contains("--oct25");
         latestOnly = Arrays.asList(args).contains("--latest");
@@ -87,6 +89,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
             });
             Gdx.audio = proxy(Audio.class, (p,m,a) -> silent);
             VisUI.load(); stage=InfoStage.getStageSafe();
+            if (october27) { october27Reports(); return; }
             if (october25) { october25Reports(); return; }
             if (buttonGlyphColors) { buttonGlyphColors(); eveningChoices(); return; }
             if (october23Evening) { eveningChoices(); return; }
@@ -104,6 +107,113 @@ public class ReportFixesPreview extends ApplicationAdapter {
             System.out.println("PASS: skill restrictions/cancel, investigator cancel, ticket availability/single completion, mystery and typewriter glyphs.");
         } catch(Throwable e) { e.printStackTrace(); System.exit(1); }
         finally { Gdx.app.exit(); }
+    }
+    private void october27Reports() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class,(p,m,a)->null)).init();
+        for (boolean fast : new boolean[]{false, true}) {
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            discardZoom();
+            solvedMysteryConfirmation();
+        }
+        FastForwardAction.turnOff();
+        yigSavedClock();
+        System.out.println("PASS: discard card taps zoom without dismissing, backdrop closes, solved mystery confirms once on centered card, Yig save/clock round-trip");
+    }
+
+    private void discardZoom() throws Exception {
+        preloadCard("card/asset/HOLY_CROSS.jpg", new HolyCrossAsset().getCost());
+        preloadCard("card/asset/HANDCUFFS.jpg", new HandcuffsAsset().getCost());
+        sk.sivak.eldritchhorror.core.view.components.sheet.discard.DiscardSheet sheet =
+                new sk.sivak.eldritchhorror.core.view.components.sheet.discard.DiscardSheet();
+        int[] closed = {0};
+        for (int opening = 0; opening < 2; opening++) {
+            sheet.init(Arrays.asList(new HolyCrossAsset(), new HandcuffsAsset()), () -> closed[0]++);
+            sheet.setPosition((960-sheet.getWidth())/2, (540-sheet.getHeight())/2);
+            stage.addActor(sheet); tick(2);
+            CardTemplate card = null;
+            for (Actor actor : all(sheet)) if (actor instanceof CardTemplate) { card=(CardTemplate)actor; break; }
+            require(card != null, "Discard has no cards");
+            tap(card.getForeground()); tick(90);
+            require(closed[0] == opening, "Card tap dismissed the discard pile");
+            CardClickListener zoom = null;
+            for (EventListener listener : card.getListeners()) if (listener instanceof CardClickListener) zoom=(CardClickListener)listener;
+            require(zoom != null && zoom.isZoomed(), "Discard card did not zoom");
+            draw("oct27-discard-zoom");
+            zoom.scaleDownIfZoomed(); tick(90);
+            require(!zoom.isZoomed() && card.getColor().a == 1f, "Discard card did not return");
+            tap((Actor)field(sheet,"hitImage"));
+            require(closed[0] == opening+1, "Backdrop did not close exactly once");
+            sheet.remove();
+        }
+    }
+
+    private void tap(Actor target) {
+        com.badlogic.gdx.math.Vector2 point=target.localToStageCoordinates(new com.badlogic.gdx.math.Vector2(1,1));
+        for (InputEvent.Type type : new InputEvent.Type[]{InputEvent.Type.touchDown,InputEvent.Type.touchUp}) {
+            InputEvent event=new InputEvent();event.setType(type);event.setStage(stage);
+            event.setStageX(point.x);event.setStageY(point.y);event.setPointer(0);event.setButton(0);
+            target.fire(event);
+        }
+    }
+
+    private void solvedMysteryConfirmation() throws Exception {
+        MysteryCardInfo info=proxy(MysteryCardInfo.class,(p,m,a)->{
+            switch(m.getName()) {
+                case "getName": return "mystery.yig.RISE_OF_THE_SERPENT_PEOPLE.name";
+                case "getFlavorText": return "mystery.yig.RISE_OF_THE_SERPENT_PEOPLE.flavor";
+                case "getMysteryText": return "mystery.yig.RISE_OF_THE_SERPENT_PEOPLE.text";
+                case "getMysteryComplexity": case "getProgress": return 2;
+                case "getClueCredit": return 0;
+                default: return null;
+            }
+        });
+        int[] confirmed={0}, removed={0};
+        new sk.sivak.eldritchhorror.core.view.game.GameViewImpl().confirmSolvedMysteryCard(info,1,3)
+                .subscribe(()->confirmed[0]++);
+        tick(180);
+        MysteryCard card=sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.getMysteryCard();
+        require(Math.abs(card.getX()-(960-card.getWidth())/2)<.1f && Math.abs(card.getY()-(540-card.getHeight())/2)<.1f,
+                "Solved mystery is not centered");
+        require(confirmed[0]==0,"Mystery confirmed before tap");
+        tap((Actor)field(card,"hitImage"));
+        require(confirmed[0]==0,"Backdrop confirmed mystery");
+        draw("oct27-solved-mystery");
+        click(card); click(card);
+        require(confirmed[0]==1 && card.getStage()!=null,"Mystery must confirm once and remain visible for destruction");
+        card.resolveWithEffect().subscribe(()->removed[0]++); tick(180);
+        require(removed[0]==1 && card.getStage()==null,"Confirmed mystery destruction did not finish");
+    }
+
+    private void yigSavedClock() throws Exception {
+        sk.sivak.eldritchhorror.core.view.initgame.SaveLoadGameHelper helper=new sk.sivak.eldritchhorror.core.view.initgame.SaveLoadGameHelper();
+        Json json=(Json)field(helper,"json");
+        for (int doom : new int[]{-8,-6,-3,0}) {
+            String minimal="{ancientOne:{class:AncientOne,ancientOneId:YIG,awaken:true},doomTrack:{class:DoomTrack,currentDoom:"+doom+"}}";
+            verifyYigClock(json,minimal,doom);
+        }
+        String[] reports={"4768b52b-1057-4d6d-a3fc-66e949c27e2e","a4a33cb2-82a7-41e2-9391-7de92f50744c","b7e89eed-d519-47f1-9248-d6f9944d7060"};
+        for(String report:reports) {
+            com.badlogic.gdx.files.FileHandle file=Gdx.files.local("../build/report-review-oct27/"+report+".save.json");
+            if(file.exists()) { verifyYigClock(json,file.readString(),report.startsWith("4768")?-6:-3);System.out.println("PASS: reported Yig save "+report); }
+        }
+    }
+
+    private void verifyYigClock(Json json,String source,int expected) throws Exception {
+        sk.sivak.eldritchhorror.core.model.save.SaveData save=json.fromJson(sk.sivak.eldritchhorror.core.model.save.SaveData.class,source);
+        // Exercise the same serializer on a second load, without overwriting the player's save.
+        save=json.fromJson(sk.sivak.eldritchhorror.core.model.save.SaveData.class,json.toJson(save));
+        sk.sivak.eldritchhorror.core.model.AncientOne ancient=new sk.sivak.eldritchhorror.core.model.AncientOne(); ancient.load(save.getAncientOne());
+        sk.sivak.eldritchhorror.core.model.DoomTrack doom=new sk.sivak.eldritchhorror.core.model.DoomTrack();doom.load(save.getDoomTrack());
+        require(ancient.getAncientOneInfo().isAwaken() && doom.getCurrentDoom()==expected,"Saved Yig state changed");
+        sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget clock=new sk.sivak.eldritchhorror.core.view.components.track.DoomTrackWidget();
+        stage.addActor(clock);
+        sk.sivak.eldritchhorror.core.controller.GameControllerImpl controller=new sk.sivak.eldritchhorror.core.controller.GameControllerImpl();
+        controller.setAncientOne(ancient);controller.setDoomTrackRead(doom);
+        controller.setView(proxy(sk.sivak.eldritchhorror.core.view.GameView.class,(p,m,a)->{clock.updateDoom((Integer)a[0]);return null;}));
+        controller.updateDoom();tick(180);
+        require(clock.getCurrentDoom()==-expected,"Loaded Yig clock shows incorrect remaining time");
+        require(Math.abs(((Actor)field(clock,"minuteHand")).getRotation()-(-expected*30f))<.1f,"Clock hand disagrees with saved Doom");
+        clock.remove();
     }
     private void october25Reports() throws Exception {
         new sk.sivak.eldritchhorror.core.view.game.HudButtons(proxy(GameController.class,(p,m,a)->null)).init();

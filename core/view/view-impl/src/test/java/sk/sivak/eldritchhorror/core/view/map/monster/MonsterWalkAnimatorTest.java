@@ -56,4 +56,38 @@ public class MonsterWalkAnimatorTest {
         }
         assertFalse(animator.isActive());
     }
+
+    @Test public void keepsHeadingAfterStoppingAndIgnoresMapWrap() {
+        Actor actor = monster();
+        MonsterWalkAnimator animator = new MonsterWalkAnimator();
+        animator.update(actor, 0f);
+        for (int i = 0; i < 30; i++) {
+            actor.moveBy(-2f, 0f); animator.update(actor, 1 / 60f);
+        }
+        actor.moveBy(3000f, 0f); animator.update(actor, 1 / 60f);
+        for (int i = 0; i < 60; i++) animator.update(actor, 1 / 60f);
+        actor.setScale(.7f, .8f);
+        animator.apply(actor);
+        assertEquals(-.7f, actor.getScaleX(), .001f);
+        animator.restore(actor);
+        assertEquals(.7f, actor.getScaleX(), .001f);
+        assertEquals(.8f, actor.getScaleY(), .001f);
+        assertEquals(2940f, actor.getX(), .001f);
+    }
+
+    @Test public void explicitRouteFacesCorrectlyEvenForSingleFrameFastForward() {
+        Actor actor = monster();
+        MonsterWalkAnimator animator = new MonsterWalkAnimator(false);
+        sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOn();
+        try {
+            animator.faceMovement(500f);
+            actor.moveBy(500f, 0f);
+            animator.update(actor, 1 / 60f);
+            animator.apply(actor, false);
+            assertEquals(-1f, actor.getScaleX(), .001f);
+            animator.restore(actor);
+        } finally {
+            sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOff();
+        }
+    }
 }

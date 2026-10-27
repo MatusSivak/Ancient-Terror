@@ -403,6 +403,17 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
+    public Completable confirmSolvedMysteryCard(MysteryCardInfo mystery, int mysteryNumber, int mysteriesRequired) {
+        return Completable.create(onSub -> {
+            BigActorsManager.getMysteryCard().init(mystery, mysteryNumber, mysteriesRequired);
+            BigActorsManager.getMysteryCard().setMoveCamera(false);
+            BigActorsManager.getMysteryCard().setAfterHideAction(() -> {});
+            BigActorsManager.getMysteryCard().confirmResolution().subscribe(onSub::onCompleted, onSub::onError);
+            showMysteryCardAgain();
+        });
+    }
+
+    @Override
     public Completable justShowRumorCard(RumorCardInfo rumorCardInfo) {
         return Completable.create(onSub -> {
             BigActorsManager.getRumorCard().init(rumorCardInfo);

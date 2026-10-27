@@ -104,23 +104,27 @@ public class DeliveryServiceListener extends AbstractAssetListener<DeliveryServi
 
         @Override
         public void onNotify(TradeData eventData) {
-            IterableUtils.removeIf(eventData.getSourceCards(), cardInfo -> !cardInfo.getTraits().contains(AssetTrait.ITEM));
-            eventData.getTargetCards().clear();
-            TradeData.TokenTrading targetTokenTrading = eventData.getTargetTokenTrading();
-            if (targetTokenTrading == null) {
-                return;
-            }
-            if (targetTokenTrading.getBeforeTrade() == null) {
-                return;
-            }
-            targetTokenTrading.getBeforeTrade().setClues(0);
-            targetTokenTrading.getBeforeTrade().setTrainTickets(0);
-            targetTokenTrading.getBeforeTrade().setShipTickets(0);
+            restrictDelivery(eventData);
         }
 
         @Override
         public Class<TradeData> getDataClass() {
             return TradeData.class;
         }
+    }
+
+    static void restrictDelivery(TradeData trade) {
+        IterableUtils.removeIf(trade.getSourceCards(), card -> !card.getTraits().contains(AssetTrait.ITEM));
+        trade.getTargetCards().clear();
+        // These are the offered quantities, not the investigators' actual possessions.
+        // Zero on both sides means the trade UI and transfer deltas cannot deliver tokens.
+        clearOfferedTokens(trade.getSourceTokenTrading());
+        clearOfferedTokens(trade.getTargetTokenTrading());
+    }
+
+    private static void clearOfferedTokens(TradeData.TokenTrading trading) {
+        if (trading == null) return;
+        trading.setBeforeTrade(new TradeData.Tokens());
+        trading.setAfterTrade(new TradeData.Tokens());
     }
 }

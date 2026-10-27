@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.map.monster;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 /**
  * Makes a map monster look like it walks instead of gliding: while its position changes it bounces with each step,
@@ -37,17 +38,29 @@ class MonsterWalkAnimator {
     private float savedScaleX;
     private float savedScaleY;
     private boolean applied;
+    private final MonsterFacing facing;
+
+    MonsterWalkAnimator() { this(true); }
+
+    MonsterWalkAnimator(boolean artworkFacesRight) { facing = new MonsterFacing(artworkFacesRight); }
+
+    void faceMovement(float dx) { facing.followMovement(dx); }
 
     void update(Actor actor, float delta) {
+        update(actor, delta, true);
+    }
+
+    void update(Actor actor, float delta, boolean followPosition) {
         float x = actor.getX();
         float y = actor.getY();
         boolean walking = false;
         float targetLean = 0f;
-        if (hasLast && delta > 0f) {
+        if (followPosition && hasLast && delta > 0f) {
             float moved = Vector2.dst(last.x, last.y, x, y);
             // Ignore jitter and the jump when the map wraps around.
             walking = moved > 0.05f && moved < actor.getWidth();
             if (walking) {
+                faceMovement(x - last.x);
                 float steps = Math.min(moved / (actor.getHeight() * STRIDE), MAX_STEPS_PER_SECOND * delta);
                 phase += steps * MathUtils.PI;
                 float speedX = (x - last.x) / delta / actor.getHeight();
@@ -66,6 +79,7 @@ class MonsterWalkAnimator {
         }
         last.set(x, y);
         hasLast = true;
+        facing.update(delta * (FastForwardAction.isOn() ? 20f : 1f));
     }
 
     boolean isActive() {
@@ -88,21 +102,22 @@ class MonsterWalkAnimator {
 
     /** Offsets the actor for drawing; must be paired with {@link #restore(Actor)}. */
     void apply(Actor actor) {
-        applied = isActive();
-        if (!applied) {
-            return;
-        }
+        apply(actor, true);
+    }
+
+    void apply(Actor actor, boolean walking) {
+        applied = true;
         savedY = actor.getY();
         savedRotation = actor.getRotation();
         savedScaleX = actor.getScaleX();
         savedScaleY = actor.getScaleY();
-        float squash = getSquash();
+        float squash = walking ? getSquash() : 0f;
         float scaleY = savedScaleY * (1f - squash);
         // Scaling happens around the centre; drop the body so its feet stay on the ground.
         float keepFeetDown = actor.getOriginY() * (savedScaleY - scaleY);
-        actor.setY(savedY + getBob(actor.getHeight()) - keepFeetDown);
-        actor.setRotation(savedRotation + getTilt());
-        actor.setScale(savedScaleX * (1f + squash), scaleY);
+        actor.setY(savedY + (walking ? getBob(actor.getHeight()) : 0f) - keepFeetDown);
+        actor.setRotation(savedRotation + (walking ? getTilt() : 0f));
+        actor.setScale(savedScaleX * (1f + squash) * facing.scaleX(), scaleY);
     }
 
     void restore(Actor actor) {

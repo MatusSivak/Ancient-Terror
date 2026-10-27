@@ -95,3 +95,10 @@ It finishes a hidden research paper, answers the plain Yes/No question and a
 K'n-yan paper choice, then requires the discarded Clue token to stay visible
 instead of fading out with the small-actor layer. Screenshots use the
 `yig-clue-*` prefix.
+
+Use `--args="--oct27"` for discard-card zoom/dismissal, centered solved-Mystery
+confirmation and destruction, and awakened Yig save/clock round trips. Card
+interactions run at normal and fast-forward speed. This mode optionally reads
+the three downloaded Yig saves in `build/report-review-oct27/` when present;
+it never modifies them or contacts Firestore. Synthetic states run even without
+the reports. Screenshots use the `oct27-*` prefix.

@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
+import sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCardEffect;
@@ -43,11 +44,14 @@ public class MonsterImage extends Image {
     private float reckoningPulseTime = 0f;
 
     private boolean drawShadow = true;
-    private final MonsterWalkAnimator walkAnimator = new MonsterWalkAnimator();
+    private final MonsterWalkAnimator walkAnimator;
 
     public MonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
         super(texture);
         this.monsterInfo = monsterInfo;
+        walkAnimator = new MonsterWalkAnimator(
+                monsterInfo == null || MonsterArtwork.facesRight(
+                        monsterInfo.getClass().getSimpleName(), monsterInfo.isEpic()));
         this.gameController = gameController;
         this.isCenter = isCenter;
         this.hasReckoning = hasReckoning;
@@ -62,6 +66,10 @@ public class MonsterImage extends Image {
         addSquishStretchAnimation();
     }
 
+    public void faceMovement(float dx) {
+        walkAnimator.faceMovement(dx);
+    }
+
     public void hideShadow() {
         drawShadow = false;
     }
@@ -73,7 +81,7 @@ public class MonsterImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
-        walkAnimator.update(this, delta);
+        walkAnimator.update(this, delta, drawShadow);
         if (drawReckoningPulse) {
             reckoningPulseTime += delta;
         }
@@ -83,9 +91,7 @@ public class MonsterImage extends Image {
     public void draw(Batch batch, float parentAlpha) {
         // While walking, the body and its shadow bounce, waddle and lean together.
         boolean walking = drawShadow;
-        if (walking) {
-            walkAnimator.apply(this);
-        }
+        walkAnimator.apply(this, walking);
         // Draw blurred shadow using Gaussian blur shader
         if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
             TextureRegionDrawable trd = (TextureRegionDrawable) getDrawable();
@@ -114,9 +120,7 @@ public class MonsterImage extends Image {
         if (drawReckoningPulse) {
             drawReckoningPulse(batch, parentAlpha);
         }
-        if (walking) {
-            walkAnimator.restore(this);
-        }
+        walkAnimator.restore(this);
     }
 
     private void drawReckoningPulse(Batch batch, float parentAlpha) {

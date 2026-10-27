@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.schedulers.Schedulers;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
+import sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -56,7 +57,7 @@ public class EpicMonsterImage extends Image {
     private float reckoningPulseTime = 0f;
 
     private boolean drawShadow = true;
-    private final MonsterWalkAnimator walkAnimator = new MonsterWalkAnimator();
+    private final MonsterWalkAnimator walkAnimator;
 
     public EpicMonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
         this(monsterInfo, gameController, hasReckoning, LocationPositionResolver.resolve(location), texture);
@@ -65,6 +66,9 @@ public class EpicMonsterImage extends Image {
     public EpicMonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean hasReckoning, Vector2 position, Texture texture) {
         super(texture);
         this.monsterInfo = monsterInfo;
+        walkAnimator = new MonsterWalkAnimator(
+                monsterInfo == null || MonsterArtwork.facesRight(
+                        monsterInfo.getClass().getSimpleName(), monsterInfo.isEpic()));
         this.gameController = gameController;
         this.hasReckoning = hasReckoning;
         this.position = position;
@@ -81,6 +85,10 @@ public class EpicMonsterImage extends Image {
         addSquishStretchAnimation();
     }
 
+    public void faceMovement(float dx) {
+        walkAnimator.faceMovement(dx);
+    }
+
     public void hideShadow() {
         drawShadow = false;
     }
@@ -93,7 +101,7 @@ public class EpicMonsterImage extends Image {
     public void act(float delta) {
         super.act(delta);
         epicPulseTime += delta;
-        walkAnimator.update(this, delta);
+        walkAnimator.update(this, delta, drawShadow);
         if (drawReckoningPulse) {
             reckoningPulseTime += delta;
         }
@@ -106,9 +114,7 @@ public class EpicMonsterImage extends Image {
     public void draw(Batch batch, float parentAlpha) {
         // While walking, the body and its shadow bounce, waddle and lean together.
         boolean walking = drawShadow;
-        if (walking) {
-            walkAnimator.apply(this);
-        }
+        walkAnimator.apply(this, walking);
         // Draw blurred shadow using Gaussian blur shader
         if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
             TextureRegionDrawable trd = (TextureRegionDrawable) getDrawable();
@@ -144,9 +150,7 @@ public class EpicMonsterImage extends Image {
         if (drawReckoningPulse) {
             drawReckoningPulse(batch, parentAlpha);
         }
-        if (walking) {
-            walkAnimator.restore(this);
-        }
+        walkAnimator.restore(this);
 
 
 

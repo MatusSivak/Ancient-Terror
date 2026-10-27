@@ -17,6 +17,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
+import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CardClickListener;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
@@ -43,6 +44,7 @@ public class DiscardSheet extends VisTable {
     private final DisplayHide displayHide;
     private final Label discardLabel;
     private Image hitImage;
+    private final List<CardClickListener> cardListeners = new LinkedList<>();
 
     public DiscardSheet() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.DISCARD);
@@ -56,6 +58,8 @@ public class DiscardSheet extends VisTable {
     }
 
     public void init(List<CardInfo> discardedCards, Action0 onClickAction) {
+        for (CardClickListener listener : cardListeners) listener.hideDuplicate();
+        cardListeners.clear();
         clear();
         align(Align.top);
         getColor().a = 1f;
@@ -67,6 +71,13 @@ public class DiscardSheet extends VisTable {
         pad(16, PANEL_PADDING, 20, PANEL_PADDING);
 
         List<CardTemplate> cardTemplates = toCardTemplates(discardedCards);
+        for (CardTemplate card : cardTemplates) {
+            CardClickListener listener = new CardClickListener();
+            listener.setAllTemplates(cardTemplates);
+            card.addListener(listener);
+            cardListeners.add(listener);
+        }
+        for (CardClickListener listener : cardListeners) listener.setOtherListeners(cardListeners);
         addHitImage(onClickAction);
 
         discardLabel.setText(get("discard.label"));
@@ -132,8 +143,8 @@ public class DiscardSheet extends VisTable {
         hitImage.getColor().a = 0.0f;
         hitImage.setBounds(-getX(), -getY(), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
         if (onClickAction != null) {
-            // Capture taps anywhere in the sheet, including its cards and scrollbar.
-            addCaptureListener(new ClickListener() {
+            // Only the backdrop dismisses the sheet; cards and scrolling keep it open.
+            hitImage.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     onClickAction.call();
@@ -168,6 +179,7 @@ public class DiscardSheet extends VisTable {
         });
 
         displayHide.setBeforeHideAction(() -> {
+            for (CardClickListener listener : cardListeners) listener.hideDuplicate();
             InfoStage.getInvestigatorHud().show().subscribe();
             HudButtons.getTrackHud().show().subscribe();
         });

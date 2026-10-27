@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -50,6 +52,7 @@ public class MysteryCard extends VisTable {
     private boolean moveCamera = false;
     private Action0 beforeDisplayAction;
     private boolean awaitingAcknowledgement;
+    private boolean confirmingResolution;
     private float acknowledgementPulseTime;
 
     public MysteryCard() {
@@ -76,6 +79,7 @@ public class MysteryCard extends VisTable {
 
     public void init(MysteryCardInfo mysteryCardInfo, int mysteryNumber, int mysteriesRequired) {
         stopAcknowledgementPulse();
+        confirmingResolution = false;
         advanceActiveMysteryAmount = null;
         clear();
         hitImage = null;
@@ -244,6 +248,28 @@ public class MysteryCard extends VisTable {
         });
     }
 
+    /** A solved mystery stays visible until its destruction animation takes over. */
+    public Completable confirmResolution() {
+        return Completable.create(onSub -> {
+            clearListeners();
+            confirmingResolution = true;
+            awaitingAcknowledgement = true;
+            addListener(new ClickListener() {
+                private boolean confirmed;
+
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (confirmed || !displayHide.isDisplayed() || getTouchable() != Touchable.enabled
+                            || x < 0 || y < 0 || x > getWidth() || y > getHeight()) return;
+                    confirmed = true;
+                    setTouchable(Touchable.disabled);
+                    stopAcknowledgementPulse();
+                    onSub.onCompleted();
+                }
+            });
+        });
+    }
+
     @Override
     public boolean remove() {
         stopAcknowledgementPulse();
@@ -324,6 +350,7 @@ public class MysteryCard extends VisTable {
 
     private float getPromptAwareY() {
         float centeredY = (VIEWPORT_HEIGHT - getHeight()) / 2f;
+        if (confirmingResolution) return centeredY;
         float promptTop = InfoStage.getBottomPromptTop();
         return promptTop > 0f ? Math.max(centeredY, promptTop + 10f) : centeredY;
     }

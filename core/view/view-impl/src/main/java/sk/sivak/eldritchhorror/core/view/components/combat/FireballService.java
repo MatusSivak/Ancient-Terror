@@ -135,6 +135,7 @@ public class FireballService {
 
     private void initOnLandLastAction(Map<Vector2, List<Fireball>> fireballsMap) {
         if (onLandLastAction != null) {
+            Runnable completedVolley = onLandLastAction;
             List<Completable> completables = new LinkedList<>();
             Observable.from(fireballsMap.values())
                     .flatMapIterable(fireballs -> fireballs)
@@ -142,12 +143,13 @@ public class FireballService {
                         completables.add(Completable.create(onSub -> fireball.addOnLandAction(onSub::onCompleted)));
                     });
 
-            Completable.merge(completables).subscribe(() -> onLandLastAction.run());
+            Completable.merge(completables).subscribe(completedVolley::run);
         }
     }
 
     private void initOnLandFirstAction(Map<Vector2, List<Fireball>> fireballsMap) {
         if (onLandFirstAction != null) {
+            Runnable firstImpact = onLandFirstAction;
             List<Completable> completables = new LinkedList<>();
             Observable.from(fireballsMap.values())
                     .flatMapIterable(fireballs -> fireballs)
@@ -155,7 +157,7 @@ public class FireballService {
                         completables.add(Completable.create(onSub -> fireball.addOnLandAction(onSub::onCompleted)));
                     });
 
-            Completable.amb(completables).subscribe(() -> onLandFirstAction.run());;
+            Completable.amb(completables).subscribe(firstImpact::run);
         }
     }
 
@@ -228,11 +230,13 @@ public class FireballService {
                     fireballsMap.put(target, new LinkedList<>());
                 }
                 fireballsMap.get(target).add(fireball);
+                // Apply the hit before announcing volley completion. Registering this at throw
+                // time puts it after completion listeners and can release the next volley early.
+                fireball.addOnLandAction(MapUtils.getOrDefault(onLandActions, target, () -> {}));
                 sequenceAction.addAction(Actions.run(() -> {
                     fireball.setExplosion(targetExplosionMap.get(target));
                     fireball.setSmokeGroup(smokeGroup);
                     fireball.setMidpointDisplacementDirection(midpointDisplacementDirection);
-                    fireball.addOnLandAction(MapUtils.getOrDefault(onLandActions, target, () -> {}));
                     MapUtils.getOrDefault(onThrowActions, source, () -> {}).run();
                     if (source instanceof ActorCenterPosition) {
                         ((ActorCenterPosition) source).refresh();

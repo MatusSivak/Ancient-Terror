@@ -50,6 +50,8 @@ public interface GameController {
 
     Completable showCurrentMysteryCard(boolean moveCamera);
 
+    Completable confirmSolvedMysteryCard();
+
     void updateRumorButtonVisibility();
 
     Completable showRumorCard(RumorCardInfo activeRumor);

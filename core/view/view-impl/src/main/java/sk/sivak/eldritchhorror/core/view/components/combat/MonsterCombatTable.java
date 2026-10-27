@@ -23,6 +23,8 @@ import rx.functions.Func0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterFacing;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
@@ -103,6 +105,7 @@ public class MonsterCombatTable extends VisTable {
     private Cell<Table> horrorRowCell;
     private FireballService fireballService;
     private Image monsterImage;
+    private MonsterFacing facing;
     private Image groundShadow;
     private float imageSize = IMAGE_SIZE;
     /** Red rim behind epic monsters; null for ordinary ones. */
@@ -176,6 +179,9 @@ public class MonsterCombatTable extends VisTable {
         attackTime = 0f;
         hitShake = 0f;
         monsterImage = createMonsterImage(data);
+        facing = new MonsterFacing(MonsterArtwork.facesRight(data.getMonsterClassName(), data.isMonsterEpic()));
+        // The investigator's portrait occupies the lower-left corner of combat.
+        facing.face(false, false);
         groundShadow = new Image(CustomAssetManager.getTexture("dice_shadow.png"));
         groundShadow.setName("combat-ground-shadow");
         groundShadow.setTouchable(Touchable.disabled);
@@ -266,6 +272,9 @@ public class MonsterCombatTable extends VisTable {
         float previousY = wanderPosition.y;
         boolean walking = !holdStill && updateWander(delta);
         updateGait(delta, walking, wanderPosition.x - previousX, wanderPosition.y - previousY);
+        if (walking) facing.followMovement(wanderPosition.x - previousX);
+        else facing.face(false, true);
+        facing.update(delta * (FastForwardAction.isOn() ? 20f : 1f));
         // Waddle with a stepping bounce while walking; breathe gently while standing; settle down while fighting.
         // Gaits cross-fade, so starting and stopping never snaps.
         float breathing = (1f - walkBlend) * idleBlend;
@@ -286,7 +295,8 @@ public class MonsterCombatTable extends VisTable {
         attackTime = Math.max(0f, attackTime - delta * (FastForwardAction.isOn() ? 20f : 1f));
         float attackPulse = attackTime > 0f ? 0.12f * MathUtils.sin(MathUtils.PI * attackTime / ATTACK_PULSE_DURATION) : 0f;
         float scale = perspective * (1f + attackPulse + 0.012f * MathUtils.sin(hoverTime * 2f) * breathing);
-        monsterImage.setScale(scale * (1f - 0.12f * Math.abs(walkLean) / MAX_LEAN * walkBlend), scale);
+        monsterImage.setScale(scale * (1f - 0.12f * Math.abs(walkLean) / MAX_LEAN * walkBlend)
+                * facing.scaleX(), scale);
         monsterImage.getColor().a = presence * getColor().a;
         if (epicGlow != null) {
             float glowOffset = imageSize * (EPIC_GLOW_SCALE - 1f) / 2f;
@@ -360,8 +370,8 @@ public class MonsterCombatTable extends VisTable {
     }
 
     private Vector2 randomBodyPoint(Vector2 body) {
-        float spread = Math.min(monsterImage.getImageWidth() * monsterImage.getScaleX(),
-                monsterImage.getImageHeight() * monsterImage.getScaleY()) * 0.18f;
+        float spread = Math.min(monsterImage.getImageWidth() * Math.abs(monsterImage.getScaleX()),
+                monsterImage.getImageHeight() * Math.abs(monsterImage.getScaleY())) * 0.18f;
         return new Vector2(body.x + MathUtils.random(-spread, spread), body.y + MathUtils.random(-spread, spread));
     }
 

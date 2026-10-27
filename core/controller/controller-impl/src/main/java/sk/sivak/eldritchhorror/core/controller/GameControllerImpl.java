@@ -258,6 +258,12 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public Completable confirmSolvedMysteryCard() {
+        return view.confirmSolvedMysteryCard(mysteryDeck.getCurrentMysteryCard(),
+                mysteryDeck.getSolvedMysteriesCount() + 1, ancientOne.getAncientOneInfo().getMysteriesRequired());
+    }
+
+    @Override
     public Completable showRumorCard(RumorCardInfo activeRumor) {
         return view.showRumorCard(activeRumor);
     }

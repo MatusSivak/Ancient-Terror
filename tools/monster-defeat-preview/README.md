@@ -39,3 +39,8 @@ fast-forward, early removal, deferred closing, and the visible copy at each map 
 Combat checks ordinary and epic near/far movement, transformed artwork bounds,
 nameplates, aiming, relative attack lunges, ground shadows, interruptions and removal.
 PNG film strips and key frames go to `build/gate-combat-preview/`.
+
+Combat also checks left/right movement facing, entering and idling toward the
+investigator, animated side turns, mirrored epic glow, invertible hit transforms,
+and fireball scatter inside mirrored artwork. The existing depth film strips show
+both directions and the flip between them.

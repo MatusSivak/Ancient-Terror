@@ -9,6 +9,8 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
+import sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -44,6 +46,9 @@ public class MoveActorHelper {
             int[] remaining = {actors.size() + 1};
             Runnable arrived = () -> { if (--remaining[0] == 0) onSub.onCompleted(); };
             for (Actor actor : actors) {
+                // Use the actual wrapped route, even when fast-forward finishes it in one frame.
+                if (actor instanceof MonsterImage) ((MonsterImage) actor).faceMovement(moveByVector.x);
+                if (actor instanceof EpicMonsterImage) ((EpicMonsterImage) actor).faceMovement(moveByVector.x);
                 actor.addAction(new FastForwardAction<>(Actions.sequence(
                         Actions.moveBy(moveByVector.x, moveByVector.y, duration * 1.3f, Interpolation.sine),
                         Actions.run(arrived))));

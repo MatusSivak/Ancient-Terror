@@ -54,6 +54,8 @@ public interface GameView {
 
     Completable showCurrentMysteryCard(MysteryCardInfo currentMysteryCard, boolean moveCamera, int mysteryNumber, int mysteriesRequired);
 
+    Completable confirmSolvedMysteryCard(MysteryCardInfo currentMysteryCard, int mysteryNumber, int mysteriesRequired);
+
     Completable showRumorCard(RumorCardInfo rumorCardInfo);
 
     Completable justShowRumorCard(RumorCardInfo activeRumor);

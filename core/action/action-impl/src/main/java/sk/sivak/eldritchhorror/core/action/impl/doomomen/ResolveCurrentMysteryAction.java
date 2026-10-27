@@ -9,7 +9,6 @@ import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
-import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
@@ -40,16 +39,10 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
 
     private void onMysterySolved(SingleSubscriber<? super Boolean> ss) {
         ServicePlatform.get().getGameController().showWholeWorld().subscribe();
-        ServicePlatform.get().getGameController().showCurrentMysteryCard(false)
-                .subscribe(() -> {});
-        Question<Object> question = new Question<>();
-        question.setTitle("Mystery was solved!");
-        question.setOptions(Question.Option.okOption);
-        question.displayCurrentMysteryCard();
-        ServicePlatform.get().getGameController().ask(question).subscribe(ok -> {
+        ServicePlatform.get().getGameController().confirmSolvedMysteryCard().subscribe(() -> {
             trackSolvedMystery();
             onQuestionConfirmation(ss);
-        });
+        }, ss::onError);
     }
 
     private void trackSolvedMystery() {

@@ -182,6 +182,7 @@ public class GateCombatPreview extends ApplicationAdapter {
         data.setMonsterName(epic ? "Yig" : "Skeleton"); data.setMonsterEpic(epic);
         data.setHorror(3); data.setDamage(3); data.setToughness(6); data.setCurrentHealth(6);
         table.init(data);
+        require(table.getMonsterImage().getScaleX() < 0, "Monster did not enter facing the investigator");
         table.highlightDamageAndToughness();
         tick(45);
         Image image = table.getMonsterImage();
@@ -193,6 +194,10 @@ public class GateCombatPreview extends ApplicationAdapter {
             if (frame == 0) stroll(table, far, near);
             if (frame == 180) stroll(table, near, far);
             stage.act(1f / 60f);
+            if (frame == 60) require(image.getScaleX() > 0, "Monster walking right faces left");
+            if (frame == 240) require(image.getScaleX() < 0, "Monster walking left faces right");
+            require(Math.abs(image.getScaleX()) > .02f, "Turn produced a singular hit transform");
+            if (epic) require(table.getEpicGlow().getScaleX() == image.getScaleX(), "Epic rim faces the wrong way");
             minScale = Math.min(minScale, image.getScaleY());
             maxScale = Math.max(maxScale, image.getScaleY());
             checkBounds(table);
@@ -205,9 +210,21 @@ public class GateCombatPreview extends ApplicationAdapter {
             ((Vector2) field(table, "wanderPosition")).set(position);
             set(table, "holdStill", true);
             tick(30);
+            require(image.getScaleX() < 0, "Idle/attacking monster does not face the investigator");
             Method body = MonsterCombatTable.class.getDeclaredMethod("getMonsterBodyCenter"); body.setAccessible(true);
             Vector2 actual = image.localToStageCoordinates(new Vector2(image.getWidth() / 2, image.getHeight() / 2));
             require(actual.dst((Vector2) body.invoke(table)) < .01f, "Fireball target ignores perspective");
+            Method scatter = MonsterCombatTable.class.getDeclaredMethod("randomBodyPoint", Vector2.class);
+            scatter.setAccessible(true);
+            com.badlogic.gdx.math.RandomXS128 random = (com.badlogic.gdx.math.RandomXS128) MathUtils.random;
+            long random0 = random.getState(0), random1 = random.getState(1);
+            for (int i = 0; i < 30; i++) {
+                Vector2 point = (Vector2) scatter.invoke(table, actual);
+                require(Float.isFinite(point.x) && Float.isFinite(point.y)
+                        && Math.abs(point.x - actual.x) <= image.getImageWidth() * Math.abs(image.getScaleX()) * .18f,
+                        "Mirrored fireball scatter left the artwork");
+            }
+            random.setState(random0, random1);
             float base = image.getScaleY();
             Method attack = MonsterCombatTable.class.getDeclaredMethod("playAttackReaction"); attack.setAccessible(true);
             attack.invoke(table);
@@ -219,7 +236,10 @@ public class GateCombatPreview extends ApplicationAdapter {
             table.destroyMonsterHealth(Collections.singletonList(new Vector2(650, 50))).subscribe(done::incrementAndGet);
             for (int frame = 0; frame < 600 && done.get() == 0; frame++) {
                 stage.act(1f / 60f);
-                if (done.get() == 0) require(((Vector2) field(table, "wanderPosition")).dst(position) < .01f, "Monster moved during aimed fireball");
+                if (done.get() == 0) require(((Vector2) field(table, "wanderPosition")).dst(position) < .01f,
+                        "Monster moved during aimed fireball: epic=" + epic + ", frame=" + frame
+                                + ", held=" + field(table, "holdStill") + ", from=" + position
+                                + ", to=" + field(table, "wanderPosition"));
             }
             require(done.get() == 1, "Perspective health hit never completed");
         }

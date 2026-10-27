@@ -21,6 +21,17 @@ public class MonsterArtworkTest {
     private AncientOneId current;
     private final Set<String> available = new HashSet<>();
 
+    @Test public void headingsFollowTheActualArtworkIncludingCultistVariants() {
+        assertEquals(true, MonsterArtwork.facesRight("DeepOneMonster", false));
+        assertEquals(false, MonsterArtwork.facesRight("ByakheeMonster", false));
+        assertEquals(true, MonsterArtwork.facesRight("HydraMonster", true));
+        assertEquals(true, MonsterArtwork.facesRight("CultistMonster", false));
+        current = AncientOneId.YIG;
+        assertEquals(false, MonsterArtwork.facesRight("CultistMonster", false));
+        available.clear();
+        assertEquals(true, MonsterArtwork.facesRight("CultistMonster", false));
+    }
+
     @Before public void setup() {
         previousFiles = Gdx.files;
         Gdx.files = (Files) Proxy.newProxyInstance(Files.class.getClassLoader(), new Class[]{Files.class},
