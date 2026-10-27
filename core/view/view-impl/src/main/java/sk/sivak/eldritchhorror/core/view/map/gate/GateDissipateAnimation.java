@@ -28,6 +28,11 @@ final class GateDissipateAnimation extends Group {
     private static final float FADE_TIME = 1.55f;
     private static final float TOTAL_TIME = SHUDDER_TIME + FADE_TIME;
     private static final int WISPS = 30;
+    /** Degrees per second of the open gate (360 degrees per 8 seconds in NewGateAnimatedImage). */
+    static final float IDLE_SPIN = 45f;
+    static final float CORE_PEAK_SPIN = 600f;
+    static final float HALO_PEAK_SPIN = 260f;
+    private static final float SPIN_EASE = 3f;
 
     private final Group portrait;
     private final Actor halo;
@@ -73,9 +78,8 @@ final class GateDissipateAnimation extends Group {
     }
 
     private void animate(float elapsed) {
-        // Both phases share one angular path; the collapse inherits the spin-up velocity.
-        core.setRotation(coreRotation - spinDegrees(elapsed, 260f));
-        halo.setRotation(haloRotation + spinDegrees(elapsed, 90f));
+        core.setRotation(coreRotation + spinDegrees(elapsed, CORE_PEAK_SPIN));
+        halo.setRotation(haloRotation + spinDegrees(elapsed, HALO_PEAK_SPIN));
         if (elapsed < SHUDDER_TIME) {
             float progress = elapsed / SHUDDER_TIME;
             float tremor = MathUtils.sin(progress * MathUtils.PI);
@@ -96,15 +100,17 @@ final class GateDissipateAnimation extends Group {
         }
     }
 
-    private static float spinDegrees(float elapsed, float spinUpDegrees) {
-        if (elapsed < SHUDDER_TIME) {
-            float progress = elapsed / SHUDDER_TIME;
-            return spinUpDegrees * progress * progress;
-        }
-        float time = MathUtils.clamp(elapsed - SHUDDER_TIME, 0f, FADE_TIME);
-        float entrySpeed = 2f * spinUpDegrees / SHUDDER_TIME;
-        // Integrate a gradual slowdown, keeping position and velocity continuous at the join.
-        return spinUpDegrees + entrySpeed * (time - time * time / (2f * FADE_TIME));
+    /**
+     * Starts at the open gate's idle speed, in its idle direction, and accelerates
+     * smoothly over the whole animation so the spin is fastest as the gate vanishes.
+     */
+    static float spinDegrees(float elapsed, float peakSpeed) {
+        float time = MathUtils.clamp(elapsed, 0f, TOTAL_TIME);
+        float progress = time / TOTAL_TIME;
+        float extra = peakSpeed - IDLE_SPIN;
+        // Integral of IDLE_SPIN + extra * progress^SPIN_EASE.
+        return IDLE_SPIN * time
+                + extra * TOTAL_TIME / (SPIN_EASE + 1f) * (float) Math.pow(progress, SPIN_EASE + 1f);
     }
 
     @Override protected void setStage(Stage stage) {

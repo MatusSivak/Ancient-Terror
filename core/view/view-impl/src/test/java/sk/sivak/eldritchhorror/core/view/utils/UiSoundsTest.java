@@ -159,6 +159,19 @@ public class UiSoundsTest {
         assertEquals(ENCOUNTER_CLOSE, UiSounds.sheetCue(BigActorKey.ENCOUNTER_TABLE, false));
     }
 
+    @Test public void cardRevealUsesTheCueOfItsCardType() {
+        assertEquals(CARD_OPEN_SPELL, UiSounds.cardOpenCue(proxy(sk.sivak.eldritchhorror.core.constants.spell.SpellInfo.class)));
+        assertEquals(CARD_OPEN_ARTIFACT, UiSounds.cardOpenCue(proxy(sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo.class)));
+        assertEquals(CARD_OPEN_CONDITION, UiSounds.cardOpenCue(proxy(sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo.class)));
+        assertEquals(CARD_OPEN_ASSET, UiSounds.cardOpenCue(proxy(sk.sivak.eldritchhorror.core.constants.asset.AssetInfo.class)));
+        assertEquals(CARD_OPEN, UiSounds.cardOpenCue((Object) null));
+        assertEquals(CARD_OPEN, UiSounds.cardOpenCue("unknown"));
+    }
+
+    private static Object proxy(Class<?> type) {
+        return Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, (p, method, args) -> null);
+    }
+
     @Test public void dialogAnnouncesEachVisibilityChangeOnlyOnce() {
         Gdx.graphics = (Graphics) Proxy.newProxyInstance(Graphics.class.getClassLoader(), new Class[]{Graphics.class},
                 (proxy, method, args) -> method.getName().equals("getWidth") ? 800 : 600);

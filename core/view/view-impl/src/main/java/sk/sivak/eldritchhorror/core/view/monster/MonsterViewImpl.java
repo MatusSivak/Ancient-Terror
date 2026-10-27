@@ -25,6 +25,7 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper;
 import sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterFootsteps;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImageEffect;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils;
@@ -229,7 +230,8 @@ public class MonsterViewImpl implements MonsterView {
 
     @Override
     public Completable moveMonster(MonsterInfo monsterInfo, LocationId targetLocationId) {
-        return moveActor(monsterInfo.getCurrentLocation(), targetLocationId, new MonsterUtils.MonsterIdLayerResolver(monsterInfo));
+        return MonsterFootsteps.during(
+                moveActor(monsterInfo.getCurrentLocation(), targetLocationId, new MonsterUtils.MonsterIdLayerResolver(monsterInfo)));
     }
 
     @Override
@@ -237,7 +239,7 @@ public class MonsterViewImpl implements MonsterView {
         if(monsters.isEmpty())return Completable.complete();
         List<MapStage.IdLayerResolver> resolvers=new java.util.ArrayList<>();
         for(MonsterInfo monster:monsters)resolvers.add(new MonsterUtils.MonsterIdLayerResolver(monster));
-        return sk.sivak.eldritchhorror.core.view.map.helper.MoveActorHelper.moveActors(
-                monsters.get(0).getCurrentLocation(),targetLocationId,resolvers);
+        return MonsterFootsteps.during(sk.sivak.eldritchhorror.core.view.map.helper.MoveActorHelper.moveActors(
+                monsters.get(0).getCurrentLocation(),targetLocationId,resolvers));
     }
 }

@@ -88,7 +88,11 @@ public class AssetView {
 
     public Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest) {
         return Single.create(subscriber -> {
-            UiSounds.transition(UiSounds.Cue.CARD_OPEN);
+            UiSounds.transition(UiSounds.cardOpenCue(showCardRequest.isHiddenTemplate() ? null
+                    : showCardRequest.getAssetInfo() != null ? showCardRequest.getAssetInfo()
+                    : showCardRequest.getArtifactInfo() != null ? showCardRequest.getArtifactInfo()
+                    : showCardRequest.getConditionInfo() != null ? showCardRequest.getConditionInfo()
+                    : showCardRequest.getSpellInfo()));
             originalBottomHeight = InfoStage.getBottomHeight();
             displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
                     showCardRequest.getAssetOriginType(), subscriber);
@@ -311,7 +315,7 @@ public class AssetView {
 
     public Completable gainCard(CardInfo cardInfo) {
         return Completable.create(onSub -> {
-            GameplaySounds.play(GameplaySounds.Cue.CARD_GAIN);
+            UiSounds.transition(UiSounds.cardOpenCue(cardInfo));
             originalBottomHeight = InfoStage.getBottomHeight();
             displayGainButton(onSub);
             displayTable(get("asset.gained", cardInfo.getName()), null);

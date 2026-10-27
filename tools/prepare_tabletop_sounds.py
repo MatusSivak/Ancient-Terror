@@ -37,17 +37,27 @@ SOURCES = {
     "focus_gain": "chips-handle-2.ogg",
     "focus_land": "chip-lay-3.ogg",
     "dice_sort": "dice-grab-1.ogg",
+    "ui_card_open_spell": "spell_01.ogg",
+    "ui_card_open_artifact": "item_gem_03.ogg",
+    "ui_card_open_condition": "chain_02.ogg",
+    "ui_card_open_asset": "handleCoins.ogg",
+    "monster_step_1": "footstep00.ogg",
+    "monster_step_2": "footstep01.ogg",
+    "monster_step_3": "footstep02.ogg",
+    "monster_step_4": "footstep03.ogg",
 }
 
 
 def recording(name):
-    book = name.startswith("book_flip")
-    archive = "book_flips_-_starninjas.zip" if book else "kenney_casino-audio.zip"
-    with ZipFile(SOURCE / archive) as pack:
-        matches = [entry for entry in pack.namelist() if Path(entry).name == name]
-        if len(matches) != 1:
-            raise ValueError(f"Expected one {name} in {archive}")
-        data, rate = sf.read(BytesIO(pack.read(matches[0])), always_2d=True)
+    found = []
+    for archive in sorted(SOURCE.glob("*.zip")):
+        with ZipFile(archive) as pack:
+            found += [(archive, entry) for entry in pack.namelist() if Path(entry).name == name]
+    if len(found) != 1:
+        raise ValueError(f"Expected exactly one {name} across {SOURCE}, found {len(found)}")
+    archive, entry = found[0]
+    with ZipFile(archive) as pack:
+        data, rate = sf.read(BytesIO(pack.read(entry)), always_2d=True)
     data = data.mean(axis=1)
     active = np.flatnonzero(np.abs(data) > .001)
     if not len(active):

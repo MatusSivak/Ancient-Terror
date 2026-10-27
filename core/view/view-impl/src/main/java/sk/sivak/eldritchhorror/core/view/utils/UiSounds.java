@@ -7,8 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
+import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
+import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.BigActorKey;
+import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.hud.HudButton;
 
 /** UI gestures stay audible during fast-forward; automatic panel animations do not. */
@@ -16,6 +21,8 @@ public final class UiSounds {
     public enum Cue {
         BUTTON_CLICK("button_click", .75f), HUD_CLICK("hud_click", .80f),
         CARD_OPEN("card_open", .80f), CARD_CLOSE("card_close", .72f),
+        CARD_OPEN_SPELL("card_open_spell", .80f), CARD_OPEN_ARTIFACT("card_open_artifact", .85f),
+        CARD_OPEN_CONDITION("card_open_condition", .80f), CARD_OPEN_ASSET("card_open_asset", .80f),
         SHEET_OPEN("sheet_open", .80f), SHEET_CLOSE("sheet_close", .72f),
         ENCOUNTER_OPEN("encounter_open", .80f), ENCOUNTER_CLOSE("encounter_close", .72f),
         MYSTERY_OPEN("mystery_open", .82f), MYSTERY_CLOSE("mystery_close", .72f),
@@ -50,6 +57,23 @@ public final class UiSounds {
         } finally {
             inputDepth--;
         }
+    }
+
+    /** Spells, artifacts, conditions and assets each have their own reveal; anything else uses CARD_OPEN. */
+    public static Cue cardOpenCue(Object cardInfo) {
+        if (cardInfo instanceof SpellInfo) return Cue.CARD_OPEN_SPELL;
+        if (cardInfo instanceof ArtifactInfo) return Cue.CARD_OPEN_ARTIFACT;
+        if (cardInfo instanceof ConditionInfo) return Cue.CARD_OPEN_CONDITION;
+        if (cardInfo instanceof AssetInfo) return Cue.CARD_OPEN_ASSET;
+        return Cue.CARD_OPEN;
+    }
+
+    public static Cue cardOpenCue(CardTemplate template) {
+        if (template.getSpellInfo() != null) return Cue.CARD_OPEN_SPELL;
+        if (template.getArtifactInfo() != null) return Cue.CARD_OPEN_ARTIFACT;
+        if (template.getConditionInfo() != null) return Cue.CARD_OPEN_CONDITION;
+        if (template.getAssetInfo() != null) return Cue.CARD_OPEN_ASSET;
+        return Cue.CARD_OPEN;
     }
 
     public static Cue sheetCue(BigActorKey key, boolean opening) {

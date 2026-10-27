@@ -24,6 +24,7 @@ import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.font.BitmapFontSizing;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterFootsteps;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
@@ -372,6 +373,10 @@ public class CustomAssetManager extends AssetManager {
         for (UiSounds.Cue cue : UiSounds.Cue.values()) {
             load(cue.path, Sound.class);
             soundPaths.add(cue.path);
+        }
+        for (String path : MonsterFootsteps.SOUNDS) {
+            load(path, Sound.class);
+            soundPaths.add(path);
         }
         load(TICK, Texture.class);
         load("background/gray.jpg", Texture.class);

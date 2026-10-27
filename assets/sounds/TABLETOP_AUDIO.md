@@ -5,7 +5,7 @@ spawn sounds with physical card, paper and chip recordings. No audio was generat
 
 ## Downloads and licensing
 
-Both collections are CC0 1.0; the original download archives are preserved in
+All collections are CC0 1.0; the original download archives are preserved in
 `source_assets/sounds/tabletop/` and contain the unchanged source audio.
 
 - **Kenney, Casino Audio 1.1:** [author and license](https://kenney.nl/assets/casino-audio),
@@ -16,6 +16,12 @@ Both collections are CC0 1.0; the original download archives are preserved in
   [ZIP download](https://opengameart.org/sites/default/files/book_flips_-_starninjas.zip).
   Credit: [StarNinjas](https://opengameart.org/users/starninjas).
   SHA-256: `0ff49c3677ea0e64544aeda3a0aa2ce71ee5d42b266da9e54421252a5ca5f20f`.
+- **Kenney, RPG Audio:** [author and license](https://kenney.nl/assets/rpg-audio),
+  [ZIP download](https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip).
+  SHA-256: `6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b`.
+- **rubberduck, 80 CC0 RPG SFX:** [author and CC0 declaration](https://opengameart.org/content/80-cc0-rpg-sfx),
+  [ZIP download](https://opengameart.org/sites/default/files/80-CC0-RPG-SFX_0.zip).
+  SHA-256: `1c2f06ff4e8563b5b8b745b23cf213c1474142a69bb82bd8f5e10d9b3f7a7bbd`.
 
 ## Cue mapping
 
@@ -35,6 +41,11 @@ Both collections are CC0 1.0; the original download archives are preserved in
 | Clue / focus gain | Kenney `chips-handle-3.ogg` / `chips-handle-2.ogg` |
 | Health/sanity, clue, focus HUD landing | Kenney `chip-lay-1.ogg`, `chip-lay-2.ogg`, `chip-lay-3.ogg` |
 | Thrown dice slide into sorted order, `dice_sort` | Kenney `dice-grab-1.ogg` |
+| Spell card shown/gained/zoomed, `ui_card_open_spell` | rubberduck `spell_01.ogg` |
+| Artifact card, `ui_card_open_artifact` | rubberduck `item_gem_03.ogg` |
+| Condition card, `ui_card_open_condition` | rubberduck `chain_02.ogg` |
+| Asset card, `ui_card_open_asset` | Kenney RPG `handleCoins.ogg` |
+| Monster movement, `monster_step_1`–`4` | Kenney RPG `footstep00.ogg`–`footstep03.ogg`; played every 0.38 s while monsters move, random variant, runtime pitch 0.72–0.84 |
 
 Run `python tools/prepare_tabletop_sounds.py` with `numpy` and `soundfile` installed.
 It reads directly from the ZIPs, removes surrounding silence, converts to 44.1 kHz

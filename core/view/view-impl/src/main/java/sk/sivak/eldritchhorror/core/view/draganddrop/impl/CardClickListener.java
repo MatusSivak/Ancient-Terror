@@ -90,7 +90,7 @@ public class CardClickListener extends ClickListener {
         duplicate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
         duplicate.setScale(placement.scaleX, placement.scaleY);
         duplicate.setPosition(placement.x, placement.y);
-        UiSounds.play(UiSounds.Cue.CARD_OPEN);
+        UiSounds.play(UiSounds.cardOpenCue(cardTemplate));
 
         ScaleToAction scaleToAction = Actions.scaleTo(SCALE_AMOUNT, SCALE_AMOUNT, DURATION, Interpolation.sine);
         MoveToAction moveToAction = Actions.moveTo(
