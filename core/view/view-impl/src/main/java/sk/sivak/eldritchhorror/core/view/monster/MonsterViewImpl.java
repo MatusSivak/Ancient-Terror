@@ -188,15 +188,18 @@ public class MonsterViewImpl implements MonsterView {
 
     @Override
     public Completable tearMonsterCardApart(MonsterInfo monsterInfo) {
-        if (!BigActorsManager.isMonsterCardDisplayed()) {
+        return Completable.defer(() -> {
+            if (BigActorsManager.isMonsterCardDisplayed()) {
+                return BigActorsManager.getMonsterCard().destroyWithEffect();
+            }
             return Completable.create(onSub -> {
                 BigActorsManager.initMonsterCard(monsterInfo, () -> {}, () -> {
-                    MonsterCardEffect.tearAppart(BigActorsManager.getMonsterCard()).subscribe(onSub::onCompleted);
+                    BigActorsManager.getMonsterCard().destroyWithEffect()
+                            .subscribe(onSub::onCompleted, onSub::onError);
                 });
                 BigActorsManager.displayOrHideMonsterCard();
             });
-        }
-        return MonsterCardEffect.tearAppart(BigActorsManager.getMonsterCard());
+        });
     }
 
     @Override

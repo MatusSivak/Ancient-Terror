@@ -7,6 +7,7 @@ sys.dont_write_bytecode = True
 import numpy as np
 import soundfile as sf
 from prepare_gameplay_sounds import ROOT, RATE, OUTPUT, clip, bell, mix
+from prepare_tabletop_sounds import SOURCES as TABLETOP_SOURCES, prepare as prepare_tabletop
 
 SOURCE = ROOT / "source_assets/sounds/interface"
 PAPER = ROOT / "source_assets/sounds/typewriter/paper.mp3"
@@ -42,6 +43,9 @@ def cues():
 
 def main():
     for name, samples in cues().items():
+        if name in TABLETOP_SOURCES:
+            prepare_tabletop(name)
+            continue
         samples -= samples.mean()
         attack = min(round(.004 * RATE), len(samples))
         tail = min(round(.045 * RATE), len(samples) // 3)

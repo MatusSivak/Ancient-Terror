@@ -13,6 +13,10 @@ import com.kotcrab.vis.ui.VisUI;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AxeAsset;
+import sk.sivak.eldritchhorror.core.constants.monster.CultistMonster;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorBasics;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.displayasset.*;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.asset.AssetView;
@@ -23,6 +27,10 @@ import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.sheet.mystery.MysteryCard;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
+import sk.sivak.eldritchhorror.core.view.investigator.InvestigatorView;
+import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
+import sk.sivak.eldritchhorror.core.view.map.CameraActor;
 import sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -61,17 +69,85 @@ public class CardDestructionPreview extends ApplicationAdapter {
             background.setSize(960, 540); background.setColor(.42f, .42f, .42f, 1);
             stage.getRoot().addActorAt(0, background);
             checkSnapshotTransform();
+            checkInvestigatorRefreshCamera();
             for (boolean fast : new boolean[]{false, true}) {
                 checkDiscard(false, fast);
                 checkDiscard(true, fast);
                 checkMystery(false, fast);
+                checkMonster(false, fast);
+                checkMonster(true, fast);
             }
             checkMystery(true, false);
             checkSpeedChangeAndInterruption();
             require(tracked() == 0, "Fast-forward actions leaked");
-            System.out.println("PASS: real card discard and Mystery resolution; snapshot colour/transform; hidden cards; normal/fast-forward; next Mystery; tall text; early removal and GPU cleanup");
+            System.out.println("PASS: card discard, Mystery and monster destruction; encounter camera preservation; snapshot colour/transform; hidden cards; normal/fast-forward; reused sheets; tall text; early removal and GPU cleanup");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+
+    private void checkInvestigatorRefreshCamera() {
+        InvestigatorBasics basics = (InvestigatorBasics) Proxy.newProxyInstance(InvestigatorBasics.class.getClassLoader(),
+                new Class<?>[]{InvestigatorBasics.class}, (p, m, a) -> {
+                    if (m.getName().equals("getInvestigatorId")) return InvestigatorId.values()[0];
+                    if (m.getName().equals("getLocationId")) return LocationId.LONDON;
+                    throw new AssertionError("Unexpected investigator lookup: " + m.getName());
+                });
+        GameController controller = (GameController) Proxy.newProxyInstance(GameController.class.getClassLoader(),
+                new Class<?>[]{GameController.class}, (p, m, a) -> basics);
+        AtomicInteger refreshed = new AtomicInteger();
+        InvestigatorView view = new InvestigatorView(controller) {
+            @Override public Completable updateHud(InvestigatorBasics current) {
+                return Completable.fromAction(refreshed::incrementAndGet);
+            }
+        };
+        OrthographicCamera camera = MapStage.getCamera();
+        for (boolean fast : new boolean[]{false, true}) {
+            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+            camera.position.set(1234, 678, 0); camera.zoom = 1.7f; camera.update();
+            AtomicInteger done = new AtomicInteger();
+            view.showActiveInvestigator(false, false).subscribe(done::incrementAndGet);
+            for (Actor actor : MapStage.getStage().getActors())
+                require(!(actor instanceof CameraActor), "Encounter refresh queued a camera movement");
+            require(done.get() == 1 && camera.position.x == 1234 && camera.position.y == 678 && camera.zoom == 1.7f,
+                    "Encounter refresh changed camera position or zoom");
+        }
+        require(refreshed.get() == 2, "Camera preservation skipped the HUD refresh");
+        FastForwardAction.turnOff(); tick(100);
+    }
+
+    private void checkMonster(boolean hidden, boolean fast) throws Exception {
+        FastForwardAction.turnOff();
+        CultistMonster monster = new CultistMonster();
+        MonsterCard card = BigActorsManager.getMonsterCard();
+        AtomicInteger dismissed = new AtomicInteger();
+        if (!hidden) {
+            BigActorsManager.initMonsterCard(monster, () -> {}, dismissed::incrementAndGet);
+            BigActorsManager.displayOrHideMonsterCard(); tick(100);
+            require(dismissed.get() == 1, "Monster failed to open");
+            card.setOnDisplayHideAction(dismissed::incrementAndGet);
+        }
+        int buffers = buffers();
+        AtomicInteger done = new AtomicInteger();
+        Completable destroy = new MonsterViewImpl().tearMonsterCardApart(monster);
+        require(buffers() == buffers && done.get() == 0, "Monster destruction ran before subscription");
+        if (fast) FastForwardAction.turnOn();
+        destroy.subscribe(done::incrementAndGet, error -> { throw new RuntimeException(error); });
+        Group animation = stage.getRoot().findActor("card-destruction");
+        for (int frame = 0; animation == null && frame < 180; frame++) {
+            stage.act(1f / 60);
+            animation = stage.getRoot().findActor("card-destruction");
+        }
+        require(animation != null && done.get() == 0, "Missing monster tear");
+        runEffect(animation, done, !hidden && !fast ? "monster" : null, false);
+        require(dismissed.get() == (hidden ? 0 : 1), "Monster destruction replayed dismissal");
+        require(!BigActorsManager.isMonsterCardDisplayed() && !BigActorsManager.isLocked(), "Destroyed monster kept sheet state");
+        require(card.getStage() == null && buffers() == buffers && tracked() == 0, "Monster snapshot or actions leaked");
+        FastForwardAction.turnOff();
+        BigActorsManager.initMonsterCard(monster, () -> {}, null);
+        BigActorsManager.displayOrHideMonsterCard(); tick(100);
+        require(card.getStage() == stage && card.getColor().a == 1 && card.getScaleX() == 1,
+                "Next monster did not reopen at full opacity and size");
+        BigActorsManager.displayOrHideMonsterCard(); tick(100);
     }
 
     private void checkSnapshotTransform() throws Exception {

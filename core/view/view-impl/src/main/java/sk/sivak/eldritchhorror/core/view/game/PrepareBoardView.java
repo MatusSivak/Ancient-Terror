@@ -46,7 +46,7 @@ public class PrepareBoardView {
         return Completable.create(onSub -> {
             InfoStage.displayText(UiText.get("prepare.activeExpedition"));
             MapUtils.moveCameraToLocation(locationId).subscribe(() -> {
-                withCue(CLUE_SPAWN, ExpeditionUtils.spawnExpedition(locationId)).subscribe(onSub::onCompleted);
+                withCue(EXPEDITION_SPAWN, ExpeditionUtils.spawnExpedition(locationId)).subscribe(onSub::onCompleted);
             });
         });
     }

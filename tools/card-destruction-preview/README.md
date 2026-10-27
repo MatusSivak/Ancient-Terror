@@ -19,3 +19,9 @@ pieces cover the complete card across portrait, landscape and tall layouts.
 
 PNG film strips are written to `build/card-destruction-preview/card/`, `mystery/`
 and `tall-mystery/`.
+
+Also exercises the real monster-sheet destruction (visible and initially hidden),
+normal/fast-forward playback, callback ownership, GPU cleanup and reopening the
+reused sheet. Monster frames are saved under `monster/`. An investigator refresh
+check verifies that post-encounter HUD updates leave camera position and zoom
+untouched in both normal and fast-forward playback.

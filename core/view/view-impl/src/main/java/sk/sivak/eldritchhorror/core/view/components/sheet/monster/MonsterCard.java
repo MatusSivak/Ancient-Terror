@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
+import sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect;
 import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 
@@ -255,6 +256,14 @@ public class MonsterCard extends VisTable {
 
     public Completable loseHealth(int amount) {
         return toughnessBar.loseToughness(amount);
+    }
+
+    public Completable destroyWithEffect() {
+        return Completable.defer(() -> {
+            // Destruction owns completion; do not run the old close/display callback again.
+            onDisplayHideAction = null;
+            return CardDestructionEffect.discard(this).doOnCompleted(displayHide::finishRemoval);
+        });
     }
 
     public Table getReckoningTextTable() { return reckoningTextTable; }

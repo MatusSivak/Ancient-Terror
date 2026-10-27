@@ -164,7 +164,11 @@ def token_land():
 
 
 def main():
-    for build, peak in ((health_gain, 0.80), (health_loss, 0.85), (token_leave, 0.75), (token_land, 0.85)):
+    # Gain and landing now use downloaded foley; do not overwrite them with synthesis.
+    from prepare_tabletop_sounds import prepare
+    prepare("health_gain")
+    prepare("token_land")
+    for build, peak in ((health_loss, 0.85), (token_leave, 0.75)):
         name, samples = build()
         write(name, finish(samples, peak))
 

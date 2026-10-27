@@ -7,6 +7,7 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 public final class GameplaySounds {
     public enum Cue {
         CLUE_SPAWN("clue_spawn", .80f),
+        EXPEDITION_SPAWN("expedition_spawn", .80f),
         CLUE_GAIN("clue_gain", .85f),
         CLUE_LAND("clue_land", .85f),
         FOCUS_GAIN("focus_gain", .78f),

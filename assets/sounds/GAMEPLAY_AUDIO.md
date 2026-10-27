@@ -1,5 +1,9 @@
 # Gameplay sound effects
 
+The 27 October investigator, clue/token and expedition placement replacements are
+documented in [downloaded tabletop foley](TABLETOP_AUDIO.md), which supersedes
+those mappings below. Expeditions now have a separate `expedition_spawn` cue.
+
 Source and event audit: 24 October 2026. The **37 prepared gameplay WAV files** are derived from
 the following recordings, offered by their authors under
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).

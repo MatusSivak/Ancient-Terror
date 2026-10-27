@@ -85,7 +85,9 @@ public class InvestigatorView {
         }
 
         Completable moveCameraToPosition;
-        if (currentInvestigator.getLocationId() != null) {
+        // Refreshing the HUD after an encounter must preserve the player's map position.
+        // Only an explicit investigator transition takes the camera to their location.
+        if (displayTransition && currentInvestigator.getLocationId() != null) {
             moveCameraToPosition = Completable.create(afterMoveSub -> MoveCameraToLocationHelper.moveCameraToPosition(
                     LocationPositionResolver.resolve(currentInvestigator.getLocationId()),
                     afterMoveSub));

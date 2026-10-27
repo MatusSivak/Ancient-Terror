@@ -1,5 +1,9 @@
 # Interface sound effects
 
+The 27 October replacements for setup, HUD, sheets, dialogs, Ancient One and
+Mystery panels are documented in [downloaded tabletop foley](TABLETOP_AUDIO.md).
+That mapping supersedes those entries below; preparation scripts retain the new recordings.
+
 Source and event audit: 24 October 2026. The 14 UI cues use CC0 recordings.
 
 - Kenney, [Interface Sounds](https://kenney.nl/assets/interface-sounds),
