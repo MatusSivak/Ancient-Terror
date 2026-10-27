@@ -30,3 +30,15 @@ ignored `build/report-review-oct27/` directory; they are not committed.
 - `previewReportFixes --args=--oct27`: passed real card taps through the discard event hierarchy, repeated opening and backdrop dismissal, centered solved-Mystery acknowledgement exactly once, and destruction completion at normal/fast-forward speed.
 - The report preview also deserialized and reserialized three actual Yig report saves, then checked model state and clock-hand rotation. Synthetic states cover `-8`, `-6`, `-3`, and `0`.
 - Inspected rendered screenshots for the centered Mystery, enlarged discard card, and combat heading changes. Desktop compilation passed as part of the previews. Android device playback was not performed.
+
+## CI follow-up
+
+The first GitHub run failed in the service module's `MysteryResolutionTest`, which
+the original five-module local run omitted. Its controller mock still stubbed the
+old dialog API, leaving `confirmSolvedMysteryCard()` null. Updated the fixture to
+the card-confirmation API and added an asynchronous check that destruction and
+queue continuation wait for the card tap without displaying an OK question.
+The failure was reproduced locally before the correction. The full JVM command
+`gradlew test -x :android:test --offline -PUSE_TEST_ADMOB_IDS=true` now passes
+548 tests; Android tests and APK packaging are verified by GitHub's SDK-equipped
+workflow.

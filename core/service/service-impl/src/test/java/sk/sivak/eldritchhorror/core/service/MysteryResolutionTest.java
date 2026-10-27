@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import rx.Completable;
 import rx.Single;
+import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.action.AfterEventActionImpl;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.action.impl.doomomen.ResolveCurrentMysteryAction;
@@ -30,6 +31,8 @@ public class MysteryResolutionTest {
     private ServiceImpl service;
     private MysteryCardInfo mystery;
     private InitGameService init;
+    private GameController game;
+    private MonsterController monsters;
     private final List<Throwable> errors = new ArrayList<>();
 
     @Before public void setUp() {
@@ -64,14 +67,13 @@ public class MysteryResolutionTest {
         when(deck.getSolvedMysteriesCount()).thenReturn(1);
         p.setMysteryDeck(deck);
 
-        GameController game = mock(GameController.class);
+        game = mock(GameController.class);
         when(game.showWholeWorld()).thenReturn(Completable.complete());
-        when(game.showCurrentMysteryCard(false)).thenReturn(Completable.complete());
+        when(game.confirmSolvedMysteryCard()).thenReturn(Completable.complete());
         when(game.showWorldBackground()).thenReturn(Completable.complete());
         when(game.showCustomBackground(anyString())).thenReturn(Completable.complete());
-        when(game.ask(any())).thenReturn(Single.just(null));
         p.setGameController(game);
-        MonsterController monsters = mock(MonsterController.class);
+        monsters = mock(MonsterController.class);
         when(monsters.tearMysteryCardApart()).thenReturn(Completable.complete());
         p.setMonsterController(monsters);
     }
@@ -108,7 +110,36 @@ public class MysteryResolutionTest {
         assertResolution(false);
     }
 
+    @Test public void solvedMysteryWaitsForCardTapBeforeDestructionAndQueueContinuation() {
+        when(mystery.getProgress()).thenReturn(1);
+        PublishSubject<Void> cardTap = PublishSubject.create();
+        when(game.confirmSolvedMysteryCard()).thenReturn(cardTap.toCompletable());
+
+        List<Boolean> results = queueResolution();
+        tickUntilResult(results);
+        assertTrue(errors.toString(), errors.isEmpty());
+        assertTrue(results.isEmpty());
+        verify(game).confirmSolvedMysteryCard();
+        verify(game, never()).ask(any());
+        verify(monsters, never()).tearMysteryCardApart();
+        verify(init, never()).registerCurrentMysteryCard();
+
+        cardTap.onCompleted();
+        tickUntilResult(results);
+        assertTrue(errors.toString(), errors.isEmpty());
+        assertEquals(java.util.Collections.singletonList(true), results);
+        verify(monsters).tearMysteryCardApart();
+        verify(init).registerCurrentMysteryCard();
+    }
+
     private void assertResolution(boolean expected) {
+        List<Boolean> results = queueResolution();
+        tickUntilResult(results);
+        assertTrue(errors.toString(), errors.isEmpty());
+        assertEquals(java.util.Collections.singletonList(expected), results);
+    }
+
+    private List<Boolean> queueResolution() {
         AfterEventActionImpl<Boolean> after = new AfterEventActionImpl<>();
         after.setBeforeAfterEvent(BeforeAfterEvent.RESOLVE_CURRENT_MYSTERY);
         ActionCommand<Boolean, Boolean> afterCommand = new ActionCommand<>(after, "AFTER_RESOLVE_CURRENT_MYSTERY");
@@ -118,8 +149,10 @@ public class MysteryResolutionTest {
             @Override public void onError(Throwable error) { errors.add(error); }
         });
         queue.addCommands(new Command[]{new ActionCommand<>(new ResolveCurrentMysteryAction(), "RESOLVE_CURRENT_MYSTERY"), afterCommand});
+        return results;
+    }
+
+    private void tickUntilResult(List<Boolean> results) {
         for (int i = 0; i < 100 && results.isEmpty() && errors.isEmpty(); i++) queue.tick();
-        assertTrue(errors.toString(), errors.isEmpty());
-        assertEquals(java.util.Collections.singletonList(expected), results);
     }
 }
