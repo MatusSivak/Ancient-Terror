@@ -38,19 +38,26 @@ class MonsterWalkAnimator {
     private float savedScaleX;
     private float savedScaleY;
     private boolean applied;
+    private boolean defeated;
     private final MonsterFacing facing;
 
     MonsterWalkAnimator() { this(true); }
 
     MonsterWalkAnimator(boolean artworkFacesRight) { facing = new MonsterFacing(artworkFacesRight); }
 
-    void faceMovement(float dx) { facing.followMovement(dx); }
+    void faceMovement(float dx) {
+        if (!defeated) facing.followMovement(dx);
+    }
+
+    /** Defeat owns the portrait transform, including its orientation and fragment snapshot. */
+    void stopForDefeat() { defeated = true; }
 
     void update(Actor actor, float delta) {
         update(actor, delta, true);
     }
 
     void update(Actor actor, float delta, boolean followPosition) {
+        if (defeated) return;
         float x = actor.getX();
         float y = actor.getY();
         boolean walking = false;
@@ -106,6 +113,7 @@ class MonsterWalkAnimator {
     }
 
     void apply(Actor actor, boolean walking) {
+        if (defeated) return;
         applied = true;
         savedY = actor.getY();
         savedRotation = actor.getRotation();

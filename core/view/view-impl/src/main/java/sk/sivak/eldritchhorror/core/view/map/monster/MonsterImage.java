@@ -70,8 +70,10 @@ public class MonsterImage extends Image {
         walkAnimator.faceMovement(dx);
     }
 
-    public void hideShadow() {
+    public void prepareForDefeat() {
         drawShadow = false;
+        walkAnimator.stopForDefeat();
+        removeReckoningImage();
     }
 
     private void displayMonsterCard() {

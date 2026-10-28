@@ -17,11 +17,9 @@ public class MonsterImageEffect {
                 return;
             }
             if (monsterImage instanceof MonsterImage) {
-                ((MonsterImage) monsterImage).hideShadow();
-                ((MonsterImage) monsterImage).removeReckoningImage();
+                ((MonsterImage) monsterImage).prepareForDefeat();
             } else if (monsterImage instanceof EpicMonsterImage) {
-                ((EpicMonsterImage) monsterImage).hideShadow();
-                ((EpicMonsterImage) monsterImage).removeReckoningImage();
+                ((EpicMonsterImage) monsterImage).prepareForDefeat();
             }
             BreakApartAnimation.start(monsterImage,
                     monsterImage instanceof Image ? ((Image) monsterImage).getDrawable() : null,

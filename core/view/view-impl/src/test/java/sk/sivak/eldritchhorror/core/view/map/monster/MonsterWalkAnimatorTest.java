@@ -90,4 +90,35 @@ public class MonsterWalkAnimatorTest {
             sk.sivak.eldritchhorror.core.view.utils.FastForwardAction.turnOff();
         }
     }
+
+    @Test public void defeatDisablesMidTurnAndCompletedFlipsWithoutChangingEffectTransforms() {
+        for (boolean artworkFacesRight : new boolean[]{true, false}) {
+            for (float turnTime : new float[]{.12f, .3f}) {
+                Actor actor = monster();
+                MonsterWalkAnimator animator = new MonsterWalkAnimator(artworkFacesRight);
+                animator.faceMovement(artworkFacesRight ? -10f : 10f);
+                animator.update(actor, turnTime);
+                animator.apply(actor, false);
+                assertTrue("Reproduce a partial or completed flip", actor.getScaleX() < 1f);
+                animator.restore(actor);
+
+                animator.stopForDefeat();
+                for (int frame = 0; frame < 90; frame++) {
+                    // Defeat moves, zooms and recoils the actor independently of its old route.
+                    actor.setPosition(frame * 2f, 120f);
+                    actor.setScale(1f + frame / 30f, 1f + frame / 40f);
+                    actor.setRotation(-8f);
+                    animator.faceMovement(frame % 2 == 0 ? -5f : 5f);
+                    animator.update(actor, 1 / 60f);
+                    animator.apply(actor, false);
+                    assertEquals(1f + frame / 30f, actor.getScaleX(), .001f);
+                    assertEquals(1f + frame / 40f, actor.getScaleY(), .001f);
+                    assertEquals(120f, actor.getY(), .001f);
+                    assertEquals(-8f, actor.getRotation(), .001f);
+                    animator.restore(actor);
+                    assertEquals(1f + frame / 30f, actor.getScaleX(), .001f);
+                }
+            }
+        }
+    }
 }
