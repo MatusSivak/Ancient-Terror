@@ -438,7 +438,12 @@ public class InfoStage {
         for (Actor actor : get().smallActors.getChildren()) {
             if (actor instanceof LabelTable && isPromptVisible(actor)) top = Math.max(top, actor.getTop());
         }
-        // Card questions move their prompt into this layer to keep it visible.
+        return Math.max(top, getCardPromptTop());
+    }
+
+    /** Only prompts belonging to the open sheet; background controls will be hidden as it opens. */
+    public static float getCardPromptTop() {
+        float top = 0f;
         for (Actor actor : get().bigActors.getChildren()) {
             if ((actor instanceof LabelTable || actor instanceof Button) && isPromptVisible(actor))
                 top = Math.max(top, actor.getTop());

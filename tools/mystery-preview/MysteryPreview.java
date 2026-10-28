@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
+import sk.sivak.eldritchhorror.core.view.components.button.HideOkButtons;
 import sk.sivak.eldritchhorror.core.view.components.sheet.mystery.MysteryCard;
 import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.game.*;
@@ -53,12 +54,50 @@ public class MysteryPreview extends ApplicationAdapter {
             try {
                 for(String language:new String[]{"en","sk"}) {
                     language(language);
+                    checkActionsButton();
                     for(String key:keys) checkCard(key,language);
                 }
             } finally { language(original); }
             System.out.println("PASS: all 34 mysteries in EN/SK; real open/close, centered over hidden controls, readable lore, no hard breaks, question clearance, fit and recentering");
         } catch(Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+
+    private void checkActionsButton() {
+        class Controls extends HideOkButtons { TextButton button() { return getHideButton(); } }
+        Controls controls=new Controls();
+        Table content=new Table(); content.setBounds(300,180,360,160); stage.addActor(content);
+        AtomicInteger shown=new AtomicInteger();
+        controls.init(null,()->{},content);
+        controls.setShowButtonText(UiText.get("action.displayActions")); controls.setOnShowAction(shown::incrementAndGet);
+        controls.hideInstantly(); tick(90);
+        float reserved=InfoStage.getBottomHeight();
+        for(int cycle=0;cycle<2;cycle++) {
+            TextButton button=controls.button();
+            require(button.getText().toString().equals(UiText.get("action.displayActions")),"Actions button is mislabeled");
+            require(countHints(stage.getRoot())==0,"Actions button still has a black hint label");
+            click(button); tick(90);
+            require(shown.get()==cycle+1 && content.getColor().a==1,"Actions did not reopen");
+            require(InfoStage.getBottomHeight()==reserved,"Actions reserved phantom hint space");
+            click(button); tick(90);
+            require(content.getColor().a==0,"Hide failed");
+        }
+        controls.cancel(); tick(90); InfoStage.setBottomHeight(0);
+    }
+
+    private int countHints(Group parent) {
+        int count=0;
+        for(Actor actor:parent.getChildren()) {
+            if(actor instanceof LabelTable) count++;
+            else if(actor instanceof Group) count+=countHints((Group)actor);
+        }
+        return count;
+    }
+
+    private void click(Actor actor) {
+        Vector2 point=actor.localToStageCoordinates(new Vector2(actor.getWidth()/2,actor.getHeight()/2));
+        stage.stageToScreenCoordinates(point);
+        stage.touchDown((int)point.x,(int)point.y,0,0); stage.touchUp((int)point.x,(int)point.y,0,0);
     }
 
     private void checkCard(String key,String language) throws Exception {
@@ -79,8 +118,16 @@ public class MysteryPreview extends ApplicationAdapter {
         LabelTable backgroundPrompt=LabelTable.createAndShowTable(0,"A background gameplay prompt should not move the opened mystery.");
         tick(90);
         AtomicInteger closed=new AtomicInteger(); view.showCurrentMysteryCard(info,false,1,3).subscribe(closed::incrementAndGet);
-        tick(100);
         MysteryCard card=BigActorsManager.getMysteryCard();
+        float previousScale=card.getScaleX();
+        for(int frame=0;frame<100;frame++) {
+            tick(1);
+            Vector2 zoomCenter=card.localToStageCoordinates(new Vector2(card.getWidth()/2,card.getHeight()/2));
+            require(zoomCenter.dst(480,270)<.01f,"Zoom moved away from the final center: "+key);
+            require(card.getScaleX()+.0001f>=previousScale,"Zoom reversed direction: "+key);
+            previousScale=card.getScaleX();
+            if(key.endsWith("CROWN_OF_THE_SERPENT") && frame==8) draw(language+"-zoom-"+key);
+        }
         require(card.getStage()==stage && card.getTouchable()==Touchable.enabled,"Card did not open: "+key);
         require(InfoStage.getBottomPromptTop()==0,"Faded prompt still reserves space: "+key);
         centered(card,key); require(card.getHeight()<=516,"Card needs scaling without a question: "+key+" "+card.getHeight());

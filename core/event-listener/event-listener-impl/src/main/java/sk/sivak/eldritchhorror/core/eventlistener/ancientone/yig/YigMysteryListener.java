@@ -28,7 +28,12 @@ public final class YigMysteryListener extends AbstractMysteryListener {
     private final MysteryCardId.Yig id;
     private final List<EventListener> listeners = new ArrayList<>();
     private int progress;
-    public YigMysteryListener(MysteryCardInfo info) { super(info); id=(MysteryCardId.Yig)info.getMysteryCardId(); }
+    public YigMysteryListener(MysteryCardInfo info) {
+        super(info);
+        id=(MysteryCardId.Yig)info.getMysteryCardId();
+        // Saved camera hints must not freeze the crown's owner/expedition location after loading.
+        if(id==CROWN_OF_THE_SERPENT) info.setPinLocationsSupplier(this::getPinLocations);
+    }
     private EpicMonsterId epic() {
         switch(id) {
             case DESCENDANTS_OF_YIG:return EpicMonsterId.CHILDREN_OF_YIG;
@@ -48,6 +53,19 @@ public final class YigMysteryListener extends AbstractMysteryListener {
     }
     @Override protected List<LocationId> getPinLocations() {
         if(id==MIGRATION_OF_SERPENTS)return new ArrayList<>(p().getCluePool().getClueLocations());
+        if(id==CROWN_OF_THE_SERPENT) {
+            List<InvestigatorRead> possibleOwners=new ArrayList<>(p().getInvestigators().getSelectedInvestigators());
+            possibleOwners.addAll(p().getInvestigators().getDefeatedInvestigators());
+            for(InvestigatorRead investigator:possibleOwners) {
+                if(p().getArtifactsDeck().hasArtifact(investigator.getInfo().getInvestigatorId(),ArtifactId.SERPENT_CROWN)) {
+                    LocationId location=investigator.getCurrentLocationId();
+                    return location==null || investigator.isLostInTimeAndSpace()
+                            ? Collections.emptyList() : Collections.singletonList(location);
+                }
+            }
+            LocationId expedition=p().getExpeditionDeck().getExpeditionTokenLocation();
+            return expedition==null ? Collections.emptyList() : Collections.singletonList(expedition);
+        }
         return Collections.emptyList();
     }
     private boolean hasEncounterPins() {

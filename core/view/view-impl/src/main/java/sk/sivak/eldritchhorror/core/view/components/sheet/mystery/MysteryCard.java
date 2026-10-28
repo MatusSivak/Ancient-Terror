@@ -57,6 +57,7 @@ public class MysteryCard extends VisTable {
 
     public MysteryCard() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.MYSTERY_CARD);
+        displayHide.setCenteredZoom(true);
         displayHide.setActorKey(OnScreenActors.ActorKey.MYSTERY_CARD);
         displayHide.setBeforeHideAction(this::stopAcknowledgementPulse);
         setTransform(true);
@@ -351,20 +352,24 @@ public class MysteryCard extends VisTable {
     private float getPromptAwareY() {
         float centeredY = (VIEWPORT_HEIGHT - getHeight()) / 2f;
         if (confirmingResolution) return centeredY;
-        float promptTop = InfoStage.getBottomPromptTop();
+        float promptTop = InfoStage.getCardPromptTop();
         float scaledHeight = getHeight() * getDisplayScale();
         return promptTop > 0f ? Math.max(centeredY,
                 promptTop + 10f + scaledHeight / 2f - getHeight() / 2f) : centeredY;
     }
 
     private float getDisplayScale() {
-        float promptTop = confirmingResolution ? 0 : InfoStage.getBottomPromptTop();
+        float promptTop = confirmingResolution ? 0 : InfoStage.getCardPromptTop();
         float availableHeight = VIEWPORT_HEIGHT - 24f - (promptTop > 0 ? promptTop + 10f : 0);
         return Math.min(1f, Math.max(1f, availableHeight) / getHeight());
     }
 
     @Override
     public void act(float delta) {
+        if (displayHide.isDisplayed()) {
+            displayHide.setDisplayedScale(getDisplayScale());
+            displayHide.setDisplayedY(getPromptAwareY());
+        }
         super.act(delta);
         // Prompts may appear after the card is already open. Leave entry/exit animations alone.
         if (displayHide.isDisplayed() && getTouchable() == Touchable.enabled) {

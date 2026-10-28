@@ -109,11 +109,11 @@ public class NewGateAnimatedImage extends Group {
             if (matches) {
                 omenHalo.setColor(tint);
                 omenHalo.setRotation(0);
-                omenHalo.addAction(Actions.forever(Actions.sequence(
+                omenHalo.addAction(Actions.sequence(
                         Actions.scaleTo(1.35f, 1.35f), Actions.alpha(.95f),
                         Actions.parallel(Actions.scaleTo(3.2f, 3.2f, 1.25f, Interpolation.sineOut),
                                 Actions.alpha(0, 1.25f, Interpolation.sineIn), Actions.rotateBy(-65, 1.25f)),
-                        Actions.delay(.45f))));
+                        Actions.visible(false)));
             }
         }
         if (matches) {

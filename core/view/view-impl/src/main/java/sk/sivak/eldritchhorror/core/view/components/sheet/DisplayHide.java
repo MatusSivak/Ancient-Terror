@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import rx.Completable;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
@@ -28,6 +29,7 @@ public class DisplayHide {
     private float displayedY;
     private Float displayedX;
     private float displayedScale = 1f;
+    private boolean centeredZoom;
 
     private Action0 beforeDisplayAction = () -> {
     };
@@ -57,6 +59,10 @@ public class DisplayHide {
 
     public void setDisplayedScale(float displayedScale) {
         this.displayedScale = displayedScale;
+    }
+
+    public void setCenteredZoom(boolean centeredZoom) {
+        this.centeredZoom = centeredZoom;
     }
 
     private float getDisplayedX() {
@@ -106,6 +112,25 @@ public class DisplayHide {
             }
             actor.setPosition(getDisplayedX(), -actor.getHeight());
             actor.setOrigin(actor.getWidth() / 2, actor.getHeight() / 2);
+            if (centeredZoom) {
+                actor.setPosition(getDisplayedX(), displayedY);
+                actor.setScale(displayedScale * .82f);
+                actor.getColor().a = 0f;
+                actor.addAction(Actions.sequence(new FastForwardAction<>(new TemporalAction(.4f, Interpolation.pow3Out) {
+                    @Override protected void update(float percent) {
+                        // Read current targets so a card-specific question can reserve space during entry.
+                        actor.setPosition(getDisplayedX(), displayedY);
+                        actor.setScale(displayedScale * (.82f + .18f * percent));
+                        actor.getColor().a = percent;
+                    }
+                }), Actions.run(() -> {
+                    BigActorsManager.unlock(bigActorKey);
+                    actor.setTouchable(Touchable.enabled);
+                    afterDisplayAction.call();
+                    onSub.onCompleted();
+                })));
+                return;
+            }
             actor.setScale(0f);
             actor.addAction(Actions.sequence(
                     new FastForwardAction(Actions.parallel(

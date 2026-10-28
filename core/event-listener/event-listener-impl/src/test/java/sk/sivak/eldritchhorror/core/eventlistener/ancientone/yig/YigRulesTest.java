@@ -269,6 +269,47 @@ public class YigRulesTest {
         assertFalse(effects.contains("advanceCurrentMysteryCard"));
     }
 
+    @Test public void crownCameraHintTracksOwnerTransferMovementAndExpeditionAfterLoading() {
+        LocationId[] expedition={LocationId.THE_AMAZON}, ownerLocation={LocationId.ROME};
+        InvestigatorId[] owner={null};
+        boolean[] lost={false};
+        InvestigatorRead investigator=mock(InvestigatorRead.class,(name,a)-> {
+            if(name.equals("getInfo"))return mock(InvestigatorInfo.class,(n,b)->InvestigatorId.THE_SAILOR);
+            if(name.equals("getCurrentLocationId"))return ownerLocation[0];
+            if(name.equals("isLostInTimeAndSpace"))return lost[0];
+            throw new AssertionError(name);
+        });
+        List<InvestigatorRead> selected=new ArrayList<>(Collections.singletonList(investigator));
+        List<InvestigatorRead> defeated=new ArrayList<>();
+        platform.setInvestigators(mock(InvestigatorsRead.class,(name,a)-> {
+            if(name.equals("getSelectedInvestigators"))return selected;
+            if(name.equals("getDefeatedInvestigators"))return defeated;
+            throw new AssertionError(name);
+        }));
+        platform.setArtifactsDeck(mock(ArtifactsDeckRead.class,(name,a)-> {
+            assertEquals("hasArtifact",name);assertEquals(ArtifactId.SERPENT_CROWN,a[1]);return a[0]==owner[0];
+        }));
+        platform.setExpeditionDeck(mock(ExpeditionDeckRead.class,(name,a)->expedition[0]));
+        MysteryCardInfo crown=YigMysteryDeck.create(2).stream()
+                .filter(c->c.getMysteryCardId()==MysteryCardId.Yig.CROWN_OF_THE_SERPENT).findFirst().get();
+        // A saved hint must be replaced by a live supplier on restore.
+        crown.setPinLocationsSupplier(()->Collections.singletonList(LocationId.TOKYO));
+        new YigMysteryListener(crown).justRegisterListeners(0);
+        assertEquals(Collections.singletonList(LocationId.THE_AMAZON),crown.getPinLocations());
+        expedition[0]=LocationId.ANTARCTICA;
+        assertEquals(Collections.singletonList(LocationId.ANTARCTICA),crown.getPinLocations());
+        owner[0]=InvestigatorId.THE_SAILOR;
+        assertEquals(Collections.singletonList(LocationId.ROME),crown.getPinLocations());
+        ownerLocation[0]=LocationId.LONDON;
+        assertEquals(Collections.singletonList(LocationId.LONDON),crown.getPinLocations());
+        lost[0]=true;assertTrue(crown.getPinLocations().isEmpty());lost[0]=false;
+        selected.clear();defeated.add(investigator);
+        assertEquals(Collections.singletonList(LocationId.LONDON),crown.getPinLocations());
+        owner[0]=null;
+        assertEquals(Collections.singletonList(LocationId.ANTARCTICA),crown.getPinLocations());
+        expedition[0]=null;assertTrue(crown.getPinLocations().isEmpty());
+    }
+
     @Test public void crownResolutionWithoutActiveInvestigatorOrCrownOwnerDoesNothing() {
         resolveCrown(null, false, false);
     }

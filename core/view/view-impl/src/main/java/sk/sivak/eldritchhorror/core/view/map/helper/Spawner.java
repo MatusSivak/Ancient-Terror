@@ -2,14 +2,14 @@ package sk.sivak.eldritchhorror.core.view.map.helper;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import rx.Completable;
-import rx.Single;
-import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
@@ -18,7 +18,6 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
-import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MODE_TEST;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTION_DURATION;
 
 /**
@@ -59,38 +58,54 @@ public class Spawner {
                 MapStage.addToLayer(leftActor, idLayerResolver);
                 MapStage.addToLayer(centerActor, idLayerResolver);
                 MapStage.addToLayer(rightActor, idLayerResolver);
+                if (onSpawn != null) onSpawn.run();
+                spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
+                int[] landedCopies = {0};
                 for (Actor token : new Actor[]{leftActor, centerActor, rightActor}) {
-                    MapStage.getSpawnEffectLayer().addActor(new MapSpawnEffect(token));
-                }
-
-                AlphaAction alphaAction = createAlphaAction(spawnConfig.getFinalAlpha());
-                AlphaAction alphaActionLeft = createAlphaAction(spawnConfig.getFinalAlpha());
-                AlphaAction alphaActionRight = createAlphaAction(spawnConfig.getFinalAlpha());
-                for (AlphaAction reveal : new AlphaAction[]{alphaAction, alphaActionLeft, alphaActionRight}) {
-                    reveal.setDuration(NORMAL_ACTION_DURATION * .55f);
-                    reveal.setInterpolation(Interpolation.sineOut);
-                }
-
-                ScaleToAction scaleToAction = createScaleToAction();
-                ScaleToAction scaleToActionLeft = createScaleToAction();
-                ScaleToAction scaleToActionRight = createScaleToAction();
-
-                centerActor.addAction(Actions.sequence(
-                        Actions.run(() -> {
-                            if (onSpawn != null) onSpawn.run();
-                            spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
-                        }),
-                        new FastForwardAction(Actions.parallel(alphaAction, scaleToAction)),
-                        Actions.run(() -> {
+                    token.addAction(Actions.sequence(new FastForwardAction<>(createLandingAction(token)), Actions.run(() -> {
+                        if (++landedCopies[0] == 3) {
                             spawnConfig.postSpawnConfig(leftActor, centerActor, rightActor);
                             onSub.onCompleted();
-
-                        })));
-                leftActor.addAction(new FastForwardAction(Actions.parallel(alphaActionLeft, scaleToActionLeft)));
-                rightActor.addAction(new FastForwardAction(Actions.parallel(alphaActionRight, scaleToActionRight)));
+                        }
+                    })));
+                }
             });
 
         });
+    }
+
+    private TemporalAction createLandingAction(Actor token) {
+        float landingY = token.getY();
+        float dropHeight = 180f;
+        token.setY(landingY + dropHeight);
+        token.setScale(1.2f);
+        return new TemporalAction(1.1f * NORMAL_ACTION_DURATION) {
+            private MapSpawnEffect dust;
+
+            @Override protected void update(float percent) {
+                float descent = Math.min(1f, percent / .4f);
+                if (descent < 1f) {
+                    token.setY(landingY + dropHeight * (1f - descent * descent));
+                    token.setScale(MathUtils.lerp(1.2f, 1f, descent));
+                } else {
+                    // Smoke stays on the ground while the token makes one small settling bounce.
+                    token.setY(landingY);
+                    if (dust == null) {
+                        dust = new MapSpawnEffect(token);
+                        MapStage.getSpawnEffectLayer().addActor(dust);
+                    }
+                    float bounce = MathUtils.clamp((percent - .4f) / .22f, 0f, 1f);
+                    token.setY(landingY + MathUtils.sin(bounce * MathUtils.PI) * 10f * (1f - bounce));
+                    token.setScale(1f);
+                }
+            }
+
+            @Override protected void end() {
+                token.setY(landingY);
+                token.setScale(1f);
+                if (dust != null) dust.remove();
+            }
+        };
     }
 
     public Completable unspawn(MapStage.IdLayerResolver<?> idLayerResolver) {
@@ -121,8 +136,8 @@ public class Spawner {
 
     private Actor spawnActor(ActorSpawner actorSpawner, SpawnConfig spawnConfig, Vector2 position, boolean isCenter) {
         Actor actor = actorSpawner.spawnActor(isCenter);
-        actor.setScale(0);
-        actor.setColor(1, 1, 1, 0);
+        actor.setScale(1);
+        actor.setColor(1, 1, 1, spawnConfig.getFinalAlpha());
         actor.setRotation(spawnConfig.getActorRotation());
         actor.setPosition(position.x - actor.getOriginX() + spawnConfig.getOffsetX(), position.y - actor.getOriginY() + spawnConfig.getOffsetY());
 

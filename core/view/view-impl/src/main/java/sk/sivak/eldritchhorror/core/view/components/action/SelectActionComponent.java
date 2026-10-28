@@ -83,7 +83,8 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
         hideOkButtons = new HideOkButtons();
 
-        hideOkButtons.init(get("action.displayActions"), getOnConfirmAction(), this);
+        hideOkButtons.init(null, getOnConfirmAction(), this);
+        hideOkButtons.setShowButtonText(get("action.displayActions"));
         hideOkButtons.setOnShowAction(onShowAction);
     }
 

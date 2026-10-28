@@ -100,6 +100,10 @@ public class MapEffectsPreview extends ApplicationAdapter {
         require(halo.isVisible() && halo.getScaleX() > 1.5f, "Matching gate did not animate");
         float scale = halo.getScaleX(); gate.updateGateTransparency(OmenColor.BLUE); stage.act(1f/60);
         require(halo.getScaleX() >= scale, "Repeated omen update restarted the pulse"); draw("omen-match");
+        for (int i = 0; i < 180; i++) stage.act(1f/60);
+        require(!halo.isVisible() && halo.getActions().size == 0, "Omen highlight loops");
+        gate.updateGateTransparency(OmenColor.BLUE); stage.act(.1f);
+        require(!halo.isVisible(), "An unchanged matching omen replays the highlight");
         gate.updateGateTransparency(null);
         require(!halo.isVisible() && halo.getActions().size == 0, "Omen pulse did not stop");
         gate.updateGateTransparency(OmenColor.BLUE); stage.act(.1f);
@@ -121,9 +125,11 @@ public class MapEffectsPreview extends ApplicationAdapter {
 
     private void checkSpawn() throws Exception {
         java.util.List<Actor> copies = MapStage.getActor(resolver);
-        require(copies.size() == 3 && MapStage.getSpawnEffectLayer().getChildren().size == 3, "Wrapped spawns missing");
+        require(copies.size() == 3 && MapStage.getSpawnEffectLayer().getChildren().size == 0, "Smoke appeared before landing");
         if (scenario >= 3) FastForwardAction.turnOn();
         Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
+        for (Actor token : copies) require(token.getY() + token.getOriginY() > position.y + 150
+                && token.getColor().a == 1, "Token must arrive visibly from above");
         camera(position.x, position.y);
         for (int frame = 0; frame < 90; frame++) {
             stage.act(1f/60);
@@ -131,10 +137,16 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 draw("spawn-" + scenario); camera(position.x - MAP_WIDTH, position.y); draw("spawn-left-" + scenario);
                 camera(position.x, position.y);
             }
+            if (frame == 33 && scenario < 3) {
+                require(MapStage.getSpawnEffectLayer().getChildren().size == 3, "Landing did not produce smoke");
+                draw("landing-" + scenario);
+            }
         }
         require(starts.get() == 1 && finishes.get() == 1, "Spawn callbacks must run once");
         for (Actor actor : copies) require(Math.abs(actor.getScaleX() - 1) < .1f && actor.getColor().a == 1,
                 "Spawn did not settle (allowing the monster's idle breathing)");
+        for (Actor actor : copies) require(Math.abs(actor.getY() + actor.getOriginY() - position.y) < .01f,
+                "Token missed its landing location");
         require(MapStage.getSpawnEffectLayer().getChildren().size == 0, "Smoke remained after spawn");
         MapStage.removeActor(resolver); FastForwardAction.turnOff();
         Actor interrupted = new Image(getTexture(CLUE_TOKEN)); stage.addActor(interrupted);

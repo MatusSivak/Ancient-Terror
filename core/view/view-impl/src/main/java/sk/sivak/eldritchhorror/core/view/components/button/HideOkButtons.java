@@ -26,6 +26,7 @@ public class HideOkButtons {
     private Action0 onConfirmAction;
     private Action0 onShowAction;
     private String displayLabelText;
+    private String showButtonText;
     private Actor actorToHide;
     private boolean displayed;
     private ClickListener addedListener;
@@ -46,6 +47,10 @@ public class HideOkButtons {
 
     public void setOnShowAction(Action0 onShowAction) {
         this.onShowAction = onShowAction;
+    }
+
+    public void setShowButtonText(String text) {
+        showButtonText = text;
     }
 
     public void hideInstantly() {
@@ -150,8 +155,8 @@ public class HideOkButtons {
             }
             displayed = false;
             actorToHide.setTouchable(Touchable.disabled);
-            labelTable = LabelTable.createAndShowHint(displayLabelText);
-            button.setText(get("dialog.yes"));
+            labelTable = displayLabelText == null ? null : LabelTable.createAndShowHint(displayLabelText);
+            button.setText(showButtonText == null ? get("dialog.yes") : showButtonText);
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
             if (instant) {
@@ -186,11 +191,13 @@ public class HideOkButtons {
                 onShowAction.call();
             }
             actorToHide.setTouchable(Touchable.enabled);
-            InfoStage.setBottomHeight(InfoStage.getBottomHeight() - labelTable.getHeight() - 5);
-            labelTable.addAction(new FastForwardAction<>(sequence(
-                    Actions.alpha(0, FAST_ACTION_DURATION),
-                    Actions.run(() -> labelTable.remove())
-            )));
+            if (labelTable != null) {
+                InfoStage.setBottomHeight(InfoStage.getBottomHeight() - labelTable.getHeight() - 5);
+                LabelTable previousLabel = labelTable;
+                previousLabel.addAction(new FastForwardAction<>(sequence(
+                        Actions.alpha(0, FAST_ACTION_DURATION), Actions.run(previousLabel::remove))));
+                labelTable = null;
+            }
             button.setText(get("dialog.hide"));
             button.setTouchable(Touchable.disabled);
             actorToHide.addAction(new FastForwardAction<>(Actions.alpha(1, FAST_ACTION_DURATION)));

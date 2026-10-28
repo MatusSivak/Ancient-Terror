@@ -6,6 +6,6 @@ With the project JDK configured, run from the repository root:
 ./gradlew -I tools/mystery-preview/preview.gradle :desktop:previewMysteries
 ```
 
-The offscreen LWJGL runner exercises all 34 mystery descriptions in English and Slovak through the actual sheet opening and click-to-close flow. It checks centering over faded gameplay controls, natural text wrapping, font glyph coverage, bounds with a live question, recentering after the question disappears, and exactly one dismissal callback.
+The offscreen LWJGL runner exercises all 34 mystery descriptions in English and Slovak through the actual sheet opening and click-to-close flow. It checks centering throughout every frame of the opening zoom, natural text wrapping, font glyph coverage, bounds with a live question, recentering after the question disappears, and exactly one dismissal callback. It also checks repeated Actions/Hide button transitions without a hint label or extra reserved space.
 
 Screenshots are saved under `build/mystery-preview/`. The runner restores the language without writing preferences and does not load or modify a saved game.
