@@ -1,9 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.action.focus;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
@@ -15,7 +13,7 @@ import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static com.badlogic.gdx.math.Interpolation.sine;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.HUD_HEIGHT_RATIO;
@@ -30,19 +28,19 @@ public final class GainClueFromSpaceHelper {
     static Completable gainClueFromSpace(LocationId locationId) {
         return Completable.create(onSub -> {
             ClueUtils.ClueIdLayerResolver clueIdLayerResolver = new ClueUtils.ClueIdLayerResolver(locationId);
-            Actor clueActor = MapStage.getActor(clueIdLayerResolver).get(1);
-            clueActor.clearActions();
-            clueActor.clearListeners();
-            clueActor.setOrigin(0,0);
-
-
-            Vector2 stageCoords = clueActor.localToStageCoordinates(new Vector2());
+            Actor clueActor = nearestClueCopy(MapStage.getActor(clueIdLayerResolver), MapStage.getCamera().position);
+            // Project the visible token's center before changing its origin, scale, or parent.
+            Vector2 stageCoords = clueActor.localToStageCoordinates(new Vector2(clueActor.getWidth() / 2f, clueActor.getHeight() / 2f));
             Vector2 screenCoordinates = MapStage.getStage().stageToScreenCoordinates(stageCoords);
             Vector2 infoStageCoordinates = InfoStage.getStageSafe().screenToStageCoordinates(screenCoordinates);
-            clueActor.setScale(1/ MapStage.getCamera().zoom);
+            clueActor.clearActions();
+            clueActor.clearListeners();
+            clueActor.setOrigin(clueActor.getWidth() / 2f, clueActor.getHeight() / 2f);
+            clueActor.setScale(clueActor.getScaleX() / MapStage.getCamera().zoom,
+                    clueActor.getScaleY() / MapStage.getCamera().zoom);
             clueActor.setPosition(
-                    infoStageCoordinates.x + (clueActor.getScaleX()-1) * clueActor.getWidth()/2f,
-                    infoStageCoordinates.y  + (clueActor.getScaleY()-1) * clueActor.getHeight()/2f);
+                    infoStageCoordinates.x - clueActor.getWidth() / 2f,
+                    infoStageCoordinates.y - clueActor.getHeight() / 2f);
 
             MapStage.removeActor(clueIdLayerResolver);
 
@@ -52,6 +50,21 @@ public final class GainClueFromSpaceHelper {
 
         });
 
+    }
+
+    static Actor nearestClueCopy(List<Actor> copies, Vector3 cameraPosition) {
+        Actor nearest = null;
+        float nearestDistance = Float.POSITIVE_INFINITY;
+        for (Actor copy : copies) {
+            Vector2 center = copy.localToStageCoordinates(new Vector2(copy.getWidth() / 2f, copy.getHeight() / 2f));
+            float distance = center.dst2(cameraPosition.x, cameraPosition.y);
+            if (distance < nearestDistance) {
+                nearest = copy;
+                nearestDistance = distance;
+            }
+        }
+        if (nearest == null) throw new IllegalStateException("No Clue token to collect");
+        return nearest;
     }
 
     private static void withClue(Actor clueActor, rx.CompletableSubscriber onSub) {

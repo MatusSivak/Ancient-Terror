@@ -63,6 +63,11 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         if (startsWithChoice()) {
             openingChoice = info;
             resolve();
+        } else if (getLocationType() == LocationType.WILDERNESS && page == 3) {
+            // The guaranteed Clue precedes the trap test; the test is the only opening prompt.
+            p().getEncounterService().typeInfo(info);
+            hidePaper();
+            resolve();
         } else if (info.isEmpty()) {
             resolve();
         } else {
@@ -260,7 +265,12 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         switch (page) {
             case 1: test(STRENGTH,expedition()?-3:-1,this::twoClues,() -> { damage(2,0); condition(BACK_INJURY); }); break;
             case 2: test(LORE,-1,() -> { clue(); cureCurse(); },() -> { damage(2,0); condition(POISONED); }); break;
-            case 3: clue(); test(OBSERVATION,-2,() -> artifact(ArtifactId.CURSED_SPHERE),() -> condition(CURSED)); break;
+            case 3:
+                clue();
+                // Gaining a board Clue switches to the map. Restore the encounter before its next test.
+                p().getService().showResearchBackground(getLocationType());
+                test(OBSERVATION,-2,() -> artifact(ArtifactId.CURSED_SPHERE),() -> condition(CURSED));
+                break;
             case 4: test(STRENGTH,has(POISONED)?-2:0,this::clue,() -> { damage(1,0); discardPossessions(AssetTrait.ITEM,2,false,NOTHING); }); break;
             case 5: if (expedition()) condition(POISONED); test(OBSERVATION,-2,this::twoClues,NOTHING); break;
             case 6: pay("Spend 2 Health to gain this Clue and let an investigator discard Cursed?",0,2,0,

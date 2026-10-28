@@ -30,6 +30,6 @@ public class AxeAsset extends AbstractAssetInfo {
         return "Combat: +2 Strength.\n" +
                 "\n" +
                 "Combat Strength tests:\n" +
-                "2 Sanity → reroll any dice.";
+                "2 Sanity → reroll all failed dice.";
     }
 }

@@ -57,7 +57,7 @@ public final class ResourceSpendEffect extends Group {
                 : kind == Kind.TRAIN ? TICKET_TRAIN_DOWN : TICKET_SHIP_DOWN);
         Color accent = Color.valueOf(kind == Kind.CLUE ? "8EECC5" : kind == Kind.FOCUS ? "B9A1FF"
                 : kind == Kind.TRAIN ? "FFD28C" : "8FD9FF");
-        float targetHeight = ticket ? 76 : 108;
+        float targetHeight = ticket ? 152 : 108;
         setSize(targetHeight * texture.getWidth() / texture.getHeight(), targetHeight);
         setOrigin(getWidth() / 2, getHeight() / 2);
         setName("resource-spend-" + kind.name().toLowerCase(java.util.Locale.ROOT));
@@ -114,7 +114,7 @@ public final class ResourceSpendEffect extends Group {
             for (int i = 0; i < pieces.length; i++) {
                 Actor piece = pieces[i]; piece.setVisible(true);
                 float side = i == 0 ? -1 : 1;
-                piece.setPosition(side * 26 * pull, side * 7 * pull - 42 * fall * fall);
+                piece.setPosition(side * 52 * pull, side * 14 * pull - 84 * fall * fall);
                 piece.setRotation(-side * 12 * pull);
                 piece.getColor().a = 1 - Interpolation.pow2In.apply(MathUtils.clamp((flight - .45f) / .55f, 0, 1));
             }

@@ -1,17 +1,14 @@
 package sk.sivak.eldritchhorror.core.view.map;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import java8.features.util.IterableUtils;
-import rx.schedulers.Schedulers;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
@@ -66,12 +63,22 @@ public class CompositeMap {
         locationLabelMap.put(LocationId.TOKYO, get("map.cityInfo.tokyo"));
         locationLabelMap.put(LocationId.SHANGHAI, get("map.cityInfo.shanghai"));
         locationLabelMap.put(LocationId.SYDNEY, get("map.cityInfo.sydney"));
+        locationLabelMap.put(LocationId.THE_AMAZON, "");
+        locationLabelMap.put(LocationId.THE_HEART_OF_AFRICA, "");
+        locationLabelMap.put(LocationId.THE_PYRAMIDS, "");
+        locationLabelMap.put(LocationId.ANTARCTICA, "");
+        locationLabelMap.put(LocationId.THE_HIMALAYAS, "");
+        locationLabelMap.put(LocationId.TUNGUSKA, "");
         IterableUtils.forEach(locationLabelMap.entrySet(), entry -> {
             LocationId location = entry.getKey();
+            String text = get("map.locationName." + location.name());
+            if (!entry.getValue().isEmpty()) {
+                text += "\n" + entry.getValue();
+            }
             Vector2[] labelPositions = LocationPositionResolver.resolveAll(location);
             CityInfoLabelLayerResolver cityInfoLabelLayerResolver = new CityInfoLabelLayerResolver(location);
             for (Vector2 labelPosition : labelPositions) {
-                Label label = createCityInfoLabel(entry.getValue());
+                Label label = createCityInfoLabel(text);
                 label.setPosition(labelPosition.x - label.getWidth() / 2, labelPosition.y - 65 - label.getHeight());
                 MapStage.addToLayer(label, cityInfoLabelLayerResolver);
                 MapStage.getCityInfoLayer().addActor(label);

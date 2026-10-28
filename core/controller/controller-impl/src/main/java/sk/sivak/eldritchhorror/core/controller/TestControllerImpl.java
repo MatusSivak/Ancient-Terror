@@ -88,6 +88,7 @@ public class TestControllerImpl implements TestController {
     public Completable showCombatOverview(InvestigatorId investigatorId, MonsterInfo monsterInfo, Stat damageTestType) {
         CombatOverviewTableData data = new CombatOverviewTableData();
         data.setInvestigatorId(investigatorId);
+        data.setMonsterInfo(monsterInfo);
         InvestigatorRead investigator = investigators.getInvestigator(investigatorId);
         if (monsterInfo.getHorror() != null) {
             Stat horrorTestType = monsterInfo.getHorrorTestType();

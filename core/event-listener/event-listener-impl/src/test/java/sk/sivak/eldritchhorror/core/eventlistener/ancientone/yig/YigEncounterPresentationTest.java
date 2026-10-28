@@ -33,6 +33,7 @@ public class YigEncounterPresentationTest {
     private final List<String> infos = new ArrayList<>(), effects = new ArrayList<>();
     private final List<String> flavors = new ArrayList<>();
     private final List<String> paperTransitions = new ArrayList<>();
+    private final List<String[]> buttonHistory = new ArrayList<>();
     private SingleSubscriber<? super Integer> button;
     private SingleSubscriber<? super TestData> test;
     private SingleSubscriber<? super CombatData> combat;
@@ -51,6 +52,7 @@ public class YigEncounterPresentationTest {
         platform.setService(mock(Service.class, (name, args) -> {
             if (name.equals("addEventCommand")) queue(() -> ((Consumer<Object>) args[0]).accept(null));
             if (name.equals("showKnyanBackground") || name.equals("hideBackground")) queue(() -> effects.add(name));
+            if (name.equals("showResearchBackground")) queue(() -> effects.add(name + ":" + args[0]));
             return null;
         }));
         platform.setEncounterService(mock(EncounterService.class, (name, args) -> {
@@ -81,6 +83,7 @@ public class YigEncounterPresentationTest {
             if (name.equals("displayButtons")) return Single.<Integer>create(sub -> queue(() -> {
                 assertTrue("Buttons must be on a visible typewriter paper", paperVisible);
                 buttons = (String[]) args[0]; button = sub; waiting = true;
+                buttonHistory.add(buttons);
             }));
             return null;
         }));
@@ -120,6 +123,31 @@ public class YigEncounterPresentationTest {
         platform.setCluePoolRead(mock(CluePoolRead.class, (name, args) -> Collections.emptyList()));
     }
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
+
+    @Test public void cursedSphereRestoresResearchAfterClueAndHasOnlyTheTestPrompt() {
+        for (boolean passed : new boolean[]{true, false}) {
+            YigEncounterPresentationTest fixture = new YigEncounterPresentationTest();
+            fixture.setup();
+            fixture.start(3, LocationType.WILDERNESS);
+            assertEquals(Arrays.asList("flavor", "hideBackground", "gainClueFromSpace",
+                    "showResearchBackground:" + LocationType.WILDERNESS), fixture.effects);
+            assertEquals(Arrays.asList("show", "hide", "show"), fixture.paperTransitions);
+            assertEquals("No redundant OK before the trap test", 1, fixture.buttonHistory.size());
+            assertArrayEquals(new String[]{"[#BAD]Observation-2[]"}, fixture.buttons);
+            assertNull("Test waits for the player's click", fixture.test);
+            fixture.click();
+            fixture.finishTest(passed);
+            assertTrue(fixture.paperVisible);
+            assertArrayEquals(new String[]{"OK"}, fixture.buttons);
+            assertEquals(1, Collections.frequency(fixture.effects, "gainClueFromSpace"));
+            fixture.click();
+            assertEquals(passed, fixture.effects.contains("gainArtifact:CURSED_SPHERE"));
+            assertEquals(!passed, fixture.effects.contains("gainCondition:CURSED"));
+            assertEquals(0, fixture.papers);
+            assertFalse(fixture.waiting);
+            fixture.cleanup();
+        }
+    }
 
     @Test public void sleepingYigDoesNotShowOrApplyAwakenedHealthLoss() {
         researchHealthLoss(false);

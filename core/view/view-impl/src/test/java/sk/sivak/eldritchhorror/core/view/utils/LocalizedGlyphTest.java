@@ -22,7 +22,8 @@ public class LocalizedGlyphTest {
         assertTrue(crown.contains(String.valueOf(getGlyph("Will"))));
         assertTrue(MarkupText.replaceColoredGlyphKeywords(sk.getProperty("mystery.clueCost.other"))
                 .contains(String.valueOf(getGlyph("Clue"))));
-        assertTrue(sk.getProperty("mystery.yig.CROWN_OF_THE_SERPENT.flavor").contains("vôľa"));
+        assertFalse(MarkupText.replaceColoredGlyphKeywords(sk.getProperty("mystery.yig.CROWN_OF_THE_SERPENT.flavor"))
+                .contains(String.valueOf(getGlyph("Will"))));
     }
     private int count(String value, String token) {
         Matcher matcher = Pattern.compile("\\b" + token + "\\b").matcher(value);

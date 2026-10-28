@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.constants.combat;
 
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 
 public class CombatOverviewTableData {
     private InvestigatorId investigatorId;
@@ -9,6 +10,14 @@ public class CombatOverviewTableData {
     private StatRowData damageRowData;
 
     private MonsterCombatTableData monsterCombatTableData = new MonsterCombatTableData();
+
+    public MonsterInfo getMonsterInfo() {
+        return monsterCombatTableData.getMonsterInfo();
+    }
+
+    public void setMonsterInfo(MonsterInfo monsterInfo) {
+        monsterCombatTableData.setMonsterInfo(monsterInfo);
+    }
 
 
     public InvestigatorId getInvestigatorId() {

@@ -21,7 +21,6 @@ public class GreenMythosCard12 implements MythosCardEventListener {
     private static final int GAIN_FOCUS = 1;
     private static final int FOCUS_FOR_CLUE = 2;
     private static final int CLUE_FOR_SPELL = 3;
-    private static final int NOTHING = 0;
 
     @Override
     public void execute() {
@@ -43,7 +42,6 @@ public class GreenMythosCard12 implements MythosCardEventListener {
             if (options.isEmpty()) {
                 continue;
             }
-            options.add(new Question.Option<>("Nothing", NOTHING));
             ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(investigatorId);
             ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
             Question<Integer> question = new Question<>();

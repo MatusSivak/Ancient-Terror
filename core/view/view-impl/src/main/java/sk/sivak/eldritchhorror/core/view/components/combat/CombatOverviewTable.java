@@ -10,7 +10,9 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SPECIAL_ELITE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
@@ -81,6 +83,10 @@ public class CombatOverviewTable extends VisTable {
             monsterImage = new Image(CustomAssetManager.getNonEpicMonsterTexture(data.getMonsterClassName()));
         }
         monsterImage.setScaling(Scaling.fit);
+        ButtonUtils.addClickListener(monsterImage, () -> {
+            BigActorsManager.initMonsterCard(data.getMonsterInfo(), BigActorsManager::displayOrHideMonsterCard, () -> {});
+            BigActorsManager.displayOrHideMonsterCard();
+        });
 
         int toughness = data.getToughness() == null ? 0 : data.getToughness();
         // Tough monsters get smaller hearts, so the whole row always fits inside the card.
