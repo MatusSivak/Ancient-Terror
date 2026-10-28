@@ -59,10 +59,17 @@ public class Spawner {
                 MapStage.addToLayer(leftActor, idLayerResolver);
                 MapStage.addToLayer(centerActor, idLayerResolver);
                 MapStage.addToLayer(rightActor, idLayerResolver);
+                for (Actor token : new Actor[]{leftActor, centerActor, rightActor}) {
+                    MapStage.getSpawnEffectLayer().addActor(new MapSpawnEffect(token));
+                }
 
                 AlphaAction alphaAction = createAlphaAction(spawnConfig.getFinalAlpha());
                 AlphaAction alphaActionLeft = createAlphaAction(spawnConfig.getFinalAlpha());
                 AlphaAction alphaActionRight = createAlphaAction(spawnConfig.getFinalAlpha());
+                for (AlphaAction reveal : new AlphaAction[]{alphaAction, alphaActionLeft, alphaActionRight}) {
+                    reveal.setDuration(NORMAL_ACTION_DURATION * .55f);
+                    reveal.setInterpolation(Interpolation.sineOut);
+                }
 
                 ScaleToAction scaleToAction = createScaleToAction();
                 ScaleToAction scaleToActionLeft = createScaleToAction();

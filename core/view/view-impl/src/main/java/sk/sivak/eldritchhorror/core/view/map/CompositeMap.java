@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import java8.features.util.IterableUtils;
@@ -13,6 +14,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,49 +74,57 @@ public class CompositeMap {
         IterableUtils.forEach(locationLabelMap.entrySet(), entry -> {
             LocationId location = entry.getKey();
             String text = get("map.locationName." + location.name());
-            if (!entry.getValue().isEmpty()) {
-                text += "\n" + entry.getValue();
-            }
             Vector2[] labelPositions = LocationPositionResolver.resolveAll(location);
             CityInfoLabelLayerResolver cityInfoLabelLayerResolver = new CityInfoLabelLayerResolver(location);
             for (Vector2 labelPosition : labelPositions) {
-                Label label = createCityInfoLabel(text);
-                label.setPosition(labelPosition.x - label.getWidth() / 2, labelPosition.y - 65 - label.getHeight());
+                Table label = createCityInfoLabel(text, entry.getValue(), labelPosition);
+                label.setPosition(labelPosition.x - label.getWidth() / 2, labelPosition.y - 34 - label.getHeight());
                 MapStage.addToLayer(label, cityInfoLabelLayerResolver);
-                MapStage.getCityInfoLayer().addActor(label);
             }
         });
     }
 
-    private Label createCityInfoLabel(String text) {
-        Label.LabelStyle labelStyle = new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.LIGHT_GRAY);
-        labelStyle.background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
-            @Override
-            public void draw(Batch batch, float x, float y, float width, float height) {
-                batch.setColor(new Color(1f,1f,1f,batch.getColor().a * 0.75f));
-                super.draw(batch, x, y, width, height);
-            }
-        };
-        Label label = new Label(text, labelStyle) {
+    private Table createCityInfoLabel(String text, String effect, Vector2 location) {
+        Table label = new Table() {
             @Override
             public void act(float delta) {
                 super.act(delta);
-                float distance = (float) DistanceHelper.getDistance(new Vector2(
-                        getX() + getWidth() / 2,
-                        getY() + 65 / 2f + getHeight()), getStage().getCamera().position);
-                changeVisibilityBasedOnDistance(distance);
-            }
-
-            private void changeVisibilityBasedOnDistance(float distance) {
-                float alpha = Math.max(0, Math.min(1, (-2 / 150f) * distance + 2));
-                getColor().a = alpha;
+                if (getStage() == null) return;
+                // Keep camera proximity independent of the label's height and typography.
+                float distance = (float) DistanceHelper.getDistance(
+                        new Vector2(location.x, location.y - 32.5f), getStage().getCamera().position);
+                getColor().a = Math.max(0, Math.min(1, (-2 / 150f) * distance + 2));
             }
         };
-        label.setAlignment(Align.center);
-        label.setFontScale(0.35f);
+        TextureRegionDrawable background = new TextureRegionDrawable(CustomAssetManager.getTextureRegionDrawable(GRAY_BACKGROUND)) {
+            @Override
+            public void draw(Batch batch, float x, float y, float width, float height) {
+                float previous = batch.getPackedColor();
+                batch.setColor(1f, 1f, 1f, batch.getColor().a * 0.75f);
+                super.draw(batch, x, y, width, height);
+                batch.setColor(previous);
+            }
+        };
+        background.setMinWidth(0);
+        background.setMinHeight(0);
+        label.setBackground(background);
+        Label title = new Label(text, new Label.LabelStyle(
+                getBitmapFontNew(NEW_FONT_SPECIAL_ELITE, 42), Color.valueOf("EAD6A6")));
+        title.setAlignment(Align.center);
+        title.setFontScale(.40f);
+        label.pad(5, 9, 5, 9);
+        label.add(title);
+        if (!effect.isEmpty()) {
+            Label description = new Label(MarkupText.replaceColoredGlyphKeywords(effect.replace('\n', ' ')),
+                    new Label.LabelStyle(getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 42), Color.LIGHT_GRAY));
+            description.getStyle().font.getData().markupEnabled = true;
+            description.setFontScale(.34f);
+            description.setAlignment(Align.center);
+            label.row();
+            label.add(description).padTop(3);
+        }
         label.setTouchable(Touchable.disabled);
-        label.setHeight(label.getPrefHeight() + 5);
-        label.setWidth(label.getPrefWidth() + 5);
+        label.pack();
         return label;
     }
 

@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('mapEffectsPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/map-effects-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewMapEffects', JavaExec) {
+        dependsOn desktop.tasks.named('mapEffectsPreviewClasses')
+        classpath = desktop.sourceSets.mapEffectsPreview.runtimeClasspath
+        mainClass.set('MapEffectsPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

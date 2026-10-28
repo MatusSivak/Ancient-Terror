@@ -590,9 +590,14 @@ public class GameViewImpl implements Screen, GameView {
         float tokenWidth = 100;
         float baseOffset = - (amount - 1) * tokenWidth / 2f;
         for (int i = 0; i < amount; i++) {
-            // Simultaneous losses share one fracture cue; combat impacts each have their own cue.
-            completables.add(function.call(baseOffset, i == 0
-                    ? () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, amount) : null));
+            // A short cascade keeps every departing HUD token readable. Resolve its slot only on departure.
+            Completable loss = function.call(baseOffset, i == 0
+                    ? () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, amount) : null);
+            float delay = i * .03f * ViewProperties.NORMAL_ACTION_DURATION;
+            Completable departure = i == 0 ? Completable.complete() : Completable.create(subscriber ->
+                    InfoStage.addActionToInfoStage(new FastForwardAction<>(
+                            Actions.delay(delay, Actions.run(subscriber::onCompleted)))));
+            completables.add(departure.andThen(loss));
             baseOffset += tokenWidth;
         }
         if (completables.isEmpty()) {

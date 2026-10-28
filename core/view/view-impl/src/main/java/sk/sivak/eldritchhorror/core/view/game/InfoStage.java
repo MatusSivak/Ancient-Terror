@@ -433,17 +433,25 @@ public class InfoStage {
     public static float getBottomPromptTop() {
         float top = 0f;
         for (Actor actor : get().buttonLayer.getChildren()) {
-            if (actor instanceof Button && actor.isVisible()) top = Math.max(top, actor.getTop());
+            if (actor instanceof Button && isPromptVisible(actor)) top = Math.max(top, actor.getTop());
         }
         for (Actor actor : get().smallActors.getChildren()) {
-            if (actor instanceof LabelTable && actor.isVisible()) top = Math.max(top, actor.getTop());
+            if (actor instanceof LabelTable && isPromptVisible(actor)) top = Math.max(top, actor.getTop());
         }
         // Card questions move their prompt into this layer to keep it visible.
         for (Actor actor : get().bigActors.getChildren()) {
-            if ((actor instanceof LabelTable || actor instanceof Button) && actor.isVisible())
+            if ((actor instanceof LabelTable || actor instanceof Button) && isPromptVisible(actor))
                 top = Math.max(top, actor.getTop());
         }
         return top;
+    }
+
+    private static boolean isPromptVisible(Actor actor) {
+        // Opening a sheet fades whole layers, without changing their children's visible flags.
+        for (Actor ancestor = actor; ancestor != null; ancestor = ancestor.getParent()) {
+            if (!ancestor.isVisible() || ancestor.getColor().a <= .01f) return false;
+        }
+        return true;
     }
 
     public static void setBottomHeight(float bottomHeight) {

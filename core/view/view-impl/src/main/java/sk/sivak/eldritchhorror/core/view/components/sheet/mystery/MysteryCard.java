@@ -136,7 +136,7 @@ public class MysteryCard extends VisTable {
                 .replace("CLUE_COST", clueCost == null ? "?"
                         : get(clueCostKey(clueCost), clueCost))
                 + (clueCost == null && mysteryCardInfo.getClueCredit() > 0
-                ? "\n\n" + get("mystery.clueCostReduced", mysteryCardInfo.getClueCredit()) : "");
+                ? " " + get("mystery.clueCostReduced", mysteryCardInfo.getClueCredit()) : "");
     }
 
     private static String clueCostKey(int clueCost) {
@@ -178,9 +178,8 @@ public class MysteryCard extends VisTable {
     }
 
     private String reflowText(String text) {
-        // Legacy copy has hard-wrapped lines. Let the label wrap to the card width,
-        // while retaining explicit blank lines between paragraphs.
-        return text.replace("\r\n", "\n").replaceAll("(?<!\n)\n(?!\n)", " ");
+        // The card already separates lore from rules. Wrap prose naturally, without legacy blank lines.
+        return text.replaceAll("\\s+", " ").trim();
     }
 
     private Label createProgressLabel() {
@@ -319,6 +318,7 @@ public class MysteryCard extends VisTable {
     }
 
     public void displayOrHide() {
+        displayHide.setDisplayedScale(getDisplayScale());
         displayHide.setDisplayedY(getPromptAwareY());
 
         displayHide.setBeforeDisplayAction(() -> {
@@ -352,7 +352,15 @@ public class MysteryCard extends VisTable {
         float centeredY = (VIEWPORT_HEIGHT - getHeight()) / 2f;
         if (confirmingResolution) return centeredY;
         float promptTop = InfoStage.getBottomPromptTop();
-        return promptTop > 0f ? Math.max(centeredY, promptTop + 10f) : centeredY;
+        float scaledHeight = getHeight() * getDisplayScale();
+        return promptTop > 0f ? Math.max(centeredY,
+                promptTop + 10f + scaledHeight / 2f - getHeight() / 2f) : centeredY;
+    }
+
+    private float getDisplayScale() {
+        float promptTop = confirmingResolution ? 0 : InfoStage.getBottomPromptTop();
+        float availableHeight = VIEWPORT_HEIGHT - 24f - (promptTop > 0 ? promptTop + 10f : 0);
+        return Math.min(1f, Math.max(1f, availableHeight) / getHeight());
     }
 
     @Override
@@ -360,6 +368,7 @@ public class MysteryCard extends VisTable {
         super.act(delta);
         // Prompts may appear after the card is already open. Leave entry/exit animations alone.
         if (displayHide.isDisplayed() && getTouchable() == Touchable.enabled) {
+            setScale(getDisplayScale());
             setY(getPromptAwareY());
         }
     }

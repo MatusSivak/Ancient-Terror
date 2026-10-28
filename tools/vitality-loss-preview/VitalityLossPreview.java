@@ -102,16 +102,28 @@ public class VitalityLossPreview extends ApplicationAdapter {
         tokenView.setAccessible(true); tokenView.set(view, new TokenView());
         for (boolean sanity : new boolean[]{false, true}) {
             ContainerBar bar = sanity ? InfoStage.getInvestigatorHud().getSanityBar() : InfoStage.getInvestigatorHud().getHealthBar();
-            bar.setTotalEmptyContainers(5); bar.setCurrentValue(2); bar.validate();
+            bar.setTotalEmptyContainers(6); bar.setCurrentValue(6); bar.validate();
             AtomicInteger done = new AtomicInteger();
-            (sanity ? view.loseSanity(2) : view.loseHealth(2)).subscribe(done::incrementAndGet);
-            require(bar.getCurrentValue() == 0 && effects() == 2, "One animation per lost point");
-            tick(55); require(done.get() == 0, "Encounter advanced before fragments cleared"); tick(35);
+            (sanity ? view.loseSanity(6) : view.loseHealth(6)).subscribe(done::incrementAndGet);
+            require(bar.getCurrentValue() == 5 && effects() == 1, "Only the first token should leave immediately");
+            stage.act(.02f);
+            require(bar.getCurrentValue() == 5 && effects() == 1, "Second token left before its delay");
+            stage.act(.02f);
+            require(bar.getCurrentValue() == 4 && effects() == 2, "Second token did not leave in sequence");
+            tick(12);
+            require(bar.getCurrentValue() == 0 && effects() == 6, "One animation per lost point");
+            draw(sanity ? "six-sanity" : "six-health");
+            tick(40); require(done.get() == 0, "Encounter advanced before fragments cleared"); tick(55);
             require(done.get() == 1 && effects() == 0, "Investigator loss did not finish");
             (sanity ? view.loseSanity(1) : view.loseHealth(1)).subscribe(done::incrementAndGet);
             require(done.get() == 2 && effects() == 0, "Empty bar started a loss");
             (sanity ? view.loseSanity(0) : view.loseHealth(0)).subscribe(done::incrementAndGet);
             require(done.get() == 3, "Zero loss stalled the encounter");
+            bar.setCurrentValue(6);
+            (sanity ? view.loseSanity(6) : view.loseHealth(6)).subscribe(done::incrementAndGet);
+            FastForwardAction.turnOn(); tick(12); FastForwardAction.turnOff();
+            require(bar.getCurrentValue() == 0 && done.get() == 4 && effects() == 0 && tracked() == 0,
+                    "Fast-forward during a cascade lost tokens, completed early or leaked actions");
         }
     }
 

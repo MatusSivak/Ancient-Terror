@@ -64,6 +64,7 @@ public class MapStage {
     private Group stormLayer;
     private Group vortexLayer;
     private Group mapLayer;
+    private final Group spawnEffectLayer = new Group();
     private Group epicMonsterLayer;
     private Group reckoningMonsterLayer;
     private Group gateLayer;
@@ -256,6 +257,8 @@ public class MapStage {
         mapShadowLayer.setTouchable(Touchable.disabled);
 
         stage.addActor(mapLayer);
+        spawnEffectLayer.setTouchable(Touchable.disabled);
+        stage.addActor(spawnEffectLayer);
         stage.addActor(expeditionLayer);
         stage.addActor(gateLayer);
         stage.addActor(stormLayer);
@@ -456,6 +459,7 @@ public class MapStage {
                 Actions.touchable(visibility? Touchable.enabled : Touchable.disabled)
         );
         get().mapLayer.addAction(actionSupplier.get());
+        get().spawnEffectLayer.addAction(Actions.alpha(visibility ? 1f : 0f, 1f));
         get().expeditionLayer.addAction(actionSupplier.get());
         get().gateLayer.addAction(actionSupplier.get());
         get().defeatedInvestigatorLayer.addAction(actionSupplier.get());
@@ -473,6 +477,10 @@ public class MapStage {
 
     public static Group getMapLayer() {
         return get().mapLayer;
+    }
+
+    public static Group getSpawnEffectLayer() {
+        return get().spawnEffectLayer;
     }
 
     public static Group getExpeditionLayer() {
@@ -583,6 +591,7 @@ public class MapStage {
     }
 
     public static void clearIdActorMap() {
+        get().spawnEffectLayer.clear();
         for (List<Actor> actors : get().idActorMap.values()) {
             IterableUtils.forEach(actors, Actor::remove);
         }
