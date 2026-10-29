@@ -1,18 +1,14 @@
 package sk.sivak.eldritchhorror.core.view.map.expedition;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
-import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.Spawner;
 
 /**
@@ -26,10 +22,16 @@ public class ExpeditionUtils {
         Spawner.SpawnConfigImpl spawnConfig = new Spawner.SpawnConfigImpl(
                 0,
                 0,
-                0, 1f);
+                0, 1f) {
+            @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.EXPEDITION; }
+
+            @Override public void postSpawnConfig(Actor left, Actor center, Actor right) {
+                for (Actor actor : new Actor[]{left, center, right}) ((ExpeditionImage) actor).startIdleAnimation();
+            }
+        };
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
-            Image compassImage = new RotatingImage(compassTexture);
+            Image compassImage = new ExpeditionImage(compassTexture);
             compassImage.setTouchable(Touchable.disabled);
             compassImage.setWidth(compassImage.getWidth() / 5);
             compassImage.setHeight(compassImage.getHeight() / 5);
@@ -56,20 +58,6 @@ public class ExpeditionUtils {
         public Group getLayer() {
             return MapStage.getExpeditionLayer();
         }
-    }
-
-    private static class RotatingImage extends Image {
-
-        private static final float DIRECTION = MathUtils.random(0);
-
-        RotatingImage(Texture texture) {
-            super(texture);
-            addAction(Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                    Actions.rotateTo(DIRECTION - 15, 1f, Interpolation.sine),
-                    Actions.rotateTo(DIRECTION + 15, 1f, Interpolation.sine)
-            )));
-        }
-
     }
 
 }

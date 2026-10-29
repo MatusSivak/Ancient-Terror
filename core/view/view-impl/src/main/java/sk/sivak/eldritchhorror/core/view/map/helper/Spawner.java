@@ -14,6 +14,8 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
+import sk.sivak.eldritchhorror.core.view.map.expedition.ExpeditionImage;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.List;
@@ -26,7 +28,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
  */
 public class Spawner {
 
-    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE }
+    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE, EXPEDITION }
 
     private static AlphaAction createAlphaAction(float finalAlpha) {
         AlphaAction alphaAction = new AlphaAction();
@@ -79,7 +81,34 @@ public class Spawner {
 
     private TemporalAction createSpawnAction(Actor token, SpawnStyle style) {
         if (style == SpawnStyle.MONSTER) return createEmergenceAction(token);
+        if (style == SpawnStyle.EXPEDITION) return createExpeditionAction(token);
         return createLandingAction(token, style);
+    }
+
+    private TemporalAction createExpeditionAction(Actor token) {
+        float rotation = token.getRotation();
+        float alpha = token.getColor().a;
+        token.setScale(.35f);
+        token.setRotation(rotation - 160f);
+        token.getColor().a = 0;
+        if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(0);
+        return new TemporalAction(1.2f * NORMAL_ACTION_DURATION) {
+            @Override protected void update(float percent) {
+                float reveal = Interpolation.pow3Out.apply(Math.min(1, percent / .75f));
+                float settle = Interpolation.sine.apply(MathUtils.clamp((percent - .65f) / .35f, 0, 1));
+                token.setScale(MathUtils.lerp(.35f, 1.1f, reveal) - .1f * settle);
+                token.setRotation(rotation - 160f * (1 - reveal) + 8f * (reveal - settle));
+                token.getColor().a = alpha * Math.min(1, percent / .25f);
+                if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(percent);
+            }
+
+            @Override protected void end() {
+                token.setScale(1);
+                token.setRotation(rotation);
+                token.getColor().a = alpha;
+                if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(1);
+            }
+        };
     }
 
     private TemporalAction createEmergenceAction(Actor token) {
@@ -124,6 +153,7 @@ public class Spawner {
             token.setColor(.825f, .825f, .825f, token.getColor().a);
         }
         if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(dropHeight);
+        if (token instanceof InvestigatorImage) ((InvestigatorImage) token).setSpawnElevation(dropHeight);
         return new TemporalAction(1.1f * NORMAL_ACTION_DURATION) {
             private MapSpawnEffect dust;
 
@@ -157,6 +187,7 @@ public class Spawner {
                     }
                 }
                 if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(token.getY() - landingY);
+                if (token instanceof InvestigatorImage) ((InvestigatorImage) token).setSpawnElevation(token.getY() - landingY);
             }
 
             @Override protected void end() {
@@ -164,6 +195,7 @@ public class Spawner {
                 token.setScale(1f);
                 token.setRotation(rotation);
                 if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(0);
+                if (token instanceof InvestigatorImage) ((InvestigatorImage) token).setSpawnElevation(0);
                 if (dust != null) dust.remove();
             }
         };

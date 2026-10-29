@@ -37,6 +37,8 @@ public class InvestigatorImage extends Image {
     private final GameController gameController;
     private Image asteroid;
     private Image borderImage;
+    private final Drawable groundShadow;
+    private float spawnElevation;
     private float offsetX;
     private float offsetY;
 
@@ -64,12 +66,18 @@ public class InvestigatorImage extends Image {
 
     public InvestigatorImage(InvestigatorId investigatorId, GameController gameController) {
         this(investigatorId, gameController, CustomAssetManager.getInvestigatorDrawable(investigatorId),
-                CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.INVESTIGATOR_BORDER));
+                CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.INVESTIGATOR_BORDER),
+                CustomAssetManager.getTextureRegionDrawable("dice_shadow.png"));
     }
 
     InvestigatorImage(InvestigatorId investigatorId, GameController gameController, Drawable portrait, Drawable border) {
-        super(portrait);
+        this(investigatorId, gameController, portrait, border, null);
+    }
 
+    InvestigatorImage(InvestigatorId investigatorId, GameController gameController, Drawable portrait, Drawable border,
+                      Drawable groundShadow) {
+        super(portrait);
+        this.groundShadow = groundShadow;
         this.gameController = gameController;
         this.investigatorId = investigatorId;
         setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -201,6 +209,7 @@ public class InvestigatorImage extends Image {
     }
     @Override
     public void draw(Batch batch, float parentAlpha) {
+        drawGroundShadow(batch, parentAlpha);
         // The hit shake and flash only affect drawing, so moves and offsets in progress are left alone.
         float groundX = getX();
         boolean shaking = hitShake > 0f;
@@ -229,6 +238,29 @@ public class InvestigatorImage extends Image {
         if (shaking) {
             setX(groundX);
         }
+    }
+
+    public void setSpawnElevation(float elevation) {
+        spawnElevation = Math.max(0, elevation);
+    }
+
+    private void drawGroundShadow(Batch batch, float parentAlpha) {
+        if (groundShadow == null || asteroidVisible) return;
+        Color color = batch.getColor();
+        float r = color.r, g = color.g, b = color.b, a = color.a;
+        float contact = 1f / (1f + spawnElevation / 45f);
+        float width = getWidth() * Math.abs(getScaleX());
+        float height = getWidth() * .28f * Math.abs(getScaleY());
+        float centerX = getX() + getOriginX() + (getWidth() / 2f - getOriginX()) * getScaleX();
+        float centerY = getY() - spawnElevation + getOriginY() + (-2f - getOriginY()) * getScaleY();
+        float alpha = getColor().a * parentAlpha;
+        // Broad penumbra and a narrow contact patch under the base, not a portrait silhouette.
+        float spread = 1.35f + (1f - contact) * .5f;
+        batch.setColor(.025f, .035f, .025f, .42f * contact * alpha);
+        groundShadow.draw(batch, centerX - width * spread / 2f, centerY - height / 2f, width * spread, height);
+        batch.setColor(.015f, .02f, .015f, .55f * contact * contact * alpha);
+        groundShadow.draw(batch, centerX - width * .52f, centerY - height * .2f, width * 1.04f, height * .4f);
+        batch.setColor(r, g, b, a);
     }
 
     /** Shakes the stand and flashes it red (health) or blue (sanity), like a monster taking damage. */

@@ -19,6 +19,7 @@ import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.map.*;
 import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
+import sk.sivak.eldritchhorror.core.view.map.expedition.ExpeditionUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.*;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
@@ -173,6 +174,12 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 require(MapStage.getSpawnEffectLayer().getChildren().size == (scenario == 2 ? 0 : 3), "Unexpected landing smoke");
                 draw("landing-" + scenario);
             }
+            if (frame == 150 && scenario == 1) {
+                draw("investigator-ground-shadow");
+                for (Actor actor : copies) actor.moveBy(130, 0);
+                draw("investigator-ground-shadow-clear-map");
+                for (Actor actor : copies) actor.moveBy(-130, 0);
+            }
         }
         require(starts.get() == 1 && finishes.get() == 1, "Spawn callbacks must run once");
         for (Actor actor : copies) require(Math.abs(actor.getScaleX() - 1) < .1f && actor.getColor().a == 1,
@@ -188,7 +195,47 @@ public class MapEffectsPreview extends ApplicationAdapter {
         Field tracked = InfoStage.getFastForwardButton().getClass().getDeclaredField("fastForwardActions"); tracked.setAccessible(true);
         require(((Map<?,?>)tracked.get(InfoStage.getFastForwardButton())).isEmpty(), "Animation actions leaked");
         if (++scenario < 6) startSpawn();
-        else { System.out.println("PASS: EN/SK labels, glyphs, camera fade, omen transitions, clue/investigator/monster spawns, wrapped copies, callbacks, fast-forward and cleanup"); Gdx.app.exit(); }
+        else startExpedition(false);
+    }
+
+    private void startExpedition(boolean fastForward) {
+        finishes.set(0);
+        Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
+        camera(position.x, position.y);
+        if (fastForward) FastForwardAction.turnOn();
+        ExpeditionUtils.spawnExpedition(LocationId.ARKHAM).subscribe(finishes::incrementAndGet, MapEffectsPreview::fail);
+        Gdx.app.postRunnable(() -> {
+            try {
+                require(MapStage.getExpeditionLayer().getChildren().size == 3, "Expedition lost wrapped copies");
+                for (Actor actor : MapStage.getExpeditionLayer().getChildren()) {
+                    require(actor.getColor().a == 0 && actor.getScaleX() == .35f, "Expedition did not start its reveal");
+                }
+                for (int frame = 0; frame < 180; frame++) {
+                    stage.act(1f / 60);
+                    for (Actor actor : MapStage.getExpeditionLayer().getChildren()) {
+                        require(Math.abs(actor.getY() + actor.getOriginY() - position.y) < .01f,
+                                "Expedition must reveal on the map without dropping");
+                    }
+                    require(MapStage.getSpawnEffectLayer().getChildren().size == 0, "Expedition produced landing dust");
+                    if (!fastForward && (frame == 12 || frame == 40 || frame == 90)) draw("expedition-reveal-" + frame);
+                }
+                require(finishes.get() == 1, "Expedition completed more than once");
+                for (Actor actor : MapStage.getExpeditionLayer().getChildren()) {
+                    require(actor.getScaleX() == 1 && actor.getColor().a == 1 && Math.abs(actor.getRotation()) <= 15.1f,
+                            "Expedition did not settle into its idle sway");
+                }
+                int[] removed = {0};
+                ExpeditionUtils.discardExpeditionToken().subscribe(() -> removed[0]++);
+                for (int frame = 0; frame < 90; frame++) stage.act(1f / 60);
+                require(removed[0] == 1 && MapStage.getExpeditionLayer().getChildren().size == 0, "Expedition cleanup failed");
+                FastForwardAction.turnOff();
+                if (!fastForward) startExpedition(true);
+                else {
+                    System.out.println("PASS: labels, omen, clue/investigator/monster/expedition spawns, ground shadows, wrapped copies, callbacks, fast-forward and cleanup");
+                    Gdx.app.exit();
+                }
+            } catch (Throwable error) { fail(error); }
+        });
     }
 
     private static void setSpawning(boolean active, Actor... actors) {
