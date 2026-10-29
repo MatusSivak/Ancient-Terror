@@ -250,16 +250,16 @@ public class InvestigatorImage extends Image {
         float r = color.r, g = color.g, b = color.b, a = color.a;
         float contact = 1f / (1f + spawnElevation / 45f);
         float width = getWidth() * Math.abs(getScaleX());
-        float height = getWidth() * .28f * Math.abs(getScaleY());
+        float height = getWidth() * .45f * Math.abs(getScaleY());
         float centerX = getX() + getOriginX() + (getWidth() / 2f - getOriginX()) * getScaleX();
-        float centerY = getY() - spawnElevation + getOriginY() + (-2f - getOriginY()) * getScaleY();
+        float centerY = getY() - spawnElevation + getOriginY() + (-6f - getOriginY()) * getScaleY();
         float alpha = getColor().a * parentAlpha;
         // Broad penumbra and a narrow contact patch under the base, not a portrait silhouette.
-        float spread = 1.35f + (1f - contact) * .5f;
-        batch.setColor(.025f, .035f, .025f, .42f * contact * alpha);
+        float spread = 1.8f + (1f - contact) * .5f;
+        batch.setColor(.025f, .035f, .025f, .72f * contact * alpha);
         groundShadow.draw(batch, centerX - width * spread / 2f, centerY - height / 2f, width * spread, height);
-        batch.setColor(.015f, .02f, .015f, .55f * contact * contact * alpha);
-        groundShadow.draw(batch, centerX - width * .52f, centerY - height * .2f, width * 1.04f, height * .4f);
+        batch.setColor(.015f, .02f, .015f, .85f * contact * contact * alpha);
+        groundShadow.draw(batch, centerX - width * .65f, centerY - height * .275f, width * 1.3f, height * .55f);
         batch.setColor(r, g, b, a);
     }
 

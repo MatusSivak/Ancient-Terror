@@ -14,7 +14,6 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
-import sk.sivak.eldritchhorror.core.view.map.expedition.ExpeditionImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
@@ -91,7 +90,6 @@ public class Spawner {
         token.setScale(.35f);
         token.setRotation(rotation - 160f);
         token.getColor().a = 0;
-        if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(0);
         return new TemporalAction(1.2f * NORMAL_ACTION_DURATION) {
             @Override protected void update(float percent) {
                 float reveal = Interpolation.pow3Out.apply(Math.min(1, percent / .75f));
@@ -99,14 +97,12 @@ public class Spawner {
                 token.setScale(MathUtils.lerp(.35f, 1.1f, reveal) - .1f * settle);
                 token.setRotation(rotation - 160f * (1 - reveal) + 8f * (reveal - settle));
                 token.getColor().a = alpha * Math.min(1, percent / .25f);
-                if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(percent);
             }
 
             @Override protected void end() {
                 token.setScale(1);
                 token.setRotation(rotation);
                 token.getColor().a = alpha;
-                if (token instanceof ExpeditionImage) ((ExpeditionImage) token).setSpawnProgress(1);
             }
         };
     }
