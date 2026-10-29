@@ -10,7 +10,6 @@ public class ElderThingMonsterListener extends AbstractMonsterListener {
     public void register(MonsterInfo monsterInfo) {
         super.register(monsterInfo);
         ServicePlatform.get().getService().hold();
-        ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);
         ServicePlatform.get().getMonsterService().moveMonster(monsterInfo, LocationId.ANTARCTICA);
         ServicePlatform.get().getService().release();
     }

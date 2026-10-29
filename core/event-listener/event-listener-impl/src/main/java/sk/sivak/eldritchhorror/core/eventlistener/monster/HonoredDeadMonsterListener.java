@@ -46,7 +46,7 @@ public class HonoredDeadMonsterListener extends AbstractComposedMonsterListener 
 
     @Override
     protected void onSpawn() {
-        spawnEffect(false, () -> moveMonster(monsterInfo, LocationId.THE_PYRAMIDS));
+        spawnMovement(false, () -> moveMonster(monsterInfo, LocationId.THE_PYRAMIDS));
     }
 
 }

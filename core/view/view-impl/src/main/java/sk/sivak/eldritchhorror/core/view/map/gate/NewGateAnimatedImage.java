@@ -22,16 +22,11 @@ public class NewGateAnimatedImage extends Group {
     private final Image backgroundImage;
     private final AnimatedImage gateAnimatedImage;
     private final GateColor gateColor;
-    private final Image omenHalo;
-    private boolean matchingOmen;
 
     public NewGateAnimatedImage(GateColor gateColor, OmenColor omenColor) {
         this.gateColor = gateColor;
         setTouchable(Touchable.disabled);
         backgroundImage = new Image(CustomAssetManager.getTexture("gate/gate_border.png"));
-        omenHalo = new Image(CustomAssetManager.getTexture("gate/gate_border.png"));
-        omenHalo.setName("matching-omen-halo");
-        omenHalo.setVisible(false);
         gateAnimatedImage = new AnimatedImage(new Animation<>(0.04f, CustomAssetManager.getGateAnimation(), Animation.PlayMode.LOOP));
 
         backgroundImage.setScale(0);
@@ -54,7 +49,6 @@ public class NewGateAnimatedImage extends Group {
                 Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(360f, 8f))
         ));
 
-        addActor(omenHalo);
         addActor(backgroundImage);
         addActor(gateAnimatedImage);
         updateGateTransparency(omenColor);
@@ -79,8 +73,6 @@ public class NewGateAnimatedImage extends Group {
             portrait.setScale(center.dst(horizontal), center.dst(vertical));
             gateAnimatedImage.clearActions();
             backgroundImage.clearActions();
-            omenHalo.clearActions();
-            omenHalo.setVisible(false);
             for (Image layer : new Image[]{backgroundImage, gateAnimatedImage}) {
                 layer.setPosition((portrait.getWidth() - getWidth()) / 2f,
                         (portrait.getHeight() - getHeight()) / 2f);
@@ -102,20 +94,6 @@ public class NewGateAnimatedImage extends Group {
     public void updateGateTransparency(OmenColor omenColor) {
         Color tint = toLibgdxColor(gateColor);
         boolean matches = omenColor != null && gateColor.equals(omenColor.toGateColor());
-        if (matches != matchingOmen) {
-            matchingOmen = matches;
-            omenHalo.clearActions();
-            omenHalo.setVisible(matches);
-            if (matches) {
-                omenHalo.setColor(tint);
-                omenHalo.setRotation(0);
-                omenHalo.addAction(Actions.sequence(
-                        Actions.scaleTo(1.35f, 1.35f), Actions.alpha(.95f),
-                        Actions.parallel(Actions.scaleTo(3.2f, 3.2f, 1.25f, Interpolation.sineOut),
-                                Actions.alpha(0, 1.25f, Interpolation.sineIn), Actions.rotateBy(-65, 1.25f)),
-                        Actions.visible(false)));
-            }
-        }
         if (matches) {
             gateAnimatedImage.setColor(tint.r, tint.g, tint.b, 1.0f);
             gateAnimatedImage.setFrameDuration(0.04f);

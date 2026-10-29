@@ -33,7 +33,7 @@ public class HuntingByakheeMonsterListener extends AbstractComposedMonsterListen
 
     @Override
     protected void onSpawn() {
-        spawnEffect(true, () -> {
+        spawnMovement(true, () -> {
             FindNearestData nearest = findNearestInvestigator(monsterInfo.getCurrentLocation());
             if (nearest == null) {
                 return;

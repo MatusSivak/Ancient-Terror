@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -44,6 +45,8 @@ public class MonsterImage extends Image {
     private float reckoningPulseTime = 0f;
 
     private boolean drawShadow = true;
+    private boolean spawning;
+    private Action breathingAction;
     private final MonsterWalkAnimator walkAnimator;
 
     public MonsterImage(MonsterInfo monsterInfo, GameController gameController, boolean isCenter, boolean hasReckoning, LocationId location, Texture texture) {
@@ -66,6 +69,16 @@ public class MonsterImage extends Image {
         addSquishStretchAnimation();
     }
 
+    public void setSpawnAnimationActive(boolean active) {
+        if (spawning == active) return;
+        spawning = active;
+        if (breathingAction != null) {
+            removeAction(breathingAction);
+            breathingAction = null;
+        }
+        if (!active) addSquishStretchAnimation();
+    }
+
     public void faceMovement(float dx) {
         walkAnimator.faceMovement(dx);
     }
@@ -83,7 +96,7 @@ public class MonsterImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
-        walkAnimator.update(this, delta, drawShadow);
+        walkAnimator.update(this, delta, drawShadow && !spawning);
         if (drawReckoningPulse) {
             reckoningPulseTime += delta;
         }
@@ -92,7 +105,7 @@ public class MonsterImage extends Image {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         // While walking, the body and its shadow bounce, waddle and lean together.
-        boolean walking = drawShadow;
+        boolean walking = drawShadow && !spawning;
         walkAnimator.apply(this, walking);
         // Draw blurred shadow using Gaussian blur shader
         if (drawShadow && getDrawable() instanceof TextureRegionDrawable) {
@@ -154,13 +167,14 @@ public class MonsterImage extends Image {
         float baseScaleY = getScaleY();
         // Each monster breathes at its own pace and phase, so a crowd never pulses in lockstep.
         float duration = SQUISH_STRETCH_DURATION * MathUtils.random(0.85f, 1.2f);
-        addAction(Actions.sequence(
+        breathingAction = Actions.sequence(
                 Actions.delay(MathUtils.random(0f, 2f * duration)),
                 Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
                         Actions.scaleTo(baseScaleX + SQUISH_STRETCH_SCALE_DELTA, baseScaleY - SQUISH_STRETCH_SCALE_DELTA,
                                 duration, Interpolation.sine),
                         Actions.scaleTo(baseScaleX - SQUISH_STRETCH_SCALE_DELTA, baseScaleY + SQUISH_STRETCH_SCALE_DELTA,
                                 duration, Interpolation.sine)
-                ))));
+                )));
+        addAction(breathingAction);
     }
 }

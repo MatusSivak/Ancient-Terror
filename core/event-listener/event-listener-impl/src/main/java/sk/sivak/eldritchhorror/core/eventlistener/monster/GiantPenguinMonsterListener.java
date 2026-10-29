@@ -33,7 +33,7 @@ public class GiantPenguinMonsterListener extends AbstractComposedMonsterListener
 
     @Override
     protected void onSpawn() {
-        spawnEffect(false, () -> moveMonster(monsterInfo, LocationId.ANTARCTICA));
+        spawnMovement(false, () -> moveMonster(monsterInfo, LocationId.ANTARCTICA));
     }
 
 }

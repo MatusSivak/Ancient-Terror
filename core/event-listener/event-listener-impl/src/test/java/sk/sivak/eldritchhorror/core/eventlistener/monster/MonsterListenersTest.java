@@ -15,6 +15,15 @@ import sk.sivak.eldritchhorror.core.constants.monster.MiGoMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.NightGauntMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.WarlockMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.WerewolfMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.ColourOutOfSpaceMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.CthonianMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.GiantPenguinMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.GnophKehMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.HonoredDeadMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.HuntingByakheeMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.MummyMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.SerpentPeopleMonster;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueImpl;
 import sk.sivak.eldritchhorror.core.eventtype.DirectEvent;
@@ -105,6 +114,7 @@ public class MonsterListenersTest {
         }));
         platform.setInvestigators(mock(InvestigatorsRead.class, (name, a) -> {
             if (name.equals("getOnBoardInvestigators")) return onBoard;
+            if (name.equals("getActiveInvestigatorId")) return null;
             throw new AssertionError(name);
         }));
         platform.setLocationMap(mock(LocationMapRead.class, (name, a) -> {
@@ -120,6 +130,40 @@ public class MonsterListenersTest {
     @After
     public void tearDown() {
         ServicePlatform.nullifyInstance();
+    }
+
+    @Test
+    public void fixedSpawnDestinationsMoveWithoutOpeningTheMonsterSheet() {
+        AbstractMonsterListener[] listeners = {new CthonianMonsterListener(), new ElderThingMonsterListener(),
+                new MummyMonsterListener(), new ColourOutOfSpaceMonsterListener(), new GnophKehMonsterListener(),
+                new SerpentPeopleMonsterListener(), new GiantPenguinMonsterListener(), new HonoredDeadMonsterListener()};
+        AbstractMonsterInfo[] monsters = {new CthonianMonster(), new ElderThingMonster(), new MummyMonster(),
+                new ColourOutOfSpaceMonster(), new GnophKehMonster(), new SerpentPeopleMonster(),
+                new GiantPenguinMonster(), new HonoredDeadMonster()};
+        LocationId[] targets = {LocationId.THE_HEART_OF_AFRICA, LocationId.ANTARCTICA, LocationId.THE_PYRAMIDS,
+                LocationId.TUNGUSKA, LocationId.THE_HIMALAYAS, LocationId.THE_AMAZON,
+                LocationId.ANTARCTICA, LocationId.THE_PYRAMIDS};
+        for (int i = 0; i < listeners.length; i++) {
+            effects.clear();
+            listeners[i].register(monster(monsters[i], SPACE_1));
+            drain();
+            assertEquals(targets[i], monsters[i].getCurrentLocation());
+            assertEquals(Collections.singletonList("moveMonster:" + targets[i]), effects);
+        }
+    }
+
+    @Test
+    public void huntingByakheeMovesAndDelaysWithoutOpeningTheMonsterSheet() {
+        InvestigatorId target = InvestigatorId.values()[0];
+        investigator(target, SPACE_2);
+        nearest = new FindNearestData(SPACE_2, 1, Arrays.asList(SPACE_1, SPACE_2));
+        HuntingByakheeMonster monster = monster(new HuntingByakheeMonster(), SPACE_1);
+        new HuntingByakheeMonsterListener().register(monster);
+        drain();
+        assertEquals(SPACE_2, monster.getCurrentLocation());
+        assertTrue(effects.contains("becomeDelayed"));
+        assertFalse(effects.contains("highlightSpawnText"));
+        assertTrue(effects.indexOf("moveMonster:" + SPACE_2) < effects.indexOf("becomeDelayed"));
     }
 
     @Test

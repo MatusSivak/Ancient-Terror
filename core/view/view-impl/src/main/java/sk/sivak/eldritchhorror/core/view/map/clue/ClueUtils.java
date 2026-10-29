@@ -30,7 +30,7 @@ public class ClueUtils {
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
             clueTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            Image clueImage = new Image(clueTexture);
+            Image clueImage = new ClueImage(clueTexture);
             clueImage.setTouchable(Touchable.disabled);
             clueImage.setWidth(clueImage.getWidth() / CLUE_TEXTURE_SCALE);
             clueImage.setHeight(clueImage.getHeight() / CLUE_TEXTURE_SCALE);
@@ -65,6 +65,8 @@ public class ClueUtils {
     }
 
     private static class ClueSpawnConfig implements Spawner.SpawnConfig {
+
+        @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.CLUE; }
 
         private float offsetRotation;
         private float positionRotation;

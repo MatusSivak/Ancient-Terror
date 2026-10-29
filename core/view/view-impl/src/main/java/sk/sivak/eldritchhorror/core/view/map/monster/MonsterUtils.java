@@ -81,12 +81,14 @@ public class MonsterUtils {
 
     private static class MonsterSpawnConfig implements Spawner.SpawnConfig<Actor> {
 
+        @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.MONSTER; }
+
         public MonsterSpawnConfig(float actorWidth, float actorHeight) {
         }
 
         @Override
         public void preSpawnConfig(Actor leftActor, Actor centerActor, Actor rightActor) {
-
+            for (Actor actor : new Actor[]{leftActor, centerActor, rightActor}) setSpawning(actor, true);
         }
 
         @Override
@@ -111,7 +113,13 @@ public class MonsterUtils {
 
         @Override
         public void postSpawnConfig(Actor leftActor, Actor centerActor, Actor rightActor) {
+            for (Actor actor : new Actor[]{leftActor, centerActor, rightActor}) setSpawning(actor, false);
             postSpawnConfig(leftActor, centerActor, rightActor, 0, 0);
+        }
+
+        private void setSpawning(Actor actor, boolean spawning) {
+            if (actor instanceof MonsterImage) ((MonsterImage) actor).setSpawnAnimationActive(spawning);
+            if (actor instanceof EpicMonsterImage) ((EpicMonsterImage) actor).setSpawnAnimationActive(spawning);
         }
 
         private void postSpawnConfig(Actor leftActor, Actor centerActor, Actor rightActor, float offsetX, float offsetY) {

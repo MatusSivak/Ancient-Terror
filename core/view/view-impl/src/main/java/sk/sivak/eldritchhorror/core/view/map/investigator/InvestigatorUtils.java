@@ -32,7 +32,9 @@ public class InvestigatorUtils {
     public static Completable spawnInvestigator(LocationId location, InvestigatorId investigatorId,
                                                 GameController gameController, Runnable onSpawn) {
 
-        Spawner.SpawnConfig spawnConfig = new Spawner.SpawnConfigImpl(0, 0, 0, 1);
+        Spawner.SpawnConfig spawnConfig = new Spawner.SpawnConfigImpl(0, 0, 0, 1) {
+            @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.INVESTIGATOR; }
+        };
 
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> new InvestigatorImage(investigatorId, gameController);
 

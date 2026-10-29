@@ -18,9 +18,11 @@ import sk.sivak.eldritchhorror.core.view.game.*;
 import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.map.*;
 import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
+import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
 import sk.sivak.eldritchhorror.core.view.map.helper.*;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
+import sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage;
 import sk.sivak.eldritchhorror.core.view.utils.*;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
@@ -94,31 +96,46 @@ public class MapEffectsPreview extends ApplicationAdapter {
         Vector2 location = LocationPositionResolver.resolve(LocationId.ARKHAM); camera(location.x, location.y);
         NewGateAnimatedImage gate = new NewGateAnimatedImage(GateColor.BLUE, OmenColor.GREEN);
         gate.setBounds(location.x - 67.5f, location.y - 67.5f, 135, 135); MapStage.getGateLayer().addActor(gate);
-        Actor halo = gate.findActor("matching-omen-halo");
-        require(!halo.isVisible(), "Mismatching gate glows"); gate.updateGateTransparency(OmenColor.BLUE);
-        for (int i = 0; i < 36; i++) stage.act(1f/60);
-        require(halo.isVisible() && halo.getScaleX() > 1.5f, "Matching gate did not animate");
-        float scale = halo.getScaleX(); gate.updateGateTransparency(OmenColor.BLUE); stage.act(1f/60);
-        require(halo.getScaleX() >= scale, "Repeated omen update restarted the pulse"); draw("omen-match");
-        for (int i = 0; i < 180; i++) stage.act(1f/60);
-        require(!halo.isVisible() && halo.getActions().size == 0, "Omen highlight loops");
-        gate.updateGateTransparency(OmenColor.BLUE); stage.act(.1f);
-        require(!halo.isVisible(), "An unchanged matching omen replays the highlight");
-        gate.updateGateTransparency(null);
-        require(!halo.isVisible() && halo.getActions().size == 0, "Omen pulse did not stop");
-        gate.updateGateTransparency(OmenColor.BLUE); stage.act(.1f);
-        require(halo.isVisible(), "Omen pulse cannot restart"); gate.remove();
+        for (OmenColor omen : new OmenColor[]{OmenColor.BLUE, OmenColor.BLUE, null, OmenColor.GREEN, OmenColor.BLUE}) {
+            gate.updateGateTransparency(omen);
+            for (int i = 0; i < 36; i++) stage.act(1f/60);
+            require(gate.findActor("matching-omen-halo") == null && gate.getChildren().size == 2,
+                    "Omen update added a matching halo");
+        }
+        draw("omen-match"); gate.remove();
     }
 
     private void startSpawn() {
         starts.set(0); finishes.set(0);
+        Vector2 location = LocationPositionResolver.resolve(LocationId.ARKHAM);
+        camera(location.x, location.y);
+        // Exercise zoomed-out and vertically offset cameras as well as the normal close-up.
+        if (scenario == 4) { MapStage.getCamera().zoom = 1.5f; MapStage.getCamera().position.y += 160; }
+        if (scenario % 3 == 2) {
+            NewGateAnimatedImage gate = new NewGateAnimatedImage(GateColor.BLUE, OmenColor.BLUE);
+            gate.setBounds(location.x - 67.5f, location.y - 67.5f, 135, 135);
+            MapStage.getGateLayer().addActor(gate);
+            gate.act(1f);
+        }
         new Spawner().spawn(center -> {
             Actor actor;
-            if (scenario % 3 == 0) { actor = new Image(getTexture(CLUE_TOKEN)); actor.setSize(45,45); actor.setOrigin(22.5f,22.5f); }
+            if (scenario % 3 == 0) { actor = new ClueImage(getTexture(CLUE_TOKEN)); actor.setSize(45,45); actor.setOrigin(22.5f,22.5f); }
             else if (scenario % 3 == 1) actor = new InvestigatorImage(InvestigatorId.THE_SAILOR, null);
-            else actor = new MonsterImage(null, null, true, false, null, getNonEpicMonsterTexture("SkeletonMonster"));
+            else if (scenario < 3) actor = new MonsterImage(null, null, true, false, null, getNonEpicMonsterTexture("SkeletonMonster"));
+            else actor = new EpicMonsterImage(null, null, false, location, getNonEpicMonsterTexture("SkeletonMonster"));
             return actor;
-        }, new Spawner.SpawnConfigImpl(0,0,0,1), resolver, LocationId.ARKHAM, starts::incrementAndGet)
+        }, new Spawner.SpawnConfigImpl(0,0,0,1) {
+            @Override public void preSpawnConfig(Actor left, Actor center, Actor right) {
+                setSpawning(true, left, center, right);
+            }
+            @Override public void postSpawnConfig(Actor left, Actor center, Actor right) {
+                setSpawning(false, left, center, right);
+            }
+            @Override public Spawner.SpawnStyle getSpawnStyle() {
+                return new Spawner.SpawnStyle[]{Spawner.SpawnStyle.CLUE, Spawner.SpawnStyle.INVESTIGATOR,
+                        Spawner.SpawnStyle.MONSTER}[scenario % 3];
+            }
+        }, resolver, LocationId.ARKHAM, starts::incrementAndGet)
                 .subscribe(finishes::incrementAndGet, MapEffectsPreview::fail);
         Gdx.app.postRunnable(() -> { try { checkSpawn(); } catch (Throwable error) { fail(error); } });
     }
@@ -128,17 +145,32 @@ public class MapEffectsPreview extends ApplicationAdapter {
         require(copies.size() == 3 && MapStage.getSpawnEffectLayer().getChildren().size == 0, "Smoke appeared before landing");
         if (scenario >= 3) FastForwardAction.turnOn();
         Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
-        for (Actor token : copies) require(token.getY() + token.getOriginY() > position.y + 150
-                && token.getColor().a == 1, "Token must arrive visibly from above");
-        camera(position.x, position.y);
-        for (int frame = 0; frame < 90; frame++) {
+        for (Actor token : copies) {
+            if (scenario % 3 == 2) {
+                require(Math.abs(token.getY() + token.getOriginY() - position.y) < .01f
+                        && token.getColor().a == 0 && token.getScaleX() < .05f, "Monster must start inside the gate");
+            } else if (scenario % 3 == 1) {
+                float visibleTop = MapStage.getCamera().position.y
+                        + MapStage.getCamera().viewportHeight * MapStage.getCamera().zoom / 2f;
+                require(token.getY() - token.getOriginY() * .2f > visibleTop, "Investigator appeared inside the viewport");
+            } else require(token.getY() + token.getOriginY() > position.y + 150, "Clue must fall toward the map");
+        }
+        for (int frame = 0; frame < 180; frame++) {
             stage.act(1f/60);
+            if (frame > 70 && scenario % 3 == 2) {
+                for (Actor actor : copies) require(Math.abs(actor.getScaleX() - 1) < .1f,
+                        "Idle breathing retained the tiny spawn scale");
+            }
             if (frame == 12 && scenario < 3) {
+                if (scenario == 0) require(copies.get(1).getScaleY() < copies.get(1).getScaleX(), "Clue lacks foreshortening");
+                if (scenario == 2) require(copies.get(1).getScaleX() < .6f
+                        && copies.get(1).getY() + copies.get(1).getOriginY() < position.y + 20,
+                        "Monster dropped from above instead of emerging");
                 draw("spawn-" + scenario); camera(position.x - MAP_WIDTH, position.y); draw("spawn-left-" + scenario);
                 camera(position.x, position.y);
             }
             if (frame == 33 && scenario < 3) {
-                require(MapStage.getSpawnEffectLayer().getChildren().size == 3, "Landing did not produce smoke");
+                require(MapStage.getSpawnEffectLayer().getChildren().size == (scenario == 2 ? 0 : 3), "Unexpected landing smoke");
                 draw("landing-" + scenario);
             }
         }
@@ -149,6 +181,7 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 "Token missed its landing location");
         require(MapStage.getSpawnEffectLayer().getChildren().size == 0, "Smoke remained after spawn");
         MapStage.removeActor(resolver); FastForwardAction.turnOff();
+        MapStage.getGateLayer().clearChildren();
         Actor interrupted = new Image(getTexture(CLUE_TOKEN)); stage.addActor(interrupted);
         MapStage.getSpawnEffectLayer().addActor(new MapSpawnEffect(interrupted)); interrupted.remove(); stage.act(.01f);
         require(MapStage.getSpawnEffectLayer().getChildren().size == 0, "Removed token left smoke behind");
@@ -156,6 +189,13 @@ public class MapEffectsPreview extends ApplicationAdapter {
         require(((Map<?,?>)tracked.get(InfoStage.getFastForwardButton())).isEmpty(), "Animation actions leaked");
         if (++scenario < 6) startSpawn();
         else { System.out.println("PASS: EN/SK labels, glyphs, camera fade, omen transitions, clue/investigator/monster spawns, wrapped copies, callbacks, fast-forward and cleanup"); Gdx.app.exit(); }
+    }
+
+    private static void setSpawning(boolean active, Actor... actors) {
+        for (Actor actor : actors) {
+            if (actor instanceof MonsterImage) ((MonsterImage) actor).setSpawnAnimationActive(active);
+            if (actor instanceof EpicMonsterImage) ((EpicMonsterImage) actor).setSpawnAnimationActive(active);
+        }
     }
 
     private void camera(float x, float y) { MapStage.getCamera().position.set(x,y,0); MapStage.getCamera().zoom=.65f; MapStage.getCamera().update(); }

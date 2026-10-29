@@ -129,11 +129,20 @@ abstract class AbstractComposedMonsterListener extends AbstractMonsterListener {
 
     /** Runs a spawn effect as a queued command; optionally restores the active investigator afterwards. */
     protected final void spawnEffect(boolean switchesInvestigator, Runnable effect) {
+        spawnEffect(switchesInvestigator, true, effect);
+    }
+
+    /** Resolve movement immediately on the map, without opening the monster sheet. */
+    protected final void spawnMovement(boolean switchesInvestigator, Runnable effect) {
+        spawnEffect(switchesInvestigator, false, effect);
+    }
+
+    private void spawnEffect(boolean switchesInvestigator, boolean highlight, Runnable effect) {
         ServicePlatform.get().getService().addEventCommand(in -> {
             sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId previouslyActive =
                     ServicePlatform.get().getInvestigators().getActiveInvestigatorId();
             ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);
+            if (highlight) ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);
             effect.run();
             if (switchesInvestigator) {
                 MonsterAbilities.restoreActive(previouslyActive);

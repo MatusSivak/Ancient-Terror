@@ -13,6 +13,7 @@ import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
+import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.List;
@@ -24,6 +25,8 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
  * @author msivak
  */
 public class Spawner {
+
+    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE }
 
     private static AlphaAction createAlphaAction(float finalAlpha) {
         AlphaAction alphaAction = new AlphaAction();
@@ -62,7 +65,7 @@ public class Spawner {
                 spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
                 int[] landedCopies = {0};
                 for (Actor token : new Actor[]{leftActor, centerActor, rightActor}) {
-                    token.addAction(Actions.sequence(new FastForwardAction<>(createLandingAction(token)), Actions.run(() -> {
+                    token.addAction(Actions.sequence(new FastForwardAction<>(createSpawnAction(token, spawnConfig.getSpawnStyle())), Actions.run(() -> {
                         if (++landedCopies[0] == 3) {
                             spawnConfig.postSpawnConfig(leftActor, centerActor, rightActor);
                             onSub.onCompleted();
@@ -74,11 +77,53 @@ public class Spawner {
         });
     }
 
-    private TemporalAction createLandingAction(Actor token) {
+    private TemporalAction createSpawnAction(Actor token, SpawnStyle style) {
+        if (style == SpawnStyle.MONSTER) return createEmergenceAction(token);
+        return createLandingAction(token, style);
+    }
+
+    private TemporalAction createEmergenceAction(Actor token) {
         float landingY = token.getY();
-        float dropHeight = 180f;
+        float rotation = token.getRotation();
+        float alpha = token.getColor().a;
+        token.setScale(.02f);
+        token.getColor().a = 0;
+        return new TemporalAction(1.1f * NORMAL_ACTION_DURATION) {
+            @Override protected void update(float percent) {
+                // Grow out of the portal's center, then settle onto the map.
+                float emerge = Interpolation.sineOut.apply(Math.min(1f, percent / .8f));
+                token.setScale(MathUtils.lerp(.02f, 1f, emerge));
+                token.setY(landingY + MathUtils.sin(percent * MathUtils.PI) * 18f);
+                token.setRotation(rotation - 18f * (1f - emerge));
+                token.getColor().a = alpha * Math.min(1f, percent / .3f);
+            }
+
+            @Override protected void end() {
+                token.setY(landingY);
+                token.setScale(1f);
+                token.setRotation(rotation);
+                token.getColor().a = alpha;
+            }
+        };
+    }
+
+    private TemporalAction createLandingAction(Actor token, SpawnStyle style) {
+        float landingY = token.getY();
+        float rotation = token.getRotation();
+        // Account for zoom and the whole portrait, including its border, before the first frame.
+        float visibleTop = MapStage.getCamera().position.y
+                + MapStage.getCamera().viewportHeight * MapStage.getCamera().zoom / 2f;
+        float dropHeight = style == SpawnStyle.INVESTIGATOR
+                ? Math.max(180f, visibleTop - landingY + token.getHeight() * 1.5f) : 180f;
+        boolean clue = style == SpawnStyle.CLUE;
         token.setY(landingY + dropHeight);
         token.setScale(1.2f);
+        if (clue) {
+            token.setRotation(rotation - 160f);
+            token.setScale(1.2f, .708f);
+            token.setColor(.825f, .825f, .825f, token.getColor().a);
+        }
+        if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(dropHeight);
         return new TemporalAction(1.1f * NORMAL_ACTION_DURATION) {
             private MapSpawnEffect dust;
 
@@ -87,6 +132,14 @@ public class Spawner {
                 if (descent < 1f) {
                     token.setY(landingY + dropHeight * (1f - descent * descent));
                     token.setScale(MathUtils.lerp(1.2f, 1f, descent));
+                    if (clue) {
+                        // Foreshortening and changing light make the token tumble like a solid coin.
+                        float tilt = MathUtils.cosDeg(300f * (1f - descent));
+                        token.setScale(token.getScaleX(), token.getScaleX() * (.18f + .82f * Math.abs(tilt)));
+                        token.setRotation(rotation - 160f * (1f - descent));
+                        float light = .65f + .35f * Math.abs(tilt);
+                        token.setColor(light, light, light, token.getColor().a);
+                    }
                 } else {
                     // Smoke stays on the ground while the token makes one small settling bounce.
                     token.setY(landingY);
@@ -97,12 +150,20 @@ public class Spawner {
                     float bounce = MathUtils.clamp((percent - .4f) / .22f, 0f, 1f);
                     token.setY(landingY + MathUtils.sin(bounce * MathUtils.PI) * 10f * (1f - bounce));
                     token.setScale(1f);
+                    if (clue) {
+                        token.setScale(1f, 1f - .2f * MathUtils.sin(bounce * MathUtils.PI));
+                        token.setRotation(rotation);
+                        token.setColor(1, 1, 1, token.getColor().a);
+                    }
                 }
+                if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(token.getY() - landingY);
             }
 
             @Override protected void end() {
                 token.setY(landingY);
                 token.setScale(1f);
+                token.setRotation(rotation);
+                if (token instanceof ClueImage) ((ClueImage) token).setSpawnElevation(0);
                 if (dust != null) dust.remove();
             }
         };
@@ -149,6 +210,8 @@ public class Spawner {
     }
 
     public interface SpawnConfig<T extends Actor> {
+        default SpawnStyle getSpawnStyle() { return SpawnStyle.DROP; }
+
         float getActorRotation(); // 0-360
 
         float getOffsetX();
