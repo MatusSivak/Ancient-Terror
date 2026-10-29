@@ -17,6 +17,7 @@ import com.kotcrab.vis.ui.VisUI;
 import sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCard;
+import sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterAbilityHighlight;
 
 /** Renders real game components and checks all bundled monsters without touching save data. */
 public class MonsterSheetPreview extends ApplicationAdapter {
@@ -48,9 +49,9 @@ public class MonsterSheetPreview extends ApplicationAdapter {
                     render(card, monster, file.nameWithoutExtension());
                     if (card.getHeight() > 510) throw new AssertionError("Off-screen card: " + monster.getName());
                     checkLabels(card);
-                    checkRule(card, card.getSpawnTextTable(), 0);
-                    checkRule(card, card.getSpecialTextTable(), 1);
-                    checkRule(card, card.getReckoningTextTable(), 2);
+                    checkRule(card, card.getSpawnTextTable(), file.nameWithoutExtension() + "-spawn");
+                    checkRule(card, card.getSpecialTextTable(), file.nameWithoutExtension() + "-special");
+                    checkRule(card, card.getReckoningTextTable(), file.nameWithoutExtension() + "-reckoning");
                     int expected = monster.getToughness() == null ? 0 : monster.getToughness();
                     if (card.getToughnessBar().getChildren().size != expected) {
                         throw new AssertionError("Incorrect health tokens: " + monster.getName());
@@ -72,11 +73,13 @@ public class MonsterSheetPreview extends ApplicationAdapter {
             scroll.setScrollPercentY(1);
             scroll.updateVisualScroll();
             draw("long-rules-bottom");
+            checkRule(card, card.getSpawnTextTable(), "long-rules-spawn-highlight");
+            checkRule(card, card.getSpecialTextTable(), "long-rules-special-highlight");
             render(card, new ElderThingMonster(), "ElderThing");
             if (card.getSpecialTextTable() != null || card.getReckoningTextTable() != null) {
                 throw new AssertionError("Reused card retained stale rule rows");
             }
-            System.out.println("PASS: " + count + " monsters, label bounds, rule reattachment, health tokens, scrolling and reuse");
+            System.out.println("PASS: " + count + " monsters, label bounds, in-place highlights, health tokens, scrolling and reuse");
         } catch (Throwable failure) {
             failure.printStackTrace();
             System.exit(1);
@@ -105,14 +108,23 @@ public class MonsterSheetPreview extends ApplicationAdapter {
         pixels.dispose();
     }
 
-    private void checkRule(MonsterCard card, Table rule, int type) {
+    private void checkRule(MonsterCard card, Table rule, String filename) throws Exception {
         if (rule == null) return;
         Group original = rule.getParent();
-        stage.addActor(rule);
-        if (type == 0) card.reattachSpawnTable();
-        if (type == 1) card.reattachSpecialTable();
-        if (type == 2) card.reattachReckoningTable();
-        if (rule.getParent() != original) throw new AssertionError("Rule reattachment failed");
+        float x = rule.getX(), y = rule.getY(), width = rule.getWidth(), height = rule.getHeight();
+        int stageActors = stage.getActors().size;
+        MonsterAbilityHighlight highlight = new MonsterAbilityHighlight(card, rule);
+        draw(filename);
+        if (rule.getParent() != original || rule.getX() != x || rule.getY() != y
+                || rule.getWidth() != width || rule.getHeight() != height) {
+            throw new AssertionError("Highlight changed the ability's layout: " + filename);
+        }
+        if (stage.getActors().size != stageActors) {
+            throw new AssertionError("Highlight created duplicate text or a detached overlay");
+        }
+        checkLabels(rule);
+        highlight.remove();
+        if (rule.getParent() != original) throw new AssertionError("Dismissal detached the ability");
     }
 
     private ScrollPane findScroll(Group group) {

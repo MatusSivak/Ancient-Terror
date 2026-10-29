@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -46,9 +45,6 @@ public class MonsterCard extends VisTable {
     private Table reckoningTextTable;
     private Table specialTextTable;
     private Table spawnTextTable;
-    private Cell<Table> reckoningCell;
-    private Cell<Table> specialCell;
-    private Cell<Table> spawnCell;
 
     public MonsterCard() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.MONSTER_CARD);
@@ -61,7 +57,6 @@ public class MonsterCard extends VisTable {
         clear();
         hitImage = null;
         reckoningTextTable = specialTextTable = spawnTextTable = null;
-        reckoningCell = specialCell = spawnCell = null;
         getColor().a = 1f;
         top();
         setBackground(createSheetBackground());
@@ -102,21 +97,21 @@ public class MonsterCard extends VisTable {
         body.add(stats).width(CONTENT_WIDTH - 220);
         add(body).width(CONTENT_WIDTH).padBottom(14).row();
 
-        // Keep rule rows detachable for the existing spawn/special/reckoning highlights.
+        // Rule rows stay in this layout during spawn/special/reckoning highlights.
         Table rules = new Table();
         if (monsterInfo.getSpawnText() != null) {
             spawnTextTable = createRuleTable("SPAWN", monsterInfo.getSpawnText(), false);
-            spawnCell = rules.add(spawnTextTable).width(CONTENT_WIDTH).padBottom(6);
+            rules.add(spawnTextTable).width(CONTENT_WIDTH).padBottom(6);
             rules.row();
         }
         if (monsterInfo.getSpecialText() != null) {
             specialTextTable = createRuleTable("SPECIAL", monsterInfo.getSpecialText(), false);
-            specialCell = rules.add(specialTextTable).width(CONTENT_WIDTH).padBottom(6);
+            rules.add(specialTextTable).width(CONTENT_WIDTH).padBottom(6);
             rules.row();
         }
         if (monsterInfo.hasReckoning()) {
             reckoningTextTable = createRuleTable("RECKONING", monsterInfo.getReckoningText(), true);
-            reckoningCell = rules.add(reckoningTextTable).width(CONTENT_WIDTH).padBottom(6);
+            rules.add(reckoningTextTable).width(CONTENT_WIDTH).padBottom(6);
             rules.row();
         }
         rules.pack();
@@ -270,7 +265,4 @@ public class MonsterCard extends VisTable {
     public Table getSpecialTextTable() { return specialTextTable; }
     public Table getSpawnTextTable() { return spawnTextTable; }
     public ToughnessBar getToughnessBar() { return toughnessBar; }
-    public void reattachReckoningTable() { reckoningCell.setActor(reckoningTextTable); }
-    public void reattachSpecialTable() { specialCell.setActor(specialTextTable); }
-    public void reattachSpawnTable() { spawnCell.setActor(spawnTextTable); }
 }

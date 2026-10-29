@@ -1,39 +1,27 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.monster;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import java8.features.function.Consumer;
+import java8.features.function.Function;
 import java8.features.function.Supplier;
 import rx.Completable;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.controller.GameController;
-import sk.sivak.eldritchhorror.core.view.GameView;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.sheet.mystery.MysteryCard;
 import sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
-import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 public class MonsterCardEffect {
-
-    private static Table specialTextTable;
-    private static Table reckoningTextTable;
-    private static Table spawnTextTable;
-    private static Image blackMonsterCard;
 
     private MonsterCardEffect() {
     }
@@ -145,9 +133,7 @@ public class MonsterCardEffect {
                                                    GameController gameController,
                                                    Supplier<Completable> beforeHideAction) {
         return highlightSpecialOrReckoningText(monsterInfo, gameController,
-                monsterCard -> specialTextTable = monsterCard.getSpecialTextTable(),
-                () -> specialTextTable,
-                () -> BigActorsManager.getMonsterCard().reattachSpecialTable(),
+                MonsterCard::getSpecialTextTable,
                 beforeHideAction);
     }
 
@@ -155,9 +141,7 @@ public class MonsterCardEffect {
                                                    GameController gameController,
                                                    Supplier<Completable> beforeHideAction) {
         return highlightSpecialOrReckoningText(monsterInfo, gameController,
-                monsterCard -> reckoningTextTable = monsterCard.getReckoningTextTable(),
-                () -> reckoningTextTable,
-                () -> BigActorsManager.getMonsterCard().reattachReckoningTable(),
+                MonsterCard::getReckoningTextTable,
                 beforeHideAction);
     }
 
@@ -165,53 +149,42 @@ public class MonsterCardEffect {
                                                      GameController gameController,
                                                      Supplier<Completable> beforeHideAction) {
         return highlightSpecialOrReckoningText(monsterInfo, gameController,
-                monsterCard -> spawnTextTable = monsterCard.getSpawnTextTable(),
-                () -> spawnTextTable,
-                () -> BigActorsManager.getMonsterCard().reattachSpawnTable(),
+                MonsterCard::getSpawnTextTable,
                 beforeHideAction);
     }
 
     private static Completable highlightSpecialOrReckoningText(MonsterInfo monsterInfo, GameController gameController,
-                                                               Consumer<MonsterCard> c1, Supplier<Table> s1,
-                                                               Runnable reatttachAction,
+                                                               Function<MonsterCard, Table> ruleSelector,
                                                                Supplier<Completable> beforeHideAction) {
         return Completable.create(onSub -> {
+            MonsterAbilityHighlight[] highlight = {null};
+            boolean[] dismissing = {false};
             Action0 onDisplayHideAction = () -> {
                 MonsterCard monsterCard = BigActorsManager.getMonsterCard();
                 if (monsterCard.getStage() == null) {
                     return;
                 }
-                blackMonsterCard = new Image(MonsterCard.createSheetBackground());
-                blackMonsterCard.setTouchable(Touchable.disabled);
-                blackMonsterCard.setColor(0f, 0f, 0f, 0f);
-                blackMonsterCard.addAction(Actions.color(new Color(0f, 0f, 0f, 0.75f),0.5f));
-                blackMonsterCard.setSize(monsterCard.getWidth(), monsterCard.getHeight());
-                blackMonsterCard.setPosition(monsterCard.getX(), monsterCard.getY());
-                monsterCard.getStage().addActor(blackMonsterCard);
-
-                c1.accept(monsterCard);
-                Table textTable = s1.get();
+                Table textTable = ruleSelector.apply(monsterCard);
                 if (textTable == null) {
                     return;
                 }
-                Vector2 tablePosition = textTable.localToStageCoordinates(new Vector2());
-                textTable.setPosition(tablePosition.x, tablePosition.y);
-                textTable.setTouchable(Touchable.disabled);
-                monsterCard.getStage().addActor(textTable);
+                highlight[0] = new MonsterAbilityHighlight(monsterCard, textTable);
+                highlight[0].getColor().a = 0;
+                highlight[0].addAction(Actions.fadeIn(.5f));
             };
             Action0 onClickAction = () -> {
+                if (dismissing[0]) return;
+                dismissing[0] = true;
                 BigActorsManager.getMonsterCard().setOnDisplayHideAction(onSub::onCompleted);
-                if (blackMonsterCard == null) {
-                    return;
+                Runnable hide = () -> beforeHideAction.get().subscribe(BigActorsManager::displayOrHideMonsterCard, onSub::onError);
+                if (highlight[0] == null) hide.run();
+                else {
+                    highlight[0].clearActions();
+                    highlight[0].addAction(Actions.sequence(Actions.fadeOut(.25f), Actions.run(() -> {
+                        highlight[0].remove();
+                        hide.run();
+                    })));
                 }
-                blackMonsterCard.addAction(Actions.after(Actions.sequence(
-                        Actions.color(new Color(0f, 0f, 0f, 0.0f), 0.25f),
-                        Actions.run(() -> {
-                            reatttachAction.run();
-                            beforeHideAction.get().subscribe(BigActorsManager::displayOrHideMonsterCard);
-                        }),
-                        Actions.removeActor()
-                )));
             };
             if (BigActorsManager.isMonsterCardDisplayed()) {
                 onDisplayHideAction.call();
