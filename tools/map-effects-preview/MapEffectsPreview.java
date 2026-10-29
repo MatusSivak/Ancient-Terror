@@ -144,6 +144,7 @@ public class MapEffectsPreview extends ApplicationAdapter {
     private void checkSpawn() throws Exception {
         java.util.List<Actor> copies = MapStage.getActor(resolver);
         require(copies.size() == 3 && MapStage.getSpawnEffectLayer().getChildren().size == 0, "Smoke appeared before landing");
+        require(starts.get() == (scenario % 3 == 2 ? 1 : 0), "Landing sound played before contact");
         if (scenario >= 3) FastForwardAction.turnOn();
         Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
         for (Actor token : copies) {
@@ -157,7 +158,12 @@ public class MapEffectsPreview extends ApplicationAdapter {
             } else require(token.getY() + token.getOriginY() > position.y + 150, "Clue must fall toward the map");
         }
         for (int frame = 0; frame < 180; frame++) {
+            int previousStarts = starts.get();
             stage.act(1f/60);
+            if (scenario % 3 != 2 && previousStarts == 0) {
+                require(starts.get() == (MapStage.getSpawnEffectLayer().getChildren().size > 0 ? 1 : 0),
+                        "Landing sound is not synchronized with dust");
+            }
             if (frame > 70 && scenario % 3 == 2) {
                 for (Actor actor : copies) require(Math.abs(actor.getScaleX() - 1) < .1f,
                         "Idle breathing retained the tiny spawn scale");

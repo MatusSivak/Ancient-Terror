@@ -20,6 +20,10 @@ public class RedPinUtils {
     private final static float RED_PIN_TEXTURE_SCALE = 5f;
 
     public static Completable spawnRedPin(LocationId location) {
+        return spawnRedPin(location, null);
+    }
+
+    public static Completable spawnRedPin(LocationId location, Runnable onContact) {
 
         Texture redPinTexture = CustomAssetManager.getTexture(CustomAssetManager.RED_PIN);
         RedPinSpawnConfig spawnConfig = new RedPinSpawnConfig();
@@ -34,7 +38,7 @@ public class RedPinUtils {
             return redPinImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new RedPinIdLayerResolver(location), location);
+        return new Spawner().spawn(actorSpawner, spawnConfig, new RedPinIdLayerResolver(location), location, onContact);
     }
 
     public static Completable discardRedPin(LocationId location) {

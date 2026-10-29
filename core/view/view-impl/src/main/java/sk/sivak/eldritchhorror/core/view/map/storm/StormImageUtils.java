@@ -14,6 +14,10 @@ public class StormImageUtils {
 
 
     public static Completable spawnStorm(String stormId, LocationId locationId) {
+        return spawnStorm(stormId, locationId, null);
+    }
+
+    public static Completable spawnStorm(String stormId, LocationId locationId, Runnable onContact) {
 
         StormSpawnConfig spawnConfig = new StormSpawnConfig();
 
@@ -27,7 +31,7 @@ public class StormImageUtils {
             return stormImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new StormIdLayerResolver(stormId), locationId);
+        return new Spawner().spawn(actorSpawner, spawnConfig, new StormIdLayerResolver(stormId), locationId, onContact);
     }
 
     public static Completable discardStorm(String stormId) {

@@ -48,7 +48,7 @@ public class Spawner {
         return spawn(actorSpawner, spawnConfig, idLayerResolver, location, null);
     }
 
-    /** Runs once for the visible spawn, after assets/camera are ready, not once per world copy. */
+    /** Runs once at ground contact (or emergence for non-falling pieces), never per world copy. */
     public Completable spawn(ActorSpawner actorSpawner, SpawnConfig spawnConfig, MapStage.IdLayerResolver<?> idLayerResolver,
                              LocationId location, Runnable onSpawn) {
         return Completable.create(onSub -> {
@@ -62,11 +62,19 @@ public class Spawner {
                 MapStage.addToLayer(leftActor, idLayerResolver);
                 MapStage.addToLayer(centerActor, idLayerResolver);
                 MapStage.addToLayer(rightActor, idLayerResolver);
-                if (onSpawn != null) onSpawn.run();
+                boolean[] sounded = {false};
+                Runnable contact = () -> {
+                    if (!sounded[0]) {
+                        sounded[0] = true;
+                        if (onSpawn != null) onSpawn.run();
+                    }
+                };
+                SpawnStyle style = spawnConfig.getSpawnStyle();
+                if (style == SpawnStyle.MONSTER || style == SpawnStyle.EXPEDITION) contact.run();
                 spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
                 int[] landedCopies = {0};
                 for (Actor token : new Actor[]{leftActor, centerActor, rightActor}) {
-                    token.addAction(Actions.sequence(new FastForwardAction<>(createSpawnAction(token, spawnConfig.getSpawnStyle())), Actions.run(() -> {
+                    token.addAction(Actions.sequence(new FastForwardAction<>(createSpawnAction(token, style, contact)), Actions.run(() -> {
                         if (++landedCopies[0] == 3) {
                             spawnConfig.postSpawnConfig(leftActor, centerActor, rightActor);
                             onSub.onCompleted();
@@ -78,10 +86,10 @@ public class Spawner {
         });
     }
 
-    private TemporalAction createSpawnAction(Actor token, SpawnStyle style) {
+    private TemporalAction createSpawnAction(Actor token, SpawnStyle style, Runnable contact) {
         if (style == SpawnStyle.MONSTER) return createEmergenceAction(token);
         if (style == SpawnStyle.EXPEDITION) return createExpeditionAction(token);
-        return createLandingAction(token, style);
+        return createLandingAction(token, style, contact);
     }
 
     private TemporalAction createExpeditionAction(Actor token) {
@@ -132,7 +140,7 @@ public class Spawner {
         };
     }
 
-    private TemporalAction createLandingAction(Actor token, SpawnStyle style) {
+    private TemporalAction createLandingAction(Actor token, SpawnStyle style, Runnable contact) {
         float landingY = token.getY();
         float rotation = token.getRotation();
         // Account for zoom and the whole portrait, including its border, before the first frame.
@@ -172,6 +180,7 @@ public class Spawner {
                     if (dust == null) {
                         dust = new MapSpawnEffect(token);
                         MapStage.getSpawnEffectLayer().addActor(dust);
+                        contact.run();
                     }
                     float bounce = MathUtils.clamp((percent - .4f) / .22f, 0f, 1f);
                     token.setY(landingY + MathUtils.sin(bounce * MathUtils.PI) * 10f * (1f - bounce));

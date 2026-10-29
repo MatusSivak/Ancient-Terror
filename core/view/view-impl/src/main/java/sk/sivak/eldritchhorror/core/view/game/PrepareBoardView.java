@@ -66,7 +66,7 @@ public class PrepareBoardView {
                     InfoStage.displayText(UiText.get("prepare.spawningClues"));
                     MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
                         ClueUtils.spawnClue(spawnLocationId, currentLocationId,
-                                () -> GameplaySounds.play(CLUE_SPAWN)).subscribe(onSub::onCompleted);
+                                () -> GameplaySounds.play(TOKEN_IMPACT)).subscribe(onSub::onCompleted);
                     });
                 })
         );
@@ -81,7 +81,7 @@ public class PrepareBoardView {
             InfoStage.displayText(UiText.get("prepare.spawningGates"));
             MapUtils.moveCameraToLocation(gateInfo.getLocationId()).subscribe(() -> {
                 GateUtils.spawnGate(gateInfo, omenColor,
-                        () -> GameplaySounds.play(GATE_OPEN)).subscribe(onSub::onCompleted);
+                        () -> GameplaySounds.play(GATE_IMPACT)).subscribe(onSub::onCompleted);
             });
         });
     }
@@ -110,7 +110,7 @@ public class PrepareBoardView {
             MapUtils.moveCameraToLocation(selectedInvestigators.getLocationId()).subscribe(() -> {
                 InvestigatorUtils.spawnInvestigator(selectedInvestigators.getLocationId(),
                         selectedInvestigators.getInvestigatorId(), gameController,
-                        () -> GameplaySounds.play(INVESTIGATOR_SPAWN))
+                        () -> GameplaySounds.play(INVESTIGATOR_IMPACT))
                         .subscribe(onSub::onCompleted);
             });
         });
@@ -140,7 +140,7 @@ public class PrepareBoardView {
         InfoStage.displayTextForce(UiText.get("prepare.mysteryLocation"));
         for (LocationId pinLocation : pinLocations) {
             completable = completable.andThen(MapUtils.moveCameraToLocation(pinLocation));
-            completable = completable.andThen(RedPinUtils.spawnRedPin(pinLocation));
+            completable = completable.andThen(RedPinUtils.spawnRedPin(pinLocation, () -> GameplaySounds.play(TOKEN_IMPACT)));
         }
         return completable;
     }
@@ -148,7 +148,7 @@ public class PrepareBoardView {
     public Completable showStormLocation(String stormId, LocationId locationId) {
         InfoStage.displayTextForce(UiText.get("prepare.rumorLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
-        completable = completable.andThen(withCue(HAZARD_SPAWN, StormImageUtils.spawnStorm(stormId, locationId)));
+        completable = completable.andThen(StormImageUtils.spawnStorm(stormId, locationId, () -> GameplaySounds.play(TOKEN_IMPACT)));
         return completable;
     }
 
@@ -214,7 +214,7 @@ public class PrepareBoardView {
     public Completable spawnVortex(LocationId locationId) {
         InfoStage.displayTextForce(UiText.get("prepare.vortexLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
-        completable = completable.andThen(withCue(HAZARD_SPAWN, VortexImageUtils.spawnVortex(locationId)));
+        completable = completable.andThen(VortexImageUtils.spawnVortex(locationId, () -> GameplaySounds.play(TOKEN_IMPACT)));
         return completable;
     }
 

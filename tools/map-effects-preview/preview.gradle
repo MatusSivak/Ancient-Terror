@@ -11,4 +11,10 @@ gradle.projectsEvaluated {
         mainClass.set('MapEffectsPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewTokenGain', JavaExec) {
+        dependsOn desktop.tasks.named('mapEffectsPreviewClasses')
+        classpath = desktop.sourceSets.mapEffectsPreview.runtimeClasspath
+        mainClass.set('TokenGainPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

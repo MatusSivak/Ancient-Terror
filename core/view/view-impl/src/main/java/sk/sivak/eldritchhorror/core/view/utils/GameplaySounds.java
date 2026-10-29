@@ -6,6 +6,9 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 /** Short, preloaded cues for game events. Source credits: sounds/GAMEPLAY_AUDIO.md. */
 public final class GameplaySounds {
     public enum Cue {
+        TOKEN_IMPACT("map_token_impact", .85f),
+        INVESTIGATOR_IMPACT("map_investigator_impact", .90f),
+        GATE_IMPACT("map_gate_impact", .90f),
         CLUE_SPAWN("clue_spawn", .80f),
         EXPEDITION_SPAWN("expedition_spawn", .80f),
         CLUE_GAIN("clue_gain", .85f),

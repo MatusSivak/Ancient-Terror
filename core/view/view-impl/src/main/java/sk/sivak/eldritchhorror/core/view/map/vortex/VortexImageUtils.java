@@ -15,6 +15,10 @@ public class VortexImageUtils {
 
 
     public static Completable spawnVortex(LocationId locationId) {
+        return spawnVortex(locationId, null);
+    }
+
+    public static Completable spawnVortex(LocationId locationId, Runnable onContact) {
 
         VortexSpawnConfig spawnConfig = new VortexSpawnConfig();
 
@@ -28,7 +32,7 @@ public class VortexImageUtils {
             return vortexImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new VortexIdLayerResolver(locationId), locationId);
+        return new Spawner().spawn(actorSpawner, spawnConfig, new VortexIdLayerResolver(locationId), locationId, onContact);
     }
 
     public static Completable discardVortex(LocationId locationId) {

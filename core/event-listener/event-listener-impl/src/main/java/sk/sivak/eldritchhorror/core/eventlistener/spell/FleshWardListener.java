@@ -1,22 +1,12 @@
 package sk.sivak.eldritchhorror.core.eventlistener.spell;
 
-import rx.Single;
-import sk.sivak.eldritchhorror.core.constants.displayasset.DisplayAssetResponseType;
-import sk.sivak.eldritchhorror.core.constants.displayasset.HideType;
-import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
-import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
+import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
-import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
-import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.fleshward.FleshWardSpell;
-import sk.sivak.eldritchhorror.core.constants.spell.wither.WitherSpell;
 import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
-import sk.sivak.eldritchhorror.core.constants.test.UsableAsset;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.asset.BandagesListener;
 import sk.sivak.eldritchhorror.core.eventlistener.back.spell.AbstractSpellBackListener;
 import sk.sivak.eldritchhorror.core.eventlistener.card.EnableCardListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
@@ -27,7 +17,6 @@ import sk.sivak.eldritchhorror.core.eventtype.data.test.TestFlavorRequest;
 import sk.sivak.eldritchhorror.core.eventtype.data.token.LoseTokenData;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class FleshWardListener extends AbstractSpellListener<FleshWardSpell> {
@@ -72,38 +61,35 @@ public class FleshWardListener extends AbstractSpellListener<FleshWardSpell> {
                 InvestigatorId targetInvestigatorId = ServicePlatform.get().getInvestigators().getActiveInvestigatorId();
 
                 ServicePlatform.get().getService().hold();
-                if (spellOwnerId != targetInvestigatorId) {
-                    ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(spellOwnerId);
-                    ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
-                }
-                ShowCardRequest showCardRequest = new ShowCardRequest();
-                showCardRequest.setSpellInfo(spellInfo);
-                showCardRequest.setTitle("Cast Flesh Ward?");
-                showCardRequest.setHideType(HideType.DISABLE_ON_YES);
-                showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
+                Question<Boolean> question = new Question<>();
+                question.setTitle("Cast Flesh Ward?");
+                question.setPortraitBeforeTitle(spellOwnerId);
+                question.setOptions(Arrays.asList(new Question.Option<>("Yes", true), new Question.Option<>("No", false)));
 
-                ServicePlatform.get().getGameService().showCard(showCardRequest)
-                        .subscribe(showCardResponse -> onAnswer(showCardResponse, input, targetInvestigatorId));
+                ServicePlatform.get().getGameService().ask(question)
+                        .subscribe(answer -> onAnswer(Boolean.TRUE.equals(answer.getResponseData()), input, targetInvestigatorId));
                 ServicePlatform.get().getService().release();
 
             };
         }
 
-        private void onAnswer(ShowCardResponse showCardResponse, LoseTokenData input, InvestigatorId targetInvestigatorId) {
-            if (ShowCardResponse.YES != showCardResponse) {
+        private void onAnswer(boolean cast, LoseTokenData input, InvestigatorId targetInvestigatorId) {
+            if (!cast) {
                 ServicePlatform.get().getService().hold();
-                if (spellOwnerId != targetInvestigatorId) {
-                    ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigatorId);
-                    ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
-                }
                 ServicePlatform.get().getService().convertTo(LoseTokenData.class, () -> input);
                 ServicePlatform.get().getService().release();
                 return;
             }
 
+            ServicePlatform.get().getService().hold();
+            // Only an accepted cast needs the owner's rules context; keep the current sheet visible.
+            if (spellOwnerId != targetInvestigatorId) {
+                ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(spellOwnerId);
+            }
             ServicePlatform.get().getTestService().test(Stat.LORE, 0, 16,
                     new TestFlavorRequest(TestFlavorType.SPELL)).subscribe(
                             testData -> disableAndFlipCard(testData, input, targetInvestigatorId));
+            ServicePlatform.get().getService().release();
         }
 
         private void disableAndFlipCard(TestData testData,
@@ -124,7 +110,7 @@ public class FleshWardListener extends AbstractSpellListener<FleshWardSpell> {
                 if (ServicePlatform.get().getInvestigators().getActiveInvestigatorId() != targetInvestigatorId) {
                     ServicePlatform.get().getService().hold();
                     ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigatorId);
-                    ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
+                    ServicePlatform.get().getInvestigatorService().showActiveInvestigator(false);
                     ServicePlatform.get().getService().release();
                 }
             });
