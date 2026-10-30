@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 from prepare_tabletop_sounds import SOURCES as TABLETOP_SOURCES, prepare as prepare_tabletop
+from prepare_release_sounds import NAMES as RELEASE_NAMES, prepare as prepare_release
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source_assets/sounds/gameplay"
@@ -90,6 +91,8 @@ def cues():
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     for name, samples in cues().items():
+        if name in RELEASE_NAMES:
+            continue
         if name in TABLETOP_SOURCES:
             prepare_tabletop(name)
             continue
@@ -105,6 +108,7 @@ def main():
         assert len(samples) * 2 < 1_000_000, "Exceeds Android SoundPool decoded buffer budget"
         print(f"{name}: {len(samples) / RATE:.2f}s, peak {max(np.abs(samples)):.3f}")
     prepare_tabletop("expedition_spawn")
+    prepare_release()
 
 
 if __name__ == "__main__":

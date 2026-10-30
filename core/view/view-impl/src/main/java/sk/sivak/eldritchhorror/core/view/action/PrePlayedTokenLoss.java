@@ -1,56 +1,64 @@
 package sk.sivak.eldritchhorror.core.view.action;
 
-import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 
-/**
- * Health / sanity tokens whose loss was already animated (one per monster fireball impact in combat).
- * The following model-driven loss consumes them instead of animating the same tokens again.
- */
+/** Tracks visual combat losses only while the original HUD contents are still present. */
 public final class PrePlayedTokenLoss {
+    private static final PendingLoss health = new PendingLoss();
+    private static final PendingLoss sanity = new PendingLoss();
 
-    private static int health;
-    private static int sanity;
+    private PrePlayedTokenLoss() { }
 
-    private PrePlayedTokenLoss() {
-    }
+    public static synchronized void recordHealth(ContainerBar bar) { health.record(bar); }
+    public static synchronized void recordSanity(ContainerBar bar) { sanity.record(bar); }
+    public static synchronized int consumeHealth(int amount) { return health.consume(amount); }
+    public static synchronized int consumeSanity(int amount) { return sanity.consume(amount); }
 
-    public static synchronized void recordHealth() {
-        health++;
-    }
-
-    public static synchronized void recordSanity() {
-        sanity++;
-    }
-
-    /** @return how many of {@code amount} health tokens were already animated; the rest is cleared. */
-    public static synchronized int consumeHealth(int amount) {
-        int consumed = Math.min(health, amount);
-        health = 0;
-        return consumed;
-    }
-
-    /** @return how many of {@code amount} sanity tokens were already animated; the rest is cleared. */
-    public static synchronized int consumeSanity(int amount) {
-        int consumed = Math.min(sanity, amount);
-        sanity = 0;
-        return consumed;
-    }
-
-    /** Puts the already torn tokens back on the bars, so the real loss is animated normally later. */
+    /** Restore only tokens removed by this animation, never a refreshed investigator's HUD. */
     public static synchronized void undo() {
-        if (InfoStage.getInvestigatorHud() != null) {
-            for (int i = 0; i < health; i++) {
-                InfoStage.getInvestigatorHud().getHealthBar().increaseCurrentValue();
-            }
-            for (int i = 0; i < sanity; i++) {
-                InfoStage.getInvestigatorHud().getSanityBar().increaseCurrentValue();
-            }
-        }
-        reset();
+        health.undo();
+        sanity.undo();
     }
 
     public static synchronized void reset() {
-        health = 0;
-        sanity = 0;
+        health.clear();
+        sanity.clear();
+    }
+
+    private static final class PendingLoss {
+        private ContainerBar bar;
+        private long generation;
+        private int before, count;
+
+        void record(ContainerBar target) {
+            if (bar != target || !matches()) {
+                clear();
+                bar = target;
+                generation = target.getContentsGeneration();
+                before = target.getCurrentValue();
+            }
+            if (target.getCurrentValue() > 0) count++;
+        }
+
+        boolean matches() {
+            return bar != null && bar.getContentsGeneration() == generation
+                    && bar.getCurrentValue() == before - count;
+        }
+
+        int consume(int amount) {
+            int consumed = matches() ? Math.min(count, Math.max(0, amount)) : 0;
+            clear();
+            return consumed;
+        }
+
+        void undo() {
+            ContainerBar original = bar;
+            int value = before;
+            boolean restore = matches();
+            clear();
+            if (restore) original.setCurrentValue(value);
+        }
+
+        void clear() { bar = null; count = 0; before = 0; }
     }
 }

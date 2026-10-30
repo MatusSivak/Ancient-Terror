@@ -28,6 +28,7 @@ public class CardDuplicator {
             throw new IllegalArgumentException("Duplicate cannot be null at this point");
         }
         duplicate.setScaleX(cardTemplate.getScaleX());
+        duplicate.setDisabledBadgeVisible(cardTemplate.isDisabledBadgeVisible());
         duplicate.setScaleY(cardTemplate.getScaleY());
         return duplicate;
     }

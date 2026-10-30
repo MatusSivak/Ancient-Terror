@@ -30,6 +30,7 @@ public class InAppPurchaseManagerTest {
     private Application.ApplicationType applicationType = Application.ApplicationType.Android;
 
     @Before public void setup() {
+        LocalTesting.setLocalPurchases(false);
         LocalTesting.setAllInvestigatorsUnlocked(false);
         oldApp = Gdx.app;
         oldNet = Gdx.net;
@@ -53,6 +54,7 @@ public class InAppPurchaseManagerTest {
     }
 
     @After public void cleanup() {
+        LocalTesting.setLocalPurchases(false);
         LocalTesting.setAllInvestigatorsUnlocked(false);
         Gdx.app = oldApp;
         Gdx.net = oldNet;
@@ -66,6 +68,25 @@ public class InAppPurchaseManagerTest {
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
         assertFalse(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
         assertTrue(values.isEmpty());
+    }
+
+    @Test public void localAndroidProfileStaysLockedUntilConfirmationWithoutCallingStore() {
+        LocalTesting.setLocalPurchases(true);
+        store.fail = true;
+        Gdx.net = (Net) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Net.class},
+                (proxy, method, args) -> { throw new AssertionError("Local purchase must not use network"); });
+        for (String product : new String[]{"full_game", "investigators_1", "cthulhu", "shub_niggurath", "yog_sothoth"}) {
+            assertFalse(new InAppPurchaseManager().isProductPurchased(product).toBlocking().value());
+        }
+        assertFalse(InAppPurchaseManager.areBonusInvestigatorsAvailable());
+        assertTrue(values.isEmpty());
+        assertEquals(0, store.restores);
+        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertNull(store.requested);
+        assertUnlocked();
+        assertTrue(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertTrue(InAppPurchaseManager.areBonusInvestigatorsAvailable());
+        assertEquals(0, store.restores);
     }
 
     @Test public void desktopPurchaseUnlocksAndPersistsFullGame() {

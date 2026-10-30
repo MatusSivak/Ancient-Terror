@@ -17,7 +17,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
 
-/** A card unfolds from an illuminated edge, settles, and sheds a few drifting sparks. */
+/** Gathering motes ignite a card's edge; it unfolds, lifts, and settles into a readable reveal. */
 public final class CardArrivalEffect extends Actor {
     private final Actor card;
     private final Color accent;
@@ -29,7 +29,7 @@ public final class CardArrivalEffect extends Actor {
         CardArrivalEffect effect = new CardArrivalEffect(card, info);
         card.getParent().addActor(effect);
         card.setPosition(x, y - 24); card.setScale(scale * .10f, scale * .86f);
-        card.setRotation(0); card.getColor().a = 0;
+        card.setRotation(-9); card.getColor().a = 0;
         card.addAction(new FastForwardAction<>(new TemporalAction(1.05f * NORMAL_ACTION_DURATION) {
             @Override protected void update(float percent) {
                 effect.progress = percent;
@@ -37,10 +37,11 @@ public final class CardArrivalEffect extends Actor {
                 float settle = Interpolation.sine.apply(MathUtils.clamp((percent - .58f) / .42f, 0, 1));
                 card.setScale(scale * (.10f + .96f * open - .06f * settle), scale * (.86f + .18f * open - .04f * settle));
                 card.setY(y - 24 * (1 - open) + 5 * (open - settle));
+                card.setRotation(-9f * (1f - open) + 2f * (open - settle));
                 card.getColor().a = MathUtils.clamp(percent / .22f, 0, 1);
             }
             @Override protected void end() {
-                card.setPosition(x, y); card.setScale(scale); card.getColor().a = 1;
+                card.setPosition(x, y); card.setScale(scale); card.setRotation(0); card.getColor().a = 1;
                 effect.remove();
             }
         }));
@@ -66,17 +67,32 @@ public final class CardArrivalEffect extends Actor {
         float light = MathUtils.sin(MathUtils.PI * p) * parentAlpha;
         batch.setColor(accent.r,accent.g,accent.b,light*.16f);
         batch.draw(glow,center.x-width*.7f,center.y-height*.6f,width*1.4f,height*1.2f);
-        float scanY = center.y - height/2 + height * Math.min(1,p/.72f);
-        batch.setColor(accent.r,accent.g,accent.b,light*.65f);
-        batch.draw(white,center.x-width/2,scanY,width,1.8f);
-        for (int i=0;i<24;i++) {
-            float side = i%2==0 ? -1 : 1;
-            float x = center.x + side*(width/2 + 4 + 18*p*p);
-            float y = center.y - height/2 + height*((i*.618034f)%1) + 24*p;
-            float size = 2 + (i%3)*1.2f;
-            float pulse = Math.max(0,MathUtils.sin(p*5+i*.7f));
-            batch.setColor(accent.r,accent.g,accent.b,light*fade*pulse);
-            batch.draw(glow,x-size,y-size,size*2,size*2);
+        // A brief edge flash, followed by corner highlights that clear before reading.
+        float flash = Math.max(0f, 1f - Math.abs(p - .28f) / .12f);
+        batch.setColor(accent.r,accent.g,accent.b,flash * .6f * parentAlpha);
+        batch.draw(glow,center.x-width*.65f,center.y-height*.65f,width*1.3f,height*1.3f);
+        batch.setColor(accent.r,accent.g,accent.b,light*fade*.8f);
+        float corner = Math.min(width, height) * .13f;
+        for (int side = -1; side <= 1; side += 2) {
+            for (int top = -1; top <= 1; top += 2) {
+                float x = center.x + side * (width / 2 + 3);
+                float y = center.y + top * (height / 2 + 3);
+                batch.draw(white, side < 0 ? x : x-corner, y, corner, 1.2f);
+                batch.draw(white, x, top < 0 ? y : y-corner, 1.2f, corner);
+            }
+        }
+        for (int i=0;i<32;i++) {
+            float angle = i * 137.508f + p * 60f;
+            float gather = 1f - Interpolation.pow2Out.apply(Math.min(p / .35f, 1f));
+            float drift = Math.max(0f, (p - .35f) / .65f);
+            float radius = 1f + gather * .65f + drift * drift * .3f;
+            float x = center.x + MathUtils.cosDeg(angle) * (width/2 + 8) * radius;
+            float y = center.y + MathUtils.sinDeg(angle) * (height/2 + 8) * radius + 18*drift;
+            float size = 1.6f + (i%3)*.7f;
+            float pulse = .55f + .45f*MathUtils.sin(p*9+i*.7f);
+            batch.setColor(accent.r,accent.g,accent.b,light*fade*pulse*.85f);
+            batch.draw(glow,x-size*2,y-size*2,size*4,size*4);
+            batch.draw(white,x-size*.25f,y-size*.25f,size*.5f,size*.5f);
         }
         batch.setColor(saved);
     }

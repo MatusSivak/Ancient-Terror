@@ -9,8 +9,8 @@ import sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager;
 public class GameDesktop {
 
     public static void main(String[] args) {
-        // Temporary local playtesting: remove this override when investigator testing is finished.
-        LocalTesting.setAllInvestigatorsUnlocked(true);
+        LocalTesting.setAllInvestigatorsUnlocked(false);
+        LocalTesting.setLocalPurchases(true);
         for (String arg : args) {
             if ("--crash-report-test".equals(arg)) {
                 System.setProperty("ancientterror.crashReportTest", "true");

@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 /** Drives the real discard confirmation and current-Mystery resolution without loading a saved game. */
 public class CardDestructionPreview extends ApplicationAdapter {
     private Stage stage;
+    private final AtomicInteger tearSounds = new AtomicInteger();
 
     public static void main(String[] args) {
         LwjglApplicationConfiguration.disableAudio = true;
@@ -60,7 +61,16 @@ public class CardDestructionPreview extends ApplicationAdapter {
                         if (m.getName().equals("equals")) return p == a[0];
                         return m.getReturnType() == long.class ? 0L : null;
                     });
-            Gdx.audio = (Audio) Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class<?>[]{Audio.class}, (p, m, a) -> silent);
+            Sound tearSound = (Sound) Proxy.newProxyInstance(Sound.class.getClassLoader(), new Class<?>[]{Sound.class},
+                    (p, m, a) -> {
+                        if (m.getName().equals("hashCode")) return System.identityHashCode(p);
+                        if (m.getName().equals("equals")) return p == a[0];
+                        if (m.getName().equals("play")) tearSounds.incrementAndGet();
+                        return m.getReturnType() == long.class ? 0L : null;
+                    });
+            Gdx.audio = (Audio) Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class<?>[]{Audio.class},
+                    (p, m, a) -> a != null && a.length > 0 && a[0].toString().contains("monster_sheet_tear") ? tearSound : silent);
+            CustomAssetManager.getSound("sounds/monster_sheet_tear.wav");
             VisUI.load(); stage = InfoStage.getStageSafe();
             GameController controller = (GameController) Proxy.newProxyInstance(GameController.class.getClassLoader(),
                     new Class<?>[]{GameController.class}, (p, m, a) -> null);
@@ -70,7 +80,11 @@ public class CardDestructionPreview extends ApplicationAdapter {
             stage.getRoot().addActorAt(0, background);
             checkSnapshotTransform();
             checkInvestigatorRefreshCamera();
+            checkCombatInterruption();
+            checkUsableDisabledCard();
             for (boolean fast : new boolean[]{false, true}) {
+                checkCardGain(fast);
+                checkGateClose(fast);
                 checkDiscard(false, fast);
                 checkDiscard(true, fast);
                 checkMystery(false, fast);
@@ -81,9 +95,96 @@ public class CardDestructionPreview extends ApplicationAdapter {
             checkMystery(true, false);
             checkSpeedChangeAndInterruption();
             require(tracked() == 0, "Fast-forward actions leaked");
+            System.out.println("PASS: received card reveal/flight and gate spin/dissipation, normal and fast-forward");
+            System.out.println("PASS: stale combat loss rollback, usable-card badges and monster tear sound timing");
             System.out.println("PASS: card discard, Mystery and monster destruction; encounter camera preservation; snapshot colour/transform; hidden cards; normal/fast-forward; reused sheets; tall text; early removal and GPU cleanup");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+
+    private void checkCombatInterruption() {
+        sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar bar = InfoStage.getInvestigatorHud().getHealthBar();
+        int oldTotal = bar.getCells().size, oldValue = bar.getCurrentValue();
+        bar.setTotalEmptyContainers(4); bar.setCurrentValue(4);
+        sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.recordHealth(bar);
+        bar.decreaseCurrentValue();
+        bar.setTotalEmptyContainers(4); bar.setCurrentValue(4);
+        sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable table =
+                new sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable();
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.start(table, InvestigatorId.values()[0]);
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.suspend();
+        require(bar.getCurrentValue() == 4 && table.isInterrupted(), "Flesh Ward restored tokens beyond the refreshed bar");
+        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.finish();
+        bar.setCurrentValue(10); require(bar.getCurrentValue() == 4, "Fixed-capacity bar overflowed");
+        bar.setCurrentValue(-1); require(bar.getCurrentValue() == 0, "Bar underflowed");
+        bar.setTotalEmptyContainers(oldTotal); bar.setCurrentValue(oldValue);
+    }
+
+    private void checkUsableDisabledCard() throws Exception {
+        AxeAsset asset = new AxeAsset(); asset.disable();
+        CardTemplate testCard = CardTemplate.buildCard(asset);
+        testCard.setDisabledBadgeVisible(false);
+        loadArtwork();
+        require(!((Image) field(testCard, "disabledImage")).isVisible(), "Async load restored the usable card badge");
+        CardTemplate dragCopy = sk.sivak.eldritchhorror.core.view.components.card.CardDuplicator.duplicate(testCard);
+        CardTemplate inventoryCard = CardTemplate.buildCard(asset);
+        loadArtwork();
+        require(!((Image) field(dragCopy, "disabledImage")).isVisible(), "Drag/zoom copy restored disabled badge");
+        require(((Image) field(inventoryCard, "disabledImage")).isVisible() && asset.isDisabled(),
+                "Test presentation changed the card's exhaustion state");
+    }
+
+    private void checkCardGain(boolean fast) throws Exception {
+        FastForwardAction.turnOff();
+        CardTemplate.buildCard(new AxeAsset());
+        loadArtwork();
+        AssetView view = new AssetView();
+        AtomicInteger done = new AtomicInteger();
+        view.gainCard(new AxeAsset()).subscribe(done::incrementAndGet);
+        Field cardField = AssetView.class.getDeclaredField("cardTemplate"); cardField.setAccessible(true);
+        Actor card = (Actor) cardField.get(view);
+        tick(18); if (!fast) draw("release-card-spawn");
+        tick(65);
+        require(stage.getRoot().findActor("card-arrival-light") == null, "Reveal light leaked");
+        require(Math.abs(card.getRotation()) < .01f, "Reveal did not settle upright");
+        Field buttonsField = AssetView.class.getDeclaredField("buttons"); buttonsField.setAccessible(true);
+        Button button = ((Button[]) buttonsField.get(view))[0];
+        if (fast) FastForwardAction.turnOn();
+        click(button); click(button);
+        require(done.get() == 0, "Gain completed before the flight");
+        tick(fast ? 1 : 22);
+        if (!fast) {
+            require(card.getRotation() > 30f, "Received card did not rotate");
+            draw("release-card-flight");
+        }
+        tick(90);
+        require(done.get() == 1 && card.getParent() == null, "Card flight must complete once and remove card");
+        FastForwardAction.turnOff();
+    }
+
+    private void checkGateClose(boolean fast) throws Exception {
+        FastForwardAction.turnOff();
+        sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage gate =
+                new sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage(
+                        sk.sivak.eldritchhorror.core.constants.gate.GateColor.BLUE,
+                        sk.sivak.eldritchhorror.core.constants.omen.OmenColor.BLUE);
+        gate.setSize(120, 120); gate.setPosition(420, 210); stage.addActor(gate);
+        tick(90);
+        AtomicInteger done = new AtomicInteger();
+        if (fast) FastForwardAction.turnOn();
+        gate.closeGate().subscribe(done::incrementAndGet);
+        tick(fast ? 1 : 40);
+        if (!fast) {
+            Group portrait = stage.getRoot().findActor("closing-gate-portrait");
+            require(portrait != null && portrait.getChildren().get(1).getColor().a > .99f,
+                    "Gate faded before its spin-up finished");
+            draw("release-gate-spin");
+            tick(30); draw("release-gate-dissipate");
+        }
+        tick(150);
+        require(done.get() == 1 && stage.getRoot().findActor("gate-close") == null,
+                "Gate must complete once and clear its mist");
+        FastForwardAction.turnOff();
     }
 
     private void checkInvestigatorRefreshCamera() {
@@ -117,6 +218,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
     }
 
     private void checkMonster(boolean hidden, boolean fast) throws Exception {
+        int previousTears = tearSounds.get();
         FastForwardAction.turnOff();
         CultistMonster monster = new CultistMonster();
         MonsterCard card = BigActorsManager.getMonsterCard();
@@ -139,7 +241,9 @@ public class CardDestructionPreview extends ApplicationAdapter {
             animation = stage.getRoot().findActor("card-destruction");
         }
         require(animation != null && done.get() == 0, "Missing monster tear");
+        require(tearSounds.get() == previousTears, "Tear audio preceded the split");
         runEffect(animation, done, !hidden && !fast ? "monster" : null, false);
+        require(tearSounds.get() == previousTears + (fast ? 0 : 1), "Monster tear cue must play once, except fast-forward");
         require(dismissed.get() == (hidden ? 0 : 1), "Monster destruction replayed dismissal");
         require(!BigActorsManager.isMonsterCardDisplayed() && !BigActorsManager.isLocked(), "Destroyed monster kept sheet state");
         require(card.getStage() == null && buffers() == buffers && tracked() == 0, "Monster snapshot or actions leaked");

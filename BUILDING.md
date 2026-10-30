@@ -20,6 +20,12 @@ For only the debug APK or desktop compilation:
 
 Android APKs are written under `android/build/outputs/apk`. Release APKs are unsigned until a signing configuration is supplied.
 
+Premium content starts locked. Local Android builds and desktop enable simulated
+purchases: confirming Buy immediately persists the full-game unlock without billing,
+purchase restore calls, or purchase analytics. Existing owned/earned content is retained.
+For a Google Play build, pass `-PLOCAL_PURCHASES=false` to restore real billing.
+Use a fresh app profile to test the locked state again after a simulated purchase.
+
 The desktop distribution JAR is `desktop/build/libs/desktop-1.0-all.jar`.
 
 ## Automatic APK downloads

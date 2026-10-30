@@ -1,5 +1,8 @@
 # Travel, artifact, exhaustion and monster defeat audio
 
+Walking and asset exhaustion now use the replacements in
+[RELEASE_AUDIO.md](RELEASE_AUDIO.md); that page also credits the monster-sheet tear.
+
 Prepared on 30 October 2026 with `python tools/prepare_oct30_sounds.py`
 (`numpy` and `soundfile` required). The script supersedes the corresponding
 outputs from `prepare_presentation_sounds.py`, `prepare_tabletop_sounds.py`

@@ -31,6 +31,7 @@ public final class GameplaySounds {
         MONSTER_SPAWN("monster_spawn", .85f),
         EPIC_MONSTER_SPAWN("epic_monster_spawn", .95f),
         MONSTER_DEFEAT("monster_defeat", .85f),
+        MONSTER_SHEET_TEAR("monster_sheet_tear", .85f),
         MONSTER_DEFEAT_FLY("monster_defeat_fly", .85f),
         MYSTERY_PROGRESS("mystery_progress", .72f),
         MYSTERY_SOLVED("mystery_solved", .90f),
@@ -52,7 +53,7 @@ public final class GameplaySounds {
         RUMOR_FAILURE("rumor_failure", .90f),
         RECKONING("reckoning", .85f),
         ANCIENT_POWER("ancient_power", .88f),
-        ACTION_PHASE("action_phase", .75f),
+        ACTION_PHASE("action_phase", .78f),
         ENCOUNTER_PHASE("encounter_phase", .78f),
         MYTHOS_PHASE("mythos_phase", .78f);
 

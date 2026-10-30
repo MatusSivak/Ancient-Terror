@@ -46,8 +46,7 @@ public class SelectAncientOneTable extends Table {
                                  SingleSubscriber<? super AncientOneInfo> subscriber) {
         this.subscriber = subscriber;
         for (AncientOneInfo info : availableAncientOnes) choices.put(info.getAncientOneId(), info);
-        // TEMP: Yig unlocked for device testing; restore to yogPurchased before release.
-        unlocked.put(AncientOneId.YIG, true);
+        unlocked.put(AncientOneId.YIG, yogPurchased);
         unlocked.put(AncientOneId.AZATHOTH, true);
         unlocked.put(AncientOneId.CTHULHU, cthulhuPurchased);
         unlocked.put(AncientOneId.SHUB_NIGGURATH, shubPurchased);

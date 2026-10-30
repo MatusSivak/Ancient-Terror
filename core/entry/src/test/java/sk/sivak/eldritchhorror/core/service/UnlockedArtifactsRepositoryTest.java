@@ -40,6 +40,14 @@ public class UnlockedArtifactsRepositoryTest {
         assertTrue(new UnlockedArtifactsRepository().loadData().contains(ArtifactId.ZANTHU_TABLETS));
     }
 
+    @Test public void freshProfilesKeepPremiumCardsOutOfTheDeck() {
+        List<ArtifactId> artifacts = new UnlockedArtifactsRepository().loadData();
+        assertTrue(artifacts.size() < ArtifactId.values().length);
+        assertFalse(artifacts.contains(ArtifactId.BONE_PIPES));
+        List<sk.sivak.eldritchhorror.core.constants.asset.AssetId> assets = new UnlockedAssetsRepository().loadData();
+        assertTrue(assets.size() < sk.sivak.eldritchhorror.core.constants.asset.AssetId.values().length);
+    }
+
     @Test public void freshProfilesIncludeTheMysteryRequiredSerpentCrown() {
         assertTrue(new UnlockedArtifactsRepository().loadData().contains(ArtifactId.SERPENT_CROWN));
     }

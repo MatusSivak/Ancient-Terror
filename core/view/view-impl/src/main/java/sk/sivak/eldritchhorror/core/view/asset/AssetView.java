@@ -86,6 +86,7 @@ public class AssetView {
     private LabelTable labelTable;
     private Button[] buttons;
     private float originalBottomHeight;
+    private boolean collecting;
 
     public Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest) {
         return Single.create(subscriber -> {
@@ -327,6 +328,7 @@ public class AssetView {
 
     public Completable gainCard(CardInfo cardInfo) {
         return Completable.create(onSub -> {
+            collecting = false;
             UiSounds.transition(UiSounds.cardOpenCue(cardInfo));
             originalBottomHeight = InfoStage.getBottomHeight();
             displayGainButton(onSub);
@@ -352,24 +354,36 @@ public class AssetView {
     }
 
     private void onGainButtonClick(CompletableSubscriber completableSubscriber) {
+        if (collecting) return;
+        collecting = true;
         InfoStage.hideActor(labelTable);
         for (Button button : buttons) {
+            button.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
             InfoStage.hideActor(button);
         }
         InfoStage.setBottomHeight(originalBottomHeight);
 
-        cardTemplate.addAction(
-                sequence(
-                        new FastForwardAction(parallel(
-                                color(new Color(0xffffff00), FADING_EFFECT_DURATION),
-                                rotateTo(0, FADING_EFFECT_DURATION),
-                                scaleTo(0.0f, 0.0f, FADING_EFFECT_DURATION),
-                                moveTo(INVENTORY_X - CARD_ORIGIN_X, INVENTORY_Y - CARD_ORIGIN_Y, FADING_EFFECT_DURATION)
-                        )),
-                        run(cardTemplate::remove)
-                )
-        );
-        completableSubscriber.onCompleted();
+        Vector2 target = investigatorDestination();
+        sk.sivak.eldritchhorror.core.view.components.card.CardCollectionAnimation.play(
+                cardTemplate, target, completableSubscriber::onCompleted);
+    }
+
+    private Vector2 investigatorDestination() {
+        Vector2 target = new Vector2(INVENTORY_X, INVENTORY_Y);
+        float nearest = Float.MAX_VALUE;
+        // The map has three wrapped copies. Choose the active investigator visible on screen.
+        for (Actor actor : sk.sivak.eldritchhorror.core.view.game.MapStage.getInvestigatorLayer().getChildren()) {
+            if (!(actor instanceof sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage)
+                    || !((sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage) actor).isHighlighted()
+                    || !actor.isVisible() || actor.getStage() == null) continue;
+            Vector2 position = actor.localToStageCoordinates(new Vector2(actor.getWidth() / 2f, actor.getHeight() / 2f));
+            actor.getStage().stageToScreenCoordinates(position);
+            cardTemplate.getStage().screenToStageCoordinates(position);
+            if (position.x < 0 || position.x > VIEWPORT_WIDTH || position.y < 0 || position.y > VIEWPORT_HEIGHT) continue;
+            float distance = position.dst2(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f);
+            if (distance < nearest) { nearest = distance; target.set(position); }
+        }
+        return cardTemplate.getParent().stageToLocalCoordinates(target);
     }
 
     public Completable sewCard(CardInfo cardInfo) {

@@ -1,5 +1,8 @@
 # Gameplay sound effects
 
+The latest walking and phase replacements are documented in
+[walking and phase recordings](RELEASE_AUDIO.md), superseding those cues below.
+
 The 27 October investigator, clue/token and expedition placement replacements are
 documented in [downloaded tabletop foley](TABLETOP_AUDIO.md), which supersedes
 those mappings below. Expeditions now have a separate `expedition_spawn` cue.

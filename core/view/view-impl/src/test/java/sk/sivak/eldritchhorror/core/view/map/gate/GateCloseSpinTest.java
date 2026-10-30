@@ -13,19 +13,20 @@ public class GateCloseSpinTest {
                 - GateDissipateAnimation.spinDegrees(time, peak)) / step;
     }
 
-    @Test public void spinStartsAtIdleSpeedAndAcceleratesToItsPeakAtTheEnd() {
+    @Test public void spinReachesFullSpeedBeforeDissipationStarts() {
         for (float peak : new float[]{GateDissipateAnimation.CORE_PEAK_SPIN, GateDissipateAnimation.HALO_PEAK_SPIN}) {
             assertEquals(0f, GateDissipateAnimation.spinDegrees(0f, peak), 0.001f);
             assertEquals(GateDissipateAnimation.IDLE_SPIN, speed(0f, peak), 1f);
             float previous = 0f;
             for (float t = 0f; t < TOTAL - 0.01f; t += 0.05f) {
                 float current = speed(t, peak);
-                assertTrue("Spin must never slow down at " + t, current >= previous - 0.01f);
+                assertTrue("Spin must never slow down at " + t, current >= previous - 0.2f);
                 previous = current;
             }
             assertEquals(peak, speed(TOTAL - 0.002f, peak), peak * 0.01f);
-            // The first half stays gentle; most of the acceleration happens near the end.
-            assertTrue(speed(TOTAL / 2f, peak) < peak / 3f);
+            assertEquals(peak, speed(GateDissipateAnimation.SPIN_UP_TIME, peak), peak * .01f);
+            assertTrue("A visible turn must happen before fading", GateDissipateAnimation.spinDegrees(
+                    GateDissipateAnimation.SPIN_UP_TIME, peak) > 100f);
         }
     }
 }

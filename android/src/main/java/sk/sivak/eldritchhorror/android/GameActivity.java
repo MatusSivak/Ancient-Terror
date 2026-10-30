@@ -38,8 +38,8 @@ public class GameActivity extends AndroidApplication {
         }
         gameCreatedInProcess = true;
 
-        // Temporary local playtesting; release builds retain normal investigator access.
-        LocalTesting.setAllInvestigatorsUnlocked(BuildConfig.DEBUG);
+        LocalTesting.setAllInvestigatorsUnlocked(false);
+        LocalTesting.setLocalPurchases(BuildConfig.LOCAL_PURCHASES);
         game = new Game();
         analyticsTracker = new AndroidFirebaseAnalyticsTracker(this);
         game.setAnalyticsTracker(analyticsTracker);
@@ -51,8 +51,12 @@ public class GameActivity extends AndroidApplication {
 
         adHandler = new AndroidAdHandler(this);
         game.setAdHandler(adHandler);
-        billingPurchaseManager = new AndroidBillingPurchaseManager(this);
-        game.setPurchaseManager(billingPurchaseManager);
+        if (LocalTesting.useLocalPurchases()) {
+            game.setPurchaseManager(new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
+        } else {
+            billingPurchaseManager = new AndroidBillingPurchaseManager(this);
+            game.setPurchaseManager(billingPurchaseManager);
+        }
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         initialize(game, config);

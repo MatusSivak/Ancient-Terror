@@ -129,10 +129,9 @@ def write(name, samples):
 
 
 def main():
-    OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    for build, peak in ((depart, 0.50), (arrive, 0.50)):
-        name, samples = build()
-        write(name, finish(samples, peak))
+    # Travel now uses downloaded foley. Keep this entry point safe for existing workflows.
+    from prepare_release_sounds import prepare
+    prepare()
 
 
 if __name__ == "__main__":

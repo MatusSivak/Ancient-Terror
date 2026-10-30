@@ -33,11 +33,14 @@ public final class CardDestructionEffect extends Group {
     private final float chargeTime, splitTime, flightTime, duration;
     private final float startX, startY, startRotation, targetScale;
     private float charge, flight, separation;
+    private Runnable onTear;
+    private boolean tearStarted;
 
-    public static Completable discard(Actor card) { return play(card, false); }
-    public static Completable resolveMystery(Actor card) { return play(card, true); }
+    public static Completable discard(Actor card) { return play(card, false, null); }
+    public static Completable discard(Actor card, Runnable onTear) { return play(card, false, onTear); }
+    public static Completable resolveMystery(Actor card) { return play(card, true, null); }
 
-    private static Completable play(Actor card, boolean mystery) {
+    private static Completable play(Actor card, boolean mystery, Runnable onTear) {
         return Completable.create(subscriber -> {
             if (card == null || card.getStage() == null) { subscriber.onCompleted(); return; }
             Stage stage = card.getStage();
@@ -56,6 +59,7 @@ public final class CardDestructionEffect extends Group {
             } catch (RuntimeException | Error failure) { snapshot.dispose(); throw failure; }
             card.clearActions(); card.setTouchable(Touchable.disabled); card.remove();
             stage.addActor(effect);
+            effect.onTear = onTear;
             effect.addAction(new FastForwardAction<>(new TemporalAction(effect.duration * NORMAL_ACTION_DURATION) {
                 @Override protected void update(float percent) { effect.animate(percent * effect.duration); }
                 @Override protected void end() {
@@ -109,6 +113,10 @@ public final class CardDestructionEffect extends Group {
         separation = MathUtils.clamp((time - chargeTime) / splitTime, 0, 1);
         flight = MathUtils.clamp((time - chargeTime - splitTime) / flightTime, 0, 1);
         if (time < chargeTime) return;
+        if (!tearStarted) {
+            tearStarted = true;
+            if (onTear != null) onTear.run();
+        }
         whole.setVisible(false);
         float travel = Interpolation.pow2Out.apply(flight);
         halo.getColor().a *= Math.max(0, 1f - flight * 4f);

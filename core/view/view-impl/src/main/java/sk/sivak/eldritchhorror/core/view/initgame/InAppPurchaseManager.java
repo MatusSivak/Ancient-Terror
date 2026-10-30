@@ -52,6 +52,11 @@ public class InAppPurchaseManager {
                 return;
             }
 
+            if (LocalTesting.useLocalPurchases()) {
+                onSub.onSuccess(false);
+                return;
+            }
+
             restoreActionRef[0] = transactions -> {
                 for (Transaction transaction : transactions) {
                     if (FULL_GAME.equals(transaction.getIdentifier()) && transaction.isPurchased()) {
@@ -100,7 +105,8 @@ public class InAppPurchaseManager {
         final Action1<Throwable>[] purchaseErrorActionRef = new Action1[1];
 
         return Single.<Boolean>create(onSub -> {
-            if (Gdx.app.getType() == ApplicationType.Desktop && FULL_GAME.equals(productName)) {
+            if (LocalTesting.useLocalPurchases()
+                    || Gdx.app.getType() == ApplicationType.Desktop && FULL_GAME.equals(productName)) {
                 unlockFullGame(Gdx.app.getPreferences("AncientTerror.xml"));
                 onSub.onSuccess(true);
                 return;

@@ -257,7 +257,10 @@ public class MonsterCard extends VisTable {
         return Completable.defer(() -> {
             // Destruction owns completion; do not run the old close/display callback again.
             onDisplayHideAction = null;
-            return CardDestructionEffect.discard(this).doOnCompleted(displayHide::finishRemoval);
+            return CardDestructionEffect.discard(this, () ->
+                    sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.play(
+                            sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.Cue.MONSTER_SHEET_TEAR))
+                    .doOnCompleted(displayHide::finishRemoval);
         });
     }
 

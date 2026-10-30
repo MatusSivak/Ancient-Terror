@@ -23,6 +23,7 @@ public class ContainerBar extends Table {
     private String id;
     private boolean displayBlackContainers = false;
     private RepeatAction highlightAction;
+    private long contentsGeneration;
 
     public ContainerBar(Texture texture) {
         this.texture = texture;
@@ -39,6 +40,7 @@ public class ContainerBar extends Table {
     }
 
     public void setTotalEmptyContainers(int totalEmptyContainers) {
+        contentsGeneration++;
         this.totalEmptyContainers = totalEmptyContainers;
         displayBlackContainers = true;
         initWithEmptyContainers(totalEmptyContainers);
@@ -93,11 +95,15 @@ public class ContainerBar extends Table {
         return currentValue;
     }
 
+    /** Changes when model/HUD refresh replaces the tokens, even if values are identical. */
+    public long getContentsGeneration() { return contentsGeneration; }
+
     public void decreaseCurrentValue() {
         setCurrentValue(currentValue - 1);
     }
 
     public void setCurrentValue(int currentValue) {
+        currentValue = Math.max(0, displayBlackContainers ? Math.min(currentValue, totalEmptyContainers) : currentValue);
         this.currentValue = currentValue;
         if (!displayBlackContainers) {
             initWithEmptyContainers(currentValue);

@@ -65,8 +65,8 @@ if __name__ == "__main__":
     for i in range(1,5):
         write(f"monster_prowl_{i}", mix((0,clip(f"stones_0{i}.ogg",.65,.36),.8),
               (.015,clip(f"creature_monster_0{i}.ogg",.7,.33),.24)), -18)
-    write("travel_walk", mix((0,clip("footstep_grass_000.ogg"),.8),
-          (.24,clip("footstep_grass_002.ogg"),.65),(.48,clip("footstep_grass_003.ogg"),.5)), -18)
+    from prepare_release_sounds import prepare as prepare_release
+    prepare_release()
     clack = clip("impactMetal_light_002.ogg",.85,.13)
     write("travel_rail", mix(*[(t,clack,g) for t,g in [(0,.8),(.11,.55),(.31,.75),(.42,.5),(.62,.55),(.73,.4)]]), -17)
     water, rate = sf.read(ROOT / "source_assets/sounds/presentation/wave_01.flac", always_2d=True)

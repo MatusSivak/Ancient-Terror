@@ -35,7 +35,7 @@ public class ConfirmTestAction extends AbstractHookableAction<TestData, TestData
                 input.getUsableAssets(),
                 input.getAdditionalDicesCount(),
                 input.isCombat())
-                .subscribe(usableAssets -> doOnConfirm(usableAssets, ss));
+                .subscribe(usableAssets -> doOnConfirm(usableAssets, ss), ss::onError);
     }
 
     private void doOnConfirm(List<UsableAsset> out, SingleSubscriber<? super TestData> ss) {

@@ -137,6 +137,8 @@ android {
         }
     }
     defaultConfig {
+        // Local checkout builds exercise the locked storefront without contacting Google Play.
+        buildConfigField "boolean", "LOCAL_PURCHASES", propOrDefault("LOCAL_PURCHASES", "true").toBoolean().toString()
         applicationId androidApplicationId
         minSdkVersion 26
         multiDexEnabled true

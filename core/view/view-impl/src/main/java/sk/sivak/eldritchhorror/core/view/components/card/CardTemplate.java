@@ -54,6 +54,15 @@ public class CardTemplate extends WidgetGroup {
     private Image unavailableShade;
     private boolean unavailableForSelection;
     private Image disabledImage;
+    private boolean disabledBadgeVisible = true;
+
+    /** A test can use a passive bonus even when the card's activated ability is exhausted. */
+    public void setDisabledBadgeVisible(boolean visible) {
+        disabledBadgeVisible = visible;
+        if (disabledImage != null) disabledImage.setVisible(visible);
+    }
+
+    public boolean isDisabledBadgeVisible() { return disabledBadgeVisible; }
 
     private CardTemplate(String textureId,
                          String title,
@@ -225,6 +234,7 @@ public class CardTemplate extends WidgetGroup {
         String disabledTexture = "card/disabled.png";
         getTextureAsync(disabledTexture).subscribe(t -> {
             disabledImage = new Image(getTextureRegionDrawable(disabledTexture));
+            disabledImage.setVisible(disabledBadgeVisible);
             disabledImage.setOrigin(Align.center);
             disabledImage.setScale(0.70f);
             disabledImage.setPosition(CARD_WIDTH/2f-disabledImage.getWidth()/2f,

@@ -24,15 +24,14 @@ import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.
  * One clock drives every layer so the effect stays coherent at fast-forward speed.
  */
 final class GateDissipateAnimation extends Group {
-    private static final float SHUDDER_TIME = 0.45f;
-    private static final float FADE_TIME = 1.55f;
-    private static final float TOTAL_TIME = SHUDDER_TIME + FADE_TIME;
+    static final float SPIN_UP_TIME = 0.8f;
+    private static final float FADE_TIME = 1.2f;
+    private static final float TOTAL_TIME = SPIN_UP_TIME + FADE_TIME;
     private static final int WISPS = 30;
     /** Degrees per second of the open gate (360 degrees per 8 seconds in NewGateAnimatedImage). */
     static final float IDLE_SPIN = 45f;
     static final float CORE_PEAK_SPIN = 600f;
     static final float HALO_PEAK_SPIN = 260f;
-    private static final float SPIN_EASE = 3f;
 
     private final Group portrait;
     private final Actor halo;
@@ -80,17 +79,16 @@ final class GateDissipateAnimation extends Group {
     private void animate(float elapsed) {
         core.setRotation(coreRotation + spinDegrees(elapsed, CORE_PEAK_SPIN));
         halo.setRotation(haloRotation + spinDegrees(elapsed, HALO_PEAK_SPIN));
-        if (elapsed < SHUDDER_TIME) {
-            float progress = elapsed / SHUDDER_TIME;
+        if (elapsed < SPIN_UP_TIME) {
+            float progress = elapsed / SPIN_UP_TIME;
             float tremor = MathUtils.sin(progress * MathUtils.PI);
             // The vortex spins up and swells as the seal takes hold.
             core.setScale(coreScale * (1f + 0.12f * tremor));
             halo.setScale(haloScale * (1f + 0.06f * tremor));
             halo.getColor().a = MathUtils.lerp(haloAlpha, 1f, progress);
-            portrait.setRotation(1.5f * MathUtils.sin(progress * MathUtils.PI * 6f) * tremor);
             mist.update(0f);
         } else {
-            float progress = Math.min((elapsed - SHUDDER_TIME) / FADE_TIME, 1f);
+            float progress = Math.min((elapsed - SPIN_UP_TIME) / FADE_TIME, 1f);
             portrait.setRotation(0f);
             core.setScale(coreScale * MathUtils.lerp(1f, 0.08f, Interpolation.pow2In.apply(Math.min(progress / 0.7f, 1f))));
             core.getColor().a = 1f - Interpolation.pow2In.apply(Math.min(progress / 0.7f, 1f));
@@ -102,15 +100,16 @@ final class GateDissipateAnimation extends Group {
 
     /**
      * Starts at the open gate's idle speed, in its idle direction, and accelerates
-     * smoothly over the whole animation so the spin is fastest as the gate vanishes.
+     * to full speed while still opaque, then holds that speed throughout dissipation.
      */
     static float spinDegrees(float elapsed, float peakSpeed) {
         float time = MathUtils.clamp(elapsed, 0f, TOTAL_TIME);
-        float progress = time / TOTAL_TIME;
+        float ramp = Math.min(time, SPIN_UP_TIME);
         float extra = peakSpeed - IDLE_SPIN;
-        // Integral of IDLE_SPIN + extra * progress^SPIN_EASE.
-        return IDLE_SPIN * time
-                + extra * TOTAL_TIME / (SPIN_EASE + 1f) * (float) Math.pow(progress, SPIN_EASE + 1f);
+        // Integral of a smoothstep velocity ramp; no jump when the mist begins.
+        float p = ramp / SPIN_UP_TIME;
+        return IDLE_SPIN * ramp + extra * SPIN_UP_TIME * (p * p * p - .5f * p * p * p * p)
+                + peakSpeed * Math.max(0f, time - SPIN_UP_TIME);
     }
 
     @Override protected void setStage(Stage stage) {
@@ -157,9 +156,10 @@ final class GateDissipateAnimation extends Group {
                 float travel = Interpolation.pow2Out.apply(life);
                 float distance = radius * (0.6f + 0.3f * size[i] + 1.2f * drift[i] * travel);
                 // Mist rises like warm air and wavers as it thins out.
-                float x = center.x + MathUtils.cosDeg(angle[i]) * distance
+                float swirl = angle[i] + 155f * travel;
+                float x = center.x + MathUtils.cosDeg(swirl) * distance
                         + MathUtils.sin(sway[i] + life * 5f) * radius * 0.12f * life;
-                float y = center.y + MathUtils.sinDeg(angle[i]) * distance + radius * 1.6f * drift[i] * life * life;
+                float y = center.y + MathUtils.sinDeg(swirl) * distance + radius * 1.6f * drift[i] * life * life;
                 float puff = radius * size[i] * (0.45f + 0.9f * travel);
                 float alpha = Math.min(life / 0.15f, 1f) * (1f - Interpolation.pow2In.apply(life)) * 0.42f;
                 batch.setColor(tint.r, tint.g, tint.b, alpha * parentAlpha);

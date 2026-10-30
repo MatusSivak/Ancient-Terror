@@ -186,6 +186,7 @@ public class TestViewImpl implements TestView {
         float cardScale = Math.max(MIN_CARD_SCALE, Math.min(MAX_CARD_SCALE, Math.min(scaleForHeight, scaleForWidth)));
         CardTemplate[] cardTemplates = collectToList(map(usableAssets, it -> {
             CardTemplate cardTemplate = CardTemplate.buildCard(it.getCardInfo());
+            cardTemplate.setDisabledBadgeVisible(false);
             cardTemplate.setScale(cardScale);
             return cardTemplate;
         })).toArray(new CardTemplate[usableAssets.size()]);
@@ -615,7 +616,7 @@ public class TestViewImpl implements TestView {
                 positions -> monsterCombatTableStack.peek().destroySanity(positions,
                         () -> {
                             shakeInvestigatorStands(true);
-                            return loseTokenOnImpact(bar, PrePlayedTokenLoss::recordSanity, () -> impactTokenView.loseSanity(0));
+                            return loseTokenOnImpact(bar, () -> PrePlayedTokenLoss.recordSanity(bar), () -> impactTokenView.loseSanity(0));
                         }));
     }
 
@@ -626,7 +627,7 @@ public class TestViewImpl implements TestView {
                 positions -> monsterCombatTableStack.peek().destroyHealth(positions,
                         () -> {
                             shakeInvestigatorStands(false);
-                            return loseTokenOnImpact(bar, PrePlayedTokenLoss::recordHealth, () -> impactTokenView.loseHealth(0));
+                            return loseTokenOnImpact(bar, () -> PrePlayedTokenLoss.recordHealth(bar), () -> impactTokenView.loseHealth(0));
                         }));
     }
 
@@ -639,12 +640,12 @@ public class TestViewImpl implements TestView {
 
     /** One token leaves the bar and tears per fireball impact; the later model-driven loss skips it. */
     private Completable loseTokenOnImpact(ContainerBar bar, Runnable record, Func0<Completable> loseToken) {
-        if (bar.getCurrentValue() <= 0) {
-            return Completable.complete();
-        }
-        record.run();
-        TokenSounds.playLeave();
-        return loseToken.call();
+        return Completable.defer(() -> {
+            if (bar.getCurrentValue() <= 0) return Completable.complete();
+            record.run();
+            TokenSounds.playLeave();
+            return loseToken.call();
+        });
     }
 
     private Completable destroySanityOrHealth(int tokensCount, ContainerBar containerBar, Function<List<Vector2>, Completable> destroyFunction) {
