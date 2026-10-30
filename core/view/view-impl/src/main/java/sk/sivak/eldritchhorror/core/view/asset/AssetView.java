@@ -51,6 +51,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FADING_EFFECT_DURATION;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
 import static sk.sivak.eldritchhorror.core.constants.displayasset.AssetOriginType.CENTER;
@@ -219,6 +220,10 @@ public class AssetView {
     }
 
     private void displayCard(CardInfo cardInfo, AssetOriginType assetOriginType) {
+        displayCard(cardInfo, assetOriginType, false);
+    }
+
+    private void displayCard(CardInfo cardInfo, AssetOriginType assetOriginType, boolean gained) {
         cardTemplate = CardTemplate.buildCard(cardInfo);
         cardTemplate.setOrigin(CARD_ORIGIN_X, CARD_ORIGIN_Y);
         cardTemplate.setScale(0.0f);
@@ -229,9 +234,16 @@ public class AssetView {
         }
         cardTemplate.getColor().a = 0f;
 
-        float availableHeight = VIEWPORT_HEIGHT - InfoStage.getBottomHeight() - 5;
+        float availableHeight = VIEWPORT_HEIGHT - InfoStage.getBottomHeight() - (gained ? 25 : 5);
         float targetScale = availableHeight / CARD_HEIGHT;
         float bottomOffset = -(CARD_HEIGHT - (CARD_HEIGHT * targetScale)) / 2 + InfoStage.getBottomHeight();
+        if (gained) {
+            InfoStage.addSmallActorToInfoStage(cardTemplate);
+            sk.sivak.eldritchhorror.core.view.components.card.CardArrivalEffect.play(cardTemplate, cardInfo,
+                    VIEWPORT_WIDTH / 2 - CARD_ORIGIN_X, bottomOffset, targetScale);
+            cardTemplate.addListener(new CardClickListener());
+            return;
+        }
         cardTemplate.addAction(
                 new FastForwardAction<>(parallel(
                         color(new Color(0xffffffff), ACTION_DURATION),
@@ -319,7 +331,7 @@ public class AssetView {
             originalBottomHeight = InfoStage.getBottomHeight();
             displayGainButton(onSub);
             displayTable(get("asset.gained", cardInfo.getName()), null);
-            displayCard(cardInfo, CENTER);
+            displayCard(cardInfo, CENTER, true);
         });
     }
 
@@ -334,7 +346,7 @@ public class AssetView {
         ButtonUtils.addClickListener(discardButton, () -> onGainButtonClick(completableSubscriber));
 
 
-        InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(0.5f), Actions.run(() -> {
+        InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(1.05f * NORMAL_ACTION_DURATION), Actions.run(() -> {
             InfoStage.showButton(discardButton, VIEWPORT_WIDTH / 2 - discardButton.getWidth() / 2, originalBottomHeight);
         }))));
     }

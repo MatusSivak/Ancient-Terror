@@ -143,7 +143,16 @@ public class GameplaySoundsTest {
         for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) paths.add(cue.path);
         for (UiSounds.Cue cue : UiSounds.Cue.values()) paths.add(cue.path);
         for (TokenSounds.Cue cue : TokenSounds.Cue.values()) paths.add(cue.path);
+        paths.addAll(Arrays.asList(sk.sivak.eldritchhorror.core.view.map.monster.MonsterFootsteps.SOUNDS));
         return paths;
+    }
+
+    @Test public void travelUsesTheSelectedTransportCue() {
+        assertEquals(TRAVEL_SEA, GameplaySounds.travelCue(sk.sivak.eldritchhorror.core.constants.location.PathType.SHIP));
+        assertEquals(TRAVEL_RAIL, GameplaySounds.travelCue(sk.sivak.eldritchhorror.core.constants.location.PathType.TRAIN));
+        assertEquals(TRAVEL_WALK, GameplaySounds.travelCue(sk.sivak.eldritchhorror.core.constants.location.PathType.WALK));
+        assertNotEquals(TRAVEL_SEA.path, TRAVEL_RAIL.path);
+        assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
     }
 
     @Test public void pickupsAndHudArrivalsHaveDistinctMatchingSounds() {

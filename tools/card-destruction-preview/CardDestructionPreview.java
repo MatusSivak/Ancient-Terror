@@ -74,6 +74,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
                 checkDiscard(false, fast);
                 checkDiscard(true, fast);
                 checkMystery(false, fast);
+                checkRumor(fast);
                 checkMonster(false, fast);
                 checkMonster(true, fast);
             }
@@ -253,6 +254,40 @@ public class CardDestructionPreview extends ApplicationAdapter {
             if (frames != null && frame % 2 == 0) draw(frames + "/frame-" + String.format("%03d", frame / 2));
         }
         require(split && done.get() == 1 && animation.getStage() == null, "Effect completion or cleanup");
+    }
+
+    private void checkRumor(boolean fast) throws Exception {
+        FastForwardAction.turnOff();
+        sk.sivak.eldritchhorror.core.constants.RumorCardInfo info =
+                (sk.sivak.eldritchhorror.core.constants.RumorCardInfo) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class[]{sk.sivak.eldritchhorror.core.constants.RumorCardInfo.class}, (p,m,a) -> {
+                    switch(m.getName()) {
+                        case "getId": return "preview-rumor";
+                        case "getTitleText": return "A Rumor Resolved";
+                        case "getFlavorText": return "The whispers finally fade.";
+                        case "getObjectiveText": return "Spend 2 Clues to resolve this rumor.";
+                        case "getFailureText": return "Lose 1 Sanity.";
+                        case "getReckoningText": return "Advance the countdown.";
+                        case "getCluesRequired": return 2;
+                        case "getTimeRemaining": return 3;
+                        case "isStormSpawned": return false;
+                        default: return null;
+                    }
+                });
+        sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard card = BigActorsManager.getRumorCard();
+        card.init(info); BigActorsManager.displayOrHideRumor(); tick(100);
+        require(card.getStage()==stage,"Rumor did not open");
+        int buffers = buffers(); AtomicInteger done = new AtomicInteger();
+        if(fast)FastForwardAction.turnOn();
+        new MonsterViewImpl().tearRumorCardApart().subscribe(done::incrementAndGet);
+        Group animation = stage.getRoot().findActor("mystery-resolution");
+        require(animation!=null,"Rumor still uses the old tear");
+        runEffect(animation,done,fast?null:"rumor",true);
+        require(card.getStage()==null&&buffers()==buffers&&!BigActorsManager.isLocked(),"Rumor destruction leaked state");
+        FastForwardAction.turnOff();
+        card.init(info);BigActorsManager.displayOrHideRumor();tick(100);
+        require(card.getStage()==stage&&card.getColor().a==1,"Next rumor could not reopen");
+        BigActorsManager.displayOrHideRumor();tick(100);
     }
 
     private void checkSpeedChangeAndInterruption() throws Exception {

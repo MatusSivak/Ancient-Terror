@@ -107,7 +107,7 @@ public class ActionButtonsTable extends Table {
         ActionButtonData actionButtonData = buttonWithText.getActionButton().getActionButtonData();
         buttonWithText.getActionButton().setChecked(true);
         if (actionButtonData.isEnabled()) {
-            UiSounds.play(UiSounds.Cue.BUTTON_CLICK);
+            UiSounds.play(UiSounds.Cue.ACTION_CLICK);
             fireEnabledButtonClickedEvent(actionButtonData);
         } else {
             fireDisabledButtonClickedEvent(actionButtonData);

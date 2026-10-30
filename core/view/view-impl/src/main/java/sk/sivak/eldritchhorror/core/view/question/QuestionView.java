@@ -37,10 +37,12 @@ public class QuestionView {
     private SelectComponentsTable selectComponentsTable;
     private Answer answer;
     private Runnable beforeOnSubAction;
+    private Runnable restoreTestUi = () -> {};
 
     public <RD, AD> Single<Answer<RD, AD>> ask(Question<RD> question) {
         return Single.create(subscriber -> {
             beforeOnSubAction = () -> {};
+            restoreTestUi = question.isHideTestUi() ? TestPromptVisibility.hide(InfoStage.getStageSafe().getRoot()) : () -> {};
             answer = new Answer<RD, AD>();
             originalBottomHeight = InfoStage.getBottomHeight();
             displayButtons(question.getOptions(), subscriber);
@@ -215,6 +217,7 @@ public class QuestionView {
             Answer<RD, AD> answer = getAnswer();
             answer.setResponseData(option.getValue());
             beforeOnSubAction.run();
+            restoreTestUi.run();
             subscriber.onSuccess(answer);
         };
     }

@@ -3,6 +3,8 @@
 Requires numpy and soundfile. See assets/sounds/LANDING_AUDIO.md.
 """
 from zipfile import ZipFile
+import numpy as np
+import soundfile as sf
 import prepare_tabletop_sounds as foley
 
 foley.SOURCE = foley.ROOT / "source_assets/sounds/landing"
@@ -19,3 +21,8 @@ if __name__ == "__main__":
             "\n".join(line.rstrip() for line in license_text.splitlines()).strip() + "\n",
             encoding="utf-8", newline="\n")
     foley.main()
+    # Give the soft investigator footfall more presence without clipping the transient.
+    path = foley.OUTPUT / "map_investigator_impact.wav"
+    data, rate = sf.read(path)
+    data = .92 * np.tanh(data * 2.6 / .92)
+    sf.write(path, data, rate, subtype="PCM_16")

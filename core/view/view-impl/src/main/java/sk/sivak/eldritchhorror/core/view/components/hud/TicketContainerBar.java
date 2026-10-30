@@ -29,6 +29,11 @@ public class TicketContainerBar extends ContainerBar {
         currentValue++;
     }
 
+    public Image getEmptyTicketImage() {
+        validate();
+        return (Image) getCells().get(currentValue).getActor();
+    }
+
     public void clearTickets() {
         clearChildren();
         java.util.Arrays.fill(slots, null);

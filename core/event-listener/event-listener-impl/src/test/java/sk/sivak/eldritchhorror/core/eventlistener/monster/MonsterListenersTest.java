@@ -153,7 +153,7 @@ public class MonsterListenersTest {
     }
 
     @Test
-    public void huntingByakheeMovesAndDelaysWithoutOpeningTheMonsterSheet() {
+    public void huntingByakheeExplainsSpawnBeforeMovingAndDelaying() {
         InvestigatorId target = InvestigatorId.values()[0];
         investigator(target, SPACE_2);
         nearest = new FindNearestData(SPACE_2, 1, Arrays.asList(SPACE_1, SPACE_2));
@@ -162,7 +162,8 @@ public class MonsterListenersTest {
         drain();
         assertEquals(SPACE_2, monster.getCurrentLocation());
         assertTrue(effects.contains("becomeDelayed"));
-        assertFalse(effects.contains("highlightSpawnText"));
+        assertTrue(effects.contains("highlightSpawnText"));
+        assertTrue(effects.indexOf("highlightSpawnText") < effects.indexOf("moveMonster:" + SPACE_2));
         assertTrue(effects.indexOf("moveMonster:" + SPACE_2) < effects.indexOf("becomeDelayed"));
     }
 

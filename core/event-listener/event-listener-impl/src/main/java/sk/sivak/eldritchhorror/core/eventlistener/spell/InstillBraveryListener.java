@@ -64,6 +64,7 @@ public class InstillBraveryListener extends AbstractSpellListener<InstillBravery
                 Question<Boolean> question = new Question<>();
                 question.setTitle("Cast Instill Bravery?");
                 question.setPortraitBeforeTitle(spellOwnerId);
+                question.setHideTestUi(true);
                 question.setOptions(Arrays.asList(new Question.Option<>("Yes", true), new Question.Option<>("No", false)));
 
                 ServicePlatform.get().getGameService().ask(question)
@@ -82,10 +83,11 @@ public class InstillBraveryListener extends AbstractSpellListener<InstillBravery
             }
 
             ServicePlatform.get().getService().hold();
-            // Only an accepted cast needs the owner's rules context; keep the current sheet visible.
+            // Wait for consent before focusing the caster and rolling their Lore.
             if (spellOwnerId != targetInvestigatorId) {
                 ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(spellOwnerId);
             }
+            ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
             ServicePlatform.get().getTestService().test(Stat.LORE, 0, 16,
                     new TestFlavorRequest(TestFlavorType.SPELL)).subscribe(
                             testData -> disableAndFlipCard(testData, input, targetInvestigatorId));

@@ -66,8 +66,10 @@ public class DefensiveSpellPromptTest {
         platform.setInvestigatorService(mock(InvestigatorService.class, (name, a) -> {
             if (name.equals("changeActiveInvestigator")) pending.add(() -> { active = (InvestigatorId)a[0]; effects.add("change"); });
             else if (name.equals("showActiveInvestigator")) {
-                assertEquals(false, a[0]);
-                pending.add(() -> assertEquals(protectedId, active));
+                pending.add(() -> {
+                    assertEquals(Boolean.TRUE.equals(a[0]) ? owner : protectedId, active);
+                    if (Boolean.TRUE.equals(a[0])) effects.add("focusCaster");
+                });
             } else throw new AssertionError("Unexpected investigator UI: " + name);
             return null;
         }));
@@ -97,13 +99,15 @@ public class DefensiveSpellPromptTest {
         assertEquals("investigator/" + owner.name() + ".png", prompt.getPortraitTextureName());
         assertTrue(prompt.getTitle().contains(spell.getName()));
         assertTrue(prompt.getTextureNameList().isEmpty());
+        assertTrue(prompt.isHideTestUi());
         assertEquals(2, prompt.getOptions().size());
         assertEquals(Boolean.TRUE, prompt.getOptions().get(0).getValue());
         assertEquals(Boolean.FALSE, prompt.getOptions().get(1).getValue());
         assertSame(loss, restored);
         assertEquals(protectedId, active);
         assertEquals(accept ? 1 : 3, loss.getAmount());
-        assertEquals(accept ? (self ? 3 : 5) : 0, effects.size());
+        assertEquals(accept ? (self ? 4 : 6) : 0, effects.size());
+        if (accept) assertTrue(effects.indexOf("focusCaster") < effects.indexOf("test"));
     }
 
     private AbstractSpellBackListener back(SpellInfo spell, InvestigatorId protectedId) {

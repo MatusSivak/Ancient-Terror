@@ -22,6 +22,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.*;
 public class ItemActor extends Image {
 
     protected Vector2 holderLocation = new Vector2(0, 0);
+    private Image holderImage;
     private final Color materializeColor = new Color(.95f, .77f, .4f, 1);
     private TokenMaterializeEffect materializeEffect;
     private float materializeProgress = 1;
@@ -86,33 +87,47 @@ public class ItemActor extends Image {
             }
         };
 
-        MoveToAction moveToHolderAction = new MoveToAction();
-        moveToHolderAction.setPosition(holderLocation.x, holderLocation.y);
-        moveToHolderAction.setDuration(actionDuration);
-        moveToHolderAction.setInterpolation(Interpolation.sine);
-        moveToHolderAction.setActor(this);
-
-        RotateToAction rotateToAction = new RotateToAction();
-        rotateToAction.setRotation(360);
-        rotateToAction.setDuration(actionDuration);
-        rotateToAction.setInterpolation(Interpolation.sine);
-        rotateToAction.setActor(this);
-
-        ScaleToAction scaleDownAction = new ScaleToAction();
-        scaleDownAction.setScale(1f);
-        scaleDownAction.setDuration(actionDuration);
-        scaleDownAction.setActor(this);
-
         addAction(Actions.sequence(
                 new FastForwardAction(reveal),
-                new FastForwardAction(Actions.parallel(
-                        moveToHolderAction,
-                        rotateToAction,
-                        scaleDownAction
-                )),
-                Actions.run(onSub::onCompleted),
-                Actions.run(this::remove)
+                new FastForwardAction(createHolderFlight(actionDuration)),
+                Actions.run(() -> { remove(); onSub.onCompleted(); })
         ));
+    }
+
+    private TemporalAction createHolderFlight(float duration) {
+        return new TemporalAction(duration) {
+            private float startX, startY, scaleX, scaleY, rotation;
+            private final Vector2 lower = new Vector2(), upper = new Vector2();
+
+            @Override protected void begin() {
+                startX = getX(); startY = getY(); scaleX = getScaleX(); scaleY = getScaleY(); rotation = getRotation();
+            }
+
+            @Override protected void update(float percent) {
+                float targetX = holderLocation.x, targetY = holderLocation.y, targetScaleX = 1, targetScaleY = 1;
+                if (holderImage != null) {
+                    holderImage.validate();
+                    holderImage.localToStageCoordinates(lower.set(holderImage.getImageX(), holderImage.getImageY()));
+                    holderImage.localToStageCoordinates(upper.set(holderImage.getImageX() + holderImage.getImageWidth(),
+                            holderImage.getImageY() + holderImage.getImageHeight()));
+                    getParent().stageToLocalCoordinates(lower);
+                    getParent().stageToLocalCoordinates(upper);
+                    targetScaleX = (upper.x - lower.x) / getWidth();
+                    targetScaleY = (upper.y - lower.y) / getHeight();
+                    // Scaling happens around our origin, not around the destination's bottom-left corner.
+                    targetX = lower.x - getOriginX() * (1 - targetScaleX);
+                    targetY = lower.y - getOriginY() * (1 - targetScaleY);
+                }
+                float travel = Interpolation.sine.apply(percent);
+                setPosition(MathUtils.lerp(startX, targetX, travel), MathUtils.lerp(startY, targetY, travel));
+                setScale(MathUtils.lerp(scaleX, targetScaleX, percent), MathUtils.lerp(scaleY, targetScaleY, percent));
+                setRotation(MathUtils.lerp(rotation, 360, travel));
+            }
+        };
+    }
+
+    public void setHolderImage(Image holderImage) {
+        this.holderImage = holderImage;
     }
 
     public void setHolderLocation(Vector2 holderLocation) {

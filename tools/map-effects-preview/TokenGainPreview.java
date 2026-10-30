@@ -11,6 +11,10 @@ import java.lang.reflect.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import sk.sivak.eldritchhorror.core.view.action.GainTokenHelper;
+import sk.sivak.eldritchhorror.core.view.action.ticket.TicketActionView;
+import sk.sivak.eldritchhorror.core.constants.location.PathType;
+import sk.sivak.eldritchhorror.core.view.components.hud.TicketContainerBar;
+import rx.Completable;
 import sk.sivak.eldritchhorror.core.view.components.ItemActor;
 import sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -38,10 +42,47 @@ public class TokenGainPreview extends ApplicationAdapter {
             for (String texture : new String[]{CLUE_TOKEN, HEALTH_ICON, SANITY_ICON, FOCUS_TOKEN}) {
                 for (int mode = 0; mode < 4; mode++) check(texture, mode);
             }
+            for (int mode = 0; mode < 4; mode++) checkTickets(mode);
             require(tracked() == 0, "Fast-forward action leak");
-            System.out.println("PASS: generated clue/health/sanity/focus, normal/fast/speed-change/large-delta, HUD count, destination and cleanup");
+            System.out.println("PASS: generated resources and both ticket slots, exact landing bounds, lazy queue construction, normal/fast/speed-change/large-delta, HUD count and cleanup");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+    private void checkTickets(int mode) throws Exception {
+        FastForwardAction.turnOff();
+        TicketContainerBar bar = InfoStage.getInvestigatorHud().getTicketBar();
+        bar.clearTickets();
+        InfoStage.getInvestigatorHud().setPosition(15, 450);
+        InfoStage.getInvestigatorHud().validate(); bar.validate();
+        TicketActionView view = new TicketActionView(null);
+        Completable[] gains = {view.gainTravelTicket(PathType.TRAIN), view.gainTravelTicket(PathType.SHIP)};
+        require(findToken(stage.getRoot()) == null, "Queued ticket appeared before it was received");
+        for (int slot = 0; slot < 2; slot++) {
+            FastForwardAction.turnOff();
+            AtomicInteger done = new AtomicInteger(); gains[slot].subscribe(done::incrementAndGet);
+            ItemActor ticket = findToken(stage.getRoot());
+            Group parent = ticket.getParent();
+            require(ticket != null && bar.getCurrentValue() == slot, "Ticket filled its slot too early");
+            for (int frame = 0; frame < 150; frame++) {
+                if (mode == 1 || (mode == 2 && frame == 75)) FastForwardAction.turnOn();
+                if (mode == 2 && frame == 75) InfoStage.getInvestigatorHud().moveBy(20, -12);
+                stage.act(mode == 3 ? 4 : 1f/60);
+                if (mode == 0 && (frame == 116 || frame == 125)) draw("ticket-"+slot+"-"+frame);
+            }
+            require(done.get() == 1 && bar.getCurrentValue() == slot + 1, "Ticket gain did not finish once");
+            bar.validate();
+            Image filled = bar.getTicketImage(slot == 0 ? PathType.TRAIN : PathType.SHIP);
+            filled.validate();
+            Vector2 expectedLower = filled.localToStageCoordinates(new Vector2(filled.getImageX(), filled.getImageY()));
+            Vector2 expectedUpper = filled.localToStageCoordinates(new Vector2(filled.getImageX()+filled.getImageWidth(),
+                    filled.getImageY()+filled.getImageHeight()));
+            Vector2 actualLower = parent.localToStageCoordinates(ticket.localToParentCoordinates(new Vector2()));
+            Vector2 actualUpper = parent.localToStageCoordinates(ticket.localToParentCoordinates(new Vector2(ticket.getWidth(), ticket.getHeight())));
+            require(actualLower.epsilonEquals(expectedLower, .02f) && actualUpper.epsilonEquals(expectedUpper, .02f),
+                    "Ticket landing bounds differ from the filled HUD slot: " + actualLower + " / " + actualUpper
+                            + " expected " + expectedLower + " / " + expectedUpper);
+            require(ticket.getStage() == null && tracked() == 0, "Ticket left an actor or action behind");
+        }
     }
     private void check(String texture, int mode) throws Exception {
         FastForwardAction.turnOff();

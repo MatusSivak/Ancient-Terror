@@ -215,7 +215,7 @@ public class MonsterViewImpl implements MonsterView {
     public Completable tearRumorCardApart() {
         return Completable.create(onSub -> {
             GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD);
-            MonsterCardEffect.tearAppart(BigActorsManager.getRumorCard()).subscribe(onSub::onCompleted);
+            BigActorsManager.getRumorCard().destroyWithEffect().subscribe(onSub::onCompleted, onSub::onError);
         });
     }
 

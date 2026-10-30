@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 import com.badlogic.gdx.utils.Align;
 import java8.features.function.Predicate;
 import java8.features.stream.Stream;
@@ -64,7 +65,7 @@ public class SelectMultipleInvestigators {
         abilityLabel = new Label("", new Label.LabelStyle(
                 CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4),
                 new Color(0.93f, 0.9f, 0.81f, 1f)));
-        abilityLabel.setFontScale(0.27f);
+        abilityLabel.setFontScale(0.25f);
         abilityLabel.setAlignment(Align.topLeft);
         abilityLabel.setWrap(true);
 
@@ -100,8 +101,13 @@ public class SelectMultipleInvestigators {
                 investigatorName.setText(info.getInvestigatorName());
                 String ability = info.getAbilityText();
                 if (ability != null && ability.startsWith("investigator.")) ability = get(ability);
-                abilityLabel.setText(ability == null || ability.isEmpty() ? "" :
-                        "[#E8D9B0]" + get("investigator.label.ability") + "[]\n" + ability);
+                String action = info.getActionText();
+                if (action != null && action.startsWith("investigator.")) action = get(action);
+                String details = ability == null || ability.isEmpty() ? "" :
+                        "[#E8D9B0]" + get("investigator.label.ability") + "[]\n" + ability;
+                if (action != null && !action.isEmpty()) details += "\n[#E8D9B0]"
+                        + get("investigator.label.action") + "[]\n" + action;
+                abilityLabel.setText(MarkupText.replaceColoredGlyphKeywords(details));
                 String firstName = info.getInvestigatorName().trim().split("\\s+")[0];
                 confirmButton.setText(get("investigator.confirmNamed", firstName));
                 quoteLabel.setText("\"" + info.getQuote() + "\"");
@@ -139,11 +145,11 @@ public class SelectMultipleInvestigators {
         detailsPanel.setBackground(SelectionPanelStyle.panel("0C1714F5", "676044"));
         detailsPanel.setBounds(VIEWPORT_WIDTH - panelWidth - 12f, 12f, panelWidth, VIEWPORT_HEIGHT - 24f);
         detailsPanel.pad(14f);
-        detailsPanel.add(investigatorName).growX().height(48f).padBottom(6f).row();
+        detailsPanel.add(investigatorName).growX().height(40f).padBottom(6f).row();
         Image divider = new Image(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.PURE_WHITE_BACKGROUND));
         divider.setColor(Color.valueOf("75633E"));
         detailsPanel.add(divider).growX().height(1f).padBottom(8f).row();
-        float chartSize = Math.min(panelWidth - 28f, 204f);
+        float chartSize = Math.min(panelWidth - 28f, 150f);
         detailsPanel.add(labeledStatChart).size(chartSize).row();
         Table description = new Table();
         description.top();

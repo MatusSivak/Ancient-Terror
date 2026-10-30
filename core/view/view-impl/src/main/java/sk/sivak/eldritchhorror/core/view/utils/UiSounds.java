@@ -20,9 +20,10 @@ import sk.sivak.eldritchhorror.core.view.components.hud.HudButton;
 public final class UiSounds {
     public enum Cue {
         BUTTON_CLICK("button_click", .75f), HUD_CLICK("hud_click", .80f),
+        ACTION_CLICK("action_click", .85f),
         CARD_OPEN("card_open", .80f), CARD_CLOSE("card_close", .72f),
-        CARD_OPEN_SPELL("card_open_spell", .80f), CARD_OPEN_ARTIFACT("card_open_artifact", .85f),
-        CARD_OPEN_CONDITION("card_open_condition", .80f), CARD_OPEN_ASSET("card_open_asset", .80f),
+        CARD_OPEN_SPELL("card_reveal_spell", .90f), CARD_OPEN_ARTIFACT("card_reveal_artifact", .90f),
+        CARD_OPEN_CONDITION("card_reveal_condition", .90f), CARD_OPEN_ASSET("card_reveal_asset", .90f),
         SHEET_OPEN("sheet_open", .80f), SHEET_CLOSE("sheet_close", .72f),
         ENCOUNTER_OPEN("encounter_open", .80f), ENCOUNTER_CLOSE("encounter_close", .72f),
         MYSTERY_OPEN("mystery_open", .82f), MYSTERY_CLOSE("mystery_close", .72f),
@@ -87,6 +88,8 @@ public final class UiSounds {
 
     /** Safe to call from both a button factory and its action binding. No ChangeEvent sounds. */
     public static void attachButton(Button button) {
+        // The action tile includes its caption and plays one cue from the wrapper's click handler.
+        if (button instanceof sk.sivak.eldritchhorror.core.view.components.action.ActionButton) return;
         if (clickListener(button) == null) button.addCaptureListener(new ButtonSoundListener(button));
     }
 

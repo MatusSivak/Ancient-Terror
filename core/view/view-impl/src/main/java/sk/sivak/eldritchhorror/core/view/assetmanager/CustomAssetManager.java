@@ -379,6 +379,11 @@ public class CustomAssetManager extends AssetManager {
             soundPaths.add(path);
         }
         load(TICK, Texture.class);
+        // Keep the next setup screen ahead of the large gameplay preload queue.
+        for (String name : new String[]{"azathoth", "cthulhu", "shub_niggurath", "yog_sothoth", "yig"}) {
+            load("ancient_one/button_" + name + ".jpg", Texture.class);
+        }
+        load("ancient_one/lock.png", Texture.class);
         load("background/gray.jpg", Texture.class);
         load("background/pure_white.png", Texture.class);
     }

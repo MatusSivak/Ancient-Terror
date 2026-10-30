@@ -32,7 +32,7 @@ public class MonsterImage extends Image {
     private static final float RECKONING_PULSE_SPEED = 4f;
     private static final float RECKONING_PULSE_MIN_ALPHA = 0.0f;
     private static final float RECKONING_PULSE_MAX_ALPHA = 0.75f;
-    private static final float MONSTER_SCALE_FACTOR = 0.9f;
+    private static final float MONSTER_SCALE_FACTOR = 0.99f;
     private static final float SQUISH_STRETCH_DURATION = 0.9f;
     private static final float SQUISH_STRETCH_SCALE_DELTA = 0.05f;
 

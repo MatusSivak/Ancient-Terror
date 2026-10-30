@@ -16,6 +16,10 @@ import java.util.Set;
 
 public class Question<RD> {
     private String title;
+    private boolean hideTestUi;
+
+    public boolean isHideTestUi() { return hideTestUi; }
+    public void setHideTestUi(boolean hideTestUi) { this.hideTestUi = hideTestUi; }
     private String portraitTextureName;
     private List<Option<RD>> options;
     private SelectComponentsTableData selectComponentsTableData;

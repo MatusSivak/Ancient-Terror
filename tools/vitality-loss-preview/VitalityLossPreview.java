@@ -121,7 +121,15 @@ public class VitalityLossPreview extends ApplicationAdapter {
             require(done.get() == 3, "Zero loss stalled the encounter");
             bar.setCurrentValue(6);
             (sanity ? view.loseSanity(6) : view.loseHealth(6)).subscribe(done::incrementAndGet);
-            FastForwardAction.turnOn(); tick(12); FastForwardAction.turnOff();
+            FastForwardAction.turnOn();
+            stage.act(.02f);
+            require(bar.getCurrentValue() == 5, "Fast-forward collapsed the departure delay");
+            stage.act(.011f);
+            require(bar.getCurrentValue() == 4, "Fast-forward skipped the second departure");
+            // A slow frame must not release all remaining tokens together.
+            stage.act(.3f);
+            require(bar.getCurrentValue() == 3, "Slow frame collapsed the remaining departures");
+            tick(22); FastForwardAction.turnOff();
             require(bar.getCurrentValue() == 0 && done.get() == 4 && effects() == 0 && tracked() == 0,
                     "Fast-forward during a cascade lost tokens, completed early or leaked actions");
         }

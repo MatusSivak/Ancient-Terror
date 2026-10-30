@@ -586,26 +586,27 @@ public class GameViewImpl implements Screen, GameView {
 
     private Completable loseHealthOrSanity(Integer amount,
             Func2<Float, Action0, Completable> function) {
-        List<Completable> completables = new LinkedList<>();
-        float tokenWidth = 100;
-        float baseOffset = - (amount - 1) * tokenWidth / 2f;
-        for (int i = 0; i < amount; i++) {
-            // A short cascade keeps every departing HUD token readable. Resolve its slot only on departure.
-            Completable loss = function.call(baseOffset, i == 0
-                    ? () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, amount) : null);
-            float delay = i * .03f * ViewProperties.NORMAL_ACTION_DURATION;
-            Completable departure = i == 0 ? Completable.complete() : Completable.create(subscriber ->
-                    InfoStage.addActionToInfoStage(new FastForwardAction<>(
-                            Actions.delay(delay, Actions.run(subscriber::onCompleted)))));
-            completables.add(departure.andThen(loss));
-            baseOffset += tokenWidth;
-        }
-        if (completables.isEmpty()) {
-            return Completable.complete();
-        }
-        // Wait for every fragment to clear before advancing the encounter.
-        return Completable.fromAction(TokenSounds::playLeave)
-                .andThen(Completable.merge(completables));
+        if (amount <= 0) return Completable.complete();
+        return Completable.defer(() -> {
+            List<Completable> completables = new LinkedList<>();
+            com.badlogic.gdx.scenes.scene2d.actions.SequenceAction departures = Actions.sequence();
+            float tokenWidth = 100;
+            float baseOffset = -(amount - 1) * tokenWidth / 2f;
+            for (int i = 0; i < amount; i++) {
+                Completable loss = function.call(baseOffset, i == 0
+                        ? () -> TokenSounds.playLoss(TokenSounds.Cue.LOSS, amount) : null);
+                // Preserve 30 ms between departures even in fast-forward. A single queue also
+                // prevents a slow frame from expiring every token's independent timer at once.
+                Completable departure = i == 0 ? Completable.complete() : Completable.create(subscriber ->
+                        departures.addAction(Actions.delay(.03f, Actions.run(subscriber::onCompleted))));
+                completables.add(departure.andThen(loss));
+                baseOffset += tokenWidth;
+            }
+            return Completable.fromAction(() -> {
+                TokenSounds.playLeave();
+                if (amount > 1) InfoStage.addActionToInfoStage(departures);
+            }).andThen(Completable.merge(completables));
+        });
     }
 
 

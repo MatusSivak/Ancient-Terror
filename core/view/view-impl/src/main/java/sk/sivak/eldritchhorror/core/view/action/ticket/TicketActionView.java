@@ -8,7 +8,7 @@ import rx.SingleSubscriber;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.components.TokenActor;
+import sk.sivak.eldritchhorror.core.view.components.ItemActor;
 import sk.sivak.eldritchhorror.core.view.components.YellowButton;
 import sk.sivak.eldritchhorror.core.view.components.hud.TicketContainerBar;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
@@ -84,27 +84,18 @@ public class TicketActionView {
     }
 
     public Completable gainTravelTicket(PathType ticketType) {
-        TokenActor tokenActor;
-        if (ticketType == PathType.TRAIN) {
-            tokenActor = new TokenActor(
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_TRAIN_LEFT),
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_TRAIN_RIGHT)
-            );
-        } else {
-            tokenActor = new TokenActor(
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_SHIP_LEFT),
-                    CustomAssetManager.getTexture(CustomAssetManager.TICKET_SHIP_RIGHT)
-            );
-        }
-
-        addSmallActorToInfoStage(tokenActor);
-        TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
-        tokenActor.setHolderLocation(ticketBar.getEmptyContainerPosition());
-        Completable gain = GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN, tokenActor.gain());
-        return gain.andThen(Completable.create(onSub -> {
-            TokenSounds.playLand(TokenSounds.Cue.TICKET_GAIN, 0);
-            ticketBar.addTicket(ticketType);
-            onSub.onCompleted();
-        }));
+        return Completable.defer(() -> {
+            InfoStage.getInvestigatorHud().validate();
+            TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
+            ItemActor tokenActor = new ItemActor(CustomAssetManager.getTexture(ticketType == PathType.TRAIN
+                    ? CustomAssetManager.TICKET_TRAIN_DOWN : CustomAssetManager.TICKET_SHIP_DOWN));
+            tokenActor.setHolderImage(ticketBar.getEmptyTicketImage());
+            addSmallActorToInfoStage(tokenActor);
+            return GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN, tokenActor.gain())
+                    .andThen(Completable.fromAction(() -> {
+                        TokenSounds.playLand(TokenSounds.Cue.TICKET_GAIN, 0);
+                        ticketBar.addTicket(ticketType);
+                    }));
+        });
     }
 }

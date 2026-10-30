@@ -7,8 +7,11 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 public final class GameplaySounds {
     public enum Cue {
         TOKEN_IMPACT("map_token_impact", .85f),
-        INVESTIGATOR_IMPACT("map_investigator_impact", .90f),
-        GATE_IMPACT("map_gate_impact", .90f),
+        INVESTIGATOR_IMPACT("map_investigator_impact", 1f),
+        GATE_IMPACT("gate_resonance", 1f),
+        TRAVEL_SEA("travel_sea", .90f),
+        TRAVEL_RAIL("travel_rail", .90f),
+        TRAVEL_WALK("travel_walk", .90f),
         CLUE_SPAWN("clue_spawn", .80f),
         EXPEDITION_SPAWN("expedition_spawn", .80f),
         CLUE_GAIN("clue_gain", .85f),
@@ -61,6 +64,12 @@ public final class GameplaySounds {
     }
 
     private GameplaySounds() { }
+
+    public static Cue travelCue(sk.sivak.eldritchhorror.core.constants.location.PathType type) {
+        if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.SHIP) return Cue.TRAVEL_SEA;
+        if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.TRAIN) return Cue.TRAVEL_RAIL;
+        return Cue.TRAVEL_WALK;
+    }
 
     public static void play(Cue cue) {
         if (FastForwardAction.isOn()) return;

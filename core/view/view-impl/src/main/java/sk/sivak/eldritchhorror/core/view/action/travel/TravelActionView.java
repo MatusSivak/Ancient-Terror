@@ -49,6 +49,7 @@ public class TravelActionView {
     private final CompositeMap compositeMap;
     private GameController controller;
     private TextButton stopButton;
+    private PathType selectedTravelPath;
 
     private BackgroundUtils backgroundUtils;
     public TravelActionView(CompositeMap compositeMap, GameController controller) {
@@ -63,11 +64,11 @@ public class TravelActionView {
 
     public Single<LocationInfo.Connection> selectTravelLocation(
             LocationId currentLocationId, List<LocationInfo.Connection> connections, boolean optional) {
-        return backgroundUtils.hideBackground().andThen(Single.create(onSub -> {
+        return backgroundUtils.hideBackground().andThen(Single.<LocationInfo.Connection>create(onSub -> {
             InfoStage.displayTextForce(get("travel.selectDestination"));
             compositeMap.showCityInfoLabels();
             new TravelHelper().selectLocation(currentLocationId, connections, optional, onSub);
-        }));
+        })).doOnSuccess(connection -> selectedTravelPath = connection == null ? null : connection.getPathType());
     }
 
     public Single<LocationInfo.Connection> selectLocation(List<LocationId> locations) {
@@ -111,7 +112,8 @@ public class TravelActionView {
             Completable.create(sub2 -> {
                 SequenceAction sequence = Actions.sequence(
                         Actions.run(() -> {
-                            InvestigatorSounds.playDepart();
+                            GameplaySounds.play(GameplaySounds.travelCue(selectedTravelPath));
+                            selectedTravelPath = null;
                             for (InvestigatorImage investigatorImage : currentInvestigatorList) {
                                 AlphaAction action = new AlphaAction();
                                 action.setTarget(investigatorImage);
@@ -163,14 +165,14 @@ public class TravelActionView {
     }
 
     public Single<LocationInfo.Connection> selectTicketTravelLocation(LocationId currentLocationId, List<LocationInfo.Connection> connections) {
-        return Single.create(onSub -> {
+        return Single.<LocationInfo.Connection>create(onSub -> {
             if (connections.size() == 0) {
                 onSub.onSuccess(null);
                 return;
             }
             InfoStage.displayTextForce(get("travel.spendTicket"));
             new TravelHelper().selectLocation(currentLocationId, connections, true, onSub);
-        });
+        }).doOnSuccess(connection -> selectedTravelPath = connection == null ? null : connection.getPathType());
     }
 
     public Completable loseTicket(PathType input) {

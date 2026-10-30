@@ -67,6 +67,11 @@ public class RumorCard extends VisTable {
         setTransform(true);
     }
 
+    public Completable destroyWithEffect() {
+        return Completable.defer(() -> sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect
+                .resolveMystery(this).doOnCompleted(displayHide::finishRemoval));
+    }
+
     private void addHitImage() {
         hitImage = new Image(CustomAssetManager.getTextureRegion(CustomAssetManager.PURE_WHITE_BACKGROUND));
         addActor(hitImage);

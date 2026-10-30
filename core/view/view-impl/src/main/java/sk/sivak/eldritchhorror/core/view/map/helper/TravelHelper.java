@@ -256,6 +256,7 @@ public class TravelHelper {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     super.clicked(event, x, y);
+                    sk.sivak.eldritchhorror.core.view.utils.UiSounds.play(sk.sivak.eldritchhorror.core.view.utils.UiSounds.Cue.HUD_CLICK);
                     subscriber.onSuccess(connectionPosition.connection);
                     hideTableAndButtons();
                 }
