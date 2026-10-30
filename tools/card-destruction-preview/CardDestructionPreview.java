@@ -102,7 +102,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
     }
 
-    private void checkCombatInterruption() {
+    private void checkCombatInterruption() throws Exception {
         sk.sivak.eldritchhorror.core.view.components.hud.ContainerBar bar = InfoStage.getInvestigatorHud().getHealthBar();
         int oldTotal = bar.getCells().size, oldValue = bar.getCurrentValue();
         bar.setTotalEmptyContainers(4); bar.setCurrentValue(4);
@@ -112,9 +112,28 @@ public class CardDestructionPreview extends ApplicationAdapter {
         sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable table =
                 new sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable();
         sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.start(table, InvestigatorId.values()[0]);
-        sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.suspend();
-        require(bar.getCurrentValue() == 4 && table.isInterrupted(), "Flesh Ward restored tokens beyond the refreshed bar");
+        // Live crash 2d9ee869: SHOW_ACTIVE_INVESTIGATOR refreshes the HUD, then
+        // CONFIRM_TEST for Flesh Ward suspends the existing combat panel.
+        sk.sivak.eldritchhorror.core.view.test.TestViewImpl testView =
+                new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
+        @SuppressWarnings("unchecked")
+        java.util.Stack<sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable> combats =
+                (java.util.Stack<sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable>)
+                        field(testView, "monsterCombatTableStack");
+        combats.push(table);
+        AtomicInteger confirmed = new AtomicInteger();
+        testView.confirmTest(sk.sivak.eldritchhorror.core.constants.investigator.Stat.LORE,
+                0, 3, 0, java.util.Collections.emptyList(), 0, false)
+                .subscribe(ignored -> confirmed.incrementAndGet(), error -> { throw new RuntimeException(error); });
+        require(confirmed.get() == 1 && bar.getCurrentValue() == 4 && table.isInterrupted() && table.isLocked(),
+                "Flesh Ward test failed after a four-token HUD refresh");
         sk.sivak.eldritchhorror.core.view.components.combat.CombatInterruption.finish();
+        // confirmTest also fades the map curtain. Drive its real stage through
+        // both fades so this scenario leaves no actions for subsequent checks.
+        for (int i = 0; i < 90; i++) { MapStage.render(1f / 60); stage.act(1f / 60); }
+        MapStage.brightenWorld();
+        for (int i = 0; i < 180; i++) { MapStage.render(1f / 60); stage.act(1f / 60); }
+        require(tracked() == 0, "Nested spell confirmation leaked actions");
         bar.setCurrentValue(10); require(bar.getCurrentValue() == 4, "Fixed-capacity bar overflowed");
         bar.setCurrentValue(-1); require(bar.getCurrentValue() == 0, "Bar underflowed");
         bar.setTotalEmptyContainers(oldTotal); bar.setCurrentValue(oldValue);

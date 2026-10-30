@@ -32,8 +32,11 @@ keep the vortex opaque during spin-up and complete exactly once after the mist.
 Inspection frames are `release-card-spawn.png`, `release-card-flight.png`,
 `release-gate-spin.png`, and `release-gate-dissipate.png` in the preview directory.
 
-Combat regression checks rebuild a four-token HUD before a spell interruption,
-then verify rollback cannot overfill it. Usable exhausted cards keep their badge
+Combat regression checks rebuild a four-token HUD, then call the actual
+`TestViewImpl.confirmTest` for a nested Flesh Ward spell test. They verify that
+confirmation completes, the combat panel is interrupted and locked, rollback
+cannot overfill the HUD, and map-curtain actions complete without leaking.
+Usable exhausted cards keep their badge
 hidden through asynchronous artwork loading and drag/zoom duplication, while
 inventory cards retain it. An instrumented audio stub checks the monster-sheet
 tear plays once at the split and stays silent during fast-forward.
