@@ -30,6 +30,7 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 public class MonsterDefeatPreview extends ApplicationAdapter {
     private Stage stage;
+    private final java.util.List<String> audioEvents = new java.util.ArrayList<>();
 
     public static void main(String[] args) {
         LwjglApplicationConfiguration.disableAudio = true;
@@ -41,6 +42,23 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
 
     @Override public void create() {
         try {
+            Field assets = CustomAssetManager.class.getDeclaredField("instance");
+            assets.setAccessible(true);
+            assets.set(null, new CustomAssetManager() {
+                @Override public synchronized boolean isLoaded(String name, Class type) {
+                    return type == com.badlogic.gdx.audio.Sound.class || super.isLoaded(name, type);
+                }
+                @Override public synchronized <T> T get(String name, Class<T> type) {
+                    if (type != com.badlogic.gdx.audio.Sound.class) return super.get(name, type);
+                    return type.cast(java.lang.reflect.Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type},
+                            (p,m,a) -> {
+                                if (m.getName().equals("hashCode")) return System.identityHashCode(p);
+                                if (m.getName().equals("equals")) return p == a[0];
+                                if (m.getName().equals("play")) { audioEvents.add(name); return 1L; }
+                                return null;
+                            }));
+                }
+            });
             VisUI.load();
             stage = InfoStage.getStageSafe();
             Image background = new Image(CustomAssetManager.getTexture("encounter/background/combat.jpg"));
@@ -70,6 +88,8 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
     }
 
     private void check(String name, boolean epic, boolean fast, boolean ambush, boolean switchSpeed, boolean interrupt) throws Exception {
+        audioEvents.clear();
+        if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
         int actorsBefore = stage.getActors().size;
         int buffersBefore = bufferCount();
         Texture texture = epic ? CustomAssetManager.getEpicMonsterTexture("YigMonster")
@@ -86,6 +106,8 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
         stage.addActor(monster);
         AtomicInteger completed = new AtomicInteger();
         MonsterImageEffect.tearAppart(monster).subscribe(completed::incrementAndGet);
+        require(audioEvents.size() == (fast ? 0 : 1), name + ": takeoff cue missing or duplicated");
+        if (!fast) require(audioEvents.get(0).equals("sounds/monster_defeat_fly.wav"), "Wrong takeoff sound");
         Group animation = stage.getRoot().findActor("monster-defeat");
         require(animation != null, name + ": missing animation");
         float startSize = originalHeight * (ambush ? 1 : 1f / .75f);
@@ -95,6 +117,7 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
             else FastForwardAction.turnOff();
             stage.act(1f / 60f);
             if (frame == 44 && !fast) {
+                require(!audioEvents.contains("sounds/monster_defeat.wav"), name + ": explosion sounded before shattering");
                 require(monster.isVisible(), name + ": tears before the enlarged portrait can be seen");
                 require(monster.getHeight() * monster.getScaleY() > (name.equals("tall") ? 540f * .70f : startSize * 1.8f),
                         name + ": zoom is barely visible");
@@ -104,6 +127,8 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
             }
             Actor left = animation.findActor("defeat-fragment-0");
             if (left != null) {
+                require(java.util.Collections.frequency(audioEvents, "sounds/monster_defeat.wav")
+                        == (fast || switchSpeed ? 0 : 1), name + ": explosion cue timing/count");
                 piecesSeen = true;
                 require(monster.getWidth() == originalWidth && monster.getHeight() == originalHeight,
                         name + ": snapshot changed the original dimensions");

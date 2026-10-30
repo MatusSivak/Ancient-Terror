@@ -3,7 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.artifact;
 import java8.features.stream.Stream;
 import java8.features.util.IterableUtils;
 import rx.Single;
-import sk.sivak.eldritchhorror.core.constants.artifact.KhopeshOfTheAbyssArtifact;
+import sk.sivak.eldritchhorror.core.constants.artifact.MiGoBrainCaseArtifact;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
 import sk.sivak.eldritchhorror.core.constants.displayasset.DisplayAssetResponseType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.HideType;
@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class MiGoBrainCaseListener extends AbstractArtifactListener<KhopeshOfTheAbyssArtifact> {
+public class MiGoBrainCaseListener extends AbstractArtifactListener<MiGoBrainCaseArtifact> {
 
     private EnableCardListener enableCardListener;
     private ActionListener actionListener;

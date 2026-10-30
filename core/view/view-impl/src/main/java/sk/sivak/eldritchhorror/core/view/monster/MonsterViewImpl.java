@@ -106,8 +106,6 @@ public class MonsterViewImpl implements MonsterView {
     }
 
     private void defeatMonster(MonsterInfo monsterInfo, CompletableSubscriber onSub) {
-        GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT);
-
         MonsterUtils.MonsterIdLayerResolver idLayerResolver = new MonsterUtils.MonsterIdLayerResolver(monsterInfo);
         List<Actor> allMonsters = MapStage.getActor(idLayerResolver);
 

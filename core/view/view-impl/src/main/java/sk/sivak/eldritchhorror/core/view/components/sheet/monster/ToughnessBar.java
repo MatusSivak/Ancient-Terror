@@ -10,6 +10,7 @@ import rx.Completable;
 import rx.CompletableSubscriber;
 import sk.sivak.eldritchhorror.core.view.components.VitalityLossEffect;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatSounds;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -53,13 +54,21 @@ public class ToughnessBar extends HorizontalGroup {
     public Completable loseToughness(int amount) {
         return Completable.defer(() -> {
             List<Completable> losses = new LinkedList<>();
+            if (getStage() == null) return Completable.complete();
             int count = Math.min(Math.max(0, amount), currentHealth);
             float spacing = Math.min(110f, 650f / Math.max(1, count - 1));
+            SequenceAction departures = Actions.sequence();
             for (int i = 0; i < count; i++) {
                 Actor token = getChildren().get(currentHealth - 1 - i);
-                losses.add(loseToughnessNew(token, (i - (count - 1) / 2f) * spacing));
+                float offset = ((count - 1) / 2f - i) * spacing;
+                // One queue preserves the stagger even on slow frames or during fast-forward.
+                Completable wait = i == 0 ? Completable.complete() : Completable.create(subscriber ->
+                        departures.addAction(Actions.delay(.03f, Actions.run(subscriber::onCompleted))));
+                losses.add(wait.andThen(loseToughnessNew(token, offset)));
             }
-            return Completable.merge(losses);
+            return Completable.fromAction(() -> {
+                if (count > 1) addAction(departures);
+            }).andThen(Completable.merge(losses));
         });
     }
 
@@ -69,8 +78,13 @@ public class ToughnessBar extends HorizontalGroup {
             if (getStage() == null || currentHealth <= 0 || !lostActors.add(healthToken)) {
                 return Completable.complete();
             }
-            Vector2 position = healthToken.localToStageCoordinates(new Vector2());
-            return VitalityLossEffect.play(getStage(), position, healthToken.getWidth(), healthToken.getHeight(),
+            validate();
+            Container<ToughnessToken> slot = (Container<ToughnessToken>) healthToken;
+            slot.validate();
+            Actor icon = slot.getActor();
+            Vector2 position = icon.localToStageCoordinates(new Vector2());
+            Vector2 corner = icon.localToStageCoordinates(new Vector2(icon.getWidth(), icon.getHeight()));
+            return VitalityLossEffect.play(getStage(), position, corner.x - position.x, corner.y - position.y,
                     offsetX, VitalityLossEffect.Kind.MONSTER, () -> {
                         currentHealth--;
                         ((Container<ToughnessToken>) healthToken).getActor().deplete();

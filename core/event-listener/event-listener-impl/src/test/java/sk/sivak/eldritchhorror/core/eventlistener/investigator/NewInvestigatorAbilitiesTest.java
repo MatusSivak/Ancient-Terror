@@ -128,6 +128,29 @@ public class NewInvestigatorAbilitiesTest {
     }
     @After public void cleanup(){ServicePlatform.nullifyInstance();}
 
+    @Test public void explorerExplainsStartingImprovementBeforeOpeningSkillSelection() {
+        List<String> calls = new ArrayList<>();
+        ServicePlatform.get().setInvestigatorService(proxy(InvestigatorService.class, (method,args) -> {
+            calls.add(method);
+            return null;
+        }));
+        deferNotice = true;
+        TheExplorerInitListener listener = new TheExplorerInitListener();
+        listener.onNotify(InvestigatorId.THE_EXPLORER);
+        events.fireAfterEvent(BeforeAfterEvent.SHOW_PHASE, null);
+        assertEquals("The Explorer starts with one skill improved.", lastQuestion.getTitle());
+        assertNotNull(pendingNotice);
+        assertFalse(calls.contains("improveSkill"));
+        pendingNotice.onSuccess(new Answer<>());
+        assertEquals(1, Collections.frequency(calls, "improveSkill"));
+        events.fireAfterEvent(BeforeAfterEvent.SHOW_PHASE, null);
+        assertEquals(1, questions);
+        listener.unregisterInvestigator();
+        listener.justRegisterListeners();
+        events.fireAfterEvent(BeforeAfterEvent.SHOW_PHASE, null);
+        assertEquals(1, questions);
+    }
+
     @Test public void startingAssetsAndCluesAreGrantedOnlyOnNewInitialization() {
         AbstractInvestigatorInitListener[] listeners={new TheButlerInitListener(),new ThePriestInitListener(),new TheNunInitListener(),new TheExplorerInitListener()};
         for(AbstractInvestigatorInitListener listener:listeners) listener.onNotify(listener.getInvestigatorId());

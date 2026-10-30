@@ -31,6 +31,11 @@ public class CombatData {
         return monsterInfo;
     }
 
+    /** Defeated monsters have their health reset when returned to the cup. */
+    public boolean isMonsterDefeated() {
+        return !monsterInfo.isAlive() || monsterInfo.getCurrentHealth() <= 0;
+    }
+
     public void setMonsterInfo(MonsterInfo monsterInfo) {
         this.monsterInfo = monsterInfo;
         setActualHorror(monsterInfo.getHorror());

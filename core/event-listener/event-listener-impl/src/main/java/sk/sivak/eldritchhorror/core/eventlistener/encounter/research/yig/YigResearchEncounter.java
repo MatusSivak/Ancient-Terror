@@ -189,7 +189,7 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
         hidePaper();
         p().getMonsterService().ambush(id).subscribe(data -> sequence(() -> next.call(data)));
     }
-    private boolean defeated(CombatData data) { return data.getMonsterInfo().getCurrentHealth() <= 0; }
+    private boolean defeated(CombatData data) { return data.isMonsterDefeated(); }
     private void cultist(Runnable pass, Runnable fail) {
         ambush(NonEpicMonsterId.CULTIST, d -> {
             boolean rewarded = getLocationType() == LocationType.WILDERNESS && page == 7 ? !has(POISONED) : defeated(d);

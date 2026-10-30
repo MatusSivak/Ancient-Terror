@@ -17,6 +17,7 @@ import sk.sivak.eldritchhorror.core.constants.card.Trait;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 import java.util.Set;
 
@@ -512,6 +513,7 @@ public class CardTemplate extends WidgetGroup {
 
     public Completable disable() {
         return Completable.create(onSub -> {
+            GameplaySounds.play(GameplaySounds.Cue.CARD_DISABLE);
             updateDisabledPositionAndScale();
             disabledImage.addAction(new FastForwardAction<>(sequence(
                     alpha(1f, ViewProperties.FADING_EFFECT_DURATION),

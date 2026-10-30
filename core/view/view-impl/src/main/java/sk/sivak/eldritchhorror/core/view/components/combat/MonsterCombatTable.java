@@ -784,8 +784,8 @@ public class MonsterCombatTable extends VisTable {
                         return;
                     }
                     float tokenWidth = Math.min(110f, 650f / Math.max(1, healthIcons.size() - 1));
-                    float baseOffset = - (healthIcons.size() - 1) * tokenWidth / 2f;
-                    float offsetX = baseOffset + healthIcons.indexOf(child) * tokenWidth;
+                    float baseOffset = (healthIcons.size() - 1) * tokenWidth / 2f;
+                    float offsetX = baseOffset - healthIcons.indexOf(child) * tokenWidth;
                     runningLosses[0]++;
                     toughnessBar.loseToughnessNew(child, offsetX).subscribe(() -> {
                         runningLosses[0]--;

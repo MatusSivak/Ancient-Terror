@@ -207,6 +207,7 @@ public class YigEncounterPresentationTest {
     private void guardianOutcome(int health, String message) {
         startSpecial(6); click(); finishTest(false); click();
         CultistMonster monster = new CultistMonster(); monster.setCurrentHealth(health);
+        monster.setAlive(health > 0);
         CombatData result = new CombatData(); result.setMonsterInfo(monster);
         resume(() -> combat.onSuccess(result));
         assertTrue(paperVisible);
@@ -686,7 +687,14 @@ public class YigEncounterPresentationTest {
     }
 
     private void finishCombat(boolean will, boolean strength, boolean lostHealth, boolean defeated) {
-        CultistMonster monster = new CultistMonster(); monster.setCurrentHealth(defeated ? 0 : 1);
+        CultistMonster monster = new CultistMonster(); monster.setAlive(true);
+        monster.setToughness(2);
+        monster.setCurrentHealth(2);
+        if (defeated) {
+            MonsterCup cup = new MonsterCup(); cup.createMonsterCup(); cup.defeatMonster(monster);
+            assertEquals(Integer.valueOf(2), monster.getCurrentHealth());
+        }
+        // Real defeat returns a healthy, non-living monster to the cup before the encounter resumes.
         CombatData result = new CombatData(); result.setMonsterInfo(monster);
         result.setHorrorTestResult(testResult(will)); result.setDamageTestResult(testResult(strength));
         result.setHealthLost(lostHealth ? 1 : 0);

@@ -15,6 +15,7 @@ import rx.CompletableSubscriber;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.view.components.combat.SilhouetteImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 /** A single clock keeps the zoom, recoil and debris synchronized at any fast-forward speed. */
 public final class BreakApartAnimation extends Group {
@@ -42,6 +43,7 @@ public final class BreakApartAnimation extends Group {
         BreakApartAnimation animation = new BreakApartAnimation(subject, flashDrawable, accent, name);
         // The small-actor layer fades during other UI transitions; defeat owns its visibility.
         stage.addActor(animation);
+        GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT_FLY);
         animation.addAction(new FastForwardAction<>(new TemporalAction(TOTAL_TIME * ViewProperties.NORMAL_ACTION_DURATION) {
             @Override protected void update(float percent) {
                 animation.animate(percent * TOTAL_TIME);
@@ -138,6 +140,7 @@ public final class BreakApartAnimation extends Group {
     }
 
     private void split() {
+        GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT);
         subject.setPosition(targetX, targetY);
         subject.setScale(targetScale);
         subject.setRotation(0f);

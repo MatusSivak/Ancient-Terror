@@ -135,20 +135,25 @@ public class VitalityLossPreview extends ApplicationAdapter {
         }
     }
 
-    private void checkMonster() {
+    private void checkMonster() throws Exception {
         FastForwardAction.turnOff();
         ToughnessBar bar = new ToughnessBar(); bar.init(4, 4, .52f); bar.pack(); bar.setPosition(400, 440);
         stage.addActor(bar); bar.validate();
         Completable loss = bar.loseToughness(2);
         require(bar.getCurrentHealth() == 4 && effects() == 0, "Monster loss was eager");
         AtomicInteger done = new AtomicInteger(); loss.subscribe(done::incrementAndGet);
-        require(bar.getCurrentHealth() == 2 && effects() == 2, "Monster lost the wrong amount");
+        require(bar.getCurrentHealth() == 3 && effects() == 1, "First monster heart must leave immediately");
+        stage.act(.02f);
+        require(bar.getCurrentHealth() == 3 && effects() == 1, "Monster stagger shorter than 30ms");
+        stage.act(.011f);
+        require(bar.getCurrentHealth() == 2 && effects() == 2, "Second monster heart did not leave after 30ms");
         bar.loseToughnessNew(bar.getChildren().get(3), 0).subscribe();
         require(effects() == 2 && bar.getCurrentHealth() == 2, "Duplicate hit removed another heart");
         tick(90); require(done.get() == 1 && effects() == 0, "Monster completion");
         bar.restoreHealth(1).subscribe(); tick(90);
         require(bar.getCurrentHealth() == 3 && bar.getChildren().size == 4, "Healing after damage");
         bar.loseToughness(10).subscribe(done::incrementAndGet);
+        tick(6);
         require(bar.getCurrentHealth() == 0 && effects() == 3, "Repeated damage/overkill");
         tick(90); require(done.get() == 2 && effects() == 0, "Overkill completion");
         bar.init(2, 2, .52f); bar.pack(); bar.validate();
@@ -156,6 +161,49 @@ public class VitalityLossPreview extends ApplicationAdapter {
         bar.loseToughness(0).subscribe(done::incrementAndGet);
         require(done.get() == 3, "Zero loss stalled");
         bar.remove();
+        checkMonsterPositions(false);
+        checkMonsterPositions(true);
+    }
+
+    private void checkMonsterPositions(boolean fast) throws Exception {
+        if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+        Group parent = new Group(); parent.setPosition(150, 200); parent.setScale(.7f);
+        stage.addActor(parent);
+        ToughnessBar bar = new ToughnessBar(); bar.init(4, 4, .52f); bar.pack();
+        parent.addActor(bar); bar.setPosition(110, 120); bar.validate();
+        Vector2[] centers = new Vector2[4];
+        for (int i = 0; i < 4; i++) {
+            Container<?> slot = (Container<?>) bar.getChildren().get(i); slot.validate();
+            Actor icon = slot.getActor();
+            centers[i] = icon.localToStageCoordinates(new Vector2(icon.getWidth()/2, icon.getHeight()/2));
+        }
+        AtomicInteger done = new AtomicInteger();
+        bar.loseToughness(4).subscribe(done::incrementAndGet);
+        require(effects() == 1 && bar.getCurrentHealth() == 3, "Four hearts launched together");
+        for (int departure = 0; departure < 4; departure++) {
+            Actor last = null;
+            for (Actor actor : stage.getActors()) if (actor instanceof VitalityLossEffect) last = actor;
+            Vector2 expected = centers[3-departure];
+            require(Math.abs(number(last,"startX")-expected.x) < .01f
+                    && Math.abs(number(last,"startY")-expected.y) < .01f, "Scaled slot source mismatch");
+            require(Math.abs(number(last,"targetX")-(480+(1.5f-departure)*110)) < .01f,
+                    "Monster hearts cross instead of retaining slot order");
+            if (departure < 3) {
+                stage.act(.02f);
+                require(bar.getCurrentHealth() == 3-departure, "Early departure during fast-forward");
+                stage.act(.011f);
+                require(bar.getCurrentHealth() == 2-departure, "Missing staggered departure");
+            }
+        }
+        if (!fast) { tick(15); draw("four-monster-hearts"); }
+        tick(110);
+        require(done.get() == 1 && effects() == 0, "Four-heart completion");
+        parent.remove(); FastForwardAction.turnOff();
+    }
+
+    private float number(Actor actor, String fieldName) throws Exception {
+        Field field = VitalityLossEffect.class.getDeclaredField(fieldName); field.setAccessible(true);
+        return field.getFloat(actor);
     }
 
     private int effects() {

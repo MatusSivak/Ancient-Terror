@@ -80,7 +80,7 @@ final class YigSpecialEncounter {
                 test(OBSERVATION,0,() -> nextTest(text("knyan.6.pass.flavor"), WILL,-1,
                         progress, outcome(text("knyan.6.pass.fail.info"), () -> damage(0,2))),
                         outcome(text("knyan.6.fail.info"), () -> p().getMonsterService().ambush(NonEpicMonsterId.SERPENT_PEOPLE)
-                                .subscribe(result -> outcome(result.getMonsterInfo().getCurrentHealth() <= 0
+                                .subscribe(result -> outcome(result.isMonsterDefeated()
                                         ? text("knyan.6.fail.defeated.info")
                                         : text("knyan.6.fail.survived.info"), () -> {}).run())));
                 break;

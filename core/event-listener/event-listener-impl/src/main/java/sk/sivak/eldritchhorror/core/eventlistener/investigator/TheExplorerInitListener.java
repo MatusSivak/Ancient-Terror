@@ -61,7 +61,16 @@ public class TheExplorerInitListener extends AbstractInvestigatorInitListener {
                     getService().hold();
                     ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(getInvestigatorId());
                     ServicePlatform.get().getInvestigatorService().showActiveInvestigator(false);
-                    ServicePlatform.get().getInvestigatorService().improveSkill(null);
+                    Question<Object> question = new Question<>();
+                    question.setTitle("The Explorer starts with one skill improved.");
+                    question.setPortraitBeforeTitle(getInvestigatorId());
+                    question.setOptions(Question.Option.okOption);
+                    ServicePlatform.get().getGameService().ask(question).subscribe(answer -> {
+                        getService().hold();
+                        ServicePlatform.get().getInvestigatorService().improveSkill(null);
+                        getService().convertToNull();
+                        getService().release();
+                    });
                     ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(previous);
                     ServicePlatform.get().getInvestigatorService().showActiveInvestigator(false);
                     getService().convertToNull();
