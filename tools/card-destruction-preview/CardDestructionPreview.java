@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 public class CardDestructionPreview extends ApplicationAdapter {
     private Stage stage;
     private final AtomicInteger tearSounds = new AtomicInteger();
+    private final AtomicInteger cardOpenSounds = new AtomicInteger();
 
     public static void main(String[] args) {
         LwjglApplicationConfiguration.disableAudio = true;
@@ -68,8 +69,21 @@ public class CardDestructionPreview extends ApplicationAdapter {
                         if (m.getName().equals("play")) tearSounds.incrementAndGet();
                         return m.getReturnType() == long.class ? 0L : null;
                     });
+            Sound cardOpenSound = (Sound) Proxy.newProxyInstance(Sound.class.getClassLoader(), new Class<?>[]{Sound.class},
+                    (p, m, a) -> {
+                        if (m.getName().equals("hashCode")) return System.identityHashCode(p);
+                        if (m.getName().equals("equals")) return p == a[0];
+                        if (m.getName().equals("play")) cardOpenSounds.incrementAndGet();
+                        return m.getReturnType() == long.class ? 0L : null;
+                    });
             Gdx.audio = (Audio) Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class<?>[]{Audio.class},
-                    (p, m, a) -> a != null && a.length > 0 && a[0].toString().contains("monster_sheet_tear") ? tearSound : silent);
+                    (p, m, a) -> {
+                        String path = a != null && a.length > 0 ? a[0].toString() : "";
+                        return path.contains("monster_sheet_tear") ? tearSound
+                                : path.contains("ui_card_open") || path.contains("ui_card_reveal") ? cardOpenSound : silent;
+                    });
+            for (sk.sivak.eldritchhorror.core.view.utils.UiSounds.Cue cue : sk.sivak.eldritchhorror.core.view.utils.UiSounds.Cue.values())
+                if (cue.name().startsWith("CARD_OPEN")) CustomAssetManager.getSound(cue.path);
             CustomAssetManager.getSound("sounds/monster_sheet_tear.wav");
             VisUI.load(); stage = InfoStage.getStageSafe();
             GameController controller = (GameController) Proxy.newProxyInstance(GameController.class.getClassLoader(),
@@ -87,6 +101,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
                 checkGateClose(fast);
                 checkDiscard(false, fast);
                 checkDiscard(true, fast);
+                checkDiscardChoices(fast);
                 checkMystery(false, fast);
                 checkRumor(fast);
                 checkMonster(false, fast);
@@ -170,7 +185,8 @@ public class CardDestructionPreview extends ApplicationAdapter {
         Button button = ((Button[]) buttonsField.get(view))[0];
         if (fast) FastForwardAction.turnOn();
         click(button); click(button);
-        require(done.get() == 0, "Gain completed before the flight");
+        require(done.get() == 1 && card.getParent() != null,
+                "Gain must confirm once immediately while its flight continues");
         tick(fast ? 1 : 22);
         if (!fast) {
             require(card.getRotation() > 30f, "Received card did not rotate");
@@ -305,30 +321,71 @@ public class CardDestructionPreview extends ApplicationAdapter {
     }
 
     private void checkDiscard(boolean hidden, boolean fast) throws Exception {
+        for (int kind = 0; kind < 4; kind++) checkDiscard(hidden, fast, kind);
+    }
+
+    private void checkDiscard(boolean hidden, boolean fast, int kind) throws Exception {
         FastForwardAction.turnOff();
         int buffers = buffers();
         AssetView view = new AssetView();
         ShowCardRequest request = new ShowCardRequest();
-        request.setAssetInfo(new AxeAsset()); request.setAssetOriginType(AssetOriginType.CENTER);
+        sk.sivak.eldritchhorror.core.constants.card.CardInfo card;
+        if (kind == 0) { AxeAsset asset = new AxeAsset(); card = asset; request.setAssetInfo(asset); }
+        else if (kind == 1) {
+            sk.sivak.eldritchhorror.core.constants.artifact.SerpentCrownArtifact artifact = new sk.sivak.eldritchhorror.core.constants.artifact.SerpentCrownArtifact();
+            card = artifact; request.setArtifactInfo(artifact);
+        } else if (kind == 2) {
+            sk.sivak.eldritchhorror.core.constants.condition.poisoned.PoisonedCondition condition = new sk.sivak.eldritchhorror.core.constants.condition.poisoned.PoisonedCondition();
+            card = condition; request.setConditionInfo(condition);
+        } else {
+            sk.sivak.eldritchhorror.core.constants.spell.fleshward.FleshWardSpell spell = new sk.sivak.eldritchhorror.core.constants.spell.fleshward.FleshWardSpell();
+            card = spell; request.setSpellInfo(spell);
+        }
+        CardTemplate.buildCard(card); loadArtwork();
+        request.setAssetOriginType(AssetOriginType.CENTER);
         request.setHideType(HideType.DISCARD_ALWAYS); request.setHiddenTemplate(hidden);
+        request.setDisplayAssetResponseType(hidden ? DisplayAssetResponseType.NOTHING : DisplayAssetResponseType.OK);
+        int previousOpens = cardOpenSounds.get();
+        float bottom = InfoStage.getBottomHeight();
         AtomicInteger done = new AtomicInteger();
         view.showCard(request).subscribe(response -> {
-            require(response == ShowCardResponse.OK, "Discard changed the response"); done.incrementAndGet();
+            require(response == (hidden ? ShowCardResponse.NOTHING : ShowCardResponse.OK), "Discard changed the response"); done.incrementAndGet();
         }, error -> { throw new RuntimeException(error); });
-        loadArtwork();
+        require(cardOpenSounds.get() == previousOpens, "Discard replayed the card's opening sound");
+        require(((Button[]) field(view, "buttons")).length == 0, "Automatic discard created a confirmation button");
+        require(InfoStage.getBottomHeight() == bottom, "Automatic discard reserved button space");
         Actor original = (Actor) field(view, "cardTemplate");
-        require(hidden || ((CardTemplate) original).getForeground() != null, "Card artwork is not fully loaded");
-        float x = original.getX(), y = original.getY(), sx = original.getScaleX();
-        Button button = ((Button[]) field(view, "buttons"))[0];
         if (fast) FastForwardAction.turnOn();
-        click(button);
+        Group animation = null;
+        for (int frame = 0; frame < 120 && animation == null; frame++) {
+            tick(1); animation = stage.getRoot().findActor("card-destruction");
+        }
         require(done.get() == 0, "Discard advances before the effect finishes");
-        require(original.getX() == x && original.getY() == y && original.getScaleX() == sx, "Discard mutated the card transform");
-        Group animation = stage.getRoot().findActor("card-destruction");
         require(animation != null && original.getStage() == null, "Missing discard animation");
-        runEffect(animation, done, !hidden && !fast ? "card" : null, false);
+        runEffect(animation, done, !hidden && !fast && kind == 0 ? "card" : null, false);
         tick(50);
         require(buffers() == buffers && tracked() == 0, "Discard leaked resources");
+    }
+
+    private void checkDiscardChoices(boolean fast) throws Exception {
+        AssetView view = new AssetView();
+        ShowCardRequest request = new ShowCardRequest();
+        request.setAssetInfo(new AxeAsset());
+        request.setHideType(HideType.DISCARD_ON_YES);
+        request.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
+        AtomicInteger done = new AtomicInteger();
+        if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+        view.showCard(request).subscribe(response -> {
+            require(response == ShowCardResponse.YES, "Discard choice changed the response"); done.incrementAndGet();
+        }, error -> { throw new RuntimeException(error); });
+        tick(150);
+        require(done.get() == 0, "A real discard choice was automatically answered");
+        Button[] buttons = (Button[]) field(view, "buttons");
+        require(buttons.length == 2, "Discard choice buttons missing");
+        click(buttons[1]);
+        Group animation = stage.getRoot().findActor("card-destruction");
+        require(animation != null, "Confirmed discard did not animate");
+        runEffect(animation, done, null, false); tick(50);
     }
 
     private void checkMystery(boolean tall, boolean fast) throws Exception {

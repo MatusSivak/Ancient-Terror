@@ -227,6 +227,24 @@ public class YigRulesTest {
         assertEquals(1,monsters.size());assertNotNull(monsters.get(0).getCurrentLocation());
         assertEquals(Arrays.asList("onTriggeredReckoning","notice:ancientOne.yig.reckoning.cultistRandom","spawn"),effects);
     }
+    @Test public void awakeningSpawnsOneCultistAtYigsLairAndReloadDoesNotRepeatIt() {
+        ancient.awaken();
+        platform.setInvestigators(mock(InvestigatorsRead.class,(n,a)->Collections.emptyList()));
+        CultistMonster existing = new CultistMonster();
+        existing.setMonsterId(NonEpicMonsterId.CULTIST);
+        monsters.add(existing);
+        YigInitListener listener = new YigInitListener();
+        listener.register();
+        drain();
+        assertEquals(1, Collections.frequency(effects,"spawn"));
+        assertEquals(LocationId.SPACE_7, monsters.get(1).getCurrentLocation());
+        assertEquals(2, (int) existing.getToughness());
+        listener.unregister();
+        new YigInitListener().load();
+        drain();
+        assertEquals(1, Collections.frequency(effects,"spawn"));
+        assertEquals(2, monsters.size());
+    }
     @Test public void retreatChoiceCanKeepDoomRetreatOrReplaceItWithCurseRemoval() {
         for (boolean discard : new boolean[]{false,true}) {
             setup();ancient.awaken();new YigInitListener().load();

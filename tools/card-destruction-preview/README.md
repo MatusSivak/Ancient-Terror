@@ -6,8 +6,10 @@ Run from the repository root with Java configured as described in `BUILDING.md`:
 .\gradlew.bat -I tools/card-destruction-preview/preview.gradle :desktop:previewCardDestruction --offline
 ```
 
-Uses an offscreen desktop window and silent audio stubs, without loading or changing
-a saved game. Exercises the actual asset discard confirmation and current-Mystery
+Uses an offscreen desktop window and instrumented audio stubs, without loading or changing
+a saved game. Exercises automatic discards for assets, artifacts, conditions and spells:
+no confirmation button or reveal sound, original OK/NOTHING responses, completion
+after the tear, and YES/NO choices that still wait for input. Also checks current-Mystery
 resolution, including hidden cards, fast-forward, changing speed mid-animation,
 long Mystery text, and opening the next Mystery on the reused sheet.
 
@@ -26,7 +28,7 @@ reused sheet. Monster frames are saved under `monster/`. An investigator refresh
 check verifies that post-encounter HUD updates leave camera position and zoom
 untouched in both normal and fast-forward playback.
 
-Also verifies received-card reveal and collection: rotation, deferred completion,
+Also verifies received-card reveal and collection: rotation, immediate confirmation with a continuing flight,
 double-click protection, effect cleanup, and fast-forward. Gate closure checks
 keep the vortex opaque during spin-up and complete exactly once after the mist.
 Inspection frames are `release-card-spawn.png`, `release-card-flight.png`,

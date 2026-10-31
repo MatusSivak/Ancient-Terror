@@ -90,13 +90,16 @@ public class AssetView {
 
     public Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest) {
         return Single.create(subscriber -> {
-            UiSounds.transition(UiSounds.cardOpenCue(showCardRequest.isHiddenTemplate() ? null
+            labelTable = null;
+            buttons = new Button[0];
+            if (showCardRequest.getHideType() != DISCARD_ALWAYS) UiSounds.transition(UiSounds.cardOpenCue(showCardRequest.isHiddenTemplate() ? null
                     : showCardRequest.getAssetInfo() != null ? showCardRequest.getAssetInfo()
                     : showCardRequest.getArtifactInfo() != null ? showCardRequest.getArtifactInfo()
                     : showCardRequest.getConditionInfo() != null ? showCardRequest.getConditionInfo()
                     : showCardRequest.getSpellInfo()));
             originalBottomHeight = InfoStage.getBottomHeight();
-            displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
+            ShowCardResponse automaticResponse = automaticDiscardResponse(showCardRequest);
+            if (automaticResponse == null) displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
                     showCardRequest.getAssetOriginType(), subscriber);
             displayTable(showCardRequest.getTitle(), showCardRequest.getPortraitTextureName());
             if (showCardRequest.isHiddenTemplate()) {
@@ -110,7 +113,26 @@ public class AssetView {
             } else if (showCardRequest.getSpellInfo() != null) {
                 displayCard(showCardRequest.getSpellInfo(), showCardRequest.getAssetOriginType());
             }
+            if (automaticResponse != null) {
+                // Finish revealing the card before tearing it; complete the command only after the tear.
+                scheduleAutomaticDiscard(cardTemplate, () -> buttonClickAction(subscriber, automaticResponse,
+                        showCardRequest.getHideType(), showCardRequest.getAssetOriginType()));
+            }
         });
+    }
+
+    private static ShowCardResponse automaticDiscardResponse(ShowCardRequest request) {
+        if (request.getHideType() != DISCARD_ALWAYS) return null;
+        switch (request.getDisplayAssetResponseType()) {
+            case OK: return OK;
+            case NOTHING: return NOTHING;
+            default: return null; // Real choices still require a response.
+        }
+    }
+
+    private static void scheduleAutomaticDiscard(Actor card, Runnable discard) {
+        card.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+        card.addAction(new FastForwardAction<>(sequence(delay(ACTION_DURATION), run(discard))));
     }
 
     private void displayTable(String title, String portraitTextureName) {

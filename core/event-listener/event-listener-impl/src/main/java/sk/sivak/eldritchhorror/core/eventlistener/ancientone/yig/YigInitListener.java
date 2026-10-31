@@ -39,6 +39,9 @@ public class YigInitListener extends AncientOneInitListener {
                     if (monster.getMonsterId() == NonEpicMonsterId.CULTIST)
                         sk.sivak.eldritchhorror.core.eventlistener.monster.YigCultistMonsterListener.configure(monster, true, true);
                 }
+                // Space 7 is Yig's lair, also used by the final Serpent's Nest mystery.
+                // Keep this in awakening setup: restoring listeners must not spawn another Cultist.
+                spawn(NonEpicMonsterId.CULTIST, LocationId.SPACE_7);
             } else {
                 p().getMythosDeck().initSelectedMythosCards(new MythosDeckRead.MythosStageImpl(1,2,1),
                         new MythosDeckRead.MythosStageImpl(2,3,1), new MythosDeckRead.MythosStageImpl(2,4,0));

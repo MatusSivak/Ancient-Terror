@@ -4,11 +4,17 @@ import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventtype.data.ReckoningFireType;
-import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 public abstract class AbstractCardReckoningListener extends EventListenerImpl<ReckoningFireType> {
 
     private boolean charged = false;
+    private int generation;
+
+    /** Removing a card must also cancel reckoning work already inserted in the command queue. */
+    final void cancelPendingReckoning() {
+        charged = false;
+        generation++;
+    }
 
     @Override
     public final void onNotify(ReckoningFireType eventData) {
@@ -20,7 +26,9 @@ public abstract class AbstractCardReckoningListener extends EventListenerImpl<Re
             return;
         }
         charged = false;
+        final int queuedGeneration = generation;
         ServicePlatform.get().getService().addEventCommand(in -> {
+            if (queuedGeneration != generation) return;
             // Investigators Lost in Time and Space are not on board; their reckoning effects do not resolve.
             if (!ServicePlatform.get().getInvestigators().isOnBoard(getCardOwnerId())) {
                 return;

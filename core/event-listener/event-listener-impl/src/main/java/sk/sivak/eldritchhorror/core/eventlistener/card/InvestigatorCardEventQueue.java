@@ -61,6 +61,9 @@ public final class InvestigatorCardEventQueue implements EventQueueRead {
 
     @Override
     public void unregisterListener(EventListener listener) {
+        if (listener instanceof AbstractCardReckoningListener) {
+            ((AbstractCardReckoningListener) listener).cancelPendingReckoning();
+        }
         EventListener guarded = guardedListeners.remove(listener);
         if (guarded != null) {
             delegate.unregisterListener(guarded);
