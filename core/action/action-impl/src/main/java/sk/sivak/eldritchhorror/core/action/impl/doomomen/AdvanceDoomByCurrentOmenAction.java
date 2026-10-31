@@ -26,10 +26,14 @@ public class AdvanceDoomByCurrentOmenAction extends AbstractHookableAction<OmenI
         ServicePlatform.get().getService().hold();
         for (LocationId gate : gatesRepresentingCurrentOmen) {
             ServicePlatform.get().getService().moveCameraToLocation(gate);
+            ServicePlatform.get().getService().addEventCommand(ignored -> {
+                ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gate, true);
+            });
             Question<Object> question = new Question<>();
             question.setOptions(Collections.singletonList(new Question.Option<>("OK", Boolean.TRUE)));
             question.setTitle(omenColor.getPrettyString() + " Gate matches Omen. Doom advances!");
             ServicePlatform.get().getGameService().ask(question).subscribe(x -> {
+                ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gate, false);
                 ServicePlatform.get().getDoomOmenService().advanceDoom();
             });
         }

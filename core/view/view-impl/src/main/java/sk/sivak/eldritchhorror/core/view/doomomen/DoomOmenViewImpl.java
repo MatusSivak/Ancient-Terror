@@ -1,5 +1,10 @@
 package sk.sivak.eldritchhorror.core.view.doomomen;
 
+import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
+import sk.sivak.eldritchhorror.core.view.map.gate.GateUtils;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import rx.Completable;
 import rx.Single;
@@ -28,6 +33,16 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class DoomOmenViewImpl implements DoomOmenView {
 
     private DoomOmenController controller;
+
+    @Override
+    public void setGateDoomPulse(LocationId location, boolean enabled) {
+        for (Actor actor : MapStage.getActor(
+                new GateUtils.GateIdLayerResolver(location))) {
+            if (actor instanceof NewGateAnimatedImage) {
+                ((NewGateAnimatedImage) actor).setDoomPulse(enabled);
+            }
+        }
+    }
 
     public void setController(DoomOmenController controller) {
         this.controller = controller;

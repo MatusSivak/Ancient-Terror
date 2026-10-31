@@ -18,7 +18,10 @@ The related six-token Health/Sanity cascade checks are in `tools/vitality-loss-p
 
 Use `:desktop:previewOctoberReports` with the same init script for the 30–31 October
 reports: gate closing below monsters, normal/epic monster discards, and the Detained
-bars overlay on gain, load, discard and defeat. Both animation speeds are checked,
+bars overlay on gain, load, discard and defeat. It also checks the Doom-source gate
+pulse and its removal, the monster disappearance puff, and Poisoned vapour/skull
+on gain, load, cure and defeat (including coexistence with Detained and transformed
+stands). Both animation speeds are checked,
 including all three map copies and exactly-once completion. Screenshots go to
 `build/report-review-oct31/`. If the downloaded Curse-crash save is present there,
 the preview loads its condition deck and verifies duplicate and exhausted draws

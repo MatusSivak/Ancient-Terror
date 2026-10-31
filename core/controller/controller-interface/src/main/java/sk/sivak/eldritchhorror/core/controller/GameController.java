@@ -38,6 +38,8 @@ public interface GameController {
 
     boolean isInvestigatorDetained(InvestigatorId investigatorId);
 
+    boolean isInvestigatorPoisoned(InvestigatorId investigatorId);
+
     Completable confirmExpeditionLocation();
 
     void justPlaceExpeditionToken();

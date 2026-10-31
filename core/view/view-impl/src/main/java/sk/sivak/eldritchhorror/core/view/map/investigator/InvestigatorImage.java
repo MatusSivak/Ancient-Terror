@@ -51,6 +51,20 @@ public class InvestigatorImage extends Image {
     private float detainedTime;
     private boolean detainedInitialized;
     private boolean detainedSoundEnabled;
+    private final PoisonOverlay poisonOverlay = new PoisonOverlay();
+    private boolean poisonedVisible;
+    private float poisonedTime;
+
+    public boolean isPoisonedVisible() {
+        return poisonedVisible;
+    }
+
+    private void updatePoisoned(float delta) {
+        poisonedVisible = !defeated && !asteroidVisible && gameController != null
+                && gameController.isInvestigatorPoisoned(investigatorId);
+        if (poisonedVisible) poisonedTime += delta;
+        else poisonedTime = 0f;
+    }
 
     private boolean defeated;
     private boolean defeatedByHealth;
@@ -207,6 +221,7 @@ public class InvestigatorImage extends Image {
     public void act(float delta) {
         super.act(delta);
         updateDetained(delta);
+        updatePoisoned(delta);
         if (hitShake > 0f) {
             hitShake = Math.max(0f, hitShake - delta);
             hitTime += delta;
@@ -310,6 +325,7 @@ public class InvestigatorImage extends Image {
         }
         borderImage.draw(batch, parentAlpha);
         super.draw(batch, parentAlpha);
+        if (poisonedVisible) poisonOverlay.draw(batch, parentAlpha, this, poisonedTime);
         if (hourglassComponent != null) {
             hourglassComponent.draw(batch, parentAlpha);
         }
@@ -397,6 +413,7 @@ public class InvestigatorImage extends Image {
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeated = true;
+        poisonedVisible = false;
         detainedVisible = false;
         detainedBars = null;
         hourglassVisible = false;

@@ -32,6 +32,7 @@ public class OctoberReportsPreview extends ApplicationAdapter {
     private Stage stage;
     private final Vector2 location = LocationPositionResolver.resolve(LocationId.ARKHAM);
     private boolean detained;
+    private boolean poisoned;
     private GameController controller;
 
     public static void main(String[] args) {
@@ -48,7 +49,8 @@ public class OctoberReportsPreview extends ApplicationAdapter {
             Gdx.audio=(Audio)Proxy.newProxyInstance(Audio.class.getClassLoader(),new Class[]{Audio.class},(p,m,a)->silent);
             VisUI.load(); InfoStage.getStageSafe(); MapStage.resize(960,540); stage=MapStage.getStage();
             controller=(GameController)Proxy.newProxyInstance(GameController.class.getClassLoader(),new Class[]{GameController.class},
-                    (p,m,a)->m.getName().equals("isInvestigatorDetained") ? detained : null);
+                    (p,m,a)->m.getName().equals("isInvestigatorDetained") ? detained :
+                            m.getName().equals("isInvestigatorPoisoned") ? poisoned : null);
             for(int i=-1;i<=1;i++) {
                 Image map=new Image(getTexture(MAP)); map.setX(i*MAP_WIDTH); MapStage.getMapLayer().addActor(map);
             }
@@ -58,8 +60,9 @@ public class OctoberReportsPreview extends ApplicationAdapter {
                 checkGate(fast);
                 checkDiscard(false,fast); checkDiscard(true,fast);
                 checkDetained(fast);
+                checkPoisoned(fast);
             }
-            System.out.println("PASS: reported duplicate Curse and exhausted deck; gate below monsters; normal/epic discard; Detained gain/load/discard/defeat; normal and fast-forward");
+            System.out.println("PASS: reported duplicate Curse and exhausted deck; gate pulse and layer; normal/epic disappearance; Detained and Poisoned gain/load/discard/defeat; normal and fast-forward");
         } catch(Throwable t) { t.printStackTrace();System.exit(1); }
         finally { FastForwardAction.turnOff();Gdx.app.exit(); }
     }
@@ -75,6 +78,15 @@ public class OctoberReportsPreview extends ApplicationAdapter {
         }
         MonsterImage monster=monster(); monster.setPosition(location.x-35,location.y-35);
         MapStage.getMonsterLayer().addActor(monster);tick(40);
+        sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl doomView =
+                new sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl();
+        doomView.setGateDoomPulse(LocationId.ARKHAM, true);
+        tick(25); if (!fast) draw("doom-source-pulse");
+        for (Actor copy : MapStage.getActor(resolver))
+            require(((Group)copy).findActor("doom-source-pulse") != null, "Wrapped gate missing pulse");
+        doomView.setGateDoomPulse(LocationId.ARKHAM, false);
+        for (Actor copy : MapStage.getActor(resolver))
+            require(((Group)copy).findActor("doom-source-pulse") == null, "Pulse persists after confirmation");
         AtomicInteger done=new AtomicInteger();
         new PrepareBoardView(controller).closeGate(LocationId.ARKHAM).subscribe(done::incrementAndGet);
         boolean sawEffect=false;
@@ -110,6 +122,7 @@ public class OctoberReportsPreview extends ApplicationAdapter {
         }
         AtomicInteger done=new AtomicInteger();
         MonsterUtils.discardMonster(info).subscribe(done::incrementAndGet);
+        require(layer.findActor("monster-discard-puff") != null, "Discard has no disappearance puff");
         for(int i=0;i<120;i++) {
             tick(1);
             if(!fast && (i==5||i==27||i==48))draw("discard-"+(epic?"epic":"normal")+"-"+i);
@@ -144,6 +157,25 @@ public class OctoberReportsPreview extends ApplicationAdapter {
         loaded.act(.2f);require(loaded.isDetainedVisible(),"Loaded Detained missing");
         for(InvestigatorImage actor:copies) {actor.setDefeatedByHealth(true);actor.act(.1f);require(!actor.isDetainedVisible(),"Defeated token has bars");actor.remove();}
         detained=false;
+    }
+
+    private void checkPoisoned(boolean fast)throws Exception {
+        camera(location.x,location.y,.45f); poisoned=false; detained=false;
+        InvestigatorImage actor=new InvestigatorImage(InvestigatorId.THE_SAILOR,controller);
+        actor.setPosition(location.x-actor.getWidth()/2,location.y-actor.getHeight()/2);
+        MapStage.getInvestigatorLayer().addActor(actor);
+        tick(1); require(!actor.isPoisonedVisible(),"Healthy token has poison");
+        poisoned=true; tick(75); require(actor.isPoisonedVisible(),"Poison gain missing");
+        if(!fast)draw("poisoned-overlay");
+        detained=true; tick(60); if(!fast)draw("poisoned-and-detained");
+        actor.moveBy(24,0);actor.setScale(.85f);actor.setRotation(12f);
+        tick(1);if(!fast)draw("poisoned-transformed");
+        poisoned=false;tick(1);require(!actor.isPoisonedVisible(),"Cure left poison overlay");
+        poisoned=true;
+        InvestigatorImage loaded=new InvestigatorImage(InvestigatorId.THE_SAILOR,controller);
+        loaded.act(.2f);require(loaded.isPoisonedVisible(),"Loaded Poisoned missing");
+        actor.setDefeatedByHealth(true);tick(1);require(!actor.isPoisonedVisible(),"Defeated token has poison");
+        actor.remove();poisoned=false;detained=false;
     }
 
     private void verifyReportedConditions()throws Exception {

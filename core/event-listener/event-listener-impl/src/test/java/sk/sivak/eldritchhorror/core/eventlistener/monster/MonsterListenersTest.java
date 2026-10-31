@@ -336,6 +336,49 @@ public class MonsterListenersTest {
         }
     }
 
+    @Test public void zoogReadsTheTargetInventoryAfterTheQueuedInvestigatorSwitch() {
+        for (boolean hasItem : new boolean[]{true, false}) {
+            setup();
+            InvestigatorId target = InvestigatorId.THE_SAILOR;
+            InvestigatorId[] active = {InvestigatorId.THE_MUSICIAN};
+            investigator(target, SPACE_2);
+            nearest = new FindNearestData(SPACE_2, 1, Arrays.asList(SPACE_1, SPACE_2));
+            ServicePlatform platform = ServicePlatform.get();
+            platform.setInvestigators(mock(InvestigatorsRead.class, (name, args) ->
+                    name.equals("getOnBoardInvestigators") ? onBoard : active[0]));
+            platform.setInvestigatorService(mock(InvestigatorService.class, (name, args) -> {
+                if (name.equals("changeActiveInvestigator")) pending.add(() -> active[0] = (InvestigatorId) args[0]);
+                return null;
+            }));
+            sk.sivak.eldritchhorror.core.constants.asset.AssetInfo item = new sk.sivak.eldritchhorror.core.constants.asset.AxeAsset();
+            platform.setAssetDeck(mock(sk.sivak.eldritchhorror.core.model.AssetDeckRead.class, (name, args) -> {
+                assertEquals("Inventory read before queued switch", target, args[0]);
+                return hasItem ? Collections.singletonList(item) : Collections.emptyList();
+            }));
+            platform.setArtifactsDeck(mock(sk.sivak.eldritchhorror.core.model.ArtifactsDeckRead.class,
+                    (name, args) -> Collections.emptyList()));
+            platform.setCardService(mock(sk.sivak.eldritchhorror.core.service.CardService.class, (name, args) -> {
+                sk.sivak.eldritchhorror.core.eventtype.SelectCardData selection =
+                        (sk.sivak.eldritchhorror.core.eventtype.SelectCardData) args[0];
+                assertEquals(Collections.singletonList(item), selection.getAvailableCards());
+                effects.add("chooseItem");
+                return Single.just(item);
+            }));
+            platform.setGameService(mock(GameService.class, (name, args) -> {
+                if (name.equals("showCard")) return Single.just(sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse.OK);
+                return null;
+            }));
+            new ZoogMonsterListener().register(monster(new sk.sivak.eldritchhorror.core.constants.monster.ZoogMonster(), SPACE_1));
+            events.fireDirectEvent(DirectEvent.RECKONING_MONSTER, ReckoningFireType.CHARGE);
+            events.fireDirectEvent(DirectEvent.RECKONING_MONSTER, ReckoningFireType.FIRE);
+            assertEquals(InvestigatorId.THE_MUSICIAN, active[0]);
+            drain();
+            assertEquals(target, active[0]);
+            assertEquals(hasItem, effects.contains("chooseItem"));
+            assertEquals(hasItem, effects.contains("discardAssetFromInvestigator"));
+        }
+    }
+
     private <M extends AbstractMonsterInfo> M monster(M monster, LocationId location) {
         monster.setCurrentLocation(location);
         return monster;

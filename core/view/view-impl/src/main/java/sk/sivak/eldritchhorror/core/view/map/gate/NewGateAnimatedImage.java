@@ -1,6 +1,8 @@
 package sk.sivak.eldritchhorror.core.view.map.gate;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
@@ -22,6 +24,35 @@ public class NewGateAnimatedImage extends Group {
     private final Image backgroundImage;
     private final AnimatedImage gateAnimatedImage;
     private final GateColor gateColor;
+    private Image doomPulse;
+
+    /** A separate halo leaves the idle vortex animation and the gate's map layer intact. */
+    public void setDoomPulse(boolean enabled) {
+        if (doomPulse != null) {
+            doomPulse.remove();
+            doomPulse = null;
+        }
+        if (!enabled) return;
+        doomPulse = new Image(CustomAssetManager.getTexture("gate/gate_border.png")) {
+            @Override public void draw(Batch batch, float parentAlpha) {
+                int source = batch.getBlendSrcFunc(), destination = batch.getBlendDstFunc();
+                batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+                super.draw(batch, parentAlpha);
+                batch.setBlendFunction(source, destination);
+            }
+        };
+        doomPulse.setName("doom-source-pulse");
+        doomPulse.setTouchable(Touchable.disabled);
+        doomPulse.setSize(getWidth(), getHeight());
+        doomPulse.setOrigin(getWidth() / 2f, getHeight() / 2f);
+        Color tint = toLibgdxColor(gateColor).lerp(Color.WHITE, .45f);
+        doomPulse.setColor(tint);
+        doomPulse.addAction(Actions.forever(Actions.sequence(
+                Actions.scaleTo(1.1f, 1.1f), Actions.alpha(.95f),
+                Actions.parallel(Actions.scaleTo(3.2f, 3.2f, 1.15f, Interpolation.pow2Out),
+                        Actions.fadeOut(1.15f, Interpolation.sineIn)), Actions.delay(.15f))));
+        addActor(doomPulse);
+    }
 
     public NewGateAnimatedImage(GateColor gateColor, OmenColor omenColor) {
         this.gateColor = gateColor;
@@ -56,6 +87,7 @@ public class NewGateAnimatedImage extends Group {
 
     public Completable closeGate() {
         return Completable.create(onSub -> {
+            setDoomPulse(false);
             if (getStage() == null) {
                 onSub.onCompleted();
                 return;

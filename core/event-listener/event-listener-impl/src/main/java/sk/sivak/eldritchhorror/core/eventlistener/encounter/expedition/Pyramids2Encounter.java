@@ -25,7 +25,7 @@ public class Pyramids2Encounter extends AbstractExpeditionEncounter {
                 () -> {
                     loseHealth(1);
                     gainCondition(ConditionId.INTERNAL_INJURY);
-                }).withTwoFailInfos().withExpeditionFlavor();
+                }).withoutFailFlavor().withTwoFailInfos().withExpeditionFlavor();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.OBSERVATION, 0, passTemplate, failTemplate).execute();
     }
