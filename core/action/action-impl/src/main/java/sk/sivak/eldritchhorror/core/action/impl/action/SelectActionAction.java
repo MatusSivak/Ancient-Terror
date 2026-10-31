@@ -9,9 +9,11 @@ import rx.schedulers.Schedulers;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
+import sk.sivak.eldritchhorror.core.eventlistener.action.basic.SkipActionListener;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.CollectAvailableActionsData;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -28,13 +30,25 @@ public class SelectActionAction extends AbstractHookableAction<CollectAvailableA
 
     @Override
     protected void onExecute(SingleSubscriber<? super ActionPhaseAction> ss) {
-        if (input.getActionPhaseActions().size() == 1 && !input.getActionPhaseActions().get(0).isDisabled()) {
-            ss.onSuccess(input.getActionPhaseActions().get(0));
+        ActionPhaseAction automatic = automaticChoice(input.getActionPhaseActions());
+        if (automatic != null) {
+            ss.onSuccess(automatic);
             return;
         }
         Single<ActionPhaseAction> actionPhaseActionSingle = ServicePlatform.get().getGameController().selectAction(input.getActionPhaseActions());
         actionPhaseActionSingle
                 .retry()
                 .subscribe(ss::onSuccess);
+    }
+
+    /** The only enabled action, when it is the sole action or skipping the turn is all that is left. */
+    static ActionPhaseAction automaticChoice(List<ActionPhaseAction> actions) {
+        ActionPhaseAction enabled = null;
+        for (ActionPhaseAction action : actions) {
+            if (action.isDisabled()) continue;
+            if (enabled != null) return null;
+            enabled = action;
+        }
+        return enabled != null && (actions.size() == 1 || enabled instanceof SkipActionListener.SkipAction) ? enabled : null;
     }
 }

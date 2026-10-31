@@ -42,7 +42,7 @@ if __name__ == "__main__":
     write("dice_sort", recording("403653__lamamakesmusic__wood-sliding-various-objects_excerpt-0-4s.flac", .7, .9), -27)
     write("card_discard", recording("272028__aldenroth2__ripping-paper.mp3", .3, 1.4), -18, .3)
     write("clue_gain", recording("85703__tmkappelt__pencil-scribble.mp3", .6, .7), -20)
-    write("focus_gain", recording("696440__itinerantmonk108__aum-in-concrete-pipe.mp3", .1, 2.4), -25, 1.3)
+    write("focus_gain", recording("691805__hollandm__g4-soft-kalimba.mp3", 0, 2.0), -26, .8)
     write("ticket_gain", recording("447927__breviceps__hole-punch.mp3", .8, .45), -18)
     write("health_gain", recording("273150__michorvath__heart-beating.mp3", .25, .8), -16)
     write("sanity_gain", recording("242909__reitanna__relieved-sigh.mp3"), -19)

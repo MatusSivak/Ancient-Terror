@@ -48,7 +48,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | [Moving piece on a boardgame](https://freesound.org/s/556387/) | zachrau | Clue spawn (token tap) |
 | [Wood_Sliding_Various-Objects](https://freesound.org/s/403653/) | LamaMakesMusic | Dice dragged back into order (0–4 s excerpt kept as lossless FLAC) |
 | [Pencil_scibble](https://freesound.org/s/85703/) | tmkappelt | Clue gained |
-| [Aum in concrete pipe](https://freesound.org/s/696440/) | itinerantmonk108 | Focus gained (sung "aum", quiet with a long fade) |
+| [G4 soft - kalimba](https://freesound.org/s/691805/) | hollandm | Focus gained (softly plucked note that decays naturally) |
 | [Ripping Paper](https://freesound.org/s/272028/) | aldenroth2 | Card torn apart (asset discarded, rumor removed) |
 | [Hole-punch / puncher](https://freesound.org/s/447927/) | Breviceps | Ticket gained |
 | [Poker Chip Drop](https://freesound.org/s/540369/) | Za-Games | Health / sanity token reaches the HUD |
@@ -73,7 +73,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | `clue_spawn` | Clue placed on the map | Wooden token thud with a tap |
 | `dice_sort` | Thrown dice dragged back into order | Quiet, gentle wooden drag (no rattle) |
 | `clue_gain` | Clue gained | Quick pencil scribble (noting the clue) |
-| `focus_gain` | Focus gained | Quiet sung "aum" fading out smoothly |
+| `focus_gain` | Focus gained | Quiet soft kalimba note ringing out naturally |
 | `card_discard` | Card destroyed (plays as the card tears) | Paper ripped by hand |
 | `ticket_gain` | Train or ship ticket gained | Ticket hole punch |
 | `health_gain` / `sanity_gain` | Health / sanity restored | Heartbeat / relieved sigh |
