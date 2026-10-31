@@ -101,8 +101,8 @@ public class DefensiveSpellPromptTest {
         assertTrue(prompt.getTextureNameList().isEmpty());
         assertTrue(prompt.isHideTestUi());
         assertEquals(2, prompt.getOptions().size());
-        assertEquals(Boolean.TRUE, prompt.getOptions().get(0).getValue());
-        assertEquals(Boolean.FALSE, prompt.getOptions().get(1).getValue());
+        assertEquals(Boolean.FALSE, prompt.getOptions().get(0).getValue());
+        assertEquals(Boolean.TRUE, prompt.getOptions().get(1).getValue());
         assertSame(loss, restored);
         assertEquals(protectedId, active);
         assertEquals(accept ? 1 : 3, loss.getAmount());

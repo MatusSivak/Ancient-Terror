@@ -26,6 +26,7 @@ public interface InvestigatorService extends CommonService {
 
     Single<InvestigatorId> selectInvestigator(InvestigatorRestriction investigatorRestriction);
 
+    /** Improve the specified skill, or let the player choose when skill is null. */
     void improveSkill(Stat skill);
 
     void loseImprovement(LoseImprovementData loseImprovementData);

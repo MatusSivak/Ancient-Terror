@@ -65,7 +65,7 @@ public class InstillBraveryListener extends AbstractSpellListener<InstillBravery
                 question.setTitle("Cast Instill Bravery?");
                 question.setPortraitBeforeTitle(spellOwnerId);
                 question.setHideTestUi(true);
-                question.setOptions(Arrays.asList(new Question.Option<>("Yes", true), new Question.Option<>("No", false)));
+                question.setOptions(Question.Option.noYesOptions);
 
                 ServicePlatform.get().getGameService().ask(question)
                         .subscribe(answer -> onAnswer(Boolean.TRUE.equals(answer.getResponseData()), input, targetInvestigatorId));

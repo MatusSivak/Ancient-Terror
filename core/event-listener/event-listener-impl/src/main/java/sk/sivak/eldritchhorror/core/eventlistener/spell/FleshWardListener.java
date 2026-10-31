@@ -65,7 +65,7 @@ public class FleshWardListener extends AbstractSpellListener<FleshWardSpell> {
                 question.setTitle("Cast Flesh Ward?");
                 question.setPortraitBeforeTitle(spellOwnerId);
                 question.setHideTestUi(true);
-                question.setOptions(Arrays.asList(new Question.Option<>("Yes", true), new Question.Option<>("No", false)));
+                question.setOptions(Question.Option.noYesOptions);
 
                 ServicePlatform.get().getGameService().ask(question)
                         .subscribe(answer -> onAnswer(Boolean.TRUE.equals(answer.getResponseData()), input, targetInvestigatorId));

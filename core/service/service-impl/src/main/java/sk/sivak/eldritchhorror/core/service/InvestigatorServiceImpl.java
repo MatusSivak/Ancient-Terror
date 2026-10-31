@@ -67,7 +67,13 @@ public class InvestigatorServiceImpl extends AbstractCommonService implements In
 
     @Override
     public void improveSkill(Stat skill) {
+        hold();
+        // Null means choose a skill, not inherit the previous command's answer or skill.
+        if (skill == null) {
+            convertTo(Stat.class, () -> null);
+        }
         executeHookable(skill, investigatorActionProvider.improveSkill());
+        release();
     }
 
     @Override
