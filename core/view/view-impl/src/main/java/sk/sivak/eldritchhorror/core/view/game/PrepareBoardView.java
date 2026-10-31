@@ -66,7 +66,7 @@ public class PrepareBoardView {
                     InfoStage.displayText(UiText.get("prepare.spawningClues"));
                     MapUtils.moveCameraToLocation(currentLocationId).subscribe(() -> {
                         ClueUtils.spawnClue(spawnLocationId, currentLocationId,
-                                () -> GameplaySounds.play(TOKEN_IMPACT)).subscribe(onSub::onCompleted);
+                                () -> GameplaySounds.play(CLUE_SPAWN)).subscribe(onSub::onCompleted);
                     });
                 })
         );

@@ -14,7 +14,7 @@ Prepared by `tools/prepare_presentation_sounds.py` from retained CC0 recordings:
 | ui_card_reveal_condition | chain_03 and quiet creature_misc_03, dark echo |
 | ui_card_reveal_asset | Leather handling and metal latch |
 | ui_action_click | chip-lay-3 and a quiet metal click |
-| monster_prowl_1–4 | Lowered stones_01–04 with quiet creature_monster_01–04 layers |
+| monster_prowl_1–4 | Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md) |
 | travel_walk | Three grass footsteps |
 | travel_rail | Rhythmic paired metal clacks |
 | travel_sea | Recorded wave with a quiet wooden creak |

@@ -84,6 +84,7 @@ public class CombatOverviewTable extends VisTable {
         }
         monsterImage.setScaling(Scaling.fit);
         ButtonUtils.addClickListener(monsterImage, () -> {
+            BigActorsManager.voiceMonsterIfOpening(data.getMonsterInfo());
             BigActorsManager.initMonsterCard(data.getMonsterInfo(), BigActorsManager::displayOrHideMonsterCard, () -> {});
             BigActorsManager.displayOrHideMonsterCard();
         });

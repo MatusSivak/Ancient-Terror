@@ -33,8 +33,8 @@ PWL bell and the existing wave recording.
 | `ui_card_reveal_artifact` | Resonant bell and magical discovery flourish |
 | `ui_card_open_artifact` | Shorter version for opening an existing artifact |
 | `card_disable` | Book closing and a latch, at exhaustion-overlay start |
-| `monster_defeat_fly` | Rising fire/magic sweep at animation takeoff |
-| `monster_defeat` | Layered magical explosion and heavy impact at fragmentation |
+| `monster_defeat_fly` | Rising fire/magic sweep at animation takeoff Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| `monster_defeat` | Layered magical explosion and heavy impact at fragmentation Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
 
 Files are mono 44.1 kHz PCM16, 0.34–2.20 seconds, with boundary fades and
 normalized levels. Each stays below Android SoundPool's decoded-size limit.

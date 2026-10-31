@@ -9,12 +9,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
+import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
+import sk.sivak.eldritchhorror.core.constants.spell.SpellTrait;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.BigActorKey;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.hud.HudButton;
+
+import java.util.Set;
 
 /** UI gestures stay audible during fast-forward; automatic panel animations do not. */
 public final class UiSounds {
@@ -23,7 +28,20 @@ public final class UiSounds {
         ACTION_CLICK("action_click", .85f),
         CARD_OPEN("card_open", .80f), CARD_CLOSE("card_close", .72f),
         CARD_OPEN_SPELL("card_reveal_spell", .90f), CARD_OPEN_ARTIFACT("card_reveal_artifact", .90f),
+        CARD_OPEN_SPELL_INCANTATION("card_reveal_spell_incantation", .85f),
+        CARD_OPEN_SPELL_RITUAL("card_reveal_spell_ritual", .85f),
         CARD_OPEN_CONDITION("card_reveal_condition", .90f), CARD_OPEN_ASSET("card_reveal_asset", .90f),
+        CARD_OPEN_ASSET_WEAPON("card_reveal_asset_weapon", .90f),
+        CARD_OPEN_ASSET_TOME("card_reveal_asset_tome", .90f),
+        CARD_OPEN_ASSET_ALLY("card_reveal_asset_ally", .90f),
+        CARD_OPEN_ASSET_SERVICE("card_reveal_asset_service", .85f),
+        CARD_OPEN_ASSET_TRINKET("card_reveal_asset_trinket", .85f),
+        CARD_OPEN_CONDITION_BOON("card_reveal_condition_boon", .85f),
+        CARD_OPEN_CONDITION_MADNESS("card_reveal_condition_madness", .85f),
+        CARD_OPEN_CONDITION_INJURY("card_reveal_condition_injury", .90f),
+        CARD_OPEN_CONDITION_ILLNESS("card_reveal_condition_illness", .85f),
+        CARD_OPEN_CONDITION_DEAL("card_reveal_condition_deal", .85f),
+        CARD_OPEN_CONDITION_BANE("card_reveal_condition_bane", .90f),
         SHEET_OPEN("sheet_open", .80f), SHEET_CLOSE("sheet_close", .72f),
         ENCOUNTER_OPEN("encounter_open", .80f), ENCOUNTER_CLOSE("encounter_close", .72f),
         MYSTERY_OPEN("mystery_open", .82f), MYSTERY_CLOSE("mystery_close", .72f),
@@ -60,21 +78,53 @@ public final class UiSounds {
         }
     }
 
-    /** Spells, artifacts, conditions and assets each have their own reveal; anything else uses CARD_OPEN. */
+    /** Artifacts have their own reveal; spells, assets and conditions sound by category; else CARD_OPEN. */
     public static Cue cardOpenCue(Object cardInfo) {
-        if (cardInfo instanceof SpellInfo) return Cue.CARD_OPEN_SPELL;
+        if (cardInfo instanceof SpellInfo) return spellCue(((SpellInfo) cardInfo).getTraits());
         if (cardInfo instanceof ArtifactInfo) return Cue.CARD_OPEN_ARTIFACT;
-        if (cardInfo instanceof ConditionInfo) return Cue.CARD_OPEN_CONDITION;
-        if (cardInfo instanceof AssetInfo) return Cue.CARD_OPEN_ASSET;
+        if (cardInfo instanceof ConditionInfo) return conditionCue(((ConditionInfo) cardInfo).getTraits());
+        if (cardInfo instanceof AssetInfo) return assetCue(((AssetInfo) cardInfo).getTraits());
         return Cue.CARD_OPEN;
     }
 
     public static Cue cardOpenCue(CardTemplate template) {
-        if (template.getSpellInfo() != null) return Cue.CARD_OPEN_SPELL;
+        if (template.getSpellInfo() != null) return cardOpenCue(template.getSpellInfo());
         if (template.getArtifactInfo() != null) return Cue.CARD_OPEN_ARTIFACT;
-        if (template.getConditionInfo() != null) return Cue.CARD_OPEN_CONDITION;
-        if (template.getAssetInfo() != null) return Cue.CARD_OPEN_ASSET;
+        if (template.getConditionInfo() != null) return cardOpenCue(template.getConditionInfo());
+        if (template.getAssetInfo() != null) return cardOpenCue(template.getAssetInfo());
         return Cue.CARD_OPEN;
+    }
+
+    /** Glamour, teamwork-only and untraited spells keep the original spell reveal. */
+    static Cue spellCue(Set<SpellTrait> traits) {
+        if (traits == null) return Cue.CARD_OPEN_SPELL;
+        if (traits.contains(SpellTrait.INCANTATION)) return Cue.CARD_OPEN_SPELL_INCANTATION;
+        if (traits.contains(SpellTrait.RITUAL)) return Cue.CARD_OPEN_SPELL_RITUAL;
+        return Cue.CARD_OPEN_SPELL;
+    }
+
+    /** First matching category wins, e.g. a magical weapon sounds like a weapon. */
+    static Cue assetCue(Set<AssetTrait> traits) {
+        if (traits == null) return Cue.CARD_OPEN_ASSET;
+        if (traits.contains(AssetTrait.WEAPON)) return Cue.CARD_OPEN_ASSET_WEAPON;
+        if (traits.contains(AssetTrait.TOME)) return Cue.CARD_OPEN_ASSET_TOME;
+        if (traits.contains(AssetTrait.ALLY)) return Cue.CARD_OPEN_ASSET_ALLY;
+        if (traits.contains(AssetTrait.SERVICE) || traits.contains(AssetTrait.TASK)) return Cue.CARD_OPEN_ASSET_SERVICE;
+        if (traits.contains(AssetTrait.TRINKET) || traits.contains(AssetTrait.MAGICAL) || traits.contains(AssetTrait.RELIC))
+            return Cue.CARD_OPEN_ASSET_TRINKET;
+        return Cue.CARD_OPEN_ASSET;
+    }
+
+    /** Restrictions and anything uncategorized keep the chain reveal. */
+    static Cue conditionCue(Set<ConditionTrait> traits) {
+        if (traits == null) return Cue.CARD_OPEN_CONDITION;
+        if (traits.contains(ConditionTrait.BOON)) return Cue.CARD_OPEN_CONDITION_BOON;
+        if (traits.contains(ConditionTrait.MADNESS)) return Cue.CARD_OPEN_CONDITION_MADNESS;
+        if (traits.contains(ConditionTrait.INJURY)) return Cue.CARD_OPEN_CONDITION_INJURY;
+        if (traits.contains(ConditionTrait.ILLNESS)) return Cue.CARD_OPEN_CONDITION_ILLNESS;
+        if (traits.contains(ConditionTrait.DEAL)) return Cue.CARD_OPEN_CONDITION_DEAL;
+        if (traits.contains(ConditionTrait.BANE)) return Cue.CARD_OPEN_CONDITION_BANE;
+        return Cue.CARD_OPEN_CONDITION;
     }
 
     public static Cue sheetCue(BigActorKey key, boolean opening) {

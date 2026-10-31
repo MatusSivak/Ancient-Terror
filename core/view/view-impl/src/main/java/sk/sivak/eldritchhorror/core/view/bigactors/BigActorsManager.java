@@ -1,6 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.bigactors;
 
-import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 
 import com.badlogic.gdx.Gdx;
 import com.kotcrab.vis.ui.VisUI;
@@ -40,8 +40,8 @@ import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import java.util.Collection;
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MAXIMIZE_SOUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MINIMIZE_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.TRACK_ZOOM_IN_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.TRACK_ZOOM_OUT_SOUND;
 import static sk.sivak.eldritchhorror.core.view.utils.ButtonUtils.addClickListener;
 
 public class BigActorsManager {
@@ -85,9 +85,9 @@ public class BigActorsManager {
         selectEncounterTable = new SelectEncounterTable();
         selectActionComponent = new SelectActionComponent();
         omenTrack = new MaxMinComponent(HudButtons.getOmenTrack(), BigActorKey.OMEN_TRACK)
-                .withSounds(OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND);
+                .withSounds(TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND);
         doomTrack = new MaxMinComponent(HudButtons.getDoomTrack(), BigActorKey.DOOM_TRACK)
-                .withSounds(UiSounds.Cue.SHEET_OPEN.path, UiSounds.Cue.SHEET_CLOSE.path);
+                .withSounds(TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND);
     }
 
     public static void reset() {
@@ -162,6 +162,12 @@ public class BigActorsManager {
 
     public static void displayOrHideMonsterCard() {
         displayOrHide(BigActorKey.MONSTER_CARD);
+    }
+
+    /** Call before a monster click is handled; closing clicks and clicks during a sheet animation stay silent. */
+    public static void voiceMonsterIfOpening(MonsterInfo monsterInfo) {
+        if (monsterInfo == null || isLocked() || getInstance().monsterCard.getStage() != null) return;
+        GameplaySounds.playMonsterVoice(monsterInfo.isEpic());
     }
 
     public static void advanceCurrentMystery(MysteryCardInfo currentMysteryCard, Action0 onClickAction, Action0 afterHideAction, int amount, int mysteryNumber, int mysteriesRequired) {

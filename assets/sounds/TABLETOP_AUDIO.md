@@ -37,10 +37,10 @@ All collections are CC0 1.0; the original download archives are preserved in
 | Investigator spawn | Kenney `chip-lay-3.ogg` |
 | Clue token spawn | Kenney `chip-lay-2.ogg` |
 | Expedition spawn, `expedition_spawn` | Kenney `card-shove-3.ogg` |
-| Health/sanity token gain, `health_gain` | Kenney `chips-handle-1.ogg` |
+| Health/sanity token gain, `health_gain` | Kenney `chips-handle-1.ogg` Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
 | Clue / focus gain | Kenney `chips-handle-3.ogg` / `chips-handle-2.ogg` |
 | Health/sanity, clue, focus HUD landing | Kenney `chip-lay-1.ogg`, `chip-lay-2.ogg`, `chip-lay-3.ogg` |
-| Thrown dice slide into sorted order, `dice_sort` | Kenney `dice-grab-1.ogg` |
+| Thrown dice slide into sorted order, `dice_sort` | Kenney `dice-grab-1.ogg` Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
 | Spell card shown/gained/zoomed, `ui_card_open_spell` | rubberduck `spell_01.ogg` |
 | Artifact card, `ui_card_open_artifact` | rubberduck `item_gem_03.ogg` |
 | Condition card, `ui_card_open_condition` | rubberduck `chain_02.ogg` |

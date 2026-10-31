@@ -109,6 +109,7 @@ public class EpicMonsterImage extends Image {
     }
 
     private void displayMonsterCard() {
+        BigActorsManager.voiceMonsterIfOpening(monsterInfo);
         gameController.displayMonsterCard(monsterInfo, () -> gameController.hideMonsterCard(monsterInfo, null), null);
     }
 

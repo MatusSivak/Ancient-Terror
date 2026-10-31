@@ -21,6 +21,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
+import sk.sivak.eldritchhorror.core.constants.spell.SpellTrait;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager.BigActorKey;
 import sk.sivak.eldritchhorror.core.view.components.SoundDialog;
@@ -170,6 +173,41 @@ public class UiSoundsTest {
 
     private static Object proxy(Class<?> type) {
         return Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, (p, method, args) -> null);
+    }
+
+    private static Object withTraits(Class<?> type, Enum<?>... traits) {
+        java.util.Set<Object> set = new java.util.HashSet<>(Arrays.asList(traits));
+        return Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type},
+                (p, method, args) -> method.getName().equals("getTraits") ? set : null);
+    }
+
+    @Test public void assetAndConditionRevealsUseTheirCategoryCue() {
+        Class<?> asset = sk.sivak.eldritchhorror.core.constants.asset.AssetInfo.class;
+        Class<?> condition = sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo.class;
+        assertEquals(CARD_OPEN_ASSET_WEAPON, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.ITEM, AssetTrait.MAGICAL, AssetTrait.WEAPON)));
+        assertEquals(CARD_OPEN_ASSET_TOME, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.ITEM, AssetTrait.TOME)));
+        assertEquals(CARD_OPEN_ASSET_ALLY, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.ALLY)));
+        assertEquals(CARD_OPEN_ASSET_SERVICE, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.SERVICE, AssetTrait.TEAMWORK)));
+        assertEquals(CARD_OPEN_ASSET_SERVICE, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.TASK)));
+        assertEquals(CARD_OPEN_ASSET_TRINKET, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.TRINKET)));
+        assertEquals(CARD_OPEN_ASSET_TRINKET, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.ITEM, AssetTrait.MAGICAL)));
+        assertEquals(CARD_OPEN_ASSET, UiSounds.cardOpenCue(withTraits(asset, AssetTrait.ITEM)));
+        assertEquals(CARD_OPEN_CONDITION_BOON, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.BOON)));
+        assertEquals(CARD_OPEN_CONDITION_MADNESS, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.MADNESS)));
+        assertEquals(CARD_OPEN_CONDITION_INJURY, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.INJURY)));
+        assertEquals(CARD_OPEN_CONDITION_ILLNESS, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.ILLNESS)));
+        assertEquals(CARD_OPEN_CONDITION_DEAL, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.COMMON, ConditionTrait.DEAL)));
+        assertEquals(CARD_OPEN_CONDITION_BANE, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.BANE)));
+        assertEquals(CARD_OPEN_CONDITION, UiSounds.cardOpenCue(withTraits(condition, ConditionTrait.RESTRICTION)));
+    }
+
+    @Test public void incantationAndRitualSpellsHaveTheirOwnRevealWhileGlamourKeepsTheSpellCue() {
+        Class<?> spell = sk.sivak.eldritchhorror.core.constants.spell.SpellInfo.class;
+        assertEquals(CARD_OPEN_SPELL_INCANTATION, UiSounds.cardOpenCue(withTraits(spell, SpellTrait.INCANTATION)));
+        assertEquals(CARD_OPEN_SPELL_INCANTATION, UiSounds.cardOpenCue(withTraits(spell, SpellTrait.INCANTATION, SpellTrait.TEAMWORK)));
+        assertEquals(CARD_OPEN_SPELL_RITUAL, UiSounds.cardOpenCue(withTraits(spell, SpellTrait.RITUAL)));
+        assertEquals(CARD_OPEN_SPELL, UiSounds.cardOpenCue(withTraits(spell, SpellTrait.GLAMOUR)));
+        assertEquals(CARD_OPEN_SPELL, UiSounds.cardOpenCue(withTraits(spell, SpellTrait.TEAMWORK)));
     }
 
     @Test public void dialogAnnouncesEachVisibilityChangeOnlyOnce() {

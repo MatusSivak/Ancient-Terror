@@ -51,16 +51,16 @@ public class TrackZoomSoundsTest {
         FastForwardAction.turnOn();
         Actor omen = new Actor(); omen.setSize(100, 100);
         new MaxMinComponent(omen, BigActorsManager.BigActorKey.OMEN_TRACK)
-                .withSounds(CustomAssetManager.OMEN_MAXIMIZE_SOUND, CustomAssetManager.OMEN_MINIMIZE_SOUND)
+                .withSounds(CustomAssetManager.TRACK_ZOOM_IN_SOUND, CustomAssetManager.TRACK_ZOOM_OUT_SOUND)
                 .maximizeOrMinimize();
         assertEquals(1, plays);
     }
     @Test public void acceleratedAutomaticZoomStaysSilent() {
         FastForwardAction.turnOn();
-        TrackZoomSounds.play(CustomAssetManager.OMEN_MAXIMIZE_SOUND);
+        TrackZoomSounds.play(CustomAssetManager.TRACK_ZOOM_IN_SOUND);
         assertEquals(0, plays);
         FastForwardAction.turnOff();
-        TrackZoomSounds.play(CustomAssetManager.OMEN_MAXIMIZE_SOUND);
+        TrackZoomSounds.play(CustomAssetManager.TRACK_ZOOM_IN_SOUND);
         assertEquals(1, plays);
     }
 }

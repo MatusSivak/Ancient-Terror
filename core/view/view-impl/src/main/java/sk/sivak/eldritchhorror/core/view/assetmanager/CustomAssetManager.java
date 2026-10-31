@@ -362,7 +362,7 @@ public class CustomAssetManager extends AssetManager {
                 TOKEN_GAIN_SOUND, TOKEN_LOSS_SOUND, TOKEN_LEAVE_SOUND, TOKEN_LAND_SOUND,
                 FIREBALL_LAUNCH_SOUND, FIREBALL_IMPACT_SOUND, MONSTER_TOKEN_HIT_SOUND,
                 MONSTER_HEALTH_LEAVE_SOUND, MONSTER_HEALTH_TEAR_SOUND,
-                OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND}) {
+                TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND}) {
             load(path, Sound.class);
             soundPaths.add(path);
         }
@@ -601,8 +601,8 @@ public class CustomAssetManager extends AssetManager {
     public final static String DOOM_ADVANCE_SOUND = "sounds/doom_advance.wav";
     public final static String DOOM_RETREAT_SOUND = "sounds/doom_retreat.wav";
     // CC0 Freesound whooshes by brktkrgll (856169) and TommasoMotteran (850767).
-    public final static String OMEN_MAXIMIZE_SOUND = "sounds/omen_maximize.wav";
-    public final static String OMEN_MINIMIZE_SOUND = "sounds/omen_minimize.wav";
+    public final static String TRACK_ZOOM_IN_SOUND = "sounds/track_zoom_in.wav";
+    public final static String TRACK_ZOOM_OUT_SOUND = "sounds/track_zoom_out.wav";
     // "maximize_006" from Kenney Interface Sounds (www.kenney.nl), CC0.
     public final static String INVESTIGATOR_HIGHLIGHT_SOUND = "sounds/investigator_highlight.ogg";
     // Shared by Health and Sanity.

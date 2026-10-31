@@ -554,6 +554,7 @@ public class MonsterCombatTable extends VisTable {
     }
 
     private void displayMonsterCard(MonsterCombatTableData data) {
+        BigActorsManager.voiceMonsterIfOpening(data.getMonsterInfo());
         BigActorsManager.initMonsterCard(data.getMonsterInfo(), BigActorsManager::displayOrHideMonsterCard, () -> {});
         BigActorsManager.displayOrHideMonsterCard();
     }

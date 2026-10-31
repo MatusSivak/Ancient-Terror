@@ -16,11 +16,12 @@ public final class GameplaySounds {
         EXPEDITION_SPAWN("expedition_spawn", .80f),
         CLUE_GAIN("clue_gain", .85f),
         CLUE_LAND("clue_land", .85f),
-        FOCUS_GAIN("focus_gain", .78f),
+        FOCUS_GAIN("focus_gain", .60f),
         FOCUS_LAND("focus_land", .80f),
         RESOURCE_SPEND("resource_spend", .70f),
-        DICE_SORT("dice_sort", .75f),
+        DICE_SORT("dice_sort", .60f),
         TICKET_GAIN("ticket_gain", .85f),
+        SANITY_GAIN("sanity_gain", .90f),
         TICKET_LAND("ticket_land", .82f),
         TICKET_SPEND("ticket_spend", .78f),
         CARD_GAIN("card_gain", .75f),
@@ -32,6 +33,8 @@ public final class GameplaySounds {
         EPIC_MONSTER_SPAWN("epic_monster_spawn", .95f),
         MONSTER_DEFEAT("monster_defeat", .85f),
         MONSTER_SHEET_TEAR("monster_sheet_tear", .85f),
+        MONSTER_SHEET_GROWL("monster_sheet_growl", .80f),
+        EPIC_MONSTER_SHEET_ROAR("epic_monster_sheet_roar", .90f),
         MONSTER_DEFEAT_FLY("monster_defeat_fly", .85f),
         MYSTERY_PROGRESS("mystery_progress", .72f),
         MYSTERY_SOLVED("mystery_solved", .90f),
@@ -42,7 +45,7 @@ public final class GameplaySounds {
         INVESTIGATOR_DEFEAT("investigator_defeat", .90f),
         INVESTIGATOR_DEVOURED("investigator_devoured", .90f),
         INVESTIGATOR_DELAYED("investigator_delayed", .82f),
-        INVESTIGATOR_DETAINED("investigator_detained", .65f),
+        INVESTIGATOR_DETAINED("investigator_detained", .85f),
         INVESTIGATOR_READY("investigator_ready", .80f),
         INVESTIGATOR_DISAPPEAR("investigator_disappear", .85f),
         OMEN_CHANGE("omen_change", .85f),
@@ -78,6 +81,16 @@ public final class GameplaySounds {
     public static void play(Cue cue) {
         if (FastForwardAction.isOn()) return;
         // Never synchronously decode audio on the render thread. Missing cues stay silent.
+        SoundPlayer.play(CustomAssetManager.getLoadedSound(cue.path), cue.volume, 1f, 0f);
+    }
+
+    public static Cue monsterSheetCue(boolean epic) {
+        return epic ? Cue.EPIC_MONSTER_SHEET_ROAR : Cue.MONSTER_SHEET_GROWL;
+    }
+
+    /** User gesture, so it stays audible during fast-forward. */
+    public static void playMonsterVoice(boolean epic) {
+        Cue cue = monsterSheetCue(epic);
         SoundPlayer.play(CustomAssetManager.getLoadedSound(cue.path), cue.volume, 1f, 0f);
     }
 

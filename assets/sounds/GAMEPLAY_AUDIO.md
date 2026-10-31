@@ -29,18 +29,18 @@ decoded Android SoundPool limit. The script contains exact processing settings.
 
 | Event / animation | Output WAV (under `sounds/`) | Source / sound direction |
 | --- | --- | --- |
-| Clue appears; expedition becomes active | `clue_spawn` | PWL bell, slightly lowered discovery chime |
-| Clue collected from map or pool | `clue_gain` | rubberduck gem 04 + PWL bell; brighter pickup |
-| Clue reaches its HUD slot | `clue_land` | rubberduck gem 01 + short high PWL bell; crisp contact |
-| Focus token gained | `focus_gain` | PWL bell, soft lower chime |
-| Focus token reaches its HUD slot | `focus_land` | rubberduck gem 01 + short lower PWL bell |
+| Clue appears; expedition becomes active | `clue_spawn` | PWL bell, slightly lowered discovery chime Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| Clue collected from map or pool | `clue_gain` | rubberduck gem 04 + PWL bell; brighter pickup Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| Clue reaches its HUD slot | `clue_land` | rubberduck gem 01 + short high PWL bell; crisp contact Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| Focus token gained | `focus_gain` | PWL bell, soft lower chime Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| Focus token reaches its HUD slot | `focus_land` | rubberduck gem 01 + short lower PWL bell Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
 | Clue/focus spent; clue removed from map | `resource_spend` | rubberduck gem 01; short physical token tick |
-| Travel ticket gained / spent or discarded | `ticket_gain`, `ticket_spend` | rubberduck books 01 / 02; paper handling |
-| Travel ticket reaches its HUD slot | `ticket_land` | rubberduck book 02 + gem 01; brief paper/token contact |
-| Card gained / discarded; rumor card removed | `card_gain`, `card_discard` | rubberduck books 03 / 04; neutral paper handling, including harmful conditions |
+| Travel ticket gained / spent or discarded | `ticket_gain`, `ticket_spend` | rubberduck books 01 / 02; paper handling (`ticket_gain` superseded by `prepare_category_sounds.py`, see CATEGORY_AUDIO.md) |
+| Travel ticket reaches its HUD slot | `ticket_land` | rubberduck book 02 + gem 01; brief paper/token contact Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
+| Card gained / discarded; rumor card removed | `card_gain`, `card_discard` | rubberduck books 03 / 04; neutral paper handling, including harmful conditions (`card_discard` superseded by `prepare_category_sounds.py`, see CATEGORY_AUDIO.md) |
 | Gate opens / closes | `gate_open`, `gate_close` | Ogrebane teleport, forward / reversed |
 | Regular / epic monster appears | `monster_spawn`, `epic_monster_spawn` | rubberduck monster 03 / lowered roar 03 |
-| Monster defeated, including ambushes | `monster_defeat` | rubberduck creature death 01 |
+| Monster defeated, including ambushes | `monster_defeat` | rubberduck creature death 01 Superseded by `prepare_category_sounds.py` (see CATEGORY_AUDIO.md). |
 | Mystery progress increases / mystery solved | `mystery_progress`, `mystery_solved` | PWL bell, single step / ascending layered resolution |
 | Skill improvement gained / lost | `skill_gain`, `skill_loss` | PWL bell, ascending pair / lower tone |
 | Rumor storm or vortex appears | `hazard_spawn` | rubberduck spell 02, lowered magical burst |

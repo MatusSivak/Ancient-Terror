@@ -321,8 +321,7 @@ public class AssetView {
     }
 
     private void discardCard(SingleSubscriber<? super ShowCardResponse> onSub, ShowCardResponse showCardResponse) {
-        GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD);
-        CardDestructionEffect.discard(cardTemplate)
+        CardDestructionEffect.discard(cardTemplate, () -> GameplaySounds.play(GameplaySounds.Cue.CARD_DISCARD))
                 .subscribe(() -> onSub.onSuccess(showCardResponse), onSub::onError);
     }
 
@@ -364,8 +363,9 @@ public class AssetView {
         InfoStage.setBottomHeight(originalBottomHeight);
 
         Vector2 target = investigatorDestination();
-        sk.sivak.eldritchhorror.core.view.components.card.CardCollectionAnimation.play(
-                cardTemplate, target, completableSubscriber::onCompleted);
+        // The card flies away on its own; the game continues as soon as the gain is confirmed.
+        sk.sivak.eldritchhorror.core.view.components.card.CardCollectionAnimation.play(cardTemplate, target, () -> { });
+        completableSubscriber.onCompleted();
     }
 
     private Vector2 investigatorDestination() {

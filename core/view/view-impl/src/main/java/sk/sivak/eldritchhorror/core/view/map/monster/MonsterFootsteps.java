@@ -12,7 +12,7 @@ import sk.sivak.eldritchhorror.core.view.utils.SoundPlayer;
 
 /**
  * Heavy footsteps while monster tokens travel across the map; they stop as soon as the move completes.
- * Source credits: sounds/PRESENTATION_AUDIO.md.
+ * Source credits: sounds/CATEGORY_AUDIO.md.
  */
 public final class MonsterFootsteps {
     public static final String[] SOUNDS = {
@@ -43,7 +43,7 @@ public final class MonsterFootsteps {
         int next = MathUtils.random(SOUNDS.length - 1);
         if (next == lastStep) next = (next + 1) % SOUNDS.length;
         lastStep = next;
-        // Prepared gravel/creature layers give each step weight; vary them without a repeated loop.
+        // Lowered mud squelches with a wet layer give each step weight; vary them without a repeated loop.
         SoundPlayer.play(CustomAssetManager.getLoadedSound(SOUNDS[lastStep]),
                 VOLUME * MathUtils.random(0.85f, 1f), MathUtils.random(0.92f, 1.04f), 0f);
     }

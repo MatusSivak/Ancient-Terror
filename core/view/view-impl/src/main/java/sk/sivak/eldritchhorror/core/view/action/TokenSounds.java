@@ -10,8 +10,9 @@ import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 public final class TokenSounds {
 
     public enum Cue {
-        // Health and Sanity share the same cues.
-        GAIN(CustomAssetManager.TOKEN_GAIN_SOUND, 0.90f),
+        // Health and Sanity have their own pickups but share the HUD arrival and loss cues.
+        HEALTH_GAIN(CustomAssetManager.TOKEN_GAIN_SOUND, 0.90f),
+        SANITY_GAIN(GameplaySounds.Cue.SANITY_GAIN.path, GameplaySounds.Cue.SANITY_GAIN.volume),
         CLUE_GAIN(GameplaySounds.Cue.CLUE_GAIN.path, GameplaySounds.Cue.CLUE_GAIN.volume),
         FOCUS_GAIN(GameplaySounds.Cue.FOCUS_GAIN.path, GameplaySounds.Cue.FOCUS_GAIN.volume),
         TICKET_GAIN(GameplaySounds.Cue.TICKET_GAIN.path, GameplaySounds.Cue.TICKET_GAIN.volume),

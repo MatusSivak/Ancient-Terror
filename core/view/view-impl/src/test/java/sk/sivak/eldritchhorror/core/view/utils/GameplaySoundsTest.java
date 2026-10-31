@@ -155,10 +155,14 @@ public class GameplaySoundsTest {
         assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
     }
 
+    @Test public void healthAndSanityHaveTheirOwnPickups() {
+        assertNotEquals(TokenSounds.Cue.HEALTH_GAIN.path, TokenSounds.Cue.SANITY_GAIN.path);
+    }
+
     @Test public void pickupsAndHudArrivalsHaveDistinctMatchingSounds() {
-        TokenSounds.Cue[] pickups = {TokenSounds.Cue.GAIN, TokenSounds.Cue.CLUE_GAIN,
+        TokenSounds.Cue[] pickups = {TokenSounds.Cue.HEALTH_GAIN, TokenSounds.Cue.SANITY_GAIN, TokenSounds.Cue.CLUE_GAIN,
                 TokenSounds.Cue.FOCUS_GAIN, TokenSounds.Cue.TICKET_GAIN};
-        TokenSounds.Cue[] arrivals = {TokenSounds.Cue.TOKEN_LAND, TokenSounds.Cue.CLUE_LAND,
+        TokenSounds.Cue[] arrivals = {TokenSounds.Cue.TOKEN_LAND, TokenSounds.Cue.TOKEN_LAND, TokenSounds.Cue.CLUE_LAND,
                 TokenSounds.Cue.FOCUS_LAND, TokenSounds.Cue.TICKET_LAND};
         for (int i = 0; i < pickups.length; i++) {
             events.clear();
@@ -183,5 +187,19 @@ public class GameplaySoundsTest {
         }
         assertTrue(events.isEmpty());
         assertTrue(queuedSounds.isEmpty());
+    }
+
+    @Test public void clickedMonstersVoiceByEpicnessEvenDuringFastForward() {
+        assertEquals(MONSTER_SHEET_GROWL, GameplaySounds.monsterSheetCue(false));
+        assertEquals(EPIC_MONSTER_SHEET_ROAR, GameplaySounds.monsterSheetCue(true));
+        assertNotEquals(MONSTER_SHEET_GROWL.path, EPIC_MONSTER_SHEET_ROAR.path);
+        FastForwardAction.turnOn();
+        try {
+            GameplaySounds.playMonsterVoice(false);
+            GameplaySounds.playMonsterVoice(true);
+        } finally {
+            FastForwardAction.turnOff();
+        }
+        assertEquals(Arrays.asList(MONSTER_SHEET_GROWL.path, EPIC_MONSTER_SHEET_ROAR.path), events);
     }
 }

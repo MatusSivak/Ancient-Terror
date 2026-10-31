@@ -21,8 +21,8 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.DOOM_CHANGED;
 import static sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory.HUD_BUTTON;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MAXIMIZE_SOUND;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.OMEN_MINIMIZE_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.TRACK_ZOOM_IN_SOUND;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.TRACK_ZOOM_OUT_SOUND;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 
 public class DoomOmenViewImpl implements DoomOmenView {
@@ -47,7 +47,8 @@ public class DoomOmenViewImpl implements DoomOmenView {
         return Completable.create(onSub -> {
             InfoStage.displayTextDontHide(text);
             DoomTrackWidget doomTrackWidget = HudButtons.getDoomTrack();
-            ClickZoomListener clickZoomListener = new ClickZoomListener(doomTrackWidget);
+            ClickZoomListener clickZoomListener = new ClickZoomListener(doomTrackWidget)
+                    .withSounds(TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND);
             clickZoomListener.setOnCompletedListener(() -> {
                 doomTrackWidget.addOnCompletedListener(() -> {
                     // A later refresh (including Yig's awakening) must not complete this action again.
@@ -162,7 +163,7 @@ public class DoomOmenViewImpl implements DoomOmenView {
     }
 
     private static ClickZoomListener omenZoomListener(OmenTrack omenTrack) {
-        return new ClickZoomListener(omenTrack).withSounds(OMEN_MAXIMIZE_SOUND, OMEN_MINIMIZE_SOUND);
+        return new ClickZoomListener(omenTrack).withSounds(TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND);
     }
 
     private void selectNewOmen(SingleSubscriber<? super OmenId> onSub, OmenTrack omenTrack, ClickZoomListener clickZoomListener) {
