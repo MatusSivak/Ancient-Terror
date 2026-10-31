@@ -187,6 +187,12 @@ public class GameControllerImpl implements GameController {
         return getInvestigatorBasics(investigators.getActiveInvestigatorId());
     }
 
+    @Override
+    public boolean isInvestigatorDetained(InvestigatorId investigatorId) {
+        return conditionsDeck.hasCondition(investigatorId,
+                sk.sivak.eldritchhorror.core.constants.condition.ConditionId.DETAINED);
+    }
+
     private InvestigatorBasics getInvestigatorBasics(InvestigatorId investigatorId) {
         InvestigatorRead investigator;
         if (Stream.anyMatch(investigators.getDefeatedInvestigators(), di -> di.getInfo().getInvestigatorId() == investigatorId)) {

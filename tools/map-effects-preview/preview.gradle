@@ -23,4 +23,10 @@ gradle.projectsEvaluated {
         mainClass.set('PresentationPreview')
         workingDir = new File(gradle.rootProject.projectDir, 'assets')
     }
+    desktop.tasks.register('previewOctoberReports', JavaExec) {
+        dependsOn desktop.tasks.named('mapEffectsPreviewClasses')
+        classpath = desktop.sourceSets.mapEffectsPreview.runtimeClasspath
+        mainClass.set('OctoberReportsPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
 }

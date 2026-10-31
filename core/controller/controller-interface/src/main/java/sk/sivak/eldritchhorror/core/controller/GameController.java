@@ -36,6 +36,8 @@ import java.util.List;
  */
 public interface GameController {
 
+    boolean isInvestigatorDetained(InvestigatorId investigatorId);
+
     Completable confirmExpeditionLocation();
 
     void justPlaceExpeditionToken();

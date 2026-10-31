@@ -22,6 +22,13 @@ public class GainConditionFromDeckAction extends AbstractHookableAction<GainCond
 
     @Override
     protected void onExecute(SingleSubscriber<? super GainConditionFromDeckData> ss) {
+        // Resolve availability when this queued command runs: a preceding effect may
+        // already have given this condition, or used the last copy in the deck.
+        if (!ServicePlatform.get().getConditionsDeck().canGetConditionId(input.getInvestigatorId(), input.getConditionId())) {
+            logger.info("Skipping unavailable condition: " + input);
+            ss.onSuccess(input);
+            return;
+        }
         ConditionInfo conditionInfo = ServicePlatform.get().getConditionsDeck().gainCondition(input.getConditionId(), input.getInvestigatorId());
         ServicePlatform.get().getConditionListenerProvider().getConditionListener(conditionInfo).register(conditionInfo, input.getInvestigatorId());
         ss.onSuccess(input);

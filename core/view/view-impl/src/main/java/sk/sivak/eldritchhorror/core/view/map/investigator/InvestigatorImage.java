@@ -46,6 +46,11 @@ public class InvestigatorImage extends Image {
 
     private HourglassComponent hourglassComponent;
     private boolean hourglassVisible;
+    private Image detainedBars;
+    private boolean detainedVisible;
+    private float detainedTime;
+    private boolean detainedInitialized;
+    private boolean detainedSoundEnabled;
 
     private boolean defeated;
     private boolean defeatedByHealth;
@@ -123,6 +128,33 @@ public class InvestigatorImage extends Image {
         return hourglassVisible;
     }
 
+    public boolean isDetainedVisible() {
+        return detainedVisible;
+    }
+
+    public void setDetainedSoundEnabled(boolean enabled) {
+        detainedSoundEnabled = enabled;
+    }
+
+    private void updateDetained(float delta) {
+        // Read the actual card ownership so gains, discards, transfers and loaded saves agree.
+        boolean detained = !defeated && !asteroidVisible && gameController != null
+                && gameController.isInvestigatorDetained(investigatorId);
+        if (detained != detainedVisible) {
+            if (detained && detainedInitialized && detainedSoundEnabled) {
+                sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.play(
+                        sk.sivak.eldritchhorror.core.view.utils.GameplaySounds.Cue.INVESTIGATOR_DETAINED);
+            }
+            detainedVisible = detained;
+            detainedTime = 0f;
+            if (detained && detainedBars == null) {
+                detainedBars = new Image(CustomAssetManager.getTexture(CustomAssetManager.DETAINED_BARS));
+            }
+        }
+        detainedInitialized = true;
+        if (detainedVisible) detainedTime += delta * (FastForwardAction.isOn() ? 20f : 1f);
+    }
+
     private void createHourglassComponent() {
         if (hourglassComponent == null) {
             hourglassComponent = new HourglassComponent(getColor());
@@ -174,6 +206,7 @@ public class InvestigatorImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
+        updateDetained(delta);
         if (hitShake > 0f) {
             hitShake = Math.max(0f, hitShake - delta);
             hitTime += delta;
@@ -280,6 +313,16 @@ public class InvestigatorImage extends Image {
         if (hourglassComponent != null) {
             hourglassComponent.draw(batch, parentAlpha);
         }
+        if (detainedVisible && detainedBars != null) {
+            float settle = Math.min(1f, detainedTime / .7f);
+            float rattle = (float) Math.sin(detainedTime * 65f) * 3f * (1f - settle);
+            detainedBars.setBounds(getX() + rattle, getY() + (1f - settle) * 12f, getWidth(), getHeight());
+            detainedBars.setOrigin(getOriginX() - rattle, getOriginY());
+            detainedBars.setScale(getScaleX(), getScaleY());
+            detainedBars.setRotation(getRotation());
+            detainedBars.setColor(1f, 1f, 1f, getColor().a * Math.min(1f, detainedTime / .15f));
+            detainedBars.draw(batch, parentAlpha);
+        }
     }
 
     public void setAsteroidVisible(boolean asteroidVisible) {
@@ -354,6 +397,8 @@ public class InvestigatorImage extends Image {
 
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeated = true;
+        detainedVisible = false;
+        detainedBars = null;
         hourglassVisible = false;
         this.defeatedByHealth = defeatedByHealth;
         // This decoration is drawn manually, so remove() alone would not hide it.

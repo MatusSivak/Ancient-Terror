@@ -42,6 +42,7 @@ public final class GameplaySounds {
         INVESTIGATOR_DEFEAT("investigator_defeat", .90f),
         INVESTIGATOR_DEVOURED("investigator_devoured", .90f),
         INVESTIGATOR_DELAYED("investigator_delayed", .82f),
+        INVESTIGATOR_DETAINED("investigator_detained", .65f),
         INVESTIGATOR_READY("investigator_ready", .80f),
         INVESTIGATOR_DISAPPEAR("investigator_disappear", .85f),
         OMEN_CHANGE("omen_change", .85f),

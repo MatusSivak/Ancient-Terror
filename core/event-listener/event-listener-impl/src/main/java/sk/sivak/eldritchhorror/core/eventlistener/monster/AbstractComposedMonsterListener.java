@@ -132,13 +132,23 @@ abstract class AbstractComposedMonsterListener extends AbstractMonsterListener {
         spawnEffect(switchesInvestigator, true, effect);
     }
 
+    /** Check affected investigators when the queued spawn resolves, before showing its sheet. */
+    protected final void spawnEffect(boolean switchesInvestigator, java8.features.function.Supplier<Boolean> applies, Runnable effect) {
+        spawnEffect(switchesInvestigator, true, applies, effect);
+    }
+
     /** Resolve movement immediately on the map, without opening the monster sheet. */
     protected final void spawnMovement(boolean switchesInvestigator, Runnable effect) {
         spawnEffect(switchesInvestigator, false, effect);
     }
 
     private void spawnEffect(boolean switchesInvestigator, boolean highlight, Runnable effect) {
+        spawnEffect(switchesInvestigator, highlight, () -> true, effect);
+    }
+
+    private void spawnEffect(boolean switchesInvestigator, boolean highlight, java8.features.function.Supplier<Boolean> applies, Runnable effect) {
         ServicePlatform.get().getService().addEventCommand(in -> {
+            if (!applies.get()) return;
             sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId previouslyActive =
                     ServicePlatform.get().getInvestigators().getActiveInvestigatorId();
             ServicePlatform.get().getService().hold();

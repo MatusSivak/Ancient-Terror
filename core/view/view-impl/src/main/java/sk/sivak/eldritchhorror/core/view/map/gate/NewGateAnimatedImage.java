@@ -60,17 +60,17 @@ public class NewGateAnimatedImage extends Group {
                 onSub.onCompleted();
                 return;
             }
-            // Carry the visible map copy into the UI without jumping when the map is zoomed or wrapped.
-            Vector2 center = toInfoCoordinates(getWidth() / 2f, getHeight() / 2f);
-            Vector2 horizontal = toInfoCoordinates(getWidth() / 2f + 1f, getHeight() / 2f);
-            Vector2 vertical = toInfoCoordinates(getWidth() / 2f, getHeight() / 2f + 1f);
+            // Keep the closing gate and its mist below monsters, in the same map coordinates.
+            Group parent = getParent();
+            int layerIndex = getZIndex();
+            Vector2 center = localToParentCoordinates(new Vector2(getWidth() / 2f, getHeight() / 2f));
             Group portrait = new Group();
             portrait.setName("closing-gate-portrait");
             // The halo extends beyond the gate's nominal bounds. Include it in the torn snapshots.
             portrait.setSize(getWidth() * 2.4f, getHeight() * 2.4f);
             portrait.setOrigin(portrait.getWidth() / 2f, portrait.getHeight() / 2f);
             portrait.setPosition(center.x - portrait.getWidth() / 2f, center.y - portrait.getHeight() / 2f);
-            portrait.setScale(center.dst(horizontal), center.dst(vertical));
+            portrait.setScale(getScaleX(), getScaleY());
             gateAnimatedImage.clearActions();
             backgroundImage.clearActions();
             for (Image layer : new Image[]{backgroundImage, gateAnimatedImage}) {
@@ -80,15 +80,10 @@ public class NewGateAnimatedImage extends Group {
             }
             clearActions();
             remove();
-            InfoStage.getStageSafe().addActor(portrait);
+            parent.addActorAt(layerIndex, portrait);
             GateDissipateAnimation.start(portrait, backgroundImage, gateAnimatedImage,
                     toLibgdxColor(gateColor), "gate-close", onSub);
         });
-    }
-
-    private Vector2 toInfoCoordinates(float x, float y) {
-        Vector2 point = localToStageCoordinates(new Vector2(x, y));
-        return InfoStage.getStageSafe().screenToStageCoordinates(getStage().stageToScreenCoordinates(point));
     }
 
     public void updateGateTransparency(OmenColor omenColor) {

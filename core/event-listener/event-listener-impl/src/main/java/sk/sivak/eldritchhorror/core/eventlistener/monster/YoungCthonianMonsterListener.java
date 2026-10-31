@@ -33,7 +33,9 @@ public class YoungCthonianMonsterListener extends AbstractComposedMonsterListene
 
     @Override
     protected void onSpawn() {
-        spawnEffect(true, () -> damageEach(investigatorsAt(withAdjacent(monsterInfo.getCurrentLocation())), 1, 1));
+        spawnEffect(true,
+                () -> !investigatorsAt(withAdjacent(monsterInfo.getCurrentLocation())).isEmpty(),
+                () -> damageEach(investigatorsAt(withAdjacent(monsterInfo.getCurrentLocation())), 1, 1));
     }
 
 }

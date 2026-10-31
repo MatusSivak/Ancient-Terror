@@ -36,7 +36,11 @@ public class InvestigatorUtils {
             @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.INVESTIGATOR; }
         };
 
-        Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> new InvestigatorImage(investigatorId, gameController);
+        Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
+            InvestigatorImage image = new InvestigatorImage(investigatorId, gameController);
+            image.setDetainedSoundEnabled(isCenter);
+            return image;
+        };
 
         Completable spawn = new Spawner().spawn(actorSpawner, spawnConfig,
                 new InvestigatorIdLayerResolver(investigatorId, false, false), location, onSpawn);

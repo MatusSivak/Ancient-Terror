@@ -40,11 +40,12 @@ final class GateDissipateAnimation extends Group {
     private final Mist mist;
 
     static void start(Group portrait, Actor halo, Actor core, Color accent, String name, CompletableSubscriber subscriber) {
-        Stage stage = portrait.getStage();
+        Group parent = portrait.getParent();
+        int layerIndex = portrait.getZIndex();
         portrait.remove();
         GateDissipateAnimation animation = new GateDissipateAnimation(portrait, halo, core, accent);
         animation.setName(name);
-        stage.addActor(animation);
+        parent.addActorAt(layerIndex, animation);
         animation.addAction(new FastForwardAction<>(new TemporalAction(TOTAL_TIME * ViewProperties.NORMAL_ACTION_DURATION) {
             @Override protected void update(float percent) {
                 animation.animate(percent * TOTAL_TIME);
@@ -68,7 +69,7 @@ final class GateDissipateAnimation extends Group {
         haloRotation = halo.getRotation();
         coreRotation = core.getRotation();
         addActor(portrait);
-        Vector2 center = portrait.localToStageCoordinates(new Vector2(portrait.getWidth() / 2f, portrait.getHeight() / 2f));
+        Vector2 center = portrait.localToParentCoordinates(new Vector2(portrait.getWidth() / 2f, portrait.getHeight() / 2f));
         // The vortex itself is about a third of the portrait; the halo reaches further.
         float radius = core.getWidth() * coreScale * portrait.getScaleX() * 0.36f;
         mist = new Mist(center, radius, new Color(accent).lerp(Color.WHITE, 0.3f));

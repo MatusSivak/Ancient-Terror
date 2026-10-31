@@ -55,8 +55,10 @@ public class MonsterUtils {
     }
 
     public static Completable discardMonster(MonsterInfo input) {
-        return new Spawner().unspawn(new MonsterIdLayerResolver(input));
-
+        return Completable.defer(() -> {
+            MonsterIdLayerResolver resolver = new MonsterIdLayerResolver(input);
+            return MonsterDiscardAnimation.play(MapStage.getActor(resolver), () -> MapStage.removeActor(resolver));
+        });
     }
 
     public static class MonsterIdLayerResolver implements MapStage.IdLayerResolver<MonsterInfo> {

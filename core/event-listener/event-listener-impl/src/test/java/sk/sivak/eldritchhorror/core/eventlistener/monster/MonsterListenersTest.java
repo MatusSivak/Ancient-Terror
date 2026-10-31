@@ -299,6 +299,37 @@ public class MonsterListenersTest {
         drain();
     }
 
+    @Test public void youngCthonianSkipsEmptyAreaAndChecksTargetsAtResolution() {
+        ServicePlatform.get().setLocationMap(mock(LocationMapRead.class, (name, a) ->
+                new sk.sivak.eldritchhorror.core.constants.location.Location(SPACE_1, null,
+                        new sk.sivak.eldritchhorror.core.constants.location.LocationInfo.Connection() {
+                            public LocationId getLocationId() { return SPACE_2; }
+                            public sk.sivak.eldritchhorror.core.constants.location.PathType getPathType() {
+                                return sk.sivak.eldritchhorror.core.constants.location.PathType.SHIP;
+                            }
+                        })));
+        AbstractMonsterInfo monster = monster(new sk.sivak.eldritchhorror.core.constants.monster.YoungCthonianMonster(), SPACE_1);
+        investigator(InvestigatorId.THE_SAILOR, SPACE_5);
+        new YoungCthonianMonsterListener().register(monster);
+        drain();
+        assertTrue(effects.isEmpty());
+
+        new YoungCthonianMonsterListener().register(monster);
+        investigator(InvestigatorId.THE_MUSICIAN, SPACE_2);
+        drain();
+        assertEquals(1, Collections.frequency(effects, "highlightSpawnText"));
+        assertEquals(1, Collections.frequency(effects, "loseHealth:1"));
+        assertEquals(1, Collections.frequency(effects, "loseSanity:1"));
+        assertTrue(effects.contains("changeActiveInvestigator:" + InvestigatorId.THE_MUSICIAN));
+        assertFalse(effects.contains("changeActiveInvestigator:" + InvestigatorId.THE_SAILOR));
+
+        effects.clear();
+        new YoungCthonianMonsterListener().register(monster);
+        onBoard.clear();
+        drain();
+        assertTrue(effects.isEmpty());
+    }
+
     private void drain() {
         while (!pending.isEmpty()) {
             pending.remove(0).run();

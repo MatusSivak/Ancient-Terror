@@ -430,6 +430,7 @@ public class CustomAssetManager extends AssetManager {
     }
 
     private void initCustomAssetManager() {
+        load(DETAINED_BARS, Texture.class);
         load("ancient_one/button_azathoth.jpg", Texture.class);
         load("ancient_one/button_cthulhu.jpg", Texture.class);
         load("ancient_one/button_shub_niggurath.jpg", Texture.class);
@@ -585,6 +586,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPLASH_TITLE = "background/title.png";
     public final static String BLANK_MAP = "map/blank_map.png";
     public final static String ASTEROID = "map/asteroid.png";
+    public final static String DETAINED_BARS = "map/detained-bars.png";
     public final static String MAP = "map/new_map.jpg";
     public final static String RED_PIN = "map/redpin.png";
     public final static String STORM = "map/storm.png";

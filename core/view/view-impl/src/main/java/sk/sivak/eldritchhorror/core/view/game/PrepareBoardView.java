@@ -182,7 +182,7 @@ public class PrepareBoardView {
     public Completable closeGate(LocationId location) {
         GateUtils.GateIdLayerResolver idLayerResolver = new GateUtils.GateIdLayerResolver(location);
         Completable moveCameraToLocation = Completable.create(onSub -> {
-            // Frame the whole halo before the closing effect brings it forward.
+            // Frame the whole halo while keeping it on the gate layer.
             MoveCameraToLocationHelper.moveCameraToPosition(LocationPositionResolver.resolve(location), onSub, 1.25f);
         });
         Completable closeGate = Completable.defer(() -> {
@@ -204,11 +204,11 @@ public class PrepareBoardView {
             }
             return visibleGate == null ? Completable.complete() : ((NewGateAnimatedImage) visibleGate).closeGate();
         });
-        Completable removeActorAndSwapLayers = Completable.create(onSub -> {
+        Completable removeActor = Completable.create(onSub -> {
             MapStage.removeActor(idLayerResolver);
             onSub.onCompleted();
         });
-        return moveCameraToLocation.andThen(withCue(GATE_CLOSE, closeGate)).andThen(removeActorAndSwapLayers);
+        return moveCameraToLocation.andThen(withCue(GATE_CLOSE, closeGate)).andThen(removeActor);
     }
 
     public Completable spawnVortex(LocationId locationId) {
