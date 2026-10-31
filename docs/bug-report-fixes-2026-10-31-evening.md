@@ -6,8 +6,8 @@ Refreshed both report collections. Three open reports required changes; report
 Original reports and attachments are retained in ignored
 `build/report-review-oct31-evening/`. The existing `assets/save.json` edit is
 excluded from this change.
-The three actionable reports were marked Fixed after verification. The save-only
-report and all attachments remain unchanged.
+The local report viewer stopped responding before status updates could be sent,
+so remote report statuses and attachments remain unchanged.
 
 - `232332d5-c794-4c9d-9963-04fb6b4a9f36`: Serpent Crown discarded Conspiracy
   Theorist, but its already queued reckoning still ran. Unregistering a card now
