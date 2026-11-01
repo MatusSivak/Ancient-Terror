@@ -112,6 +112,9 @@ public class Investigators implements InvestigatorsWrite {
         InvestigatorWrite newLeadInvestigator = Stream.findFirstOrException(selectedInvestigators,
                 investigator -> investigator.getInfo().getInvestigatorId() == investigatorId);
 
+        for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
+            selectedInvestigator.setLeadInvestigator(false);
+        }
         newLeadInvestigator.setLeadInvestigator(true);
 
         if (reorder) {
