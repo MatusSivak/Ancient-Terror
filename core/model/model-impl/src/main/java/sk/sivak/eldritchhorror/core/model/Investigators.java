@@ -171,6 +171,25 @@ public class Investigators implements InvestigatorsWrite {
     }
 
     @Override
+    public List<InvestigatorId> getInvestigatorIdsInTurnOrder() {
+        List<InvestigatorId> result = new ArrayList<>();
+        for (InvestigatorId investigatorId : investigatorOrder) {
+            for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
+                if (selectedInvestigator.getInfo().getInvestigatorId() == investigatorId) {
+                    result.add(investigatorId);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<InvestigatorId> getInvestigatorOrder() {
+        return new ArrayList<>(investigatorOrder);
+    }
+
+    @Override
     public InvestigatorWrite getLeadInvestigator() {
         if (Stream.anyMatch(selectedInvestigators, InvestigatorRead::isLeadInvestigator)) {
             return findFirstOrException(selectedInvestigators, InvestigatorRead::isLeadInvestigator);

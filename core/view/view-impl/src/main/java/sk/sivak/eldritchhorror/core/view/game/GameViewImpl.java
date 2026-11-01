@@ -364,7 +364,8 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public void showInvestigators(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId) {
-        BigActorsManager.initInvestigatorsSheet(investigators, activeInvestigatorId, controller::displayInvestigatorPassport);
+        BigActorsManager.initInvestigatorsSheet(investigators, activeInvestigatorId, controller::displayInvestigatorPassport,
+                controller::getRemainingActionsInActionPhase);
         BigActorsManager.displayOrHideInvestigators();
     }
 
@@ -517,6 +518,11 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public Single<ActionPhaseAction> selectAction(List<ActionPhaseAction> actionPhaseActions) {
         return selectActionView.selectAction(actionPhaseActions);
+    }
+
+    @Override
+    public boolean switchActiveInvestigatorDuringActionSelection(ActionPhaseAction switchAction) {
+        return BigActorsManager.resolveActionSelection(switchAction);
     }
 
     @Override

@@ -9,7 +9,10 @@ import rx.schedulers.Schedulers;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
+import sk.sivak.eldritchhorror.core.constants.action.SwitchActiveInvestigatorAction;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.eventlistener.action.basic.SkipActionListener;
+import sk.sivak.eldritchhorror.core.eventtype.AfterActionPerformedData;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.CollectAvailableActionsData;
 
@@ -38,7 +41,25 @@ public class SelectActionAction extends AbstractHookableAction<CollectAvailableA
         Single<ActionPhaseAction> actionPhaseActionSingle = ServicePlatform.get().getGameController().selectAction(input.getActionPhaseActions());
         actionPhaseActionSingle
                 .retry()
-                .subscribe(ss::onSuccess);
+                .subscribe(action -> {
+                    if (action instanceof SwitchActiveInvestigatorAction) {
+                        switchActiveInvestigator(((SwitchActiveInvestigatorAction) action).getInvestigatorId());
+                    }
+                    ss.onSuccess(action);
+                });
+    }
+
+    /** Makes the clicked investigator active and restarts action selection for it, skipping action execution. */
+    private void switchActiveInvestigator(InvestigatorId investigatorId) {
+        logger.info("Switching active investigator to " + investigatorId);
+        ServicePlatform.get().getService().hold();
+        ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(investigatorId);
+        ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
+        AfterActionPerformedData afterActionPerformedData = new AfterActionPerformedData();
+        afterActionPerformedData.setCanPerformAction(true);
+        afterActionPerformedData.setLast(false);
+        ServicePlatform.get().getService().skipAfterEvent(BeforeAfterEvent.AFTER_ACTION_PERFORMED, afterActionPerformedData);
+        ServicePlatform.get().getService().release();
     }
 
     /** The only enabled action, when it is the sole action or skipping the turn is all that is left. */

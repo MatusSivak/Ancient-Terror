@@ -38,6 +38,9 @@ public interface GameController {
 
     boolean isInvestigatorDetained(InvestigatorId investigatorId);
 
+    /** Actions the investigator has left in the current action phase, or -1 outside of the action phase. */
+    int getRemainingActionsInActionPhase(InvestigatorId investigatorId);
+
     boolean isInvestigatorPoisoned(InvestigatorId investigatorId);
 
     Completable confirmExpeditionLocation();

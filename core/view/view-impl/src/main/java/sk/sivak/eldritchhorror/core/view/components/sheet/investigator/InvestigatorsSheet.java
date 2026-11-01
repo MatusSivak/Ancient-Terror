@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorBasics;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
@@ -15,6 +16,7 @@ import sk.sivak.eldritchhorror.core.view.components.sheet.DisplayHide;
 import sk.sivak.eldritchhorror.core.view.game.HudButtons;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
+import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +51,7 @@ public class InvestigatorsSheet extends Table {
     }
 
     public void init(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId,
-                     Action1<InvestigatorId> onInvestigatorSelected) {
+                     Action1<InvestigatorId> onInvestigatorSelected, Func1<InvestigatorId, Integer> remainingActions) {
         if (displayHide.isDisplayed()) return;
         this.onInvestigatorSelected = onInvestigatorSelected;
         clear();
@@ -83,8 +85,12 @@ public class InvestigatorsSheet extends Table {
 
         Table grid = new Table();
         grid.top().left();
+        boolean actionPhase = false;
         for (int i = 0; i < investigators.size(); i++) {
-            grid.add(tile(investigators.get(i), investigators.get(i).getInvestigatorId() == activeInvestigatorId)).width(TILE_WIDTH).top()
+            int remaining = remainingActions == null ? -1 : remainingActions.call(investigators.get(i).getInvestigatorId());
+            actionPhase |= remaining >= 0;
+            grid.add(tile(investigators.get(i), investigators.get(i).getInvestigatorId() == activeInvestigatorId, remaining))
+                    .width(TILE_WIDTH).top()
                     .padRight((i + 1) % COLUMNS == 0 ? 0 : GAP).padBottom(GAP);
             if ((i + 1) % COLUMNS == 0) grid.row();
         }
@@ -92,7 +98,7 @@ public class InvestigatorsSheet extends Table {
         scroll.setScrollingDisabled(true, false);
         scroll.setOverscroll(false, false);
         add(scroll).width(width).height(Math.min(390, grid.getPrefHeight())).row();
-        Label hint = text(get("investigator.overview.hint"), 16, SECONDARY_INK);
+        Label hint = text(get(actionPhase ? "investigator.overview.hintActionPhase" : "investigator.overview.hint"), 16, SECONDARY_INK);
         hint.setWrap(true);
         add(hint).width(width).padTop(8);
         setWidth(width + 40);
@@ -100,7 +106,7 @@ public class InvestigatorsSheet extends Table {
         validate();
     }
 
-    private Table tile(InvestigatorBasics investigator, boolean active) {
+    private Table tile(InvestigatorBasics investigator, boolean active, int remainingActions) {
         Table tile = new Table();
         Image portrait = new Image(getInvestigatorDrawable(investigator.getInvestigatorId()));
         portrait.setScaling(Scaling.fit);
@@ -118,7 +124,15 @@ public class InvestigatorsSheet extends Table {
         frame.setMinHeight(0);
         Container<Image> framedPortrait = new Container<>(portrait);
         framedPortrait.background(frame).pad(3);
-        tile.add(framedPortrait).size(162, 132).padBottom(3).row();
+        Stack portraitStack = new Stack(framedPortrait);
+        if (remainingActions >= 0) {
+            Table pipsOverlay = new Table();
+            pipsOverlay.bottom().padBottom(8);
+            pipsOverlay.add(actionPips(remainingActions));
+            pipsOverlay.setTouchable(Touchable.disabled);
+            portraitStack.add(pipsOverlay);
+        }
+        tile.add(portraitStack).size(162, 132).padBottom(3).row();
         tile.add(text(active ? get("investigator.overview.active") : "", 15, highlight))
                 .height(20).padBottom(2).row();
         Label name = text(investigator.getInvestigatorName(), 20, INK);
@@ -143,6 +157,18 @@ public class InvestigatorsSheet extends Table {
         tokens.add(counter(TICKET_SHIP_DOWN, Collections.frequency(investigator.getTickets(), PathType.SHIP))).expandX();
         tile.add(tokens).width(TILE_WIDTH).row();
         return tile;
+    }
+
+    /** Same gold/dark pips as on the board stand. */
+    private Table actionPips(int remaining) {
+        Table row = new Table();
+        int pips = Math.max(InvestigatorImage.BASE_ACTIONS, remaining);
+        for (int i = 0; i < pips; i++) {
+            Image pip = new Image(getTextureRegionDrawable(OMEN_CIRCLE)
+                    .tint(i < remaining ? new Color(1f, 0.82f, 0.36f, 1f) : new Color(0.16f, 0.15f, 0.15f, 0.85f)));
+            row.add(pip).size(22).padRight(i < pips - 1 ? 3 : 0);
+        }
+        return row;
     }
 
     private Table counter(String asset, int count) {

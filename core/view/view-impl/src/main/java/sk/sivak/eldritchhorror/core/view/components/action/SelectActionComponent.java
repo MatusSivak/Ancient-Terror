@@ -152,6 +152,20 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
         return onStage;
     }
 
+    /** Resolves pending action selection with the given action without the player confirming any action button. */
+    public boolean cancelWith(ActionPhaseAction action) {
+        if (!onStage || subscriber == null || hideOkButtons == null) {
+            return false;
+        }
+        onStage = false;
+        visible = false;
+        hideOkButtons.cancel();
+        InfoStage.hideLabel(selectActionText);
+        BigActorsManager.finishRemoval(BigActorsManager.BigActorKey.ACTION_TABLE);
+        subscriber.onSuccess(action);
+        return true;
+    }
+
     private Action0 getOnConfirmAction() {
         return () -> {
             if (selectedActionButtonData == null) {

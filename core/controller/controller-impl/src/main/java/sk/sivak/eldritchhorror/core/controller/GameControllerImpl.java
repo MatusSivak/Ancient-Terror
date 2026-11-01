@@ -26,6 +26,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
+import sk.sivak.eldritchhorror.core.constants.action.SwitchActiveInvestigatorAction;
 import sk.sivak.eldritchhorror.core.constants.question.Answer;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.trade.TradeData;
@@ -44,6 +45,7 @@ import sk.sivak.eldritchhorror.core.model.MonsterCupRead;
 import sk.sivak.eldritchhorror.core.model.MysteryDeckRead;
 import sk.sivak.eldritchhorror.core.model.OmenTrackRead;
 import sk.sivak.eldritchhorror.core.model.PerformedActionsRead;
+import sk.sivak.eldritchhorror.core.model.PhaseRead;
 import sk.sivak.eldritchhorror.core.model.RumorsRead;
 import sk.sivak.eldritchhorror.core.model.SpellsDeckRead;
 import sk.sivak.eldritchhorror.core.view.EncounterView;
@@ -82,6 +84,23 @@ public class GameControllerImpl implements GameController {
     private AncientOneRead ancientOne;
     private EncounterView encounterView;
     private MonsterCupRead monsterCup;
+    private PhaseRead phase;
+
+    public void setPhase(PhaseRead phase) {
+        this.phase = phase;
+    }
+
+    @Override
+    public int getRemainingActionsInActionPhase(InvestigatorId investigatorId) {
+        if (phase == null || phase.getPhaseType() != PhaseType.ACTION || investigatorId == null
+                || !investigators.getInvestigatorIdsInTurnOrder().contains(investigatorId)) {
+            return -1;
+        }
+        if (!performedActions.wantsToPerformAction(investigatorId)) {
+            return 0;
+        }
+        return Math.max(0, performedActions.getActionsRemaining(investigatorId));
+    }
 
     public void setMonsterCup(MonsterCupRead monsterCup) {
         this.monsterCup = monsterCup;
@@ -649,12 +668,27 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public void displayInvestigatorPassport(InvestigatorId investigatorId) {
+        if (switchActiveInvestigatorDuringActionSelection(investigatorId)) {
+            return;
+        }
         List<CardInfo> cards = new ArrayList<>();
         cards.addAll(assetDeck.getAssets(investigatorId));
         cards.addAll(conditionsDeck.getConditions(investigatorId));
         cards.addAll(spellsDeck.getSpells(investigatorId));
         cards.addAll(artifactsDeck.getArtifacts(investigatorId));
         view.displayInvestigatorPassport(getInvestigatorBasics(investigatorId), cards);
+    }
+
+    /** In the action phase, clicking another investigator that still has actions makes it active instead of showing its passport. */
+    private boolean switchActiveInvestigatorDuringActionSelection(InvestigatorId investigatorId) {
+        InvestigatorId activeInvestigatorId = investigators.getActiveInvestigatorId();
+        if (activeInvestigatorId == null || investigatorId == null || investigatorId == activeInvestigatorId
+                || !investigators.getInvestigatorIdsInTurnOrder().contains(investigatorId)
+                || !performedActions.canPerformAction(investigatorId)
+                || !performedActions.wantsToPerformAction(investigatorId)) {
+            return false;
+        }
+        return view.switchActiveInvestigatorDuringActionSelection(new SwitchActiveInvestigatorAction(investigatorId));
     }
 
     @Override

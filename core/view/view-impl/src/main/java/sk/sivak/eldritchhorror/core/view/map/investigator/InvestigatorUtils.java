@@ -39,6 +39,7 @@ public class InvestigatorUtils {
         Spawner.ActorSpawner actorSpawner = (boolean isCenter) -> {
             InvestigatorImage image = new InvestigatorImage(investigatorId, gameController);
             image.setDetainedSoundEnabled(isCenter);
+            image.setActionPipsEnabled(isCenter);
             return image;
         };
 

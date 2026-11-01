@@ -7,6 +7,7 @@ import com.kotcrab.vis.ui.VisUI;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.action.ActionPhaseAction;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneId;
@@ -244,9 +245,10 @@ public class BigActorsManager {
     }
 
     public static void initInvestigatorsSheet(List<InvestigatorBasics> investigators, InvestigatorId activeInvestigatorId,
-                                              Action1<InvestigatorId> onInvestigatorSelected) {
+                                              Action1<InvestigatorId> onInvestigatorSelected,
+                                              Func1<InvestigatorId, Integer> remainingActions) {
         if (isLocked()) return;
-        getInstance().investigatorsSheet.init(investigators, activeInvestigatorId, onInvestigatorSelected);
+        getInstance().investigatorsSheet.init(investigators, activeInvestigatorId, onInvestigatorSelected, remainingActions);
     }
 
     public static void displayOrHideInvestigators() {
@@ -305,6 +307,27 @@ public class BigActorsManager {
 
     public static void displayOrHideActionsTable() {
         displayOrHide(BigActorKey.ACTION_TABLE);
+    }
+
+    /**
+     * Resolves a pending action selection with the given action (e.g. switching active investigator),
+     * closing the action table and any big actor displayed over it.
+     *
+     * @return false when no action selection is pending or the screen is locked
+     */
+    public static boolean resolveActionSelection(ActionPhaseAction action) {
+        if (isLocked() || !getInstance().selectActionComponent.isOnStage()) {
+            return false;
+        }
+        BigActorKey displayedOverActionTable = getInstance().currentBigActorKey;
+        if (!getInstance().selectActionComponent.cancelWith(action)) {
+            return false;
+        }
+        if (displayedOverActionTable != null && displayedOverActionTable != BigActorKey.ACTION_TABLE
+                && getInstance().currentBigActorKey == displayedOverActionTable) {
+            displayOrHide(displayedOverActionTable);
+        }
+        return true;
     }
 
     private static void displayOrHide(BigActorKey bigActorKey) {

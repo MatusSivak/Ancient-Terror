@@ -70,6 +70,47 @@ public class InvestigatorImage extends Image {
     private boolean defeatedByHealth;
     private boolean highlighted;
 
+    public static final int BASE_ACTIONS = 2;
+    private static final float PIP_SIZE = 16f;
+    private static final float PIP_GAP = 2f;
+    private static final float PIP_BOTTOM = 3f;
+    private static final Color PIP_AVAILABLE = new Color(1f, 0.82f, 0.36f, 1f);
+    private static final Color PIP_USED = new Color(0.16f, 0.15f, 0.15f, 0.8f);
+    private boolean actionPipsEnabled;
+    private int remainingActions = -1;
+    private Drawable actionPip;
+
+    /** Shows remaining actions during the action phase; only the board stand should, not animation copies. */
+    public void setActionPipsEnabled(boolean enabled) {
+        actionPipsEnabled = enabled;
+    }
+
+    private void updateRemainingActions() {
+        remainingActions = actionPipsEnabled && !defeated && gameController != null
+                ? gameController.getRemainingActionsInActionPhase(investigatorId) : -1;
+    }
+
+    /** Gold pips for actions left and dark pips for actions used, along the bottom edge of the portrait. */
+    private void drawActionPips(Batch batch, float parentAlpha) {
+        if (remainingActions < 0) return;
+        if (actionPip == null) actionPip = CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.OMEN_CIRCLE);
+        int pips = Math.max(BASE_ACTIONS, remainingActions);
+        float size = PIP_SIZE * Math.abs(getScaleX());
+        float gap = PIP_GAP * Math.abs(getScaleX());
+        float total = pips * size + (pips - 1) * gap;
+        float startX = getX() + getOriginX() + (getWidth() / 2f - getOriginX()) * getScaleX() - total / 2f;
+        float y = getY() + getOriginY() + (PIP_BOTTOM - getOriginY()) * getScaleY();
+        float alpha = getColor().a * parentAlpha;
+        Color color = batch.getColor();
+        float r = color.r, g = color.g, b = color.b, a = color.a;
+        for (int i = 0; i < pips; i++) {
+            Color pipColor = i < remainingActions ? PIP_AVAILABLE : PIP_USED;
+            batch.setColor(pipColor.r, pipColor.g, pipColor.b, pipColor.a * alpha);
+            actionPip.draw(batch, startX + i * (size + gap), y, size, size);
+        }
+        batch.setColor(r, g, b, a);
+    }
+
     private static final float HIT_SHAKE_DURATION = 0.3f;
     private static final float HIT_SHAKE_DISTANCE = 5f;
     private static final float HIT_FLASH_IN = 0.06f;
@@ -222,6 +263,7 @@ public class InvestigatorImage extends Image {
         super.act(delta);
         updateDetained(delta);
         updatePoisoned(delta);
+        updateRemainingActions();
         if (hitShake > 0f) {
             hitShake = Math.max(0f, hitShake - delta);
             hitTime += delta;
@@ -339,6 +381,7 @@ public class InvestigatorImage extends Image {
             detainedBars.setColor(1f, 1f, 1f, getColor().a * Math.min(1f, detainedTime / .15f));
             detainedBars.draw(batch, parentAlpha);
         }
+        drawActionPips(batch, parentAlpha);
     }
 
     public void setAsteroidVisible(boolean asteroidVisible) {

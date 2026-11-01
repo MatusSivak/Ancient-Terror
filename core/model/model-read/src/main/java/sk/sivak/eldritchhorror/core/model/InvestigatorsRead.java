@@ -28,6 +28,12 @@ public interface InvestigatorsRead {
 
     boolean isActiveLast();
 
+    /** Ids of selected investigators (including lost in time and space) in turn order. */
+    List<InvestigatorId> getInvestigatorIdsInTurnOrder();
+
+    /** Raw turn order; may also contain ids of investigators no longer in game (e.g. defeated or devoured). */
+    List<InvestigatorId> getInvestigatorOrder();
+
     InvestigatorRead getLeadInvestigator();
 
     boolean isOnBoard(InvestigatorId investigatorId);

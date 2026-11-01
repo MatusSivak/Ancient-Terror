@@ -88,6 +88,13 @@ public interface GameView {
 
     Single<ActionPhaseAction> selectAction(List<ActionPhaseAction> actionPhaseActions);
 
+    /**
+     * Resolves a pending action selection with the given action.
+     *
+     * @return false when no action selection is pending
+     */
+    boolean switchActiveInvestigatorDuringActionSelection(ActionPhaseAction switchAction);
+
     Single<LocationInfo.Connection> selectTravelLocation(LocationId currentLocationId, List<LocationInfo.Connection> connections, boolean optional);
 
     Completable travelToLocation(LocationId locationFrom, LocationId locationTo);

@@ -59,6 +59,7 @@ public class ViewControllerBinder {
         controller.setDoomTrackRead(modelProvider.getDoomTrack());
         controller.setOmenTrack(modelProvider.getOmenTrack());
         controller.setPerformedActions(modelProvider.getPerformedActions());
+        controller.setPhase(modelProvider.getPhase());
         controller.setInvestigators(modelProvider.getInvestigators());
         controller.setLocationMap(modelProvider.getLocationMap());
         controller.setCluePoolRead(modelProvider.getCluePool());
