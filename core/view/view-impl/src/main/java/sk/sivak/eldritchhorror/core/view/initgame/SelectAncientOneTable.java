@@ -42,15 +42,15 @@ public class SelectAncientOneTable extends Table {
     private boolean completed;
 
     public SelectAncientOneTable(List<AncientOneInfo> availableAncientOnes,
-                                 boolean cthulhuPurchased, boolean shubPurchased, boolean yogPurchased,
+                                 boolean fullGamePurchased,
                                  SingleSubscriber<? super AncientOneInfo> subscriber) {
         this.subscriber = subscriber;
         for (AncientOneInfo info : availableAncientOnes) choices.put(info.getAncientOneId(), info);
-        unlocked.put(AncientOneId.YIG, yogPurchased);
+        unlocked.put(AncientOneId.YIG, fullGamePurchased);
         unlocked.put(AncientOneId.AZATHOTH, true);
-        unlocked.put(AncientOneId.CTHULHU, cthulhuPurchased);
-        unlocked.put(AncientOneId.SHUB_NIGGURATH, shubPurchased);
-        unlocked.put(AncientOneId.YOG_SOTHOTH, yogPurchased);
+        unlocked.put(AncientOneId.CTHULHU, fullGamePurchased);
+        unlocked.put(AncientOneId.SHUB_NIGGURATH, fullGamePurchased);
+        unlocked.put(AncientOneId.YOG_SOTHOTH, fullGamePurchased);
 
         Table gallery = new Table();
         gallery.setBackground(panelBackground("09130FE8"));

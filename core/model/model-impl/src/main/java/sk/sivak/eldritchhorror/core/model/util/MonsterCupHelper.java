@@ -28,8 +28,15 @@ public class MonsterCupHelper {
     private static final Logger logger = LogManager.getLogger(MonsterCupHelper.class);
 
     public List<AbstractMonsterInfo> createMonsterCup() {
+        return createMonsterCup(true);
+    }
+
+    public List<AbstractMonsterInfo> createMonsterCup(boolean premiumMonstersAvailable) {
         LinkedList<AbstractMonsterInfo> monsterCup = new LinkedList<>();
         for (NonEpicMonsterId nonEpicMonsterId : NonEpicMonsterId.values()) {
+            if (!premiumMonstersAvailable && nonEpicMonsterId.isPremium()) {
+                continue;
+            }
             try {
                 AbstractMonsterInfo monsterInfo = (AbstractMonsterInfo) Class.forName(nonEpicMonsterId.getMonsterClassName()).newInstance();
                 monsterInfo.setMonsterId(nonEpicMonsterId);

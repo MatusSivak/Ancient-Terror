@@ -10,6 +10,7 @@ import sk.sivak.eldritchhorror.core.view.ScreenType;
 import sk.sivak.eldritchhorror.core.view.components.RestartConfirmationDialog;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler;
+import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
 import sk.sivak.eldritchhorror.core.view.map.CameraActor;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
@@ -27,7 +28,7 @@ public class RestartGameAction {
     }
 
     public void restartGame() {
-        if (Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {
+        if (InAppPurchaseManager.isFullGamePurchased()) {
             InfoStage.getMenuButton().remove();
             justRestartGame();
             return;

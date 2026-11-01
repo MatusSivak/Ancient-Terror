@@ -14,8 +14,8 @@ import sk.sivak.eldritchhorror.core.constants.card.CardId;
 import sk.sivak.eldritchhorror.core.constants.displayasset.AssetOriginType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.DisplayAssetResponseType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.HideType;
+import sk.sivak.eldritchhorror.core.constants.displayasset.RewardOfferType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
-import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 
@@ -61,15 +61,9 @@ public class UnlockRandomCardAction implements Action<Object, Void> {
     }
 
     private void onAdLoaded(SingleSubscriber<? super Void> onSub, List<CardId> lockedCards) {
-        ShowCardRequest showCardRequest = new ShowCardRequest();
-        showCardRequest.setTitle("Watch Ad to unlock new content?");
-        showCardRequest.setAssetOriginType(AssetOriginType.CENTER);
-        showCardRequest.setHideType(HideType.RETURN);
-        showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
-        showCardRequest.setHiddenTemplate(true);
         darkenWorld();
-        ServicePlatform.get().getGameController().showCard(showCardRequest).subscribe(watchAdResponse -> {
-            if (watchAdResponse != ShowCardResponse.YES) {
+        ServicePlatform.get().getGameController().showRewardOffer(RewardOfferType.WATCH_AD, lockedCards.size()).subscribe(accepted -> {
+            if (!accepted) {
                 brightenWorld();
                 onSub.onSuccess(null);
                 return;

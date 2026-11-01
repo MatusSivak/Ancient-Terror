@@ -1,5 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.game;
 
+import sk.sivak.eldritchhorror.core.view.initgame.InAppPurchaseManager;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
@@ -228,7 +230,7 @@ public class GameViewImpl implements Screen, GameView {
         removeOnRewardedAdLoadedListener.run();
         removeOnRewardedAdLoadedListener = () -> {};
         InfoStage.displayMenuButton(skin);
-        if (Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {
+        if (InAppPurchaseManager.isFullGamePurchased()) {
             InfoStage.getMenuButton().displayRestartButton();
             return;
         }
@@ -673,6 +675,11 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest) {
         return assetView.showCard(showCardRequest);
+    }
+
+    @Override
+    public Single<Boolean> showRewardOffer(sk.sivak.eldritchhorror.core.constants.displayasset.RewardOfferType type, int lockedCards) {
+        return sk.sivak.eldritchhorror.core.view.reward.RewardOfferDialog.show(InfoStage.getStageSafe(), type, lockedCards);
     }
 
     @Override

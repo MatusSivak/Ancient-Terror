@@ -66,7 +66,7 @@ public class InAppPurchaseManagerTest {
     @Test public void desktopRestoreWithoutPurchaseCompletesWithoutUnlocking() {
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
-        assertFalse(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertFalse(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
         assertTrue(values.isEmpty());
     }
 
@@ -75,16 +75,14 @@ public class InAppPurchaseManagerTest {
         store.fail = true;
         Gdx.net = (Net) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Net.class},
                 (proxy, method, args) -> { throw new AssertionError("Local purchase must not use network"); });
-        for (String product : new String[]{"full_game", "investigators_1", "cthulhu", "shub_niggurath", "yog_sothoth"}) {
-            assertFalse(new InAppPurchaseManager().isProductPurchased(product).toBlocking().value());
-        }
+        assertFalse(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
         assertFalse(InAppPurchaseManager.areBonusInvestigatorsAvailable());
         assertTrue(values.isEmpty());
         assertEquals(0, store.restores);
-        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertNull(store.requested);
         assertUnlocked();
-        assertTrue(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
         assertTrue(InAppPurchaseManager.areBonusInvestigatorsAvailable());
         assertEquals(0, store.restores);
     }
@@ -93,11 +91,11 @@ public class InAppPurchaseManagerTest {
         applicationType = Application.ApplicationType.Desktop;
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
-        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertUnlocked();
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
-        assertTrue(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
         assertUnlocked();
     }
 
@@ -106,7 +104,7 @@ public class InAppPurchaseManagerTest {
         store.fail = true;
         Gdx.net = (Net) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Net.class},
                 (proxy, method, args) -> { throw new AssertionError("Desktop purchase must not use the network"); });
-        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertNull(store.requested);
         assertUnlocked();
     }
@@ -115,7 +113,7 @@ public class InAppPurchaseManagerTest {
         GoogleServicesHolder.setPurchaseManager(
                 new sk.sivak.eldritchhorror.core.constants.tracker.DummyPurchaseManager());
         List<InvestigatorInfo> stale = Collections.emptyList();
-        new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value();
+        new InAppPurchaseManager().purchaseFullGame().toBlocking().value();
         List<InvestigatorInfo> refreshed = bonusRoster();
         assertSame(refreshed, InitGameViewImpl.refreshPurchasedInvestigators(stale, () -> refreshed)
                 .toBlocking().value());
@@ -140,7 +138,6 @@ public class InAppPurchaseManagerTest {
     @Test public void localTestingUnlocksInvestigatorsWithoutPersistingOrRestoringPurchases() {
         LocalTesting.setAllInvestigatorsUnlocked(true);
         assertTrue(InAppPurchaseManager.areBonusInvestigatorsAvailable());
-        assertTrue(new InAppPurchaseManager().isProductPurchased("investigators_1").toBlocking().value());
         List<InvestigatorInfo> roster = bonusRoster();
         assertSame(roster, InitGameViewImpl.refreshPurchasedInvestigators(
                 Collections.emptyList(), () -> roster).toBlocking().value());
@@ -151,14 +148,12 @@ public class InAppPurchaseManagerTest {
 
         LocalTesting.setAllInvestigatorsUnlocked(false);
         assertFalse(InAppPurchaseManager.areBonusInvestigatorsAvailable());
-        assertFalse(new InAppPurchaseManager().isProductPurchased("investigators_1").toBlocking().value());
+        assertFalse(InAppPurchaseManager.isFullGamePurchased());
     }
 
-    @Test public void localInvestigatorOverrideDoesNotUnlockOtherProducts() {
+    @Test public void localInvestigatorOverrideDoesNotUnlockFullGame() {
         LocalTesting.setAllInvestigatorsUnlocked(true);
-        for (String product : new String[]{"full_game", "no_ads", "cthulhu", "shub_niggurath", "yog_sothoth"}) {
-            assertFalse(product, new InAppPurchaseManager().isProductPurchased(product).toBlocking().value());
-        }
+        assertFalse(InAppPurchaseManager.isFullGamePurchased());
         assertTrue(values.isEmpty());
     }
 
@@ -174,38 +169,45 @@ public class InAppPurchaseManagerTest {
     }
 
     @Test public void purchaseUnlocksEveryFeature() {
-        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertEquals("full_game", store.requested);
         assertUnlocked();
     }
 
-    @Test public void restoreFullGameUnlocksLegacyFeatureChecks() {
+    @Test public void restoreUnlocksFullGame() {
         store.restored = new Transaction[]{transaction("full_game")};
-        assertTrue(new InAppPurchaseManager().isProductPurchased("investigators_1").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
+        assertTrue(InAppPurchaseManager.areBonusInvestigatorsAvailable());
         assertUnlocked();
+    }
+
+    @Test public void restoreIgnoresOtherProducts() {
+        store.restored = new Transaction[]{transaction("other_product")};
+        assertFalse(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
+        assertTrue(values.isEmpty());
     }
 
     @Test public void cancellationDoesNotUnlock() {
         store.cancel = true;
-        assertFalse(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertFalse(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertTrue(values.isEmpty());
     }
 
     @Test public void failureCanBeRetried() {
         store.fail = true;
         List<Throwable> errors = new ArrayList<>();
-        new InAppPurchaseManager().purchaseProduct("full_game").subscribe(result -> fail("Unexpected result"), errors::add);
+        new InAppPurchaseManager().purchaseFullGame().subscribe(result -> fail("Unexpected result"), errors::add);
         assertEquals(1, errors.size());
         assertTrue(values.isEmpty());
         store.fail = false;
-        assertTrue(new InAppPurchaseManager().purchaseProduct("full_game").toBlocking().value());
+        assertTrue(new InAppPurchaseManager().purchaseFullGame().toBlocking().value());
         assertUnlocked();
     }
 
     @Test public void unrelatedTransactionCannotGrantFullGame() {
         store.unrelated = true;
         List<Boolean> results = new ArrayList<>();
-        new InAppPurchaseManager().purchaseProduct("full_game").subscribe(results::add);
+        new InAppPurchaseManager().purchaseFullGame().subscribe(results::add);
         assertTrue(values.isEmpty());
         assertTrue(results.isEmpty());
         store.observer.handlePurchaseCanceled();
@@ -216,12 +218,12 @@ public class InAppPurchaseManagerTest {
         Transaction refunded = transaction("full_game");
         refunded.setReversalTime(new Date());
         store.restored = new Transaction[]{refunded};
-        assertFalse(new InAppPurchaseManager().isProductPurchased("full_game").toBlocking().value());
+        assertFalse(new InAppPurchaseManager().restoreFullGame().toBlocking().value());
         assertTrue(values.isEmpty());
     }
 
     private void assertUnlocked() {
-        for (String key : new String[]{"full_game", "no_ads", "investigators_1", "cthulhu", "shub_niggurath", "yog_sothoth"}) assertEquals(key, true, values.get(key));
+        assertEquals(Collections.singletonMap("full_game", true), values);
         assertEquals(sk.sivak.eldritchhorror.core.constants.asset.AssetId.values().length, assetCount);
         assertEquals(sk.sivak.eldritchhorror.core.constants.artifact.ArtifactId.values().length, artifactCount);
     }
@@ -249,7 +251,7 @@ public class InAppPurchaseManagerTest {
             requested = id;
             if (cancel) observer.handlePurchaseCanceled();
             else if (fail) observer.handlePurchaseError(new IllegalStateException("offline"));
-            else observer.handlePurchase(transaction(unrelated ? "cthulhu" : id));
+            else observer.handlePurchase(transaction(unrelated ? "other_product" : id));
         }
     }
 }

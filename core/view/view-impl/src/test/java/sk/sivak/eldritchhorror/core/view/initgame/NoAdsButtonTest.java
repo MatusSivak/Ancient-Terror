@@ -42,7 +42,7 @@ public class NoAdsButtonTest {
             assertTrue(wheel.isVisible());
             owned.put("no_ads", true);
             wheel.act(0);
-            assertFalse(wheel.isVisible());
+            assertTrue("Retired no_ads product must not hide the full-game offer", wheel.isVisible());
         } finally {
             Gdx.app = previous;
             Gdx.files = previousFiles;

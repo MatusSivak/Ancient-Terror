@@ -35,8 +35,9 @@ public class PrepareNewRoundAction extends AbstractHookableAction<Object, Void> 
         });
 
         ServicePlatform.get().getModel().newRound();
+        // Full-screen ad at round start, throttled to once every 3 minutes by the AdHandler.
         if (!ServicePlatform.get().getInitGameController().hasPurchasedNoAds()) {
-            GoogleServicesHolder.getAdHandler().showInterstitialAd(new AdHandler.AdCallbacks()
+            GoogleServicesHolder.getAdHandler().showInterstitialAdAfterThreeMinutes(new AdHandler.AdCallbacks()
                     .setOnAdOpenedAction(() -> GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AD_MOB, "interstitial_ad", "show_opened"))
                     .setOnAdClosedAction(() -> GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AD_MOB, "interstitial_ad", "show_closed"))
                     .setOnAdFailedToLoadAction(errorCode -> GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AD_MOB, "interstitial_ad", "show_failed_" + errorCode)));

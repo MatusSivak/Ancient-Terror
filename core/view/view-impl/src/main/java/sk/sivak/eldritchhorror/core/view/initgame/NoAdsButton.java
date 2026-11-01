@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.initgame;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -14,7 +13,7 @@ public class NoAdsButton extends ImageButton {
 
     public NoAdsButton() {
         this(CustomAssetManager.getTextureRegionDrawable("no_ads.png"));
-        new InAppPurchaseManager().isProductPurchased("no_ads").subscribe(
+        new InAppPurchaseManager().restoreFullGame().subscribe(
                 purchased -> Gdx.app.postRunnable(this::refreshVisibility),
                 error -> Gdx.app.postRunnable(this::refreshVisibility));
     }
@@ -36,9 +35,7 @@ public class NoAdsButton extends ImageButton {
     }
 
     private void refreshVisibility() {
-        Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
-        boolean adsDisabled = preferences.getBoolean("no_ads", false)
-                || preferences.getBoolean(InAppPurchaseManager.FULL_GAME, false);
+        boolean adsDisabled = InAppPurchaseManager.isFullGamePurchased();
         setTouchable(adsDisabled ? Touchable.disabled : Touchable.enabled);
         setVisible(!adsDisabled);
     }

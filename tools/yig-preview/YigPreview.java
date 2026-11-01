@@ -48,12 +48,12 @@ public class YigPreview extends ApplicationAdapter {
                 monster.setToughness(monster instanceof YigMonster?5:4);monster.setCurrentHealth(monster.getToughness());
                 MonsterCard monsterCard=new MonsterCard();monsterCard.init(monster,null);render(monsterCard,monster.getClass().getSimpleName());
             }
-            SelectAncientOneTable selection=new SelectAncientOneTable(AncientOneHelper.initAvailableAncientOnes(),true,true,true,null);
+            SelectAncientOneTable selection=new SelectAncientOneTable(AncientOneHelper.initAvailableAncientOnes(),true,null);
             render(selection,"selection-top");
             java.lang.reflect.Method select=SelectAncientOneTable.class.getDeclaredMethod("select",AncientOneId.class);
             select.setAccessible(true);select.invoke(selection,AncientOneId.YIG);
             stage.act(0);draw("selection-yig");
-            SelectAncientOneTable lockedSelection=new SelectAncientOneTable(AncientOneHelper.initAvailableAncientOnes(),false,false,false,null);
+            SelectAncientOneTable lockedSelection=new SelectAncientOneTable(AncientOneHelper.initAvailableAncientOnes(),false,null);
             render(lockedSelection,"selection-locked");
             select.invoke(lockedSelection,AncientOneId.YIG);stage.act(0);draw("selection-yig-locked");
             for(int frame=0;frame<110;frame++)stage.act(1f/60f);

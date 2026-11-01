@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.util;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import sk.sivak.eldritchhorror.core.Game;
 import sk.sivak.eldritchhorror.core.action.provider.*;
@@ -195,6 +196,8 @@ public class ServiceLocator {
 
         modelProvider.setUnlockedAssetsSupplier(unlockedAssetsRepository::getUnlockedAssets);
         modelProvider.setUnlockedArtifactsSupplier(unlockedArtifactsRepository::getUnlockedArtifacts);
+        modelProvider.setPremiumMonstersAvailableSupplier(() ->
+                Gdx.app.getPreferences("AncientTerror.xml").getBoolean("full_game", false));
     }
 
 

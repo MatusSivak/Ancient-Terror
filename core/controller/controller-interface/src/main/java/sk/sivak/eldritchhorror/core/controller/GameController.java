@@ -150,6 +150,9 @@ public interface GameController {
 
     Single<ShowCardResponse> showCard(ShowCardRequest showCardRequest);
 
+    /** Offers one random locked card for rating the game or watching a video; emits whether the player accepted. */
+    Single<Boolean> showRewardOffer(sk.sivak.eldritchhorror.core.constants.displayasset.RewardOfferType type, int lockedCards);
+
     Completable sewCard(CardInfo cardInfo);
 
     void displayText(String text);

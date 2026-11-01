@@ -2,6 +2,8 @@ package sk.sivak.eldritchhorror.core.constants.monster;
 
 import sk.sivak.eldritchhorror.core.constants.card.CardIdUtils;
 
+import java.util.EnumSet;
+
 public enum NonEpicMonsterId implements MonsterId {
     WARLOCK,
     MUMMY,
@@ -67,6 +69,23 @@ public enum NonEpicMonsterId implements MonsterId {
             Class.forName(monsterName).newInstance();
             System.out.println(monsterName);
         }
+    }
+
+    /** Expansion monsters available only with the full-game purchase. */
+    private static final class Premium {
+        private static final EnumSet<NonEpicMonsterId> IDS = EnumSet.of(
+                FORMLESS_SPAWN, SHAN, FIRE_VAMPIRE, HUNTING_HORROR, PROTO_SHOGGOTH, DHOLE, FLYING_POLYP,
+                FIREBUG, CRAZED_MOB, GIANT_PENGUIN, HONORED_DEAD, GHAST, YOUNG_CTHONIAN, HUNTING_BYAKHEE,
+                JIANGSHI, SPAWN_OF_SEBAK, POLTERGEIST, TCHO_TCHO, DEEP_ONE_HYBRID, RAT_THING, SAND_DWELLER,
+                ZOOG, DIMENSIONAL_SHAMBLER, MOON_BEAST, CHILD_OF_THE_GOAT, CRAWLING_ONE);
+    }
+
+    public boolean isPremium() {
+        return Premium.IDS.contains(this);
+    }
+
+    public static EnumSet<NonEpicMonsterId> premiumMonsters() {
+        return EnumSet.copyOf(Premium.IDS);
     }
 
     @Override

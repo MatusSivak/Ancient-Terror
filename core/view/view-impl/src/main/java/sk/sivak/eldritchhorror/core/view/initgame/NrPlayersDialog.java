@@ -58,7 +58,7 @@ public class NrPlayersDialog extends SoundDialog {
         getContentTable().pack();
         pack();
         setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-        new InAppPurchaseManager().isProductPurchased("no_ads").subscribe();
+        new InAppPurchaseManager().restoreFullGame().subscribe();
     }
 
     public void setSubscriber(SingleSubscriber<? super Integer> subscriber) {

@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.model;
 
+import java8.features.function.Supplier;
 import java8.features.stream.Stream;
 import java8.features.util.IterableUtils;
 import java8.features.util.MapUtils;
@@ -38,9 +39,16 @@ public class MonsterCup implements MonsterCupWrite {
     private Map<MonsterId, Integer> removedFromCupMap;
     private List<AbstractMonsterInfo> epicMonsterCup;
     private Map<LocationId, List<MonsterInfo>> locationMonstersMap;
+    private Supplier<Boolean> premiumMonstersAvailableSupplier = () -> false;
+    private boolean premiumMonstersAvailable;
+
+    public void setPremiumMonstersAvailableSupplier(Supplier<Boolean> premiumMonstersAvailableSupplier) {
+        this.premiumMonstersAvailableSupplier = premiumMonstersAvailableSupplier;
+    }
 
     public void createMonsterCup() {
-        monsterCup = new MonsterCupHelper().createMonsterCup();
+        premiumMonstersAvailable = Boolean.TRUE.equals(premiumMonstersAvailableSupplier.get());
+        monsterCup = new MonsterCupHelper().createMonsterCup(premiumMonstersAvailable);
         epicMonsterCup = new MonsterCupHelper().createEpicMonsterCup();
         locationMonstersMap = new HashMap<>();
         removedFromCupMap = new HashMap<>();
@@ -144,6 +152,9 @@ public class MonsterCup implements MonsterCupWrite {
         abstractMonsterInfo.setCurrentLocation(null);
         if (monsterInfo.isEpic()) {
             epicMonsterCup.add(abstractMonsterInfo);
+        } else if (isLockedPremium(monsterInfo.getMonsterId())) {
+            // Locked expansion monsters restored from an older save must not re-enter the cup.
+            return;
         } else {
             monsterCup.add(abstractMonsterInfo);
             Collections.shuffle(monsterCup);
@@ -246,7 +257,33 @@ public class MonsterCup implements MonsterCupWrite {
     public void load(MonsterCupSaveDataRead saveData) {
         for (MonsterCupSaveDataRead.MonsterSaveDataRead monsterSaveDataRead : saveData.getMonsters()) {
             MonsterInfo monsterInfo = spawnMonster(monsterSaveDataRead.getMonsterId(), monsterSaveDataRead.getCurrentLocationId(), true);
+            if (monsterInfo == null && isLockedPremium(monsterSaveDataRead.getMonsterId())) {
+                monsterInfo = placeLockedPremiumMonster((NonEpicMonsterId) monsterSaveDataRead.getMonsterId(),
+                        monsterSaveDataRead.getCurrentLocationId());
+            }
             ((AbstractMonsterInfo)monsterInfo).setCurrentHealth(monsterSaveDataRead.getCurrentHealth());
         }
+    }
+
+    private boolean isLockedPremium(MonsterId monsterId) {
+        return !premiumMonstersAvailable
+                && monsterId instanceof NonEpicMonsterId
+                && ((NonEpicMonsterId) monsterId).isPremium();
+    }
+
+    private MonsterInfo placeLockedPremiumMonster(NonEpicMonsterId monsterId, LocationId locationId) {
+        AbstractMonsterInfo monsterInfo;
+        try {
+            monsterInfo = (AbstractMonsterInfo) Class.forName(monsterId.getMonsterClassName()).newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(monsterId.toString(), e);
+        }
+        monsterInfo.setMonsterId(monsterId);
+        monsterInfo.setAlive(true);
+        computeIfAbsent(locationMonstersMap, locationId, k -> new LinkedList<>());
+        locationMonstersMap.get(locationId).add(monsterInfo);
+        monsterInfo.setCurrentLocation(locationId);
+        logger.info("Locked monster '" + monsterInfo.getName() + "' restored from save at '" + locationId + "'");
+        return monsterInfo;
     }
 }

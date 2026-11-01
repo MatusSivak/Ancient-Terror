@@ -14,8 +14,8 @@ import sk.sivak.eldritchhorror.core.constants.card.CardId;
 import sk.sivak.eldritchhorror.core.constants.displayasset.AssetOriginType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.DisplayAssetResponseType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.HideType;
+import sk.sivak.eldritchhorror.core.constants.displayasset.RewardOfferType;
 import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
-import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 
@@ -48,21 +48,15 @@ public class AskToRateThisGameAction implements Action<Object, Object> {
                 onSub.onSuccess(input);
                 return;
             }
-            xxx(onSub, lockedCards);
+            offerRating(onSub, lockedCards);
 
         });
     }
 
-    private void xxx(SingleSubscriber<? super Object> onSub, List<CardId> lockedCards) {
-        ShowCardRequest showCardRequest = new ShowCardRequest();
-        showCardRequest.setTitle("Rate this game to unlock new content?");
-        showCardRequest.setAssetOriginType(AssetOriginType.CENTER);
-        showCardRequest.setHideType(HideType.RETURN);
-        showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
-        showCardRequest.setHiddenTemplate(true);
+    private void offerRating(SingleSubscriber<? super Object> onSub, List<CardId> lockedCards) {
         darkenWorld();
-        ServicePlatform.get().getGameController().showCard(showCardRequest).subscribe(rateThisGameResponse -> {
-            if (rateThisGameResponse != ShowCardResponse.YES) {
+        ServicePlatform.get().getGameController().showRewardOffer(RewardOfferType.RATE_GAME, lockedCards.size()).subscribe(accepted -> {
+            if (!accepted) {
                 GoogleServicesHolder.getAnalyticsTracker().trackInteraction(AnalyticsCategory.RATE_THIS_APP, "No");
                 brightenWorld();
                 GoogleServicesHolder.askLater();

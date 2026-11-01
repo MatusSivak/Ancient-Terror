@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('rewardDialogPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/reward-dialog-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewRewardDialogs', JavaExec) {
+        dependsOn desktop.tasks.named('rewardDialogPreviewClasses')
+        classpath = desktop.sourceSets.rewardDialogPreview.runtimeClasspath
+        mainClass.set('RewardDialogPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}

@@ -599,6 +599,11 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public Single<Boolean> showRewardOffer(sk.sivak.eldritchhorror.core.constants.displayasset.RewardOfferType type, int lockedCards) {
+        return view.showRewardOffer(type, lockedCards);
+    }
+
+    @Override
     public Completable sewCard(CardInfo cardInfo) {
         return view.sewCard(cardInfo);
     }

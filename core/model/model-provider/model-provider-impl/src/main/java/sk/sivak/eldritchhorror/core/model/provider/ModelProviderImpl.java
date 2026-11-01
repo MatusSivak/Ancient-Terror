@@ -198,4 +198,8 @@ public class ModelProviderImpl implements ModelProvider {
     public void setUnlockedArtifactsSupplier(Supplier<List<ArtifactId>> unlockedArtifactsSupplier) {
         artifactsDeck.setUnlockedArtifactsSupplier(unlockedArtifactsSupplier);
     }
+
+    public void setPremiumMonstersAvailableSupplier(Supplier<Boolean> premiumMonstersAvailableSupplier) {
+        monsterCup.setPremiumMonstersAvailableSupplier(premiumMonstersAvailableSupplier);
+    }
 }

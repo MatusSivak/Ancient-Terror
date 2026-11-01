@@ -123,7 +123,8 @@ public class SelectMultipleInvestigators {
         };
         selectInvestigatorComponent.setTitle(get("investigator.selectLead"));
         clearPreview();
-        new InAppPurchaseManager().isProductPurchased("investigators_1").subscribe(isPurchased -> {
+        if (InAppPurchaseManager.areBonusInvestigatorsAvailable()) return;
+        new InAppPurchaseManager().restoreFullGame().subscribe(isPurchased -> {
             if (!isPurchased) {
                 com.badlogic.gdx.Gdx.app.postRunnable(() -> selectInvestigatorComponent.showLockedInvestigators());
             }

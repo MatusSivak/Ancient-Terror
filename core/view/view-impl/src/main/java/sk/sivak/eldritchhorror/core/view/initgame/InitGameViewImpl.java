@@ -106,6 +106,9 @@ public class InitGameViewImpl implements Screen, InitGameView {
     private Chalkboard chalkboard;
     private AncientOneEndingDialog ancientOneEndingDialog;
     private boolean screenInitialized;
+    private static final float STARTUP_OFFER_DELAY = 1.2f;
+    // Once per app process, so returning to the menu from a game does not re-trigger it.
+    private static boolean startupOfferShown;
     private TextButton collectionButton;
     private TextButton hallOfFameButton;
     private TextButton replayTutorialButton;
@@ -187,18 +190,16 @@ public class InitGameViewImpl implements Screen, InitGameView {
     static Single<List<InvestigatorInfo>> refreshPurchasedInvestigators(
             List<InvestigatorInfo> availableInvestigators, Supplier<List<InvestigatorInfo>> refresh) {
         // Basic setup can predate a purchase on the Ancient One screen or a restored entitlement.
-        return new InAppPurchaseManager().isProductPurchased("investigators_1")
+        if (InAppPurchaseManager.areBonusInvestigatorsAvailable()) return Single.just(refresh.get());
+        return new InAppPurchaseManager().restoreFullGame()
                 .map(purchased -> purchased ? refresh.get() : availableInvestigators);
     }
 
     @Override
     public Single<AncientOneInfo> selectAncientOne(List<AncientOneInfo> availableAncientOnes) {
         return Single.create(sub -> {
-            Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
-            boolean isCthulhuPurchased = preferences.getBoolean("cthulhu", false);
-            boolean isShubNiggurathPurchased = preferences.getBoolean("shub_niggurath", false);
-            boolean isYogSothothPurchased = preferences.getBoolean("yog_sothoth", false);
-            SelectAncientOneTable selectAncientOneTable = new SelectAncientOneTable(availableAncientOnes, isCthulhuPurchased, isShubNiggurathPurchased, isYogSothothPurchased, sub);
+            SelectAncientOneTable selectAncientOneTable = new SelectAncientOneTable(
+                    availableAncientOnes, InAppPurchaseManager.isFullGamePurchased(), sub);
 
 
             setMenuDecorationsVisible(false);
@@ -224,10 +225,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
             return;
         }
         initLocaleFromPreferences();
-        new InAppPurchaseManager().isProductPurchased(InAppPurchaseManager.FULL_GAME).subscribe();
-        new InAppPurchaseManager().isProductPurchased("cthulhu").subscribe();
-        new InAppPurchaseManager().isProductPurchased("shub_niggurath").subscribe();
-        new InAppPurchaseManager().isProductPurchased("yog_sothoth").subscribe();
+        new InAppPurchaseManager().restoreFullGame().subscribe(this::offerFullGameOnLaunch);
         screenInitialized = true;
         stage = new Stage(new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
         CustomAssetManager.getTextureAsync(SPLASH).subscribe(texture -> {
@@ -330,7 +328,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
             newGameButton.setPosition(ViewProperties.VIEWPORT_WIDTH/2f - newGameButton.getWidth()/2f, MENU_BUTTON_BOTTOM + 3 * MENU_BUTTON_STEP);
             stage.addActor(newGameButton);
 
-            if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {
+            if (!InAppPurchaseManager.isFullGamePurchased()) {
                 removeOnRewardedAdLoadedListener.run();
                 removeOnRewardedAdFailedToLoadListener.run();
                 removeOnRewardedAdLoadedListener = GoogleServicesHolder.getAdHandler().addOnRewardedAdLoadedAction(() -> {
@@ -350,7 +348,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
                     newGameAction.run();
                 };
 
-                if (Gdx.app.getPreferences("AncientTerror.xml").getBoolean("no_ads", false)) {
+                if (InAppPurchaseManager.isFullGamePurchased()) {
                     adRewardedAction.run();
                     return;
                 }
@@ -839,6 +837,24 @@ public class InitGameViewImpl implements Screen, InitGameView {
         }
     }
 
+    private void offerFullGameOnLaunch(boolean purchased) {
+        boolean tutorialPassed = Gdx.app.getPreferences("AncientTerror.xml").getBoolean("TUTORIAL_PASSED", false);
+        if (!shouldOfferFullGameOnLaunch(purchased, tutorialPassed, startupOfferShown)) return;
+        startupOfferShown = true;
+        Gdx.app.postRunnable(() -> {
+            if (stage == null) return;
+            stage.addAction(Actions.sequence(Actions.delay(STARTUP_OFFER_DELAY), Actions.run(() -> {
+                if (!InAppPurchaseManager.isFullGamePurchased()) {
+                    FullGamePurchaseDialog.show(stage, this::restoreNoAdsButton);
+                }
+            })));
+        });
+    }
+
+    static boolean shouldOfferFullGameOnLaunch(boolean purchased, boolean tutorialPassed, boolean alreadyShown) {
+        return !purchased && tutorialPassed && !alreadyShown;
+    }
+
     private void restoreNoAdsButton() {
         if (noAdsButton == null || stage == null) return;
         noAdsButton.setPosition(VIEWPORT_WIDTH - noAdsButton.getWidth() - 12f, 12f);
@@ -881,7 +897,7 @@ public class InitGameViewImpl implements Screen, InitGameView {
     public boolean hasPurchasedNoAds() {
         Preferences preferences = Gdx.app.getPreferences("AncientTerror.xml");
         if (preferences.getBoolean("TUTORIAL_PASSED", false)) {
-            return preferences.getBoolean("no_ads", false);
+            return InAppPurchaseManager.isFullGamePurchased();
         } else {
             return true;
         }
