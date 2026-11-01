@@ -1,6 +1,6 @@
 # Building Ancient Terror
 
-Use JDK 17 or 21 with the checked-in Gradle wrapper. Set `JAVA_HOME` to the JDK directory and configure the Android SDK location in `local.properties` (`sdk.dir`) or `ANDROID_HOME`. The Android build uses SDK 35.
+Use JDK 17 or 21 with the checked-in Gradle wrapper. Set `JAVA_HOME` to the JDK directory and configure the Android SDK location in `local.properties` (`sdk.dir`) or `ANDROID_HOME`. The Android build uses SDK 36.
 
 From the repository root on Windows:
 

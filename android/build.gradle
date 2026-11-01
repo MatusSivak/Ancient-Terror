@@ -92,7 +92,7 @@ tasks.register("verifyReleaseFirebaseConfig") {
 
 android {
     namespace "sk.sivak.eldritchhorror.android"
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     signingConfigs {
         debug {
@@ -142,7 +142,12 @@ android {
         applicationId androidApplicationId
         minSdkVersion 26
         multiDexEnabled true
-        targetSdkVersion 35
+        targetSdkVersion 36
+        ndk {
+            // libGDX 1.9.8 x86_64 natives are 4 KB-aligned and fail Play's 16 KB page-size
+            // requirement; x86_64 devices run the 32-bit x86 libraries instead.
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+        }
         versionCode apkVersionCode
         versionName "1.7.17" + (apkVersionSuffix ? "-" + apkVersionSuffix : "")
         manifestPlaceholders = [
@@ -184,7 +189,6 @@ task copyAndroidNatives() {
         file("libs/armeabi/").mkdirs();
         file("libs/armeabi-v7a/").mkdirs();
         file("libs/arm64-v8a/").mkdirs();
-        file("libs/x86_64/").mkdirs();
         file("libs/x86/").mkdirs();
 
         configurations.natives.files.each { jar ->
@@ -192,7 +196,6 @@ task copyAndroidNatives() {
             if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
             if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
             if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
-            if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
             if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
             if(outputDir != null) {
                 copy {
