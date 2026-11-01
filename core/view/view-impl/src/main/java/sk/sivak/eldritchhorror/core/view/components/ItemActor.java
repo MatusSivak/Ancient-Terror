@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.Completable;
 import rx.CompletableSubscriber;
+import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.view.animation.TokenMaterializeEffect;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -60,11 +61,19 @@ public class ItemActor extends Image {
     }
 
     public Completable gain() {
-        getColor().a = 0f;
-        return Completable.create(this::gain);
+        return gain(false, null);
     }
 
-    private void gain(CompletableSubscriber onSub) {
+    /**
+     * @param completeOnSpawn complete once the item has materialized instead of when it lands in its holder
+     * @param onLanded        run when the item reaches its holder; may be null
+     */
+    public Completable gain(boolean completeOnSpawn, Action0 onLanded) {
+        getColor().a = 0f;
+        return Completable.create(onSub -> gain(onSub, completeOnSpawn, onLanded));
+    }
+
+    private void gain(CompletableSubscriber onSub, boolean completeOnSpawn, Action0 onLanded) {
         float actionDuration = ViewProperties.NORMAL_ACTION_DURATION;
         setPosition(VIEWPORT_WIDTH / 2 - getOriginX(), VIEWPORT_HEIGHT / 2 - getOriginY());
         materializeEffect = new TokenMaterializeEffect(materializeColor);
@@ -89,8 +98,15 @@ public class ItemActor extends Image {
 
         addAction(Actions.sequence(
                 new FastForwardAction(reveal),
+                Actions.run(() -> {
+                    if (completeOnSpawn) onSub.onCompleted();
+                }),
                 new FastForwardAction(createHolderFlight(actionDuration)),
-                Actions.run(() -> { remove(); onSub.onCompleted(); })
+                Actions.run(() -> {
+                    remove();
+                    if (onLanded != null) onLanded.call();
+                    if (!completeOnSpawn) onSub.onCompleted();
+                })
         ));
     }
 

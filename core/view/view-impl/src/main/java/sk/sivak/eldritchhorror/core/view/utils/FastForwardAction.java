@@ -63,4 +63,24 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
     public static boolean isOn() {
         return on;
     }
+
+    public static boolean isHeld() {
+        FastForwardButton fastForwardButton = InfoStage.getFastForwardButton();
+        return fastForwardButton != null && fastForwardButton.isHeld();
+    }
+
+    /**
+     * Confirms a plain OK (nothing to choose) for the player if fast-forward is already held when the button becomes
+     * clickable. Pressing fast-forward later, while the button waits, does not count as pressing it.
+     */
+    public static void autoConfirmWhileHeld(Button button, Runnable confirm) {
+        button.addAction(new Action() {
+            @Override
+            public boolean act(float delta) {
+                if (button.getStage() == null || !button.isTouchable() || button.isDisabled()) return false;
+                if (isHeld()) confirm.run();
+                return true;
+            }
+        });
+    }
 }

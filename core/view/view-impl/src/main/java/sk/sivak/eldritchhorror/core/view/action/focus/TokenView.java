@@ -25,18 +25,20 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
  */
 public class TokenView {
 
+    private static final float SPEND_STAGGER = 0.3f;
+
     public Completable gainClueFromPool() {
         return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN,
-                get("focus.gainingClue"), TokenSounds.Cue.CLUE_GAIN);
+                get("focus.gainingClue"), TokenSounds.Cue.CLUE_GAIN, true);
     }
 
     public Completable gainClueFromSpace(LocationId locationId) {
         return GainClueFromSpaceHelper.gainClueFromSpace(locationId);
     }
 
-    public Completable gainFocus(int amount) {
+    public Completable gainFocus(int amount, boolean completeOnSpawn) {
         return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getFocusBar(), CustomAssetManager.FOCUS_TOKEN,
-                get("focus.gainingFocus"), TokenSounds.Cue.FOCUS_GAIN);
+                get("focus.gainingFocus"), TokenSounds.Cue.FOCUS_GAIN, completeOnSpawn);
     }
 
     public Completable justFocus() {
@@ -56,11 +58,20 @@ public class TokenView {
     }
 
     private Completable loseResource(ContainerBar bar, ResourceSpendEffect.Kind kind) {
-        return Completable.defer(() -> {
+        // A token gained just before may still be flying; let it land so it is counted before being spent.
+        return InfoStage.getInvestigatorHud().awaitTokensLanded().andThen(Completable.defer(() -> {
             if (bar.getCurrentValue() <= 0) return Completable.complete();
             return ResourceSpendEffect.play(InfoStage.getStageSafe(), bar.getFullContainerPosition(), 27, 27, kind,
-                    bar::decreaseCurrentValue, () -> GameplaySounds.play(GameplaySounds.Cue.RESOURCE_SPEND));
-        });
+                    bar::decreaseCurrentValue, () -> GameplaySounds.play(GameplaySounds.Cue.RESOURCE_SPEND), true)
+                    .andThen(spendStagger());
+        }));
+    }
+
+    /** Short pause after a spend so several tokens spent in a row pop out one by one, not all at once. */
+    private static Completable spendStagger() {
+        return Completable.create(onSub -> InfoStage.addActionToInfoStage(new FastForwardAction<>(Actions.sequence(
+                Actions.delay(SPEND_STAGGER * ViewProperties.NORMAL_ACTION_DURATION),
+                Actions.run(onSub::onCompleted)))));
     }
 
     public Completable loseToken(String leftTexture, String rightTexture, ContainerBar containerBar, Vector2 tokenSize, float offsetX) {

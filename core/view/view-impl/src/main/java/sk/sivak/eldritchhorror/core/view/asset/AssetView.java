@@ -117,18 +117,6 @@ public class AssetView {
         });
     }
 
-    /** Presses the discard confirmation when it appears if fast-forward is on at that moment; otherwise it waits for the player. */
-    static void autoPressWhileFastForward(Button button, Runnable press) {
-        button.addAction(new com.badlogic.gdx.scenes.scene2d.Action() {
-            @Override
-            public boolean act(float delta) {
-                if (!button.isTouchable()) return false;
-                if (FastForwardAction.isOn()) press.run();
-                return true;
-            }
-        });
-    }
-
     private void displayTable(String title, String portraitTextureName) {
         if (title == null) {
             return;
@@ -157,7 +145,7 @@ public class AssetView {
 
                 InfoStage.setBottomHeight(InfoStage.getBottomHeight() + okButton.getHeight() + 5);
 
-                ButtonUtils.addClickListener(okButton, pressOnce(okButton, hideType,
+                ButtonUtils.addClickListener(okButton, pressOnce(okButton,
                         () -> buttonClickAction(subscriber, OK, hideType, assetOriginType)));
 
                 InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(ACTION_DURATION/2f), Actions.run(() -> {
@@ -175,7 +163,7 @@ public class AssetView {
 
                 InfoStage.setBottomHeight(InfoStage.getBottomHeight() + discardButton.getHeight() + 5);
 
-                ButtonUtils.addClickListener(discardButton, pressOnce(discardButton, hideType,
+                ButtonUtils.addClickListener(discardButton, pressOnce(discardButton,
                         () -> buttonClickAction(subscriber, NOTHING, hideType, assetOriginType)));
 
                 InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(ACTION_DURATION/2f), Actions.run(() -> {
@@ -185,15 +173,15 @@ public class AssetView {
         }
     }
 
-    /** Discard confirmations may be pressed by the player or by fast-forward, but only once. */
-    private static Runnable pressOnce(Button button, HideType hideType, Runnable action) {
+    /** Plain OK confirmations may be pressed by the player or by holding fast-forward, but only once. */
+    private static Runnable pressOnce(Button button, Runnable action) {
         boolean[] pressed = {false};
         Runnable once = () -> {
             if (pressed[0]) return;
             pressed[0] = true;
             action.run();
         };
-        if (hideType == DISCARD_ALWAYS) autoPressWhileFastForward(button, once);
+        FastForwardAction.autoConfirmWhileHeld(button, once);
         return once;
     }
 
@@ -375,11 +363,11 @@ public class AssetView {
         InfoStage.setBottomHeight(InfoStage.getBottomHeight() + discardButton.getHeight() + 5);
 
         ButtonUtils.addClickListener(discardButton, () -> onGainButtonClick(completableSubscriber));
+        FastForwardAction.autoConfirmWhileHeld(discardButton, () -> onGainButtonClick(completableSubscriber));
 
 
-        InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(1.05f * NORMAL_ACTION_DURATION), Actions.run(() -> {
-            InfoStage.showButton(discardButton, VIEWPORT_WIDTH / 2 - discardButton.getWidth() / 2, originalBottomHeight);
-        }))));
+        InfoStage.showButton(discardButton, VIEWPORT_WIDTH / 2 - discardButton.getWidth() / 2, originalBottomHeight);
+        discardButton.getColor().a = 1f;
     }
 
     private void onGainButtonClick(CompletableSubscriber completableSubscriber) {

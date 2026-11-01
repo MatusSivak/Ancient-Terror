@@ -16,12 +16,12 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
  */
 public class RestActionView {
 
-    public Completable gainHealth(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, get("rest.healthRestored"), TokenSounds.Cue.HEALTH_GAIN);
+    public Completable gainHealth(int amount, boolean completeOnSpawn) {
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getHealthBar(), CustomAssetManager.HEALTH_ICON, get("rest.healthRestored"), TokenSounds.Cue.HEALTH_GAIN, completeOnSpawn);
     }
 
-    public Completable gainSanity(int amount) {
-        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, get("rest.sanityRestored"), TokenSounds.Cue.SANITY_GAIN);
+    public Completable gainSanity(int amount, boolean completeOnSpawn) {
+        return gainTokenAndUpdateHud(amount, InfoStage.getInvestigatorHud().getSanityBar(), CustomAssetManager.SANITY_ICON, get("rest.sanityRestored"), TokenSounds.Cue.SANITY_GAIN, completeOnSpawn);
     }
 
     public Completable justRest() {

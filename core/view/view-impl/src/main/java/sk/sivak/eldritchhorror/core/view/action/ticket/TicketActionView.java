@@ -16,6 +16,7 @@ import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
+import sk.sivak.eldritchhorror.core.view.action.GainTokenHelper;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
@@ -40,6 +41,9 @@ public class TicketActionView {
     }
 
     public Single<PathType> selectTravelTicket(boolean trainAvailable, boolean shipAvailable, String title) {
+        if (trainAvailable != shipAvailable) {
+            return Single.just(trainAvailable ? PathType.TRAIN : PathType.SHIP);
+        }
         return Single.create(onSub -> {
             InfoStage.displayTextForce(title);
             trainButton = trainAvailable
@@ -83,7 +87,8 @@ public class TicketActionView {
                 VIEWPORT_HEIGHT * 0.1f);
     }
 
-    public Completable gainTravelTicket(PathType ticketType) {
+    /** @param completeOnSpawn complete once the ticket has materialized; the HUD is still updated when it lands */
+    public Completable gainTravelTicket(PathType ticketType, boolean completeOnSpawn) {
         return Completable.defer(() -> {
             InfoStage.getInvestigatorHud().validate();
             TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
@@ -91,11 +96,11 @@ public class TicketActionView {
                     ? CustomAssetManager.TICKET_TRAIN_DOWN : CustomAssetManager.TICKET_SHIP_DOWN));
             tokenActor.setHolderImage(ticketBar.getEmptyTicketImage());
             addSmallActorToInfoStage(tokenActor);
-            return GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN, tokenActor.gain())
-                    .andThen(Completable.fromAction(() -> {
+            return GameplaySounds.withCue(GameplaySounds.Cue.TICKET_GAIN,
+                    tokenActor.gain(completeOnSpawn, GainTokenHelper.skipIfHudReset(() -> {
                         TokenSounds.playLand(TokenSounds.Cue.TICKET_GAIN, 0);
                         ticketBar.addTicket(ticketType);
-                    }));
+                    })));
         });
     }
 }

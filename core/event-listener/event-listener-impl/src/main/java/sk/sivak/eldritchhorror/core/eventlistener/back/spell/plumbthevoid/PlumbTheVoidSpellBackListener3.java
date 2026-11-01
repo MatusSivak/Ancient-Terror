@@ -3,8 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.back.spell.plumbthevoid;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
-import sk.sivak.eldritchhorror.core.constants.location.PathType;
+import sk.sivak.eldritchhorror.core.constants.location.TeleportConnection;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.back.spell.AbstractSpellBackListener;
@@ -37,17 +36,7 @@ public class PlumbTheVoidSpellBackListener3 extends AbstractSpellBackListener {
             }
             ServicePlatform.get().getTokenService().loseSanity(1);
             LocationId locationId = LocationId.getRandomLocations(1).get(0);
-            ServicePlatform.get().getBasicActionService().travelToLocation(new LocationInfo.Connection() {
-                @Override
-                public LocationId getLocationId() {
-                    return locationId;
-                }
-
-                @Override
-                public PathType getPathType() {
-                    return PathType.WALK;
-                }
-            });
+            ServicePlatform.get().getBasicActionService().travelToLocation(new TeleportConnection(locationId));
             if (spellOwnerId != selectedInvestigator) {
                 ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(spellOwnerId);
                 if (ServicePlatform.get().getPerformedActions().canPerformAction(spellOwnerId)) {

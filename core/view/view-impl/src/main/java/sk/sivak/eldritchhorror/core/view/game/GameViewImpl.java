@@ -533,7 +533,15 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable travelToLocation(LocationId locationFrom, LocationId locationTo) {
-        return travelActionView.travelToLocation(locationFrom, locationTo);
+        return travelActionView.travelToLocation(locationFrom, locationTo, controller.isActionPhase());
+    }
+
+    @Override
+    public Completable teleportInvestigator(InvestigatorId investigatorId, LocationId locationFrom, InvestigatorBasics investigatorTo) {
+        return backgroundUtils.hideBackground()
+                .andThen(MapUtils.moveCameraToLocation(locationFrom))
+                .andThen(lostInTimeAndSpaceHelper.removeInvestigator(investigatorId, locationFrom))
+                .andThen(prepareBoardView.initInvestigator(investigatorTo));
     }
 
     @Override
@@ -563,7 +571,7 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable gainTravelTicket(PathType ticketType) {
-        return ticketActionView.gainTravelTicket(ticketType);
+        return ticketActionView.gainTravelTicket(ticketType, true);
     }
 
     @Override
@@ -623,12 +631,12 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable gainHealth(int amount) {
-        return restActionView.gainHealth(amount);
+        return restActionView.gainHealth(amount, controller.isActionPhase());
     }
 
     @Override
     public Completable gainSanity(int amount) {
-        return restActionView.gainSanity(amount);
+        return restActionView.gainSanity(amount, controller.isActionPhase());
     }
 
     @Override
@@ -643,7 +651,7 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable gainFocus(int amount) {
-        return tokenView.gainFocus(amount);
+        return tokenView.gainFocus(amount, true);
     }
 
     @Override

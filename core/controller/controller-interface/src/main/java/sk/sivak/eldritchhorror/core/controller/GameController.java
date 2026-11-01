@@ -41,6 +41,8 @@ public interface GameController {
     /** Actions the investigator has left in the current action phase, or -1 outside of the action phase. */
     int getRemainingActionsInActionPhase(InvestigatorId investigatorId);
 
+    boolean isActionPhase();
+
     boolean isInvestigatorPoisoned(InvestigatorId investigatorId);
 
     Completable confirmExpeditionLocation();
@@ -98,6 +100,9 @@ public interface GameController {
     int getCurrentActionNumber();
 
     Completable travelToLocation(LocationId input);
+
+    /** The model must already have the investigator on locationTo. */
+    Completable teleportInvestigator(InvestigatorId investigatorId, LocationId locationFrom, LocationId locationTo);
 
     Completable initInvestigators();
 

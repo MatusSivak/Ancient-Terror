@@ -147,9 +147,10 @@ public class InvestigatorView {
     }
 
     public Completable updateHud(InvestigatorBasics currentInvestigator) {
-        return Completable.create(onSub -> {
+        return Completable.create(onSub -> InfoStage.getInvestigatorHud().awaitTokensLanded().subscribe(() -> {
             InfoStage.getInvestigatorHud().hide().subscribe(
                     () -> {
+                        InfoStage.getInvestigatorHud().markValuesReset();
                         InfoStage.getInvestigatorHud().getHealthBar().setTotalEmptyContainers(currentInvestigator.getMaxHealth());
                         InfoStage.getInvestigatorHud().getHealthBar().setCurrentValue(currentInvestigator.getCurrentHealth());
 
@@ -169,7 +170,7 @@ public class InvestigatorView {
                         InfoStage.getInvestigatorHud().show().subscribe(() -> onSub.onCompleted());
                     }
             );
-        });
+        }));
 
     }
 

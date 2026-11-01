@@ -11,7 +11,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Align;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.after;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
@@ -38,6 +42,61 @@ public class InvestigatorHud extends Table {
     private boolean displayed;
     private boolean moving;
     private boolean initialized;
+    private int valuesVersion;
+
+    /** Changes whenever bar values are reset from the model, so a token landing after that knows it is already counted. */
+    public int getValuesVersion() {
+        return valuesVersion;
+    }
+
+    public void markValuesReset() {
+        valuesVersion++;
+    }
+
+    private static final float TOKENS_IN_FLIGHT_TIMEOUT = 3f;
+    private int tokensInFlight;
+    private int tokensLandedGeneration;
+    private final List<Runnable> tokensLandedListeners = new ArrayList<>();
+
+    public void tokenLaunched() {
+        tokensInFlight++;
+    }
+
+    public void tokenLanded() {
+        if (tokensInFlight > 0) {
+            tokensInFlight--;
+        }
+        if (tokensInFlight == 0) {
+            notifyTokensLanded();
+        }
+    }
+
+    /** Completes once every token flying towards the HUD has landed (or after a safety timeout). */
+    public Completable awaitTokensLanded() {
+        return Completable.create(onSub -> {
+            if (tokensInFlight == 0) {
+                onSub.onCompleted();
+                return;
+            }
+            tokensLandedListeners.add(onSub::onCompleted);
+            int generation = tokensLandedGeneration;
+            // A token removed mid-flight (e.g. stage cleared) never lands; do not block the HUD forever.
+            InfoStage.addActionToInfoStage(new FastForwardAction<>(Actions.delay(TOKENS_IN_FLIGHT_TIMEOUT, run(() -> {
+                if (generation != tokensLandedGeneration) return;
+                tokensInFlight = 0;
+                notifyTokensLanded();
+            }))));
+        });
+    }
+
+    private void notifyTokensLanded() {
+        tokensLandedGeneration++;
+        List<Runnable> listeners = new ArrayList<>(tokensLandedListeners);
+        tokensLandedListeners.clear();
+        for (Runnable listener : listeners) {
+            listener.run();
+        }
+    }
 
     public InvestigatorHud() {
         super();

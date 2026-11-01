@@ -11,6 +11,7 @@ import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.action.GainTokenHelper;
 import sk.sivak.eldritchhorror.core.view.action.TokenSounds;
 
 import java.util.List;
@@ -74,6 +75,10 @@ public final class GainClueFromSpaceHelper {
 
         Vector2 emptyContainerPosition = InfoStage.getInvestigatorHud().getClueBar().getEmptyContainerPosition(0);
         float targetScale = (VIEWPORT_HEIGHT * getMinSizeRatio()) / clueActor.getHeight();
+        rx.functions.Action0 onLanded = GainTokenHelper.skipIfHudReset(() -> {
+            TokenSounds.playLand(TokenSounds.Cue.CLUE_GAIN, 0);
+            InfoStage.getInvestigatorHud().getClueBar().increaseCurrentValue();
+        });
 
         clueActor.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.run(() -> TokenSounds.playGain(TokenSounds.Cue.CLUE_GAIN, 0)),
@@ -85,17 +90,15 @@ public final class GainClueFromSpaceHelper {
                                 normalActionDuration, sine),
                         Actions.scaleTo(4, 4, normalActionDuration, sine)
                 ),
+                // Continue once the clue is collected; it reaches the HUD on its own.
+                Actions.run(onSub::onCompleted),
                 Actions.parallel(
                         Actions.moveTo(emptyContainerPosition.x - (clueActor.getWidth() * targetScale)/2f - 7,
                                 emptyContainerPosition.y - (clueActor.getHeight() * targetScale)/2f - 7, normalActionDuration, sine),
                         Actions.rotateTo(0, normalActionDuration, sine),
                         Actions.scaleTo(targetScale, targetScale, normalActionDuration, sine)
                 ),
-                Actions.run(() -> {
-                    TokenSounds.playLand(TokenSounds.Cue.CLUE_GAIN, 0);
-                    InfoStage.getInvestigatorHud().getClueBar().increaseCurrentValue();
-                }),
-                Actions.run(onSub::onCompleted),
+                Actions.run(onLanded::call),
                 Actions.run(clueActor::remove)
         )));
     }

@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.question;
 
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -45,7 +46,7 @@ public class QuestionView {
             restoreTestUi = question.isHideTestUi() ? TestPromptVisibility.hide(InfoStage.getStageSafe().getRoot()) : () -> {};
             answer = new Answer<RD, AD>();
             originalBottomHeight = InfoStage.getBottomHeight();
-            displayButtons(question.getOptions(), subscriber);
+            displayButtons(question.getOptions(), subscriber, question.getSelectComponentsTableData() == null);
             displayTable(question.getTitle(), question.getPortraitTextureName());
             displaySelectComponentsTable(question.getSelectComponentsTableData());
 
@@ -158,7 +159,8 @@ public class QuestionView {
         }
     }
 
-    private <RD, AD> void displayButtons(List<Question.Option<RD>> options, SingleSubscriber<? super Answer<RD, AD>> subscriber) {
+    private <RD, AD> void displayButtons(List<Question.Option<RD>> options, SingleSubscriber<? super Answer<RD, AD>> subscriber,
+                                         boolean nothingToSelect) {
         float bottomHeight = InfoStage.getBottomHeight();
         buttons = new LinkedList<>();
         float buttonWidth = 135f;
@@ -176,6 +178,9 @@ public class QuestionView {
             buttonWidth = Math.max(buttonWidth, textButton.getLabel().getPrefWidth() + 36f);
             buttonHeight = Math.max(buttonHeight, textButton.getHeight());
             addClickListener(textButton, createOnClickAction(subscriber, option));
+            if (nothingToSelect && options.size() == 1) {
+                FastForwardAction.autoConfirmWhileHeld(textButton, createOnClickAction(subscriber, option));
+            }
             buttons.add(textButton);
         }
         buttonWidth = Math.min(buttonWidth, availableWidth);

@@ -102,6 +102,11 @@ public class GameControllerImpl implements GameController {
         return Math.max(0, performedActions.getActionsRemaining(investigatorId));
     }
 
+    @Override
+    public boolean isActionPhase() {
+        return phase != null && phase.getPhaseType() == PhaseType.ACTION;
+    }
+
     public void setMonsterCup(MonsterCupRead monsterCup) {
         this.monsterCup = monsterCup;
     }
@@ -507,6 +512,11 @@ public class GameControllerImpl implements GameController {
     public Completable travelToLocation(LocationId input) {
         LocationId locationFrom = investigators.getActiveInvestigator().getCurrentLocationId();
         return view.travelToLocation(locationFrom, input);
+    }
+
+    @Override
+    public Completable teleportInvestigator(InvestigatorId investigatorId, LocationId locationFrom, LocationId locationTo) {
+        return view.teleportInvestigator(investigatorId, locationFrom, new InvestigatorBasicsImpl(investigatorId, locationTo));
     }
 
     @Override

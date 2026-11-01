@@ -4,7 +4,9 @@ import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
+import sk.sivak.eldritchhorror.core.constants.location.TeleportConnection;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.model.InvestigatorWrite;
 
@@ -23,6 +25,14 @@ public class TravelToLocationAction extends AbstractHookableAction<LocationInfo.
             ss.onSuccess(null);
         }
         InvestigatorWrite activeInvestigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
+        if (input instanceof TeleportConnection) {
+            InvestigatorId investigatorId = activeInvestigator.getInfo().getInvestigatorId();
+            LocationId locationFrom = activeInvestigator.getCurrentLocationId();
+            activeInvestigator.setCurrentLocationId(input.getLocationId());
+            ServicePlatform.get().getGameController().teleportInvestigator(investigatorId, locationFrom, input.getLocationId())
+                    .subscribe(() -> ss.onSuccess(investigatorId));
+            return;
+        }
         ServicePlatform.get().getGameController().travelToLocation(input.getLocationId()).subscribe(() -> {
             activeInvestigator.setCurrentLocationId(input.getLocationId());
             ss.onSuccess(activeInvestigator.getInfo().getInvestigatorId());

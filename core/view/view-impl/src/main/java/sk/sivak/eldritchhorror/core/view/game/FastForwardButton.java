@@ -60,6 +60,11 @@ public class FastForwardButton extends ImageButton {
         super.draw(batch, parentAlpha);
     }
 
+    /** Live state: the flag in {@link FastForwardAction} is only refreshed while something is being fast-forwarded. */
+    public boolean isHeld() {
+        return isPressedOrButtonIsDown();
+    }
+
     private boolean isPressedOrButtonIsDown() {
         return isPressed() || Gdx.input.isKeyPressed(Input.Keys.F);
     }

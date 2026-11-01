@@ -114,7 +114,6 @@ public class LostInTimeAndSpaceHelper {
                             Actions.delay(0.5f), // to wait for card to hide
                             Actions.run(() -> GameplaySounds.play(GameplaySounds.Cue.INVESTIGATOR_DISAPPEAR)),
                             Actions.alpha(0, FAST_ACTION_DURATION),
-                            Actions.run(onSub::onCompleted),
                             Actions.run(() -> {
                                 List<InvestigatorId> otherInvestigators = collectToList(
                                         Stream.map(
@@ -125,6 +124,7 @@ public class LostInTimeAndSpaceHelper {
                                 findInvestigatorsOffset(otherInvestigators, 0);
 
                                 MapStage.removeActor(idLayerResolver);
+                                onSub.onCompleted();
                             })
                     ));
                 } else {

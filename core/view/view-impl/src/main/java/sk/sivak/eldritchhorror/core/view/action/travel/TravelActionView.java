@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.action.travel;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
@@ -33,7 +34,9 @@ import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorUtils;
 import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java8.features.stream.Stream.collectToList;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
@@ -50,6 +53,8 @@ public class TravelActionView {
     private GameController controller;
     private TextButton stopButton;
     private PathType selectedTravelPath;
+    /** Arrival fade-ins still running; a following travel must cancel them or they would fight its fade-out. */
+    private final Map<InvestigatorImage, Action> pendingArrivalFades = new HashMap<>();
 
     private BackgroundUtils backgroundUtils;
     public TravelActionView(CompositeMap compositeMap, GameController controller) {
@@ -84,7 +89,7 @@ public class TravelActionView {
         }));
     }
 
-    public Completable travelToLocation(LocationId locationFrom, LocationId locationTo) {
+    public Completable travelToLocation(LocationId locationFrom, LocationId locationTo, boolean completeOnArrival) {
 
         return backgroundUtils.hideBackground().andThen(Completable.create((sub) -> {
             InvestigatorBasics currentInvestigator = controller.getInvestigatorBasics();
@@ -115,6 +120,10 @@ public class TravelActionView {
                             GameplaySounds.play(GameplaySounds.travelCue(selectedTravelPath));
                             selectedTravelPath = null;
                             for (InvestigatorImage investigatorImage : currentInvestigatorList) {
+                                Action arrivalFade = pendingArrivalFades.remove(investigatorImage);
+                                if (arrivalFade != null) {
+                                    investigatorImage.removeAction(arrivalFade);
+                                }
                                 AlphaAction action = new AlphaAction();
                                 action.setTarget(investigatorImage);
                                 action.setDuration(FAST_ACTION_DURATION);
@@ -153,11 +162,22 @@ public class TravelActionView {
                                 action.setTarget(investigatorImage);
                                 action.setDuration(FAST_ACTION_DURATION);
                                 action.setAlpha(1);
-                                investigatorImage.addAction(new FastForwardAction<>(action));
+                                Action arrivalFade = Actions.sequence(new FastForwardAction<>(action),
+                                        Actions.run(() -> pendingArrivalFades.remove(investigatorImage)));
+                                pendingArrivalFades.put(investigatorImage, arrivalFade);
+                                investigatorImage.addAction(arrivalFade);
+                            }
+                            // The investigator is already standing on the new location; the fade-in may finish on its own.
+                            if (completeOnArrival) {
+                                sub.onCompleted();
                             }
                         }),
-                        new FastForwardAction<>(Actions.delay(FAST_ACTION_DURATION)),
-                        Actions.run(sub::onCompleted)
+                        new FastForwardAction<>(Actions.delay(completeOnArrival ? 0 : FAST_ACTION_DURATION)),
+                        Actions.run(() -> {
+                            if (!completeOnArrival) {
+                                sub.onCompleted();
+                            }
+                        })
                 );
                 MapStage.getStage().addAction(sequence);
             });
@@ -176,7 +196,8 @@ public class TravelActionView {
     }
 
     public Completable loseTicket(PathType input) {
-        return Completable.defer(() -> {
+        // A ticket gained just before may still be flying; let it land so it can be spent from the HUD.
+        return InfoStage.getInvestigatorHud().awaitTokensLanded().andThen(Completable.defer(() -> {
             TicketContainerBar ticketBar = InfoStage.getInvestigatorHud().getTicketBar();
             Image ticket = ticketBar.getTicketImage(input);
             if (ticket == null) return Completable.complete();
@@ -184,6 +205,6 @@ public class TravelActionView {
             return ResourceSpendEffect.play(InfoStage.getStageSafe(), position, ticket.getWidth(), ticket.getHeight(),
                     input == PathType.TRAIN ? ResourceSpendEffect.Kind.TRAIN : ResourceSpendEffect.Kind.SHIP,
                     () -> ticketBar.removeTicket(input), () -> GameplaySounds.play(GameplaySounds.Cue.TICKET_SPEND));
-        });
+        }));
     }
 }

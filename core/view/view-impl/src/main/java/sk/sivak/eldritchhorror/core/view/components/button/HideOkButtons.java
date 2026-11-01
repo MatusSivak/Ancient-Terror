@@ -218,6 +218,14 @@ public class HideOkButtons {
         return okButton;
     }
 
+    /** Acts as if the player pressed the show button, revealing the hidden actor. */
+    public void pressShowButton() {
+        if (displayed || hideButton == null) {
+            return;
+        }
+        prepareHideButton(hideButton).run();
+    }
+
     protected TextButton getHideButton() {
         return hideButton;
     }

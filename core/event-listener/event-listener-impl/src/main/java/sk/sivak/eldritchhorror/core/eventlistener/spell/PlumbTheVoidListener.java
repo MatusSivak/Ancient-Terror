@@ -9,9 +9,7 @@ import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
 import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
-import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
-import sk.sivak.eldritchhorror.core.constants.location.PathType;
+import sk.sivak.eldritchhorror.core.constants.location.TeleportConnection;
 import sk.sivak.eldritchhorror.core.constants.spell.plumbthevoid.PlumbTheVoidSpell;
 import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
@@ -155,17 +153,7 @@ public class PlumbTheVoidListener extends AbstractSpellListener<PlumbTheVoidSpel
 
                 ServicePlatform.get().getGameService().selectLocation(new SelectLocationData(null)).subscribe(locationId -> {
                     ServicePlatform.get().getService().hold();
-                    ServicePlatform.get().getBasicActionService().travelToLocation(new LocationInfo.Connection() {
-                        @Override
-                        public LocationId getLocationId() {
-                            return locationId;
-                        }
-
-                        @Override
-                        public PathType getPathType() {
-                            return PathType.WALK;
-                        }
-                    });
+                    ServicePlatform.get().getBasicActionService().travelToLocation(new TeleportConnection(locationId));
                     ServicePlatform.get().getService().release();
                 });
 

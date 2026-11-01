@@ -32,10 +32,17 @@ public final class ResourceSpendEffect extends Group {
 
     public static Completable play(Stage stage, Vector2 position, float width, float height,
                                    Kind kind, Action0 onLeave, Action0 onBreak) {
+        return play(stage, position, width, height, kind, onLeave, onBreak, false);
+    }
+
+    /** @param completeOnLeave complete as soon as the token leaves its holder; the burst keeps playing on its own */
+    public static Completable play(Stage stage, Vector2 position, float width, float height,
+                                   Kind kind, Action0 onLeave, Action0 onBreak, boolean completeOnLeave) {
         return Completable.create(subscriber -> {
             ResourceSpendEffect effect = new ResourceSpendEffect(position, width, height, kind);
             stage.addActor(effect);
             if (onLeave != null) onLeave.call();
+            if (completeOnLeave) subscriber.onCompleted();
             effect.addAction(new FastForwardAction<>(new TemporalAction(DURATION * NORMAL_ACTION_DURATION) {
                 private boolean broken;
                 @Override protected void update(float percent) {
@@ -46,7 +53,10 @@ public final class ResourceSpendEffect extends Group {
                         if (onBreak != null) onBreak.call();
                     }
                 }
-                @Override protected void end() { effect.remove(); subscriber.onCompleted(); }
+                @Override protected void end() {
+                    effect.remove();
+                    if (!completeOnLeave) subscriber.onCompleted();
+                }
             }));
         });
     }

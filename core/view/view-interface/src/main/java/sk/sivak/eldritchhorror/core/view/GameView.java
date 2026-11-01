@@ -99,6 +99,9 @@ public interface GameView {
 
     Completable travelToLocation(LocationId locationFrom, LocationId locationTo);
 
+    /** Removes the investigator from locationFrom and spawns him on his new location like at the start of the game. */
+    Completable teleportInvestigator(InvestigatorId investigatorId, LocationId locationFrom, InvestigatorBasics investigatorTo);
+
     Completable initInvestigator(InvestigatorBasics selectedInvestigators);
 
     void justPlaceInvestigator(InvestigatorBasics investigatorBasics);

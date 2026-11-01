@@ -8,7 +8,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.NEW_FONT_SOURCE_SERIF_4;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew;
 import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
-import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredTicketKeywords;
+import static sk.sivak.eldritchhorror.core.view.utils.MarkupText.replaceColoredGlyphKeywords;
 
 public class SpecialTable extends VisTable {
 
@@ -35,8 +35,8 @@ public class SpecialTable extends VisTable {
     }
 
     public void init(SpecialTableData data) {
-        actionValue.setText(replaceColoredTicketKeywords(resolveLocalizedText(data.getAction())));
-        abilityValue.setText(replaceColoredTicketKeywords(resolveLocalizedText(data.getAbility())));
+        actionValue.setText(replaceColoredGlyphKeywords(resolveLocalizedText(data.getAction())));
+        abilityValue.setText(replaceColoredGlyphKeywords(resolveLocalizedText(data.getAbility())));
 
     }
 

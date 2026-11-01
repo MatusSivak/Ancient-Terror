@@ -126,6 +126,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
             InfoStage.addBigActor(null, this, null, null);
             hideOkButtons.hideInstantly();
             hideOkButtons.disableOkButton();
+            hideOkButtons.pressShowButton();
         } else if (isOnStage()) {
             flipAlpha();
         }
