@@ -277,6 +277,11 @@ public class BigActorsManager {
         displayOrHide(BigActorKey.ENCOUNTER_TABLE);
     }
 
+    /** Encounter executors close the table; a lone encounter starts without ever opening it. */
+    public static boolean isEncounterTableDisplayed() {
+        return getInstance().currentBigActorKey == BigActorKey.ENCOUNTER_TABLE;
+    }
+
     public static void displayOrHidePaper() {
         displayOrHide(BigActorKey.PAPER);
     }

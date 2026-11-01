@@ -37,7 +37,11 @@ public class MonsterSurgeAction extends AbstractHookableAction<Object, Void> {
             ServicePlatform.get().getService().hold();
             for (LocationId gateLocation : gateLocations) {
                 ServicePlatform.get().getService().moveCameraToLocation(gateLocation);
-                ServicePlatform.get().getGameService().spawnMonsters(monstersCount, gateLocation, false).subscribe();
+                ServicePlatform.get().getService().addEventCommand(ignored -> {
+                    ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gateLocation, true);
+                });
+                ServicePlatform.get().getGameService().spawnMonsters(monstersCount, gateLocation, false).subscribe(spawned ->
+                        ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gateLocation, false));
             }
             ServicePlatform.get().getService().convertTo(Void.class, () -> null);
             ServicePlatform.get().getService().release();

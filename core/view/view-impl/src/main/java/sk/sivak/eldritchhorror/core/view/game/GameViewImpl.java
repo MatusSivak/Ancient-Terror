@@ -914,6 +914,10 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public Completable hideSelectEncounterTable() {
         return Completable.create(onSub -> {
+            if (!BigActorsManager.isEncounterTableDisplayed()) {
+                onSub.onCompleted();
+                return;
+            }
             InfoStage.addActionToInfoStage(new FastForwardAction<>(Actions.sequence(
                     Actions.run(BigActorsManager::displayOrHideEncounterTable),
                     Actions.delay(0.5f),

@@ -92,14 +92,15 @@ public class AssetView {
         return Single.create(subscriber -> {
             labelTable = null;
             buttons = new Button[0];
-            if (showCardRequest.getHideType() != DISCARD_ALWAYS) UiSounds.transition(UiSounds.cardOpenCue(showCardRequest.isHiddenTemplate() ? null
-                    : showCardRequest.getAssetInfo() != null ? showCardRequest.getAssetInfo()
-                    : showCardRequest.getArtifactInfo() != null ? showCardRequest.getArtifactInfo()
-                    : showCardRequest.getConditionInfo() != null ? showCardRequest.getConditionInfo()
-                    : showCardRequest.getSpellInfo()));
+            if (showCardRequest.getHideType() != DISCARD_ALWAYS) {
+                UiSounds.transition(UiSounds.cardOpenCue(showCardRequest.isHiddenTemplate() ? null
+                        : showCardRequest.getAssetInfo() != null ? showCardRequest.getAssetInfo()
+                        : showCardRequest.getArtifactInfo() != null ? showCardRequest.getArtifactInfo()
+                        : showCardRequest.getConditionInfo() != null ? showCardRequest.getConditionInfo()
+                        : showCardRequest.getSpellInfo()));
+            }
             originalBottomHeight = InfoStage.getBottomHeight();
-            ShowCardResponse automaticResponse = automaticDiscardResponse(showCardRequest);
-            if (automaticResponse == null) displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
+            displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
                     showCardRequest.getAssetOriginType(), subscriber);
             displayTable(showCardRequest.getTitle(), showCardRequest.getPortraitTextureName());
             if (showCardRequest.isHiddenTemplate()) {
@@ -113,26 +114,19 @@ public class AssetView {
             } else if (showCardRequest.getSpellInfo() != null) {
                 displayCard(showCardRequest.getSpellInfo(), showCardRequest.getAssetOriginType());
             }
-            if (automaticResponse != null) {
-                // Finish revealing the card before tearing it; complete the command only after the tear.
-                scheduleAutomaticDiscard(cardTemplate, () -> buttonClickAction(subscriber, automaticResponse,
-                        showCardRequest.getHideType(), showCardRequest.getAssetOriginType()));
-            }
         });
     }
 
-    private static ShowCardResponse automaticDiscardResponse(ShowCardRequest request) {
-        if (request.getHideType() != DISCARD_ALWAYS) return null;
-        switch (request.getDisplayAssetResponseType()) {
-            case OK: return OK;
-            case NOTHING: return NOTHING;
-            default: return null; // Real choices still require a response.
-        }
-    }
-
-    private static void scheduleAutomaticDiscard(Actor card, Runnable discard) {
-        card.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
-        card.addAction(new FastForwardAction<>(sequence(delay(ACTION_DURATION), run(discard))));
+    /** Presses the discard confirmation when it appears if fast-forward is on at that moment; otherwise it waits for the player. */
+    static void autoPressWhileFastForward(Button button, Runnable press) {
+        button.addAction(new com.badlogic.gdx.scenes.scene2d.Action() {
+            @Override
+            public boolean act(float delta) {
+                if (!button.isTouchable()) return false;
+                if (FastForwardAction.isOn()) press.run();
+                return true;
+            }
+        });
     }
 
     private void displayTable(String title, String portraitTextureName) {
@@ -163,7 +157,8 @@ public class AssetView {
 
                 InfoStage.setBottomHeight(InfoStage.getBottomHeight() + okButton.getHeight() + 5);
 
-                ButtonUtils.addClickListener(okButton, () -> buttonClickAction(subscriber, OK, hideType, assetOriginType));
+                ButtonUtils.addClickListener(okButton, pressOnce(okButton, hideType,
+                        () -> buttonClickAction(subscriber, OK, hideType, assetOriginType)));
 
                 InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(ACTION_DURATION/2f), Actions.run(() -> {
                     InfoStage.showButton(okButton, VIEWPORT_WIDTH / 2 - okButton.getWidth() / 2, bottomHeight);
@@ -180,13 +175,26 @@ public class AssetView {
 
                 InfoStage.setBottomHeight(InfoStage.getBottomHeight() + discardButton.getHeight() + 5);
 
-                ButtonUtils.addClickListener(discardButton, () -> buttonClickAction(subscriber, NOTHING, hideType, assetOriginType));
+                ButtonUtils.addClickListener(discardButton, pressOnce(discardButton, hideType,
+                        () -> buttonClickAction(subscriber, NOTHING, hideType, assetOriginType)));
 
                 InfoStage.addActionToInfoStage(new FastForwardAction(new SequenceAction(Actions.delay(ACTION_DURATION/2f), Actions.run(() -> {
                     InfoStage.showButton(discardButton, VIEWPORT_WIDTH / 2 - discardButton.getWidth() / 2, bottomHeight);
                 }))));
                 break;
         }
+    }
+
+    /** Discard confirmations may be pressed by the player or by fast-forward, but only once. */
+    private static Runnable pressOnce(Button button, HideType hideType, Runnable action) {
+        boolean[] pressed = {false};
+        Runnable once = () -> {
+            if (pressed[0]) return;
+            pressed[0] = true;
+            action.run();
+        };
+        if (hideType == DISCARD_ALWAYS) autoPressWhileFastForward(button, once);
+        return once;
     }
 
     private void buttonClickAction(SingleSubscriber<? super ShowCardResponse> subscriber,

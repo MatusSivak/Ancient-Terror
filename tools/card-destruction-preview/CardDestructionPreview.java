@@ -346,16 +346,23 @@ public class CardDestructionPreview extends ApplicationAdapter {
         request.setHideType(HideType.DISCARD_ALWAYS); request.setHiddenTemplate(hidden);
         request.setDisplayAssetResponseType(hidden ? DisplayAssetResponseType.NOTHING : DisplayAssetResponseType.OK);
         int previousOpens = cardOpenSounds.get();
-        float bottom = InfoStage.getBottomHeight();
         AtomicInteger done = new AtomicInteger();
+        if (fast) FastForwardAction.turnOn();
         view.showCard(request).subscribe(response -> {
             require(response == (hidden ? ShowCardResponse.NOTHING : ShowCardResponse.OK), "Discard changed the response"); done.incrementAndGet();
         }, error -> { throw new RuntimeException(error); });
-        require(cardOpenSounds.get() == previousOpens, "Discard replayed the card's opening sound");
-        require(((Button[]) field(view, "buttons")).length == 0, "Automatic discard created a confirmation button");
-        require(InfoStage.getBottomHeight() == bottom, "Automatic discard reserved button space");
+        require(cardOpenSounds.get() == previousOpens, "Discard played the card's opening sound");
+        Button[] buttons = (Button[]) field(view, "buttons");
+        require(buttons.length == 1, "Discard confirmation button missing");
         Actor original = (Actor) field(view, "cardTemplate");
-        if (fast) FastForwardAction.turnOn();
+        if (!fast) {
+            tick(150);
+            require(original.getStage() != null && done.get() == 0, "Discard did not wait for confirmation");
+            // Turning fast-forward on while the button waits must not press it.
+            FastForwardAction.turnOn(); tick(30); FastForwardAction.turnOff();
+            require(original.getStage() != null && done.get() == 0, "Late fast-forward pressed the discard button");
+            click(buttons[0]); click(buttons[0]);
+        }
         Group animation = null;
         for (int frame = 0; frame < 120 && animation == null; frame++) {
             tick(1); animation = stage.getRoot().findActor("card-destruction");

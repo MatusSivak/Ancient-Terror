@@ -7,8 +7,9 @@ Run from the repository root with Java configured as described in `BUILDING.md`:
 ```
 
 Uses an offscreen desktop window and instrumented audio stubs, without loading or changing
-a saved game. Exercises automatic discards for assets, artifacts, conditions and spells:
-no confirmation button or reveal sound, original OK/NOTHING responses, completion
+a saved game. Exercises discards for assets, artifacts, conditions and spells:
+the card's opening sound stays silent, the OK confirmation waits for input, fast-forward held when the button
+appears presses it once (turning it on later does not), original OK/NOTHING responses, completion
 after the tear, and YES/NO choices that still wait for input. Also checks current-Mystery
 resolution, including hidden cards, fast-forward, changing speed mid-animation,
 long Mystery text, and opening the next Mystery on the reused sheet.

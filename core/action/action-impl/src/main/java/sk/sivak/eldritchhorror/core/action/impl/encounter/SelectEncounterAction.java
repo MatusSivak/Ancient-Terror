@@ -35,11 +35,28 @@ public class SelectEncounterAction implements Action<AvailableEncounters, Encoun
                 sub.onSuccess(null);
                 return;
             }
+            // Runs after every disabling hook (e.g. Mists of R'lyeh), so a lone option is final.
+            Encounter automatic = automaticChoice(input.getEncounters());
+            if (automatic != null) {
+                sub.onSuccess(automatic);
+                return;
+            }
             Collection<EncounterButtonData> encounterButtonDataList = Stream.map(input.getEncounters(), Encounter::getEncounterButtonData);
             ServicePlatform.get().getGameController().selectEncounter(encounterButtonDataList)
                     .subscribe(this::onSelectEncounter);
         });
 
+    }
+
+    /** The only enabled encounter, or null when the player has a real choice. */
+    static Encounter automaticChoice(List<Encounter> encounters) {
+        Encounter enabled = null;
+        for (Encounter encounter : encounters) {
+            if (!encounter.getEncounterButtonData().isEnabled()) continue;
+            if (enabled != null) return null;
+            enabled = encounter;
+        }
+        return enabled;
     }
 
     private void onSelectEncounter(String uuid) {
