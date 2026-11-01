@@ -1,147 +1,90 @@
 package sk.sivak.eldritchhorror.core.view.components.table;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTable;
-import java8.features.function.Consumer;
-import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
-import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
+import sk.sivak.eldritchhorror.core.view.utils.PromptStyle;
 
+import java.util.Collections;
 import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTexture;
 
 public class LabelTable extends VisTable {
+    private static final float PORTRAIT_SIZE = 54f;
+    private static final float ICON_SIZE = 26f;
+    private static final float GAP = 12f;
 
-    private LabelTable() {
+    private LabelTable() { }
+
+    public static LabelTable createAndShowTable(float delay, String text, Texture texture) {
+        return show(delay, text, null, Collections.singletonList(texture), 0, false);
     }
 
-    private static Label createPromptLabel(String text, Color color) {
-        Label.LabelStyle style = new Label.LabelStyle(
-                getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.WHITE);
-        style.font.getData().markupEnabled = true;
-        // Tint the prose with markup so embedded artwork keeps its own colors.
-        return new Label("[#" + color + "]"
-                + MarkupText.replaceColoredGlyphKeywords(text == null ? "" : text) + "[]", style);
+    public static LabelTable createAndShowTable(float delay, String text, String portrait,
+                                               List<Texture> textures, int minWidth) {
+        return show(delay, text, portrait, textures, minWidth, false);
     }
 
-    public static LabelTable createAndShowTable(float delay, String labelText, Texture texture) {
-
-        Consumer<Table> consumer = table -> {
-            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
-            resultLabel.setAlignment(Align.center, Align.center);
-            resultLabel.setFontScale(0.5f);
-
-            Image image = new Image(texture);
-            image.setScaling(Scaling.fit);
-            table.add(image)
-                    .height(resultLabel.getPrefHeight() + 4)
-                    .width(resultLabel.getPrefHeight() + 4)
-                    .padTop(5).padLeft(5).padBottom(5);
-            table.add(resultLabel).pad(5);
-        };
-        return createAndShowTable(delay, consumer, 0);
-    }
-
-    public static LabelTable createAndShowTable(float delay, String labelText, String portraitTextureName, List<Texture> textures, int minWidth) {
-
-        Consumer<Table> consumer = table -> {
-            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
-            resultLabel.setAlignment(Align.center, Align.center);
-            resultLabel.setFontScale(0.5f);
-
-            Image image = new Image(CustomAssetManager.getTexture(portraitTextureName));
-            image.setScaling(Scaling.fit);
-            table.add(image).align(Align.top).height(95).width(95).padTop(5).padBottom(75);
-
-            for (Texture texture : textures) {
-                if (texture != null) {
-                    Image otherImage = new Image(texture);
-                    otherImage.setScaling(Scaling.fit);
-                    table.add(otherImage)
-                            .height(resultLabel.getPrefHeight() + 4)
-                            .width(resultLabel.getPrefHeight() + 4)
-                            .padTop(5).padLeft(5).padBottom(5);
-                }
-            }
-
-            table.add(resultLabel).minWidth(minWidth).pad(5);
-        };
-        return createAndShowTable(delay, consumer, minWidth > 0 ? -95/2 : 0);
-    }
-
-    public static LabelTable createAndShowTable(float delay, String labelText) {
-
-        Consumer<Table> consumer = table -> {
-            Label resultLabel = createPromptLabel(labelText, Color.YELLOW);
-            resultLabel.setAlignment(Align.center, Align.center);
-            resultLabel.setFontScale(0.5f);
-
-            table.add(resultLabel).pad(5);
-        };
-        return createAndShowTable(delay, consumer, 0);
+    public static LabelTable createAndShowTable(float delay, String text) {
+        return show(delay, text, null, Collections.emptyList(), 0, false);
     }
 
     public static LabelTable createAndShowHint(String text) {
-        return createAndShowTable(0, table -> {
-            Label hint = createPromptLabel(text, Color.valueOf("E8D9B0"));
-            hint.setAlignment(Align.center);
-            hint.setFontScale(0.42f);
-            table.add(hint).pad(3f, 10f, 3f, 10f);
-        }, 0);
+        return show(0, text, null, Collections.emptyList(), 0, true);
     }
 
-    public static LabelTable createAndShowNotice(String text, String portraitTextureName) {
-        return createAndShowTable(0, table -> {
-            Label label = createPromptLabel(text, Color.YELLOW);
-            label.setFontScale(0.5f);
-            label.setAlignment(Align.center);
-            label.setWrap(true);
-            if (portraitTextureName != null) {
-                Image portrait = new Image(CustomAssetManager.getTexture(portraitTextureName));
-                portrait.setScaling(Scaling.fit);
-                table.add(portrait).size(95).pad(10);
-            }
-            table.add(label).width(550).pad(10);
-        }, 0, true);
+    public static LabelTable createAndShowNotice(String text, String portrait) {
+        return show(0, text, portrait, Collections.emptyList(), 0, false);
     }
 
-    private static LabelTable createAndShowTable(float delay, Consumer<Table> prepareTableFunction, int offsetX) {
-        return createAndShowTable(delay, prepareTableFunction, offsetX, false);
-    }
-
-    private static LabelTable createAndShowTable(float delay, Consumer<Table> prepareTableFunction, int offsetX, boolean naturalHeight) {
-        if (!VisUI.isLoaded()) {
-            VisUI.load();
+    private static LabelTable show(float delay, String text, String portrait,
+                                    List<Texture> textures, int minWidth, boolean hint) {
+        if (!VisUI.isLoaded()) VisUI.load();
+        LabelTable table = new LabelTable();
+        table.setTouchable(Touchable.disabled);
+        table.setBackground(PromptStyle.panel());
+        float artworkWidth = 0;
+        if (portrait != null) {
+            table.add(image(getTexture(portrait))).size(PORTRAIT_SIZE).padRight(GAP);
+            artworkWidth += PORTRAIT_SIZE + GAP;
         }
-        LabelTable table = naturalHeight ? new LabelTable() : new LabelTable() {
-            @Override
-            public float getHeight() {
-               return 32f;
-            }
-        };
+        for (Texture texture : textures) {
+            if (texture == null) continue;
+            table.add(image(texture)).size(ICON_SIZE).padRight(GAP);
+            artworkWidth += ICON_SIZE + GAP;
+        }
 
-        prepareTableFunction.accept(table);
+        Label label = PromptStyle.label(text, hint);
+        float available = PromptStyle.MAX_WIDTH - 2 * PromptStyle.PAD_X - artworkWidth;
+        // Leave a little slack for scaled glyph bearings and Scene2D's pixel rounding.
+        float textWidth = Math.min(available, Math.max(Math.max(minWidth, label.getPrefWidth() + 8f),
+                240f - 2 * PromptStyle.PAD_X - artworkWidth));
+        boolean multiline = label.getPrefWidth() > textWidth || (text != null && text.contains("\n"));
+        label.setAlignment(multiline || portrait != null ? Align.left : Align.center);
+        label.setWrap(true);
+        table.add(label).width(textWidth);
+        // Use the real wrapped/portrait height so cards and buttons reserve the correct space.
         table.pack();
-        table.setBackground(getTextureRegionDrawable(GRAY_BACKGROUND));
-
-        table.setPosition(VIEWPORT_WIDTH / 2f - table.getWidth() / 2 + offsetX, InfoStage.getBottomHeight());
-
+        table.setPosition((VIEWPORT_WIDTH - table.getWidth()) / 2f, InfoStage.getBottomHeight());
         InfoStage.addSmallActorToInfoStage(table);
-        table.setColor(new Color(1f, 1f, 1f, 0f));
+        table.getColor().a = 0;
         table.addAction(Actions.alpha(1, delay));
-        InfoStage.setBottomHeight(InfoStage.getBottomHeight() + table.getHeight() + 5);
-
+        InfoStage.setBottomHeight(table.getTop() + 5);
         return table;
+    }
+
+    private static Image image(Texture texture) {
+        Image image = new Image(texture);
+        image.setScaling(Scaling.fit);
+        return image;
     }
 }

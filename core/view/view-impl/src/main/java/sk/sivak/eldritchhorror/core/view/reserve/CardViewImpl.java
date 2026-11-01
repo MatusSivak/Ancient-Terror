@@ -139,7 +139,7 @@ public class CardViewImpl implements CardView {
             }
             dragAndDropBinder.getSourceTargetGroup().setTouchable(Touchable.disabled);
             displayReserveLabel = LabelTable.createAndShowTable(0, get("reserve.displayPrompt"));
-            button.setText(get("dialog.yes"));
+            button.setText(get("dialog.show"));
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
             SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();

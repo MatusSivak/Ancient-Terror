@@ -7,6 +7,16 @@ Run from the repository root with the JDK configured as described in `BUILDING.m
 ```
 
 Uses an offscreen desktop window and silent audio stubs without loading a saved game.
+For the shared parchment question/info panels and their layout regression checks:
+
+```powershell
+.\gradlew.bat -I tools/prompt-preview/preview.gradle :desktop:previewPrompts --args="--notices"
+```
+
+Renders short, wrapped, portrait, token and status notices over the map as `notice-*.png`.
+Checks real question dismissal and bottom-space restoration, plus mystery-card spacing
+and Focus/Clue rerolls at normal and fast-forward speed.
+
 To run only the ordinary/epic combat display, phase highlighting, and cleanup checks:
 
 ```powershell

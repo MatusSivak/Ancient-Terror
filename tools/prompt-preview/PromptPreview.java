@@ -55,10 +55,12 @@ public class PromptPreview extends ApplicationAdapter {
     private Stage stage;
     private static boolean combatDisplayOnly;
     private static boolean mapReportsOnly;
+    private static boolean noticesOnly;
 
     public static void main(String[] args) {
         combatDisplayOnly = Arrays.asList(args).contains("--combat-display");
         mapReportsOnly = Arrays.asList(args).contains("--map-reports");
+        noticesOnly = Arrays.asList(args).contains("--notices");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 960; config.height = 540; config.x = -10000; config.y = -10000;
@@ -78,6 +80,14 @@ public class PromptPreview extends ApplicationAdapter {
                     new Class<?>[]{Audio.class}, (proxy, method, args) -> silent);
             VisUI.load();
             stage = InfoStage.getStageSafe();
+            if (noticesOnly) {
+                previewNotices();
+                checkMystery();
+                checkDice(false);
+                checkDice(true);
+                System.out.println("PASS: notice wrapping, portrait/icon bounds, answers, prompt restoration, mystery spacing and rerolls");
+                return;
+            }
             if (mapReportsOnly) {
                 previewMapReports();
                 return;
@@ -114,6 +124,89 @@ public class PromptPreview extends ApplicationAdapter {
         } finally {
             Gdx.app.exit();
         }
+    }
+
+    private void previewNotices() throws Exception {
+        new sk.sivak.eldritchhorror.core.view.game.HudButtons(null);
+        com.badlogic.gdx.scenes.scene2d.ui.Image map = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                CustomAssetManager.getTexture(CustomAssetManager.MAP));
+        map.setBounds(0, 0, 960, 540);
+        map.setTouchable(Touchable.disabled);
+        stage.addActor(map);
+        map.toBack();
+        String[] prompts = {
+                UiText.get("encounter.displayPrompt"),
+                "Spend 1 Focus to reroll a die?",
+                "The expedition has returned with news from the ruins. Choose an investigator to receive the recovered artifact, then continue your journey to the next encounter.",
+                "Gate closed: the Priest gains a Boon.\nRecover 1 Sanity before continuing."
+        };
+        for (int i = 0; i < prompts.length; i++) {
+            InfoStage.setBottomHeight(5);
+            sk.sivak.eldritchhorror.core.constants.question.Question<Boolean> question =
+                    new sk.sivak.eldritchhorror.core.constants.question.Question<>();
+            question.setTitle(prompts[i]);
+            if (i == 3) question.setPortraitBeforeTitle(InvestigatorId.THE_PRIEST);
+            question.addOption(new sk.sivak.eldritchhorror.core.constants.question.Question.Option<>(
+                    i == 0 ? UiText.get("encounter.show") : "Continue", true));
+            sk.sivak.eldritchhorror.core.view.question.QuestionView view =
+                    new sk.sivak.eldritchhorror.core.view.question.QuestionView();
+            AtomicInteger answered = new AtomicInteger();
+            view.ask(question).subscribe(value -> answered.incrementAndGet());
+            tick(100);
+            LabelTable panel = (LabelTable) field(view, "labelTable");
+            Button button = ((List<Button>) field(view, "buttons")).get(0);
+            require(panel.getWidth() <= 640.1f && panel.getX() >= 0 && panel.getTop() < 540,
+                    "Notice exceeds safe screen bounds");
+            require(panel.getY() >= button.getTop() + 4.9f, "Notice overlaps its action");
+            for (Actor child : panel.getChildren()) {
+                require(child.getX() >= 0 && child.getRight() <= panel.getWidth() + .1f
+                        && child.getY() >= 0 && child.getTop() <= panel.getHeight() + .1f,
+                        "Notice clips its text or portrait");
+            }
+            if (i == 2) require(panel.getHeight() > 60, "Long question failed to wrap");
+            if (i == 3) require(panel.getHeight() >= 74, "Portrait height was not reserved");
+            if (i < 2) require(panel.getHeight() < 50, "Short prompt unnecessarily wrapped");
+            require(button.getHeight() < 60, "Short action unnecessarily wrapped");
+            draw("notice-" + i);
+            Vector2 point = button.localToStageCoordinates(new Vector2(button.getWidth() / 2, button.getHeight() / 2));
+            stage.stageToScreenCoordinates(point);
+            stage.touchDown((int) point.x, (int) point.y, 0, 0);
+            stage.touchUp((int) point.x, (int) point.y, 0, 0);
+            tick(100);
+            require(answered.get() == 1 && panel.getParent() == null && InfoStage.getBottomHeight() == 5,
+                    "Answer failed to dismiss the notice or restore layout");
+        }
+        // Render the exact hidden-encounter control from the reported screen as well.
+        sk.sivak.eldritchhorror.core.view.components.encounter.SelectEncounterTable encounters =
+                new sk.sivak.eldritchhorror.core.view.components.encounter.SelectEncounterTable();
+        java.lang.reflect.Method hideEncounters = encounters.getClass().getDeclaredMethod("beforeHide");
+        hideEncounters.setAccessible(true);
+        hideEncounters.invoke(encounters);
+        tick(100);
+        com.badlogic.gdx.scenes.scene2d.ui.TextButton show =
+                (com.badlogic.gdx.scenes.scene2d.ui.TextButton) field(encounters, "showButton");
+        require(show.getLabel().getPrefWidth() + 30 <= show.getWidth(), "Encounter action text exceeds its button");
+        draw("notice-encounter");
+        show.remove();
+        ((Actor) field(encounters, "showLabel")).remove();
+        InfoStage.setBottomHeight(60);
+        LabelTable token = LabelTable.createAndShowTable(0, "Reroll this die?",
+                CustomAssetManager.getTexture(CustomAssetManager.FOCUS_TOKEN));
+        tick(2);
+        draw("notice-token");
+        token.remove();
+        Field suppression = InfoStage.class.getDeclaredField("supressTextOnLabel");
+        suppression.setAccessible(true);
+        boolean wasSuppressed = suppression.getBoolean(null);
+        suppression.setBoolean(null, false);
+        InfoStage.displayTextDontHide("Choose a destination for your investigator.");
+        tick(100);
+        draw("notice-status");
+        InfoStage.hideLabel("Choose a destination for your investigator.");
+        tick(100);
+        suppression.setBoolean(null, wasSuppressed);
+        InfoStage.setBottomHeight(5);
+        map.remove();
     }
 
     private void checkMystery() throws Exception {

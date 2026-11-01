@@ -156,7 +156,7 @@ public class HideOkButtons {
             displayed = false;
             actorToHide.setTouchable(Touchable.disabled);
             labelTable = displayLabelText == null ? null : LabelTable.createAndShowHint(displayLabelText);
-            button.setText(showButtonText == null ? get("dialog.yes") : showButtonText);
+            button.setText(showButtonText == null ? get("dialog.show") : showButtonText);
             button.setTouchable(Touchable.disabled);
             okButton.setTouchable(Touchable.disabled);
             if (instant) {

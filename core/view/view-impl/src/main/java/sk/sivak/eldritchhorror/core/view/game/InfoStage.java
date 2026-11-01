@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.Align;
 import rx.functions.Action0;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
@@ -21,6 +22,7 @@ import sk.sivak.eldritchhorror.core.view.components.skill.ImproveSkillComponent;
 import sk.sivak.eldritchhorror.core.view.components.table.LabelTable;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.SourceTargetGroup;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.PromptStyle;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.*;
@@ -266,22 +268,20 @@ public class InfoStage {
 
 
     private static void showBackground(boolean fadeAway) {
+        if (supressTextOnLabel) return;
         Image grayBackground = get().grayBackground;
         grayBackground.setVisible(true);
         grayBackground.clearActions();
         grayBackground.getColor().a = 0;
         float labelWidth = get().label.getWidth();
         float labelHeight = get().label.getHeight();
-        float imageScale = 1.05f;
-        grayBackground.setWidth(labelWidth * imageScale);
-
-        grayBackground.setHeight(labelHeight * imageScale);
-        grayBackground.setX(get().label.getX() - (labelWidth * imageScale - labelWidth) / 2);
-        grayBackground.setY(get().label.getY() - (labelHeight * imageScale - labelHeight) / 2);
+        grayBackground.setSize(labelWidth + 2 * PromptStyle.PAD_X, labelHeight + 2 * PromptStyle.PAD_Y);
+        grayBackground.setPosition(get().label.getX() - PromptStyle.PAD_X,
+                get().label.getY() - PromptStyle.PAD_Y);
 
         AlphaAction alphaActionIn = new AlphaAction();
         alphaActionIn.setActor(grayBackground);
-        alphaActionIn.setAlpha(0.75f);
+        alphaActionIn.setAlpha(1f);
         alphaActionIn.setDuration(NORMAL_ACTION_DURATION);
 
         AlphaAction alphaActionOut = new AlphaAction();
@@ -321,8 +321,12 @@ public class InfoStage {
         label.clearActions();
         label.getColor().a = 0f;
         label.setText(text);
-        label.pack();
-        label.setPosition(VIEWPORT_WIDTH / 2 - label.getWidth() / 2, VIEWPORT_HEIGHT - label.getHeight() - 3);
+        label.setWrap(false);
+        float width = Math.min(label.getPrefWidth() + 8f, PromptStyle.MAX_WIDTH - 2 * PromptStyle.PAD_X);
+        label.setWrap(true);
+        label.setWidth(width);
+        label.setHeight(label.getPrefHeight());
+        label.setPosition(VIEWPORT_WIDTH / 2 - width / 2, VIEWPORT_HEIGHT - label.getHeight() - PromptStyle.PAD_Y - 8);
 
         AlphaAction alphaActionIn = new AlphaAction();
         alphaActionIn.setActor(label);
@@ -472,8 +476,8 @@ public class InfoStage {
     }
 
     private Image createGrayBackground() {
-        Image created = new Image(CustomAssetManager.getTexture(CustomAssetManager.PURE_WHITE_BACKGROUND));
-        created.setColor(Color.BLACK);
+        Image created = new Image(PromptStyle.panel());
+        created.setTouchable(Touchable.disabled);
         created.setX(VIEWPORT_WIDTH / 2f - created.getWidth() / 2);
         created.setY(VIEWPORT_HEIGHT / 2f - created.getHeight() / 2);
         return created;
@@ -481,9 +485,12 @@ public class InfoStage {
 
     private Label createLabel() {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 44);
+        labelStyle.font = CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SOURCE_SERIF_4, 40);
+        labelStyle.fontColor = new Color(0x302A20ff);
         Label createdLabel = new Label("", labelStyle);
-        createdLabel.setFontScale(0.65f);
+        createdLabel.setFontScale(0.5f);
+        createdLabel.setAlignment(Align.center);
+        createdLabel.setTouchable(Touchable.disabled);
         return createdLabel;
     }
 

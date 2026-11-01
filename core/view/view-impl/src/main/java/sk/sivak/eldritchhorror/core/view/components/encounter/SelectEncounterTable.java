@@ -232,7 +232,9 @@ public class SelectEncounterTable extends Table {
     }
 
     private void beforeHide() {
-        showButton = ButtonBuilder.buildButton(get("dialog.yes"));
+        showButton = ButtonBuilder.buildButton(get("encounter.show"));
+        showButton.setWidth(Math.max(showButton.getWidth(), showButton.getLabel().getPrefWidth() + 40f));
+        showButton.setOrigin(showButton.getWidth() / 2, showButton.getHeight() / 2);
         ButtonUtils.addClickListener(showButton, () -> {
             if (getParent() != null) {
                 return;

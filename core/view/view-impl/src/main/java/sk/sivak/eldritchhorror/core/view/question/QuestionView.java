@@ -175,7 +175,7 @@ public class QuestionView {
             // Tint prose with markup so embedded token artwork keeps its own colors.
             textButton.getStyle().fontColor = Color.WHITE;
             textButton.getLabel().setColor(Color.WHITE);
-            buttonWidth = Math.max(buttonWidth, textButton.getLabel().getPrefWidth() + 36f);
+            buttonWidth = Math.max(buttonWidth, textButton.getLabel().getPrefWidth() + 44f);
             buttonHeight = Math.max(buttonHeight, textButton.getHeight());
             addClickListener(textButton, createOnClickAction(subscriber, option));
             if (nothingToSelect && options.size() == 1) {
