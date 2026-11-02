@@ -168,6 +168,7 @@ public class QuestionView {
         float availableWidth = VIEWPORT_WIDTH - 180f;
         float gap = 10f;
 
+        boolean[] answered = {false};
         for (Question.Option<RD> option : options) {
             String text = "[#" + new Color(option.getColorCode()) + "]"
                     + MarkupText.replaceColoredGlyphKeywords(option.getName()) + "[]";
@@ -177,9 +178,12 @@ public class QuestionView {
             textButton.getLabel().setColor(Color.WHITE);
             buttonWidth = Math.max(buttonWidth, textButton.getLabel().getPrefWidth() + 44f);
             buttonHeight = Math.max(buttonHeight, textButton.getHeight());
-            addClickListener(textButton, createOnClickAction(subscriber, option));
-            if (nothingToSelect && options.size() == 1) {
-                FastForwardAction.autoConfirmWhileHeld(textButton, createOnClickAction(subscriber, option));
+            Runnable choose = createOnClickAction(subscriber, option, answered);
+            addClickListener(textButton, choose);
+            if (nothingToSelect && option.isAutoAcceptFreeReroll()) {
+                FastForwardAction.autoAcceptFreeRerollWhileHeld(textButton, choose);
+            } else if (nothingToSelect && options.size() == 1) {
+                FastForwardAction.autoConfirmWhileHeld(textButton, choose);
             }
             buttons.add(textButton);
         }
@@ -209,8 +213,10 @@ public class QuestionView {
     }
 
 
-    private <RD, AD> Runnable createOnClickAction(SingleSubscriber<? super Answer<RD, AD>> subscriber, Question.Option<RD> option) {
+    private <RD, AD> Runnable createOnClickAction(SingleSubscriber<? super Answer<RD, AD>> subscriber, Question.Option<RD> option, boolean[] answered) {
         return () -> {
+            if (answered[0]) return;
+            answered[0] = true;
             for (Button button : buttons) {
                 InfoStage.hideActor(button);
             }

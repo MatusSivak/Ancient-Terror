@@ -9,6 +9,7 @@ import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
 import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.test.FreeRerollPolicy;
 import sk.sivak.eldritchhorror.core.eventlistener.card.EnableCardListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
@@ -190,6 +191,7 @@ public class TheSilverKeyListener extends AbstractArtifactListener<TheSilverKeyA
                 ShowCardRequest showCardRequest = new ShowCardRequest();
                 showCardRequest.setArtifactInfo(getArtifactInfo());
                 showCardRequest.setTitle("Reroll 1 die?");
+                showCardRequest.setAutoAcceptFreeReroll(FreeRerollPolicy.canAutoAccept(input, 1));
                 showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
 
                 ServicePlatform.get().getGameService().showCard(showCardRequest)

@@ -6,6 +6,7 @@ import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardRequest;
 import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.test.FreeRerollPolicy;
 import sk.sivak.eldritchhorror.core.eventlistener.back.spell.AbstractSpellBackListener;
 import sk.sivak.eldritchhorror.core.eventlistener.back.spell.util.DiscardThisSpellUnless;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
@@ -55,6 +56,7 @@ public class WitherSpellBackListener2 extends AbstractSpellBackListener {
                 ShowCardRequest showCardRequest = new ShowCardRequest();
                 showCardRequest.setSpellInfo(getSpellInfo());
                 showCardRequest.setTitle("Reroll 1 die?");
+                showCardRequest.setAutoAcceptFreeReroll(FreeRerollPolicy.canAutoAccept(input, 1));
                 showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
 
                 ServicePlatform.get().getGameService().showCard(showCardRequest)

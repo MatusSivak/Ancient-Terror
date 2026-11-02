@@ -198,6 +198,17 @@ public class TestData {
         return Math.max(minimumRolledDice, baseStatValue + bonusStatValue + modifier + assetStatBonus + assetDicePoolBonus + additionalDicesCount);
     }
 
+    /** Matches the numeric ordering used by RerollDiceAction, without changing the original dice. */
+    public boolean areLowestDiceFailures(int count) {
+        if (diceRolls == null || count <= 0 || count > diceRolls.size()) return false;
+        List<DiceRoll> ordered = new ArrayList<>(diceRolls);
+        java.util.Collections.sort(ordered, (a, b) -> Integer.compare(a.getDiceValue(), b.getDiceValue()));
+        for (int i = 0; i < count; i++) {
+            if (ordered.get(i).getScore() != DiceRoll.Score.BAD) return false;
+        }
+        return true;
+    }
+
     public int getSuccessRolls() {
         return count(diceRolls, diceRoll -> diceRoll.getScore() != DiceRoll.Score.BAD);
     }

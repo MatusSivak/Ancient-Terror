@@ -140,6 +140,7 @@ public class Question<RD> {
         private String name;
         private RD value;
         private int colorCode;
+        private boolean autoAcceptFreeReroll;
 
         public Option(String name, RD value) {
             this(name, value, 0x3f3f3fff);
@@ -149,6 +150,16 @@ public class Question<RD> {
             this.name = name;
             this.value = value;
             this.colorCode = colorCode;
+        }
+
+        /** Only the affirmative option of a cost-free reroll may opt in. */
+        public Option<RD> autoAcceptFreeReroll(boolean enabled) {
+            autoAcceptFreeReroll = enabled;
+            return this;
+        }
+
+        public boolean isAutoAcceptFreeReroll() {
+            return autoAcceptFreeReroll && Boolean.TRUE.equals(value);
         }
 
         public int getColorCode() {

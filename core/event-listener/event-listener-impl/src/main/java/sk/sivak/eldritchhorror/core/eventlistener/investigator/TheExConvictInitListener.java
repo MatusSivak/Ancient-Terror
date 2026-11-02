@@ -10,6 +10,7 @@ import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellId;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.test.FreeRerollPolicy;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.GainAssetFromDeckData;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.CountRerollDiceData;
@@ -74,7 +75,7 @@ public class TheExConvictInitListener extends AbstractInvestigatorInitListener {
                 return;
             }
 
-            askQuestion().subscribe(answer -> {
+            askQuestion(FreeRerollPolicy.canAutoAccept(eventData, rolledOnes)).subscribe(answer -> {
                 if (Boolean.TRUE.equals(answer.getResponseData())) {
                     ServicePlatform.get().getTestService().hold();
                     ServicePlatform.get().getTestService().findCountRerollDice(rolledOnes, CountRerollDiceData.CountRerollDiceType.OTHER, eventData);
@@ -87,13 +88,13 @@ public class TheExConvictInitListener extends AbstractInvestigatorInitListener {
 
         }
 
-        private Single<Answer<Boolean, Object>> askQuestion() {
+        private Single<Answer<Boolean, Object>> askQuestion(boolean safeReroll) {
             Question<Boolean> question = new Question<>();
             question.setTitle("Reroll dice with value 1?");
             question.setPortraitBeforeTitle(InvestigatorId.THE_EX_CONVICT);
             question.setOptions(Arrays.asList(
                     new Question.Option<>("No", false, 0x800000ff),
-                    new Question.Option<>("Yes", true, 0x008000ff)
+                    new Question.Option<>("Yes", true, 0x008000ff).autoAcceptFreeReroll(safeReroll)
             ));
             return ServicePlatform.get().getGameService().ask(question);
         }

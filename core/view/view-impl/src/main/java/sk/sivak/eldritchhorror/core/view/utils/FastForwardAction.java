@@ -70,15 +70,26 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
     }
 
     /**
-     * Confirms a plain OK (nothing to choose) for the player if fast-forward is already held when the button becomes
+     * Confirms a plain OK (nothing to choose) if fast-forward is already held when the button becomes
      * clickable. Pressing fast-forward later, while the button waits, does not count as pressing it.
      */
     public static void autoConfirmWhileHeld(Button button, Runnable confirm) {
+        autoConfirmWhileHeld(button, confirm, FastForwardAction::isHeld, false);
+    }
+
+    /** A free reroll can also be accepted by starting to hold fast-forward while its prompt waits. */
+    public static void autoAcceptFreeRerollWhileHeld(Button button, Runnable confirm) {
+        autoConfirmWhileHeld(button, confirm, FastForwardAction::isHeld, true);
+    }
+
+    static void autoConfirmWhileHeld(Button button, Runnable confirm,
+                                     java.util.function.BooleanSupplier held, boolean waitForHold) {
         button.addAction(new Action() {
             @Override
             public boolean act(float delta) {
                 if (button.getStage() == null || !button.isTouchable() || button.isDisabled()) return false;
-                if (isHeld()) confirm.run();
+                if (!held.getAsBoolean()) return !waitForHold;
+                confirm.run();
                 return true;
             }
         });

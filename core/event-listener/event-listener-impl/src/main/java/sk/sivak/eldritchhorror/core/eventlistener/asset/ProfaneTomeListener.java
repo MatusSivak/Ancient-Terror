@@ -9,6 +9,7 @@ import sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.test.TestFlavorType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
+import sk.sivak.eldritchhorror.core.eventlistener.test.FreeRerollPolicy;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.DirectEvent;
@@ -63,6 +64,7 @@ public class ProfaneTomeListener extends AbstractAssetListener<ProfaneTomeAsset>
                 ShowCardRequest showCardRequest = new ShowCardRequest();
                 showCardRequest.setAssetInfo(getAssetInfo());
                 showCardRequest.setTitle("Reroll 1 die?");
+                showCardRequest.setAutoAcceptFreeReroll(FreeRerollPolicy.canAutoAccept(input, 1));
                 showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
 
                 ServicePlatform.get().getGameService().showCard(showCardRequest)

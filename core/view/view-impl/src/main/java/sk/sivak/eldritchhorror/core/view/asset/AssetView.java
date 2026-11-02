@@ -101,7 +101,7 @@ public class AssetView {
             }
             originalBottomHeight = InfoStage.getBottomHeight();
             displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
-                    showCardRequest.getAssetOriginType(), subscriber);
+                    showCardRequest.getAssetOriginType(), subscriber, showCardRequest.isAutoAcceptFreeReroll());
             displayTable(showCardRequest.getTitle(), showCardRequest.getPortraitTextureName());
             if (showCardRequest.isHiddenTemplate()) {
                 displayHiddentTemplate(showCardRequest.getAssetOriginType());
@@ -129,13 +129,15 @@ public class AssetView {
     }
 
     private void displayButtons(DisplayAssetResponseType displayAssetResponseType, HideType hideType, AssetOriginType assetOriginType,
-                                SingleSubscriber<? super ShowCardResponse> subscriber) {
+                                SingleSubscriber<? super ShowCardResponse> subscriber, boolean autoAcceptFreeReroll) {
         float bottomHeight = InfoStage.getBottomHeight();
         switch (displayAssetResponseType) {
             case YES_NO:
+                boolean[] answered = {false};
+                Runnable yes = answerOnce(answered, () -> buttonClickAction(subscriber, YES, hideType, assetOriginType));
                 buttons = ButtonUtils.buildNoYesButtons(FADING_EFFECT_DURATION * 2,
-                        () -> buttonClickAction(subscriber, NO, hideType, assetOriginType),
-                        () -> buttonClickAction(subscriber, YES, hideType, assetOriginType));
+                        answerOnce(answered, () -> buttonClickAction(subscriber, NO, hideType, assetOriginType)), yes);
+                if (autoAcceptFreeReroll) FastForwardAction.autoAcceptFreeRerollWhileHeld(buttons[1], yes);
                 break;
             case OK:
                 TextButton okButton = ButtonBuilder.buildButton(get("dialog.ok"));
@@ -171,6 +173,14 @@ public class AssetView {
                 }))));
                 break;
         }
+    }
+
+    static Runnable answerOnce(boolean[] answered, Runnable action) {
+        return () -> {
+            if (answered[0]) return;
+            answered[0] = true;
+            action.run();
+        };
     }
 
     /** Plain OK confirmations may be pressed by the player or by holding fast-forward, but only once. */

@@ -17,6 +17,17 @@ public class ShowCardRequest {
     private AssetOriginType assetOriginType = AssetOriginType.INVENTORY;
     private String portraitTextureName;
     private boolean hiddenTemplate;
+    private boolean autoAcceptFreeReroll;
+
+    /** Opt in only at a reroll prompt whose YES handler has no cost or exhaustion. */
+    public void setAutoAcceptFreeReroll(boolean autoAcceptFreeReroll) {
+        this.autoAcceptFreeReroll = autoAcceptFreeReroll;
+    }
+
+    public boolean isAutoAcceptFreeReroll() {
+        return autoAcceptFreeReroll && displayAssetResponseType == DisplayAssetResponseType.YES_NO
+                && hideType == HideType.RETURN;
+    }
 
     public ShowCardRequest() {
     }
