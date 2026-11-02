@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import java8.features.function.Consumer;
 import java8.features.stream.Stream;
@@ -37,6 +38,8 @@ import static sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationH
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
 
 public class BackgroundUtils {
+    private static final Object FADING_OUT = new Object();
+
     private Stage backgroundStage;
     private final GameController gameController;
     private String currentBackgroundName;
@@ -217,13 +220,22 @@ public class BackgroundUtils {
 
 
     public Image toBackground(String backgroundName) {
-        Actor background = backgroundStage.getActors().get(0);
         currentBackgroundName = backgroundName;
         float duration = 1f;
-        background.addAction(Actions.sequence(
-                Actions.alpha(0f, duration),
-                Actions.removeActor()
-        ));
+        // Fade out every previous background, not just the oldest one. Background changes often
+        // overlap the 1s fade; otherwise the older full-screen images were never removed and piled up.
+        Array<Actor> backgrounds = backgroundStage.getActors();
+        for (int i = 0; i < backgrounds.size; i++) {
+            Actor background = backgrounds.get(i);
+            if (background.getUserObject() == FADING_OUT) {
+                continue;
+            }
+            background.setUserObject(FADING_OUT);
+            background.addAction(Actions.sequence(
+                    Actions.alpha(0f, duration),
+                    Actions.removeActor()
+            ));
+        }
         MoveCameraToLocationHelper.setEnabled(backgroundName.equals(SPACE));
         Image newBackground = new Image(getTextureRegionDrawable(backgroundName));
         newBackground.setScaling(Scaling.fit);

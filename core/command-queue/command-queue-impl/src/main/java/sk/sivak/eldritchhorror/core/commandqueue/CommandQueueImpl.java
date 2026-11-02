@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class CommandQueueImpl implements CommandQueue {
 
+    private static final int MAX_LAST_COMMANDS = 100;
+
     private List<String> lastCommandsInQueue;
     private static CommandQueueImpl instance;
     private static final Logger logger = LogManager.getLogger(CommandQueueImpl.class);
@@ -137,6 +139,9 @@ public class CommandQueueImpl implements CommandQueue {
             logger.info("Executing '" + command.getName() + "' with input '" + input + "'");
         }
         lastCommandsInQueue.add(0, command.getName());
+        if (lastCommandsInQueue.size() > MAX_LAST_COMMANDS) {
+            lastCommandsInQueue.remove(lastCommandsInQueue.size() - 1);
+        }
     }
 
     private <In, Out> void logOutput(Command<In, Out> command, Out out) {

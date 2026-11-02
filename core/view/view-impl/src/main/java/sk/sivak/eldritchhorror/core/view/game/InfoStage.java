@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import rx.functions.Action0;
 import rx.subjects.PublishSubject;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
@@ -365,19 +366,37 @@ public class InfoStage {
         alphaActionIn.setAlpha(1);
         alphaActionIn.setDuration(NORMAL_ACTION_DURATION);
 
-        if (hide) {
-            button.addListener(new ClickListener() {
-
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    if (button.isDisabled()) {
-                        return;
-                    }
-                    hideActor(button);
-                }
-            });
+        if (hide && !hasHideOnClickListener(button)) {
+            button.addListener(new HideOnClickListener(button));
         }
         button.addAction(alphaActionIn);
+    }
+
+    // Buttons are often reused and shown repeatedly; attach the hide listener only once per button.
+    private static boolean hasHideOnClickListener(Button button) {
+        Array<EventListener> listeners = button.getListeners();
+        for (int i = 0; i < listeners.size; i++) {
+            if (listeners.get(i) instanceof HideOnClickListener) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static final class HideOnClickListener extends ClickListener {
+        private final Button button;
+
+        HideOnClickListener(Button button) {
+            this.button = button;
+        }
+
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+            if (button.isDisabled()) {
+                return;
+            }
+            hideActor(button);
+        }
     }
 
     public static void hideActor(Actor actor) {
