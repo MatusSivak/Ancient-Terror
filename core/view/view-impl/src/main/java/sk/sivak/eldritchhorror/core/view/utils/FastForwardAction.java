@@ -69,6 +69,27 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
         return fastForwardButton != null && fastForwardButton.isHeld();
     }
 
+    /** Keep fast-forward available while a highlighted sheet waits for acknowledgement. */
+    public static void autoConfirmHighlightWhileHeld(Actor actor, Runnable confirm,
+                                                    java.util.function.BooleanSupplier confirmed) {
+        actor.addAction(new FastForwardAction<>(highlightConfirmation(actor, confirm, confirmed,
+                FastForwardAction::isHeld)));
+    }
+
+    static Action highlightConfirmation(Actor actor, Runnable confirm,
+                                        java.util.function.BooleanSupplier confirmed,
+                                        java.util.function.BooleanSupplier held) {
+        return new Action() {
+            @Override public boolean act(float delta) {
+                if (confirmed.getAsBoolean()) return true;
+                if (actor.getStage() == null || !actor.isTouchable() || !actor.isVisible()) return false;
+                if (!held.getAsBoolean()) return false;
+                confirm.run();
+                return true;
+            }
+        };
+    }
+
     /**
      * Confirms a plain OK (nothing to choose) if fast-forward is already held when the button becomes
      * clickable. Pressing fast-forward later, while the button waits, does not count as pressing it.

@@ -16,6 +16,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import rx.Completable;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
+import sk.sivak.eldritchhorror.core.constants.MysteryCardId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect;
@@ -323,7 +324,9 @@ public class MysteryCard extends VisTable {
         displayHide.setDisplayedY(getPromptAwareY());
 
         displayHide.setBeforeDisplayAction(() -> {
-            if (mysteryCardInfo.getPinLocations() != null && !mysteryCardInfo.getPinLocations().isEmpty() && moveCamera) {
+            boolean showLocation = moveCamera
+                    || mysteryCardInfo.getMysteryCardId() == MysteryCardId.Yig.CROWN_OF_THE_SERPENT;
+            if (showLocation && mysteryCardInfo.getPinLocations() != null && !mysteryCardInfo.getPinLocations().isEmpty()) {
                 int pinLocationIndex = MathUtils.random(0, mysteryCardInfo.getPinLocations().size() - 1);
                 MapUtils.moveCameraToLocation(mysteryCardInfo.getPinLocations().get(pinLocationIndex)).subscribe();
             }
@@ -353,9 +356,8 @@ public class MysteryCard extends VisTable {
         float centeredY = (VIEWPORT_HEIGHT - getHeight()) / 2f;
         if (confirmingResolution) return centeredY;
         float promptTop = InfoStage.getCardPromptTop();
-        float scaledHeight = getHeight() * getDisplayScale();
-        return promptTop > 0f ? Math.max(centeredY,
-                promptTop + 10f + scaledHeight / 2f - getHeight() / 2f) : centeredY;
+        // Center in the area above the question, leaving the same top margin as the fit calculation.
+        return promptTop > 0f ? (promptTop + 10f + VIEWPORT_HEIGHT - 24f - getHeight()) / 2f : centeredY;
     }
 
     private float getDisplayScale() {

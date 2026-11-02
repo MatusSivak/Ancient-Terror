@@ -21,6 +21,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.card.EnableCardListener;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.DirectEvent;
+import sk.sivak.eldritchhorror.core.eventtype.SelectMonsterData;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
 
 import java.util.Arrays;
@@ -172,9 +173,15 @@ public class MonsterHunterListener extends AbstractAssetListener<MonsterHunterAs
                 ServicePlatform.get().getService().disableCard(getAssetInfo());
                 LocationId currentLocationId = getActiveInvestigator().getCurrentLocationId();
                 List<MonsterInfo> monstersAtLocation = ServicePlatform.get().getMonsterCup().getMonstersAtLocation(currentLocationId);
-                for (MonsterInfo monsterInfo : monstersAtLocation) {
-                    ServicePlatform.get().getMonsterService().dealDamageToMonster(monsterInfo,1);
-                }
+                SelectMonsterData selection = new SelectMonsterData();
+                selection.setAvailableMonsters(monstersAtLocation);
+                ServicePlatform.get().getMonsterService().selectSingleMonster(selection).subscribe(this::damageMonster);
+                ServicePlatform.get().getService().release();
+            }
+
+            private void damageMonster(MonsterInfo monsterInfo) {
+                ServicePlatform.get().getService().hold();
+                ServicePlatform.get().getMonsterService().dealDamageToMonster(monsterInfo, 1);
                 ServicePlatform.get().getService().convertToNull();
                 ServicePlatform.get().getService().release();
             }

@@ -374,8 +374,10 @@ public class RumorCard extends VisTable {
             highlightLabel((Label) firstActor);
         }
 
-        addClickListener(darkFront, () -> {
-
+        boolean[] confirmed = {false};
+        Runnable confirm = () -> {
+            if (confirmed[0]) return;
+            confirmed[0] = true;
             darkFront.addAction(new FastForwardAction<>(Actions.sequence(
                     Actions.run(() -> {
                         if (firstActor instanceof Label) {
@@ -389,7 +391,9 @@ public class RumorCard extends VisTable {
                         publishSubject.onCompleted();
                     })
             )));
-        });
+        };
+        addClickListener(darkFront, confirm);
+        FastForwardAction.autoConfirmHighlightWhileHeld(darkFront, confirm, () -> confirmed[0]);
 
         return publishSubject.toCompletable();
     }

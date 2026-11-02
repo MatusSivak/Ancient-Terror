@@ -90,4 +90,35 @@ public class FastForwardConfirmationTest {
     private void watch(boolean freeReroll) {
         FastForwardAction.autoConfirmWhileHeld(button, () -> confirmations++, () -> held, freeReroll);
     }
+
+    @Test public void highlightedSheetAcceptsLaterHoldExactlyOnce() {
+        button.addAction(FastForwardAction.highlightConfirmation(button, () -> confirmations++,
+                () -> confirmations > 0, () -> held));
+        held = true;
+        button.act(.1f);
+        assertEquals(0, confirmations);
+        stage.addActor(button);
+        button.setTouchable(Touchable.disabled);
+        button.act(.1f);
+        assertEquals(0, confirmations);
+        button.setTouchable(Touchable.enabled);
+        held = false;
+        button.act(.1f);
+        assertEquals(0, confirmations);
+        held = true;
+        button.act(.1f);
+        button.act(.1f);
+        assertEquals(1, confirmations);
+    }
+
+    @Test public void manualHighlightConfirmationCancelsWaitingFastForward() {
+        stage.addActor(button);
+        button.addAction(FastForwardAction.highlightConfirmation(button, () -> confirmations++,
+                () -> confirmations > 0, () -> held));
+        confirmations++;
+        held = true;
+        button.act(.1f);
+        assertEquals(1, confirmations);
+        assertEquals(0, button.getActions().size);
+    }
 }

@@ -42,6 +42,7 @@ public class MysteryPreview extends ApplicationAdapter {
             GameController controller=(GameController)Proxy.newProxyInstance(GameController.class.getClassLoader(),
                     new Class[]{GameController.class},(p,m,a)->null);
             new HudButtons(controller).init();
+            checkHighlightConfirmations();
             Properties bundle=new Properties();
             try(InputStreamReader reader=new InputStreamReader(getClass().getResourceAsStream("/i18n/ui.properties"), StandardCharsets.UTF_8)) {
                 bundle.load(reader);
@@ -61,6 +62,71 @@ public class MysteryPreview extends ApplicationAdapter {
             System.out.println("PASS: all 34 mysteries in EN/SK; real open/close, centered over hidden controls, readable lore, no hard breaks, question clearance, fit and recentering");
         } catch(Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+
+    private void checkHighlightConfirmations() throws Exception {
+        stage.addActor(InfoStage.getFastForwardButton());
+        Input previousInput=Gdx.input;
+        boolean[] held={false};
+        Gdx.input=(Input)Proxy.newProxyInstance(Input.class.getClassLoader(),new Class[]{Input.class},(p,m,a)-> {
+            if(m.getName().equals("isKeyPressed") && ((Integer)a[0])==Input.Keys.F) return held[0];
+            return m.invoke(previousInput,a);
+        });
+        try {
+            GameController controller=(GameController)Proxy.newProxyInstance(GameController.class.getClassLoader(),
+                    new Class[]{GameController.class},(p,m,a)-> {
+                        if(m.getName().equals("displayMonsterCard")) view.displayMonsterCard(
+                                (sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo)a[0],
+                                (rx.functions.Action0)a[1],(rx.functions.Action0)a[2]);
+                        return null;
+                    });
+            sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster monster=
+                    new sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster();
+            monster.setSpecialText("Special ability."); monster.setReckoningText("Reckoning ability.");
+            monster.setSpawnText("Spawn ability.");
+            for(boolean heldOnArrival:new boolean[]{false,true}) {
+                for(String method:new String[]{"highlightSpawnText","highlightReckoningText","highlightSpecialText"}) {
+                    held[0]=heldOnArrival;
+                    AtomicInteger done=new AtomicInteger();
+                    ((rx.Completable)sk.sivak.eldritchhorror.core.view.components.sheet.monster.MonsterCardEffect.class
+                            .getMethod(method,sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo.class,
+                                    GameController.class,java8.features.function.Supplier.class)
+                            .invoke(null,monster,controller,(java8.features.function.Supplier<rx.Completable>)rx.Completable::complete))
+                            .subscribe(done::incrementAndGet);
+                    tick(120);
+                    if(!heldOnArrival) {
+                        require(done.get()==0,"Monster confirmed without a hold");
+                        require(InfoStage.getFastForwardButton().getColor().a==1f,"Fast-forward vanished during monster highlight");
+                        held[0]=true; tick(120);
+                    }
+                    require(done.get()==1 && BigActorsManager.getMonsterCard().getStage()==null,
+                            "Monster highlight did not dismiss exactly once: "+method+" arrival="+heldOnArrival
+                                    +" completed="+done.get()+" stage="+BigActorsManager.getMonsterCard().getStage()
+                                    +" actions="+BigActorsManager.getMonsterCard().getActions());
+                    held[0]=false; FastForwardAction.turnOff();
+                }
+                for(String method:new String[]{"highlightRumorObjective","highlightRumorFailure","highlightRumorReckoning"}) {
+                    sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard info=
+                            new sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard();
+                    info.setCluesRequired(2);
+                    sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard card=
+                            new sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard();
+                    card.init(info); stage.addActor(card); tick(1);
+                    held[0]=heldOnArrival;
+                    AtomicInteger done=new AtomicInteger();
+                    ((rx.Completable)card.getClass().getMethod(method).invoke(card)).subscribe(done::incrementAndGet);
+                    tick(120);
+                    if(!heldOnArrival) {
+                        require(done.get()==0,"Rumor confirmed without a hold");
+                        require(InfoStage.getFastForwardButton().getColor().a==1f,"Fast-forward vanished during rumor highlight");
+                        held[0]=true; tick(120);
+                    }
+                    require(done.get()==1,"Rumor highlight did not dismiss exactly once: "+method);
+                    card.remove(); held[0]=false; FastForwardAction.turnOff();
+                }
+            }
+            System.out.println("PASS: monster spawn/special/reckoning and rumor objective/failure/reckoning confirmations on arrival and later hold");
+        } finally { Gdx.input=previousInput; FastForwardAction.turnOff(); }
     }
 
     private void checkActionsButton() {
@@ -143,6 +209,8 @@ public class MysteryPreview extends ApplicationAdapter {
         float bottom=card.localToStageCoordinates(new Vector2(0,0)).y;
         float top=card.localToStageCoordinates(new Vector2(0,card.getHeight())).y;
         require(bottom>=question.getTop()+9.9f && top<=528.1f,"Question overlaps/clips mystery: "+key+" "+bottom+".."+top);
+        require(Math.abs((bottom+top)/2f-(question.getTop()+10f+516f)/2f)<.01f,
+                "Mystery is not centered above its question: "+key);
         if(key.contains("CROWN_OF_THE_SERPENT") || key.contains("voice")) draw(language+"-question-"+key);
         question.remove(); answer.remove(); tick(1); centered(card,key);
         // Dismiss by clicking the card, rather than directly removing the actor.

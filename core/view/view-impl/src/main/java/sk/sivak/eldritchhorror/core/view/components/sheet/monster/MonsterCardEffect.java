@@ -189,9 +189,13 @@ public class MonsterCardEffect {
             if (BigActorsManager.isMonsterCardDisplayed()) {
                 onDisplayHideAction.call();
                 ButtonUtils.addClickListener(BigActorsManager.getMonsterCard(), onClickAction::call);
+                FastForwardAction.autoConfirmHighlightWhileHeld(BigActorsManager.getMonsterCard(),
+                        onClickAction::call, () -> dismissing[0]);
                 return;
             }
             gameController.displayMonsterCard(monsterInfo, onClickAction, onDisplayHideAction);
+            FastForwardAction.autoConfirmHighlightWhileHeld(BigActorsManager.getMonsterCard(),
+                    onClickAction::call, () -> dismissing[0]);
         });
     }
 }
