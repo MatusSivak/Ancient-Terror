@@ -21,6 +21,7 @@ import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDis
  */
 public class MoveCameraToLocationHelper {
 
+    private static final float COMPLETION_LEAD_TIME = 0.5f;
 
     private static boolean enabled = true;
 
@@ -75,7 +76,6 @@ public class MoveCameraToLocationHelper {
         CameraActor cameraActor = new CameraActor(camera);
         cameraActor.setPosition(camera.position.x, camera.position.y);
         MapStage.getStage().addActor(cameraActor);
-        cameraActor.afterMovement(subscriber::onCompleted);
 
         if (duration != null) {
             zoomDuration = duration;
@@ -95,6 +95,7 @@ public class MoveCameraToLocationHelper {
             cameraActor.addAction(new FastForwardAction(
                     Actions.parallel(Actions.sequence(zoomOutAction, zoomInAction), moveToAction)));
         }
+        cameraActor.beforeArrival(moveToAction, COMPLETION_LEAD_TIME, subscriber::onCompleted);
     }
 
     private static MoveToAction createMoveToAction(Vector2 locationPosition, float distance) {

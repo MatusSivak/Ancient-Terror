@@ -3,11 +3,75 @@ package sk.sivak.eldritchhorror.core.view.map;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
 
 public class CameraActorTest {
+    @Test public void completesEarlyButQueuesNextMoveUntilArrival() {
+        OrthographicCamera camera = new OrthographicCamera();
+        Group root = new Group();
+        CameraActor actor = new CameraActor(camera);
+        root.addActor(actor);
+        MoveToAction movement = Actions.moveTo(100, 80, 2);
+        actor.addAction(movement);
+        int[] calls = {0, 0};
+        actor.beforeArrival(movement, .5f, () -> {
+            calls[0]++;
+            assertSame(root, actor.getParent());
+            assertEquals(75, camera.position.x, .001f);
+            actor.afterMovement(() -> {
+                calls[1]++;
+                assertNull(actor.getParent());
+                assertEquals(100, camera.position.x, .001f);
+            });
+        });
+
+        actor.act(1.25f);
+        assertEquals(0, calls[0]);
+        actor.act(.25f);
+        assertEquals(1, calls[0]);
+        assertEquals(0, calls[1]);
+        actor.act(.5f);
+        actor.act(1);
+        assertEquals(1, calls[0]);
+        assertEquals(1, calls[1]);
+    }
+
+    @Test public void shortMovesCompleteImmediatelyAndStillReachDestination() {
+        OrthographicCamera camera = new OrthographicCamera();
+        CameraActor actor = new CameraActor(camera);
+        MoveToAction movement = Actions.moveTo(100, 80, .25f);
+        actor.addAction(movement);
+        int[] calls = {0};
+        actor.beforeArrival(movement, .5f, () -> calls[0]++);
+
+        actor.act(0);
+        assertEquals(1, calls[0]);
+        assertTrue(actor.hasActions());
+        actor.act(.25f);
+        assertEquals(100, camera.position.x, .001f);
+        assertEquals(1, calls[0]);
+    }
+
+    @Test public void frameSkippingPastArrivalCompletesOnceBeforeQueuedMoves() {
+        OrthographicCamera camera = new OrthographicCamera();
+        CameraActor actor = new CameraActor(camera);
+        MoveToAction movement = Actions.moveTo(100, 80, 2);
+        actor.addAction(movement);
+        int[] calls = {0};
+        actor.beforeArrival(movement, .5f, () -> {
+            calls[0]++;
+            assertEquals(100, camera.position.x, .001f);
+        });
+        actor.afterMovement(() -> assertEquals(1, calls[0]));
+
+        actor.act(5);
+        actor.act(5);
+        assertEquals(1, calls[0]);
+    }
+
     @Test public void commitsAndDetachesBeforeCallbacksAndNeverWritesAgain() {
         OrthographicCamera camera = new OrthographicCamera();
         Group root = new Group();

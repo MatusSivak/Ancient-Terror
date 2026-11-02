@@ -307,7 +307,7 @@ public class DiceImage extends Image {
                 onRollEndAction.call(DiceImage.this);
             }
         };
-        motion.setDuration(MathUtils.random(1.1f, 1.45f));
+        motion.setDuration(MathUtils.random(1.1f, 1.45f) / DiceThrowMotion.ROLL_SPEED);
         throwAction = new FastForwardAction<>(motion);
         setPosition(startX, startY);
         setScale(1.2f);

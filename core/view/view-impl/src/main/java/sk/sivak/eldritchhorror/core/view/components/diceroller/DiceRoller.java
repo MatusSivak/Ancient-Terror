@@ -181,14 +181,14 @@ public class DiceRoller {
             return o1.getDiceValue() - o2.getDiceValue();
         });
         // One gathering sound for the whole group as the thrown dice start sliding into order.
-        diceLayer.addAction(new FastForwardAction<>(Actions.delay(0.25f,
+        diceLayer.addAction(new FastForwardAction<>(Actions.delay(0.25f / DiceThrowMotion.ROLL_SPEED,
                 Actions.run(() -> GameplaySounds.play(GameplaySounds.Cue.DICE_SORT)))));
         for (int i = 0; i < dices.size(); i++) {
             Vector2 returnArea = diceAreaCalculator.getReturnArea(i);
-            float returnDuration = 0.75f;
+            float returnDuration = 0.75f / DiceThrowMotion.ROLL_SPEED;
             dices.get(i).addAction(new FastForwardAction<>(
                     Actions.sequence(
-                            Actions.delay(0.25f),
+                            Actions.delay(0.25f / DiceThrowMotion.ROLL_SPEED),
                             Actions.parallel(
                                     Actions.rotateTo((int) (dices.get(i).getRotation() / 90) * 90, returnDuration, Interpolation.sine),
                                     Actions.moveTo(returnArea.x, returnArea.y, returnDuration, Interpolation.sine)),
@@ -283,7 +283,7 @@ public class DiceRoller {
         diceLayer.addActor(dice);
         dice.addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.moveTo(ViewProperties.VIEWPORT_WIDTH / 2 - dice.getWidth() / 2,
-                        -dice.getHeight() * dice.getScaleY(), 0.25f),
+                        -dice.getHeight() * dice.getScaleY(), 0.25f / DiceThrowMotion.ROLL_SPEED),
                 Actions.delay(delay), Actions.run(dice::roll))));
 
     }

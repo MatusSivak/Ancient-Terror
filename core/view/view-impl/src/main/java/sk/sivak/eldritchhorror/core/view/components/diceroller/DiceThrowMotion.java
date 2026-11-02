@@ -2,10 +2,12 @@ package sk.sivak.eldritchhorror.core.view.components.diceroller;
 
 /** Normalized throw curves: flight, two smaller rebounds, then a short slide. */
 final class DiceThrowMotion {
+    static final float ROLL_SPEED = 1.15f;
+
     private DiceThrowMotion() { }
 
     static float releaseDelay(int index, int count) {
-        return count <= 1 ? 0f : 0.18f * index / (count - 1f);
+        return count <= 1 ? 0f : 0.18f * index / (count - 1f) / ROLL_SPEED;
     }
 
     static float wobble(float progress) {
