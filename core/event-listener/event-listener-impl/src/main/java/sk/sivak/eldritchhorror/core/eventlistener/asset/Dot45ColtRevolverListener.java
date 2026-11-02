@@ -62,6 +62,7 @@ public class Dot45ColtRevolverListener extends AbstractAssetListener<Dot45ColtRe
                 }
                 UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 3);
                 usableAsset.setOnUseAction(getOnUseAction(input));
+                usableAsset.setUpByDefault(false);
             };
         }
 

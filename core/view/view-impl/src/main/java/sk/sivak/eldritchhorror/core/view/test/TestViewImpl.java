@@ -151,11 +151,13 @@ public class TestViewImpl implements TestView {
             // Cards and summary sit side by side, centred between the side menu and the right-hand buttons.
             // (In combat the monster roams above everything, so there is no panel to make room for.)
             testButton = buildButton(get("test.button"));
-            testButton.addListener(new ConfirmTestListener(onSub));
+            ConfirmTestListener confirmListener = new ConfirmTestListener(onSub);
+            testButton.addListener(confirmListener);
 
             float infoColumnWidth = Math.max(testInfoTable.getWidth(), testButton.getWidth());
             float sideColumnLeft = SAFE_RIGHT - infoColumnWidth - LAYOUT_GAP * 2;
-            VisTable cardsPanel = createDragAndDrop(usableAssets, testInfoTable, sideColumnLeft - LAYOUT_GAP - SAFE_LEFT);
+            VisTable cardsPanel = createDragAndDrop(usableAssets, testInfoTable, sideColumnLeft - LAYOUT_GAP - SAFE_LEFT,
+                    confirmListener::confirm);
             float totalWidth = cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth;
             float cardsX = SAFE_LEFT + (SAFE_RIGHT - SAFE_LEFT - totalWidth) / 2f;
             float sideColumnCenter = cardsX + cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth / 2f;
@@ -175,7 +177,8 @@ public class TestViewImpl implements TestView {
         return InfoStage.getInvestigatorHud().getPrefHeight() + 8f;
     }
 
-    private VisTable createDragAndDrop(List<UsableAsset> usableAssets, TestInfoTable testInfoTable, float maxWidth) {
+    private VisTable createDragAndDrop(List<UsableAsset> usableAssets, TestInfoTable testInfoTable, float maxWidth,
+                                      Runnable confirm) {
 
         // Largest card size that fits every card side by side and both rows (use / available) vertically.
         float maxInnerWidth = maxWidth - CARD_PANEL_PAD * 2;
@@ -193,6 +196,14 @@ public class TestViewImpl implements TestView {
         DragAndDropBinder dragAndDropBinder = new DragAndDropBinder(InfoStage.getStageSafe(), testInfoTable);
         dragAndDropBinder.init(cardTemplates);
         SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();
+        for (int i = 0; i < usableAssets.size(); i++) {
+            if (usableAssets.get(i).isUpByDefault()) {
+                sourceTargetGroup.getTargetActor().addActor(cardTemplates[i]);
+            }
+        }
+        testInfoTable.onTargetChange(sourceTargetGroup.getTargetActor().getCardTemplates());
+        testButton.addAction(new AutoConfirmTestAction(testButton, sourceTargetGroup.getSourceDockActor(),
+                sourceTargetGroup.getTargetActor(), usableAssets.size(), FastForwardAction::isHeld, confirm));
         ScrollPane scrollPane = new ScrollPane(sourceTargetGroup);
         scrollPane.setOverscroll(false, false);
 
@@ -441,6 +452,7 @@ public class TestViewImpl implements TestView {
     private class ConfirmTestListener extends ClickListener {
 
         private SingleSubscriber<? super List<UsableAsset>> singleSubscriber;
+        private boolean confirmed;
 
         public ConfirmTestListener(SingleSubscriber<? super List<UsableAsset>> singleSubscriber) {
             this.singleSubscriber = singleSubscriber;
@@ -448,6 +460,12 @@ public class TestViewImpl implements TestView {
 
         @Override
         public void clicked(InputEvent event, float x, float y) {
+            confirm();
+        }
+
+        private void confirm() {
+            if (confirmed || singleSubscriber.isUnsubscribed()) return;
+            confirmed = true;
             InfoStage.hideActor(testButton);
             InfoStage.hideActor(selectAssetsToUseActor);
             InfoStage.hideActor(testInfoTable);

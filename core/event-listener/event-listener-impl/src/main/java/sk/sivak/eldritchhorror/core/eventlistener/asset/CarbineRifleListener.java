@@ -62,6 +62,7 @@ public class CarbineRifleListener extends AbstractAssetListener<CarbineRifleAsse
                 }
                 UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 5);
                 usableAsset.setOnUseAction(getOnUseAction(input));
+                usableAsset.setUpByDefault(false);
             };
         }
 

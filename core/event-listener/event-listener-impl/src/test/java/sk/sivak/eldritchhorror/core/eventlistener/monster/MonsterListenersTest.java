@@ -153,6 +153,46 @@ public class MonsterListenersTest {
     }
 
     @Test
+    public void ghastSkipsSpawnDisplayWhenNoInvestigatorIsOnItsSpace() {
+        ghastFlavor(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.EMPTY);
+        investigator(InvestigatorId.THE_SAILOR, SPACE_2);
+        new GhastMonsterListener().register(monster(new sk.sivak.eldritchhorror.core.constants.monster.GhastMonster(), SPACE_1));
+        drain();
+        assertTrue(effects.isEmpty());
+    }
+
+    @Test
+    public void ghastChecksInvestigatorPresenceWhenSpawnResolves() {
+        ghastFlavor(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.EMPTY);
+        new GhastMonsterListener().register(monster(new sk.sivak.eldritchhorror.core.constants.monster.GhastMonster(), SPACE_1));
+        investigator(InvestigatorId.THE_SAILOR, SPACE_1);
+        drain();
+        assertTrue(effects.contains("highlightSpawnText"));
+        assertTrue(effects.contains("changeActiveInvestigator:" + InvestigatorId.THE_SAILOR));
+        assertTrue(effects.indexOf("highlightSpawnText") < effects.indexOf("combat"));
+
+        effects.clear();
+        new GhastMonsterListener().register(monster(new sk.sivak.eldritchhorror.core.constants.monster.GhastMonster(), SPACE_1));
+        onBoard.clear();
+        drain();
+        assertTrue(effects.isEmpty());
+    }
+
+    @Test
+    public void ghastStillAvoidsNestedCombat() {
+        ghastFlavor(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.COMBAT);
+        investigator(InvestigatorId.THE_SAILOR, SPACE_1);
+        new GhastMonsterListener().register(monster(new sk.sivak.eldritchhorror.core.constants.monster.GhastMonster(), SPACE_1));
+        drain();
+        assertTrue(effects.isEmpty());
+    }
+
+    private void ghastFlavor(sk.sivak.eldritchhorror.core.constants.test.TestFlavorType flavor) {
+        ServicePlatform.get().setTestFlavor(mock(sk.sivak.eldritchhorror.core.model.TestFlavorRead.class,
+                (name, args) -> flavor));
+    }
+
+    @Test
     public void huntingByakheeExplainsSpawnBeforeMovingAndDelaying() {
         InvestigatorId target = InvestigatorId.values()[0];
         investigator(target, SPACE_2);

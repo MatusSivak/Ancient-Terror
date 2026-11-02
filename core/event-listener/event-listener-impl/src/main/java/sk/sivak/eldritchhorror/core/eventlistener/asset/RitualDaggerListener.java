@@ -60,6 +60,7 @@ public class RitualDaggerListener extends AbstractAssetListener<RitualDaggerAsse
                     }
                     UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 2);
                     usableAsset.setOnUseAction(getOnUseAction(input));
+                    usableAsset.setUpByDefault(false);
                 }
                 if (input.getStat() == Stat.LORE) {
                     if (!isTestFlavorOfType(TestFlavorType.SPELL)) {
@@ -67,6 +68,7 @@ public class RitualDaggerListener extends AbstractAssetListener<RitualDaggerAsse
                     }
                     UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 1);
                     usableAsset.setOnUseAction(getOnUseAction(input));
+                    usableAsset.setUpByDefault(false);
                 }
             };
         }

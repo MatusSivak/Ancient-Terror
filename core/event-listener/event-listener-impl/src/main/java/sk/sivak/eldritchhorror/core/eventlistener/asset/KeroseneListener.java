@@ -52,6 +52,7 @@ public class KeroseneListener extends AbstractAssetListener<KeroseneAsset> {
                 }
                 UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 5);
                 usableAsset.setOnUseAction(getOnUseAction(input));
+                usableAsset.setUpByDefault(false);
             };
         }
 

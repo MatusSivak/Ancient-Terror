@@ -54,6 +54,7 @@ public class LanternListener extends AbstractAssetListener<LanternAsset> {
                 }
                 UsableAsset usableAsset = addUsableAsset(input, getAssetInfo(), 0, 1);
                 usableAsset.setOnUseAction(getOnUseAction(input));
+                usableAsset.setUpByDefault(false);
             };
         }
 

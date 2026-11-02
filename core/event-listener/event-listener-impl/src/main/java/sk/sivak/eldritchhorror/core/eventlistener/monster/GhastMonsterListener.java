@@ -37,7 +37,7 @@ public class GhastMonsterListener extends AbstractComposedMonsterListener {
         if (flavor != null && flavor != sk.sivak.eldritchhorror.core.constants.test.TestFlavorType.EMPTY) {
             return; // never start a nested combat
         }
-        spawnEffect(true, () -> {
+        spawnEffect(true, () -> firstInvestigatorAt(monsterInfo.getCurrentLocation()) != null, () -> {
             InvestigatorId investigator = firstInvestigatorAt(monsterInfo.getCurrentLocation());
             if (investigator == null) {
                 return;

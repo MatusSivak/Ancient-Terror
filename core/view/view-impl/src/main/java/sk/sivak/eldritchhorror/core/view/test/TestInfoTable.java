@@ -17,7 +17,6 @@ import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.TargetActorChangedListener;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
-import java.util.Collections;
 import java.util.List;
 
 import static java8.features.stream.Stream.*;
@@ -107,9 +106,8 @@ public class TestInfoTable extends VisTable implements TargetActorChangedListene
         add(dicePoolLabel).align(Align.right).row();
 
         pack();
-        if (additionalDicesCount != 0) {
-            updateBonuses(Collections.emptyList());
-        }
+        updateBonuses(collectToList(map(collectToList(allUsableAssets, UsableAsset::isUpByDefault),
+                asset -> asset.getCardInfo().getId())));
     }
 
     public void updateBonuses(List<AssetId> selectedAssets) {
