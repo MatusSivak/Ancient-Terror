@@ -36,15 +36,13 @@ public class WraithMonsterListener extends AbstractMonsterListener {
     @Override
     public void register(MonsterInfo monsterInfo) {
         super.register(monsterInfo);
-        if (ServicePlatform.get().getInvestigators().getLeadInvestigator() == null) {
-            return;
-        }
         ServicePlatform.get().getService().addEventCommand( in -> {
-            InvestigatorRead leadInvestigator = ServicePlatform.get().getInvestigators().getLeadInvestigator();
+            InvestigatorRead targetInvestigator = ServicePlatform.get().getInvestigators().getRandomInvestigator();
+            if (targetInvestigator == null) return;
             InvestigatorRead activeInvestigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);
-            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(leadInvestigator.getInfo().getInvestigatorId());
+            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigator.getInfo().getInvestigatorId());
             ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
             ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
             if (activeInvestigator == null) {

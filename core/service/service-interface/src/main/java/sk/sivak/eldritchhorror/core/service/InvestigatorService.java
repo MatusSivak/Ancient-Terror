@@ -62,7 +62,5 @@ public interface InvestigatorService extends CommonService {
 
     void selectReplacingInvestigator(InvestigatorId removedInvestigator);
 
-    void selectNewLeadInvestigator(boolean reorder);
-
     void replaceInvestigators();
 }

@@ -70,9 +70,6 @@ public class DefeatInvestigatorAction extends AbstractHookableAction<Object, Voi
                     ServicePlatform.get().getInvestigators().defeatInvestigator(investigatorId);
                     ServicePlatform.get().getPerformedActions().clearFreeActions(investigatorId);
                     ServicePlatform.get().getPerformedEncounters().disableAnotherEncounter(investigatorId);
-                    if (ServicePlatform.get().getInvestigators().getLeadInvestigator() == null) {
-                        ServicePlatform.get().getInvestigatorService().selectNewLeadInvestigator(false);
-                    }
                     ServicePlatform.get().getService().convertToNull();
                     ServicePlatform.get().getService().release();
                     onSubInternal.onSuccess(in);

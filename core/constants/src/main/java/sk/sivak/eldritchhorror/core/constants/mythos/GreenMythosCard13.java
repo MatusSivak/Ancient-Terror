@@ -8,6 +8,6 @@ public class GreenMythosCard13 extends GreenMythosCard {
                 "fear the toll it's taking on your friends lying in hospital beds.");
         addInfo("[#BAD]Discard all possessions of defeated investigators and return them to the game box[]\n" +
                 "Then:\n" +
-                "-[#BAD]Lead Investigator gains a Cursed Condition[]");
+                "-[#BAD]{investigator} gains a Cursed Condition[]");
     }
 }

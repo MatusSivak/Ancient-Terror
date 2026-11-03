@@ -26,12 +26,9 @@ public class PrepareNewRoundAction extends AbstractHookableAction<Object, Void> 
 
         ServicePlatform.get().getInvestigatorService().replaceInvestigators();
 
-        ServicePlatform.get().getInvestigatorService().selectNewLeadInvestigator(true);
-
         ServicePlatform.get().getGameService().changeAndShowPhase();
         ServicePlatform.get().getService().addEventCommand(in -> {
-            ServicePlatform.get().getInvestigators().changeActiveInvestigator(
-                    ServicePlatform.get().getInvestigators().getLeadInvestigator().getInfo().getInvestigatorId());
+            ServicePlatform.get().getInvestigators().initActiveInvestigator();
         });
 
         ServicePlatform.get().getModel().newRound();

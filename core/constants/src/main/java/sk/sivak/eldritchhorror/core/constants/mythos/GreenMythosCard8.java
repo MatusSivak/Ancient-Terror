@@ -11,7 +11,7 @@ public class GreenMythosCard8 extends GreenMythosCard {
                 "\"Have faith, my child,\" he tells you. " +
                 "\"Your good works have not gone unseen. " +
                 "Your brave acts are making a difference.\"");
-        addInfo("The Lead Investigator:\n" +
+        addInfo("{investigator}:\n" +
                 "-[#GOOD]Gains a Blessed Condition[]");
     }
 }

@@ -101,7 +101,7 @@ public class AssetView {
             }
             originalBottomHeight = InfoStage.getBottomHeight();
             displayButtons(showCardRequest.getDisplayAssetResponseType(), showCardRequest.getHideType(),
-                    showCardRequest.getAssetOriginType(), subscriber, showCardRequest.isAutoAcceptFreeReroll());
+                    showCardRequest.getAssetOriginType(), subscriber, showCardRequest.isAutoAcceptReroll());
             displayTable(showCardRequest.getTitle(), showCardRequest.getPortraitTextureName());
             if (showCardRequest.isHiddenTemplate()) {
                 displayHiddentTemplate(showCardRequest.getAssetOriginType());
@@ -129,7 +129,7 @@ public class AssetView {
     }
 
     private void displayButtons(DisplayAssetResponseType displayAssetResponseType, HideType hideType, AssetOriginType assetOriginType,
-                                SingleSubscriber<? super ShowCardResponse> subscriber, boolean autoAcceptFreeReroll) {
+                                SingleSubscriber<? super ShowCardResponse> subscriber, boolean autoAcceptReroll) {
         float bottomHeight = InfoStage.getBottomHeight();
         switch (displayAssetResponseType) {
             case YES_NO:
@@ -137,7 +137,7 @@ public class AssetView {
                 Runnable yes = answerOnce(answered, () -> buttonClickAction(subscriber, YES, hideType, assetOriginType));
                 buttons = ButtonUtils.buildNoYesButtons(FADING_EFFECT_DURATION * 2,
                         answerOnce(answered, () -> buttonClickAction(subscriber, NO, hideType, assetOriginType)), yes);
-                if (autoAcceptFreeReroll) FastForwardAction.autoAcceptFreeRerollWhileHeld(buttons[1], yes);
+                if (autoAcceptReroll) FastForwardAction.autoAcceptRerollWhileHeld(buttons[1], yes);
                 break;
             case OK:
                 TextButton okButton = ButtonBuilder.buildButton(get("dialog.ok"));

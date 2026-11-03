@@ -66,7 +66,7 @@ public interface EventListenerProvider {
 
     void executeDefeatedInvestigatorEncounter(DefeatedInvestigatorEncounterData data);
 
-    void executeMythosText(MythosCard.MythosColor mythosColor, int id);
+    void executeMythosText(MythosCard.MythosColor mythosColor, int id, InvestigatorId narratedTarget);
 
     void init();
 

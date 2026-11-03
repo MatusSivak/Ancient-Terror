@@ -76,7 +76,6 @@ public class Investigators implements InvestigatorsWrite {
     public void initSelectedInvestigators(InvestigatorInfo[] selected) {
         InvestigatorsHelper.initSelectedInvestigators(selectedInvestigators, selected);
         InvestigatorsHelper.removeFromAvailable(selected, availableInvestigators);
-        setLeadInvestigator(selected[0].getInvestigatorId(), false);
 
         for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
             investigatorOrder.add(selectedInvestigator.getInfo().getInvestigatorId());
@@ -101,27 +100,6 @@ public class Investigators implements InvestigatorsWrite {
                 investigator -> investigator == replacing);
         if (activeInvestigator == null) {
             activeInvestigator = selectedInvestigators.get(indexOfRemovedInvestigator);
-        }
-    }
-
-    @Override
-    public void setLeadInvestigator(InvestigatorId investigatorId, boolean reorder) {
-        if (selectedInvestigators.isEmpty()) {
-            return;
-        }
-        InvestigatorWrite newLeadInvestigator = Stream.findFirstOrException(selectedInvestigators,
-                investigator -> investigator.getInfo().getInvestigatorId() == investigatorId);
-
-        for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
-            selectedInvestigator.setLeadInvestigator(false);
-        }
-        newLeadInvestigator.setLeadInvestigator(true);
-
-        if (reorder) {
-            selectedInvestigators.remove(newLeadInvestigator);
-            selectedInvestigators.add(0, newLeadInvestigator);
-            investigatorOrder.remove(newLeadInvestigator.getInfo().getInvestigatorId());
-            investigatorOrder.add(0, newLeadInvestigator.getInfo().getInvestigatorId());
         }
     }
 
@@ -189,19 +167,21 @@ public class Investigators implements InvestigatorsWrite {
         return new ArrayList<>(investigatorOrder);
     }
 
+    /** Draw independently for each effect; no target is retained between calls. */
     @Override
-    public InvestigatorWrite getLeadInvestigator() {
-        if (Stream.anyMatch(selectedInvestigators, InvestigatorRead::isLeadInvestigator)) {
-            return findFirstOrException(selectedInvestigators, InvestigatorRead::isLeadInvestigator);
-        }
-        return null;
+    public InvestigatorWrite getRandomInvestigator() {
+        return getRandomInvestigator(new Random());
+    }
+
+    InvestigatorWrite getRandomInvestigator(Random random) {
+        List<InvestigatorWrite> eligible = getOnBoardInvestigators();
+        return eligible.isEmpty() ? null : eligible.get(random.nextInt(eligible.size()));
     }
 
     @Override
     public void initActiveInvestigator() {
-        if (Stream.anyMatch(selectedInvestigators, InvestigatorRead::isLeadInvestigator)) {
-            activeInvestigator = findFirstOrException(selectedInvestigators, InvestigatorRead::isLeadInvestigator);
-        }
+        List<InvestigatorId> order = getInvestigatorIdsInTurnOrder();
+        activeInvestigator = order.isEmpty() ? null : getInvestigator(order.get(0));
     }
 
     @Override
@@ -323,7 +303,6 @@ public class Investigators implements InvestigatorsWrite {
             savedSelectedInvestigator.setHealth(selectedInvestigator.getCurrentHealth());
             savedSelectedInvestigator.setSanity(selectedInvestigator.getCurrentSanity());
             savedSelectedInvestigator.setLocationId(selectedInvestigator.getCurrentLocationId());
-            savedSelectedInvestigator.setLeadInvestigator(selectedInvestigator.isLeadInvestigator());
             savedSelectedInvestigator.setTrainTickets(selectedInvestigator.getTrainTickets());
             savedSelectedInvestigator.setShipTickets(selectedInvestigator.getShipTickets());
             savedSelectedInvestigator.setFocusTokens(selectedInvestigator.getFocusTokens());
@@ -386,7 +365,6 @@ public class Investigators implements InvestigatorsWrite {
             investigator.setInfo(savedInvestigatorInfo);
             investigator.setCurrentHealth(savedSelectedInvestigator.getHealth());
             investigator.setCurrentSanity(savedSelectedInvestigator.getSanity());
-            investigator.setLeadInvestigator(savedSelectedInvestigator.isLeadInvestigator());
             investigator.setCurrentLocationId(savedSelectedInvestigator.getLocationId());
             investigator.setTrainTickets(savedSelectedInvestigator.getTrainTickets());
             investigator.setShipTickets(savedSelectedInvestigator.getShipTickets());

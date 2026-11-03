@@ -121,7 +121,7 @@ public class SelectMultipleInvestigators {
                 confirmButton.setDisabled(false);
             }
         };
-        selectInvestigatorComponent.setTitle(get("investigator.selectLead"));
+        selectInvestigatorComponent.setTitle(get("investigator.selectProgress", 1, totalToSelect));
         clearPreview();
         if (InAppPurchaseManager.areBonusInvestigatorsAvailable()) return;
         new InAppPurchaseManager().restoreFullGame().subscribe(isPurchased -> {

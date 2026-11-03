@@ -978,11 +978,11 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     }
 
     @Override
-    public void executeMythosText(MythosCard.MythosColor mythosColor, int id) {
+    public void executeMythosText(MythosCard.MythosColor mythosColor, int id, InvestigatorId narratedTarget) {
         try {
             String className = "sk.sivak.eldritchhorror.core.eventlistener.mythos." + mythosColor.getValue() +"MythosCard" + id;
             MythosCardEventListener mythosCardEventListener = (MythosCardEventListener) Class.forName(className).newInstance();
-            mythosCardEventListener.execute();
+            mythosCardEventListener.execute(narratedTarget);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }

@@ -83,8 +83,6 @@ public interface ActionProvider {
 
     Action<Object, Void> removeDefeatedInvestigator(InvestigatorId investigatorId);
 
-    Action<Object, InvestigatorId> selectNewLeadInvestigator(boolean reorder);
-
     Action<Object, Object> showRlyehRisenBackground();
 
     Action<Object, Object> showVoidBetweenWorldsBackground();

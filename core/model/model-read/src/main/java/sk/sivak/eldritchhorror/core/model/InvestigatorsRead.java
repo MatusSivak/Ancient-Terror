@@ -34,7 +34,8 @@ public interface InvestigatorsRead {
     /** Raw turn order; may also contain ids of investigators no longer in game (e.g. defeated or devoured). */
     List<InvestigatorId> getInvestigatorOrder();
 
-    InvestigatorRead getLeadInvestigator();
+    /** Fresh uniform choice among on-board investigators, or null when none are eligible. */
+    InvestigatorRead getRandomInvestigator();
 
     boolean isOnBoard(InvestigatorId investigatorId);
 

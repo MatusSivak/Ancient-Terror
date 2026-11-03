@@ -56,18 +56,16 @@ public class BlueMythosCard5 implements MythosCardEventListener{
             if (eventData == ReckoningFireType.CHARGE) {
                 return;
             }
-            InvestigatorRead leadInvestigator = ServicePlatform.get().getInvestigators().getLeadInvestigator();
-            if (leadInvestigator == null) {
-                return;
-            }
             ServicePlatform.get().getService().addEventCommand(in -> {
+                InvestigatorRead targetInvestigator = ServicePlatform.get().getInvestigators().getRandomInvestigator();
+                if (targetInvestigator == null) return;
                 ServicePlatform.get().getService().hold();
                 ServicePlatform.get().getDoomOmenService().onTriggeredReckoning();
                 ServicePlatform.get().getDoomOmenService().highlightRumorReckoning(RUMOR_CARD_ID);
-                ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(leadInvestigator.getInfo().getInvestigatorId());
+                ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigator.getInfo().getInvestigatorId());
                 ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
                 ServicePlatform.get().getGameService().gainCondition(ConditionTrait.MADNESS);
-                countdownForEachMadness(leadInvestigator.getInfo().getInvestigatorId());
+                countdownForEachMadness(targetInvestigator.getInfo().getInvestigatorId());
                 ServicePlatform.get().getService().release();
             });
         }

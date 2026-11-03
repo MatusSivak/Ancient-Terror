@@ -181,7 +181,7 @@ public class QuestionView {
             Runnable choose = createOnClickAction(subscriber, option, answered);
             addClickListener(textButton, choose);
             if (nothingToSelect && option.isAutoAcceptFreeReroll()) {
-                FastForwardAction.autoAcceptFreeRerollWhileHeld(textButton, choose);
+                FastForwardAction.autoAcceptRerollWhileHeld(textButton, choose);
             } else if (nothingToSelect && options.size() == 1) {
                 FastForwardAction.autoConfirmWhileHeld(textButton, choose);
             }

@@ -17,8 +17,6 @@ public interface InvestigatorWrite extends InvestigatorRead {
 
     void setCurrentSanity(int currentSanity);
 
-    void setLeadInvestigator(boolean leadInvestigator);
-
     void setCurrentLocationId(LocationId locationId);
 
     void setTrainTickets(int trainTickets);

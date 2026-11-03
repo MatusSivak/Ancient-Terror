@@ -30,8 +30,6 @@ public interface InvestigatorsSaveDataRead {
 
         LocationId getLocationId();
 
-        boolean isLeadInvestigator();
-
         int getTrainTickets();
 
         int getShipTickets();

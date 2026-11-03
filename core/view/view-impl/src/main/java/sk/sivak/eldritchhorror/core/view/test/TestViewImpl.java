@@ -321,13 +321,16 @@ public class TestViewImpl implements TestView {
             LabelTable notice = LabelTable.createAndShowTable(0, get("test.nunDiceBonus"));
             DiceRoller roller = diceRollerStack.peek();
             Completable confirmBonus = Completable.create(sub -> {
-                addClickListener(ok, () -> {
+                Runnable confirm = () -> {
                     if (ok.isDisabled()) return;
                     ok.setDisabled(true);
+                    ok.clearActions();
                     ok.remove();
                     sub.onCompleted();
-                });
+                };
+                addClickListener(ok, confirm);
                 InfoStage.showButton(ok, VIEWPORT_WIDTH / 2f - ok.getWidth() / 2f, okY, false);
+                FastForwardAction.autoConfirmHighlightWhileHeld(ok, confirm, ok::isDisabled);
             });
             Completable readAdjustedDice = Completable.create(sub -> notice.addAction(Actions.sequence(
                     Actions.delay(.6f), Actions.run(sub::onCompleted))));

@@ -90,12 +90,12 @@ public class FreeRerollPromptTest {
     }
 
     @Test public void exhaustedDiscardedAndSanityPaidRerollsStayManual() throws Exception {
-        for (String name : new String[]{"LuckyRabbitsFoot", "MapOfTheLeyLines", "GamblersDice", "TearGas", "Axe"}) {
+        for (String name : new String[]{"LuckyRabbitsFoot", "MapOfTheLeyLines", "TearGas", "Axe"}) {
             flavor = name.equals("MapOfTheLeyLines") ? TestFlavorType.OTHER_WORLD : TestFlavorType.COMBAT;
             input = data(Stat.STRENGTH, die(2, DiceRoll.Score.BAD), die(2, DiceRoll.Score.BAD));
-            offer(asset(name), name.equals("GamblersDice") ? "RerollUsingAssetListener" : "RerollUsingAssetsListener");
+            offer(asset(name), "RerollUsingAssetsListener");
             assertNotNull(name, offered);
-            assertFalse(name, offered.isAutoAcceptFreeReroll());
+            assertFalse(name, offered.isAutoAcceptReroll());
         }
         for (String name : new String[]{"AlienDevice", "DragonIdol", "HyperboreanCrystal"}) {
             flavor = name.equals("AlienDevice") ? TestFlavorType.SPELL : TestFlavorType.COMBAT;
@@ -109,6 +109,40 @@ public class FreeRerollPromptTest {
             assertNotNull(name, offered);
             assertFalse(name, offered.isAutoAcceptFreeReroll());
         }
+    }
+
+    @Test public void gamblersDiceAutoAcceptsOnlyItsMatchingFailedPairAndUsesTheCard() throws Exception {
+        DiceRoll one = die(2, DiceRoll.Score.BAD), two = die(2, DiceRoll.Score.BAD);
+        DiceRoll success = die(2, DiceRoll.Score.GOOD);
+        one.setDiceNr(1); two.setDiceNr(2); success.setDiceNr(3);
+        input = data(Stat.STRENGTH, one, two, success);
+        Object listener = asset("GamblersDice");
+        offer(listener, "RerollUsingAssetListener");
+        assertTrue(offered.isAutoAcceptReroll());
+        assertFalse(offered.isAutoAcceptFreeReroll());
+        assertFalse(effects.contains("disableCard"));
+        response = ShowCardResponse.YES;
+        ServicePlatform.get().setTestService(mock(TestService.class, (name, args) -> {
+            assertEquals("rerollDice", name);
+            assertEquals(Arrays.asList(one, two), args[0]);
+            effects.add(name);
+            return null;
+        }));
+        offer(listener, "RerollUsingAssetListener");
+        assertTrue(effects.contains("disableCard"));
+        assertTrue(effects.contains("rerollDice"));
+        offered.setHideType(HideType.DISCARD_ON_YES);
+        assertFalse(offered.isAutoAcceptReroll());
+    }
+
+    @Test public void gamblersDiceDoesNotOfferMatchingSuccessesOrUnmatchedFailures() throws Exception {
+        Object listener = asset("GamblersDice");
+        input = data(Stat.STRENGTH, die(2, DiceRoll.Score.GOOD), die(2, DiceRoll.Score.BAD));
+        offer(listener, "RerollUsingAssetListener");
+        assertNull(offered);
+        input = data(Stat.STRENGTH, die(2, DiceRoll.Score.BAD), die(3, DiceRoll.Score.BAD));
+        offer(listener, "RerollUsingAssetListener");
+        assertNull(offered);
     }
 
     @Test public void freePromptDoesNotAutomaticallyRerollAnExistingSuccess() throws Exception {

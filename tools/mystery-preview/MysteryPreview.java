@@ -105,7 +105,7 @@ public class MysteryPreview extends ApplicationAdapter {
                                     +" actions="+BigActorsManager.getMonsterCard().getActions());
                     held[0]=false; FastForwardAction.turnOff();
                 }
-                for(String method:new String[]{"highlightRumorObjective","highlightRumorFailure","highlightRumorReckoning"}) {
+                for(String method:new String[]{"highlightRumorObjective","highlightRumorFailure","highlightRumorReckoning","countdown"}) {
                     sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard info=
                             new sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard();
                     info.setCluesRequired(2);
@@ -114,7 +114,9 @@ public class MysteryPreview extends ApplicationAdapter {
                     card.init(info); stage.addActor(card); tick(1);
                     held[0]=heldOnArrival;
                     AtomicInteger done=new AtomicInteger();
-                    ((rx.Completable)card.getClass().getMethod(method).invoke(card)).subscribe(done::incrementAndGet);
+                    rx.Completable confirmation=method.equals("countdown") ? card.countdown(1)
+                            : (rx.Completable)card.getClass().getMethod(method).invoke(card);
+                    confirmation.subscribe(done::incrementAndGet);
                     tick(120);
                     if(!heldOnArrival) {
                         require(done.get()==0,"Rumor confirmed without a hold");
@@ -124,8 +126,22 @@ public class MysteryPreview extends ApplicationAdapter {
                     require(done.get()==1,"Rumor highlight did not dismiss exactly once: "+method);
                     card.remove(); held[0]=false; FastForwardAction.turnOff();
                 }
+                sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard rumor=
+                        new sk.sivak.eldritchhorror.core.model.rumor.GrowingMadnessRumorCard();
+                rumor.setCluesRequired(2); rumor.setRumorLocation(null);
+                held[0]=heldOnArrival;
+                AtomicInteger hidden=new AtomicInteger();
+                view.showRumorCard(rumor).subscribe(hidden::incrementAndGet);
+                tick(180);
+                if(!heldOnArrival) {
+                    require(hidden.get()==0,"New rumor closed without a hold");
+                    held[0]=true; tick(180);
+                }
+                require(hidden.get()==1 && BigActorsManager.getRumorCard().getStage()==null,
+                        "New rumor did not auto-hide exactly once");
+                held[0]=false; FastForwardAction.turnOff();
             }
-            System.out.println("PASS: monster spawn/special/reckoning and rumor objective/failure/reckoning confirmations on arrival and later hold");
+            System.out.println("PASS: monster and rumor highlights, countdown and new rumor auto-hide on arrival and later hold");
         } finally { Gdx.input=previousInput; FastForwardAction.turnOff(); }
     }
 

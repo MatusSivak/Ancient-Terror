@@ -325,7 +325,10 @@ public class RumorCard extends VisTable {
 
         // minus 2, because last actor is placeholder
 
-        addClickListener(darkFront, () -> {
+        boolean[] confirmed = {false};
+        Runnable confirm = () -> {
+            if (confirmed[0]) return;
+            confirmed[0] = true;
             // Keep intercepting input while the countdown resolves, without accepting another click.
             darkFront.clearListeners();
             GameplaySounds.play(GameplaySounds.Cue.RUMOR_COUNTDOWN);
@@ -346,7 +349,9 @@ public class RumorCard extends VisTable {
                         publishSubject.onCompleted();
                     })
             ))));
-        });
+        };
+        addClickListener(darkFront, confirm);
+        FastForwardAction.autoConfirmHighlightWhileHeld(darkFront, confirm, () -> confirmed[0]);
 
         return publishSubject.toCompletable();
     }

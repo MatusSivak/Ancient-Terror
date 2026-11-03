@@ -400,8 +400,16 @@ public class GameViewImpl implements Screen, GameView {
                 BigActorsManager.getRumorCard().init(rumorCardInfo);
             }
             BigActorsManager.getRumorCard().setAfterHideAction(onSub::onCompleted);
-            addClickListener(BigActorsManager.getRumorCard(), BigActorsManager::displayOrHideRumor);
+            boolean[] confirmed = {false};
+            Runnable confirm = () -> {
+                if (confirmed[0] || BigActorsManager.isLocked()) return;
+                confirmed[0] = true;
+                BigActorsManager.displayOrHideRumor();
+            };
+            addClickListener(BigActorsManager.getRumorCard(), confirm);
             showRumorCardAgain();
+            FastForwardAction.autoConfirmHighlightWhileHeld(BigActorsManager.getRumorCard(), confirm,
+                    () -> confirmed[0]);
         });
     }
 

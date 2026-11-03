@@ -38,11 +38,6 @@ public class DevourInvestigatorAction extends AbstractHookableAction<Object, Voi
         discardSpells(investigatorId);
         discardClues(investigatorId);
         ServicePlatform.get().getInvestigatorService().changeActiveInvestigator();
-        ServicePlatform.get().getService().addEventCommand(in -> {
-            if (ServicePlatform.get().getInvestigators().getLeadInvestigator() == null) {
-                ServicePlatform.get().getInvestigatorService().selectNewLeadInvestigator(false);
-            }
-        });
         ServicePlatform.get().getService().convertToNull();
         ServicePlatform.get().getService().release();
 

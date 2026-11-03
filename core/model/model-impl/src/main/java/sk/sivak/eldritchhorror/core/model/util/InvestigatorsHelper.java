@@ -453,16 +453,6 @@ public class InvestigatorsHelper {
         return result;
     }
 
-    public static InvestigatorWrite findLeadInvestigator(List<InvestigatorWrite> selectedInvestigators, InvestigatorId investigatorId) {
-        for (InvestigatorWrite selectedInvestigator : selectedInvestigators) {
-            if (selectedInvestigator.getInfo().getInvestigatorId().equals(investigatorId)) {
-                logger.info("Lead investigator is now " + investigatorId);
-                return selectedInvestigator;
-            }
-        }
-        throw new IllegalArgumentException("Lead investigator not found!");
-    }
-
     public static class InvestigatorInfoImpl implements InvestigatorInfo {
 
         private InvestigatorId investigatorId;

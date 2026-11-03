@@ -12,6 +12,8 @@ public class SaveLoadGameHelper {
 
     public SaveLoadGameHelper() {
         json = new Json(JsonWriter.OutputType.minimal);
+        // Accept retired fields from older save formats.
+        json.setIgnoreUnknownFields(true);
         try {
             json.addClassTag("AncientOne", Class.forName("sk.sivak.eldritchhorror.core.model.save.AncientOneSaveData"));
             json.addClassTag("ArtifactsDeck", Class.forName("sk.sivak.eldritchhorror.core.model.save.ArtifactsDeckSaveData"));

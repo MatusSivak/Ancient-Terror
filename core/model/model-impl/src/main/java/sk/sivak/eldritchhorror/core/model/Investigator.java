@@ -18,7 +18,6 @@ public class Investigator implements InvestigatorWrite {
     private int currentHealth;
     private int currentSanity;
     private LocationId currentLocationId;
-    private boolean leadInvestigator;
     private int trainTickets = 0;
     private int shipTickets = 0;
     private int focusTokens = 0;
@@ -65,16 +64,6 @@ public class Investigator implements InvestigatorWrite {
     @Override
     public void setCurrentSanity(int currentSanity) {
         this.currentSanity = currentSanity;
-    }
-
-    @Override
-    public boolean isLeadInvestigator() {
-        return leadInvestigator;
-    }
-
-    @Override
-    public void setLeadInvestigator(boolean leadInvestigator) {
-        this.leadInvestigator = leadInvestigator;
     }
 
     @Override

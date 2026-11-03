@@ -18,6 +18,19 @@ public class ShowCardRequest {
     private String portraitTextureName;
     private boolean hiddenTemplate;
     private boolean autoAcceptFreeReroll;
+    private boolean autoAcceptMatchingFailures;
+
+    /** Gambler's Dice explicitly permits automatic use on its selected pair of failed dice. */
+    public void setAutoAcceptMatchingFailures(boolean enabled) {
+        autoAcceptMatchingFailures = enabled;
+    }
+
+    public boolean isAutoAcceptReroll() {
+        return isAutoAcceptFreeReroll() || (autoAcceptMatchingFailures
+                && assetInfo instanceof sk.sivak.eldritchhorror.core.constants.asset.GamblersDiceAsset
+                && displayAssetResponseType == DisplayAssetResponseType.YES_NO
+                && hideType == HideType.DISABLE_ON_YES);
+    }
 
     /** Opt in only at a reroll prompt whose YES handler has no cost or exhaustion. */
     public void setAutoAcceptFreeReroll(boolean autoAcceptFreeReroll) {

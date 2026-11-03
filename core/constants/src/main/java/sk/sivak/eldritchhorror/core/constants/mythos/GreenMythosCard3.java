@@ -8,7 +8,7 @@ public class GreenMythosCard3 extends GreenMythosCard {
                 "You've been wearing the pouch around your neck ever since New Orleans. " +
                 "\"You want it to spill blood fuh you,\" he drawled, " +
                 "\"you has to spill your blood fuh the gris-gris.\"");
-        addInfo("The Lead Investigator:\n" +
+        addInfo("{investigator}:\n" +
                 "-[#GOOD]Discards one Monster of his choice[]\n" +
                 "-[#BAD]Loses Health equal to its toughness[]");
     }

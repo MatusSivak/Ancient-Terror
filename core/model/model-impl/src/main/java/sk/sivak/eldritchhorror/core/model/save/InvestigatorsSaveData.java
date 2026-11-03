@@ -78,7 +78,6 @@ public class InvestigatorsSaveData implements SaveDataWrite.InvestigatorsSaveDat
         private int health;
         private int sanity;
         private LocationId locationId;
-        private boolean leadInvestigator;
         private int trainTickets;
         private int shipTickets;
         private int focusTokens;
@@ -102,10 +101,6 @@ public class InvestigatorsSaveData implements SaveDataWrite.InvestigatorsSaveDat
 
         public void setLocationId(LocationId locationId) {
             this.locationId = locationId;
-        }
-
-        public void setLeadInvestigator(boolean leadInvestigator) {
-            this.leadInvestigator = leadInvestigator;
         }
 
         public void setTrainTickets(int trainTickets) {
@@ -154,11 +149,6 @@ public class InvestigatorsSaveData implements SaveDataWrite.InvestigatorsSaveDat
         @Override
         public LocationId getLocationId() {
             return locationId;
-        }
-
-        @Override
-        public boolean isLeadInvestigator() {
-            return leadInvestigator;
         }
 
         @Override

@@ -5,6 +5,8 @@ import rx.SingleSubscriber;
 import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import sk.sivak.eldritchhorror.core.constants.mythos.BlueMythosCard;
 import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
@@ -74,14 +76,26 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
         }
         ServicePlatform.get().getEncounterService().typeHeader(" \n" +mythosCard.getTitle());
         ServicePlatform.get().getEncounterService().typeFlavor(mythosCard.getFlavor());
-        TypewriterUtils.confirmInfos(mythosCard.getInfos()).subscribe(() -> {
+        // Resolve the recipient after the basic Mythos actions, immediately before narration.
+        ServicePlatform.get().getService().addEventCommand(in -> {
+            showMythosText(mythosCard);
+        });
+        ServicePlatform.get().getService().release();
+        ss.onSuccess(null);
+    }
+
+    private void showMythosText(MythosCard mythosCard) {
+        InvestigatorRead investigator = mythosCard.requiresRandomInvestigator()
+                ? ServicePlatform.get().getInvestigators().getRandomInvestigator() : null;
+        InvestigatorId target = investigator == null ? null : investigator.getInfo().getInvestigatorId();
+        TypewriterUtils.confirmInfos(mythosCard.getInfos(target)).subscribe(() -> {
             unsetActiveInvestigator();
             ServicePlatform.get().getModel().getBackgroundModel().setCurrentBackground(null);
             ServicePlatform.get().getGameController().showWorldBackground().subscribe();
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().hideTypewriterPaper();
             ServicePlatform.get().getService().addEventCommand(in -> {ServicePlatform.get().getModel().setMythosCardTextEffect(true);});
-            ServicePlatform.get().getEventListenerProvider().executeMythosText(mythosCard.getMythosColor(), mythosCard.getId());
+            ServicePlatform.get().getEventListenerProvider().executeMythosText(mythosCard.getMythosColor(), mythosCard.getId(), target);
             ServicePlatform.get().getService().addEventCommand(in -> {ServicePlatform.get().getModel().setMythosCardTextEffect(false);});
             ServicePlatform.get().getService().addEventCommand(in -> {
                 unsetActiveInvestigator();
@@ -90,8 +104,6 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
             ServicePlatform.get().getService().convertToNull();
             ServicePlatform.get().getService().release();
         });
-        ServicePlatform.get().getService().release();
-        ss.onSuccess(null);
     }
 
     private void spawnGate(int gatesCount) {

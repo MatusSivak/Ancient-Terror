@@ -8,12 +8,11 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 import java.util.List;
 
-public class GreenMythosCard3 implements MythosCardEventListener{
+public class GreenMythosCard3 extends RandomInvestigatorMythosEffect{
 
     @Override
-    public void execute() {
-        InvestigatorRead leadInvestigator = ServicePlatform.get().getInvestigators().getLeadInvestigator();
-        if (leadInvestigator == null) {
+    protected void executeFor(InvestigatorRead targetInvestigator) {
+        if (targetInvestigator == null) {
             return;
         }
         List<MonsterInfo> monsters = ServicePlatform.get().getMonsterCup().getMonsters();
@@ -21,7 +20,7 @@ public class GreenMythosCard3 implements MythosCardEventListener{
         selectMonsterData.setAvailableMonsters(Stream.collectToList(monsters,
                 monsterInfo -> !monsterInfo.isEpic()));
         ServicePlatform.get().getService().hold();
-        ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(leadInvestigator.getInfo().getInvestigatorId());
+        ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigator.getInfo().getInvestigatorId());
         ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
         ServicePlatform.get().getMonsterService().selectSingleMonster(selectMonsterData).subscribe(selectedMonster -> {
             if (selectedMonster != null) {

@@ -44,7 +44,6 @@ import sk.sivak.eldritchhorror.core.action.impl.investigator.GainConditionFromDe
 import sk.sivak.eldritchhorror.core.action.impl.investigator.GainSpellFromDeckAction;
 import sk.sivak.eldritchhorror.core.action.impl.investigator.RemoveDefeatedInvestigatorAction;
 import sk.sivak.eldritchhorror.core.action.impl.investigator.ReplaceInvestigatorsAction;
-import sk.sivak.eldritchhorror.core.action.impl.investigator.SelectNewLeadInvestigatorAction;
 import sk.sivak.eldritchhorror.core.action.impl.test.TestRequestToTestResponse;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
@@ -245,11 +244,6 @@ public class ActionProviderImpl extends AbstractActionProvider implements Action
     @Override
     public Action<Object, Void> removeDefeatedInvestigator(InvestigatorId investigatorId) {
         return new RemoveDefeatedInvestigatorAction(investigatorId);
-    }
-
-    @Override
-    public Action<Object, InvestigatorId> selectNewLeadInvestigator(boolean reorder) {
-        return new SelectNewLeadInvestigatorAction(reorder);
     }
 
     @Override

@@ -21,8 +21,6 @@ public interface InvestigatorRead {
 
     int getCurrentSanity();
 
-    boolean isLeadInvestigator();
-
     LocationId getCurrentLocationId();
 
     int getTrainTickets();

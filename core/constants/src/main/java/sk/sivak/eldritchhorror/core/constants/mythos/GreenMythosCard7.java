@@ -12,7 +12,7 @@ public class GreenMythosCard7 extends GreenMythosCard {
                 "When you get the bill for your meal, it includes directions to a payphone. " +
                 "It's already ringing by the time you find it. " +
                 "You answer and explain your situation to the gruff voice on the other end of the line.");
-        addInfo("The Lead Investigator tests Influence.\n" +
+        addInfo("{investigator} tests Influence.\n" +
                 "-[#GOOD]Gains a number of Clues\n" +
                 "equal to his test result.[]");
     }

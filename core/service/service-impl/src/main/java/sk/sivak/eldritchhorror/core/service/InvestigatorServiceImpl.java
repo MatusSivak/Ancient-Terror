@@ -168,11 +168,6 @@ public class InvestigatorServiceImpl extends AbstractCommonService implements In
     }
 
     @Override
-    public void selectNewLeadInvestigator(boolean reorder) {
-        execute(new ActionCommand<>(actionProvider.selectNewLeadInvestigator(reorder), "SELECT_NEW_LEAD_INVESTIGATOR"));
-    }
-
-    @Override
     public void replaceInvestigators() {
         executeHookable(actionProvider.replaceInvestigators());
     }

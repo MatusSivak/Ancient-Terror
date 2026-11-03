@@ -19,8 +19,6 @@ public interface InvestigatorsWrite extends InvestigatorsRead {
 
     void initSelectedInvestigators(InvestigatorInfo[] selected);
 
-    void setLeadInvestigator(InvestigatorId investigatorId, boolean reorder);
-
     @Override
     InvestigatorWrite getActiveInvestigator();
 

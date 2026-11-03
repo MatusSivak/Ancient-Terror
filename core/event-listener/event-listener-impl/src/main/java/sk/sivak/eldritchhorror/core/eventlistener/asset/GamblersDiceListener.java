@@ -134,6 +134,8 @@ public class GamblersDiceListener extends AbstractAssetListener<GamblersDiceAsse
             showCardRequest.setHideType(HideType.DISABLE_ON_YES);
             showCardRequest.setTitle("Reroll two dice with matching results?");
             showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
+            // Both selected dice were matched after filtering out every successful die.
+            showCardRequest.setAutoAcceptMatchingFailures(true);
 
             ServicePlatform.get().getGameService().showCard(showCardRequest)
                     .subscribe(showCardResponse -> onAnswer(diceOne, diceTwo, showCardResponse, input));

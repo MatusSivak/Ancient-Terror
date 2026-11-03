@@ -33,14 +33,15 @@ public class PoltergeistMonsterListener extends AbstractComposedMonsterListener 
                 return;
             }
             InvestigatorId active = ServicePlatform.get().getInvestigators().getActiveInvestigatorId();
-            InvestigatorRead lead = ServicePlatform.get().getInvestigators().getLeadInvestigator();
-            if (active == null && lead == null) {
+            InvestigatorRead target = active == null
+                    ? ServicePlatform.get().getInvestigators().getRandomInvestigator() : null;
+            if (active == null && target == null) {
                 return;
             }
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getMonsterService().highlightSpecialText(monsterInfo);
             if (active == null) {
-                makeActive(lead.getInfo().getInvestigatorId());
+                makeActive(target.getInfo().getInvestigatorId());
             }
             ServicePlatform.get().getGameService().gainCondition(ConditionTrait.BOON);
             if (active == null) {
@@ -53,12 +54,9 @@ public class PoltergeistMonsterListener extends AbstractComposedMonsterListener 
 
     @Override
     protected void onSpawn() {
-        if (ServicePlatform.get().getInvestigators().getLeadInvestigator() == null) {
-            return;
-        }
-        spawnEffect(true, () -> {
-            InvestigatorRead lead = ServicePlatform.get().getInvestigators().getLeadInvestigator();
-            makeActive(lead.getInfo().getInvestigatorId());
+        spawnEffect(true, () -> !ServicePlatform.get().getInvestigators().getOnBoardInvestigators().isEmpty(), () -> {
+            InvestigatorRead target = ServicePlatform.get().getInvestigators().getRandomInvestigator();
+            makeActive(target.getInfo().getInvestigatorId());
             ServicePlatform.get().getGameService().gainCondition(ConditionTrait.BANE);
         });
     }

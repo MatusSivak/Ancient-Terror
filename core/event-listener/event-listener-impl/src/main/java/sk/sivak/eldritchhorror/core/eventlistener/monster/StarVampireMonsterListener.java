@@ -10,7 +10,7 @@ public class StarVampireMonsterListener extends AbstractMonsterListener {
     @Override
     public void register(MonsterInfo monsterInfo) {
         super.register(monsterInfo);
-        if (ServicePlatform.get().getInvestigators().getLeadInvestigator() == null) {
+        if (ServicePlatform.get().getInvestigators().getOnBoardInvestigators().isEmpty()) {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);
             ServicePlatform.get().getDoomOmenService().advanceOmen();
@@ -20,8 +20,8 @@ public class StarVampireMonsterListener extends AbstractMonsterListener {
         InvestigatorRead activeInvestigator = ServicePlatform.get().getInvestigators().getActiveInvestigator();
         ServicePlatform.get().getService().hold();
         if (activeInvestigator == null) {
-            InvestigatorRead leadInvestigator = ServicePlatform.get().getInvestigators().getLeadInvestigator();
-            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(leadInvestigator.getInfo().getInvestigatorId());
+            InvestigatorRead targetInvestigator = ServicePlatform.get().getInvestigators().getRandomInvestigator();
+            ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(targetInvestigator.getInfo().getInvestigatorId());
         }
 
         ServicePlatform.get().getMonsterService().highlightSpawnText(monsterInfo);

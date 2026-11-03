@@ -98,8 +98,8 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
         autoConfirmWhileHeld(button, confirm, FastForwardAction::isHeld, false);
     }
 
-    /** A free reroll can also be accepted by starting to hold fast-forward while its prompt waits. */
-    public static void autoAcceptFreeRerollWhileHeld(Button button, Runnable confirm) {
+    /** An opted-in reroll can also be accepted by starting to hold fast-forward while its prompt waits. */
+    public static void autoAcceptRerollWhileHeld(Button button, Runnable confirm) {
         autoConfirmWhileHeld(button, confirm, FastForwardAction::isHeld, true);
     }
 

@@ -624,69 +624,80 @@ public class ReportFixesPreview extends ApplicationAdapter {
 
     private void nunDiceBonus() throws Exception {
         String oldLanguage = sk.sivak.eldritchhorror.core.view.utils.UiText.getLanguage();
-        for (String language : new String[]{"en", "sk"}) for (boolean fast : new boolean[]{false, true}) {
-            setPreviewLanguage(language);
-            if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
-            InfoStage.setBottomHeight(5);
-            sk.sivak.eldritchhorror.core.view.test.TestViewImpl view =
-                    new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
-            List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> raw = new ArrayList<>();
-            List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> adjusted = new ArrayList<>();
-            int[] values = {2, 4, 6};
-            for (int i = 0; i < values.length; i++) {
-                sk.sivak.eldritchhorror.core.constants.test.DiceRoll die =
-                        new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
-                die.setDiceNr(i); die.setDiceValue(values[i]);
-                die.setScore(values[i] >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
-                        : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
-                raw.add(die);
-                sk.sivak.eldritchhorror.core.constants.test.DiceRoll result =
-                        new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
-                result.setDiceNr(i); result.setDiceValue(Math.min(6, values[i] + 1));
-                result.setScore(result.getDiceValue() >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
-                        : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
-                adjusted.add(result);
-            }
-            int[] finished = {0};
-            view.showRolledTestDices(raw).subscribe(() -> finished[0]++);
-            tick(1200);
-            require(finished[0] == 1, "Raw dice did not settle");
-            float previousBottom = InfoStage.getBottomHeight();
-            view.showNunDiceBonus(adjusted).subscribe(() -> finished[0]++);
-            tick(600);
-            require(finished[0] == 1, "Bonus completed without OK");
-            require(labels(stage.getRoot()).contains("+1"), "Nun explanation missing");
-            TextButton ok = textButton("OK");
-            require(ok != null && ok.getStage() == stage, "Nun OK button missing");
-            for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
-                if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
-                    sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
-                            (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
-                    require(die.getDiceValue() == values[die.getDiceNumber()], "Bonus applied before OK");
+        Input previousInput=Gdx.input;
+        boolean[] held={false};
+        Gdx.input=(Input)Proxy.newProxyInstance(Input.class.getClassLoader(),new Class[]{Input.class},(p,method,args)-> {
+            if(method.getName().equals("isKeyPressed") && ((Integer)args[0])==Input.Keys.F) return held[0];
+            return method.invoke(previousInput,args);
+        });
+        try {
+            for (int confirmation=0; confirmation<3; confirmation++) for (String language : new String[]{"en", "sk"}) for (boolean fast : new boolean[]{false, true}) {
+                setPreviewLanguage(language);
+                if (fast) FastForwardAction.turnOn(); else FastForwardAction.turnOff();
+                InfoStage.setBottomHeight(5);
+                sk.sivak.eldritchhorror.core.view.test.TestViewImpl view =
+                        new sk.sivak.eldritchhorror.core.view.test.TestViewImpl();
+                List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> raw = new ArrayList<>();
+                List<sk.sivak.eldritchhorror.core.constants.test.DiceRoll> adjusted = new ArrayList<>();
+                int[] values = {2, 4, 6};
+                for (int i = 0; i < values.length; i++) {
+                    sk.sivak.eldritchhorror.core.constants.test.DiceRoll die =
+                            new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
+                    die.setDiceNr(i); die.setDiceValue(values[i]);
+                    die.setScore(values[i] >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
+                            : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
+                    raw.add(die);
+                    sk.sivak.eldritchhorror.core.constants.test.DiceRoll result =
+                            new sk.sivak.eldritchhorror.core.constants.test.DiceRoll();
+                    result.setDiceNr(i); result.setDiceValue(Math.min(6, values[i] + 1));
+                    result.setScore(result.getDiceValue() >= 5 ? sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.GOOD
+                            : sk.sivak.eldritchhorror.core.constants.test.DiceRoll.Score.BAD);
+                    adjusted.add(result);
                 }
-            }
-            String suffix = language + (fast ? "-fast" : "");
-            draw("nun-bonus-notice-" + suffix);
-            click(ok); click(ok);
-            tick(300);
-            require(finished[0] == 2, "Bonus animation did not complete once");
-            require(!labels(stage.getRoot()).contains("+1"), "Nun explanation was not removed");
-            require(ok.getStage() == null, "Nun OK button was not removed");
-            require(InfoStage.getBottomHeight() == previousBottom, "Nun prompt did not restore layout");
-            for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
-                if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
-                    sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
-                            (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
-                    require(die.getDiceValue() == adjusted.get(die.getDiceNumber()).getDiceValue(), "Adjusted face mismatch");
-                    require(die.getScore() == adjusted.get(die.getDiceNumber()).getScore(), "Adjusted highlight mismatch");
-                    require(Math.abs(die.getScaleX() - 1f) < .001f, "Bonus pulse did not finish");
+                int[] finished = {0};
+                view.showRolledTestDices(raw).subscribe(() -> finished[0]++);
+                tick(1200);
+                require(finished[0] == 1, "Raw dice did not settle");
+                float previousBottom = InfoStage.getBottomHeight();
+                held[0]=confirmation==1;
+                view.showNunDiceBonus(adjusted).subscribe(() -> finished[0]++);
+                tick(600);
+                TextButton ok = confirmation == 1 ? null : textButton("OK");
+                if (confirmation!=1) {
+                    require(finished[0] == 1, "Bonus completed without OK");
+                    require(labels(stage.getRoot()).contains("+1"), "Nun explanation missing");
+                    require(ok != null && ok.getStage() == stage, "Nun OK button missing");
+                    for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
+                        if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
+                            sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
+                                    (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
+                            require(die.getDiceValue() == values[die.getDiceNumber()], "Bonus applied before OK");
+                        }
+                    }
                 }
+                String suffix = language + (fast ? "-fast" : "") + "-confirm-"+confirmation;
+                draw("nun-bonus-notice-" + suffix);
+                if(confirmation==0) { click(ok); click(ok); } else held[0]=true;
+                tick(300);
+                require(finished[0] == 2, "Bonus animation did not complete once");
+                require(!labels(stage.getRoot()).contains("+1"), "Nun explanation was not removed");
+                require(ok == null || ok.getStage() == null, "Nun OK button was not removed");
+                require(InfoStage.getBottomHeight() == previousBottom, "Nun prompt did not restore layout");
+                for (Actor actor : InfoStage.getDiceLayer().getChildren()) {
+                    if (actor instanceof sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) {
+                        sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage die =
+                                (sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage) actor;
+                        require(die.getDiceValue() == adjusted.get(die.getDiceNumber()).getDiceValue(), "Adjusted face mismatch");
+                        require(die.getScore() == adjusted.get(die.getDiceNumber()).getScore(), "Adjusted highlight mismatch");
+                        require(Math.abs(die.getScaleX() - 1f) < .001f, "Bonus pulse did not finish");
+                    }
+                }
+                draw("nun-bonus-adjusted-" + suffix);
+                InfoStage.getDiceLayer().clearChildren();
+                held[0]=false;
             }
-            draw("nun-bonus-adjusted-" + suffix);
-            InfoStage.getDiceLayer().clearChildren();
-        }
-        setPreviewLanguage(oldLanguage); FastForwardAction.turnOff();
-        System.out.println("PASS: Nun raw dice wait for OK, adjusted faces/highlights and single completion at both speeds/languages");
+        } finally { Gdx.input=previousInput; setPreviewLanguage(oldLanguage); FastForwardAction.turnOff(); }
+        System.out.println("PASS: Nun manual, held-on-arrival and later-hold confirmations; adjusted faces and single completion at both speeds/languages");
     }
 
     private void october20Reports() throws Exception {
