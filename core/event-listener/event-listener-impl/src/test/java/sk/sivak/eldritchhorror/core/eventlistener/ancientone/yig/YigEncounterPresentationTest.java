@@ -308,6 +308,60 @@ public class YigEncounterPresentationTest {
         assertFalse(effects.contains("progress"));
     }
 
+    @Test public void specialEscapeWaitsForAdjacentMapChoiceThenMovesBeforeDelay() {
+        LocationMap map = new LocationMap(); map.initLocations(); platform.setLocationMap(map);
+        List<LocationId> adjacent = new ArrayList<>();
+        for (sk.sivak.eldritchhorror.core.constants.location.LocationInfo.Connection connection
+                : map.getLocationInfo(LocationId.THE_AMAZON).getConnections()) adjacent.add(connection.getLocationId());
+        List<LocationId> offered = new ArrayList<>();
+        rx.subjects.PublishSubject<LocationId> selection = rx.subjects.PublishSubject.create();
+        platform.setGameService(mock(GameService.class, (name, args) -> {
+            assertEquals("selectLocation", name);
+            offered.addAll(((sk.sivak.eldritchhorror.core.eventtype.data.basic.SelectLocationData) args[0]).getLocations());
+            return Single.<LocationId>create(sub -> queue(() -> {
+                assertFalse(paperVisible);
+                waiting = true;
+                selection.toSingle().subscribe(sub);
+            }));
+        }));
+        platform.setBasicActionService(mock(BasicActionService.class, (name, args) -> {
+            assertEquals("travelToLocation", name);
+            assertEquals(adjacent.get(0), ((sk.sivak.eldritchhorror.core.constants.location.LocationInfo.Connection) args[0]).getLocationId());
+            queue(() -> effects.add("move")); return null;
+        }));
+        platform.setInvestigatorService(mock(InvestigatorService.class, (name, args) -> {
+            queue(() -> effects.add(name)); return null;
+        }));
+        startSpecial(5); click(); finishTest(true); click(); finishTest(false); click();
+        assertEquals(new LinkedHashSet<>(adjacent), new LinkedHashSet<>(offered));
+        assertTrue(waiting);
+        assertFalse(effects.contains("move")); assertFalse(effects.contains("becomeDelayed"));
+        resume(() -> { selection.onNext(adjacent.get(0)); selection.onCompleted(); });
+        assertTrue(effects.contains("move"));
+        assertTrue(effects.indexOf("move") < effects.indexOf("becomeDelayed"));
+        assertEquals(0, papers); assertFalse(waiting);
+    }
+
+    @Test public void failedWildernessResearchMovesToRandomNearestCityWithoutAQuestion() {
+        LocationMap map = new LocationMap(); map.initLocations(); platform.setLocationMap(map);
+        Set<LocationId> cities = EnumSet.noneOf(LocationId.class);
+        for (LocationId id : LocationId.values())
+            if (map.getLocationInfo(id).getLocationType() == LocationType.CITY) cities.add(id);
+        List<LocationId> nearest = YigEffects.nearest(LocationId.THE_AMAZON, cities);
+        assertTrue("Exercise tied nearest cities", nearest.size() > 1);
+        platform.setBasicActionService(mock(BasicActionService.class, (name, args) -> {
+            assertEquals("travelToLocation", name);
+            assertTrue(nearest.contains(((sk.sivak.eldritchhorror.core.constants.location.LocationInfo.Connection) args[0]).getLocationId()));
+            queue(() -> effects.add("move")); return null;
+        }));
+        start(18, LocationType.WILDERNESS); click(); finishTest(false);
+        assertFalse(effects.contains("move"));
+        click();
+        assertEquals(1, Collections.frequency(effects, "move"));
+        assertTrue(effects.indexOf("move") < effects.indexOf("gainCondition:" + ConditionId.DETAINED));
+        assertNull(question); assertFalse(waiting); assertEquals(0, papers);
+    }
+
     @Test public void successIsHiddenUntilTestFinishesAndAppliedAfterConfirmation() {
         start(2, LocationType.CITY);
         assertEquals(Collections.singletonList("flavor"), effects);

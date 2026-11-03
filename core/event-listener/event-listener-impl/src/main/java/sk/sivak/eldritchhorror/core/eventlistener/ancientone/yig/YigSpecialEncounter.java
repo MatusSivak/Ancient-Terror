@@ -73,7 +73,7 @@ final class YigSpecialEncounter {
                         progress, outcome(text("knyan.5.pass.fail.info"), () -> {
                             List<LocationId> adjacent=new ArrayList<>();
                             for(LocationInfo.Connection c:p().getLocationMap().getLocationInfo(p().getInvestigators().getActiveInvestigator().getCurrentLocationId()).getConnections())adjacent.add(c.getLocationId());
-                            chooseLocation(adjacent,text("knyan.5.escape.title"),l -> moveInvestigator(l));delayed();
+                            chooseLocation(adjacent, YigEffects::moveInvestigator);delayed();
                         })), outcome(text("knyan.5.fail.info"), () -> {damage(1,0);condition(INTERNAL_INJURY);}));
                 break;
             case 6:

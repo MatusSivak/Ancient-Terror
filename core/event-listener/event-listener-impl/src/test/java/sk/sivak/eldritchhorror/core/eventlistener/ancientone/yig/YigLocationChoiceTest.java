@@ -6,7 +6,7 @@ import java.util.function.BiFunction;
 import org.junit.*;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.constants.question.*;
+import sk.sivak.eldritchhorror.core.eventtype.data.basic.SelectLocationData;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.service.*;
 import static org.junit.Assert.*;
@@ -24,33 +24,30 @@ public class YigLocationChoiceTest {
             return null;
         }));
         ServicePlatform.get().setGameService(mock(GameService.class, (name, args) -> {
-            assertEquals("ask", name); questions++;
-            Question<LocationId> question = (Question<LocationId>) args[0];
-            assertEquals("Nearest Expedition", question.getTitle());
-            assertEquals(2, question.getOptions().size());
-            Answer<LocationId, Object> answer = new Answer<>();
-            answer.setResponseData(question.getOptions().get(1).getValue());
-            return Single.just(answer);
+            assertEquals("selectLocation", name); questions++;
+            SelectLocationData selection = (SelectLocationData) args[0];
+            assertEquals(Arrays.asList(LocationId.TUNGUSKA, LocationId.THE_HIMALAYAS), selection.getLocations());
+            return Single.just(selection.getLocations().get(1));
         }));
     }
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
 
     @Test public void oneDistinctDestinationResolvesWithoutAQuestion() {
         YigEffects.chooseLocation(Arrays.asList(LocationId.TUNGUSKA, LocationId.TUNGUSKA),
-                "Nearest Expedition", location -> { assertEquals(1, holds); selected.add(location); });
+                location -> { assertEquals(1, holds); selected.add(location); });
         assertEquals(Collections.singletonList(LocationId.TUNGUSKA), selected);
         assertEquals(0, questions);
         assertEquals(0, holds);
     }
-    @Test public void tiedDestinationsRemainAPlayerChoice() {
-        YigEffects.chooseLocation(Arrays.asList(LocationId.TUNGUSKA, LocationId.THE_HIMALAYAS),
-                "Nearest Expedition", selected::add);
+    @Test public void multipleDestinationsUseMapPickerWithoutDuplicateLocations() {
+        YigEffects.chooseLocation(Arrays.asList(LocationId.TUNGUSKA, LocationId.THE_HIMALAYAS, LocationId.TUNGUSKA),
+                location -> { assertEquals(1, holds); selected.add(location); });
         assertEquals(Collections.singletonList(LocationId.THE_HIMALAYAS), selected);
         assertEquals(1, questions);
         assertEquals(0, holds);
     }
     @Test public void noDestinationDoesNothing() {
-        YigEffects.chooseLocation(Collections.emptyList(), "Nearest Expedition", selected::add);
+        YigEffects.chooseLocation(Collections.emptyList(), selected::add);
         assertTrue(selected.isEmpty());
         assertEquals(0, questions);
     }

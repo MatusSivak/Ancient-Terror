@@ -45,6 +45,8 @@ public class PassportTable extends Table {
     private static final float BACKGROUND_HEIGHT = BACKGROUND_WIDTH / 1.5f;
     private static final float BACKGROUND_X = -15f;
     private static final float BACKGROUND_Y = -12f;
+    private static final float CARDS_WIDTH = 750f;
+    private static final float CARDS_HEIGHT = 450f;
 
     private boolean displayed;
     private InvestigatorSheetButtons buttons;
@@ -150,7 +152,7 @@ public class PassportTable extends Table {
         clear();
 
         addHitImage();
-        pad(0, 35, 50, 0);
+        pad(0, 10, 15, 0);
 
         List<CardClickListener> cardClickListeners = new LinkedList<>();
         List<CardTemplate> cardTemplates = new LinkedList<>();
@@ -164,20 +166,21 @@ public class PassportTable extends Table {
                 new String[]{"investigator.section.spells", "investigator.section.conditions"},
                 java.util.Arrays.asList(spells, conditions), cardClickListeners, cardTemplates);
         if (firstRow.hasChildren()) {
-            sheet.add(firstRow).width(700).left().padBottom(secondRow.hasChildren() ? 12 : 0).row();
+            sheet.add(firstRow).width(CARDS_WIDTH).left().padBottom(secondRow.hasChildren() ? 8 : 0).row();
         }
         if (secondRow.hasChildren()) {
-            sheet.add(secondRow).width(700).left().row();
+            sheet.add(secondRow).width(CARDS_WIDTH).left().row();
         }
         for (CardClickListener listener : cardClickListeners) {
             listener.setOtherListeners(cardClickListeners);
             listener.setAllTemplates(cardTemplates);
         }
-        FittedCharacterSheet fittedSheet = new FittedCharacterSheet(sheet);
-        add(fittedSheet).width(700).height(400);
+        // Keep the full page width: fitting both rows by scaling the whole sheet
+        // also shrank every scroll viewport and left large unused side borders.
+        add(sheet).width(CARDS_WIDTH).height(CARDS_HEIGHT);
         activeCardListeners = cardClickListeners;
         // Clicks on titles, panels and empty scroll space bubble here; only the cards themselves keep it open.
-        fittedSheet.addListener(new ClickListener() {
+        sheet.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (!isInsideCard(event.getTarget())) {
@@ -232,18 +235,18 @@ public class PassportTable extends Table {
             if (!group.isEmpty()) populated++;
         }
         if (populated == 0) return row;
-        float sectionWidth = (700f - (populated - 1) * 12f) / populated;
+        float sectionWidth = (CARDS_WIDTH - (populated - 1) * 8f) / populated;
         int added = 0;
         for (int i = 0; i < groups.size(); i++) {
             if (groups.get(i).isEmpty()) continue;
             CardsTable cardsTable = new CardsTable();
-            cardsTable.init(groups.get(i), (int) (sectionWidth - 30));
+            cardsTable.init(groups.get(i), (int) (sectionWidth - 22), 0.14f);
             listeners.addAll(cardsTable.getCardClickListeners());
             templates.addAll(cardsTable.getCardTemplates());
 
             Table panel = new Table();
             panel.setBackground(new RoundedSheetPanel());
-            panel.pad(10);
+            panel.pad(6);
             Label title = new Label(
                     get(titles[i]), new Label.LabelStyle(
                     CustomAssetManager.getBitmapFontNew(CustomAssetManager.NEW_FONT_SPECIAL_ELITE, 42),
@@ -251,9 +254,9 @@ public class PassportTable extends Table {
             title.setFontScale(0.35f);
             title.setWrap(true);
             title.setAlignment(Align.left);
-            panel.add(title).width(sectionWidth - 20).padBottom(8).row();
-            panel.add(cardsTable).width(sectionWidth - 20).left();
-            row.add(panel).width(sectionWidth).top().padRight(++added < populated ? 12 : 0);
+            panel.add(title).width(sectionWidth - 12).padBottom(6).row();
+            panel.add(cardsTable).width(sectionWidth - 12).left();
+            row.add(panel).width(sectionWidth).top().padRight(++added < populated ? 8 : 0);
         }
         return row;
     }

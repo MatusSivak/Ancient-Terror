@@ -23,30 +23,34 @@ public class CardsTable extends VisTable {
     }
 
     public void init(List<? extends CardInfo> cardInfoList, int maxWidth) {
+        init(cardInfoList, maxWidth, CARD_SCALE);
+    }
+
+    public void init(List<? extends CardInfo> cardInfoList, int maxWidth, float cardScale) {
         cardTemplates.clear();
         cardClickListeners.clear();
         clear();
         HorizontalGroup horizontalGroup = new HorizontalGroup();
         ScrollPane scrollPane = new ScrollPane(horizontalGroup);
         scrollPane.setScrollingDisabled(false, true);
-        float scrollWidth = Math.min(maxWidth, cardInfoList.size() * CARD_SCALE * CardTemplate.CARD_WIDTH);
+        float scrollWidth = Math.min(maxWidth, cardInfoList.size() * cardScale * CardTemplate.CARD_WIDTH);
         add(scrollPane).width(scrollWidth);
         for (CardInfo cardInfo : cardInfoList) {
-            withCardInfo(cardInfo, horizontalGroup);
+            withCardInfo(cardInfo, horizontalGroup, cardScale);
         }
         pack();
     }
 
-    private void withCardInfo(CardInfo cardInfo, HorizontalGroup horizontalGroup) {
+    private void withCardInfo(CardInfo cardInfo, HorizontalGroup horizontalGroup, float cardScale) {
         CardTemplate cardTemplate = CardTemplate.buildCard(cardInfo);
         CardClickListener listener = new CardClickListener();
         cardTemplates.add(cardTemplate);
         cardClickListeners.add(listener);
 
         cardTemplate.addListener(listener);
-        cardTemplate.setScale(CARD_SCALE);
+        cardTemplate.setScale(cardScale);
 
-        horizontalGroup.addActor(new Container<>(cardTemplate).width(CardTemplate.CARD_WIDTH * CARD_SCALE).height(CardTemplate.CARD_HEIGHT * CARD_SCALE));
+        horizontalGroup.addActor(new Container<>(cardTemplate).width(CardTemplate.CARD_WIDTH * cardScale).height(CardTemplate.CARD_HEIGHT * cardScale));
     }
 
     public List<CardTemplate> getCardTemplates() {

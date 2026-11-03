@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
+import sk.sivak.eldritchhorror.core.eventtype.data.basic.SelectLocationData;
 import sk.sivak.eldritchhorror.core.eventtype.data.investigator.InvestigatorRestriction;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
@@ -30,16 +31,15 @@ public final class YigEffects {
         Question<Boolean> q = new Question<>(); q.setTitle(title); q.setOptions(Question.Option.noYesOptions);
         p().getGameService().ask(q).subscribe(a -> sequence(a.getResponseData() ? yes : no));
     }
-    public static void chooseLocation(Collection<LocationId> locations, String title, Action1<LocationId> action) {
+    public static void chooseLocation(Collection<LocationId> locations, Action1<LocationId> action) {
         if (locations.isEmpty()) return;
-        List<Question.Option<LocationId>> options = new ArrayList<>();
-        for (LocationId l : new LinkedHashSet<>(locations)) options.add(new Question.Option<>(l.toString(), l));
-        if (options.size() == 1) {
-            sequence(() -> action.call(options.get(0).getValue()));
+        List<LocationId> destinations = new ArrayList<>(new LinkedHashSet<>(locations));
+        if (destinations.size() == 1) {
+            sequence(() -> action.call(destinations.get(0)));
             return;
         }
-        Question<LocationId> q = new Question<>(); q.setTitle(title); q.setOptions(options);
-        p().getGameService().ask(q).subscribe(a -> sequence(() -> action.call(a.getResponseData())));
+        p().getGameService().selectLocation(new SelectLocationData(destinations))
+                .subscribe(destination -> sequence(() -> action.call(destination)));
     }
     public static void cureCurse() {
         List<InvestigatorId> eligible = new ArrayList<>();

@@ -370,7 +370,8 @@ public final class YigResearchEncounter extends AbstractResearchEncounter {
     private void moveToCity() {
         Set<LocationId> cities=EnumSet.noneOf(LocationId.class);
         for(LocationId l:LocationId.values()) if(p().getLocationMap().getLocationInfo(l).getLocationType()==LocationType.CITY) cities.add(l);
-        chooseLocation(nearest(p().getInvestigators().getActiveInvestigator().getCurrentLocationId(),cities),"Move to the nearest City", l -> moveInvestigator(l));
+        List<LocationId> destinations = nearest(p().getInvestigators().getActiveInvestigator().getCurrentLocationId(), cities);
+        if (!destinations.isEmpty()) moveInvestigator(destinations.get(new Random().nextInt(destinations.size())));
     }
     private void discardDefeated() {
         List<Question.Option<InvestigatorId>> options = new ArrayList<>();
