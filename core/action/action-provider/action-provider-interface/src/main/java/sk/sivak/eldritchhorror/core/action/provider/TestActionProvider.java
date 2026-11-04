@@ -77,7 +77,7 @@ public interface TestActionProvider {
 
     Action<Object, Void> destroyDamage(List<DiceRoll> diceRolls);
 
-    HookableAction<CombatData, CombatData> destroyMonsterHealth(List<DiceRoll> diceRolls);
+    HookableAction<CombatData, CombatData> destroyMonsterHealth();
 
     Action<Object, Void> destroySanity(int sanityLost);
 

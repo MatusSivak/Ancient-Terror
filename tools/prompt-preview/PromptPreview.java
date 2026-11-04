@@ -1,4 +1,7 @@
 import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.constants.monster.SkeletonMonster;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils;
+import sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.audio.Sound;
@@ -385,7 +388,7 @@ public class PromptPreview extends ApplicationAdapter {
         draw("combat-dice-" + (reproduceOldOrder ? "old-order" : successes + "-successes-" + fast));
         if (successes == 0) {
             completed.set(0);
-            view.destroyMonsterHealth(rolls).subscribe(completed::incrementAndGet);
+            view.destroyMonsterHealth(successes).subscribe(completed::incrementAndGet);
             tickCombat(100, fast);
             require(completed.get() == 1 && InfoStage.getDiceLayer().getChildren().size == 0,
                     "Zero-success combat did not remove its finished roll");
@@ -430,7 +433,7 @@ public class PromptPreview extends ApplicationAdapter {
         portrait.setPosition(130, 80, Align.center);
         stage.addActor(portrait);
         table.destroyMonsterHealth(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
-        float startX = image.getX();
+        Vector2 restingSpot = new Vector2((Vector2) field(table, "wanderPosition"));
         Set<Actor> bullets = new HashSet<>();
         for (int i = 0; i < 600 && completed.get() == 0; i++) {
             stage.act(1f / 60);
@@ -440,7 +443,7 @@ public class PromptPreview extends ApplicationAdapter {
                 require(shooter.dst(130, 80) < 1f, "bullet started away from the portrait: " + shooter);
                 draw("monster-health-bullets");
             }
-            require(Math.abs(image.getX() - startX) < 6f, "monster kept walking while being shot at");
+            if (completed.get() == 0) require(restingSpot.dst((Vector2) field(table, "wanderPosition")) < 1f, "monster walked during recoil");
         }
         portrait.remove();
         require(completed.get() == 1, "monster health destruction did not complete");
@@ -667,18 +670,25 @@ public class PromptPreview extends ApplicationAdapter {
         System.out.println("PASS: combat interruption hides the monster and brings it back");
     }
 
-    /** Defense is capped by incoming fireballs. Extra offensive bullets can strike the body after the last heart. */
+    /** Defense is capped by incoming fireballs and the killing shot ends the offensive volley. */
     private void previewSurplusSuccesses() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
         MonsterCombatTableData data = new MonsterCombatTableData();
         data.setMonsterClassName("SkeletonMonster"); data.setMonsterName("Skeleton");
-        data.setHorror(1); data.setDamage(1); data.setToughness(1); data.setCurrentHealth(1);
+        SkeletonMonster monster = new SkeletonMonster();
+        data.setMonsterInfo(monster);
+        data.setHorror(1); data.setDamage(1); data.setToughness(3); data.setCurrentHealth(2);
+        MonsterUtils.MonsterIdLayerResolver resolver = new MonsterUtils.MonsterIdLayerResolver(monster);
+        MapStage.addToLayer(new Actor(), resolver);
         table.init(data);
         table.highlightHorror();
         tick(150);
         int successes = 4;
         Vector2 portrait = new Vector2(130, 80);
+        InvestigatorImage fighter = new InvestigatorImage(InvestigatorId.THE_BOUNTY_HUNTER, null);
+        fighter.setPosition(portrait.x, portrait.y, Align.center);
+        stage.addActor(fighter);
         String[] phases = {"horror", "damage", "health"};
         for (String phase : phases) {
             AtomicInteger completed = new AtomicInteger();
@@ -686,16 +696,32 @@ public class PromptPreview extends ApplicationAdapter {
                     : phase.equals("damage") ? table.destroyDamage(successes, portrait) : table.destroyMonsterHealth(successes, portrait);
             attack.subscribe(completed::incrementAndGet);
             Set<Actor> bullets = new HashSet<>();
+            int killingFrame = -1;
             for (int i = 0; i < 900 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
                 for (Actor effect : descendants(stage.getRoot())) {
-                    if ("combat-bullet-tracer".equals(effect.getName())) bullets.add(effect);
+                    if ("combat-bullet-tracer".equals(effect.getName()) && bullets.add(effect) && phase.equals("health")) {
+                        if (bullets.size() == 1) {
+                            require(table.getMonsterImage().isVisible() && stage.getRoot().findActor("combat-hit-burst") != null, "first hit should stagger the living monster");
+                            continue;
+                        }
+                        killingFrame = i;
+                        require(stage.getRoot().findActor("defeat-fragment-0") != null, "lethal shot did not shatter on impact");
+                        require(table.getStage() == stage && table.getStatusPlate().getStage() == null, "defeat waited for combat teardown");
+                        require(!table.getMonsterImage().isVisible() && MapStage.getActor(resolver).isEmpty(), "defeated monster still visible");
+                    }
                 }
+                if (killingFrame >= 0 && i == killingFrame + 8) draw("combat-killing-hit");
             }
             require(completed.get() == 1, phase + " with surplus successes did not complete");
-            require(bullets.size() == (phase.equals("health") ? successes : 1), phase + ": unexpected bullet count " + bullets.size());
+            require(bullets.size() == (phase.equals("health") ? 2 : 1), phase + ": unexpected bullet count " + bullets.size());
             tick(60);
         }
+        AtomicInteger confirmed = new AtomicInteger();
+        monster.generateUuid(); // The cup renews this before the defeat notification.
+        new MonsterViewImpl().defeatMonster(monster).subscribe(confirmed::incrementAndGet);
+        require(confirmed.get() == 1 && stage.getRoot().findActor("monster-defeat") == null, "board replayed combat defeat");
+        fighter.remove();
         table.remove();
         tick(60);
         System.out.println("PASS: surplus successes respect incoming fireball and monster health counts");

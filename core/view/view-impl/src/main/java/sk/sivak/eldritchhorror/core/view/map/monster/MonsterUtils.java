@@ -17,6 +17,10 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.Spawner;
 
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.Collections;
+
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.*;
 import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDistance;
 
@@ -25,12 +29,28 @@ import static sk.sivak.eldritchhorror.core.view.map.helper.DistanceHelper.getDis
  */
 public class MonsterUtils {
 
+    // The cup changes the monster's UUID before notifying the view. Track the actual monster instance.
+    private static final Set<MonsterInfo> combatDefeats =
+            Collections.newSetFromMap(new WeakHashMap<>());
+
+    public static void recordCombatDefeat(MonsterInfo monster) {
+        if (monster != null) {
+            combatDefeats.add(monster);
+            MapStage.removeActor(new MonsterIdLayerResolver(monster));
+        }
+    }
+
+    public static boolean consumeCombatDefeat(MonsterInfo monster) {
+        return combatDefeats.remove(monster);
+    }
+
     public static Completable spawnMonster(MonsterInfo monsterInfo, GameController gameController) {
         return spawnMonster(monsterInfo, gameController, null);
     }
 
     public static Completable spawnMonster(MonsterInfo monsterInfo, GameController gameController, Runnable onSpawn) {
         return Completable.create(onSub -> {
+            combatDefeats.remove(monsterInfo);
             String textureName = sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork.path(
                     monsterInfo.getClass().getSimpleName(), monsterInfo.isEpic());
             CustomAssetManager.getTextureAsync(textureName).subscribe(texture -> {

@@ -28,6 +28,10 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterFacing;
 import sk.sivak.eldritchhorror.core.view.bigactors.BigActorsManager;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
+import sk.sivak.eldritchhorror.core.view.animation.BurstLight;
+import sk.sivak.eldritchhorror.core.view.animation.BreakApartAnimation;
+import sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -88,6 +92,8 @@ public class MonsterCombatTable extends VisTable {
     private boolean holdStill;
     private float toughnessBarScale;
     private float hitShake;
+    private final Vector2 recoilDirection = new Vector2();
+    private boolean shattered;
     private float presence;
     private boolean interrupted;
     /** Tokens jitter around their slot on the plate; the anchor is the slot, so they never drift away. */
@@ -173,6 +179,7 @@ public class MonsterCombatTable extends VisTable {
         imageSize = data.isMonsterEpic() ? EPIC_IMAGE_SIZE : IMAGE_SIZE;
         statusPlate = createStatusPlate(data);
         ButtonUtils.addClickListener(statusPlate, () -> displayMonsterCard(data));
+        shattered = false;
         holdStill = false;
         stepPhase = 0f;
         walkBlend = 0f;
@@ -256,7 +263,7 @@ public class MonsterCombatTable extends VisTable {
     @Override
     public void act(float delta) {
         super.act(delta);
-        if (monsterImage == null) {
+        if (monsterImage == null || shattered) {
             return;
         }
         attachMonsterImage();
@@ -286,11 +293,15 @@ public class MonsterCombatTable extends VisTable {
         float tilt = (MathUtils.sin(stepPhase) * STEP_TILT + walkLean) * walkBlend
                 + MathUtils.sin(hoverTime * 1.3f) * 1.5f * breathing;
         float shake = 0f;
+        float kick = 0f;
         if (hitShake > 0f) {
-            hitShake = Math.max(0f, hitShake - delta);
-            shake = MathUtils.sin(hoverTime * 70f) * 5f * (hitShake / 0.3f);
+            hitShake = Math.max(0f, hitShake - delta * (FastForwardAction.isOn() ? 20f : 1f));
+            float remaining = hitShake / 0.3f;
+            kick = 16f * remaining * remaining;
+            shake = MathUtils.sin(hoverTime * 70f) * 4f * remaining;
+            tilt -= recoilDirection.x * 8f * remaining;
         }
-        monsterImage.setPosition(wanderPosition.x + shake, wanderPosition.y + bob);
+        monsterImage.setPosition(wanderPosition.x + shake + recoilDirection.x * kick, wanderPosition.y + bob + recoilDirection.y * kick);
         monsterImage.setRotation(tilt);
         // Higher on the floor is farther away. Foreshorten the portrait slightly as it turns into a stroll.
         float depth = 1f - MathUtils.clamp((wanderPosition.y - wanderArea.y) / wanderArea.height, 0f, 1f);
@@ -303,7 +314,7 @@ public class MonsterCombatTable extends VisTable {
         monsterImage.getColor().a = presence * getColor().a;
         if (epicGlow != null) {
             float glowOffset = imageSize * (EPIC_GLOW_SCALE - 1f) / 2f;
-            epicGlow.setPosition(wanderPosition.x + shake - glowOffset, wanderPosition.y + bob - glowOffset);
+            epicGlow.setPosition(monsterImage.getX() - glowOffset, monsterImage.getY() - glowOffset);
             epicGlow.setRotation(tilt);
             epicGlow.setScale(monsterImage.getScaleX(), monsterImage.getScaleY());
             epicGlow.getColor().a = presence * getColor().a * (0.7f + 0.3f * MathUtils.sin(hoverTime * 3f));
@@ -378,12 +389,21 @@ public class MonsterCombatTable extends VisTable {
         return new Vector2(body.x + MathUtils.random(-spread, spread), body.y + MathUtils.random(-spread, spread));
     }
 
-    private void playHitReaction() {
+    private void playHitReaction(Vector2 investigator, Vector2 impact) {
+        recoilDirection.set(impact).sub(investigator).nor();
         hitShake = 0.3f;
         monsterImage.clearActions();
-        monsterImage.addAction(Actions.sequence(
-                Actions.color(new Color(1f, 0.4f, 0.4f, 1f), 0.06f),
-                Actions.color(Color.WHITE, 0.35f)));
+        monsterImage.setColor(1f, 0.30f, 0.20f, 1f);
+        monsterImage.addAction(new FastForwardAction<>(Actions.color(Color.WHITE, 0.32f)));
+        BurstLight burst = new BurstLight(new Color(1f, 0.55f, 0.21f, 1f),
+                data.isMonsterEpic() ? 138f : 104f);
+        burst.setName("combat-hit-burst");
+        burst.setPosition(impact.x, impact.y);
+        getStage().addActor(burst);
+        burst.progress(0f);
+        burst.addAction(new FastForwardAction<>(Actions.sequence(new TemporalAction(0.32f) {
+            @Override protected void update(float progress) { burst.progress(progress); }
+        }, Actions.removeActor())));
     }
 
     private void playAttackReaction() {
@@ -539,7 +559,7 @@ public class MonsterCombatTable extends VisTable {
         if (fireballService != null) {
             fireballService.dispose();
         }
-        if (monsterImage != null && monsterImage.getParent() != null) {
+        if (!shattered && monsterImage != null && monsterImage.getParent() != null) {
             monsterImage.setTouchable(Touchable.disabled);
             monsterImage.addAction(Actions.sequence(Actions.alpha(0f, HIDE_DURATION), Actions.removeActor()));
         }
@@ -734,14 +754,14 @@ public class MonsterCombatTable extends VisTable {
     public Completable destroyMonsterHealth(int successes, Vector2 investigator) {
         return Completable.create(onSub -> {
             int hearts = toughnessBar.getCurrentHealth();
-            if (hearts == 0 || successes == 0) {
+            if (hearts == 0 || successes <= 0) {
                 onSub.onCompleted();
                 return;
             }
             holdStill = true;
             int hits = Math.min(hearts, successes);
             float tokenWidth = Math.min(110f, 650f / Math.max(1, hits - 1));
-            int[] pendingShots = {successes};
+            int[] pendingShots = {hits};
             Runnable finishShot = () -> {
                 if (--pendingShots[0] == 0) {
                     holdStill = false;
@@ -749,20 +769,29 @@ public class MonsterCombatTable extends VisTable {
                 }
             };
             SequenceAction volley = Actions.sequence();
-            for (int i = 0; i < successes; i++) {
+            for (int i = 0; i < hits; i++) {
                 if (i > 0) {
                     volley.addAction(Actions.delay(MathUtils.random(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX)));
                 }
-                Actor heart = i < hits ? toughnessBar.getChildren().get(hearts - 1 - i) : null;
+                Actor heart = toughnessBar.getChildren().get(hearts - 1 - i);
                 float offsetX = ((hits - 1) / 2f - i) * tokenWidth;
                 volley.addAction(Actions.run(() -> {
-                    fireballService.fireBullet(investigator, randomBodyPoint(getMonsterBodyCenter()));
-                    playHitReaction();
-                    if (heart == null) {
-                        finishShot.run();
-                    } else {
-                        toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);
+                    Vector2 impact = randomBodyPoint(getMonsterBodyCenter());
+                    fireballService.fireBullet(investigator, impact);
+                    playHitReaction(investigator, impact);
+                    Completable loss = toughnessBar.loseToughnessNew(heart, offsetX);
+                    if (toughnessBar.getCurrentHealth() == 1) {
+                        // Tear the last heart from its slot before detaching the plate.
+                        loss = Completable.merge(loss, Completable.create(subscriber -> {
+                            shattered = true;
+                            statusPlate.remove();
+                            groundShadow.remove();
+                            if (epicGlow != null) epicGlow.remove();
+                            MonsterUtils.recordCombatDefeat(data.getMonsterInfo());
+                            BreakApartAnimation.shatterOnHit(monsterImage, subscriber);
+                        }));
                     }
+                    loss.subscribe(finishShot::run);
                 }));
             }
             addAction(new FastForwardAction<>(volley));

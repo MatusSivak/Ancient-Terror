@@ -51,7 +51,7 @@ public interface TestController {
 
     Completable destroyDamage(List<DiceRoll> diceRolls);
 
-    Completable destroyMonsterHealth(List<DiceRoll> diceRolls);
+    Completable destroyMonsterHealth(int successes);
 
     Completable destroySanity(int sanityLost);
 

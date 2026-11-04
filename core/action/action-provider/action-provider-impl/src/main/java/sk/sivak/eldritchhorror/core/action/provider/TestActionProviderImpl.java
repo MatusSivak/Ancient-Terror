@@ -221,8 +221,8 @@ public class TestActionProviderImpl implements TestActionProvider {
     }
 
     @Override
-    public HookableAction<CombatData, CombatData> destroyMonsterHealth(List<DiceRoll> diceRolls) {
-        return new DestroyMonsterHealthAction(diceRolls);
+    public HookableAction<CombatData, CombatData> destroyMonsterHealth() {
+        return new DestroyMonsterHealthAction();
     }
 
     @Override

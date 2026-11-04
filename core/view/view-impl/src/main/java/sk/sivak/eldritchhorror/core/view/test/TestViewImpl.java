@@ -729,10 +729,9 @@ public class TestViewImpl implements TestView {
     }
 
     @Override
-    public Completable destroyMonsterHealth(List<DiceRoll> diceRolls) {
+    public Completable destroyMonsterHealth(int successes) {
         CombatInterruption.resume();
-        int successes = countSuccesses(diceRolls);
-        if (successes == 0) {
+        if (successes <= 0) {
             diceRollerStack.pop().hideDices();
             InfoStage.hideActor(testTableStack.pop());
             InfoStage.setBottomHeight(5);

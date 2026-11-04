@@ -347,7 +347,7 @@ public class TestServiceImpl extends AbstractCommonService implements TestServic
 
                 convertTo(CombatData.class, () -> combatData);
                 // ghoul triggers here
-                destroyMonsterHealth(testResult.getDiceRolls());
+                destroyMonsterHealth();
                 release();
 
             });
@@ -362,8 +362,8 @@ public class TestServiceImpl extends AbstractCommonService implements TestServic
     }
 
     @Override
-    public void destroyMonsterHealth(List<DiceRoll> diceRolls) {
-        executeHookable(testActionProvider.destroyMonsterHealth(diceRolls));
+    public void destroyMonsterHealth() {
+        executeHookable(testActionProvider.destroyMonsterHealth());
     }
 
     @Override

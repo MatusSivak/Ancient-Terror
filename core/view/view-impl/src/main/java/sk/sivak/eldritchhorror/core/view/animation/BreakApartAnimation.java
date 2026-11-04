@@ -34,6 +34,15 @@ public final class BreakApartAnimation extends Group {
     private final DefeatBloodEffect blood;
 
     public static void start(Actor subject, Drawable flashDrawable, Color accent, String name, CompletableSubscriber subscriber) {
+        start(subject, flashDrawable, accent, name, subscriber, false);
+    }
+
+    public static void shatterOnHit(Image subject, CompletableSubscriber subscriber) {
+        start(subject, subject.getDrawable(), new Color(1f, 0.78f, 0.48f, 1f), "monster-defeat", subscriber, true);
+    }
+
+    private static void start(Actor subject, Drawable flashDrawable, Color accent, String name,
+                              CompletableSubscriber subscriber, boolean onHit) {
         Stage stage = subject.getStage();
         Vector2 center = subject.localToStageCoordinates(new Vector2(subject.getWidth() / 2, subject.getHeight() / 2));
         subject.clearActions();
@@ -41,13 +50,23 @@ public final class BreakApartAnimation extends Group {
         subject.setTouchable(Touchable.disabled);
         subject.setOrigin(subject.getWidth() / 2, subject.getHeight() / 2);
         subject.setPosition(center.x - subject.getWidth() / 2, center.y - subject.getHeight() / 2);
-        BreakApartAnimation animation = new BreakApartAnimation(subject, flashDrawable, accent, name);
+        BreakApartAnimation animation = new BreakApartAnimation(subject, flashDrawable, accent, name, onHit);
         // The small-actor layer fades during other UI transitions; defeat owns its visibility.
         stage.addActor(animation);
-        GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT_FLY);
-        animation.addAction(new FastForwardAction<>(new TemporalAction(TOTAL_TIME * ViewProperties.NORMAL_ACTION_DURATION) {
+        float startTime = onHit ? ZOOM_TIME + HOLD_TIME : 0f;
+        if (onHit) {
+            // Keep the fragments in the portrait's current orientation, including horizontal mirroring.
+            animation.setTransform(true);
+            animation.setPosition(center.x, center.y);
+            animation.setRotation(subject.getRotation());
+            animation.setScale(subject.getScaleX(), subject.getScaleY());
+            animation.animate(startTime);
+        } else {
+            GameplaySounds.play(GameplaySounds.Cue.MONSTER_DEFEAT_FLY);
+        }
+        animation.addAction(new FastForwardAction<>(new TemporalAction((TOTAL_TIME - startTime) * ViewProperties.NORMAL_ACTION_DURATION) {
             @Override protected void update(float percent) {
-                animation.animate(percent * TOTAL_TIME);
+                animation.animate(startTime + percent * (TOTAL_TIME - startTime));
             }
             @Override protected void end() {
                 animation.remove();
@@ -56,7 +75,7 @@ public final class BreakApartAnimation extends Group {
         }));
     }
 
-    private BreakApartAnimation(Actor subject, Drawable flashDrawable, Color accent, String name) {
+    private BreakApartAnimation(Actor subject, Drawable flashDrawable, Color accent, String name, boolean onHit) {
         this.subject = subject;
         setName(name);
         setTransform(false);
@@ -67,16 +86,18 @@ public final class BreakApartAnimation extends Group {
         startScaleY = subject.getScaleY();
         startAlpha = subject.getColor().a;
         startRotation = subject.getRotation();
-        targetX = ViewProperties.VIEWPORT_WIDTH / 2f - subject.getWidth() / 2;
-        targetY = ViewProperties.VIEWPORT_HEIGHT / 2f - subject.getHeight() / 2;
-        targetScale = presentationScale(subject.getWidth(), subject.getHeight());
+        float centerX = onHit ? 0f : ViewProperties.VIEWPORT_WIDTH / 2f;
+        float centerY = onHit ? 0f : ViewProperties.VIEWPORT_HEIGHT / 2f;
+        targetX = centerX - subject.getWidth() / 2;
+        targetY = centerY - subject.getHeight() / 2;
+        targetScale = onHit ? 1f : presentationScale(subject.getWidth(), subject.getHeight());
         extent = Math.max(subject.getWidth(), subject.getHeight()) * targetScale;
         addActor(subject);
         burst = new BurstLight(accent, extent);
-        burst.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f, ViewProperties.VIEWPORT_HEIGHT / 2f);
+        burst.setPosition(centerX, centerY);
         addActor(burst);
         blood = new DefeatBloodEffect(extent);
-        blood.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f, ViewProperties.VIEWPORT_HEIGHT / 2f);
+        blood.setPosition(centerX, centerY);
         addActor(blood);
         flash = flashDrawable == null ? null : new SilhouetteImage(flashDrawable);
         if (flash != null) {
@@ -127,8 +148,8 @@ public final class BreakApartAnimation extends Group {
                 float dx = piece.getOriginX() - paddedWidth / 2, dy = piece.getOriginY() - paddedHeight / 2;
                 float distance = Math.max(1, Vector2.len(dx, dy));
                 float speed = extent * (.40f + (i % 5) * .075f);
-                piece.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f - paddedWidth / 2 + dx / distance * speed * travel,
-                        ViewProperties.VIEWPORT_HEIGHT / 2f - paddedHeight / 2 + dy / distance * speed * travel
+                piece.setPosition(burst.getX() - paddedWidth / 2 + dx / distance * speed * travel,
+                        burst.getY() - paddedHeight / 2 + dy / distance * speed * travel
                                 - extent * .22f * progress * progress);
                 piece.setScale(1f - .55f * progress, 1f - .30f * progress);
                 piece.setRotation((i % 2 == 0 ? -1 : 1) * (70f + i % 7 * 23f) * travel);

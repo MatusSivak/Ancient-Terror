@@ -106,6 +106,10 @@ public class MonsterViewImpl implements MonsterView {
     }
 
     private void defeatMonster(MonsterInfo monsterInfo, CompletableSubscriber onSub) {
+        if (MonsterUtils.consumeCombatDefeat(monsterInfo)) {
+            onSub.onCompleted();
+            return;
+        }
         MonsterUtils.MonsterIdLayerResolver idLayerResolver = new MonsterUtils.MonsterIdLayerResolver(monsterInfo);
         List<Actor> allMonsters = MapStage.getActor(idLayerResolver);
 

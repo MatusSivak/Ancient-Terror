@@ -172,8 +172,8 @@ public class TestControllerImpl implements TestController {
     }
 
     @Override
-    public Completable destroyMonsterHealth(List<DiceRoll> diceRolls) {
-        return testView.destroyMonsterHealth(diceRolls);
+    public Completable destroyMonsterHealth(int successes) {
+        return testView.destroyMonsterHealth(successes);
     }
 
     @Override

@@ -55,7 +55,7 @@ public interface TestView {
 
     Completable destroyHealth(int healthLost);
 
-    Completable destroyMonsterHealth(List<DiceRoll> diceRolls);
+    Completable destroyMonsterHealth(int successes);
 
     Completable showCombatTable(MonsterCombatTableData data);
 
