@@ -74,11 +74,6 @@ public class ToughnessBar extends HorizontalGroup {
 
     private final Set<Actor> lostActors = new HashSet<>();
     public Completable loseToughnessNew(Actor healthToken, float offsetX) {
-        return loseToughnessNew(healthToken, offsetX, null);
-    }
-
-    /** @param onTear runs the moment the token tears apart (after its sound), e.g. to burst the defeated monster */
-    public Completable loseToughnessNew(Actor healthToken, float offsetX, Runnable onTear) {
         return Completable.defer(() -> {
             if (getStage() == null || currentHealth <= 0 || !lostActors.add(healthToken)) {
                 return Completable.complete();
@@ -94,10 +89,7 @@ public class ToughnessBar extends HorizontalGroup {
                         currentHealth--;
                         ((Container<ToughnessToken>) healthToken).getActor().deplete();
                         CombatSounds.playMonsterHealthLeave();
-                    }, () -> {
-                        CombatSounds.playMonsterHealthTear();
-                        if (onTear != null) onTear.run();
-                    });
+                    }, CombatSounds::playMonsterHealthTear);
         });
     }
 

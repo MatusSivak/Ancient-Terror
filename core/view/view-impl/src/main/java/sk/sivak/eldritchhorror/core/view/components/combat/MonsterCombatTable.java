@@ -398,6 +398,7 @@ public class MonsterCombatTable extends VisTable {
         monsterImage.clearActions();
         monsterImage.setColor(1f, 0.30f, 0.20f, 1f);
         monsterImage.addAction(new FastForwardAction<>(Actions.color(Color.WHITE, 0.32f)));
+        HitBloodSplatter.spray(getStage().getRoot(), impact, recoilDirection, data.isMonsterEpic() ? 1.35f : 1f);
         BurstLight burst = new BurstLight(new Color(1f, 0.55f, 0.21f, 1f),
                 data.isMonsterEpic() ? 138f : 104f);
         burst.setName("combat-hit-burst");
@@ -799,30 +800,22 @@ public class MonsterCombatTable extends VisTable {
                         toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);
                         return;
                     }
-                    // The monster bursts only once its last heart has torn apart.
+                    // The monster bursts the moment it loses its last heart; the heart's own effect plays on top.
                     int[] pendingParts = {2};
                     Runnable finishPart = () -> {
                         if (--pendingParts[0] == 0) finishShot.run();
                     };
-                    boolean[] burst = {false};
-                    Runnable shatter = () -> {
-                        if (burst[0]) return;
-                        burst[0] = true;
-                        shattered = true;
-                        statusPlate.remove();
-                        groundShadow.remove();
-                        if (epicGlow != null) epicGlow.remove();
-                        MonsterUtils.recordCombatDefeat(data.getMonsterInfo());
-                        BreakApartAnimation.shatterOnHit(monsterImage, new CompletableSubscriber() {
-                            @Override public void onCompleted() { finishPart.run(); }
-                            @Override public void onError(Throwable e) { finishPart.run(); }
-                            @Override public void onSubscribe(Subscription d) { }
-                        });
-                    };
-                    toughnessBar.loseToughnessNew(heart, offsetX, shatter).subscribe(() -> {
-                        // A skipped heart effect never tears; burst the monster anyway.
-                        shatter.run();
-                        finishPart.run();
+                    // Start the heart first, so it leaves its slot before the plate is detached.
+                    toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishPart::run);
+                    shattered = true;
+                    statusPlate.remove();
+                    groundShadow.remove();
+                    if (epicGlow != null) epicGlow.remove();
+                    MonsterUtils.recordCombatDefeat(data.getMonsterInfo());
+                    BreakApartAnimation.shatterOnHit(monsterImage, new CompletableSubscriber() {
+                        @Override public void onCompleted() { finishPart.run(); }
+                        @Override public void onError(Throwable e) { finishPart.run(); }
+                        @Override public void onSubscribe(Subscription d) { }
                     });
                 }));
             }
