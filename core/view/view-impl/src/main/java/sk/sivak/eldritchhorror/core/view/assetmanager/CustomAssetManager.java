@@ -367,8 +367,8 @@ public class CustomAssetManager extends AssetManager {
             soundPaths.add(path);
         }
         for (GameplaySounds.Cue cue : GameplaySounds.Cue.values()) {
-            load(cue.path, Sound.class);
-            soundPaths.add(cue.path);
+            // Several cues may share one file (e.g. the dice success sounds); queue it once.
+            if (soundPaths.add(cue.path)) load(cue.path, Sound.class);
         }
         for (UiSounds.Cue cue : UiSounds.Cue.values()) {
             load(cue.path, Sound.class);

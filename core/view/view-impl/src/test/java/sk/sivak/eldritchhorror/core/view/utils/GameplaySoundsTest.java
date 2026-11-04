@@ -157,18 +157,17 @@ public class GameplaySoundsTest {
         assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
     }
 
-    @Test public void combatAndEveryTestedSkillHaveTheirOwnDiceSuccessCue() {
-        Set<String> paths = new HashSet<>();
+    @Test public void combatHasItsOwnDiceSuccessCueAndOtherRollsShareTheWillSound() {
         for (sk.sivak.eldritchhorror.core.constants.investigator.Stat stat
                 : sk.sivak.eldritchhorror.core.constants.investigator.Stat.values()) {
             GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(stat, false);
             assertNotNull(stat.name(), cue);
-            assertTrue("Shared cue: " + cue.path, paths.add(cue.path));
+            assertEquals(stat.name(), DICE_SUCCESS_WILL.path, cue.path);
             assertEquals(DICE_SUCCESS_COMBAT, GameplaySounds.diceSuccessCue(stat, true));
         }
-        assertTrue("Combat shares a skill cue", paths.add(DICE_SUCCESS_COMBAT.path));
+        assertNotEquals(DICE_SUCCESS_WILL.path, DICE_SUCCESS_COMBAT.path);
         assertEquals(DICE_SUCCESS_ROLL, GameplaySounds.diceSuccessCue(null, false));
-        assertTrue("Plain rolls share a cue", paths.add(DICE_SUCCESS_ROLL.path));
+        assertEquals(DICE_SUCCESS_WILL.path, DICE_SUCCESS_ROLL.path);
         assertEquals(DICE_SUCCESS_STRENGTH,
                 GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH, false));
         assertEquals(DICE_SUCCESS_INFLUENCE,
