@@ -25,8 +25,8 @@ public class OmenTrackTokens extends Group {
     public final static int TOKEN_SIZE = 125;
     public final static int TOKEN_DISTANCE = 100;
     private static final float ROTATION_SPEED = 20f;
-    // The flame covers only ~70% of a fireball frame; enlarge it to match the old Orb disc.
-    private static final float ORB_SCALE = 1.4f;
+    // The flame covers only ~70% of a fireball frame; this keeps the Orb a little smaller than the old disc.
+    private static final float ORB_SCALE = 0.9f;
     private List<OmenTrackToken> tokens = new LinkedList<>();
     private float rotation;
 
@@ -120,10 +120,13 @@ public class OmenTrackTokens extends Group {
     private static class OmenTrackToken extends Image {
         private static final int FRAME_COUNT = 16;
         private static final float FRAME_DURATION = 1 / 24f;
+        private static final float SPIN_SPEED = 90f;
+        private static final float BRIGHTNESS = .6f;
         private static ShaderProgram greenShader;
 
         private final Animation<TextureRegionDrawable> animation;
         private float stateTime = MathUtils.random(FRAME_COUNT * FRAME_DURATION);
+        private final float spinSpeed = MathUtils.randomSign() * SPIN_SPEED;
 
         public OmenTrackToken() {
             TextureRegionDrawable[] frames = new TextureRegionDrawable[FRAME_COUNT];
@@ -136,12 +139,15 @@ public class OmenTrackTokens extends Group {
             animation.setPlayMode(Animation.PlayMode.LOOP);
             setDrawable(animation.getKeyFrame(stateTime));
             setScaling(Scaling.fit);
+            setColor(BRIGHTNESS, BRIGHTNESS, BRIGHTNESS, 1f);
+            setRotation(MathUtils.random(360f));
         }
 
         @Override
         public void act(float delta) {
             super.act(delta);
             stateTime += delta;
+            rotateBy(spinSpeed * delta);
             TextureRegionDrawable frame = animation.getKeyFrame(stateTime);
             if (frame != getDrawable()) setDrawable(frame);
         }
