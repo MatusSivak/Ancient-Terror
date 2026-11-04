@@ -13,6 +13,7 @@ import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
+import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
@@ -43,6 +44,12 @@ public class DiceRoller {
     private int minSuccess;
     private SingleSubscriber<? super Integer> onSub2;
     private List<Vector2> dicePositionsBeforeHide = new LinkedList<>();
+    /** Tested skill; picks the cue played when a thrown die lands as a success (rerolls included). */
+    private Stat testedStat;
+
+    public void setTestedStat(Stat testedStat) {
+        this.testedStat = testedStat;
+    }
 
     public void init(List<DiceRoll> diceRolls) {
 //        diceLayer.clearChildren();
@@ -158,6 +165,10 @@ public class DiceRoller {
     private void onRollEnd(DiceImage diceImage) {
         dicesFinished++;
         diceImage.highlight();
+        if (diceImage.getScore() != DiceRoll.Score.BAD) {
+            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(testedStat);
+            if (cue != null) GameplaySounds.play(cue);
+        }
         if (dicesFinished == dicesRolled) {
             onRollEnd();
         }

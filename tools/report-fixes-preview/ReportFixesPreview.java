@@ -655,7 +655,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                     adjusted.add(result);
                 }
                 int[] finished = {0};
-                view.showRolledTestDices(raw).subscribe(() -> finished[0]++);
+                view.showRolledTestDices(raw, null).subscribe(() -> finished[0]++);
                 tick(1200);
                 require(finished[0] == 1, "Raw dice did not settle");
                 float previousBottom = InfoStage.getBottomHeight();
@@ -740,7 +740,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
 
             String rules = language.equals("en")
                     ? "Spend 2 Clues and test Will. Gain 1 Train Ticket or 1 Ship Ticket."
-                    : "Získaj 2 vlakové lístky alebo 1 lodný lístok.";
+                    : "ZÃ­skaj 2 vlakovÃ© lÃ­stky alebo 1 lodnÃ½ lÃ­stok.";
             sk.sivak.eldritchhorror.core.view.components.table.LabelTable glyphPrompt =
                     sk.sivak.eldritchhorror.core.view.components.table.LabelTable.createAndShowTable(0, rules);
             tick(60);
@@ -905,7 +905,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
         for (String language : new String[]{"en", "sk"}) {
             setPreviewLanguage(language);
             String rules = language.equals("en") ? "Gain 2 Train Tickets or 1 Ship Ticket."
-                    : "Získaj 2 vlakové lístky alebo 1 lodný lístok.";
+                    : "ZÃ­skaj 2 vlakovÃ© lÃ­stky alebo 1 lodnÃ½ lÃ­stok.";
             Table panel = new Table(); panel.setBounds(100, 170, 760, 200);
             Label.LabelStyle style = new Label.LabelStyle(
                     sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getBitmapFontNew(
@@ -992,7 +992,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                 new sk.sivak.eldritchhorror.core.view.question.QuestionView().ask(question).subscribe(a -> done[0]++);
                 tick(120);
                 require(done[0] == 0, "Awakening must wait for OK");
-                String notice = lang.equals("en") ? "Yig awakens!" : "Yig sa prebúdza!";
+                String notice = lang.equals("en") ? "Yig awakens!" : "Yig sa prebÃºdza!";
                 require(labels(stage.getRoot()).contains(notice) && !labels(stage.getRoot()).contains("23:20"), "Awakening notice should contain only the announcement");
                 for (Actor actor : all(stage.getRoot())) if (actor instanceof Label
                         && ((Label)actor).getText().toString().equals(notice)) {

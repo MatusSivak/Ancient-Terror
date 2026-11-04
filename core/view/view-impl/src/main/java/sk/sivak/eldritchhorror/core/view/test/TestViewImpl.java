@@ -232,9 +232,10 @@ public class TestViewImpl implements TestView {
     }
 
     @Override
-    public Completable showRolledTestDices(List<DiceRoll> diceRolls) {
+    public Completable showRolledTestDices(List<DiceRoll> diceRolls, Stat stat) {
         DiceRoller diceRoller = diceRollerStack.push();
         diceRoller.setDiceLayer(InfoStage.getDiceLayer());
+        diceRoller.setTestedStat(stat);
         diceRoller.init(diceRolls);
         InfoStage.setBottomHeight(InfoStage.getInvestigatorHud().getPrefHeight() + 5);
         return diceRoller.rollDice();
@@ -243,7 +244,7 @@ public class TestViewImpl implements TestView {
     @Override
     public Completable showRolledDices(List<DiceRoll> diceRolls) {
         MapStage.darkenWorld();
-        return showRolledTestDices(diceRolls);
+        return showRolledTestDices(diceRolls, null);
     }
 
     @Override

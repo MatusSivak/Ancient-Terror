@@ -350,7 +350,7 @@ public class PromptPreview extends ApplicationAdapter {
             DiceRoll roll = new DiceRoll(i < successes ? DiceRoll.Score.GOOD : DiceRoll.Score.BAD);
             roll.setDiceNr(i); roll.setDiceValue(i < successes ? 5 : 2); rolls.add(roll);
         }
-        view.showRolledTestDices(rolls).subscribe();
+        view.showRolledTestDices(rolls, null).subscribe();
         tickCombat(600, fast);
         DiceRoller roller = ((DiceRollerStack) field(view, "diceRollerStack")).peek();
         AtomicInteger completed = new AtomicInteger();

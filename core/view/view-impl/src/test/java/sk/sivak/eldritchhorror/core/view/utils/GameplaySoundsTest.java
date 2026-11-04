@@ -155,6 +155,21 @@ public class GameplaySoundsTest {
         assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
     }
 
+    @Test public void everyTestedSkillHasItsOwnDiceSuccessCue() {
+        Set<String> paths = new HashSet<>();
+        for (sk.sivak.eldritchhorror.core.constants.investigator.Stat stat
+                : sk.sivak.eldritchhorror.core.constants.investigator.Stat.values()) {
+            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(stat);
+            assertNotNull(stat.name(), cue);
+            assertTrue("Shared cue: " + cue.path, paths.add(cue.path));
+        }
+        assertNull(GameplaySounds.diceSuccessCue(null));
+        assertEquals(DICE_SUCCESS_STRENGTH,
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH));
+        assertEquals(DICE_SUCCESS_INFLUENCE,
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.INFLUENCE));
+    }
+
     @Test public void healthAndSanityHaveTheirOwnPickups() {
         assertNotEquals(TokenSounds.Cue.HEALTH_GAIN.path, TokenSounds.Cue.SANITY_GAIN.path);
     }

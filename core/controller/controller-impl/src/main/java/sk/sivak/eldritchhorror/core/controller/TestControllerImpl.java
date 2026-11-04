@@ -40,8 +40,8 @@ public class TestControllerImpl implements TestController {
     }
 
     @Override
-    public Completable showRolledTestDices(List<DiceRoll> diceRolls) {
-        return testView.showRolledTestDices(diceRolls);
+    public Completable showRolledTestDices(List<DiceRoll> diceRolls, Stat stat) {
+        return testView.showRolledTestDices(diceRolls, stat);
     }
 
     @Override

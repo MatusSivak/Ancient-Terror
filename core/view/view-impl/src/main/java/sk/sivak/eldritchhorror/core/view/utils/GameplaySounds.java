@@ -20,6 +20,11 @@ public final class GameplaySounds {
         FOCUS_LAND("focus_land", .80f),
         RESOURCE_SPEND("resource_spend", .70f),
         DICE_SORT("dice_sort", .60f),
+        DICE_SUCCESS_LORE("dice_success_lore", .70f),
+        DICE_SUCCESS_INFLUENCE("dice_success_influence", .65f),
+        DICE_SUCCESS_OBSERVATION("dice_success_observation", .70f),
+        DICE_SUCCESS_STRENGTH("dice_success_strength", .60f),
+        DICE_SUCCESS_WILL("dice_success_will", .75f),
         TICKET_GAIN("ticket_gain", .85f),
         SANITY_GAIN("sanity_gain", .90f),
         TICKET_LAND("ticket_land", .82f),
@@ -79,6 +84,19 @@ public final class GameplaySounds {
         if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.SHIP) return Cue.TRAVEL_SEA;
         if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.TRAIN) return Cue.TRAVEL_RAIL;
         return Cue.TRAVEL_WALK;
+    }
+
+    /** Cue for a thrown die landing as a success; null when the roll isn't a skill test. */
+    public static Cue diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat stat) {
+        if (stat == null) return null;
+        switch (stat) {
+            case LORE: return Cue.DICE_SUCCESS_LORE;
+            case INFLUENCE: return Cue.DICE_SUCCESS_INFLUENCE;
+            case OBSERVATION: return Cue.DICE_SUCCESS_OBSERVATION;
+            case STRENGTH: return Cue.DICE_SUCCESS_STRENGTH;
+            case WILL: return Cue.DICE_SUCCESS_WILL;
+            default: return null;
+        }
     }
 
     public static void play(Cue cue) {
