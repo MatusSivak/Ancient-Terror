@@ -43,6 +43,7 @@ public final class UiSounds {
         CARD_OPEN_CONDITION_DEAL("card_reveal_condition_deal", .85f),
         CARD_OPEN_CONDITION_BANE("card_reveal_condition_bane", .90f),
         SHEET_OPEN("sheet_open", .80f), SHEET_CLOSE("sheet_close", .72f),
+        RESERVE_OPEN("reserve_open", .75f),
         ENCOUNTER_OPEN("encounter_open", .80f), ENCOUNTER_CLOSE("encounter_close", .72f),
         MYSTERY_OPEN("mystery_open", .82f), MYSTERY_CLOSE("mystery_close", .72f),
         ANCIENT_OPEN("ancient_open", .85f), ANCIENT_CLOSE("ancient_close", .75f),
@@ -128,6 +129,7 @@ public final class UiSounds {
     }
 
     public static Cue sheetCue(BigActorKey key, boolean opening) {
+        if (key == BigActorKey.RESERVE && opening) return Cue.RESERVE_OPEN;
         if (key == BigActorKey.ANCIENT_ONE) return opening ? Cue.ANCIENT_OPEN : Cue.ANCIENT_CLOSE;
         if (key == BigActorKey.MYSTERY_CARD) return opening ? Cue.MYSTERY_OPEN : Cue.MYSTERY_CLOSE;
         if (key == BigActorKey.MONSTER_CARD || key == BigActorKey.RUMOR_CARD)

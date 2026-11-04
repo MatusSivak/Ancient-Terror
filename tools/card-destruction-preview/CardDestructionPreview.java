@@ -46,6 +46,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
     private Stage stage;
     private final AtomicInteger tearSounds = new AtomicInteger();
     private final AtomicInteger cardOpenSounds = new AtomicInteger();
+    private final AtomicInteger collectSounds = new AtomicInteger();
 
     public static void main(String[] args) {
         LwjglApplicationConfiguration.disableAudio = true;
@@ -79,12 +80,20 @@ public class CardDestructionPreview extends ApplicationAdapter {
             Gdx.audio = (Audio) Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class<?>[]{Audio.class},
                     (p, m, a) -> {
                         String path = a != null && a.length > 0 ? a[0].toString() : "";
+                        if (path.contains("card_collect")) return Proxy.newProxyInstance(Sound.class.getClassLoader(), new Class<?>[]{Sound.class},
+                                (s, method, args) -> {
+                                    if(method.getName().equals("hashCode")) return System.identityHashCode(s);
+                                    if(method.getName().equals("equals")) return s==args[0];
+                                    if(method.getName().equals("play")) collectSounds.incrementAndGet();
+                                    return method.getReturnType()==long.class ? 0L : null;
+                                });
                         return path.contains("monster_sheet_tear") ? tearSound
                                 : path.contains("ui_card_open") || path.contains("ui_card_reveal") ? cardOpenSound : silent;
                     });
             for (sk.sivak.eldritchhorror.core.view.utils.UiSounds.Cue cue : sk.sivak.eldritchhorror.core.view.utils.UiSounds.Cue.values())
                 if (cue.name().startsWith("CARD_OPEN")) CustomAssetManager.getSound(cue.path);
             CustomAssetManager.getSound("sounds/monster_sheet_tear.wav");
+            CustomAssetManager.getSound("sounds/card_collect.wav");
             VisUI.load(); stage = InfoStage.getStageSafe();
             GameController controller = (GameController) Proxy.newProxyInstance(GameController.class.getClassLoader(),
                     new Class<?>[]{GameController.class}, (p, m, a) -> null);
@@ -169,6 +178,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
     }
 
     private void checkCardGain(boolean fast) throws Exception {
+        collectSounds.set(0);
         FastForwardAction.turnOff();
         CardTemplate.buildCard(new AxeAsset());
         loadArtwork();
@@ -185,6 +195,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
         Button button = ((Button[]) buttonsField.get(view))[0];
         if (fast) FastForwardAction.turnOn();
         click(button); click(button);
+        require(collectSounds.get()==(fast ? 0 : 1), "Card flight cue missing or duplicated");
         require(done.get() == 1 && card.getParent() != null,
                 "Gain must confirm once immediately while its flight continues");
         tick(fast ? 1 : 22);
@@ -361,6 +372,10 @@ public class CardDestructionPreview extends ApplicationAdapter {
             // Turning fast-forward on while the button waits must not press it.
             FastForwardAction.turnOn(); tick(30); FastForwardAction.turnOff();
             require(original.getStage() != null && done.get() == 0, "Late fast-forward pressed the discard button");
+            click(buttons[0]); click(buttons[0]);
+        } else {
+            tick(15);
+            require(original.getStage()!=null && done.get()==0, "Fast-forward bypassed discard confirmation");
             click(buttons[0]); click(buttons[0]);
         }
         Group animation = null;

@@ -29,7 +29,7 @@ public class TokenView {
 
     public Completable gainClueFromPool() {
         return gainTokenAndUpdateHud(1, InfoStage.getInvestigatorHud().getClueBar(), CustomAssetManager.CLUE_TOKEN,
-                get("focus.gainingClue"), TokenSounds.Cue.CLUE_GAIN, true);
+                get("focus.gainingClue"), TokenSounds.Cue.CLUE_GAIN, false);
     }
 
     public Completable gainClueFromSpace(LocationId locationId) {

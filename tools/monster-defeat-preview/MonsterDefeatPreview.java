@@ -119,7 +119,7 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
             if (frame == 44 && !fast) {
                 require(!audioEvents.contains("sounds/monster_defeat.wav"), name + ": explosion sounded before shattering");
                 require(monster.isVisible(), name + ": tears before the enlarged portrait can be seen");
-                require(monster.getHeight() * monster.getScaleY() > (name.equals("tall") ? 540f * .70f : startSize * 1.8f),
+                require(monster.getHeight() * monster.getScaleY() > (name.equals("tall") ? 540f * .63f : startSize * 1.6f),
                         name + ": zoom is barely visible");
                 require(monster.getColor().a > .99f, name + ": ambush not fully visible");
                 fullSizeSeen = true;
@@ -134,6 +134,7 @@ public class MonsterDefeatPreview extends ApplicationAdapter {
                         name + ": snapshot changed the original dimensions");
                 Actor right = animation.findActor("defeat-fragment-7");
                 require(animation.findActor("defeat-fragment-31") != null, name + ": expected 32 shards");
+                require(animation.findActor("defeat-blood").isVisible(), name + ": missing blood spray");
                 require(right.getX() > left.getX(), name + ": fragments do not separate");
                 if (interrupt) {
                     require(bufferCount() == buffersBefore + 1, "Expected one shared temporary snapshot");

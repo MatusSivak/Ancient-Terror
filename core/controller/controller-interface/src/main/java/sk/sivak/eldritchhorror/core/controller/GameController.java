@@ -67,6 +67,8 @@ public interface GameController {
 
     Completable showRumorCard();
 
+    Completable showRumorCard(String rumorId);
+
     Completable justShowRumorCard(RumorCardInfo activeRumor);
 
     Completable justHideRumorCard();

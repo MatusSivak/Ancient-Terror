@@ -321,6 +321,16 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public Completable showRumorCard(String rumorId) {
+        return Completable.defer(() -> {
+            for (RumorCardInfo rumor : rumors.getActiveRumors()) {
+                if (rumor.getId().equals(rumorId)) return view.showRumorCard(rumor);
+            }
+            return Completable.complete();
+        });
+    }
+
+    @Override
     public Completable justHideRumorCard() {
         return view.justHideRumorCard();
     }

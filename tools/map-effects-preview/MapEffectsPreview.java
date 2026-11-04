@@ -236,11 +236,54 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 require(removed[0] == 1 && MapStage.getExpeditionLayer().getChildren().size == 0, "Expedition cleanup failed");
                 FastForwardAction.turnOff();
                 if (!fastForward) startExpedition(true);
+                else startStorm(0);
+            } catch (Throwable error) { fail(error); }
+        });
+    }
+
+    private void startStorm(int mode) {
+        FastForwardAction.turnOff();
+        AtomicInteger spawned = new AtomicInteger(), sounded = new AtomicInteger(), clicked = new AtomicInteger();
+        Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
+        camera(position.x, position.y);
+        sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils.spawnStorm("storm-preview", LocationId.ARKHAM,
+                mode == 4 ? null : sounded::incrementAndGet, clicked::incrementAndGet).subscribe(spawned::incrementAndGet);
+        Gdx.app.postRunnable(() -> {
+            try {
+                Group layer = MapStage.getStormLayer();
+                require(layer.getChildren().size == 3, "Storm needs all three world copies");
+                for (Actor actor : layer.getChildren()) {
+                    require(actor.getColor().a==0 && actor.getScaleX()<.05f && actor.getTouchable()==Touchable.disabled,
+                            "Storm appeared or accepted clicks before emerging");
+                }
+                require(sounded.get()==(mode==4 ? 0 : 1), "Storm contact callback count");
+                for(int frame=0;frame<180;frame++) {
+                    if(mode==1 || (mode==2 && frame==25)) FastForwardAction.turnOn();
+                    stage.act(mode==3 ? 4f : 1f/60);
+                    for(Actor actor:layer.getChildren()) require(Math.abs(actor.getY()+actor.getOriginY()-position.y)<.01f,
+                            "Storm fell instead of forming in place");
+                    if(mode==0 && (frame==16 || frame==40 || frame==100)) draw("rumor-storm-"+frame);
+                }
+                require(spawned.get()==1, "Storm did not complete exactly once");
+                for(Actor actor:layer.getChildren()) {
+                    require(actor.getTouchable()==Touchable.enabled && actor.getColor().a==1f, "Storm did not settle/enable input");
+                    Vector2 center = actor.localToStageCoordinates(new Vector2(actor.getWidth()/2,actor.getHeight()/2));
+                    require(stage.hit(center.x,center.y,true)==actor, "Storm is not reachable by map hit-testing");
+                    for(com.badlogic.gdx.scenes.scene2d.EventListener listener:actor.getListeners()) if(listener instanceof com.badlogic.gdx.scenes.scene2d.utils.ClickListener)
+                        ((com.badlogic.gdx.scenes.scene2d.utils.ClickListener)listener).clicked(new InputEvent(),actor.getWidth()/2,actor.getHeight()/2);
+                }
+                require(clicked.get()==3, "Wrapped storm did not open its associated rumor");
+                AtomicInteger removed = new AtomicInteger();
+                sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils.discardStorm("storm-preview").subscribe(removed::incrementAndGet);
+                for(int i=0;i<100;i++) stage.act(1f/60);
+                require(removed.get()==1 && layer.getChildren().size==0,"Storm removal leaked actors");
+                FastForwardAction.turnOff();
+                if(mode<4) startStorm(mode+1);
                 else {
-                    System.out.println("PASS: labels, omen, clue/investigator/monster/expedition spawns, ground shadows, wrapped copies, callbacks, fast-forward and cleanup");
+                    System.out.println("PASS: map spawns and rumor storms; wrap, clicks, silent load, normal/fast/speed-change/large-delta and cleanup");
                     Gdx.app.exit();
                 }
-            } catch (Throwable error) { fail(error); }
+            } catch(Throwable error) { fail(error); }
         });
     }
 

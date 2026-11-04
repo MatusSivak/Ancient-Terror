@@ -31,6 +31,7 @@ public final class BreakApartAnimation extends Group {
     private TornApartActorImageBuilder.Fragments fragments;
     private final TextureShard[] pieces = new TextureShard[32];
     private final BurstLight burst;
+    private final DefeatBloodEffect blood;
 
     public static void start(Actor subject, Drawable flashDrawable, Color accent, String name, CompletableSubscriber subscriber) {
         Stage stage = subject.getStage();
@@ -74,6 +75,9 @@ public final class BreakApartAnimation extends Group {
         burst = new BurstLight(accent, extent);
         burst.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f, ViewProperties.VIEWPORT_HEIGHT / 2f);
         addActor(burst);
+        blood = new DefeatBloodEffect(extent);
+        blood.setPosition(ViewProperties.VIEWPORT_WIDTH / 2f, ViewProperties.VIEWPORT_HEIGHT / 2f);
+        addActor(blood);
         flash = flashDrawable == null ? null : new SilhouetteImage(flashDrawable);
         if (flash != null) {
             flash.setName("defeat-flash");
@@ -86,7 +90,7 @@ public final class BreakApartAnimation extends Group {
 
     public static float presentationScale(float width, float height) {
         // Leave room for recoil and the outline around a much larger portrait.
-        return Math.min(ViewProperties.VIEWPORT_WIDTH * 0.58f / width,
+        return .9f * Math.min(ViewProperties.VIEWPORT_WIDTH * 0.58f / width,
                 ViewProperties.VIEWPORT_HEIGHT * 0.76f / height);
     }
 
@@ -136,6 +140,7 @@ public final class BreakApartAnimation extends Group {
                 flash.getColor().a = 0.72f * Math.max(0f, 1f - progress * 7f);
             }
             burst.progress(progress);
+            blood.progress(progress);
         }
     }
 
@@ -157,6 +162,7 @@ public final class BreakApartAnimation extends Group {
             pieces[i] = piece;
         }
         burst.toFront();
+        blood.toFront();
     }
 
     @Override protected void setStage(Stage stage) {

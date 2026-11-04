@@ -107,7 +107,8 @@ public class OmenTrackTokens extends Group {
 
     private static class OmenTrackToken extends Image {
         public OmenTrackToken() {
-            super(CustomAssetManager.getTexture(CustomAssetManager.GATE));
+            super(CustomAssetManager.getTextureRegionDrawable(CustomAssetManager.OMEN_CIRCLE));
+            setColor(1f, .82f, .36f, 1f);
         }
     }
 }

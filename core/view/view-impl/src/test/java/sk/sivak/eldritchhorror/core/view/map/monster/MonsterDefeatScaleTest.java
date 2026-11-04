@@ -18,7 +18,7 @@ public class MonsterDefeatScaleTest {
     @Test public void ordinaryAndEpicDefeatsHaveAnObviousZoomEvenOnAZoomedMap() {
         for (float size : new float[]{108f, 135f}) {
             float scale = MonsterImageEffect.defeatScale(size, size);
-            assertTrue("Portrait should fill most of the screen height", size * scale >= VIEWPORT_HEIGHT * .70f);
+            assertEquals("Requested ten-percent reduction", VIEWPORT_HEIGHT * .76f * .9f, size * scale, .001f);
             assertTrue("Still grows substantially from the closest map zoom", scale / (1f / .75f) >= 2f);
         }
     }

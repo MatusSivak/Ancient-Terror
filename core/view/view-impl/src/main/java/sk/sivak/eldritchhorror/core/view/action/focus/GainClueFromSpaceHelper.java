@@ -90,8 +90,6 @@ public final class GainClueFromSpaceHelper {
                                 normalActionDuration, sine),
                         Actions.scaleTo(4, 4, normalActionDuration, sine)
                 ),
-                // Continue once the clue is collected; it reaches the HUD on its own.
-                Actions.run(onSub::onCompleted),
                 Actions.parallel(
                         Actions.moveTo(emptyContainerPosition.x - (clueActor.getWidth() * targetScale)/2f - 7,
                                 emptyContainerPosition.y - (clueActor.getHeight() * targetScale)/2f - 7, normalActionDuration, sine),
@@ -99,7 +97,10 @@ public final class GainClueFromSpaceHelper {
                         Actions.scaleTo(targetScale, targetScale, normalActionDuration, sine)
                 ),
                 Actions.run(onLanded::call),
-                Actions.run(clueActor::remove)
+                Actions.run(() -> {
+                    clueActor.remove();
+                    onSub.onCompleted();
+                })
         )));
     }
 

@@ -201,13 +201,14 @@ public class MysteryPreview extends ApplicationAdapter {
         tick(90);
         AtomicInteger closed=new AtomicInteger(); view.showCurrentMysteryCard(info,false,1,3).subscribe(closed::incrementAndGet);
         MysteryCard card=BigActorsManager.getMysteryCard();
-        float previousScale=card.getScaleX();
+        require(card.getY() < 0, "Mystery did not enter from below: " + key);
+        float previousY=card.getY();
         for(int frame=0;frame<100;frame++) {
             tick(1);
             Vector2 zoomCenter=card.localToStageCoordinates(new Vector2(card.getWidth()/2,card.getHeight()/2));
-            require(zoomCenter.dst(480,270)<.01f,"Zoom moved away from the final center: "+key);
-            require(card.getScaleX()+.0001f>=previousScale,"Zoom reversed direction: "+key);
-            previousScale=card.getScaleX();
+            require(Math.abs(zoomCenter.x-480)<.01f,"Entry moved horizontally: "+key);
+            require(card.getY()+.0001f>=previousY,"Entry moved downward: "+key);
+            previousY=card.getY();
             if(key.endsWith("CROWN_OF_THE_SERPENT") && frame==8) draw(language+"-zoom-"+key);
         }
         require(card.getStage()==stage && card.getTouchable()==Touchable.enabled,"Card did not open: "+key);

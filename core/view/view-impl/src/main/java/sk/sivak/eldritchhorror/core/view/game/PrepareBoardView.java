@@ -148,7 +148,8 @@ public class PrepareBoardView {
     public Completable showStormLocation(String stormId, LocationId locationId) {
         InfoStage.displayTextForce(UiText.get("prepare.rumorLocation"));
         Completable completable = MapUtils.moveCameraToLocation(locationId);
-        completable = completable.andThen(StormImageUtils.spawnStorm(stormId, locationId, () -> GameplaySounds.play(TOKEN_IMPACT)));
+        completable = completable.andThen(StormImageUtils.spawnStorm(stormId, locationId,
+                () -> GameplaySounds.play(RUMOR_SPAWN), () -> gameController.showRumorCard(stormId).subscribe()));
         return completable;
     }
 
@@ -162,7 +163,8 @@ public class PrepareBoardView {
     }
 
     public void justSpawnStorm(String stormId, LocationId locationId) {
-        StormImageUtils.spawnStorm(stormId, locationId).subscribe();
+        StormImageUtils.spawnStorm(stormId, locationId, null,
+                () -> gameController.showRumorCard(stormId).subscribe()).subscribe();
     }
 
     void clearRedPins(List<LocationId> pinLocations) {

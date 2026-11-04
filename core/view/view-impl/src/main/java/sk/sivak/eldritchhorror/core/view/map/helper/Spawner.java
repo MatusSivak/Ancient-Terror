@@ -15,6 +15,7 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
+import sk.sivak.eldritchhorror.core.view.map.storm.StormImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
  */
 public class Spawner {
 
-    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE, EXPEDITION }
+    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE, EXPEDITION, STORM }
 
     private static AlphaAction createAlphaAction(float finalAlpha) {
         AlphaAction alphaAction = new AlphaAction();
@@ -70,7 +71,7 @@ public class Spawner {
                     }
                 };
                 SpawnStyle style = spawnConfig.getSpawnStyle();
-                if (style == SpawnStyle.MONSTER || style == SpawnStyle.EXPEDITION) contact.run();
+                if (style == SpawnStyle.MONSTER || style == SpawnStyle.EXPEDITION || style == SpawnStyle.STORM) contact.run();
                 spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
                 int[] landedCopies = {0};
                 for (Actor token : new Actor[]{leftActor, centerActor, rightActor}) {
@@ -87,9 +88,18 @@ public class Spawner {
     }
 
     private TemporalAction createSpawnAction(Actor token, SpawnStyle style, Runnable contact) {
+        if (style == SpawnStyle.STORM) return createStormAction((StormImage) token);
         if (style == SpawnStyle.MONSTER) return createEmergenceAction(token);
         if (style == SpawnStyle.EXPEDITION) return createExpeditionAction(token);
         return createLandingAction(token, style, contact);
+    }
+
+    private TemporalAction createStormAction(StormImage storm) {
+        storm.setSpawnProgress(0f);
+        return new TemporalAction(1.4f * NORMAL_ACTION_DURATION) {
+            @Override protected void update(float percent) { storm.setSpawnProgress(percent); }
+            @Override protected void end() { storm.finishSpawn(); }
+        };
     }
 
     private TemporalAction createExpeditionAction(Actor token) {

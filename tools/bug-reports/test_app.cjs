@@ -20,7 +20,9 @@ async function fixture(t, failedCollection, options = {}) {
   const make = (collection, id, time) => ({collection, id, name: `${collection}/${id}`,
     createTime: time, updateTime: time, fields: {status: 'new',
       description: collection === 'crashReports' ? 'TEST crash\n at Game.render(Game.java:1)' : 'A reported bug',
-      metadata: {platform: 'Desktop'}, saveFile: {type: 'bytes', size: 4},
+      metadata: {platform: 'Desktop', ...(id === 'second-page' ? {
+        appVersion: '1.7.17-ci.123.abcdef0', appVersionCode: '100123', sourceRevision: 'abcdef012345'
+      } : {})}, saveFile: {type: 'bytes', size: 4},
       screenshotPng: {type: 'bytes', size: 68}}});
   let reports = [make('bugReports', 'same-id', '2026-09-28T10:00:00Z'),
     make('bugReports', 'second-page', '2026-09-27T10:00:00Z'),
@@ -77,6 +79,8 @@ async function fixture(t, failedCollection, options = {}) {
 test('plain bookmark loads both collections without browser storage', async t => {
   const {page, requests, errors} = await fixture(t, undefined, {blockStorage: true});
   assert.equal(await page.locator('#reports .report').count(), 3);
+  assert.match(await page.locator('#reports').textContent(), /1\.7\.17-ci\.123\.abcdef0 \(#100123\).*abcdef012345/);
+  assert.match(await page.locator('#reports').textContent(), /Unknown version.*Unrecorded revision/);
   assert.ok(requests.filter(r => r.path.startsWith('/api/')).every(r => r.session === 'current-session'));
   assert.deepEqual(errors, []);
 });

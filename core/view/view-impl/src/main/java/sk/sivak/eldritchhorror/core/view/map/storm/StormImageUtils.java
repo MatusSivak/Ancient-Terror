@@ -1,14 +1,13 @@
 package sk.sivak.eldritchhorror.core.view.map.storm;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.helper.Spawner;
+import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
 
 public class StormImageUtils {
 
@@ -18,6 +17,10 @@ public class StormImageUtils {
     }
 
     public static Completable spawnStorm(String stormId, LocationId locationId, Runnable onContact) {
+        return spawnStorm(stormId, locationId, onContact, null);
+    }
+
+    public static Completable spawnStorm(String stormId, LocationId locationId, Runnable onContact, Runnable onClick) {
 
         StormSpawnConfig spawnConfig = new StormSpawnConfig();
 
@@ -27,11 +30,16 @@ public class StormImageUtils {
             stormImage.setWidth(400/scale);
             stormImage.setHeight(400/scale);
             stormImage.setOrigin(200/scale,(200)/scale);
-            stormImage.setTouchable(Touchable.disabled); // TODO hmm...
+            stormImage.setTouchable(Touchable.disabled);
+            if (onClick != null) ButtonUtils.addClickListener(stormImage, onClick);
             return stormImage;
         };
 
-        return new Spawner().spawn(actorSpawner, spawnConfig, new StormIdLayerResolver(stormId), locationId, onContact);
+        return new Spawner().spawn(actorSpawner, spawnConfig, new StormIdLayerResolver(stormId), locationId, onContact)
+                .doOnCompleted(() -> {
+                    if (onClick != null) for (Actor actor : MapStage.getActor(new StormIdLayerResolver(stormId)))
+                        actor.setTouchable(Touchable.enabled);
+                });
     }
 
     public static Completable discardStorm(String stormId) {
@@ -58,6 +66,8 @@ public class StormImageUtils {
     }
 
     private static class StormSpawnConfig implements Spawner.SpawnConfig {
+
+        @Override public Spawner.SpawnStyle getSpawnStyle() { return Spawner.SpawnStyle.STORM; }
 
 
         @Override

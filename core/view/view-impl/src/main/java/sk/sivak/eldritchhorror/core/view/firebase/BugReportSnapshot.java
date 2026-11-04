@@ -2,7 +2,6 @@ package sk.sivak.eldritchhorror.core.view.firebase;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.JsonReader;
 import sk.sivak.eldritchhorror.core.constants.log.PhaseLog;
 import sk.sivak.eldritchhorror.core.view.utils.UiText;
 import java.util.LinkedHashMap;
@@ -53,8 +52,10 @@ public final class BugReportSnapshot {
         detail(snapshot, "language", UiText::getLanguage, bestEffort);
         detail(snapshot, "screen", () -> Gdx.graphics.getBackBufferWidth() + "x" + Gdx.graphics.getBackBufferHeight(), bestEffort);
         detail(snapshot, "density", () -> Float.toString(Gdx.graphics.getDensity()), bestEffort);
-        detail(snapshot, "appVersion", () -> new JsonReader().parse(Gdx.files.internal("bug-report-firebase.json"))
-                .getString("appVersion", "unknown"), bestEffort);
+        detail(snapshot, "appVersion", BugReportBuildInfo::appVersion, bestEffort);
+        detail(snapshot, "appVersionCode", () -> System.getProperty("ancientterror.appVersionCode", "unknown"), bestEffort);
+        detail(snapshot, "buildType", () -> System.getProperty("ancientterror.buildType", "desktop"), bestEffort);
+        detail(snapshot, "sourceRevision", BugReportBuildInfo::sourceRevision, bestEffort);
         return snapshot;
     }
 

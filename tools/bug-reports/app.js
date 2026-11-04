@@ -36,7 +36,7 @@ function renderList() {
   for (const r of visible) {
     const button = node('button', undefined, 'report' + (reportKey(r) === selected ? ' selected' : ''));
     button.setAttribute('aria-pressed', String(reportKey(r) === selected));
-    button.append(node('span', typeLabel(r), 'badge report-type'), node('span', statusLabel(r.fields.status), 'badge'), node('strong', r.fields.title || r.fields.description || '(No description)'), node('small', `${r.fields.metadata?.platform || 'Unknown platform'} · ${date(r.createTime || r.fields.capturedAt)}`));
+    button.append(node('span', typeLabel(r), 'badge report-type'), node('span', statusLabel(r.fields.status), 'badge'), node('strong', r.fields.title || r.fields.description || '(No description)'), node('small', `${r.fields.metadata?.platform || 'Unknown platform'} · ${r.fields.metadata?.appVersion || 'Unknown version'}${r.fields.metadata?.appVersionCode && r.fields.metadata.appVersionCode !== 'unknown' ? ' (#' + r.fields.metadata.appVersionCode + ')' : ''} · ${r.fields.metadata?.sourceRevision || 'Unrecorded revision'} · ${date(r.createTime || r.fields.capturedAt)}`));
     button.onclick = () => show(r); $('reports').append(button);
   }
   if (!visible.length) $('reports').append(node('p', reports.length ? 'No reports match these filters.' : 'No reports loaded.'));

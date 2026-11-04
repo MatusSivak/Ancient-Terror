@@ -1,5 +1,29 @@
 apply plugin: 'java-library'
 description = 'View Impl'
+
+// Package the revision with both desktop and Android, including CI build suffixes via the platform.
+def sourceRevision = providers.environmentVariable('GITHUB_SHA').orElse(providers.provider {
+    try {
+        def result = providers.exec {
+            workingDir rootProject.projectDir
+            commandLine 'git', 'describe', '--always', '--dirty', '--abbrev=12'
+            ignoreExitValue = true
+        }
+        return result.result.get().exitValue == 0 ? result.standardOutput.asText.get().trim() : 'unknown'
+    } catch (Exception ignored) { return 'unknown' }
+})
+def buildInfoDirectory = layout.buildDirectory.dir('generated/buildInfo')
+def generateBuildInfo = tasks.register('generateBuildInfo') {
+    inputs.property('sourceRevision', sourceRevision)
+    outputs.dir(buildInfoDirectory)
+    doLast {
+        def target = buildInfoDirectory.get().file('ancient-terror-build.properties').asFile
+        target.parentFile.mkdirs()
+        target.text = 'sourceRevision=' + sourceRevision.get() + '\n'
+    }
+}
+sourceSets.main.resources.srcDir(buildInfoDirectory)
+tasks.named('processResources') { dependsOn generateBuildInfo }
 dependencies {
   api project(':eldritch-horror-core:view:view-interface')
   api project(':eldritch-horror-core:controller:controller-interface')

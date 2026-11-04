@@ -1,3 +1,10 @@
+import sk.sivak.eldritchhorror.core.view.map.clue.ClueUtils;
+import sk.sivak.eldritchhorror.core.constants.ViewProperties;
+import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.view.components.hud.InvestigatorHud;
+import sk.sivak.eldritchhorror.core.view.action.focus.TokenView;
+import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl.*;
@@ -43,10 +50,56 @@ public class TokenGainPreview extends ApplicationAdapter {
                 for (int mode = 0; mode < 4; mode++) check(texture, mode);
             }
             for (int mode = 0; mode < 4; mode++) checkTickets(mode);
+            MapStage.resize(960,540);
+            for (boolean fromMap : new boolean[]{false,true})
+                for (int mode = 0; mode < 4; mode++) checkClueCompletionAndHudHide(mode, fromMap);
             require(tracked() == 0, "Fast-forward action leak");
             System.out.println("PASS: generated resources and both ticket slots, exact landing bounds, lazy queue construction, normal/fast/speed-change/large-delta, HUD count and cleanup");
         } catch (Throwable error) { error.printStackTrace(); System.exit(1); }
         finally { FastForwardAction.turnOff(); Gdx.app.exit(); }
+    }
+    private void checkClueCompletionAndHudHide(int mode, boolean fromMap) throws Exception {
+        FastForwardAction.turnOff();
+        InvestigatorHud hud = InfoStage.getInvestigatorHud();
+        hud.recalculateSizes(); hud.show().subscribe();
+        for (int i=0;i<80;i++) stage.act(1f/60);
+        hud.setPosition(0,0);
+        ContainerBar bar = hud.getClueBar(); bar.setTotalEmptyContainers(3); bar.setCurrentValue(0); bar.validate();
+        AtomicInteger done = new AtomicInteger(), hidden = new AtomicInteger();
+        TokenView view = new TokenView();
+        Actor mapClue = null;
+        if(fromMap) {
+            LocationId location = LocationId.ARKHAM;
+            Vector2 position = LocationPositionResolver.resolve(location);
+            MapStage.getCamera().position.set(position.x,position.y,0);
+            MapStage.getCamera().update();
+            for(int wrap=-1;wrap<=1;wrap++) {
+                Image clue = new Image(getTexture(CLUE_TOKEN));
+                clue.setSize(40,40); clue.setOrigin(20,20);
+                clue.setPosition(position.x+wrap*ViewProperties.MAP_WIDTH-20,position.y-20);
+                MapStage.addToLayer(clue,
+                        new ClueUtils.ClueIdLayerResolver(location));
+                if(wrap==0) mapClue=clue;
+            }
+        }
+        Completable gain = fromMap ? view.gainClueFromSpace(LocationId.ARKHAM)
+                : view.gainClueFromPool();
+        gain.subscribe(() -> {
+            require(bar.getCurrentValue()==1, "Clue completed before its HUD landing");
+            done.incrementAndGet();
+            hud.hide().subscribe(hidden::incrementAndGet);
+        });
+        Actor token = fromMap ? mapClue : findToken(stage.getRoot());
+        for(int frame=0;frame<240;frame++) {
+            if(mode==1 || (mode==2 && frame==25)) FastForwardAction.turnOn();
+            stage.act(mode==3 ? 4 : 1f/60);
+            if(token.getStage()!=null && bar.getCurrentValue()==0) {
+                require(done.get()==0 && hidden.get()==0 && hud.getY()==0,
+                        "HUD hid or clue completed during flight: mode="+mode+" frame="+frame+" y="+hud.getY()+" done="+done+" hidden="+hidden);
+            }
+        }
+        require(done.get()==1 && hidden.get()==1 && bar.getCurrentValue()==1, "Clue/HUD completion count");
+        require(token.getStage()==null && tracked()==0, "Clue/HUD action leak");
     }
     private void checkTickets(int mode) throws Exception {
         FastForwardAction.turnOff();
@@ -55,7 +108,7 @@ public class TokenGainPreview extends ApplicationAdapter {
         InfoStage.getInvestigatorHud().setPosition(15, 450);
         InfoStage.getInvestigatorHud().validate(); bar.validate();
         TicketActionView view = new TicketActionView(null);
-        Completable[] gains = {view.gainTravelTicket(PathType.TRAIN), view.gainTravelTicket(PathType.SHIP)};
+        Completable[] gains = {view.gainTravelTicket(PathType.TRAIN, false), view.gainTravelTicket(PathType.SHIP, false)};
         require(findToken(stage.getRoot()) == null, "Queued ticket appeared before it was received");
         for (int slot = 0; slot < 2; slot++) {
             FastForwardAction.turnOff();

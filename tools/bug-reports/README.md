@@ -1,5 +1,13 @@
 # Bug reports
 
+Reports from new builds use Android's installed version name (including CI suffix),
+version code and build type, plus a packaged source revision. Desktop uses the
+configured version and packaged revision. Local modified builds have a `-dirty`
+revision; source archives without Git use `unknown`. The viewer includes build
+identity in each summary and in metadata. Older reports only have the fixed
+`1.7.17` asset version: this cannot prove which commit they ran. Compare their
+behavior, logs and capture date against current code before reopening a fixed bug.
+
 ## Automatic crash reports
 
 The game sends its first handled or uncaught Java failure per session to

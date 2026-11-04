@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTION_DURATION;
 
 /** Keep the card readable as it curls toward its recipient, then tuck it away. */
@@ -15,6 +16,7 @@ public final class CardCollectionAnimation {
     private CardCollectionAnimation() { }
 
     public static void play(Actor card, Vector2 destination, Runnable completed) {
+        GameplaySounds.play(GameplaySounds.Cue.CARD_COLLECT);
         card.clearActions();
         card.setTouchable(Touchable.disabled);
         card.addAction(Actions.sequence(new FastForwardAction<>(flight(card, destination)),

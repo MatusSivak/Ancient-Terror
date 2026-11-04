@@ -153,6 +153,8 @@ public class UiSoundsTest {
 
     @Test public void mysteryAncientAndMonsterSheetsUseTheirOwnCuePairs() {
         assertEquals(MYSTERY_OPEN, UiSounds.sheetCue(BigActorKey.MYSTERY_CARD, true));
+        assertEquals(RESERVE_OPEN, UiSounds.sheetCue(BigActorKey.RESERVE, true));
+        assertEquals(SHEET_CLOSE, UiSounds.sheetCue(BigActorKey.RESERVE, false));
         assertEquals(MYSTERY_CLOSE, UiSounds.sheetCue(BigActorKey.MYSTERY_CARD, false));
         assertEquals(ANCIENT_OPEN, UiSounds.sheetCue(BigActorKey.ANCIENT_ONE, true));
         assertEquals(ANCIENT_CLOSE, UiSounds.sheetCue(BigActorKey.ANCIENT_ONE, false));

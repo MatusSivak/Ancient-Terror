@@ -30,6 +30,9 @@ public class GameActivity extends AndroidApplication {
         // Prevent Log4j auto-property configuration on Android (requires java.beans).
         System.setProperty("log4j.defaultInitOverride", "true");
         super.onCreate(savedInstanceState);
+        System.setProperty("ancientterror.appVersion", BuildConfig.VERSION_NAME);
+        System.setProperty("ancientterror.appVersionCode", Integer.toString(BuildConfig.VERSION_CODE));
+        System.setProperty("ancientterror.buildType", BuildConfig.BUILD_TYPE);
 
         if (gameCreatedInProcess) {
             restarting = true;

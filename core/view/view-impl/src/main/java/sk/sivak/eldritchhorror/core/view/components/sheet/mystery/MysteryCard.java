@@ -58,7 +58,6 @@ public class MysteryCard extends VisTable {
 
     public MysteryCard() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.MYSTERY_CARD);
-        displayHide.setCenteredZoom(true);
         displayHide.setActorKey(OnScreenActors.ActorKey.MYSTERY_CARD);
         displayHide.setBeforeHideAction(this::stopAcknowledgementPulse);
         setTransform(true);
