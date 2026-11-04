@@ -66,8 +66,8 @@ public class MonsterCombatTable extends VisTable {
     /** Seconds between the monster's attack fireballs. */
     private static final float ATTACK_STAGGER = 0.55f;
     /** Random gap in seconds between fireballs fired by successful dice (random die order), so each shot is heard. */
-    private static final float DICE_SHOT_GAP_MIN = 0.04f;
-    private static final float DICE_SHOT_GAP_MAX = 0.12f;
+    private static final float DICE_SHOT_GAP_MIN = 0.15f;
+    private static final float DICE_SHOT_GAP_MAX = 0.30f;
     private static final Color EPIC_GOLD = Color.valueOf("F2D27A");
     private static final Color EPIC_GLOW = Color.valueOf("FF3030");
     private static final float MIN_STEP = 90f;
