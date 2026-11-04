@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.widget.VisTable;
 import rx.Completable;
 import rx.CompletableSubscriber;
+import rx.Subscription;
 import rx.functions.Func0;
 import sk.sivak.eldritchhorror.core.constants.ViewProperties;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
@@ -775,23 +776,40 @@ public class MonsterCombatTable extends VisTable {
                 }
                 Actor heart = toughnessBar.getChildren().get(hearts - 1 - i);
                 float offsetX = ((hits - 1) / 2f - i) * tokenWidth;
+                boolean killingShot = i == hearts - 1;
                 volley.addAction(Actions.run(() -> {
                     Vector2 impact = randomBodyPoint(getMonsterBodyCenter());
                     fireballService.fireBullet(investigator, impact);
                     playHitReaction(investigator, impact);
-                    Completable loss = toughnessBar.loseToughnessNew(heart, offsetX);
-                    if (toughnessBar.getCurrentHealth() == 1) {
-                        // Tear the last heart from its slot before detaching the plate.
-                        loss = Completable.merge(loss, Completable.create(subscriber -> {
-                            shattered = true;
-                            statusPlate.remove();
-                            groundShadow.remove();
-                            if (epicGlow != null) epicGlow.remove();
-                            MonsterUtils.recordCombatDefeat(data.getMonsterInfo());
-                            BreakApartAnimation.shatterOnHit(monsterImage, subscriber);
-                        }));
+                    if (!killingShot) {
+                        toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);
+                        return;
                     }
-                    loss.subscribe(finishShot::run);
+                    // The monster bursts only once its last heart has torn apart.
+                    int[] pendingParts = {2};
+                    Runnable finishPart = () -> {
+                        if (--pendingParts[0] == 0) finishShot.run();
+                    };
+                    boolean[] burst = {false};
+                    Runnable shatter = () -> {
+                        if (burst[0]) return;
+                        burst[0] = true;
+                        shattered = true;
+                        statusPlate.remove();
+                        groundShadow.remove();
+                        if (epicGlow != null) epicGlow.remove();
+                        MonsterUtils.recordCombatDefeat(data.getMonsterInfo());
+                        BreakApartAnimation.shatterOnHit(monsterImage, new CompletableSubscriber() {
+                            @Override public void onCompleted() { finishPart.run(); }
+                            @Override public void onError(Throwable e) { finishPart.run(); }
+                            @Override public void onSubscribe(Subscription d) { }
+                        });
+                    };
+                    toughnessBar.loseToughnessNew(heart, offsetX, shatter).subscribe(() -> {
+                        // A skipped heart effect never tears; burst the monster anyway.
+                        shatter.run();
+                        finishPart.run();
+                    });
                 }));
             }
             addAction(new FastForwardAction<>(volley));
