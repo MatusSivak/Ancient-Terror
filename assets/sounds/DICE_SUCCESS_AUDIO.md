@@ -15,5 +15,5 @@ sound, overwrite the file under `assets/sounds/`; any OGG, MP3 or 16-bit PCM WAV
 | Influence | `dice_success_influence.wav` (coins) | user-provided, unchanged | source/licence not recorded | `a63830730303c1942184aca536ab8132ff3c1c62e1f53cd8130a6cf4e633549e` |
 | Observation | `dice_success_observation.wav` | user-provided, unchanged | source/licence not recorded | `5c747feb7d44b8d84653edf6cf7bcf628d415ddd97474184226fd271a083e15e` |
 | Lore | `dice_success_lore.wav` | user-provided, unchanged | source/licence not recorded | `2910d5cec528d864e3a700a9cd9fe5eb026bb38f13ee4740e07421444844f73d` |
-| Will | `dice_success_will.ogg` (gong) | `gong_01.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `4780a38e91688b59899b3679cf3534b4b75654b45a177af9d9fb681c447f7f9a` |
+| Will | `dice_success_will.wav` | user-provided, unchanged | source/licence not recorded | `d8745bed16ad18586c5176d058e8b3b8062a6a5ec62d2874e4980063ec91bb40` |
 | Plain roll (Reckonings...) | `dice_success_roll.wav` (success chime) | `bell.wav` | Fupi, [Correct Bell](https://opengameart.org/content/correct-bell) | `7b21371d23bcc5c56866b9bb32791b21bfce467edae05eef4bbc9d547da417a9` |
