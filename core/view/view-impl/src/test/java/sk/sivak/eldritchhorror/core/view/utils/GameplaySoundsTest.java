@@ -129,6 +129,8 @@ public class GameplaySoundsTest {
         for (String cue : cuePaths()) {
             Path path = root.resolve("assets").resolve(cue);
             assertTrue("Missing cue: " + path, Files.isRegularFile(path));
+            // Dice success sounds are unmodified downloads the user swaps freely; only require that they exist.
+            if (cue.startsWith("sounds/dice_success_")) continue;
             AudioFileFormat wav = AudioSystem.getAudioFileFormat(path.toFile());
             assertEquals(cue, 1, wav.getFormat().getChannels());
             assertEquals(cue, 16, wav.getFormat().getSampleSizeInBits());
@@ -153,6 +155,23 @@ public class GameplaySoundsTest {
         assertEquals(TRAVEL_WALK, GameplaySounds.travelCue(sk.sivak.eldritchhorror.core.constants.location.PathType.WALK));
         assertNotEquals(TRAVEL_SEA.path, TRAVEL_RAIL.path);
         assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
+    }
+
+    @Test public void combatHasItsOwnDiceSuccessCueAndOtherRollsShareTheWillSound() {
+        for (sk.sivak.eldritchhorror.core.constants.investigator.Stat stat
+                : sk.sivak.eldritchhorror.core.constants.investigator.Stat.values()) {
+            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(stat, false);
+            assertNotNull(stat.name(), cue);
+            assertEquals(stat.name(), DICE_SUCCESS_WILL.path, cue.path);
+            assertEquals(DICE_SUCCESS_COMBAT, GameplaySounds.diceSuccessCue(stat, true));
+        }
+        assertNotEquals(DICE_SUCCESS_WILL.path, DICE_SUCCESS_COMBAT.path);
+        assertEquals(DICE_SUCCESS_ROLL, GameplaySounds.diceSuccessCue(null, false));
+        assertEquals(DICE_SUCCESS_WILL.path, DICE_SUCCESS_ROLL.path);
+        assertEquals(DICE_SUCCESS_STRENGTH,
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH, false));
+        assertEquals(DICE_SUCCESS_INFLUENCE,
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.INFLUENCE, false));
     }
 
     @Test public void healthAndSanityHaveTheirOwnPickups() {

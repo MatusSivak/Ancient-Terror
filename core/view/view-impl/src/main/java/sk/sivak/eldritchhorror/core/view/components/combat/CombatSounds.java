@@ -11,8 +11,17 @@ public final class CombatSounds {
     private CombatSounds() {
     }
 
-    public static void playFireballLaunch() {
-        play(CustomAssetManager.FIREBALL_LAUNCH_SOUND, 0.40f, 0.06f);
+    /** Fireball fired by an investigator's die: one of three gunshots, picked at random. Every shot sounds, even when fired together. */
+    public static void playDiceFireballLaunch() {
+        play(DICE_LAUNCH_SOUNDS[MathUtils.random(DICE_LAUNCH_SOUNDS.length - 1)], 1f, 0.06f, false);
+    }
+
+    private static final String[] DICE_LAUNCH_SOUNDS = {CustomAssetManager.FIREBALL_LAUNCH_SOUND,
+            CustomAssetManager.FIREBALL_LAUNCH_SHOTGUN_SOUND, CustomAssetManager.FIREBALL_LAUNCH_GUNSHOT2_SOUND};
+
+    /** Fireball hurled by a monster (or other non-dice source): the original whoosh. */
+    public static void playMonsterFireballLaunch() {
+        play(CustomAssetManager.FIREBALL_LAUNCH_MONSTER_SOUND, 0.40f, 0.06f, false);
     }
 
     public static void playFireballImpact() {
@@ -35,6 +44,10 @@ public final class CombatSounds {
     }
 
     private static void play(String path, float volume, float pitchSpread) {
+        play(path, volume, pitchSpread, true);
+    }
+
+    private static void play(String path, float volume, float pitchSpread, boolean mergeRepeats) {
         // Fast-forward shrinks the animations to a few frames; skip the cue instead of stacking it.
         if (FastForwardAction.isOn()) {
             return;
@@ -44,6 +57,6 @@ public final class CombatSounds {
             sound = CustomAssetManager.getSound(path);
         }
         // Slight random pitch so several fireballs in a row don't sound identical.
-        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(sound, volume, MathUtils.random(1f - pitchSpread, 1f + pitchSpread), 0f);
+        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.play(sound, volume, MathUtils.random(1f - pitchSpread, 1f + pitchSpread), 0f, mergeRepeats);
     }
 }

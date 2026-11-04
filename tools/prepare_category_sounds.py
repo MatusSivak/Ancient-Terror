@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # Investigator detention and monster defeat replace generate_detained_sound / prepare_oct30_sounds.
     write("investigator_detained", recording("80449__turtlelg__jaildoorclose.mp3", 1.15, 2.3), -15)
-    write("monster_defeat_fly", recording("264777__shinplaster__swoosh.mp3", 4.0, 1.1), -17)
+    write("monster_defeat_fly", recording("683096__florianreichelt__woosh.mp3", .15, 1.1), -17)
     write("monster_defeat", mix((0, recording("641046__magnuswaker__gore-impact.mp3"), .8),
           (.03, recording("414296__thefitzyg__gore-splat.mp3", 1.0, 1.2), .9)), -14)
 

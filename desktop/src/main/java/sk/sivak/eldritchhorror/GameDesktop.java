@@ -20,6 +20,8 @@ public class GameDesktop {
             }
         }
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+        // Volleys of long gunshots overlap; the default 16 sources would cut some of them off.
+        config.audioDeviceSimultaneousSources = 32;
         // Simulate mobile screen on external monitor
 //        config.width = 480;
 //        config.height = 270;

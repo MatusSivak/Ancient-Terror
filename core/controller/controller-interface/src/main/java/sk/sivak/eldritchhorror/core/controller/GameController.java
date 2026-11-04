@@ -217,6 +217,9 @@ public interface GameController {
 
     Single<String> selectEncounter(Collection<EncounterButtonData> encounterButtonDataList);
 
+    /** Completes once the map camera has fully stopped moving (immediately when it is still). */
+    Completable waitForCameraToStop();
+
     Completable showDelayedAnimation(InvestigatorId investigatorId);
 
     void justAddDelayedAnimation(InvestigatorId investigatorId);

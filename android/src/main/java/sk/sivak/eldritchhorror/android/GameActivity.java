@@ -62,6 +62,8 @@ public class GameActivity extends AndroidApplication {
         }
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+        // Volleys of long gunshots overlap; the default 16 streams would cut some of them off.
+        config.maxSimultaneousSounds = 32;
         initialize(game, config);
         adHandler.initialize();
     }

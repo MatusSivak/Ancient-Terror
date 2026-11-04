@@ -20,13 +20,21 @@ public final class GameplaySounds {
         FOCUS_LAND("focus_land", .80f),
         RESOURCE_SPEND("resource_spend", .70f),
         DICE_SORT("dice_sort", .60f),
+        // Unmodified downloads meant to be swapped freely; credits in sounds/DICE_SUCCESS_AUDIO.md.
+        DICE_SUCCESS_COMBAT("shotgun_reload.wav", 1f),
+        DICE_SUCCESS_ROLL("dice_success_will.wav", 1f),
+        DICE_SUCCESS_LORE("dice_success_will.wav", 1f),
+        DICE_SUCCESS_INFLUENCE("dice_success_will.wav", 1f),
+        DICE_SUCCESS_OBSERVATION("dice_success_will.wav", 1f),
+        DICE_SUCCESS_STRENGTH("dice_success_will.wav", 1f),
+        DICE_SUCCESS_WILL("dice_success_will.wav", 1f),
         TICKET_GAIN("ticket_gain", .85f),
         SANITY_GAIN("sanity_gain", .90f),
         TICKET_LAND("ticket_land", .82f),
         TICKET_SPEND("ticket_spend", .78f),
         CARD_GAIN("card_gain", .75f),
         CARD_COLLECT("card_collect", .38f),
-        CARD_DISCARD("card_discard", .75f),
+        CARD_DISCARD("tear_card_sound.wav", 1f),
         CARD_DISABLE("card_disable", .80f),
         GATE_OPEN("gate_open", .85f),
         GATE_CLOSE("gate_close", .85f),
@@ -68,7 +76,7 @@ public final class GameplaySounds {
         public final float volume;
 
         Cue(String name, float volume) {
-            this.path = "sounds/" + name + ".wav";
+            this.path = "sounds/" + name + (name.contains(".") ? "" : ".wav");
             this.volume = volume;
         }
     }
@@ -79,6 +87,20 @@ public final class GameplaySounds {
         if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.SHIP) return Cue.TRAVEL_SEA;
         if (type == sk.sivak.eldritchhorror.core.constants.location.PathType.TRAIN) return Cue.TRAVEL_RAIL;
         return Cue.TRAVEL_WALK;
+    }
+
+    /** Cue for a thrown die landing as a success: combat, the tested skill, or plain rolls (Reckonings...). */
+    public static Cue diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat stat, boolean combat) {
+        if (combat) return Cue.DICE_SUCCESS_COMBAT;
+        if (stat == null) return Cue.DICE_SUCCESS_ROLL;
+        switch (stat) {
+            case LORE: return Cue.DICE_SUCCESS_LORE;
+            case INFLUENCE: return Cue.DICE_SUCCESS_INFLUENCE;
+            case OBSERVATION: return Cue.DICE_SUCCESS_OBSERVATION;
+            case STRENGTH: return Cue.DICE_SUCCESS_STRENGTH;
+            case WILL: return Cue.DICE_SUCCESS_WILL;
+            default: return null;
+        }
     }
 
     public static void play(Cue cue) {

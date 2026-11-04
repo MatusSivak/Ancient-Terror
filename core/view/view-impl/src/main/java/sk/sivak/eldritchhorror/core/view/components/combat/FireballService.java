@@ -16,6 +16,7 @@ import rx.Completable;
 import rx.Observable;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,8 +42,10 @@ public class FireballService {
     private Runnable onLandLastAction;
     private Runnable onLandFirstAction;
     private boolean blue;
+    private boolean fromDice;
     private float fireballScale = 1f;
     private float staggerDelay;
+    private float staggerDelayMax;
 
     public FireballService(Stage stage) {
         this.stage = stage;
@@ -109,8 +112,10 @@ public class FireballService {
         onLandLastAction = null;
         onLandFirstAction = null;
         blue = false;
+        fromDice = false;
         fireballScale = 1f;
         staggerDelay = 0f;
+        staggerDelayMax = 0f;
         midpointDisplacementDirection = 0f;
         targetHealth = 3;
         minDelay = 0.3f;
@@ -210,13 +215,19 @@ public class FireballService {
 
     private Map<Vector2, List<Fireball>> createFireballs(Map<Vector2, List<Vector2>> sourceTargetsMap, Map<Vector2, Explosion> targetExplosionMap, Group smokeGroup, Group fireballGroup) {
         HashMap<Vector2, List<Fireball>> fireballsMap = new HashMap<>();
-        int sourceIndex = 0;
-        for (Map.Entry<Vector2, List<Vector2>> entry : sourceTargetsMap.entrySet()) {
+        float nextThrowDelay = 0f;
+        List<Map.Entry<Vector2, List<Vector2>>> entries = new ArrayList<>(sourceTargetsMap.entrySet());
+        if (fromDice) {
+            // Dice fire one by one in random order, so every shot is heard on its own.
+            Collections.shuffle(entries);
+        }
+        for (Map.Entry<Vector2, List<Vector2>> entry : entries) {
             List<Vector2> targets = entry.getValue();
             Iterator<Vector2> targetsIterator = targets.iterator();
             SequenceAction sequenceAction = new SequenceAction();
             if (staggerDelay > 0f) {
-                sequenceAction.addAction(Actions.delay(sourceIndex++ * staggerDelay));
+                sequenceAction.addAction(Actions.delay(nextThrowDelay));
+                nextThrowDelay += MathUtils.random(staggerDelay, Math.max(staggerDelay, staggerDelayMax));
             } else {
                 sequenceAction.addAction(new VariableDelayAction(() -> MathUtils.random(0, (minDelay + maxDelay)/2f)));
             }
@@ -224,6 +235,7 @@ public class FireballService {
                 Vector2 target = targetsIterator.next();
                 Fireball fireball = new Fireball();
                 fireball.setBlue(blue);
+                fireball.setFromDice(fromDice);
                 fireball.setSizeMultiplier(fireballScale);
                 Vector2 source = entry.getKey();
                 if (fireballsMap.get(target) == null) {
@@ -295,12 +307,23 @@ public class FireballService {
 
     /** When positive, sources throw one after another, this many seconds apart, instead of at random. Reset by {@link #weakReset()}. */
     public void setStaggerDelay(float staggerDelay) {
-        this.staggerDelay = staggerDelay;
+        setStaggerDelay(staggerDelay, staggerDelay);
+    }
+
+    /** Like {@link #setStaggerDelay(float)}, but each gap is random between min and max seconds. Reset by {@link #weakReset()}. */
+    public void setStaggerDelay(float min, float max) {
+        this.staggerDelay = min;
+        this.staggerDelayMax = max;
     }
 
     /** Horror / sanity fireballs burn blue. Reset by {@link #weakReset()}. */
     public void setBlue(boolean blue) {
         this.blue = blue;
+    }
+
+    /** Fireballs fired by the investigator's dice launch with a gunshot; others (monsters) with a whoosh. Reset by {@link #weakReset()}. */
+    public void setFromDice(boolean fromDice) {
+        this.fromDice = fromDice;
     }
 
     /** Size multiplier of the next fireballs (epic monsters throw bigger ones). Reset by {@link #weakReset()}. */

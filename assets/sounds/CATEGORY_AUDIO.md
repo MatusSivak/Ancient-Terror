@@ -56,7 +56,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | [Puzzle piece placed on board](https://freesound.org/s/560698/) | el_boss | Focus reaches the HUD |
 | [place_card](https://freesound.org/s/502658/) | eggdeng | Ticket reaches the HUD |
 | [JailDoorClose](https://freesound.org/s/80449/) | TurtleLG | Investigator detained |
-| [Swoosh](https://freesound.org/s/264777/) | Shinplaster | Defeated monster flies toward the screen |
+| [Woosh](https://freesound.org/s/683096/) | florianreichelt | Defeated monster flies toward the screen |
 | [Gore Impact - "LOT OF HEART"](https://freesound.org/s/641046/) | magnuswaker | Monster explodes (impact) |
 | [goreSplat.wav](https://freesound.org/s/414296/) | ThefitzyG | Monster explodes (flesh burst) |
 | [quick woosh](https://freesound.org/s/683101/) | florianreichelt | Doom / omen track zooms in |
@@ -74,7 +74,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | `dice_sort` | Thrown dice dragged back into order | Quiet, gentle wooden drag (no rattle) |
 | `clue_gain` | Clue gained | Quick pencil scribble (noting the clue) |
 | `focus_gain` | Focus gained | Quiet soft kalimba note ringing out naturally |
-| `card_discard` | Card destroyed (plays as the card tears) | Paper ripped by hand |
+| `tear_card_sound` | Card destroyed (plays as the card tears) | user-provided (source/licence not recorded), converted from 48 kHz 24-bit to 44.1 kHz 16-bit PCM, first 200 ms trimmed (no gain change); replaces the generated `card_discard` |
 | `ticket_gain` | Train or ship ticket gained | Ticket hole punch |
 | `health_gain` / `sanity_gain` | Health / sanity restored | Heartbeat / relieved sigh |
 | `token_land` | Health / sanity token reaches the HUD | Poker chip dropped on a table |
@@ -82,7 +82,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | `focus_land` | Focus reaches the HUD | Cardboard puzzle piece placed |
 | `ticket_land` | Ticket reaches the HUD | Card placed on a table |
 | `investigator_detained` | Investigator detained | Cinematic jail door slam |
-| `monster_defeat_fly` | Defeated monster flies toward the screen | Swelling flyby swoosh |
+| `monster_defeat_fly` | Defeated monster flies toward the screen | Swelling woosh, peaking as the monster reaches the screen |
 | `monster_defeat` | Monster bursts apart | Wet gore impact into a flesh splatter |
 | `track_zoom_in` / `track_zoom_out` | Doom or omen track zooms in / out | Quick soft woosh / lowered bamboo swing |
 | `monster_prowl_1`–`4` | Monster movement | Lowered mud squelch steps with a wet slimy layer |

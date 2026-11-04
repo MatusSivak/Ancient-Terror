@@ -22,7 +22,7 @@ public class ShowRolledDicesAction extends AbstractHookableAction<TestData, Test
 
     @Override
     protected void onExecute(SingleSubscriber<? super TestData> ss) {
-        Completable completable = ServicePlatform.get().getTestController().showRolledTestDices(input.getDiceRolls());
+        Completable completable = ServicePlatform.get().getTestController().showRolledTestDices(input.getDiceRolls(), input.getStat(), input.isCombat());
         completable.andThen(InvestigatorDiceModifiers.applyAfterRoll(
                 input.getDiceRolls(), null, input.getMinSuccessDiceValue()))
                 .subscribe(() -> ss.onSuccess(input), ss::onError);
