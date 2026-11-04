@@ -48,11 +48,9 @@ Renders the pre-test asset selection with 1–3 cards, in combat and outside com
 fails if the cards panel, test summary or Test button overlap each other or the fixed HUD
 controls (side menu, clock, menu/fast-forward buttons, investigator HUD). It also checks
 that the monster portrait wanders (creature layer, drawn under the cards panel and dice, inside `getWanderArea()`), and renders
-the combat overview and a test result table. monster-health-* checks that the status
-plate rides above the roaming monster and that health fireballs stop it and land on its
-body. `monster-horror-shootdown-*` show dice fireballs burning the monster's horror icons on its
-plate first; `monster-attack-*` show the remaining sanity (blue) and health fireballs
-hitting the investigator. Plate tokens must stay in their slots throughout. A further
+the combat overview and a test result table. The monster health preview checks that each portrait shot hits the monster and removes a heart while one remains.
+`monster-horror-intercept` captures a bullet hitting a horror fireball halfway to the investigator.
+`monster-attack-*` shows unblocked sanity and health fireballs hitting the investigator. Plate tokens must stay in their slots throughout. A further
 check drives `TestViewImpl.destroySanity/destroyHealth` with the stand wrapped three times
 across the map and requires the fireballs to land on the on-screen copy, thrown one after\r
 another, with exactly one sanity/health token lost per impact. `combat-interrupted` /

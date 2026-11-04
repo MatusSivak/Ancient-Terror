@@ -21,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisTable;
 import java8.features.function.Consumer;
 import java8.features.function.Function;
-import java8.features.stream.Stream;
 import rx.Completable;
 import rx.CompletableSubscriber;
 import rx.Single;
@@ -64,7 +63,6 @@ import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.addAction;
@@ -577,7 +575,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroyHorror(List<DiceRoll> diceRolls) {
-        return destroyHorrorOrDamage(diceRolls, dicePositions -> monsterCombatTableStack.peek().destroyHorror(dicePositions), () -> {
+        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyHorror(successes, investigatorShotOrigin(true)), () -> {
             diceRollerStack.pop().hideDices();
             InfoStage.hideActor(testTableStack.pop());
             InfoStage.setBottomHeight(5);
@@ -586,7 +584,7 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroyDamage(List<DiceRoll> diceRolls) {
-        return destroyHorrorOrDamage(diceRolls, dicePositions -> monsterCombatTableStack.peek().destroyDamage(dicePositions), () -> {
+        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyDamage(successes, investigatorShotOrigin(false)), () -> {
             if (monsterCombatTableStack.peek().getRemainingDamage() > 0) {
                 diceRollerStack.peek().hideDiceDontRemove();
                 testTableStack.peek().addAction(new FastForwardAction<>(Actions.alpha(0, 1f)));
@@ -595,36 +593,31 @@ public class TestViewImpl implements TestView {
     }
 
 
-    private List<Vector2> successfulDiceSources(List<DiceRoll> diceRolls) {
-        Map<Integer, Vector2> centers = diceRollerStack.peek().getLiveDiceCenters();
-        Collections.sort(diceRolls, (o1, o2) -> o1.getDiceNr() - o2.getDiceNr());
-        List<Vector2> result = new LinkedList<>();
-        for (DiceRoll diceRoll : diceRolls) {
-            Vector2 center = centers.get(diceRoll.getDiceNr());
-            if (center == null) {
-                continue;
-            }
-            if (diceRoll.getScore() == DiceRoll.Score.GOOD) {
-                result.add(center);
-            }
-            if (diceRoll.getScore() == DiceRoll.Score.VERY_GOOD) {
-                result.add(center);
-                result.add(center);
-            }
+    private int countSuccesses(List<DiceRoll> diceRolls) {
+        int successes = 0;
+        for (DiceRoll die : diceRolls) {
+            successes += die.getScore().getValue();
         }
-        return result;
+        return successes;
     }
 
-    private Completable destroyHorrorOrDamage(List<DiceRoll> diceRolls, Function<List<Vector2>, Completable> destroyFunction, Action0 onEndAction) {
+    private Vector2 investigatorShotOrigin(boolean sanity) {
+        Vector2 stand = investigatorStandPosition();
+        if (stand != null) return stand;
+        ContainerBar bar = sanity ? InfoStage.getInvestigatorHud().getSanityBar() : InfoStage.getInvestigatorHud().getHealthBar();
+        return bar.localToStageCoordinates(new Vector2(bar.getWidth() / 2f, bar.getHeight() / 2f));
+    }
+
+    private Completable destroyHorrorOrDamage(List<DiceRoll> diceRolls, Function<Integer, Completable> destroyFunction, Action0 onEndAction) {
         CombatInterruption.resume();
-        List<Vector2> result = successfulDiceSources(diceRolls);
-        if (result.isEmpty()) {
+        int successes = countSuccesses(diceRolls);
+        if (successes == 0) {
             onEndAction.call();
             return Completable.complete();
         }
 
         return diceRollerStack.peek().waitUntilSettled()
-                .andThen(Completable.defer(() -> destroyFunction.apply(successfulDiceSources(diceRolls))))
+                .andThen(Completable.defer(() -> destroyFunction.apply(successes)))
                 .concatWith(Completable.create(onSub -> {
                     onEndAction.call();
                     onSub.onCompleted();
@@ -738,8 +731,8 @@ public class TestViewImpl implements TestView {
     @Override
     public Completable destroyMonsterHealth(List<DiceRoll> diceRolls) {
         CombatInterruption.resume();
-        boolean anyDiceWithGoodScore = Stream.anyMatch(diceRolls, diceRoll -> diceRoll.getScore() != DiceRoll.Score.BAD);
-        if (!anyDiceWithGoodScore) {
+        int successes = countSuccesses(diceRolls);
+        if (successes == 0) {
             diceRollerStack.pop().hideDices();
             InfoStage.hideActor(testTableStack.pop());
             InfoStage.setBottomHeight(5);
@@ -761,8 +754,7 @@ public class TestViewImpl implements TestView {
                         completable = Completable.complete();
                     }
                     completable.andThen(diceRollerStack.peek().waitUntilSettled()).subscribe(() -> {
-                        List<Vector2> result = successfulDiceSources(diceRolls);
-                        monsterCombatTableStack.peek().destroyMonsterHealth(result).concatWith(Completable.create(onSub -> {
+                        monsterCombatTableStack.peek().destroyMonsterHealth(successes, investigatorShotOrigin(false)).concatWith(Completable.create(onSub -> {
                             diceRollerStack.pop().hideDices();
                             InfoStage.hideActor(testTableStack.pop());
                             InfoStage.setBottomHeight(5);

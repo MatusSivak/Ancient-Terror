@@ -1,3 +1,4 @@
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.audio.Sound;
@@ -94,6 +95,10 @@ public class PromptPreview extends ApplicationAdapter {
             }
             if (combatDisplayOnly) {
                 previewCombatPanel();
+                previewMonsterHealthHit();
+                previewMonsterAttack();
+                previewSurplusSuccesses();
+                previewMonsterAttackOnStand();
                 previewEpicMonsterAndPhases();
                 System.out.println("PASS: ordinary and epic combat displays, phase highlighting and cleanup");
                 return;
@@ -402,7 +407,7 @@ public class PromptPreview extends ApplicationAdapter {
         }
     }
 
-    /** Health hearts ride above the roaming monster; health fireballs stop it and land on its body. */
+    /** Portrait bullets hit the monster and remove its hearts on impact. */
     private void previewMonsterHealthHit() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
@@ -421,31 +426,34 @@ public class PromptPreview extends ApplicationAdapter {
         draw("monster-health-plate");
 
         AtomicInteger completed = new AtomicInteger();
-        table.destroyMonsterHealth(Arrays.asList(new Vector2(300, 80), new Vector2(600, 80))).subscribe(completed::incrementAndGet);
+        table.destroyMonsterHealth(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
         float startX = image.getX();
-        boolean drawnMidFlight = false;
-        Set<Actor> fireballs = new HashSet<>();
+        Set<Actor> bullets = new HashSet<>();
         for (int i = 0; i < 600 && completed.get() == 0; i++) {
             stage.act(1f / 60);
-            collectFireballs(fireballs);
+            Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
+            if (tracer != null && bullets.add(tracer)) {
+                Vector2 shooter = tracer.localToStageCoordinates(new Vector2(tracer.getWidth(), tracer.getHeight() / 2f));
+                require(shooter.dst(130, 80) < 1f, "bullet started away from the portrait: " + shooter);
+                draw("monster-health-bullets");
+            }
             require(Math.abs(image.getX() - startX) < 6f, "monster kept walking while being shot at");
-            if (i == 25 && !drawnMidFlight) { draw("monster-health-fireballs"); drawnMidFlight = true; }
         }
         require(completed.get() == 1, "monster health destruction did not complete");
         require(((sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar) field(table, "toughnessBar"))
                 .getCurrentHealth() == 2, "monster health did not update with the impacts");
         require(stage.getRoot().findActor("vitality-loss-monster") == null,
                 "combat advanced while monster health fragments were still on screen");
-        require(fireballs.size() == 2, "expected one fireball per die, saw " + fireballs.size());
+        require(bullets.size() == 2, "expected two bullets, saw " + bullets.size());
         tick(120);
         draw("monster-health-after");
         table.remove();
         tick(60);
         require(plate.getStage() == null && image.getStage() == null, "status plate / image left behind");
-        System.out.println("PASS: monster health plate and aimed fireballs");
+        System.out.println("PASS: monster health plate and aimed bullets");
     }
 
-    /** Dice burn the monster's horror (blue), then the monster hurls its remaining horror (blue) and damage at the investigator. */
+    /** The investigator intercepts two horror fireballs, then takes unblocked horror and damage. */
     private void previewMonsterAttack() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
@@ -466,17 +474,36 @@ public class PromptPreview extends ApplicationAdapter {
         require(slots.size() == 5, "expected 3 horror + 2 damage tokens on the plate, got " + slots.size());
 
         AtomicInteger completed = new AtomicInteger();
-        table.destroyHorror(Arrays.asList(new Vector2(420, 90), new Vector2(470, 90))).subscribe(completed::incrementAndGet);
+        table.destroyHorror(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
         Set<Actor> fireballs = new HashSet<>();
+        Map<Actor, Vector2> origins = new HashMap<>();
+        Set<Actor> intercepts = new HashSet<>();
+        Vector2 shooter = new Vector2(130, 80);
         for (int i = 0; i < 600 && completed.get() == 0; i++) {
             stage.act(1f / 60);
             collectFireballs(fireballs);
+            for (Actor ball : fireballs) {
+                if (!origins.containsKey(ball)) origins.put(ball, new Vector2(ball.getX(Align.center), ball.getY(Align.center)));
+            }
+            Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
+            if (tracer != null && intercepts.add(tracer)) {
+                Vector2 impact = new Vector2(tracer.getX(Align.left), tracer.getY(Align.left));
+                boolean atMidpoint = false;
+                for (Actor ball : fireballs) {
+                    Vector2 source = origins.get(ball);
+                    Vector2 flight = new Vector2(shooter).sub(source);
+                    float fraction = new Vector2(impact).sub(source).dot(flight) / flight.len2();
+                    if (impact.dst(ball.getX(Align.center), ball.getY(Align.center)) < 1f && Math.abs(fraction - 0.5f) < 0.01f) atMidpoint = true;
+                }
+                require(atMidpoint, "tracer missed the halfway point");
+                draw("monster-horror-intercept");
+            }
             requireTokensInSlots(slots, plate);
             if (i == 30) draw("monster-horror-shootdown-1");
             if (i == 60) draw("monster-horror-shootdown-2");
         }
         require(completed.get() == 1, "horror destruction did not complete");
-        require(fireballs.size() == 2, "expected one fireball per die, saw " + fireballs.size());
+        require(fireballs.size() == 2 && intercepts.size() == 2, "expected two incoming fireballs and two intercepts");
         tick(30);
 
         for (boolean sanity : new boolean[]{true, false}) {
@@ -499,7 +526,7 @@ public class PromptPreview extends ApplicationAdapter {
         table.remove();
         tick(60);
         require(image.getStage() == null && table.getStatusPlate().getStage() == null, "monster left behind after attack");
-        System.out.println("PASS: monster horror burn and attacks on the investigator");
+        System.out.println("PASS: midpoint interceptions and unblocked attacks on the investigator");
     }
 
     /**
@@ -635,7 +662,7 @@ public class PromptPreview extends ApplicationAdapter {
         System.out.println("PASS: combat interruption hides the monster and brings it back");
     }
 
-    /** More successes than icons / hearts: every success still fires, and each icon / heart goes only once. */
+    /** Defense is capped by incoming fireballs. Extra offensive bullets can strike the body after the last heart. */
     private void previewSurplusSuccesses() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
@@ -645,25 +672,27 @@ public class PromptPreview extends ApplicationAdapter {
         table.init(data);
         table.highlightHorror();
         tick(150);
-        List<Vector2> dice = Arrays.asList(new Vector2(380, 90), new Vector2(430, 90), new Vector2(480, 90), new Vector2(530, 90));
+        int successes = 4;
+        Vector2 portrait = new Vector2(130, 80);
         String[] phases = {"horror", "damage", "health"};
         for (String phase : phases) {
             AtomicInteger completed = new AtomicInteger();
-            Completable attack = phase.equals("horror") ? table.destroyHorror(dice)
-                    : phase.equals("damage") ? table.destroyDamage(dice) : table.destroyMonsterHealth(dice);
+            Completable attack = phase.equals("horror") ? table.destroyHorror(successes, portrait)
+                    : phase.equals("damage") ? table.destroyDamage(successes, portrait) : table.destroyMonsterHealth(successes, portrait);
             attack.subscribe(completed::incrementAndGet);
-            Set<Actor> fireballs = new HashSet<>();
+            Set<Actor> bullets = new HashSet<>();
             for (int i = 0; i < 900 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
-                collectFireballs(fireballs);
+                Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
+                if (tracer != null) bullets.add(tracer);
             }
             require(completed.get() == 1, phase + " with surplus successes did not complete");
-            require(fireballs.size() == dice.size(), phase + ": expected one fireball per success (" + dice.size() + "), saw " + fireballs.size());
+            require(bullets.size() == (phase.equals("health") ? successes : 1), phase + ": unexpected bullet count " + bullets.size());
             tick(60);
         }
         table.remove();
         tick(60);
-        System.out.println("PASS: every success fires even beyond the monster's horror / damage / health");
+        System.out.println("PASS: surplus successes respect incoming fireball and monster health counts");
     }
 
     /** Epic monster: bigger portrait, pulsing red rim, gold plate and bigger fireballs. */

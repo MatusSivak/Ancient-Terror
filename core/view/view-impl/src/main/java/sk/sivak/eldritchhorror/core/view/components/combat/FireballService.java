@@ -16,7 +16,6 @@ import rx.Completable;
 import rx.Observable;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +41,6 @@ public class FireballService {
     private Runnable onLandLastAction;
     private Runnable onLandFirstAction;
     private boolean blue;
-    private boolean fromDice;
     private float fireballScale = 1f;
     private float staggerDelay;
     private float staggerDelayMax;
@@ -112,7 +110,6 @@ public class FireballService {
         onLandLastAction = null;
         onLandFirstAction = null;
         blue = false;
-        fromDice = false;
         fireballScale = 1f;
         staggerDelay = 0f;
         staggerDelayMax = 0f;
@@ -123,12 +120,20 @@ public class FireballService {
     }
 
     public void launchFireballs(List<Vector2> sources, List<Vector2> targets) {
+        launchFireballs(sources, targets, false);
+    }
+
+    public void launchInterceptedFireballs(List<Vector2> sources, Vector2 investigator) {
+        launchFireballs(sources, Collections.singletonList(investigator), true);
+    }
+
+    private void launchFireballs(List<Vector2> sources, List<Vector2> targets, boolean intercepted) {
         List<Vector2> allTargets = createAllTargets(sources, targets);
         Map<Vector2, List<Vector2>> sourceTargetsMap = createSourceTargetsMap(sources, allTargets);
         Map<Vector2, Explosion> targetExplosionMap = createTargetExplosionMap(targets);
 
         addGroupsToStage(targetExplosionMap.values(), explosionGroup, smokeGroup, fireballGroup);
-        Map<Vector2, List<Fireball>> fireballsMap = createFireballs(sourceTargetsMap, targetExplosionMap, smokeGroup, fireballGroup);
+        Map<Vector2, List<Fireball>> fireballsMap = createFireballs(sourceTargetsMap, targetExplosionMap, smokeGroup, fireballGroup, intercepted);
         initOnLandLastActions(fireballsMap);
         initOnLandFirstAction(fireballsMap);
         initOnLandLastAction(fireballsMap);
@@ -213,15 +218,10 @@ public class FireballService {
         }
     }
 
-    private Map<Vector2, List<Fireball>> createFireballs(Map<Vector2, List<Vector2>> sourceTargetsMap, Map<Vector2, Explosion> targetExplosionMap, Group smokeGroup, Group fireballGroup) {
+    private Map<Vector2, List<Fireball>> createFireballs(Map<Vector2, List<Vector2>> sourceTargetsMap, Map<Vector2, Explosion> targetExplosionMap, Group smokeGroup, Group fireballGroup, boolean intercepted) {
         HashMap<Vector2, List<Fireball>> fireballsMap = new HashMap<>();
         float nextThrowDelay = 0f;
-        List<Map.Entry<Vector2, List<Vector2>>> entries = new ArrayList<>(sourceTargetsMap.entrySet());
-        if (fromDice) {
-            // Dice fire one by one in random order, so every shot is heard on its own.
-            Collections.shuffle(entries);
-        }
-        for (Map.Entry<Vector2, List<Vector2>> entry : entries) {
+        for (Map.Entry<Vector2, List<Vector2>> entry : sourceTargetsMap.entrySet()) {
             List<Vector2> targets = entry.getValue();
             Iterator<Vector2> targetsIterator = targets.iterator();
             SequenceAction sequenceAction = new SequenceAction();
@@ -235,7 +235,6 @@ public class FireballService {
                 Vector2 target = targetsIterator.next();
                 Fireball fireball = new Fireball();
                 fireball.setBlue(blue);
-                fireball.setFromDice(fromDice);
                 fireball.setSizeMultiplier(fireballScale);
                 Vector2 source = entry.getKey();
                 if (fireballsMap.get(target) == null) {
@@ -253,7 +252,7 @@ public class FireballService {
                     if (source instanceof ActorCenterPosition) {
                         ((ActorCenterPosition) source).refresh();
                     }
-                    fireball.throwIt(source, target);
+                    fireball.throwIt(source, target, intercepted);
                     fireballGroup.addActor(fireball);
 
                 }));
@@ -321,9 +320,9 @@ public class FireballService {
         this.blue = blue;
     }
 
-    /** Fireballs fired by the investigator's dice launch with a gunshot; others (monsters) with a whoosh. Reset by {@link #weakReset()}. */
-    public void setFromDice(boolean fromDice) {
-        this.fromDice = fromDice;
+    void fireBullet(Vector2 investigator, Vector2 impact) {
+        fireballGroup.toFront();
+        BulletTracer.fire(fireballGroup, investigator, impact);
     }
 
     /** Size multiplier of the next fireballs (epic monsters throw bigger ones). Reset by {@link #weakReset()}. */

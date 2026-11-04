@@ -37,7 +37,6 @@ import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -222,7 +221,7 @@ public class GateCombatPreview extends ApplicationAdapter {
                 Vector2 point = (Vector2) scatter.invoke(table, actual);
                 require(Float.isFinite(point.x) && Float.isFinite(point.y)
                         && Math.abs(point.x - actual.x) <= image.getImageWidth() * Math.abs(image.getScaleX()) * .18f,
-                        "Mirrored fireball scatter left the artwork");
+                        "Mirrored bullet scatter left the artwork");
             }
             random.setState(random0, random1);
             float base = image.getScaleY();
@@ -233,11 +232,11 @@ public class GateCombatPreview extends ApplicationAdapter {
             tick(30);
             require(Math.abs(image.getScaleY() - base) < .01f, "Attack reset the depth scale");
             AtomicInteger done = new AtomicInteger();
-            table.destroyMonsterHealth(Collections.singletonList(new Vector2(650, 50))).subscribe(done::incrementAndGet);
+            table.destroyMonsterHealth(1, new Vector2(130, 80)).subscribe(done::incrementAndGet);
             for (int frame = 0; frame < 600 && done.get() == 0; frame++) {
                 stage.act(1f / 60f);
                 if (done.get() == 0) require(((Vector2) field(table, "wanderPosition")).dst(position) < .01f,
-                        "Monster moved during aimed fireball: epic=" + epic + ", frame=" + frame
+                        "Monster moved during aimed shot: epic=" + epic + ", frame=" + frame
                                 + ", held=" + field(table, "holdStill") + ", from=" + position
                                 + ", to=" + field(table, "wanderPosition"));
             }

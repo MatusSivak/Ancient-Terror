@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -46,7 +47,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 /**
  * Combat state of the fought monster. There is no panel any more: the actor itself is invisible and only keeps the
  * combat API and timing. What the player sees is the roaming monster portrait with a status plate (name, horror,
- * damage and health) floating above it. Fireballs from the dice hit the monster; fireballs from the monster hit the
+ * damage and health) floating above it. Bullets from the investigator hit the monster or intercept fireballs aimed at the
  * investigator. Anything related to horror / sanity burns blue.
  */
 public class MonsterCombatTable extends VisTable {
@@ -65,7 +66,7 @@ public class MonsterCombatTable extends VisTable {
     private static final float EPIC_FIREBALL_SCALE = 1.5f;
     /** Seconds between the monster's attack fireballs. */
     private static final float ATTACK_STAGGER = 0.55f;
-    /** Random gap in seconds between fireballs fired by successful dice (random die order), so each shot is heard. */
+    /** Random gap in seconds between investigator shots. */
     private static final float DICE_SHOT_GAP_MIN = 0.15f;
     private static final float DICE_SHOT_GAP_MAX = 0.30f;
     private static final Color EPIC_GOLD = Color.valueOf("F2D27A");
@@ -99,7 +100,6 @@ public class MonsterCombatTable extends VisTable {
     private ToughnessBar toughnessBar;
     private MonsterCombatTableData data;
 
-    private Integer remainingHorror;
     private Integer remainingDamage;
 
     private boolean centered = false;
@@ -686,128 +686,86 @@ public class MonsterCombatTable extends VisTable {
         return Completable.complete();
     }
 
-    public Completable destroyHorror(List<Vector2> dicePositions) {
-        return Completable.create(onSub -> {
-            remainingHorror = data.getHorror() - dicePositions.size();
-            shootDownTokens(dicePositions, onSub, horrorBar, true);
-        });
+    public Completable destroyHorror(int successes, Vector2 investigator) {
+        return interceptFireballs(horrorBar, data.getHorror(), successes, investigator, true);
     }
 
-    /** Dice beyond the monster's damage are not used here; they hit its health later. */
-    public Completable destroyDamage(List<Vector2> dicePositions) {
-        return Completable.create(onSub -> {
-            remainingDamage = data.getDamage() - dicePositions.size();
-            shootDownTokens(dicePositions, onSub, damageBar, false);
-        });
+    public Completable destroyDamage(int successes, Vector2 investigator) {
+        return interceptFireballs(damageBar, data.getDamage(), successes, investigator, false);
     }
 
-    /**
-     * Defence comes first: every successful die fires at one of the monster's horror / damage icons on the plate and
-     * burns it away. Only the icons left afterwards are thrown at the investigator ({@link #destroySanity} / {@link #destroyHealth}).
-     */
-    private void shootDownTokens(List<Vector2> dicePositions, CompletableSubscriber onSub, TokenInFrameBar bar, boolean horror) {
-        if (bar.getChildren().size == 1 && bar.getChildren().get(0) instanceof Container) {
-            onSub.onCompleted();
-            return;
-        }
-        int count = bar.getChildren().size;
-        bar.setCoveredByDice(dicePositions.size());
-        int shotDown = Math.min(dicePositions.size(), count);
-        if (shotDown == 0) {
-            onSub.onCompleted();
-            return;
-        }
-        // The plate rides on the monster; keep it still while the icons are targeted.
-        holdStill = true;
-        act(0f);
-        // Every success fires; surplus fireballs strike icons that are already burning.
-        List<Vector2> sources = new LinkedList<>(dicePositions);
-        List<Vector2> targets = new LinkedList<>();
-        Set<Image> burned = new HashSet<>();
-        fireballService.reset();
-        fireballService.setTargetHealth(1);
-        fireballService.setBlue(horror);
-        fireballService.setFromDice(true);
-        fireballService.setStaggerDelay(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX);
-        // Cancelled icons are the last ones in the row; they burn away in their own slots so nothing shifts.
-        for (int i = count - 1; i >= count - shotDown; i--) {
-            Image token = bar.getTokenImage(i);
-            token.setOrigin(Align.center);
-            Vector2 target = token.localToStageCoordinates(new Vector2(token.getWidth() / 2f, token.getHeight() / 2f));
-            targets.add(target);
-            fireballService.setOnLandAction(target, () -> {
-                CombatSounds.playMonsterTokenHit();
-                shakeToken(token);
-                if (!burned.add(token)) {
-                    return;
-                }
-                token.addAction(new FastForwardAction<>(Actions.sequence(
-                        Actions.scaleTo(0f, 0f, 0.3f, Interpolation.sineIn),
-                        Actions.visible(false),
-                        Actions.scaleTo(1f, 1f))));
-            });
-        }
-        fireballService.setOnLandLastAction(() -> addAction(new FastForwardAction<>(Actions.delay(0.4f, Actions.run(() -> {
-            holdStill = false;
-            onSub.onCompleted();
-        })))));
-        fireballService.setMidpointDisplacementDirection(-1);
-        fireballService.launchFireballs(sources, targets);
-    }
-    public Completable destroyMonsterHealth(List<Vector2> dicePositions) {
+    private Completable interceptFireballs(TokenInFrameBar bar, int strength, int successes, Vector2 investigator, boolean horror) {
         return Completable.create(onSub -> {
-            int targetsCount = Math.min(dicePositions.size(), toughnessBar.getCurrentHealth());
-            int blankHealth = toughnessBar.getChildren().size - toughnessBar.getCurrentHealth();
-            List<Actor> healthIcons = new LinkedList<>();
-            int from = toughnessBar.getChildren().size - 1 - blankHealth;
-            int to = from - targetsCount;
-            for (int i = from; i > to; i--) {
-                healthIcons.add(toughnessBar.getChildren().get(i));
+            int blocked = Math.min(successes, strength);
+            bar.setCoveredByDice(blocked);
+            if (!horror) {
+                remainingDamage = strength - blocked;
             }
-
-            fireballService.weakReset();
-            // Every success fires; one heart is torn off per heart left, surplus fireballs just strike the body.
+            if (blocked == 0) {
+                onSub.onCompleted();
+                return;
+            }
+            holdStill = true;
+            fireballService.reset();
             fireballService.setTargetHealth(1);
-            fireballService.setFromDice(true);
-            fireballService.setStaggerDelay(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX);
-            Set<Actor> torn = new HashSet<>();
-            int[] runningLosses = {0};
-            boolean[] allLanded = {false};
-            Runnable completeWhenDone = () -> {
-                if (allLanded[0] && runningLosses[0] == 0) {
+            fireballService.setBlue(horror);
+            fireballService.setFireballScale(data.isMonsterEpic() ? EPIC_FIREBALL_SCALE : 1f);
+            fireballService.setStaggerDelay(ATTACK_STAGGER);
+            fireballService.setMidpointDisplacementDirection(1);
+            Vector2 body = getMonsterBodyCenter();
+            List<Vector2> sources = new LinkedList<>();
+            for (int i = 0; i < blocked; i++) {
+                Image token = bar.getTokenImage(strength - 1 - i);
+                Vector2 source = new Vector2(body.x + (i - (blocked - 1) / 2f) * 22f, body.y + 10f);
+                sources.add(source);
+                fireballService.setOnThrowAction(source, () -> {
+                    playAttackReaction();
+                    token.setVisible(false);
+                });
+            }
+            fireballService.setOnLandLastAction(() -> {
+                holdStill = false;
+                onSub.onCompleted();
+            });
+            fireballService.launchInterceptedFireballs(sources, investigator);
+        });
+    }
+
+    public Completable destroyMonsterHealth(int successes, Vector2 investigator) {
+        return Completable.create(onSub -> {
+            int hearts = toughnessBar.getCurrentHealth();
+            if (hearts == 0 || successes == 0) {
+                onSub.onCompleted();
+                return;
+            }
+            holdStill = true;
+            int hits = Math.min(hearts, successes);
+            float tokenWidth = Math.min(110f, 650f / Math.max(1, hits - 1));
+            int[] pendingShots = {successes};
+            Runnable finishShot = () -> {
+                if (--pendingShots[0] == 0) {
                     holdStill = false;
                     onSub.onCompleted();
                 }
             };
-            // The monster stops roaming and every fireball strikes its body; each hit tears a heart off its health bar.
-            holdStill = true;
-            Vector2 body = getMonsterBodyCenter();
-            List<Vector2> targets = new LinkedList<>();
-            for (Actor child : healthIcons) {
-                Vector2 target = randomBodyPoint(body);
-                targets.add(target);
-                fireballService.setOnLandAction(target, () -> {
+            SequenceAction volley = Actions.sequence();
+            for (int i = 0; i < successes; i++) {
+                if (i > 0) {
+                    volley.addAction(Actions.delay(MathUtils.random(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX)));
+                }
+                Actor heart = i < hits ? toughnessBar.getChildren().get(hearts - 1 - i) : null;
+                float offsetX = ((hits - 1) / 2f - i) * tokenWidth;
+                volley.addAction(Actions.run(() -> {
+                    fireballService.fireBullet(investigator, randomBodyPoint(getMonsterBodyCenter()));
                     playHitReaction();
-                    if (!torn.add(child)) {
-                        return;
+                    if (heart == null) {
+                        finishShot.run();
+                    } else {
+                        toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);
                     }
-                    float tokenWidth = Math.min(110f, 650f / Math.max(1, healthIcons.size() - 1));
-                    float baseOffset = (healthIcons.size() - 1) * tokenWidth / 2f;
-                    float offsetX = baseOffset - healthIcons.indexOf(child) * tokenWidth;
-                    runningLosses[0]++;
-                    toughnessBar.loseToughnessNew(child, offsetX).subscribe(() -> {
-                        runningLosses[0]--;
-                        completeWhenDone.run();
-                    });
-                });
+                }));
             }
-            fireballService.setOnLandLastAction(() -> {
-                allLanded[0] = true;
-                completeWhenDone.run();
-            });
-            fireballService.setMidpointDisplacementDirection(-1);
-            List<Vector2> sources = targets.isEmpty() ? new LinkedList<>() : new LinkedList<>(dicePositions);
-            fireballService.launchFireballs(sources, targets);
+            addAction(new FastForwardAction<>(volley));
         });
     }
 

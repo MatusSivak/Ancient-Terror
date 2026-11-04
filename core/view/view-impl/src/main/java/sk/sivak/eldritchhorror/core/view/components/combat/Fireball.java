@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -38,7 +39,6 @@ public class Fireball extends Image {
     private Group smokeGroup;
     private float midpointDisplacementDirection;
     private boolean blue;
-    private boolean fromDice;
     private float sizeMultiplier = 1f;
     private static ShaderProgram blueShader;
 
@@ -94,10 +94,6 @@ public class Fireball extends Image {
         this.blue = blue;
     }
 
-    public void setFromDice(boolean fromDice) {
-        this.fromDice = fromDice;
-    }
-
     public void setSizeMultiplier(float sizeMultiplier) {
         this.sizeMultiplier = sizeMultiplier;
     }
@@ -149,57 +145,55 @@ public class Fireball extends Image {
         this.midpointDisplacementDirection = direction;
     }
 
-    public void throwIt(Vector2 origin, Vector2 destination) {
+    void throwIt(Vector2 origin, Vector2 destination, boolean intercepted) {
 
-        Vector2 destinationFixed = new Vector2(destination);
+        Vector2 aim = new Vector2(destination);
         fireballSmoke = FireballSmokeBuilder.get();
         smokeGroup.addActor(fireballSmoke);
         setPosition(
                 origin.x - getWidth()/2f,
                 origin.y - getHeight()/2f);
         setScale(0.0f);
-        if (fromDice) {
-            CombatSounds.playDiceFireballLaunch();
-        } else {
-            CombatSounds.playMonsterFireballLaunch();
-        }
+        CombatSounds.playMonsterFireballLaunch();
 
         float velocity = MathUtils.random(250,300);
         Vector2 tangent = new Vector2(destination).sub(origin);
         float duration = tangent.len() / velocity;
+        float travelFraction = intercepted ? 0.5f : 1f;
 
         float scale = MathUtils.random(0.4f, 0.6f) * sizeMultiplier;
         setColor(Color.DARK_GRAY);
         float midpointDisplacement = midpointDisplacementDirection * tangent.len() / 10;//MathUtils.random(-tangent.len() / 10, tangent.len() / 10);
         TweenMoveToAction tweenMoveToAction = new TweenMoveToAction(
-                duration, Interpolation.sine,
+                duration, travelFraction,
                 new Vector2(origin.x - getWidth()/2f, origin.y - getHeight()/2f),
                 new Vector2(destination.x - getWidth()/2f, destination.y - getHeight()/2f), midpointDisplacement);
+        SequenceAction color = Actions.sequence(Actions.color(Color.WHITE, duration / 2f));
+        SequenceAction size = Actions.sequence(Actions.scaleTo(scale, scale, duration / 2f, Interpolation.sineOut));
+        if (!intercepted) {
+            color.addAction(Actions.color(Color.DARK_GRAY, duration / 2f));
+            size.addAction(Actions.scaleTo(scale * 0.1f, scale * 0.1f, duration / 2f, Interpolation.sineIn));
+        }
         addAction(new FastForwardAction<>(Actions.sequence(
-                Actions.parallel(
-                        Actions.sequence(
-                                Actions.color(Color.WHITE, duration/2f),
-                                Actions.color(Color.DARK_GRAY, duration/2f)
-                        ),
-                        tweenMoveToAction,
-                        Actions.sequence(
-                                Actions.scaleTo(scale, scale, duration/2, Interpolation.sineOut),
-                                Actions.scaleTo(scale * 0.1f, scale * 0.1f, duration/2, Interpolation.sineIn)
-                        ),
-                        Actions.rotateTo(MathUtils.random(-360, 360), duration)
+                Actions.parallel(color, size, tweenMoveToAction,
+                        Actions.rotateTo(MathUtils.random(-360, 360) * travelFraction, duration * travelFraction)
                 ),
                 Actions.run(() -> {
+                    Vector2 impact = new Vector2(getX(Align.center), getY(Align.center));
+                    if (intercepted) {
+                        setVisible(false);
+                        BulletTracer.fire(getParent(), aim, impact);
+                    }
                     CombatSounds.playFireballImpact();
-                    if (!Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
+                    if (!intercepted && !Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
                         sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.runInBackground(() -> Gdx.input.vibrate(50));
                     }
+                    fireballSmoke.getParticleEffect().allowCompletion();
+                    explosion.start(new Explosion.ExplosionConfig(impact,
+                            blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f,1f)));
                     for (Runnable onLandAction : onLandActions) {
                         onLandAction.run();
                     }
-
-                    fireballSmoke.getParticleEffect().allowCompletion();
-                    explosion.start(new Explosion.ExplosionConfig(destinationFixed,
-                            blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f,1f)));
                 }),
                 Actions.removeActor()
         )));
@@ -209,22 +203,25 @@ public class Fireball extends Image {
 
         private final Vector2 origin;
         private final Vector2 destination;
+        private final float travelFraction;
         private final float midpointDisplacement;
 
         private Vector2 tangent;
         private Vector2 nor;
 
-        public TweenMoveToAction(float duration, Interpolation interpolation,
+        public TweenMoveToAction(float duration, float travelFraction,
                                  Vector2 origin, Vector2 destination,
                                  float midpointDisplacement) {
-            super(duration, interpolation);
+            super(duration * travelFraction);
+            this.travelFraction = travelFraction;
             this.origin = origin;
             this.destination = destination;
             this.midpointDisplacement = midpointDisplacement;
         }
 
         @Override
-        protected void update(float value) {
+        protected void update(float progress) {
+            float value = Interpolation.sine.apply(progress * travelFraction);
             float sin = MathUtils.sin((float) (Math.PI * value));
 
             float middlePointX = origin.x + tangent.x * value;
