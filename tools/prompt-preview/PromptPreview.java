@@ -426,6 +426,9 @@ public class PromptPreview extends ApplicationAdapter {
         draw("monster-health-plate");
 
         AtomicInteger completed = new AtomicInteger();
+        InvestigatorImage portrait = new InvestigatorImage(InvestigatorId.THE_BOUNTY_HUNTER, null);
+        portrait.setPosition(130, 80, Align.center);
+        stage.addActor(portrait);
         table.destroyMonsterHealth(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
         float startX = image.getX();
         Set<Actor> bullets = new HashSet<>();
@@ -433,12 +436,13 @@ public class PromptPreview extends ApplicationAdapter {
             stage.act(1f / 60);
             Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
             if (tracer != null && bullets.add(tracer)) {
-                Vector2 shooter = tracer.localToStageCoordinates(new Vector2(tracer.getWidth(), tracer.getHeight() / 2f));
+                Vector2 shooter = tracer.localToStageCoordinates(new Vector2());
                 require(shooter.dst(130, 80) < 1f, "bullet started away from the portrait: " + shooter);
                 draw("monster-health-bullets");
             }
             require(Math.abs(image.getX() - startX) < 6f, "monster kept walking while being shot at");
         }
+        portrait.remove();
         require(completed.get() == 1, "monster health destruction did not complete");
         require(((sk.sivak.eldritchhorror.core.view.components.sheet.monster.ToughnessBar) field(table, "toughnessBar"))
                 .getCurrentHealth() == 2, "monster health did not update with the impacts");
@@ -446,6 +450,7 @@ public class PromptPreview extends ApplicationAdapter {
                 "combat advanced while monster health fragments were still on screen");
         require(bullets.size() == 2, "expected two bullets, saw " + bullets.size());
         tick(120);
+        require(stage.getRoot().findActor("combat-bullet-tracer") == null, "gunshot effects outlived the volley");
         draw("monster-health-after");
         table.remove();
         tick(60);
@@ -487,7 +492,7 @@ public class PromptPreview extends ApplicationAdapter {
             }
             Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
             if (tracer != null && intercepts.add(tracer)) {
-                Vector2 impact = new Vector2(tracer.getX(Align.left), tracer.getY(Align.left));
+                Vector2 impact = tracer.localToStageCoordinates(new Vector2(tracer.getWidth(), 0f));
                 boolean atMidpoint = false;
                 for (Actor ball : fireballs) {
                     Vector2 source = origins.get(ball);
@@ -683,8 +688,9 @@ public class PromptPreview extends ApplicationAdapter {
             Set<Actor> bullets = new HashSet<>();
             for (int i = 0; i < 900 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
-                Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
-                if (tracer != null) bullets.add(tracer);
+                for (Actor effect : descendants(stage.getRoot())) {
+                    if ("combat-bullet-tracer".equals(effect.getName())) bullets.add(effect);
+                }
             }
             require(completed.get() == 1, phase + " with surplus successes did not complete");
             require(bullets.size() == (phase.equals("health") ? successes : 1), phase + ": unexpected bullet count " + bullets.size());
