@@ -65,6 +65,9 @@ public class MonsterCombatTable extends VisTable {
     private static final float EPIC_FIREBALL_SCALE = 1.5f;
     /** Seconds between the monster's attack fireballs. */
     private static final float ATTACK_STAGGER = 0.55f;
+    /** Random gap in seconds between fireballs fired by successful dice (random die order), so each shot is heard. */
+    private static final float DICE_SHOT_GAP_MIN = 0.04f;
+    private static final float DICE_SHOT_GAP_MAX = 0.12f;
     private static final Color EPIC_GOLD = Color.valueOf("F2D27A");
     private static final Color EPIC_GLOW = Color.valueOf("FF3030");
     private static final float MIN_STEP = 90f;
@@ -725,6 +728,7 @@ public class MonsterCombatTable extends VisTable {
         fireballService.setTargetHealth(1);
         fireballService.setBlue(horror);
         fireballService.setFromDice(true);
+        fireballService.setStaggerDelay(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX);
         // Cancelled icons are the last ones in the row; they burn away in their own slots so nothing shifts.
         for (int i = count - 1; i >= count - shotDown; i--) {
             Image token = bar.getTokenImage(i);
@@ -765,6 +769,7 @@ public class MonsterCombatTable extends VisTable {
             // Every success fires; one heart is torn off per heart left, surplus fireballs just strike the body.
             fireballService.setTargetHealth(1);
             fireballService.setFromDice(true);
+            fireballService.setStaggerDelay(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX);
             Set<Actor> torn = new HashSet<>();
             int[] runningLosses = {0};
             boolean[] allLanded = {false};
