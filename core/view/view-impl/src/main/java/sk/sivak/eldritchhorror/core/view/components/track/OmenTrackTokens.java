@@ -116,19 +116,54 @@ public class OmenTrackTokens extends Group {
         return tokens.size();
     }
 
-    /** An Orb drawn as a looping green fireball (the combat fireball frames recoloured by a shader). */
-    private static class OmenTrackToken extends Image {
-        private static final int FRAME_COUNT = 16;
-        private static final float FRAME_DURATION = 1 / 24f;
+    /** An Orb: a dark fireball with a smaller, translucent green fireball spinning the other way on top. */
+    private static class OmenTrackToken extends Group {
         private static final float SPIN_SPEED = 90f;
-        private static final float BRIGHTNESS = .6f;
-        private static ShaderProgram greenShader;
+        private static final float GREEN_SIZE = .65f;
+        private static final float GREEN_ALPHA = .7f;
+        private static final float GREEN_BRIGHTNESS = .85f;
 
-        private final Animation<TextureRegionDrawable> animation;
-        private float stateTime = MathUtils.random(FRAME_COUNT * FRAME_DURATION);
-        private final float spinSpeed = MathUtils.randomSign() * SPIN_SPEED;
+        private final FireLayer dark = new FireLayer(FireLayer.DARK);
+        private final FireLayer green = new FireLayer(FireLayer.GREEN);
 
         public OmenTrackToken() {
+            float spin = MathUtils.randomSign() * SPIN_SPEED;
+            dark.spinSpeed = spin;
+            green.spinSpeed = -spin * 1.3f;
+            green.setColor(GREEN_BRIGHTNESS, GREEN_BRIGHTNESS, GREEN_BRIGHTNESS, GREEN_ALPHA);
+            addActor(dark);
+            addActor(green);
+        }
+
+        @Override
+        protected void sizeChanged() {
+            super.sizeChanged();
+            layout(dark, 1f);
+            layout(green, GREEN_SIZE);
+        }
+
+        private void layout(FireLayer layer, float size) {
+            float w = getWidth() * size, h = getHeight() * size;
+            layer.setBounds((getWidth() - w) / 2f, (getHeight() - h) / 2f, w, h);
+            layer.setOrigin(w / 2f, h / 2f);
+        }
+    }
+
+    /** One looping fireball (the combat fireball frames), recoloured by a channel-mixing shader. */
+    private static class FireLayer extends Image {
+        private static final int FRAME_COUNT = 16;
+        private static final float FRAME_DURATION = 1 / 24f;
+        static final String GREEN = "vec4(c.g * 0.45, c.r, c.b * 0.6 + c.g * 0.15, c.a)";
+        static final String DARK = "vec4(c.r * 0.12, c.g * 0.08, c.r * 0.18, c.a)";
+        private static final java.util.Map<String, ShaderProgram> shaders = new java.util.HashMap<>();
+
+        private final String colourMix;
+        private final Animation<TextureRegionDrawable> animation;
+        private float stateTime = MathUtils.random(FRAME_COUNT * FRAME_DURATION);
+        float spinSpeed;
+
+        FireLayer(String colourMix) {
+            this.colourMix = colourMix;
             TextureRegionDrawable[] frames = new TextureRegionDrawable[FRAME_COUNT];
             for (int i = 0; i < FRAME_COUNT; i++) {
                 Texture texture = CustomAssetManager.getTexture("fireball/" +
@@ -139,7 +174,6 @@ public class OmenTrackTokens extends Group {
             animation.setPlayMode(Animation.PlayMode.LOOP);
             setDrawable(animation.getKeyFrame(stateTime));
             setScaling(Scaling.fit);
-            setColor(BRIGHTNESS, BRIGHTNESS, BRIGHTNESS, 1f);
             setRotation(MathUtils.random(360f));
         }
 
@@ -154,7 +188,7 @@ public class OmenTrackTokens extends Group {
 
         @Override
         public void draw(Batch batch, float parentAlpha) {
-            ShaderProgram shader = getGreenShader();
+            ShaderProgram shader = shader(colourMix);
             if (!shader.isCompiled()) {
                 super.draw(batch, parentAlpha);
                 return;
@@ -165,9 +199,9 @@ public class OmenTrackTokens extends Group {
             batch.setShader(previous);
         }
 
-        /** Rotates the colour channels of the orange flame art so it burns green. */
-        private static ShaderProgram getGreenShader() {
-            if (greenShader == null) {
+        private static ShaderProgram shader(String colourMix) {
+            ShaderProgram shader = shaders.get(colourMix);
+            if (shader == null) {
                 String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n"
                         + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n"
                         + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
@@ -186,14 +220,15 @@ public class OmenTrackTokens extends Group {
                         + "uniform sampler2D u_texture;\n"
                         + "void main() {\n"
                         + "  vec4 c = texture2D(u_texture, v_texCoords);\n"
-                        + "  gl_FragColor = v_color * vec4(c.g * 0.45, c.r, c.b * 0.6 + c.g * 0.15, c.a);\n"
+                        + "  gl_FragColor = v_color * " + colourMix + ";\n"
                         + "}\n";
-                greenShader = new ShaderProgram(vertex, fragment);
-                if (!greenShader.isCompiled()) {
-                    Gdx.app.error("OmenTrackTokens", "Green orb shader failed: " + greenShader.getLog());
+                shader = new ShaderProgram(vertex, fragment);
+                if (!shader.isCompiled()) {
+                    Gdx.app.error("OmenTrackTokens", "Orb shader failed: " + shader.getLog());
                 }
+                shaders.put(colourMix, shader);
             }
-            return greenShader;
+            return shader;
         }
     }
 }
