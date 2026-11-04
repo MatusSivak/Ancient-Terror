@@ -25,7 +25,7 @@ public final class GameplaySounds {
         DICE_SUCCESS_ROLL("dice_success_roll.wav", .90f),
         DICE_SUCCESS_LORE("dice_success_lore.wav", .85f),
         DICE_SUCCESS_INFLUENCE("dice_success_influence.wav", .90f),
-        DICE_SUCCESS_OBSERVATION("dice_success_observation.ogg", .45f),
+        DICE_SUCCESS_OBSERVATION("dice_success_observation.wav", .45f),
         DICE_SUCCESS_STRENGTH("dice_success_strength.wav", .80f),
         DICE_SUCCESS_WILL("dice_success_will.ogg", .70f),
         TICKET_GAIN("ticket_gain", .85f),
