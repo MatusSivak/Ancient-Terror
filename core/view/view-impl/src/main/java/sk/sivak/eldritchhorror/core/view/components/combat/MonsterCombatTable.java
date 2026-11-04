@@ -74,6 +74,8 @@ public class MonsterCombatTable extends VisTable {
     /** Random gap in seconds between investigator shots. */
     private static final float DICE_SHOT_GAP_MIN = 0.15f;
     private static final float DICE_SHOT_GAP_MAX = 0.30f;
+    /** Set when an intercepted volley ends with fireballs left over, so these follow immediately. */
+    private boolean continuesVolley;
     private static final Color EPIC_GOLD = Color.valueOf("F2D27A");
     private static final Color EPIC_GLOW = Color.valueOf("FF3030");
     private static final float MIN_STEP = 90f;
@@ -642,11 +644,15 @@ public class MonsterCombatTable extends VisTable {
         }
         if (tokens.isEmpty() || endPositions.isEmpty()) {
             holdStill = false;
+            continuesVolley = false;
             onSub.onCompleted();
             return;
         }
+        // Right after an intercepted volley, the surviving fireballs keep the same rhythm.
+        float windUp = continuesVolley ? 0.1f : 0.6f;
+        continuesVolley = false;
         addAction(new FastForwardAction<>(Actions.sequence(
-                Actions.delay(0.6f),
+                Actions.delay(windUp),
                 Actions.run(() -> {
                     fireballService.reset();
                     // Exactly one fireball per point lost.
@@ -707,15 +713,17 @@ public class MonsterCombatTable extends VisTable {
         return Completable.complete();
     }
 
-    public Completable destroyHorror(int successes, Vector2 investigator) {
-        return interceptFireballs(horrorBar, data.getHorror(), successes, investigator, true);
+    public Completable destroyHorror(int successes, Vector2 investigator, Runnable onShot) {
+        return interceptFireballs(horrorBar, data.getHorror(), successes, investigator, true, onShot);
     }
 
-    public Completable destroyDamage(int successes, Vector2 investigator) {
-        return interceptFireballs(damageBar, data.getDamage(), successes, investigator, false);
+    public Completable destroyDamage(int successes, Vector2 investigator, Runnable onShot) {
+        return interceptFireballs(damageBar, data.getDamage(), successes, investigator, false, onShot);
     }
 
-    private Completable interceptFireballs(TokenInFrameBar bar, int strength, int successes, Vector2 investigator, boolean horror) {
+    /** @param onShot runs as each bullet is fired, e.g. to light up the die it comes from */
+    private Completable interceptFireballs(TokenInFrameBar bar, int strength, int successes, Vector2 investigator, boolean horror,
+                                           Runnable onShot) {
         return Completable.create(onSub -> {
             int blocked = Math.min(successes, strength);
             bar.setCoveredByDice(blocked);
@@ -733,6 +741,8 @@ public class MonsterCombatTable extends VisTable {
             fireballService.setFireballScale(data.isMonsterEpic() ? EPIC_FIREBALL_SCALE : 1f);
             fireballService.setStaggerDelay(ATTACK_STAGGER);
             fireballService.setMidpointDisplacementDirection(1);
+            // Intercepted fireballs are shot down at the moment they "land" halfway.
+            if (onShot != null) fireballService.setOnLandAction(investigator, onShot);
             Vector2 body = getMonsterBodyCenter();
             List<Vector2> sources = new LinkedList<>();
             for (int i = 0; i < blocked; i++) {
@@ -744,15 +754,18 @@ public class MonsterCombatTable extends VisTable {
                     token.setVisible(false);
                 });
             }
+            boolean survivorsFollow = blocked < strength;
             fireballService.setOnLandLastAction(() -> {
                 holdStill = false;
+                // The unblocked fireballs should follow without a pause.
+                continuesVolley = survivorsFollow;
                 onSub.onCompleted();
             });
             fireballService.launchInterceptedFireballs(sources, investigator);
         });
     }
 
-    public Completable destroyMonsterHealth(int successes, Vector2 investigator) {
+    public Completable destroyMonsterHealth(int successes, Vector2 investigator, Runnable onShot) {
         return Completable.create(onSub -> {
             int hearts = toughnessBar.getCurrentHealth();
             if (hearts == 0 || successes <= 0) {
@@ -780,6 +793,7 @@ public class MonsterCombatTable extends VisTable {
                 volley.addAction(Actions.run(() -> {
                     Vector2 impact = randomBodyPoint(getMonsterBodyCenter());
                     fireballService.fireBullet(investigator, impact);
+                    if (onShot != null) onShot.run();
                     playHitReaction(investigator, impact);
                     if (!killingShot) {
                         toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);

@@ -23,6 +23,7 @@ public final class VitalityLossEffect extends Actor {
     public enum Kind { HEALTH, SANITY, MONSTER }
 
     private static final float LIFT = .48f, STRAIN = .20f, BREAK = .78f;
+    private static final Color GOLD = Color.valueOf("FFD25A");
     private final TextureRegion left, right, pixel;
     private final Texture halo;
     private final Kind kind;
@@ -65,8 +66,15 @@ public final class VitalityLossEffect extends Actor {
         initialHeight = height;
         aspect = width / height;
         startX = position.x + width / 2f; startY = position.y + height / 2f;
-        targetX = MathUtils.clamp(VIEWPORT_WIDTH / 2f + offsetX, 90f, VIEWPORT_WIDTH - 90f);
-        targetY = VIEWPORT_HEIGHT * .54f;
+        if (kind == Kind.MONSTER) {
+            // Like a firework rocket: straight up a random height, barely drifting sideways from its slot.
+            targetX = MathUtils.clamp(startX + MathUtils.clamp(offsetX * .2f, -30f, 30f) + MathUtils.random(-14f, 14f),
+                    60f, VIEWPORT_WIDTH - 60f);
+            targetY = Math.min(startY + MathUtils.random(110f, 210f), VIEWPORT_HEIGHT - 70f);
+        } else {
+            targetX = MathUtils.clamp(VIEWPORT_WIDTH / 2f + offsetX, 90f, VIEWPORT_WIDTH - 90f);
+            targetY = VIEWPORT_HEIGHT * .54f;
+        }
         setName("vitality-loss-" + kind.name().toLowerCase(java.util.Locale.ROOT));
         setTouchable(Touchable.disabled);
         animate(0);
@@ -75,12 +83,14 @@ public final class VitalityLossEffect extends Actor {
     private void animate(float elapsed) {
         time = elapsed;
         float lift = MathUtils.clamp(time / LIFT, 0, 1);
-        float travel = Interpolation.pow3Out.apply(lift);
+        boolean rocket = kind == Kind.MONSTER;
+        float travel = rocket ? Interpolation.pow2Out.apply(lift) : Interpolation.pow3Out.apply(lift);
         centerX = MathUtils.lerp(startX, targetX, travel);
-        centerY = MathUtils.lerp(startY, targetY, travel) + MathUtils.sin(lift * MathUtils.PI) * 30f;
-        float peak = kind == Kind.MONSTER ? 116f : 108f;
+        centerY = MathUtils.lerp(startY, targetY, travel) + (rocket ? 0f : MathUtils.sin(lift * MathUtils.PI) * 30f);
+        float peak = rocket ? 80f : 108f;
         height = MathUtils.lerp(initialHeight, peak, Interpolation.swingOut.apply(lift));
-        rotation = MathUtils.sin(lift * MathUtils.PI) * (kind == Kind.SANITY ? -16f : 12f);
+        rotation = rocket ? MathUtils.sin(lift * MathUtils.PI * 3f) * 6f * (1f - lift)
+                : MathUtils.sin(lift * MathUtils.PI) * (kind == Kind.SANITY ? -16f : 12f);
         if (time > LIFT && time < LIFT + STRAIN) {
             float strain = (time - LIFT) / STRAIN;
             height *= 1f + .13f * strain;
@@ -88,6 +98,26 @@ public final class VitalityLossEffect extends Actor {
             rotation = MathUtils.sin(strain * MathUtils.PI * 4f) * 3f * strain;
         } else if (time >= LIFT + STRAIN) {
             height = peak * 1.13f;
+        }
+    }
+
+    /** Sparks streaming down behind the rising heart, like a rocket's exhaust. */
+    private void rocketTrail(Batch batch, float alpha) {
+        float lift = MathUtils.clamp(time / LIFT, 0, 1);
+        float fuse = MathUtils.clamp((time - LIFT) / STRAIN, 0, 1);
+        float strength = alpha * (1f - fuse * .7f);
+        if (strength <= 0) return;
+        float dx = centerX - startX, dy = centerY - startY;
+        for (int i = 0; i < 10; i++) {
+            float back = (i + 1) / 10f * Math.min(1f, .35f + lift);
+            float x = centerX - dx * back * .55f + MathUtils.sin(time * 40f + i * 2.1f) * 3f * back;
+            float y = centerY - height * .35f - dy * back * .55f;
+            float spark = strength * (1f - back) * (i % 2 == 0 ? 1f : .6f);
+            float size = 22f * (1f - back) + 5f;
+            batch.setColor(accent.r, accent.g * .9f + .1f, accent.b, spark * .6f);
+            batch.draw(halo, x - size / 2, y - size / 2, size, size);
+            batch.setColor(1f, .95f, .75f, spark);
+            batch.draw(pixel, x - 1.2f, y - 1.2f, 2.4f, 2.4f);
         }
     }
 
@@ -107,6 +137,7 @@ public final class VitalityLossEffect extends Actor {
                 alpha * (1f - sourcePulse) * .8f, accent);
 
         if (flight == 0) {
+            if (kind == Kind.MONSTER) rocketTrail(batch, alpha);
             drawHalf(batch, left, centerX, centerY, height, rotation, alpha);
             drawHalf(batch, right, centerX, centerY, height, rotation, alpha);
             if (time > LIFT) {
@@ -153,18 +184,21 @@ public final class VitalityLossEffect extends Actor {
 
     private void particles(Batch batch, float flight, float alpha) {
         boolean sanity = kind == Kind.SANITY;
-        for (int i = 0; i < 18; i++) {
+        boolean firework = kind == Kind.MONSTER;
+        int count = firework ? 34 : 18;
+        for (int i = 0; i < count; i++) {
             float angle = i * 137.508f + (sanity ? 38f * flight : 0);
-            float speed = 50f + (i % 5) * 19f;
+            float speed = firework ? 75f + (i % 6) * 24f : 50f + (i % 5) * 19f;
             float distance = speed * Interpolation.pow2Out.apply(flight);
             float x = centerX + MathUtils.cosDeg(angle) * distance;
-            float y = centerY + MathUtils.sinDeg(angle) * distance * .8f
-                    + (sanity ? 48f : -100f) * flight * flight;
+            float y = centerY + MathUtils.sinDeg(angle) * distance * (firework ? 1f : .8f)
+                    + (sanity ? 48f : firework ? -70f : -100f) * flight * flight;
             float opacity = alpha * (1f - flight) * (i % 3 == 0 ? .65f : 1f);
             float length = (sanity ? 6f : 10f) * (1f - flight) + 2f;
-            Color color = i % 3 == 0 ? Color.WHITE : accent;
-            if (sanity) {
-                batch.setColor(.55f, .35f, 1f, opacity * .45f);
+            Color color = i % 3 == 0 ? Color.WHITE : firework && i % 3 == 1 ? GOLD : accent;
+            if (sanity || firework) {
+                if (firework) batch.setColor(color.r, color.g, color.b, opacity * .35f);
+                else batch.setColor(.55f, .35f, 1f, opacity * .45f);
                 batch.draw(halo, x - 10, y - 10, 20, 20);
             }
             line(batch, x, y, x + MathUtils.cosDeg(angle) * length,

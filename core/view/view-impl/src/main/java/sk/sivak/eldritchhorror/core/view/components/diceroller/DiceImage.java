@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.components.diceroller;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import rx.functions.Action1;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
+import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
@@ -53,13 +55,56 @@ public class DiceImage extends Image {
     private int audibleDiceCount = 1;
     private Texture shadowTexture;
     private float flightHeight;
+    private static final float SHOT_GLOW = 0.32f;
+    private float shotGlow;
 
     void setShadowTexture(Texture texture) {
         shadowTexture = texture;
     }
 
+    /** The die fires a shot: it hops and flares up, so the bullet's source is easy to spot. */
+    public void flashShot() {
+        shotGlow = SHOT_GLOW;
+        addAction(new FastForwardAction<>(Actions.sequence(
+                Actions.parallel(Actions.moveBy(0f, 16f, 0.08f, Interpolation.pow2Out),
+                        Actions.scaleBy(0.18f, 0.18f, 0.08f, Interpolation.pow2Out)),
+                Actions.parallel(Actions.moveBy(0f, -16f, 0.2f, Interpolation.bounceOut),
+                        Actions.scaleBy(-0.18f, -0.18f, 0.2f, Interpolation.sine)))));
+    }
+
     @Override
     public void draw(Batch batch, float parentAlpha) {
+        if (shotGlow > 0f) {
+            drawShotGlow(batch, parentAlpha);
+            return;
+        }
+        drawDie(batch, parentAlpha);
+    }
+
+    private void drawShotGlow(Batch batch, float parentAlpha) {
+        float glow = shotGlow / SHOT_GLOW;
+        float packedColor = batch.getPackedColor();
+        Texture light = CustomAssetManager.getTexture(CustomAssetManager.LIGHT);
+        float size = getWidth() * getScaleX() * (1.5f + 0.5f * (1f - glow));
+        float centerX = getX() + getWidth() / 2f;
+        float centerY = getY() + getHeight() / 2f;
+        batch.setColor(0.55f, 1f, 0.45f, glow * 0.85f * getColor().a * parentAlpha);
+        batch.draw(light, centerX - size / 2f, centerY - size / 2f, size, size);
+        batch.setColor(packedColor);
+        drawDie(batch, parentAlpha);
+        // An additive second pass makes the die itself burn bright for a moment.
+        int src = batch.getBlendSrcFunc();
+        int dst = batch.getBlendDstFunc();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        Color color = getColor();
+        float r = color.r, g = color.g, b = color.b, a = color.a;
+        color.set(1f, 1f, 0.8f, a * glow * 0.75f);
+        super.draw(batch, parentAlpha);
+        color.set(r, g, b, a);
+        batch.setBlendFunction(src, dst);
+    }
+
+    private void drawDie(Batch batch, float parentAlpha) {
         if (shadowTexture != null) {
             float packedColor = batch.getPackedColor();
             float altitude = MathUtils.clamp(flightHeight / 70f, 0f, 1f);
@@ -190,6 +235,7 @@ public class DiceImage extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
+        shotGlow = Math.max(0f, shotGlow - delta);
         if (!rolling) {
             return;
         }

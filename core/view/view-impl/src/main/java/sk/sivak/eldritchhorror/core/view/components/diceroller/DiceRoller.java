@@ -402,6 +402,24 @@ public class DiceRoller {
         return centers;
     }
 
+    /**
+     * Each call lights up the next successful die, in random order, as the one firing the shot.
+     * A die scoring two successes fires twice.
+     */
+    public Runnable createShotFlasher() {
+        List<DiceImage> shooters = new LinkedList<>();
+        for (DiceImage dice : dices) {
+            int shots = dice.getScore() == null ? 0 : dice.getScore().getValue();
+            for (int i = 0; i < shots; i++) shooters.add(dice);
+        }
+        Collections.shuffle(shooters);
+        return () -> {
+            if (shooters.isEmpty()) return;
+            DiceImage shooter = shooters.remove(0);
+            if (shooter.getStage() != null) shooter.flashShot();
+        };
+    }
+
     public void hideDiceDontRemove() {
         dicePositionsBeforeHide.clear();
         for (DiceImage dice : dices) {

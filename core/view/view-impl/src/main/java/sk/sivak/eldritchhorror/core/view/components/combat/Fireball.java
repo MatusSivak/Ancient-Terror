@@ -156,7 +156,7 @@ public class Fireball extends Image {
         setScale(0.0f);
         CombatSounds.playMonsterFireballLaunch();
 
-        float velocity = MathUtils.random(250,300);
+        float velocity = MathUtils.random(450, 520);
         Vector2 tangent = new Vector2(destination).sub(origin);
         float duration = tangent.len() / velocity;
         float travelFraction = intercepted ? 0.5f : 1f;

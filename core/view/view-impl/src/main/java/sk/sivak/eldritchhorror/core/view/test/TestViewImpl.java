@@ -575,7 +575,8 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroyHorror(List<DiceRoll> diceRolls) {
-        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyHorror(successes, investigatorShotOrigin(true)), () -> {
+        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyHorror(successes, investigatorShotOrigin(true),
+                diceRollerStack.peek().createShotFlasher()), () -> {
             diceRollerStack.pop().hideDices();
             InfoStage.hideActor(testTableStack.pop());
             InfoStage.setBottomHeight(5);
@@ -584,7 +585,8 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable destroyDamage(List<DiceRoll> diceRolls) {
-        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyDamage(successes, investigatorShotOrigin(false)), () -> {
+        return destroyHorrorOrDamage(diceRolls, successes -> monsterCombatTableStack.peek().destroyDamage(successes, investigatorShotOrigin(false),
+                diceRollerStack.peek().createShotFlasher()), () -> {
             if (monsterCombatTableStack.peek().getRemainingDamage() > 0) {
                 diceRollerStack.peek().hideDiceDontRemove();
                 testTableStack.peek().addAction(new FastForwardAction<>(Actions.alpha(0, 1f)));
@@ -753,7 +755,8 @@ public class TestViewImpl implements TestView {
                         completable = Completable.complete();
                     }
                     completable.andThen(diceRollerStack.peek().waitUntilSettled()).subscribe(() -> {
-                        monsterCombatTableStack.peek().destroyMonsterHealth(successes, investigatorShotOrigin(false)).concatWith(Completable.create(onSub -> {
+                        monsterCombatTableStack.peek().destroyMonsterHealth(successes, investigatorShotOrigin(false),
+                                diceRollerStack.peek().createShotFlasher()).concatWith(Completable.create(onSub -> {
                             diceRollerStack.pop().hideDices();
                             InfoStage.hideActor(testTableStack.pop());
                             InfoStage.setBottomHeight(5);
