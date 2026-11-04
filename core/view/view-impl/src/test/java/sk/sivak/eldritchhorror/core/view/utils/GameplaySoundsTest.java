@@ -167,7 +167,8 @@ public class GameplaySoundsTest {
             assertEquals(DICE_SUCCESS_COMBAT, GameplaySounds.diceSuccessCue(stat, true));
         }
         assertTrue("Combat shares a skill cue", paths.add(DICE_SUCCESS_COMBAT.path));
-        assertNull(GameplaySounds.diceSuccessCue(null, false));
+        assertEquals(DICE_SUCCESS_ROLL, GameplaySounds.diceSuccessCue(null, false));
+        assertTrue("Plain rolls share a cue", paths.add(DICE_SUCCESS_ROLL.path));
         assertEquals(DICE_SUCCESS_STRENGTH,
                 GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH, false));
         assertEquals(DICE_SUCCESS_INFLUENCE,

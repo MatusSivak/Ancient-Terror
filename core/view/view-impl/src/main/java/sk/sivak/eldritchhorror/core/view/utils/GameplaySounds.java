@@ -22,6 +22,7 @@ public final class GameplaySounds {
         DICE_SORT("dice_sort", .60f),
         // Unmodified downloads meant to be swapped freely; credits in sounds/DICE_SUCCESS_AUDIO.md.
         DICE_SUCCESS_COMBAT("dice_success_combat.ogg", .80f),
+        DICE_SUCCESS_ROLL("dice_success_roll.wav", .90f),
         DICE_SUCCESS_LORE("dice_success_lore.ogg", .85f),
         DICE_SUCCESS_INFLUENCE("dice_success_influence.ogg", .90f),
         DICE_SUCCESS_OBSERVATION("dice_success_observation.ogg", .45f),
@@ -88,10 +89,10 @@ public final class GameplaySounds {
         return Cue.TRAVEL_WALK;
     }
 
-    /** Cue for a thrown die landing as a success; combat has its own, null when the roll isn't a test. */
+    /** Cue for a thrown die landing as a success: combat, the tested skill, or plain rolls (Reckonings...). */
     public static Cue diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat stat, boolean combat) {
         if (combat) return Cue.DICE_SUCCESS_COMBAT;
-        if (stat == null) return null;
+        if (stat == null) return Cue.DICE_SUCCESS_ROLL;
         switch (stat) {
             case LORE: return Cue.DICE_SUCCESS_LORE;
             case INFLUENCE: return Cue.DICE_SUCCESS_INFLUENCE;
