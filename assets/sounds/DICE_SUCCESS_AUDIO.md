@@ -11,7 +11,7 @@ sound, overwrite the file under `assets/sounds/`; any OGG, MP3 or 16-bit PCM WAV
 | Roll | File (under `sounds/`) | Original file | Author / source | SHA-256 of original |
 | --- | --- | --- | --- | --- |
 | Combat | `dice_success_combat.wav` (gunshot) | user-provided 96 kHz 32-bit float WAV, converted to 16-bit PCM (libGDX 1.9.8 limit) with gain scaled to fit full scale; otherwise unchanged | source/licence not recorded | `d9b3a5316181aafb92af2e8b57e8371fc4bc369d2141d05a946a0bc2f137b3d9` |
-| Strength | `dice_success_strength.ogg` (heavy punch) | `hit_03.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `c8948294e7885ada74bcab6efb6c60613b74241cc58eacd18e81aa6bd33449b8` |
+| Strength | `dice_success_strength.wav` | user-provided 48 kHz 24-bit WAV, converted to 16-bit PCM (libGDX 1.9.8 limit); otherwise unchanged | source/licence not recorded | `5c30f5deee94e0871fc9757524be0cffc7a1f695254301c0fdfceb2a7a079d18` |
 | Influence | `dice_success_influence.wav` (coins) | user-provided, unchanged | source/licence not recorded | `a63830730303c1942184aca536ab8132ff3c1c62e1f53cd8130a6cf4e633549e` |
 | Observation | `dice_success_observation.ogg` (camera shutter) | `camera.ogg` | FacadeGaikan, [CameraShudder](https://opengameart.org/content/camerashudder) | `239b0ccc800d8aedf4448fde008254a5f34a8595be94cc7a2fbad4569fd70adb` |
 | Lore | `dice_success_lore.ogg` (old book pages) | `book_01.ogg` | rubberduck, [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | `39b2d652dc8de9d4100ae8a1d23364077fff39bf1c90009b0c0d72af8c47d0d4` |
