@@ -129,6 +129,8 @@ public class GameplaySoundsTest {
         for (String cue : cuePaths()) {
             Path path = root.resolve("assets").resolve(cue);
             assertTrue("Missing cue: " + path, Files.isRegularFile(path));
+            // Dice success sounds are unmodified downloads the user swaps freely; only require that they exist.
+            if (cue.startsWith("sounds/dice_success_")) continue;
             AudioFileFormat wav = AudioSystem.getAudioFileFormat(path.toFile());
             assertEquals(cue, 1, wav.getFormat().getChannels());
             assertEquals(cue, 16, wav.getFormat().getSampleSizeInBits());
@@ -155,19 +157,21 @@ public class GameplaySoundsTest {
         assertNotEquals(TRAVEL_RAIL.path, TRAVEL_WALK.path);
     }
 
-    @Test public void everyTestedSkillHasItsOwnDiceSuccessCue() {
+    @Test public void combatAndEveryTestedSkillHaveTheirOwnDiceSuccessCue() {
         Set<String> paths = new HashSet<>();
         for (sk.sivak.eldritchhorror.core.constants.investigator.Stat stat
                 : sk.sivak.eldritchhorror.core.constants.investigator.Stat.values()) {
-            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(stat);
+            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(stat, false);
             assertNotNull(stat.name(), cue);
             assertTrue("Shared cue: " + cue.path, paths.add(cue.path));
+            assertEquals(DICE_SUCCESS_COMBAT, GameplaySounds.diceSuccessCue(stat, true));
         }
-        assertNull(GameplaySounds.diceSuccessCue(null));
+        assertTrue("Combat shares a skill cue", paths.add(DICE_SUCCESS_COMBAT.path));
+        assertNull(GameplaySounds.diceSuccessCue(null, false));
         assertEquals(DICE_SUCCESS_STRENGTH,
-                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH));
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.STRENGTH, false));
         assertEquals(DICE_SUCCESS_INFLUENCE,
-                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.INFLUENCE));
+                GameplaySounds.diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat.INFLUENCE, false));
     }
 
     @Test public void healthAndSanityHaveTheirOwnPickups() {

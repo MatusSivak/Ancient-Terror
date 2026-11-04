@@ -39,7 +39,7 @@ public class NunDicePresentationTest {
         ServicePlatform.get().setTestFlavor(flavor);
         model = mock(ModelWrite.class); ServicePlatform.get().setModel(model);
         controller = mock(TestController.class); ServicePlatform.get().setTestController(controller);
-        when(controller.showRolledTestDices(anyList(), any())).thenReturn(raw.toCompletable());
+        when(controller.showRolledTestDices(anyList(), any(), anyBoolean())).thenReturn(raw.toCompletable());
         when(controller.rerollDice(anyList())).thenReturn(raw.toCompletable());
         when(controller.showNunDiceBonus(anyList())).thenAnswer(c -> {
             shownBonus = c.getArgument(0); return bonus.toCompletable();

@@ -44,11 +44,11 @@ public class DiceRoller {
     private int minSuccess;
     private SingleSubscriber<? super Integer> onSub2;
     private List<Vector2> dicePositionsBeforeHide = new LinkedList<>();
-    /** Tested skill; picks the cue played when a thrown die lands as a success (rerolls included). */
-    private Stat testedStat;
+    /** Cue played when a thrown die lands as a success (rerolls included); null stays silent. */
+    private GameplaySounds.Cue successCue;
 
-    public void setTestedStat(Stat testedStat) {
-        this.testedStat = testedStat;
+    public void setSuccessSound(Stat testedStat, boolean combat) {
+        this.successCue = GameplaySounds.diceSuccessCue(testedStat, combat);
     }
 
     public void init(List<DiceRoll> diceRolls) {
@@ -165,9 +165,8 @@ public class DiceRoller {
     private void onRollEnd(DiceImage diceImage) {
         dicesFinished++;
         diceImage.highlight();
-        if (diceImage.getScore() != DiceRoll.Score.BAD) {
-            GameplaySounds.Cue cue = GameplaySounds.diceSuccessCue(testedStat);
-            if (cue != null) GameplaySounds.play(cue);
+        if (successCue != null && diceImage.getScore() != DiceRoll.Score.BAD) {
+            GameplaySounds.play(successCue);
         }
         if (dicesFinished == dicesRolled) {
             onRollEnd();

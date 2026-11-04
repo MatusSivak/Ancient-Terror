@@ -655,7 +655,7 @@ public class ReportFixesPreview extends ApplicationAdapter {
                     adjusted.add(result);
                 }
                 int[] finished = {0};
-                view.showRolledTestDices(raw, null).subscribe(() -> finished[0]++);
+                view.showRolledTestDices(raw, null, false).subscribe(() -> finished[0]++);
                 tick(1200);
                 require(finished[0] == 1, "Raw dice did not settle");
                 float previousBottom = InfoStage.getBottomHeight();

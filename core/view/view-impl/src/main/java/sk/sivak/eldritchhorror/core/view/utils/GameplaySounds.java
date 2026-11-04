@@ -20,11 +20,13 @@ public final class GameplaySounds {
         FOCUS_LAND("focus_land", .80f),
         RESOURCE_SPEND("resource_spend", .70f),
         DICE_SORT("dice_sort", .60f),
-        DICE_SUCCESS_LORE("dice_success_lore", .70f),
-        DICE_SUCCESS_INFLUENCE("dice_success_influence", .65f),
-        DICE_SUCCESS_OBSERVATION("dice_success_observation", .70f),
-        DICE_SUCCESS_STRENGTH("dice_success_strength", .60f),
-        DICE_SUCCESS_WILL("dice_success_will", .75f),
+        // Unmodified downloads meant to be swapped freely; credits in sounds/DICE_SUCCESS_AUDIO.md.
+        DICE_SUCCESS_COMBAT("dice_success_combat.ogg", .80f),
+        DICE_SUCCESS_LORE("dice_success_lore.ogg", .85f),
+        DICE_SUCCESS_INFLUENCE("dice_success_influence.ogg", .90f),
+        DICE_SUCCESS_OBSERVATION("dice_success_observation.ogg", .45f),
+        DICE_SUCCESS_STRENGTH("dice_success_strength.ogg", .80f),
+        DICE_SUCCESS_WILL("dice_success_will.ogg", .70f),
         TICKET_GAIN("ticket_gain", .85f),
         SANITY_GAIN("sanity_gain", .90f),
         TICKET_LAND("ticket_land", .82f),
@@ -73,7 +75,7 @@ public final class GameplaySounds {
         public final float volume;
 
         Cue(String name, float volume) {
-            this.path = "sounds/" + name + ".wav";
+            this.path = "sounds/" + name + (name.contains(".") ? "" : ".wav");
             this.volume = volume;
         }
     }
@@ -86,8 +88,9 @@ public final class GameplaySounds {
         return Cue.TRAVEL_WALK;
     }
 
-    /** Cue for a thrown die landing as a success; null when the roll isn't a skill test. */
-    public static Cue diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat stat) {
+    /** Cue for a thrown die landing as a success; combat has its own, null when the roll isn't a test. */
+    public static Cue diceSuccessCue(sk.sivak.eldritchhorror.core.constants.investigator.Stat stat, boolean combat) {
+        if (combat) return Cue.DICE_SUCCESS_COMBAT;
         if (stat == null) return null;
         switch (stat) {
             case LORE: return Cue.DICE_SUCCESS_LORE;

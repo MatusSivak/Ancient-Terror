@@ -1,17 +1,18 @@
 # Dice success sounds
 
-Added 4 November 2026. When a thrown die (first roll or reroll) lands and turns green,
-`DiceRoller` plays a cue chosen by the tested skill. Rolls without a skill (single
-die rolls such as Reckoning effects) stay silent.
+When a thrown die (first roll or reroll) lands and turns green, `DiceRoller` plays a cue:
+the combat cue during combat tests, otherwise the cue of the tested skill. Rolls without a
+skill (single die rolls such as Reckoning effects) stay silent.
 
-All recordings are CC0 1.0. Unchanged originals are in `source_assets/sounds/dice_success/`.
-Rebuild with `python tools/prepare_dice_success_sounds.py` (requires `numpy` and `soundfile`):
-silence trim, optional length cap with fade-out, mono 44.1 kHz PCM16, -20 dBFS RMS, 0.80 peak.
+The files are the downloaded originals, unmodified (only renamed), all CC0 1.0. To replace a
+sound, overwrite the file under `assets/sounds/`; any OGG works (or change the file name in
+`GameplaySounds.Cue`). Playback volume is set per cue in `GameplaySounds.Cue`.
 
-| Skill | Output WAV (under `sounds/`) | Original recording | Author / source | SHA-256 of original |
+| Roll | File (under `sounds/`) | Original file | Author / source | SHA-256 of original |
 | --- | --- | --- | --- | --- |
-| Strength | `dice_success_strength` (gunshot) | `gunfire_sfx.wav` (stored as `gunfire.wav`) | iamoneabe, [Random gunfire SFX](https://opengameart.org/content/random-gunfire-sfx) | `a60ba5477bea3b7e1047597fee3280a1e981d63e637649763187713ff98475be` |
-| Influence | `dice_success_influence` (coins dropping) | `coin_drop.wav` | Vinrax, [Coin Drop](https://opengameart.org/content/coin-drop) | `2965ecdd82bfefca244eab761597d9409b8ec8dcac18345c125e98b4abf5e21f` |
-| Observation | `dice_success_observation` (camera shutter) | `photo.ogg` | themightyglider, [Camera](https://opengameart.org/content/camera) | `029dfcb981fdf375fb0ae4657962b3d470e1a073932c3d3aefb15d3d9ba38670` |
-| Lore | `dice_success_lore` (arcane shimmer, capped at 1.1 s) | `magical_2.ogg` | JaggedStone, [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx) | `84a70f63f3f21e5ba4a48285b760a663d422ad3feddba2f3cbadd94b76cdc52e` |
-| Will | `dice_success_will` (clear bell) | `pleasing-bell.wav` | Spring Spring, [Pleasing Bell Sound Effect](https://opengameart.org/content/pleasing-bell-sound-effect) | `3c851939ccf9146e49c1be0272386fdca1b1442bb034a5e6dcdfb3e0e144a411` |
+| Combat | `dice_success_combat.ogg` (gunshot) | `shot_01.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `f293bc079a1859ba3d7e7f200c6d4a555543010eb7f5a33f561b064621819014` |
+| Strength | `dice_success_strength.ogg` (heavy punch) | `hit_03.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `c8948294e7885ada74bcab6efb6c60613b74241cc58eacd18e81aa6bd33449b8` |
+| Influence | `dice_success_influence.ogg` (coins dropping) | `item_coins_04.ogg` | rubberduck, [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | `122b633be3e61f35363b28e7ca5f11257d9d7f2759547ba1441cf541a3e5792b` |
+| Observation | `dice_success_observation.ogg` (camera shutter) | `camera.ogg` | FacadeGaikan, [CameraShudder](https://opengameart.org/content/camerashudder) | `239b0ccc800d8aedf4448fde008254a5f34a8595be94cc7a2fbad4569fd70adb` |
+| Lore | `dice_success_lore.ogg` (old book pages) | `book_01.ogg` | rubberduck, [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | `39b2d652dc8de9d4100ae8a1d23364077fff39bf1c90009b0c0d72af8c47d0d4` |
+| Will | `dice_success_will.ogg` (gong) | `gong_01.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `4780a38e91688b59899b3679cf3534b4b75654b45a177af9d9fb681c447f7f9a` |

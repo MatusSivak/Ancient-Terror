@@ -19,8 +19,11 @@ public interface TestView {
     Single<List<UsableAsset>> confirmTest(Stat stat, int modifier, int baseStatValue, int bonusStatValue,
                                           List<UsableAsset> usableAssets, int additionalDicesCount, boolean isCombat);
 
-    /** @param stat tested skill, selects the success sound; null for rolls without one */
-    Completable showRolledTestDices(List<DiceRoll> diceRolls, Stat stat);
+    /**
+     * @param stat tested skill, selects the success sound; null for rolls without one
+     * @param isCombat combat rolls use the combat success sound instead of the skill one
+     */
+    Completable showRolledTestDices(List<DiceRoll> diceRolls, Stat stat, boolean isCombat);
 
     Completable showRolledDices(List<DiceRoll> diceRolls);
 
