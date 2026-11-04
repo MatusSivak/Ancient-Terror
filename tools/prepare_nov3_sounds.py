@@ -50,7 +50,7 @@ def main():
     write('sanity_gain', recording('magical_3.ogg'), -19, .5)
     write('token_land', category('560698__el-boss__puzzle-piece-placed.mp3'), -17, .08)
     write('omen_change', recording('magical_4.ogg'), -18, .8)
-    write('ui_reserve_open', recording('register.wav'), -21, .16)
+    write('ui_reserve_open', recording('cash_drawer.mp3', .24, 1.20), -18, .12)
     swish = recording('swish-7.wav')
     write('card_collect', mix((0, swish, 1), (.24, swish, .65), (.48, swish, .35)), -24, .2)
     write('monster_discard', echo(recording('swish-10.wav'), .13, .28), -17, .4)

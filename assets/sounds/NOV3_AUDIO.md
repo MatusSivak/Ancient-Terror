@@ -8,7 +8,7 @@ PCM16 WAV, each below Android SoundPool's decoded buffer limit.
 | --- | --- | --- |
 | [Om.wav](https://freesound.org/people/ApeironMedia/sounds/445246/) · [HQ MP3](https://cdn.freesound.org/previews/445/445246_9221316-hq.mp3) | ApeironMedia, CC0 | `focus_gain`: 2.0–5.2 second excerpt, with a 2.1 second cosine fade |
 | [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx) | JaggedStone, CC0 | `health_gain`: magical_1; `sanity_gain`: magical_3; `omen_change`: magical_4 |
-| [Vintage cash register](https://freesound.org/people/Tompalompa/sounds/475915/) · [WAV excerpt mirror](https://slapalert.com/assets/sounds/register.11d20a22.wav) | Tompalompa, CC0; excerpt supplied by [Slap Alert](https://slapalert.com/sounds) | `ui_reserve_open`: crank, bell and till opening |
+| [Metal Till Cash Drawer Slide In And Out](https://freesound.org/people/lolamadeus/sounds/217173/) · [HQ MP3](https://cdn.freesound.org/previews/217/217173_544580-hq.mp3) | lolamadeus, CC0 | `ui_reserve_open`: a single metal drawer slide and stop (0.24–1.44 s), for reserve browsing and acquisition |
 | [Swishes sound pack](https://opengameart.org/content/swishes-sound-pack) · [ZIP](https://opengameart.org/sites/default/files/swishes.zip) | artisticdude, CC0 | `card_collect`: three fading swish-7 passes; `monster_discard`: swish-10 with short echoes; `rumor_spawn`: swish-10 with thunder |
 
 Magic originals: [magical_1](https://lpc.opengameart.org/sites/default/files/magical_1_0.ogg),

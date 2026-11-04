@@ -23,6 +23,7 @@ import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonBuilder;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.UiSounds;
 
 import java.util.List;
 
@@ -171,6 +172,7 @@ public class CardViewImpl implements CardView {
             button.setTouchable(Touchable.disabled);
             SourceTargetGroup sourceTargetGroup = dragAndDropBinder.getSourceTargetGroup();
             sourceTargetGroup.addAction(Actions.alpha(1, FAST_ACTION_DURATION));
+            UiSounds.transition(UiSounds.Cue.RESERVE_OPEN);
             okButton.addAction(Actions.alpha(1, FAST_ACTION_DURATION));
             button.addAction(sequence(
                     moveTo(VIEWPORT_WIDTH / 2 - okButton.getWidth(), button.getY(), FAST_ACTION_DURATION),
@@ -197,6 +199,7 @@ public class CardViewImpl implements CardView {
         InfoStage.addBigActor(OnScreenActors.ActorKey.DRAG_AND_DROP, dragAndDropBinder.getSourceTargetGroup(),
                 () -> dragAndDropBinder.getSourceTargetGroup().addAction(Actions.alpha(0f, 1f)),
                 () -> dragAndDropBinder.getSourceTargetGroup().addAction(Actions.alpha(1f, 1f)));
+        UiSounds.transition(UiSounds.Cue.RESERVE_OPEN);
     }
 
     private List<CardTemplate> toCardTemplates(List<AssetInfo> reserve) {
