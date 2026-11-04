@@ -71,6 +71,7 @@ public final class UiSounds {
     }
 
     public static void playActionConfirmation(ActionButtonId action) {
+        if (action == null) return;
         switch (action) {
             case TRAVEL: play(Cue.CONFIRM_TRAVEL); break;
             case REST: play(Cue.CONFIRM_REST); break;
