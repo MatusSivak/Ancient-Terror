@@ -799,6 +799,11 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
+    public Completable waitForCameraToStop() {
+        return encounterView.waitForCameraToStop();
+    }
+
+    @Override
     public Completable showDelayedAnimation(InvestigatorId investigatorId) {
         return view.showDelayedAnimation(investigatorId);
     }

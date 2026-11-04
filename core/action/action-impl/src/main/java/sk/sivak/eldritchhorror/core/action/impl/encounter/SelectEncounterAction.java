@@ -38,7 +38,9 @@ public class SelectEncounterAction implements Action<AvailableEncounters, Encoun
             // Runs after every disabling hook (e.g. Mists of R'lyeh), so a lone option is final.
             Encounter automatic = automaticChoice(input.getEncounters());
             if (automatic != null) {
-                sub.onSuccess(automatic);
+                // The camera is still settling on the investigator; starting now would misplace them.
+                ServicePlatform.get().getGameController().waitForCameraToStop()
+                        .subscribe(() -> sub.onSuccess(automatic));
                 return;
             }
             Collection<EncounterButtonData> encounterButtonDataList = Stream.map(input.getEncounters(), Encounter::getEncounterButtonData);
