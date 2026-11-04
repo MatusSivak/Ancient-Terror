@@ -11,14 +11,10 @@ public final class CombatSounds {
     private CombatSounds() {
     }
 
-    /** Fireball fired by an investigator's die: one of three gunshots, never the same one twice in a row. Every shot sounds, even when fired together. */
+    /** Fireball fired by an investigator's die: one of three gunshots, picked at random. Every shot sounds, even when fired together. */
     public static void playDiceFireballLaunch() {
-        // Skip the previous sound by stepping 1..length-1 places ahead of it.
-        lastDiceLaunchSound = (lastDiceLaunchSound + 1 + MathUtils.random(DICE_LAUNCH_SOUNDS.length - 2)) % DICE_LAUNCH_SOUNDS.length;
-        play(DICE_LAUNCH_SOUNDS[lastDiceLaunchSound], 1f, 0.06f, false);
+        play(DICE_LAUNCH_SOUNDS[MathUtils.random(DICE_LAUNCH_SOUNDS.length - 1)], 1f, 0.06f, false);
     }
-
-    private static int lastDiceLaunchSound = MathUtils.random(2);
 
     private static final String[] DICE_LAUNCH_SOUNDS = {CustomAssetManager.FIREBALL_LAUNCH_SOUND,
             CustomAssetManager.FIREBALL_LAUNCH_SHOTGUN_SOUND, CustomAssetManager.FIREBALL_LAUNCH_GUNSHOT2_SOUND};
