@@ -34,7 +34,7 @@ public final class GameplaySounds {
         TICKET_SPEND("ticket_spend", .78f),
         CARD_GAIN("card_gain", .75f),
         CARD_COLLECT("card_collect", .38f),
-        CARD_DISCARD("card_discard", .75f),
+        CARD_DISCARD("tear_card_sound.wav", .75f),
         CARD_DISABLE("card_disable", .80f),
         GATE_OPEN("gate_open", .85f),
         GATE_CLOSE("gate_close", .85f),
