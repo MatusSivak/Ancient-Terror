@@ -74,7 +74,7 @@ high-quality MP3 previews were downloaded and are retained as `<id>__<author>__<
 | `dice_sort` | Thrown dice dragged back into order | Quiet, gentle wooden drag (no rattle) |
 | `clue_gain` | Clue gained | Quick pencil scribble (noting the clue) |
 | `focus_gain` | Focus gained | Quiet soft kalimba note ringing out naturally |
-| `tear_card_sound` | Card destroyed (plays as the card tears) | user-provided (source/licence not recorded), converted from 48 kHz 24-bit to 44.1 kHz 16-bit PCM only (no trim/gain); replaces the generated `card_discard` |
+| `tear_card_sound` | Card destroyed (plays as the card tears) | user-provided (source/licence not recorded), converted from 48 kHz 24-bit to 44.1 kHz 16-bit PCM, first 200 ms trimmed (no gain change); replaces the generated `card_discard` |
 | `ticket_gain` | Train or ship ticket gained | Ticket hole punch |
 | `health_gain` / `sanity_gain` | Health / sanity restored | Heartbeat / relieved sigh |
 | `token_land` | Health / sanity token reaches the HUD | Poker chip dropped on a table |
