@@ -14,6 +14,6 @@ sound, overwrite the file under `assets/sounds/`; any OGG, MP3 or 16-bit PCM WAV
 | Strength | `dice_success_strength.wav` | user-provided 48 kHz 24-bit WAV, converted to 16-bit PCM (libGDX 1.9.8 limit); otherwise unchanged | source/licence not recorded | `5c30f5deee94e0871fc9757524be0cffc7a1f695254301c0fdfceb2a7a079d18` |
 | Influence | `dice_success_influence.wav` (coins) | user-provided, unchanged | source/licence not recorded | `a63830730303c1942184aca536ab8132ff3c1c62e1f53cd8130a6cf4e633549e` |
 | Observation | `dice_success_observation.ogg` (camera shutter) | `camera.ogg` | FacadeGaikan, [CameraShudder](https://opengameart.org/content/camerashudder) | `239b0ccc800d8aedf4448fde008254a5f34a8595be94cc7a2fbad4569fd70adb` |
-| Lore | `dice_success_lore.ogg` (old book pages) | `book_01.ogg` | rubberduck, [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | `39b2d652dc8de9d4100ae8a1d23364077fff39bf1c90009b0c0d72af8c47d0d4` |
+| Lore | `dice_success_lore.wav` | user-provided, unchanged | source/licence not recorded | `2910d5cec528d864e3a700a9cd9fe5eb026bb38f13ee4740e07421444844f73d` |
 | Will | `dice_success_will.ogg` (gong) | `gong_01.ogg` | rubberduck, [100 CC0 SFX](https://opengameart.org/content/100-cc0-sfx) | `4780a38e91688b59899b3679cf3534b4b75654b45a177af9d9fb681c447f7f9a` |
 | Plain roll (Reckonings...) | `dice_success_roll.wav` (success chime) | `bell.wav` | Fupi, [Correct Bell](https://opengameart.org/content/correct-bell) | `7b21371d23bcc5c56866b9bb32791b21bfce467edae05eef4bbc9d547da417a9` |
