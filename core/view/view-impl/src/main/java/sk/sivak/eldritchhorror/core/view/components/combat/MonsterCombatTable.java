@@ -724,6 +724,7 @@ public class MonsterCombatTable extends VisTable {
         fireballService.reset();
         fireballService.setTargetHealth(1);
         fireballService.setBlue(horror);
+        fireballService.setFromDice(true);
         // Cancelled icons are the last ones in the row; they burn away in their own slots so nothing shifts.
         for (int i = count - 1; i >= count - shotDown; i--) {
             Image token = bar.getTokenImage(i);
@@ -763,6 +764,7 @@ public class MonsterCombatTable extends VisTable {
             fireballService.weakReset();
             // Every success fires; one heart is torn off per heart left, surplus fireballs just strike the body.
             fireballService.setTargetHealth(1);
+            fireballService.setFromDice(true);
             Set<Actor> torn = new HashSet<>();
             int[] runningLosses = {0};
             boolean[] allLanded = {false};

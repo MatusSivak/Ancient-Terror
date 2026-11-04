@@ -2,8 +2,8 @@
 
 Run from the tools directory with Python's standard library only (reuses helpers from
 generate_travel_sounds / generate_token_sounds).
-- fireball_launch: a die hurls a fireball (ignition puff + roaring whoosh). No longer written by main():
-  the packaged fireball_launch.wav is the user-provided gunshot.
+- fireball_launch: a monster hurls a fireball (ignition puff + roaring whoosh). Written as
+  fireball_launch_monster.wav; dice fireballs use the user-provided fireball_launch.wav / fireball_launch_shotgun.wav.
 - fireball_impact: the fireball explodes on its target (deep boom + crackle).
 - monster_token_hit: a monster's Horror / Damage icon is scorched and shrinks.
 - monster_health_leave: a monster Health token lifts out of its bar.
@@ -128,11 +128,11 @@ def monster_health_tear():
 
 
 def main():
-    # fireball_launch.wav is now the user-provided gunshot (see DICE_SUCCESS_AUDIO.md); not regenerated.
-    for build, peak in ((fireball_impact, 0.55), (monster_token_hit, 0.45),
+    # fireball_launch.wav is the user-provided gunshot; the generated whoosh (seeded by its original name) is for monsters.
+    for build, peak in ((fireball_launch, 0.45), (fireball_impact, 0.55), (monster_token_hit, 0.45),
                         (monster_health_leave, 0.42), (monster_health_tear, 0.55)):
         name, samples = build()
-        write(name, finish(samples, peak))
+        write("fireball_launch_monster" if name == "fireball_launch" else name, finish(samples, peak))
 
 
 if __name__ == "__main__":

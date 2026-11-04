@@ -41,6 +41,7 @@ public class FireballService {
     private Runnable onLandLastAction;
     private Runnable onLandFirstAction;
     private boolean blue;
+    private boolean fromDice;
     private float fireballScale = 1f;
     private float staggerDelay;
 
@@ -109,6 +110,7 @@ public class FireballService {
         onLandLastAction = null;
         onLandFirstAction = null;
         blue = false;
+        fromDice = false;
         fireballScale = 1f;
         staggerDelay = 0f;
         midpointDisplacementDirection = 0f;
@@ -224,6 +226,7 @@ public class FireballService {
                 Vector2 target = targetsIterator.next();
                 Fireball fireball = new Fireball();
                 fireball.setBlue(blue);
+                fireball.setFromDice(fromDice);
                 fireball.setSizeMultiplier(fireballScale);
                 Vector2 source = entry.getKey();
                 if (fireballsMap.get(target) == null) {
@@ -301,6 +304,11 @@ public class FireballService {
     /** Horror / sanity fireballs burn blue. Reset by {@link #weakReset()}. */
     public void setBlue(boolean blue) {
         this.blue = blue;
+    }
+
+    /** Fireballs fired by the investigator's dice launch with a gunshot; others (monsters) with a whoosh. Reset by {@link #weakReset()}. */
+    public void setFromDice(boolean fromDice) {
+        this.fromDice = fromDice;
     }
 
     /** Size multiplier of the next fireballs (epic monsters throw bigger ones). Reset by {@link #weakReset()}. */

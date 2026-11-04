@@ -23,3 +23,7 @@ sound, overwrite the file under `assets/sounds/`; any OGG, MP3 or 16-bit PCM WAV
 | Plain roll (Reckonings...) | `dice_success_roll.wav` (success chime) | `bell.wav` | Fupi, [Correct Bell](https://opengameart.org/content/correct-bell) | `7b21371d23bcc5c56866b9bb32791b21bfce467edae05eef4bbc9d547da417a9` |
 
 The former combat gunshot (user-provided 96 kHz 32-bit float WAV, SHA-256 of original `d9b3a5316181aafb92af2e8b57e8371fc4bc369d2141d05a946a0bc2f137b3d9`, source/licence not recorded) now plays when a fireball launches from a die in combat: it is packaged as `sounds/fireball_launch.wav`, converted to mono 16-bit PCM at 44.1 kHz and normalised.
+
+Each fireball launch picks 50/50 between that gunshot and `sounds/fireball_launch_shotgun.wav`: hyperix6, "Shotgun Fire", Freesound #660299 (https://freesound.org/s/660299/), file `660299__hyperix6__shotgun-fire.wav` (48 kHz 32-bit float stereo, SHA-256 `98a980336ba64b5ed616515e229c7de88daad31a1b67b4969cd9bd5e2668cc68`, licence not recorded), converted to mono 16-bit PCM at 44.1 kHz and normalised.
+
+Monster fireballs (and other non-dice fireballs) keep the original generated whoosh, now `sounds/fireball_launch_monster.wav` (`tools/generate_combat_sounds.py`). Dice fireball launches are never merged, so every shot sounds even when fired milliseconds apart.

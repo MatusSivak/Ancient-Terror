@@ -38,6 +38,7 @@ public class Fireball extends Image {
     private Group smokeGroup;
     private float midpointDisplacementDirection;
     private boolean blue;
+    private boolean fromDice;
     private float sizeMultiplier = 1f;
     private static ShaderProgram blueShader;
 
@@ -91,6 +92,10 @@ public class Fireball extends Image {
 
     public void setBlue(boolean blue) {
         this.blue = blue;
+    }
+
+    public void setFromDice(boolean fromDice) {
+        this.fromDice = fromDice;
     }
 
     public void setSizeMultiplier(float sizeMultiplier) {
@@ -153,7 +158,11 @@ public class Fireball extends Image {
                 origin.x - getWidth()/2f,
                 origin.y - getHeight()/2f);
         setScale(0.0f);
-        CombatSounds.playFireballLaunch();
+        if (fromDice) {
+            CombatSounds.playDiceFireballLaunch();
+        } else {
+            CombatSounds.playMonsterFireballLaunch();
+        }
 
         float velocity = MathUtils.random(250,300);
         Vector2 tangent = new Vector2(destination).sub(origin);
