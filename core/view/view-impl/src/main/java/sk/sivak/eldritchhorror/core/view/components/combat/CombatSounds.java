@@ -12,7 +12,7 @@ public final class CombatSounds {
     }
 
     public static void playFireballLaunch() {
-        play(CustomAssetManager.FIREBALL_LAUNCH_SOUND, 0.40f, 0.06f);
+        play(CustomAssetManager.FIREBALL_LAUNCH_SOUND, 1f, 0.06f);
     }
 
     public static void playFireballImpact() {
