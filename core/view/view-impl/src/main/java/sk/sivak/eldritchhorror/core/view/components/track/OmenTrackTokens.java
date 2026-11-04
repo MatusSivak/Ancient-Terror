@@ -26,7 +26,7 @@ public class OmenTrackTokens extends Group {
     public final static int TOKEN_DISTANCE = 100;
     private static final float ROTATION_SPEED = 20f;
     // The flame covers only ~70% of a fireball frame; this keeps the Orb a little smaller than the old disc.
-    private static final float ORB_SCALE = 0.9f;
+    private static final float ORB_SCALE = 1.1f;
     private List<OmenTrackToken> tokens = new LinkedList<>();
     private float rotation;
 
