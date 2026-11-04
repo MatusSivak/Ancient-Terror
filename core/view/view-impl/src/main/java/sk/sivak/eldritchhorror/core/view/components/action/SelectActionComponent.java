@@ -50,6 +50,7 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
     public void init(List<ActionPhaseAction> actionPhaseActions, int actionNumber, Action0 onShowAction) {
         selectActionText = get("action.select", actionNumber);
         onStage = true;
+        selectedActionButtonData = null;
         clear();
         setPosition(0, 0);
         setColor(Color.WHITE);
@@ -169,11 +170,12 @@ public class SelectActionComponent extends VisTable implements ActionButtonClick
 
     private Action0 getOnConfirmAction() {
         return () -> {
-            if (selectedActionButtonData == null) {
+            if (!onStage || selectedActionButtonData == null) {
                 return;
             }
             onStage = false;
             ActionPhaseAction selectedActionPhaseAction = findSelectedActionPhaseAction(selectedActionButtonData);
+            UiSounds.playActionConfirmation(selectedActionButtonData.getActionButtonId());
             BigActorsManager.displayOrHideActionsTable();
             BigActorsManager.unlock(BigActorsManager.BigActorKey.ACTION_TABLE);
             InfoStage.hideLabel(selectActionText);

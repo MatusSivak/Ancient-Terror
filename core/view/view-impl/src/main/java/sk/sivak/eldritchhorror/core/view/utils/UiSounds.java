@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
+import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData.ActionButtonId;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
@@ -26,6 +27,9 @@ public final class UiSounds {
     public enum Cue {
         BUTTON_CLICK("button_click", .75f), HUD_CLICK("hud_click", .80f),
         ACTION_CLICK("action_click", .85f),
+        CONFIRM_TRAVEL("confirm_travel", .80f), CONFIRM_REST("confirm_rest", .75f),
+        CONFIRM_FOCUS("confirm_focus", .75f), CONFIRM_ACQUIRE_ASSETS("confirm_acquire_assets", .80f),
+        CONFIRM_TICKET("confirm_ticket", .80f), CONFIRM_TRADE("confirm_trade", .80f),
         CARD_OPEN("card_open", .80f), CARD_CLOSE("card_close", .72f),
         CARD_OPEN_SPELL("card_reveal_spell", .90f), CARD_OPEN_ARTIFACT("card_reveal_artifact", .90f),
         CARD_OPEN_SPELL_INCANTATION("card_reveal_spell_incantation", .85f),
@@ -64,6 +68,18 @@ public final class UiSounds {
 
     public static void play(Cue cue) {
         SoundPlayer.play(CustomAssetManager.getLoadedSound(cue.path), cue.volume, 1f, 0f);
+    }
+
+    public static void playActionConfirmation(ActionButtonId action) {
+        switch (action) {
+            case TRAVEL: play(Cue.CONFIRM_TRAVEL); break;
+            case REST: play(Cue.CONFIRM_REST); break;
+            case FOCUS: play(Cue.CONFIRM_FOCUS); break;
+            case ACQUIRE_ASSETS: play(Cue.CONFIRM_ACQUIRE_ASSETS); break;
+            case TICKET: play(Cue.CONFIRM_TICKET); break;
+            case TRADE: play(Cue.CONFIRM_TRADE); break;
+            default: break;
+        }
     }
 
     public static void transition(Cue cue) {

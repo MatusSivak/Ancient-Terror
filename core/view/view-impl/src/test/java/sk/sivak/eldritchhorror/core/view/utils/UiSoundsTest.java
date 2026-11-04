@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
+import sk.sivak.eldritchhorror.core.constants.action.ActionButtonData.ActionButtonId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellTrait;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -139,6 +140,17 @@ public class UiSoundsTest {
         ButtonUtils.addClickListener(button, () -> UiSounds.transition(ANCIENT_OPEN)).clicked(event(button, button), 10, 10);
         UiSounds.transition(SHEET_CLOSE);
         assertEquals(Arrays.asList(BUTTON_CLICK.path, ANCIENT_OPEN.path), played);
+    }
+
+    @Test public void eachStandardActionConfirmationPlaysItsOwnCueDuringFastForward() {
+        FastForwardAction.turnOn();
+        for (ActionButtonId action : Arrays.asList(ActionButtonId.TRAVEL, ActionButtonId.REST,
+                ActionButtonId.FOCUS, ActionButtonId.ACQUIRE_ASSETS, ActionButtonId.TICKET,
+                ActionButtonId.TRADE, ActionButtonId.SKIP, ActionButtonId.INVESTIGATOR, ActionButtonId.NOT_APPLICABLE)) {
+            UiSounds.playActionConfirmation(action);
+        }
+        assertEquals(Arrays.asList(CONFIRM_TRAVEL.path, CONFIRM_REST.path, CONFIRM_FOCUS.path,
+                CONFIRM_ACQUIRE_ASSETS.path, CONFIRM_TICKET.path, CONFIRM_TRADE.path), played);
     }
 
     @Test public void failedClickDoesNotLeaveAutomaticAudioEnabled() {
