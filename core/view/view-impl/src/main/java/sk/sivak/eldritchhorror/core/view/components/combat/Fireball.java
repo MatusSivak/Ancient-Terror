@@ -179,18 +179,23 @@ public class Fireball extends Image {
                         Actions.rotateTo(MathUtils.random(-360, 360) * travelFraction, duration * travelFraction)
                 ),
                 Actions.run(() -> {
+                    if (intercepted) BulletTracer.fire(getParent(), aim, new Vector2(getX(Align.center), getY(Align.center)));
+                }),
+                // An intercepted fireball blows up only once the tracer round reaches it.
+                Actions.delay(intercepted ? BulletTracer.FLIGHT : 0f),
+                Actions.run(() -> {
                     Vector2 impact = new Vector2(getX(Align.center), getY(Align.center));
+                    Color burstColor = blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f, 1f);
                     if (intercepted) {
                         setVisible(false);
-                        BulletTracer.fire(getParent(), aim, impact);
+                        FireballShatter.burst(getParent(), impact, new Vector2(impact).sub(aim).nor(), burstColor, sizeMultiplier);
                     }
                     CombatSounds.playFireballImpact();
                     if (!intercepted && !Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
                         sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.runInBackground(() -> Gdx.input.vibrate(50));
                     }
                     fireballSmoke.getParticleEffect().allowCompletion();
-                    explosion.start(new Explosion.ExplosionConfig(impact,
-                            blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f,1f)));
+                    explosion.start(new Explosion.ExplosionConfig(impact, burstColor));
                     for (Runnable onLandAction : onLandActions) {
                         onLandAction.run();
                     }

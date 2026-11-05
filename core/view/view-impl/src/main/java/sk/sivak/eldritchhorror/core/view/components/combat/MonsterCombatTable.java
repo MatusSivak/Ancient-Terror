@@ -786,15 +786,21 @@ public class MonsterCombatTable extends VisTable {
             SequenceAction volley = Actions.sequence();
             for (int i = 0; i < hits; i++) {
                 if (i > 0) {
-                    volley.addAction(Actions.delay(MathUtils.random(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX)));
+                    // The previous shot's flight time already counts toward the gap.
+                    volley.addAction(Actions.delay(MathUtils.random(DICE_SHOT_GAP_MIN, DICE_SHOT_GAP_MAX) - BulletTracer.FLIGHT));
                 }
                 Actor heart = toughnessBar.getChildren().get(hearts - 1 - i);
                 float offsetX = ((hits - 1) / 2f - i) * tokenWidth;
                 boolean killingShot = i == hearts - 1;
+                Vector2 impact = new Vector2();
                 volley.addAction(Actions.run(() -> {
-                    Vector2 impact = randomBodyPoint(getMonsterBodyCenter());
+                    impact.set(randomBodyPoint(getMonsterBodyCenter()));
                     fireballService.fireBullet(investigator, impact);
                     if (onShot != null) onShot.run();
+                }));
+                // The wound opens once the tracer round actually reaches the monster.
+                volley.addAction(Actions.delay(BulletTracer.FLIGHT));
+                volley.addAction(Actions.run(() -> {
                     playHitReaction(investigator, impact);
                     if (!killingShot) {
                         toughnessBar.loseToughnessNew(heart, offsetX).subscribe(finishShot::run);

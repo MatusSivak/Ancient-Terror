@@ -15,9 +15,10 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
-/** The hit resolves immediately. A few frames of muzzle flash and tracer lead into the longer spark and smoke trails. */
+/** The round reaches its target after {@link #FLIGHT}. A few frames of muzzle flash and tracer lead into the longer spark and smoke trails. */
 final class BulletTracer extends Actor {
-    private static final float FLIGHT = 0.075f;
+    /** Time for the round to reach its target; hit effects should wait this long. */
+    static final float FLIGHT = 0.075f;
     private static final float FLASH = 0.095f;
     private static final float DURATION = 0.34f;
     /** How long the glowing streak lingers behind the round after the hit. */
