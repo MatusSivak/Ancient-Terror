@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.action.provider;
 
 import sk.sivak.eldritchhorror.core.action.*;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
@@ -71,7 +72,7 @@ public interface ActionProvider {
 
     HookableAction<Object, DiscardGateData> discardGate(LocationId location);
 
-    Action<Object, Object> showOtherWorldBackground();
+    Action<Object, Object> showOtherWorldBackground(GateColor gateColor);
 
     Action<Object, Object> swapInvestigatorAndGateLayer();
 

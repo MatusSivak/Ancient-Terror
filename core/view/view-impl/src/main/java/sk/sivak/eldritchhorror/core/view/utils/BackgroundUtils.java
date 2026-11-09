@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.utils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -20,7 +21,6 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.controller.GameController;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.components.combat.ThunderEffect;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
@@ -33,7 +33,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.FAST_ACTION_DURATION;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.LOST_IN_TIME_AND_SPACE;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.SPACE;
-import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegionDrawable;
+import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.getTextureRegion;
 import static sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper.moveCameraToPosition;
 import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPointInRectangle;
 
@@ -115,19 +115,10 @@ public class BackgroundUtils {
         });
     }
 
-    public Completable showCombatBackground(List<InvestigatorBasics> investigatorsAtLocation) {
-        return showBackground("encounter/background/combat.jpg", newBackground -> {
+    public Completable showCombatBackground(String backgroundName, List<InvestigatorBasics> investigatorsAtLocation) {
+        return showBackground(backgroundName, image -> {
             NewMusicBox.getInstance().changeMusic(NewMusicBox.TRACK_COMBAT);
-            newBackground.setScale(1.25f);
-            new ThunderEffect(newBackground).execute();
-            newBackground.setOrigin(ViewProperties.VIEWPORT_WIDTH/2f, ViewProperties.VIEWPORT_HEIGHT/2f);
-            float width = Math.abs(ViewProperties.VIEWPORT_WIDTH * newBackground.getScaleX() - ViewProperties.VIEWPORT_WIDTH);
-            float height = Math.abs(ViewProperties.VIEWPORT_HEIGHT * newBackground.getScaleY() - ViewProperties.VIEWPORT_HEIGHT);
-            MyMoveToAction moveToAction = new MyMoveToAction(new Vector2(0, 0),
-                    () -> randomPointInRectangle(new Vector2(0, 0),
-                            width, height), 100f, 1.25f);
-            newBackground.addAction(Actions.repeat(RepeatAction.FOREVER,
-                    moveToAction));
+            scaleDownBackground(image);
         }, investigatorsAtLocation);
     }
 
@@ -237,10 +228,14 @@ public class BackgroundUtils {
             ));
         }
         MoveCameraToLocationHelper.setEnabled(backgroundName.equals(SPACE));
-        Image newBackground = new Image(getTextureRegionDrawable(backgroundName));
+        TextureRegion region = getTextureRegion(backgroundName);
+        if (backgroundName.startsWith("encounter/background/other_")) {
+            region.flip(true, false);
+        }
+        Image newBackground = new Image(region);
         newBackground.setScaling(Scaling.fit);
-        newBackground.setOrigin(Align.center);
         newBackground.setSize(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
+        newBackground.setOrigin(Align.center);
         newBackground.getColor().a = 0f;
         newBackground.addAction(Actions.alpha(1f, duration));
         backgroundStage.addActor(newBackground);

@@ -1002,8 +1002,8 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
-    public Completable showCombatBackground(List<InvestigatorBasics> investigatorsAtLocation) {
-        return backgroundUtils.showCombatBackground(investigatorsAtLocation);
+    public Completable showCombatBackground(String backgroundName, List<InvestigatorBasics> investigatorsAtLocation) {
+        return backgroundUtils.showCombatBackground(backgroundName, investigatorsAtLocation);
     }
 
     @Override

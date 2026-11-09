@@ -8,6 +8,7 @@ import sk.sivak.eldritchhorror.core.constants.card.CardInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellId;
@@ -138,8 +139,8 @@ public class ServiceImpl extends AbstractCommonService implements Service {
     }
 
     @Override
-    public void showOtherWorldBackground() {
-        execute(new ActionCommand<>(actionProvider.showOtherWorldBackground(), "SHOW_OTHER_WORLD_BACKGROUND"));
+    public void showOtherWorldBackground(GateColor gateColor) {
+        execute(new ActionCommand<>(actionProvider.showOtherWorldBackground(gateColor), "SHOW_OTHER_WORLD_BACKGROUND"));
     }
 
     @Override

@@ -7,6 +7,7 @@ import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterId;
@@ -923,11 +924,11 @@ public class EventListenerProviderImpl implements EventListenerProvider {
     }
 
     @Override
-    public void executeOtherWorldEncounter(int page) {
+    public void executeOtherWorldEncounter(int page, GateColor gateColor) {
         try {
             String className = "sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld.OtherWorld" + page + "Encounter";
             AbstractOtherWorldEncounter otherWorldEncounter = (AbstractOtherWorldEncounter) Class.forName(className).newInstance();
-            otherWorldEncounter.executeWhole();
+            otherWorldEncounter.executeWhole(gateColor);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }

@@ -11,6 +11,7 @@ import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellId;
@@ -54,7 +55,7 @@ public interface Service extends CommonService {
 
     void showWholeWorld();
 
-    void showOtherWorldBackground();
+    void showOtherWorldBackground(GateColor gateColor);
 
     void showLocationBackground(LocationId locationId);
 

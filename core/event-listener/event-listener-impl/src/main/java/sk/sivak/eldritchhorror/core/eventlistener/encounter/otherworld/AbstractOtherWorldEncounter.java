@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.builder.OtherWorldEncounterTextBuilder;
@@ -17,6 +18,8 @@ public abstract class AbstractOtherWorldEncounter {
 
     private final OtherWorldEncounterTextBuilder otherWorldEncounterTextBuilder;
 
+    private GateColor gateColor;
+
     protected AbstractOtherWorldEncounter(int page) {
         otherWorldEncounterTextBuilder = new OtherWorldEncounterTextBuilder(page);
     }
@@ -25,7 +28,8 @@ public abstract class AbstractOtherWorldEncounter {
         return otherWorldEncounterTextBuilder;
     }
 
-    public void executeWhole() {
+    public void executeWhole(GateColor gateColor) {
+        this.gateColor = gateColor;
         ServicePlatform.get().getService().hold();
         ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
         ServicePlatform.get().getEncounterService().typeHeader(otherWorldEncounterTextBuilder.withTitle().build());
@@ -130,7 +134,7 @@ public abstract class AbstractOtherWorldEncounter {
         ServicePlatform.get().getService().hideBackground();
         LocationId currentLocationId = ServicePlatform.get().getInvestigators().getActiveInvestigator().getCurrentLocationId();
         ServicePlatform.get().getService().closeGate(currentLocationId, true);
-        ServicePlatform.get().getService().showOtherWorldBackground();
+        ServicePlatform.get().getService().showOtherWorldBackground(gateColor);
         ServicePlatform.get().getService().release();
     }
 

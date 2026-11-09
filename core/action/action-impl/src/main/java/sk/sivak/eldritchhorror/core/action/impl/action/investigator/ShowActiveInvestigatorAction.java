@@ -57,7 +57,7 @@ public class ShowActiveInvestigatorAction extends AbstractHookableAction<Investi
                     changeBackground = ServicePlatform.get().getGameController().showResearchBackground((LocationType) backgroundData.getAdditionalData());
                     break;
                 case COMBAT:
-                    changeBackground = ServicePlatform.get().getGameController().showCombatBackground();
+                    changeBackground = ServicePlatform.get().getGameController().showCombatBackground(backgroundData.getBackgroundName());
                     break;
                 default:
                     throw new IllegalArgumentException("Background type not recognized: " + backgroundData.getBackgroundType());

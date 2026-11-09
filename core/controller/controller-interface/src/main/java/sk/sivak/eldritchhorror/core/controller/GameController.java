@@ -250,7 +250,7 @@ public interface GameController {
 
     Completable showResearchBackground(LocationType locationType);
 
-    Completable showCombatBackground();
+    Completable showCombatBackground(String backgroundName);
 
     Completable showWorldBackground();
 

@@ -4,6 +4,7 @@ import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
 import sk.sivak.eldritchhorror.core.constants.ancientone.AncientOneInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
@@ -54,7 +55,7 @@ public interface EventListenerProvider {
 
     void executeExpeditionEncounter(int page, LocationId locationId);
 
-    void executeOtherWorldEncounter(int page);
+    void executeOtherWorldEncounter(int page, GateColor gateColor);
 
     void executeLocationEncounter(Integer page, LocationEncounter.LocationEncounterType locationEncounterType);
 

@@ -6,12 +6,14 @@ import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.constants.test.UsableAsset;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import sk.sivak.eldritchhorror.core.model.InvestigatorsRead;
+import sk.sivak.eldritchhorror.core.model.MonsterCupRead;
 import sk.sivak.eldritchhorror.core.view.TestView;
 
 import java.util.List;
@@ -24,6 +26,11 @@ public class TestControllerImpl implements TestController {
     private TestView testView;
 
     private InvestigatorsRead investigators;
+    private MonsterCupRead monsterCup;
+
+    public void setMonsterCup(MonsterCupRead monsterCup) {
+        this.monsterCup = monsterCup;
+    }
 
     public void setInvestigators(InvestigatorsRead investigators) {
         this.investigators = investigators;
@@ -138,6 +145,17 @@ public class TestControllerImpl implements TestController {
         data.setDamage(actualDamage);
         data.setCurrentHealth(monsterInfo.getCurrentHealth());
         data.setToughness(monsterInfo.getToughness());
+        LocationId location = monsterInfo.getCurrentLocation();
+        if (location == null) {
+            location = investigators.getActiveInvestigator().getCurrentLocationId();
+        }
+        if (location != null) {
+            for (MonsterInfo other : monsterCup.getMonstersAtLocation(location)) {
+                if (other.isAlive() && !monsterInfo.getUuid().equals(other.getUuid())) {
+                    data.getBackgroundMonsters().add(other);
+                }
+            }
+        }
         return data;
     }
 

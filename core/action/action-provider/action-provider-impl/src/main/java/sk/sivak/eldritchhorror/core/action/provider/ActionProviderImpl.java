@@ -46,6 +46,7 @@ import sk.sivak.eldritchhorror.core.action.impl.investigator.RemoveDefeatedInves
 import sk.sivak.eldritchhorror.core.action.impl.investigator.ReplaceInvestigatorsAction;
 import sk.sivak.eldritchhorror.core.action.impl.test.TestRequestToTestResponse;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
@@ -192,8 +193,8 @@ public class ActionProviderImpl extends AbstractActionProvider implements Action
     }
 
     @Override
-    public Action<Object, Object> showOtherWorldBackground() {
-        return new ShowOtherWorldBackgroundAction();
+    public Action<Object, Object> showOtherWorldBackground(GateColor gateColor) {
+        return new ShowOtherWorldBackgroundAction(gateColor);
     }
 
     @Override

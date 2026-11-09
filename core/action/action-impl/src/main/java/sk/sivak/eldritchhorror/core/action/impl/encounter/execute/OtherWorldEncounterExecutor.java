@@ -16,9 +16,9 @@ public class OtherWorldEncounterExecutor {
         if (input.isHideEncounterTable()) {
             ServicePlatform.get().getService().hideSelectEncounterTable();
         }
-        ServicePlatform.get().getService().showOtherWorldBackground();
+        ServicePlatform.get().getService().showOtherWorldBackground(input.getGateColor());
         ServicePlatform.get().getService().swapInvestigatorAndGateLayer();
-        ServicePlatform.get().getEventListenerProvider().executeOtherWorldEncounter(page);
+        ServicePlatform.get().getEventListenerProvider().executeOtherWorldEncounter(page, input.getGateColor());
         ServicePlatform.get().getEncounterService().endOfEncounter(input);
         ServicePlatform.get().getService().swapInvestigatorAndGateLayer();
         ServicePlatform.get().getService().hideBackground();

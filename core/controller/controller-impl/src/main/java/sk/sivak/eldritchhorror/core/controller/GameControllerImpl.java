@@ -894,9 +894,9 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
-    public Completable showCombatBackground() {
+    public Completable showCombatBackground(String backgroundName) {
         LocationId currentLocationId = investigators.getActiveInvestigator().getCurrentLocationId();
-        return view.showCombatBackground(getInvestigatorsAtLocation(currentLocationId));
+        return view.showCombatBackground(backgroundName, getInvestigatorsAtLocation(currentLocationId));
     }
 
     @Override

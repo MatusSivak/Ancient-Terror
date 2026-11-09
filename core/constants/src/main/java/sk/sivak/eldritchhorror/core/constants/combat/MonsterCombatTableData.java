@@ -2,6 +2,9 @@ package sk.sivak.eldritchhorror.core.constants.combat;
 
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MonsterCombatTableData {
 
     private boolean isMonsterEpic;
@@ -13,6 +16,11 @@ public class MonsterCombatTableData {
     private Integer toughness;
 
     private MonsterInfo monsterInfo;
+    private final List<MonsterInfo> backgroundMonsters = new ArrayList<>();
+
+    public List<MonsterInfo> getBackgroundMonsters() {
+        return backgroundMonsters;
+    }
 
     public MonsterCombatTableData() {
     }

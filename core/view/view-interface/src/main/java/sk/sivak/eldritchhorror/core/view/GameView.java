@@ -222,7 +222,7 @@ public interface GameView {
 
     Completable showResearchBackground(LocationType locationType, List<InvestigatorBasics> investigatorsAtLocation);
 
-    Completable showCombatBackground(List<InvestigatorBasics> investigatorsAtLocation);
+    Completable showCombatBackground(String backgroundName, List<InvestigatorBasics> investigatorsAtLocation);
 
     Completable hideBackground();
 
