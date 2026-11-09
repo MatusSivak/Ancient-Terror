@@ -7,38 +7,29 @@ import com.badlogic.gdx.utils.Scaling;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.assetmanager.MonsterArtwork;
-import sk.sivak.eldritchhorror.core.view.map.monster.MonsterFacing;
 
-/** A bystander walks a short loop across the far part of the combat scene. */
+/** A monster waiting on the floor behind the active opponent. */
 final class BackgroundMonster extends Image {
+    static final float EPIC_SIZE = 134f;
     private final boolean epic;
-    private final MonsterFacing facing;
     private final float centerX;
-    private final float floorY = MathUtils.random(100f, 118f);
-    private static final float PATROL_DEPTH = 5f;
-    private final float radius = MathUtils.random(18f, 27f);
-    private final float pace = MathUtils.random(0.32f, 0.46f);
+    private final float floorY;
     private final CombatGroundShadow shadow = new CombatGroundShadow();
     private float phase = MathUtils.random(MathUtils.PI2);
-    private float step;
 
-    BackgroundMonster(MonsterInfo monster, int index, int count) {
+    BackgroundMonster(MonsterInfo monster, float centerX, float floorY) {
         super(CustomAssetManager.getTexture(MonsterArtwork.path(monster.getClass().getSimpleName(), monster.isEpic())));
         epic = monster.isEpic();
-        facing = new MonsterFacing(MonsterArtwork.facesRight(monster.getClass().getSimpleName(), epic));
-        facing.face(MathUtils.cos(phase) >= 0f, false);
-        float size = epic ? 124f : 96f;
+        this.centerX = centerX;
+        this.floorY = floorY;
+        float size = epic ? EPIC_SIZE : 108f;
         setSize(size, size);
         setScaling(Scaling.fit);
         validate();
         setOrigin(getWidth() / 2f, getImageY());
         setTouchable(Touchable.disabled);
         setColor(0.52f, 0.52f, 0.55f, 0f);
-        // Space out patrols so a crowd does not emerge from a single point.
-        float margin = size / 2f + radius + 8f;
-        float slot = count == 1 ? 0.5f : index / (count - 1f);
-        centerX = MathUtils.lerp(MonsterCombatTable.MONSTER_SIDE_LEFT + margin,
-                MonsterCombatTable.SAFE_RIGHT - margin, slot);
+        setScaleX(MonsterArtwork.facesRight(monster.getClass().getSimpleName(), epic) ? -1f : 1f);
         act(0f);
     }
 
@@ -59,22 +50,11 @@ final class BackgroundMonster extends Image {
     @Override
     public void act(float delta) {
         super.act(delta);
-        float previousX = MathUtils.sin(phase) * radius;
-        float previousY = MathUtils.cos(phase) * PATROL_DEPTH;
-        phase = (phase + delta * pace) % MathUtils.PI2;
-        float x = MathUtils.sin(phase) * radius;
-        float y = MathUtils.cos(phase) * PATROL_DEPTH;
-        float dx = x - previousX;
-        float dy = y - previousY;
-        step += (float) Math.sqrt(dx * dx + dy * dy) * MathUtils.PI / 18f;
-        facing.face(MathUtils.cos(phase) >= 0f, true);
-        facing.update(delta);
-        float depthScale = 1f - y * 0.003f;
-        setScale(facing.scaleX() * depthScale, depthScale);
-        setRotation(MathUtils.sin(step) * 2.5f);
-        setPosition(centerX + x - getOriginX(), floorY + y - getOriginY());
+        phase = (phase + delta * 0.8f) % MathUtils.PI2;
+        float footX = centerX + 1.8f * MathUtils.sin(phase);
+        setPosition(footX - getOriginX(), floorY - getOriginY());
         shadow.setVisible(isVisible());
-        shadow.place(centerX + x, floorY + y, getImageWidth() * depthScale * 0.85f,
-                getHeight() * depthScale * 0.16f, getColor().a * 0.55f);
+        shadow.place(footX, floorY + getImageHeight() * 0.025f, getImageWidth() * 0.9f,
+                getHeight() * 0.13f, getColor().a * 0.44f);
     }
 }

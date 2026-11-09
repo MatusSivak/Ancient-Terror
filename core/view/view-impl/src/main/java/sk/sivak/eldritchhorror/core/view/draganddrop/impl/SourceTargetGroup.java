@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.view.draganddrop.impl;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -67,6 +68,13 @@ public class SourceTargetGroup extends Group {
         upDownImage.setPosition(getWidth() / 2 - upDownImage.getWidth() / 2,
                 getHeight() / 2 - upDownImage.getHeight() / 2);
 
+    }
+
+    @Override
+    public void setCullingArea(Rectangle visibleArea) {
+        super.setCullingArea(visibleArea);
+        float centerX = visibleArea == null ? getWidth() / 2f : visibleArea.x + visibleArea.width / 2f;
+        upDownImage.setX(centerX - upDownImage.getWidth() / 2f);
     }
 
     @Override

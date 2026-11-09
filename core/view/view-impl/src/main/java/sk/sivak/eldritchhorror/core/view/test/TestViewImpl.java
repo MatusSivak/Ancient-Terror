@@ -97,6 +97,10 @@ public class TestViewImpl implements TestView {
     private static final float MAX_CARD_SCALE = 0.155f;
     private static final float MIN_CARD_SCALE = 0.11f;
     private static final float CARD_PANEL_PAD = 6f;
+    private static final float COMBAT_CONTROLS_LEFT = 88f;
+    private static final float COMBAT_CONTROLS_RIGHT = VIEWPORT_WIDTH / 2f;
+    private static final float COMBAT_BUTTON_Y = VIEWPORT_HEIGHT * 0.46f;
+    private static final float COMBAT_CARD_SCALE = 0.125f;
 
     private TestController controller;
     private TestInfoTable testInfoTable;
@@ -146,25 +150,27 @@ public class TestViewImpl implements TestView {
             }
             testInfoTable = new TestInfoTable(stat, modifier, baseStatValue, bonusStatValue, usableAssets, additionalDicesCount);
 
-            // Cards and summary sit side by side, centred between the side menu and the right-hand buttons.
-            // (In combat the monster roams above everything, so there is no panel to make room for.)
             testButton = buildButton(get("test.button"));
             ConfirmTestListener confirmListener = new ConfirmTestListener(onSub);
             testButton.addListener(confirmListener);
 
             float infoColumnWidth = Math.max(testInfoTable.getWidth(), testButton.getWidth());
-            float sideColumnLeft = SAFE_RIGHT - infoColumnWidth - LAYOUT_GAP * 2;
-            VisTable cardsPanel = createDragAndDrop(usableAssets, testInfoTable, sideColumnLeft - LAYOUT_GAP - SAFE_LEFT,
-                    confirmListener::confirm);
-            float totalWidth = cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth;
-            float cardsX = SAFE_LEFT + (SAFE_RIGHT - SAFE_LEFT - totalWidth) / 2f;
-            float sideColumnCenter = cardsX + cardsPanel.getWidth() + LAYOUT_GAP * 3 + infoColumnWidth / 2f;
+            float columnGap = isCombat ? 16f : LAYOUT_GAP * 3;
+            float availableWidth = isCombat ? COMBAT_CONTROLS_RIGHT - COMBAT_CONTROLS_LEFT : SAFE_RIGHT - SAFE_LEFT;
+            VisTable cardsPanel = createDragAndDrop(usableAssets, testInfoTable, availableWidth - infoColumnWidth - columnGap,
+                    isCombat, confirmListener::confirm);
+            float totalWidth = infoColumnWidth + columnGap + cardsPanel.getWidth();
+            float left = isCombat ? COMBAT_CONTROLS_LEFT : SAFE_LEFT + (availableWidth - totalWidth) / 2f;
+            float summaryCenterX = left + infoColumnWidth / 2f;
             float zoneBottom = getHudTop();
-            cardsPanel.setPosition(cardsX, zoneBottom + Math.max(0, (SAFE_TOP - zoneBottom - cardsPanel.getHeight()) / 2f));
-
-            InfoStage.showButton(testButton, sideColumnCenter - testButton.getWidth() / 2f, 5);
-            testInfoTable.setX(sideColumnCenter - testInfoTable.getWidth() / 2);
-            testInfoTable.setY(Math.max(testButton.getTop() + LAYOUT_GAP, zoneBottom));
+            float zoneHeight = SAFE_TOP - zoneBottom;
+            float summaryHeight = testInfoTable.getHeight() + LAYOUT_GAP + testButton.getHeight();
+            float buttonY = isCombat ? COMBAT_BUTTON_Y : zoneBottom + Math.max(0f, (zoneHeight - summaryHeight) / 2f);
+            float cardsY = isCombat ? SAFE_TOP - LAYOUT_GAP * 2 - cardsPanel.getHeight()
+                    : zoneBottom + Math.max(0f, (zoneHeight - cardsPanel.getHeight()) / 2f);
+            cardsPanel.setPosition(left + infoColumnWidth + columnGap, cardsY);
+            InfoStage.showButton(testButton, summaryCenterX - testButton.getWidth() / 2f, buttonY);
+            testInfoTable.setPosition(summaryCenterX - testInfoTable.getWidth() / 2f, testButton.getTop() + LAYOUT_GAP);
             InfoStage.addSmallActorToInfoStage(testInfoTable);
 
             InfoStage.showActor(cardsPanel);
@@ -176,15 +182,18 @@ public class TestViewImpl implements TestView {
     }
 
     private VisTable createDragAndDrop(List<UsableAsset> usableAssets, TestInfoTable testInfoTable, float maxWidth,
-                                      Runnable confirm) {
+                                      boolean isCombat, Runnable confirm) {
 
         // Largest card size that fits every card side by side and both rows (use / available) vertically.
         float maxInnerWidth = maxWidth - CARD_PANEL_PAD * 2;
         float hintHeight = 24f;
         float maxGroupHeight = SAFE_TOP - getHudTop() - CARD_PANEL_PAD * 3 - hintHeight;
         float scaleForHeight = (maxGroupHeight - VIEWPORT_HEIGHT * 0.1f) / 2f / CardTemplate.CARD_HEIGHT;
-        float scaleForWidth = maxInnerWidth / (usableAssets.size() * (float) CardTemplate.CARD_WIDTH);
-        float cardScale = Math.max(MIN_CARD_SCALE, Math.min(MAX_CARD_SCALE, Math.min(scaleForHeight, scaleForWidth)));
+        int visibleCards = isCombat ? Math.min(2, usableAssets.size()) : usableAssets.size();
+        float scaleForWidth = maxInnerWidth / (visibleCards * (float) CardTemplate.CARD_WIDTH);
+        float fitScale = Math.min(scaleForHeight, scaleForWidth);
+        float cardScale = isCombat ? Math.min(COMBAT_CARD_SCALE, fitScale)
+                : Math.max(MIN_CARD_SCALE, Math.min(MAX_CARD_SCALE, fitScale));
         CardTemplate[] cardTemplates = collectToList(map(usableAssets, it -> {
             CardTemplate cardTemplate = CardTemplate.buildCard(it.getCardInfo());
             cardTemplate.setDisabledBadgeVisible(false);
@@ -223,7 +232,7 @@ public class TestViewImpl implements TestView {
 
         if (scrolling) {
             scrollPane.layout();
-            scrollPane.setScrollPercentX(100);
+            scrollPane.setScrollPercentX(isCombat ? 0f : 1f);
             scrollPane.updateVisualScroll();
         }
         return cardsPanel;

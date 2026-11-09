@@ -9,7 +9,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
+import sk.sivak.eldritchhorror.core.constants.monster.GhoulMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.GoatSpawnMonster;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -80,7 +81,7 @@ public class GateCombatPreview extends ApplicationAdapter {
             if (Boolean.getBoolean("preview.gatesOnly")) return;
             checkCombat(false);
             checkCombat(true);
-            System.out.println("PASS: gate colours, layered snapshots, wrapping/zoom, lazy close, fast-forward, cleanup; combat depth, bounds, targets, lunge, shadows and interruption");
+            System.out.println("PASS: gate colours, layered snapshots, wrapping/zoom, lazy close, fast-forward, cleanup; combat queues, bounds, targets, lunge, shadows and interruption");
         } catch (Throwable failure) {
             failure.printStackTrace();
             System.exit(1);
@@ -160,11 +161,11 @@ public class GateCombatPreview extends ApplicationAdapter {
                 require(MapStage.getGateLayer().getChildren().size == 3, "Constructing close removed gates eagerly");
                 AtomicInteger done = new AtomicInteger();
                 close.subscribe(done::incrementAndGet);
-                Actor portrait = stage.getRoot().findActor("closing-gate-portrait");
+                Actor portrait = MapStage.getGateLayer().findActor("closing-gate-portrait");
                 Vector2 center = portrait.localToStageCoordinates(new Vector2(portrait.getWidth() / 2, portrait.getHeight() / 2));
-                require(center.dst(480, 270) <= 1.1f, "Closing the wrong map copy: " + center);
-                require(Math.abs(portrait.getScaleX() - .8f) < .005f, "Map zoom lost during transfer");
-                tick(180);
+                require(center.dst(location.x + wrap * ViewProperties.MAP_WIDTH, location.y) <= 1.1f, "Closing the wrong map copy: " + center);
+                require(Math.abs(portrait.getScaleX() - 1f) < .005f, "Closing portrait changed scale on the map");
+                for (int frame = 0; frame < 180; frame++) map.act(1f / 60f);
                 require(done.get() == 1 && MapStage.getActor(resolver).isEmpty(), "Wrapped gate registry not cleared");
             }
         } finally {
@@ -180,82 +181,67 @@ public class GateCombatPreview extends ApplicationAdapter {
         data.setMonsterClassName(epic ? "YigMonster" : "SkeletonMonster");
         data.setMonsterName(epic ? "Yig" : "Skeleton"); data.setMonsterEpic(epic);
         data.setHorror(3); data.setDamage(3); data.setToughness(6); data.setCurrentHealth(6);
+        data.getEncounteredMonsters().add(new GhoulMonster());
+        data.getWaitingMonsters().add(new GoatSpawnMonster());
         table.init(data);
         require(table.getMonsterImage().getScaleX() < 0, "Monster did not enter facing the investigator");
         table.highlightDamageAndToughness();
         tick(45);
         Image image = table.getMonsterImage();
         Actor shadow = (Actor) field(table, "groundShadow");
-        Rectangle area = table.getWanderArea();
-        Vector2 far = new Vector2(430, area.y + area.height), near = new Vector2(area.x + area.width - 8, area.y);
-        float minScale = 2f, maxScale = 0f;
+        Image previous = null, next = null;
+        for (Actor actor : image.getParent().getChildren()) {
+            if (!(actor instanceof Image) || actor == image
+                    || actor.getClass() == shadow.getClass()) continue;
+            if (actor.getX() + actor.getWidth() / 2f < image.getX() + image.getWidth() / 2f) previous = (Image) actor;
+            else next = (Image) actor;
+        }
+        require(previous != null && next != null, "Missing encounter queue");
+        float startX = image.getX(), previousX = previous.getX(), nextX = next.getX();
         for (int frame = 0; frame < 360; frame++) {
-            if (frame == 0) stroll(table, far, near);
-            if (frame == 180) stroll(table, near, far);
             stage.act(1f / 60f);
-            if (frame == 60) require(image.getScaleX() > 0, "Monster walking right faces left");
-            if (frame == 240) require(image.getScaleX() < 0, "Monster walking left faces right");
-            require(Math.abs(image.getScaleX()) > .02f, "Turn produced a singular hit transform");
-            if (epic) require(table.getEpicGlow().getScaleX() == image.getScaleX(), "Epic rim faces the wrong way");
-            minScale = Math.min(minScale, image.getScaleY());
-            maxScale = Math.max(maxScale, image.getScaleY());
+            require(image.getRotation() == 0 && previous.getRotation() == 0 && next.getRotation() == 0,
+                    "A queued monster rotated");
+            require(Math.abs(image.getX() - startX) < 4.1f && Math.abs(previous.getX() - previousX) < 4.1f
+                    && Math.abs(next.getX() - nextX) < 4.1f, "A monster left its place");
+            require(previous.getZIndex() < image.getZIndex() && next.getZIndex() < image.getZIndex(), "Opponent is behind queue");
             checkBounds(table);
-            if (frame % 4 == 0) draw((epic ? "epic-depth" : "combat-depth") + "/frame-" + String.format("%03d", frame / 4));
         }
-        require(maxScale / minScale > 1.45f, "Depth change is barely visible: " + minScale + ".." + maxScale);
-        for (int frame = 0; frame < 3600; frame++) { stage.act(1f / 60f); checkBounds(table); }
+        draw(epic ? "epic-queue" : "combat-queue");
         require(shadow.getParent() == image.getParent() && shadow.getZIndex() < image.getZIndex(), "Shadow is not behind monster");
-        for (Vector2 position : new Vector2[]{far, near}) {
-            ((Vector2) field(table, "wanderPosition")).set(position);
-            set(table, "holdStill", true);
-            tick(30);
-            require(image.getScaleX() < 0, "Idle/attacking monster does not face the investigator");
-            Method body = MonsterCombatTable.class.getDeclaredMethod("getMonsterBodyCenter"); body.setAccessible(true);
-            Vector2 actual = image.localToStageCoordinates(new Vector2(image.getWidth() / 2, image.getHeight() / 2));
-            require(actual.dst((Vector2) body.invoke(table)) < .01f, "Fireball target ignores perspective");
-            Method scatter = MonsterCombatTable.class.getDeclaredMethod("randomBodyPoint", Vector2.class);
-            scatter.setAccessible(true);
-            com.badlogic.gdx.math.RandomXS128 random = (com.badlogic.gdx.math.RandomXS128) MathUtils.random;
-            long random0 = random.getState(0), random1 = random.getState(1);
-            for (int i = 0; i < 30; i++) {
-                Vector2 point = (Vector2) scatter.invoke(table, actual);
-                require(Float.isFinite(point.x) && Float.isFinite(point.y)
-                        && Math.abs(point.x - actual.x) <= image.getImageWidth() * Math.abs(image.getScaleX()) * .18f,
-                        "Mirrored bullet scatter left the artwork");
-            }
-            random.setState(random0, random1);
-            float base = image.getScaleY();
-            Method attack = MonsterCombatTable.class.getDeclaredMethod("playAttackReaction"); attack.setAccessible(true);
-            attack.invoke(table);
-            tick(7);
-            require(image.getScaleY() > base * 1.08f, "Attack did not lunge from current depth");
-            tick(30);
-            require(Math.abs(image.getScaleY() - base) < .01f, "Attack reset the depth scale");
-            AtomicInteger done = new AtomicInteger();
-            table.destroyMonsterHealth(1, new Vector2(130, 80)).subscribe(done::incrementAndGet);
-            for (int frame = 0; frame < 600 && done.get() == 0; frame++) {
-                stage.act(1f / 60f);
-                if (done.get() == 0) require(((Vector2) field(table, "wanderPosition")).dst(position) < .01f,
-                        "Monster moved during aimed shot: epic=" + epic + ", frame=" + frame
-                                + ", held=" + field(table, "holdStill") + ", from=" + position
-                                + ", to=" + field(table, "wanderPosition"));
-            }
-            require(done.get() == 1, "Perspective health hit never completed");
+        Method body = MonsterCombatTable.class.getDeclaredMethod("getMonsterBodyCenter"); body.setAccessible(true);
+        Vector2 actual = image.localToStageCoordinates(new Vector2(image.getWidth() / 2, image.getHeight() / 2));
+        require(actual.dst((Vector2) body.invoke(table)) < .01f, "Fireball target ignores perspective");
+        Method scatter = MonsterCombatTable.class.getDeclaredMethod("randomBodyPoint", Vector2.class);
+        scatter.setAccessible(true);
+        com.badlogic.gdx.math.RandomXS128 random = (com.badlogic.gdx.math.RandomXS128) MathUtils.random;
+        long random0 = random.getState(0), random1 = random.getState(1);
+        for (int i = 0; i < 30; i++) {
+            Vector2 point = (Vector2) scatter.invoke(table, actual);
+            require(Float.isFinite(point.x) && Float.isFinite(point.y)
+                    && Math.abs(point.x - actual.x) <= image.getImageWidth() * Math.abs(image.getScaleX()) * .18f,
+                    "Mirrored bullet scatter left the artwork");
         }
+        random.setState(random0, random1);
+        float base = image.getScaleY();
+        Method attack = MonsterCombatTable.class.getDeclaredMethod("playAttackReaction"); attack.setAccessible(true);
+        attack.invoke(table);
+        tick(7);
+        require(image.getScaleY() > base * 1.08f, "Attack did not lunge from current depth");
+        tick(30);
+        require(Math.abs(image.getScaleY() - base) < .01f, "Attack reset the depth scale");
+        AtomicInteger done = new AtomicInteger();
+        table.destroyMonsterHealth(1, new Vector2(130, 80), null).subscribe(done::incrementAndGet);
+        for (int frame = 0; frame < 600 && done.get() == 0; frame++) {
+            stage.act(1f / 60f);
+        }
+        require(done.get() == 1, "Perspective health hit never completed");
         table.setInterrupted(true); tick(60);
         require(!image.isVisible() && !shadow.isVisible(), "Interrupted shadow remains visible");
         table.setInterrupted(false); tick(60);
         require(image.isVisible() && shadow.isVisible(), "Combat depth did not resume");
         table.remove(); tick(60);
         require(image.getStage() == null && shadow.getStage() == null && table.getStatusPlate().getStage() == null, "Combat actors leaked");
-    }
-
-    private void stroll(MonsterCombatTable table, Vector2 from, Vector2 to) throws Exception {
-        ((Vector2) field(table, "wanderPosition")).set(from);
-        ((Vector2) field(table, "wanderFrom")).set(from);
-        ((Vector2) field(table, "wanderTo")).set(to);
-        ((Vector2) field(table, "wanderControl")).set(from).lerp(to, .5f).add(15, 0);
-        set(table, "wanderElapsed", 0f); set(table, "wanderDuration", 3f); set(table, "wanderPause", 0f);
     }
 
     private void checkBounds(MonsterCombatTable table) {
@@ -269,16 +255,13 @@ public class GateCombatPreview extends ApplicationAdapter {
             }
         }
         require(minX > 0 && minY > 0 && maxX < MonsterCombatTable.SAFE_RIGHT && maxY < 540, "Scaled artwork left safe area");
-        require(!new Rectangle(minX, minY, maxX - minX, maxY - minY).overlaps(MonsterCombatTable.INVESTIGATOR_KEEP_OUT), "Scaled artwork overlaps investigator");
+        require(minX >= 480f, "Scaled artwork overlaps investigator side");
         require(table.getStatusPlate().getY() >= maxY && table.getStatusPlate().getTop() <= 540, "Plate does not follow projected artwork");
     }
 
     private void tick(int frames) { for (int i = 0; i < frames; i++) stage.act(1f / 60f); }
     private static Object field(Object owner, String name) throws Exception {
         Field field = owner.getClass().getDeclaredField(name); field.setAccessible(true); return field.get(owner);
-    }
-    private static void set(Object owner, String name, Object value) throws Exception {
-        Field field = owner.getClass().getDeclaredField(name); field.setAccessible(true); field.set(owner, value);
     }
     private int tracked() throws Exception { return ((Map<?, ?>) field(InfoStage.getFastForwardButton(), "fastForwardActions")).size(); }
     private static int buffers() {

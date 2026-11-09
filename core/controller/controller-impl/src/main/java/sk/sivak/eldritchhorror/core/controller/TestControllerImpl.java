@@ -2,6 +2,7 @@ package sk.sivak.eldritchhorror.core.controller;
 
 import rx.Completable;
 import rx.Single;
+import sk.sivak.eldritchhorror.core.constants.encounter.EncounterType;
 import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
@@ -14,6 +15,7 @@ import sk.sivak.eldritchhorror.core.constants.test.UsableAsset;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import sk.sivak.eldritchhorror.core.model.InvestigatorsRead;
 import sk.sivak.eldritchhorror.core.model.MonsterCupRead;
+import sk.sivak.eldritchhorror.core.model.PerformedEncountersRead;
 import sk.sivak.eldritchhorror.core.view.TestView;
 
 import java.util.List;
@@ -27,6 +29,12 @@ public class TestControllerImpl implements TestController {
 
     private InvestigatorsRead investigators;
     private MonsterCupRead monsterCup;
+
+    private PerformedEncountersRead performedEncounters;
+
+    public void setPerformedEncounters(PerformedEncountersRead performedEncounters) {
+        this.performedEncounters = performedEncounters;
+    }
 
     public void setMonsterCup(MonsterCupRead monsterCup) {
         this.monsterCup = monsterCup;
@@ -150,9 +158,15 @@ public class TestControllerImpl implements TestController {
             location = investigators.getActiveInvestigator().getCurrentLocationId();
         }
         if (location != null) {
+            InvestigatorId fighter = investigators.getActiveInvestigatorId();
             for (MonsterInfo other : monsterCup.getMonstersAtLocation(location)) {
-                if (other.isAlive() && !monsterInfo.getUuid().equals(other.getUuid())) {
-                    data.getBackgroundMonsters().add(other);
+                if (!other.isAlive() || monsterInfo.getUuid().equals(other.getUuid())) {
+                    continue;
+                }
+                if (performedEncounters.isPerformed(fighter, EncounterType.COMBAT, other.getUuid())) {
+                    data.getEncounteredMonsters().add(other);
+                } else {
+                    data.getWaitingMonsters().add(other);
                 }
             }
         }

@@ -432,8 +432,8 @@ public class PromptPreview extends ApplicationAdapter {
         InvestigatorImage portrait = new InvestigatorImage(InvestigatorId.THE_BOUNTY_HUNTER, null);
         portrait.setPosition(130, 80, Align.center);
         stage.addActor(portrait);
-        table.destroyMonsterHealth(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
-        Vector2 restingSpot = new Vector2((Vector2) field(table, "wanderPosition"));
+        table.destroyMonsterHealth(2, new Vector2(130, 80), null).subscribe(completed::incrementAndGet);
+        float restingTime = (float) field(table, "stanceTime");
         Set<Actor> bullets = new HashSet<>();
         for (int i = 0; i < 600 && completed.get() == 0; i++) {
             stage.act(1f / 60);
@@ -443,7 +443,7 @@ public class PromptPreview extends ApplicationAdapter {
                 require(shooter.dst(130, 80) < 1f, "bullet started away from the portrait: " + shooter);
                 draw("monster-health-bullets");
             }
-            if (completed.get() == 0) require(restingSpot.dst((Vector2) field(table, "wanderPosition")) < 1f, "monster walked during recoil");
+            if (completed.get() == 0) require(restingTime == (float) field(table, "stanceTime"), "monster walked during recoil");
         }
         portrait.remove();
         require(completed.get() == 1, "monster health destruction did not complete");
@@ -482,7 +482,7 @@ public class PromptPreview extends ApplicationAdapter {
         require(slots.size() == 5, "expected 3 horror + 2 damage tokens on the plate, got " + slots.size());
 
         AtomicInteger completed = new AtomicInteger();
-        table.destroyHorror(2, new Vector2(130, 80)).subscribe(completed::incrementAndGet);
+        table.destroyHorror(2, new Vector2(130, 80), null).subscribe(completed::incrementAndGet);
         Set<Actor> fireballs = new HashSet<>();
         Map<Actor, Vector2> origins = new HashMap<>();
         Set<Actor> intercepts = new HashSet<>();
@@ -692,8 +692,8 @@ public class PromptPreview extends ApplicationAdapter {
         String[] phases = {"horror", "damage", "health"};
         for (String phase : phases) {
             AtomicInteger completed = new AtomicInteger();
-            Completable attack = phase.equals("horror") ? table.destroyHorror(successes, portrait)
-                    : phase.equals("damage") ? table.destroyDamage(successes, portrait) : table.destroyMonsterHealth(successes, portrait);
+            Completable attack = phase.equals("horror") ? table.destroyHorror(successes, portrait, null)
+                    : phase.equals("damage") ? table.destroyDamage(successes, portrait, null) : table.destroyMonsterHealth(successes, portrait, null);
             attack.subscribe(completed::incrementAndGet);
             Set<Actor> bullets = new HashSet<>();
             int killingFrame = -1;
@@ -727,7 +727,7 @@ public class PromptPreview extends ApplicationAdapter {
         System.out.println("PASS: surplus successes respect incoming fireball and monster health counts");
     }
 
-    /** Epic monster: bigger portrait, pulsing red rim, gold plate and bigger fireballs. */
+    /** Epic monster: bigger portrait, gold plate and bigger fireballs. */
     private void previewEpicMonsterAndPhases() throws Exception {
         MonsterCombatTable table = new MonsterCombatTable();
         InfoStage.addSmallActorToInfoStage(table);
@@ -737,12 +737,11 @@ public class PromptPreview extends ApplicationAdapter {
         table.init(data);
         tick(90);
         Actor image = table.getMonsterImage();
-        Actor glow = table.getEpicGlow();
         require(image.getWidth() > 250, "epic portrait should be bigger, is " + image.getWidth());
-        require(glow != null && glow.getParent() == image.getParent()
-                && glow.getParent().getChildren().indexOf(glow, true) < image.getParent().getChildren().indexOf(image, true),
-                "epic glow must be drawn right behind the portrait");
-        checkEpicPulse(table, glow, "combat-epic-pulse");
+        for (Actor actor : image.getParent().getChildren()) {
+            require(!(actor instanceof sk.sivak.eldritchhorror.core.view.components.combat.SilhouetteImage),
+                    "epic combat portrait has a silhouette behind it");
+        }
         table.highlightHorror();
         tick(70);
         require(table.getStatusPlate().isVisible(), "status plate missing during horror");
@@ -769,7 +768,7 @@ public class PromptPreview extends ApplicationAdapter {
         tick(60);
         table.remove();
         tick(60);
-        require(image.getStage() == null && glow.getStage() == null && table.getStatusPlate().getStage() == null,
+        require(image.getStage() == null && table.getStatusPlate().getStage() == null,
                 "combat artwork left behind");
         System.out.println("PASS: epic monster appearance, horror/damage steps and cleanup");
     }
@@ -968,7 +967,7 @@ public class PromptPreview extends ApplicationAdapter {
         reserved.put("fast forward", new Rectangle(898, 0, 62, 57));
         reserved.put("investigator hud", new Rectangle(0, 0, 265, hudTop));
         for (boolean combat : new boolean[]{true, false}) {
-            for (int cards : new int[]{1, 2, 3}) {
+            for (int cards : new int[]{1, 2, 3, 8}) {
                 TestViewImpl view = new TestViewImpl();
                 MonsterCombatTable panel = null;
                 if (combat) {
@@ -979,25 +978,19 @@ public class PromptPreview extends ApplicationAdapter {
                     tick(120);
                     panel = ((Stack<MonsterCombatTable>) field(view, "monsterCombatTableStack")).peek();
                     if (cards == 1) {
-                        // The portrait roams the screen on its own, behind panels, cards and dice, and never leaves the safe area.
+                        // The opponent holds its place behind the combat UI.
                         draw("test-setup-combat-centred");
                         Actor image = panel.getMonsterImage();
                         require(image.getParent() == InfoStage.getCreatureLayer() && image.getTouchable() == Touchable.enabled,
                                 "monster artwork must remain clickable on the creature layer");
                         Vector2 start = new Vector2(image.getX(), image.getY());
                         float travelled = 0;
-                        Rectangle area = new Rectangle(panel.getWanderArea());
-                        area.y -= 2; // Idle breathing also moves the portrait slightly below its floor anchor.
-                        area.setHeight(area.height + 10); // stepping bounce above, breathing below
                         for (int i = 0; i < 3600; i++) {
                             stage.act(1f / 60);
-                            require(area.contains(image.getX(), image.getY()), "monster image left wander area at " + image.getX() + "," + image.getY());
-                            // Stays away from the investigator's bottom-left corner (a few px slack for the shake).
-                            require(!new Rectangle(image.getX() + 6, image.getY() + 6, image.getWidth() - 12, image.getHeight() - 12)
-                                    .overlaps(MonsterCombatTable.INVESTIGATOR_KEEP_OUT), "monster wandered near the investigator at " + image.getX() + "," + image.getY());
+                            require(image.getRotation() == 0 && image.getX() >= 480f, "monster left its stance");
                             travelled = Math.max(travelled, start.dst(image.getX(), image.getY()));
                         }
-                        require(travelled > 90, "monster image did not wander (" + travelled + ")");
+                        require(travelled > 1 && travelled < 4.1f, "unexpected stance movement (" + travelled + ")");
                         draw("test-setup-combat-wander");
                     }
                 }
@@ -1011,6 +1004,7 @@ public class PromptPreview extends ApplicationAdapter {
                 view.confirmTest(Stat.WILL, -1, 3, combat ? 0 : 1, assets, combat ? 0 : 1, combat).subscribe(selected -> { });
                 for (int i = 0; i < 120; i++) {
                     // Card art loads on an IO thread and completes through posted render-thread runnables.
+                    CustomAssetManager.pumpLoading(10);
                     Thread.sleep(5);
                     ((LwjglApplication) Gdx.app).executeRunnables();
                     stage.act(1f / 60);
@@ -1021,12 +1015,17 @@ public class PromptPreview extends ApplicationAdapter {
                 actors.put("test button", (Actor) field(view, "testButton"));
                 String name = "test-setup-" + (combat ? "combat-" : "plain-") + cards;
                 if (combat) {
+                    require(actors.get("cards").getRight() <= 481f, name + ": cards extend onto the monster side");
+                    require(actors.get("test button").getY() > 220f, name + ": Test button crowds the investigator");
                     Group root = stage.getRoot();
                     int creature = root.getChildren().indexOf(InfoStage.getCreatureLayer(), true);
                     require(creature < root.getChildren().indexOf(actors.get("cards").getParent(), true)
                                     && creature < root.getChildren().indexOf(InfoStage.getDiceLayer(), true),
                             name + ": cards and dice must be drawn over the monster");
                 }
+                require(actors.get("test info").getRight() < actors.get("cards").getX()
+                                && actors.get("test button").getRight() < actors.get("cards").getX(),
+                        name + ": dice summary and Test button must sit left of the cards");
                 draw(name);
                 List<String> names = new ArrayList<>(actors.keySet());
                 for (int i = 0; i < names.size(); i++) {

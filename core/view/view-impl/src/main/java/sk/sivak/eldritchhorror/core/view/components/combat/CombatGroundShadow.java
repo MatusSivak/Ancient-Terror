@@ -8,7 +8,7 @@ final class CombatGroundShadow extends Image {
     CombatGroundShadow() {
         super(CustomAssetManager.getTexture("dice_shadow.png"));
         setTouchable(Touchable.disabled);
-        setColor(0.025f, 0.015f, 0.035f, 0f);
+        setColor(0f, 0f, 0f, 0f);
     }
 
     void place(float footX, float footY, float width, float height, float opacity) {

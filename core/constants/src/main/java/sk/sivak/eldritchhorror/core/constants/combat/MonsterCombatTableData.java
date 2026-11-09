@@ -16,10 +16,15 @@ public class MonsterCombatTableData {
     private Integer toughness;
 
     private MonsterInfo monsterInfo;
-    private final List<MonsterInfo> backgroundMonsters = new ArrayList<>();
+    private final List<MonsterInfo> waitingMonsters = new ArrayList<>();
+    private final List<MonsterInfo> encounteredMonsters = new ArrayList<>();
 
-    public List<MonsterInfo> getBackgroundMonsters() {
-        return backgroundMonsters;
+    public List<MonsterInfo> getEncounteredMonsters() {
+        return encounteredMonsters;
+    }
+
+    public List<MonsterInfo> getWaitingMonsters() {
+        return waitingMonsters;
     }
 
     public MonsterCombatTableData() {

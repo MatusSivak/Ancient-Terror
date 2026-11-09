@@ -73,6 +73,7 @@ public class ViewControllerBinder {
     private void bindTestControllerView() {
         TestViewImpl view = viewProvider.getTestView();
         TestControllerImpl controller = controllerProvider.getTestControllerImpl();
+        controller.setPerformedEncounters(modelProvider.getPerformedEncounters());
         controller.setMonsterCup(modelProvider.getMonsterCup());
         controller.setInvestigators(modelProvider.getInvestigators());
         controller.setView(view);

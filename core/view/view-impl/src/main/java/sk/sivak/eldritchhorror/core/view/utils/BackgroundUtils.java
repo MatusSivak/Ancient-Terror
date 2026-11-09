@@ -40,6 +40,8 @@ import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPoint
 public class BackgroundUtils {
     private static final Object FADING_OUT = new Object();
 
+    private static final float COMBAT_BRIGHTNESS = 0.66f;
+
     private Stage backgroundStage;
     private final GameController gameController;
     private String currentBackgroundName;
@@ -233,6 +235,9 @@ public class BackgroundUtils {
             region.flip(true, false);
         }
         Image newBackground = new Image(region);
+        if (backgroundName.equals(CustomAssetManager.ENCOUNTER_COMBAT) || backgroundName.startsWith("encounter/background/combat_")) {
+            newBackground.setColor(COMBAT_BRIGHTNESS, COMBAT_BRIGHTNESS, COMBAT_BRIGHTNESS, 1f);
+        }
         newBackground.setScaling(Scaling.fit);
         newBackground.setSize(ViewProperties.VIEWPORT_WIDTH, ViewProperties.VIEWPORT_HEIGHT);
         newBackground.setOrigin(Align.center);
