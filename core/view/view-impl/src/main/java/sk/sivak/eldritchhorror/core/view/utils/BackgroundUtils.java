@@ -27,6 +27,7 @@ import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.map.helper.MoveCameraToLocationHelper;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
+import sk.sivak.eldritchhorror.core.view.shader.LitImage;
 
 import java.util.List;
 
@@ -234,7 +235,8 @@ public class BackgroundUtils {
         if (backgroundName.startsWith("encounter/background/other_")) {
             region.flip(true, false);
         }
-        Image newBackground = new Image(region);
+        // Fireballs and gunshots light up the background around them.
+        Image newBackground = new LitImage(region);
         if (backgroundName.equals(CustomAssetManager.ENCOUNTER_COMBAT) || backgroundName.startsWith("encounter/background/combat_")) {
             newBackground.setColor(COMBAT_BRIGHTNESS, COMBAT_BRIGHTNESS, COMBAT_BRIGHTNESS, 1f);
         }

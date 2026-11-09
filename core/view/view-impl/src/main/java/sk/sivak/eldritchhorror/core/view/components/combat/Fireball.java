@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.shader.SceneLight;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.LinkedList;
@@ -41,6 +43,11 @@ public class Fireball extends Image {
     private boolean blue;
     private float sizeMultiplier = 1f;
     private static ShaderProgram blueShader;
+    private static final Color FIRE_LIGHT = new Color(1f, 0.5f, 0.16f, 1f);
+    private static final Color HORROR_LIGHT = new Color(0.28f, 0.5f, 1f, 1f);
+    private static final float LIGHT_RADIUS = 300f;
+    private SceneLight light;
+    private final Vector2 lightPosition = new Vector2();
 
     public Fireball() {
         List<TextureRegionDrawable> frames = new LinkedList<>();
@@ -87,7 +94,31 @@ public class Fireball extends Image {
         if (fireballSmoke != null) {
             fireballSmoke.moveTo(getX() + getWidth()/2f, getY() + getHeight()/2f);
         }
+        updateLight();
+    }
 
+    /** The flame lights the background around it; it glows brighter as it grows and heats up to full color. */
+    private void updateLight() {
+        if (getStage() == null) {
+            return;
+        }
+        if (light == null) {
+            light = SceneLight.add(getStage(), blue ? HORROR_LIGHT : FIRE_LIGHT, LIGHT_RADIUS * sizeMultiplier);
+        }
+        localToStageCoordinates(lightPosition.set(getWidth() / 2f, getHeight() / 2f));
+        float growth = MathUtils.clamp(getScaleX() / (0.5f * sizeMultiplier), 0f, 1.2f);
+        float flicker = 0.9f + 0.1f * MathUtils.sin(stateTime * 31f) * MathUtils.sin(stateTime * 17f);
+        light.setPosition(lightPosition.x, lightPosition.y)
+                .setIntensity(isVisible() ? 1.1f * growth * getColor().r * flicker : 0f);
+    }
+
+    @Override
+    protected void setStage(Stage stage) {
+        super.setStage(stage);
+        if (stage == null && light != null) {
+            light.remove();
+            light = null;
+        }
     }
 
     public void setBlue(boolean blue) {
@@ -196,6 +227,8 @@ public class Fireball extends Image {
                     }
                     fireballSmoke.getParticleEffect().allowCompletion();
                     explosion.start(new Explosion.ExplosionConfig(impact, burstColor));
+                    SceneLight.flash(getParent(), impact, blue ? HORROR_LIGHT : FIRE_LIGHT,
+                            LIGHT_RADIUS * 1.4f * sizeMultiplier, 1.6f, 0.08f, 0f, 0.5f);
                     for (Runnable onLandAction : onLandActions) {
                         onLandAction.run();
                     }

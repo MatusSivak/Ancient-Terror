@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
+import sk.sivak.eldritchhorror.core.view.shader.SceneLight;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 /** The round reaches its target after {@link #FLIGHT}. A few frames of muzzle flash and tracer lead into the longer spark and smoke trails. */
@@ -23,6 +24,8 @@ final class BulletTracer extends Actor {
     private static final float DURATION = 0.34f;
     /** How long the glowing streak lingers behind the round after the hit. */
     private static final float TRAIL_FADE = 0.17f;
+    private static final Color MUZZLE_LIGHT = new Color(1f, 0.97f, 0.9f, 1f);
+    private static final Color HIT_LIGHT = new Color(1f, 0.8f, 0.55f, 1f);
 
     private final Texture glint = CustomAssetManager.getTexture(CustomAssetManager.LIGHT);
     private final Texture smoke = CustomAssetManager.getTexture(CustomAssetManager.GATE_SMOKE);
@@ -53,6 +56,9 @@ final class BulletTracer extends Actor {
         BulletTracer shot = new BulletTracer(shooter, impact);
         layer.addActor(shot);
         CombatSounds.playDiceFireballLaunch();
+        // The muzzle flash lights the whole room white for an instant; the hit flares up briefly where it lands.
+        SceneLight.flash(layer, shooter, MUZZLE_LIGHT, 900f, 2f, 0.35f, 0f, 0.2f);
+        SceneLight.flash(layer, impact, HIT_LIGHT, 220f, 1.1f, 0f, FLIGHT, 0.22f);
         shot.addAction(new FastForwardAction<>(Actions.sequence(new TemporalAction(DURATION) {
             @Override protected void update(float progress) {
                 shot.elapsed = progress * DURATION;
@@ -90,20 +96,25 @@ final class BulletTracer extends Actor {
         float tail = MathUtils.lerp(start, head, Interpolation.pow2Out.apply(catchUp));
         if (head - tail < 1f) return;
         float fade = alpha * (1f - catchUp * 0.7f);
-        beam(batch, tail, head, 11f, Color.toFloatBits(1f, 0.45f, 0.1f, fade * 0.35f));
-        beam(batch, tail, head, 4.5f, Color.toFloatBits(1f, 0.75f, 0.35f, fade * 0.8f));
-        beam(batch, tail, head, 1.8f, Color.toFloatBits(1f, 1f, 0.9f, fade));
+        beam(batch, tail, head, 4f, 1f, 0.5f, 0.15f, fade * 0.3f);
+        beam(batch, tail, head, 1.2f, 1f, 0.97f, 0.85f, fade);
     }
 
-    private void beam(Batch batch, float from, float to, float width, float color) {
+    /** A hairline streak: brightest along its axis and at the head, fading to nothing at its edges and tail. */
+    private void beam(Batch batch, float from, float to, float width, float r, float g, float b, float a) {
         float x1 = getX() + direction.x * from, y1 = getY() + direction.y * from;
         float x2 = getX() + direction.x * to, y2 = getY() + direction.y * to;
         float nx = -direction.y * width * 0.5f, ny = direction.x * width * 0.5f;
-        vertex(0, x1 + nx, y1 + ny, color);
-        vertex(5, x1 - nx, y1 - ny, color);
-        vertex(10, x2 - nx, y2 - ny, color);
-        vertex(15, x2 + nx, y2 + ny, color);
-        batch.draw(white, vertices, 0, vertices.length);
+        float tailCore = Color.toFloatBits(r, g, b, a * 0.15f);
+        float headCore = Color.toFloatBits(r, g, b, a);
+        float clear = Color.toFloatBits(r, g, b, 0f);
+        for (int side = -1; side <= 1; side += 2) {
+            vertex(0, x1, y1, tailCore);
+            vertex(5, x1 + nx * side, y1 + ny * side, clear);
+            vertex(10, x2 + nx * side, y2 + ny * side, clear);
+            vertex(15, x2, y2, headCore);
+            batch.draw(white, vertices, 0, vertices.length);
+        }
     }
 
     private void drawMuzzle(Batch batch, float alpha) {
@@ -132,11 +143,11 @@ final class BulletTracer extends Actor {
         float x = getX() + direction.x * (head - length * 0.5f);
         float y = getY() + direction.y * (head - length * 0.5f);
         batch.setColor(1f, 0.63f, 0.18f, alpha);
-        sprite(batch, glint, x, y, length * 2.4f, 14f, getRotation());
+        sprite(batch, glint, x, y, length * 2f, 6f, getRotation());
         streak(batch, x - direction.x * length * 0.5f, y - direction.y * length * 0.5f,
-                getRotation(), length, 4.5f, Color.toFloatBits(1f, 0.78f, 0.35f, alpha));
+                getRotation(), length, 1.8f, Color.toFloatBits(1f, 0.85f, 0.5f, alpha));
         batch.setColor(1f, 0.96f, 0.79f, alpha);
-        sprite(batch, glint, getX() + direction.x * head, getY() + direction.y * head, 36f, 22f, getRotation());
+        sprite(batch, glint, getX() + direction.x * head, getY() + direction.y * head, 22f, 10f, getRotation());
     }
 
     private void drawImpact(Batch batch, float alpha) {

@@ -16,6 +16,10 @@ public class TestTableStack {
         return stack.peek();
     }
 
+    public boolean isEmpty() {
+        return stack.isEmpty();
+    }
+
     public VisTable pop() {
         return stack.pop();
     }

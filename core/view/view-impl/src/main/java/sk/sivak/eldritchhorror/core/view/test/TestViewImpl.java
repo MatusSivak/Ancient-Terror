@@ -42,6 +42,7 @@ import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.typewriter.CardResolutionArtwork;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatOverviewTable;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
+import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRoller;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRollerStack;
 import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
@@ -612,6 +613,28 @@ public class TestViewImpl implements TestView {
         return successes;
     }
 
+    /**
+     * Only the successful dice stay for the shooting, small and tucked beside the investigator HUD,
+     * next to the result plate rather than over the map and the fighting stand.
+     */
+    private Completable keepOnlyShootingDice() {
+        DiceRoller roller = diceRollerStack.peek();
+        float rowWidth = DiceRoller.compactRowWidth(roller.countShootingDice());
+        float rowHeight = DiceImage.ACTUAL_DICE_SIZE * DiceRoller.COMPACT_SCALE;
+        float left = InfoStage.getInvestigatorHud().getPrefWidth() + 12f;
+        float centerY = RESULT_TABLE_Y + rowHeight / 2f + 6f;
+        if (!testTableStack.isEmpty()) {
+            Actor result = testTableStack.peek();
+            centerY = result.getY() + result.getHeight() / 2f;
+            if (left + rowWidth > result.getX() - 12f) {
+                // Too many to fit beside the plate: line them up just above it instead.
+                left = VIEWPORT_WIDTH / 2f - rowWidth / 2f;
+                centerY = result.getTop() + rowHeight / 2f + 6f;
+            }
+        }
+        return roller.keepOnlySuccesses(left, centerY);
+    }
+
     private Vector2 investigatorShotOrigin(boolean sanity) {
         Vector2 stand = investigatorStandPosition();
         if (stand != null) return stand;
@@ -628,6 +651,7 @@ public class TestViewImpl implements TestView {
         }
 
         return diceRollerStack.peek().waitUntilSettled()
+                .andThen(Completable.defer(this::keepOnlyShootingDice))
                 .andThen(Completable.defer(() -> destroyFunction.apply(successes)))
                 .concatWith(Completable.create(onSub -> {
                     onEndAction.call();
@@ -763,7 +787,8 @@ public class TestViewImpl implements TestView {
                     } else {
                         completable = Completable.complete();
                     }
-                    completable.andThen(diceRollerStack.peek().waitUntilSettled()).subscribe(() -> {
+                    completable.andThen(diceRollerStack.peek().waitUntilSettled())
+                            .andThen(Completable.defer(TestViewImpl.this::keepOnlyShootingDice)).subscribe(() -> {
                         monsterCombatTableStack.peek().destroyMonsterHealth(successes, investigatorShotOrigin(false),
                                 diceRollerStack.peek().createShotFlasher()).concatWith(Completable.create(onSub -> {
                             diceRollerStack.pop().hideDices();
