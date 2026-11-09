@@ -73,6 +73,8 @@ public class MonsterCombatTable extends VisTable {
     private static final float EPIC_FIREBALL_SCALE = 1.5f;
     /** Seconds between the monster's attack fireballs. */
     private static final float ATTACK_STAGGER = 0.55f;
+    /** Pause between the monster's attack cry and its first fireball. */
+    private static final float ATTACK_CRY_LEAD = 0.5f;
     /** Random gap in seconds between investigator shots. */
     private static final float DICE_SHOT_GAP_MIN = 0.15f;
     private static final float DICE_SHOT_GAP_MAX = 0.30f;
@@ -454,6 +456,7 @@ public class MonsterCombatTable extends VisTable {
         }
         // Right after an intercepted volley, the surviving fireballs keep the same rhythm.
         float windUp = continuesVolley ? 0.1f : 0.6f;
+        if (!continuesVolley) CombatSounds.playMonsterAttackCry(sanity);
         continuesVolley = false;
         addAction(new FastForwardAction<>(Actions.sequence(
                 Actions.delay(windUp),
@@ -565,7 +568,10 @@ public class MonsterCombatTable extends VisTable {
                 continuesVolley = survivorsFollow;
                 onSub.onCompleted();
             });
-            fireballService.launchInterceptedFireballs(sources, investigator);
+            // The monster cries out once, then starts hurling the volley the dice shoot down.
+            CombatSounds.playMonsterAttackCry(horror);
+            addAction(new FastForwardAction<>(Actions.delay(ATTACK_CRY_LEAD,
+                    Actions.run(() -> fireballService.launchInterceptedFireballs(sources, investigator)))));
         });
     }
 

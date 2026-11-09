@@ -24,6 +24,11 @@ public final class CombatSounds {
         play(CustomAssetManager.FIREBALL_LAUNCH_MONSTER_SOUND, 0.40f, 0.06f, false);
     }
 
+    /** The monster's cry just before it starts hurling a volley: a snarl for Damage, a ghostly moan for Horror. */
+    public static void playMonsterAttackCry(boolean sanity) {
+        play(sanity ? CustomAssetManager.MONSTER_ATTACK_SANITY_SOUND : CustomAssetManager.MONSTER_ATTACK_DAMAGE_SOUND, 0.75f, 0.05f);
+    }
+
     public static void playFireballImpact() {
         play(CustomAssetManager.FIREBALL_IMPACT_SOUND, 0.50f, 0.06f);
     }

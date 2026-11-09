@@ -361,6 +361,7 @@ public class CustomAssetManager extends AssetManager {
         for (String path : new String[]{TRAVEL_DEPART_SOUND, TRAVEL_ARRIVE_SOUND, INVESTIGATOR_HIGHLIGHT_SOUND,
                 TOKEN_GAIN_SOUND, TOKEN_LOSS_SOUND, TOKEN_LEAVE_SOUND, TOKEN_LAND_SOUND,
                 FIREBALL_LAUNCH_SOUND, FIREBALL_LAUNCH_SHOTGUN_SOUND, FIREBALL_LAUNCH_GUNSHOT2_SOUND, FIREBALL_LAUNCH_MONSTER_SOUND, FIREBALL_IMPACT_SOUND, MONSTER_TOKEN_HIT_SOUND,
+                MONSTER_ATTACK_DAMAGE_SOUND, MONSTER_ATTACK_SANITY_SOUND,
                 MONSTER_HEALTH_LEAVE_SOUND, MONSTER_HEALTH_TEAR_SOUND,
                 TRACK_ZOOM_IN_SOUND, TRACK_ZOOM_OUT_SOUND}) {
             load(path, Sound.class);
@@ -615,6 +616,8 @@ public class CustomAssetManager extends AssetManager {
     public final static String FIREBALL_LAUNCH_SHOTGUN_SOUND = "sounds/fireball_launch_shotgun.wav";
     public final static String FIREBALL_LAUNCH_GUNSHOT2_SOUND = "sounds/fireball_launch_gunshot2.wav";
     public final static String FIREBALL_LAUNCH_MONSTER_SOUND = "sounds/fireball_launch_monster.wav";
+    public final static String MONSTER_ATTACK_DAMAGE_SOUND = "sounds/monster_attack_damage.wav";
+    public final static String MONSTER_ATTACK_SANITY_SOUND = "sounds/monster_attack_sanity.wav";
     public final static String FIREBALL_IMPACT_SOUND = "sounds/fireball_impact.wav";
     public final static String MONSTER_TOKEN_HIT_SOUND = "sounds/monster_token_hit.wav";
     public final static String MONSTER_HEALTH_LEAVE_SOUND = "sounds/monster_health_leave.wav";
