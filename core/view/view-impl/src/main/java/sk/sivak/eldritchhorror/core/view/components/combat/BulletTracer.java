@@ -53,17 +53,25 @@ final class BulletTracer extends Actor {
     }
 
     static void fire(Group layer, Vector2 shooter, Vector2 impact) {
+        fire(layer, shooter, impact, 0f);
+    }
+
+    static void fire(Group layer, Vector2 shooter, Vector2 impact, float initialAge) {
         BulletTracer shot = new BulletTracer(shooter, impact);
         layer.addActor(shot);
         CombatSounds.playDiceFireballLaunch();
         // The muzzle flash lights the whole room white for an instant; the hit flares up briefly where it lands.
         SceneLight.flash(layer, shooter, MUZZLE_LIGHT, 900f, 2f, 0.35f, 0f, 0.2f);
-        SceneLight.flash(layer, impact, HIT_LIGHT, 220f, 1.1f, 0f, FLIGHT, 0.22f);
-        shot.addAction(new FastForwardAction<>(Actions.sequence(new TemporalAction(DURATION) {
+        SceneLight.flash(layer, impact, HIT_LIGHT, 220f, 1.1f, 0f, FLIGHT - initialAge, 0.22f);
+        TemporalAction animation = new TemporalAction(DURATION) {
             @Override protected void update(float progress) {
                 shot.elapsed = progress * DURATION;
             }
-        }, Actions.removeActor())));
+        };
+        // A fireball can cross the firing instant partway through a frame.
+        shot.elapsed = initialAge;
+        animation.setTime(initialAge);
+        shot.addAction(new FastForwardAction<>(Actions.sequence(animation, Actions.removeActor())));
     }
 
     @Override public void draw(Batch batch, float parentAlpha) {

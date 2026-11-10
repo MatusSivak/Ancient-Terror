@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -19,15 +18,15 @@ public class TokenInFrame extends Group {
 
     public static final int ACTUAL_TOKEN_SIZE = 43;
 
-    public TokenInFrame(Texture tokenTexture) {
-        this(tokenTexture, ACTUAL_TOKEN_SIZE, ACTUAL_TOKEN_SIZE + 10);
+    public TokenInFrame(FireballImage.Kind kind) {
+        this(kind, ACTUAL_TOKEN_SIZE, ACTUAL_TOKEN_SIZE + 10);
     }
 
-    public TokenInFrame(Texture tokenTexture, float size) {
-        this(tokenTexture, size, size);
+    public TokenInFrame(FireballImage.Kind kind, float size) {
+        this(kind, size, size);
     }
 
-    private TokenInFrame(Texture tokenTexture, float size, float imageSize) {
+    private TokenInFrame(FireballImage.Kind kind, float size, float imageSize) {
         setSize(size, size);
         setOrigin(Align.center);
         // Compact combat rows have a shared highlight instead of a box behind every icon.
@@ -37,7 +36,7 @@ public class TokenInFrame extends Group {
         background.setSize(size, size);
         addActor(background);
 
-        image = new Image(tokenTexture);
+        image = new FireballImage(kind);
         image.getColor().a = 0.75f;
         image.setScaling(Scaling.fit);
         image.setSize(imageSize, imageSize);

@@ -35,9 +35,6 @@ import static sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage.
 import static sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage.DICE_SIZE;
 
 public class DiceRoller {
-    /** Size of the dice left on screen while combat successes are fired. */
-    public static final float COMPACT_SCALE = 0.5f;
-    private static final float COMPACT_GAP = 4f;
     private List<DiceImage> dices = new LinkedList<>();
     private DiceAreaCalculator diceAreaCalculator;
     private int dicesFinished;
@@ -421,58 +418,6 @@ public class DiceRoller {
             DiceImage shooter = shooters.remove(0);
             if (shooter.getStage() != null) shooter.flashShot();
         };
-    }
-
-    /**
-     * Combat resolution keeps only the dice that fire: failed dice fade away and the successes
-     * shrink into a compact row whose left edge and vertical centre are given.
-     */
-    public Completable keepOnlySuccesses(float left, float centerY) {
-        return Completable.create(onSub -> {
-            List<DiceImage> successes = new LinkedList<>();
-            for (DiceImage dice : new LinkedList<>(dices)) {
-                if (dice.getScore() != null && dice.getScore().getValue() > 0) {
-                    successes.add(dice);
-                    continue;
-                }
-                dices.remove(dice);
-                dice.clearActions();
-                dice.addAction(new FastForwardAction<>(Actions.sequence(
-                        Actions.parallel(Actions.fadeOut(0.25f), Actions.scaleTo(0.3f, 0.3f, 0.25f, Interpolation.pow2In)),
-                        Actions.removeActor())));
-            }
-            if (successes.isEmpty()) {
-                onSub.onCompleted();
-                return;
-            }
-            float step = ACTUAL_DICE_SIZE * COMPACT_SCALE + COMPACT_GAP;
-            int[] remaining = {successes.size()};
-            for (int i = 0; i < successes.size(); i++) {
-                DiceImage dice = successes.get(i);
-                float centerX = left + ACTUAL_DICE_SIZE * COMPACT_SCALE / 2f + i * step;
-                dice.addAction(new FastForwardAction<>(Actions.sequence(
-                        Actions.parallel(
-                                Actions.moveTo(centerX - dice.getWidth() / 2f, centerY - dice.getHeight() / 2f, 0.35f, Interpolation.sine),
-                                Actions.scaleTo(COMPACT_SCALE, COMPACT_SCALE, 0.35f, Interpolation.sine),
-                                Actions.rotateTo(Math.round(dice.getRotation() / 90f) * 90f, 0.35f, Interpolation.sine)),
-                        Actions.run(() -> {
-                            if (--remaining[0] == 0) onSub.onCompleted();
-                        }))));
-            }
-        });
-    }
-
-    /** Width of the compact row for the given number of dice. */
-    public static float compactRowWidth(int count) {
-        return count <= 0 ? 0 : count * ACTUAL_DICE_SIZE * COMPACT_SCALE + (count - 1) * COMPACT_GAP;
-    }
-
-    public int countShootingDice() {
-        int count = 0;
-        for (DiceImage dice : dices) {
-            if (dice.getScore() != null && dice.getScore().getValue() > 0) count++;
-        }
-        return count;
     }
 
     public void hideDiceDontRemove() {

@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.ancientone;
 
+import sk.sivak.eldritchhorror.core.view.components.combat.FireballImage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -217,7 +218,7 @@ public class AwakenShubNiggurathCard extends VisTable implements AncientOneCard{
         powerTable.add(powerLabel).padLeft(5).height(60).padRight(5);
 
         for (int i = 0; i < 5; i++) {
-            Image actor = new Image(CustomAssetManager.getTexture("combat/horror.png"));
+            Image actor = new FireballImage(FireballImage.Kind.HORROR);
             actor.setOrigin(25,25);
             actor.setScaling(Scaling.fit);
             if (i >= ancientOneInfo.getPower()) {

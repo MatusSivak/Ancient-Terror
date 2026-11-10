@@ -1,4 +1,6 @@
 import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.view.utils.BackgroundUtils;
+import sk.sivak.eldritchhorror.core.view.components.combat.FireballImage;
 import sk.sivak.eldritchhorror.core.constants.monster.SkeletonMonster;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterUtils;
 import sk.sivak.eldritchhorror.core.view.monster.MonsterViewImpl;
@@ -60,10 +62,12 @@ public class PromptPreview extends ApplicationAdapter {
     private static boolean combatDisplayOnly;
     private static boolean mapReportsOnly;
     private static boolean noticesOnly;
+    private static boolean combatResultsOnly;
 
     public static void main(String[] args) {
         combatDisplayOnly = Arrays.asList(args).contains("--combat-display");
         mapReportsOnly = Arrays.asList(args).contains("--map-reports");
+        combatResultsOnly = Arrays.asList(args).contains("--combat-results");
         noticesOnly = Arrays.asList(args).contains("--notices");
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
@@ -84,6 +88,19 @@ public class PromptPreview extends ApplicationAdapter {
                     new Class<?>[]{Audio.class}, (proxy, method, args) -> silent);
             VisUI.load();
             stage = InfoStage.getStageSafe();
+            if (combatResultsOnly) {
+                Stage backdropStage = new Stage(stage.getViewport(), stage.getBatch());
+                Actor backdrop = new BackgroundUtils(backdropStage, null).toBackground(CustomAssetManager.ENCOUNTER_COMBAT);
+                stage.getRoot().addActorAt(0, backdrop);
+                backdropStage.dispose();
+                for (boolean fast : new boolean[]{false, true}) {
+                    checkDice(fast);
+                    checkCombatDamage(0, fast, false);
+                    checkCombatDamage(1, fast, false);
+                }
+                previewMonsterAttack();
+                return;
+            }
             if (noticesOnly) {
                 previewNotices();
                 checkMystery();
@@ -294,13 +311,19 @@ public class PromptPreview extends ApplicationAdapter {
         checkRerollPrompts(view, layer);
         if (fast) FastForwardAction.turnOn();
         completed.set(0);
-        roller.moveUp(45).subscribe(() -> {
-            completed.incrementAndGet();
-            for (Actor die : layer.getChildren()) require(Math.abs(die.getY() - 45
-                    + (DiceImage.DICE_SIZE - DiceImage.ACTUAL_DICE_SIZE) / 2f) < 0.01f,
-                    "Result confirmed before every die was positioned");
-            roller.hideDices();
-        });
+        List<Actor> added = new ArrayList<>();
+        List<Actor> hidden = new ArrayList<>();
+        Subscription add = InfoStage.getAddSmallActorSubject().subscribe(added::add);
+        Subscription hide = InfoStage.getHideActorSubject().subscribe(hidden::add);
+        try {
+            view.confirmRollResult(0).subscribe(completed::incrementAndGet);
+            require(completed.get() == 1 && added.size() == 1 && hidden.equals(added)
+                            && !added.get(0).isVisible(),
+                    "Roll result must complete and emit add/hide once without a visible result frame");
+        } finally {
+            add.unsubscribe();
+            hide.unsubscribe();
+        }
         tickDice(layer, 150);
         require(completed.get() == 1 && layer.getChildren().size == 0, "Failed dice linger after cleanup");
         FastForwardAction.turnOff();
@@ -349,6 +372,8 @@ public class PromptPreview extends ApplicationAdapter {
         MonsterCombatTableData data = new MonsterCombatTableData();
         data.setMonsterClassName("ElderThingMonster"); data.setMonsterName("Elder Thing");
         data.setHorror(2); data.setDamage(3); data.setToughness(3); data.setCurrentHealth(3);
+        data.getEncounteredMonsters().add(new SkeletonMonster());
+        data.getWaitingMonsters().add(new sk.sivak.eldritchhorror.core.constants.monster.GhoulMonster());
         table.init(data);
         table.setPosition(MonsterCombatTable.X_POSITION, 540 - table.getHeight());
         table.setCentered();
@@ -371,9 +396,29 @@ public class PromptPreview extends ApplicationAdapter {
             roller.moveUp(result.getTop() + 5).subscribe();
             view.destroyDamage(rolls).subscribe(completed::incrementAndGet);
         } else {
-            view.confirmTestResult(true, successes > 0, successes)
-                    .andThen(Completable.defer(() -> view.destroyDamage(rolls)))
-                    .subscribe(completed::incrementAndGet);
+            view.confirmTestResult(true, successes > 0, successes).subscribe(completed::incrementAndGet);
+            require(completed.get() == 1 && !((TestTableStack) field(view, "testTableStack")).peek().isVisible(),
+                    "Combat result should complete before another frame without showing the result");
+            completed.set(0);
+            view.destroyDamage(rolls).subscribe(completed::incrementAndGet);
+        }
+        if (successes > 0 && !fast) {
+            Map<Actor, Vector2> row = new HashMap<>();
+            for (Actor die : InfoStage.getDiceLayer().getChildren()) row.put(die, new Vector2(die.getX(), die.getY()));
+            Set<Actor> volley = new HashSet<>();
+            for (int frame = 0; frame < 240 && volley.isEmpty(); frame++) {
+                stage.act(1f / 60);
+                collectFireballs(volley);
+            }
+            require(!volley.isEmpty() && row.size() == rolls.size(), "Expected a volley with the whole roll");
+            for (Map.Entry<Actor, Vector2> entry : row.entrySet()) {
+                Actor die = entry.getKey();
+                require(die.getParent() == InfoStage.getDiceLayer() && die.isVisible()
+                        && die.getScaleX() == 1f && die.getScaleY() == 1f
+                        && entry.getValue().epsilonEquals(die.getX(), die.getY(), .01f),
+                        "Combat changed the settled dice row before the shot");
+            }
+            draw("combat-dice-and-monsters");
         }
         tickCombat(1200, fast);
         require(completed.get() == 1, "Combat damage phase did not complete once");
@@ -487,6 +532,10 @@ public class PromptPreview extends ApplicationAdapter {
         Map<Actor, Vector2> origins = new HashMap<>();
         Set<Actor> intercepts = new HashSet<>();
         Vector2 shooter = new Vector2(130, 80);
+        Actor incoming = null;
+        Vector2 impact = null;
+        float previousDistance = 0f;
+        int bursts = 0;
         for (int i = 0; i < 600 && completed.get() == 0; i++) {
             stage.act(1f / 60);
             collectFireballs(fireballs);
@@ -495,23 +544,41 @@ public class PromptPreview extends ApplicationAdapter {
             }
             Actor tracer = stage.getRoot().findActor("combat-bullet-tracer");
             if (tracer != null && intercepts.add(tracer)) {
-                Vector2 impact = tracer.localToStageCoordinates(new Vector2(tracer.getWidth(), 0f));
-                boolean atMidpoint = false;
+                impact = tracer.localToStageCoordinates(new Vector2(tracer.getWidth(), 0f));
                 for (Actor ball : fireballs) {
+                    if (!ball.isVisible() || ball.getParent() == null) continue;
                     Vector2 source = origins.get(ball);
                     Vector2 flight = new Vector2(shooter).sub(source);
                     float fraction = new Vector2(impact).sub(source).dot(flight) / flight.len2();
-                    if (impact.dst(ball.getX(Align.center), ball.getY(Align.center)) < 1f && Math.abs(fraction - 0.5f) < 0.01f) atMidpoint = true;
+                    if (Math.abs(fraction - 0.5f) < 0.01f) incoming = ball;
                 }
-                require(atMidpoint, "tracer missed the halfway point");
+                require(incoming != null && impact.dst(incoming.getX(Align.center), incoming.getY(Align.center)) > 1f,
+                        "The shot should lead the incoming fireball");
+                previousDistance = Float.POSITIVE_INFINITY;
                 draw("monster-horror-intercept");
+            }
+            if (incoming != null) {
+                float distance = impact.dst(incoming.getX(Align.center), incoming.getY(Align.center));
+                require(distance < previousDistance, "Fireball stopped before impact");
+                previousDistance = distance;
+                if (!incoming.isVisible()) {
+                    boolean burstAtImpact = false;
+                    for (Actor actor : descendants(stage.getRoot())) {
+                        if ("combat-fireball-shatter".equals(actor.getName()) && actor.isVisible()
+                                && impact.dst(actor.getX(), actor.getY()) < 1f) burstAtImpact = true;
+                    }
+                    require(distance < 1f && burstAtImpact, "Fireball did not burst at the bullet endpoint");
+                    draw("monster-horror-impact");
+                    bursts++;
+                    incoming = null;
+                }
             }
             requireTokensInSlots(slots, plate);
             if (i == 30) draw("monster-horror-shootdown-1");
             if (i == 60) draw("monster-horror-shootdown-2");
         }
         require(completed.get() == 1, "horror destruction did not complete");
-        require(fireballs.size() == 2 && intercepts.size() == 2, "expected two incoming fireballs and two intercepts");
+        require(fireballs.size() == 2 && intercepts.size() == 2 && bursts == 2, "expected two incoming fireballs and two intercepts");
         tick(30);
 
         for (boolean sanity : new boolean[]{true, false}) {
@@ -914,16 +981,15 @@ public class PromptPreview extends ApplicationAdapter {
     }
 
     private void previewCombatTokens() throws Exception {
-        for (String type : new String[]{"horror", "damage"}) {
+        for (FireballImage.Kind kind : FireballImage.Kind.values()) {
             for (int count : new int[]{4, 12}) {
-                TokenInFrameBar bar = new TokenInFrameBar(count,
-                        CustomAssetManager.getTexture("combat/" + type + ".png"));
+                TokenInFrameBar bar = new TokenInFrameBar(count, kind);
                 stage.addActor(bar);
                 bar.setSize(bar.getPrefWidth(), bar.getPrefHeight());
                 bar.validate();
                 bar.highlightRemainingTokens();
                 tick(100);
-                draw("combat-" + type + "-" + count);
+                draw("combat-" + kind.name().toLowerCase(Locale.ROOT) + "-" + count);
                 for (Actor token : bar.getDetachedList()) token.remove();
                 bar.remove();
             }
@@ -990,7 +1056,7 @@ public class PromptPreview extends ApplicationAdapter {
                             require(image.getRotation() == 0 && image.getX() >= 480f, "monster left its stance");
                             travelled = Math.max(travelled, start.dst(image.getX(), image.getY()));
                         }
-                        require(travelled > 1 && travelled < 4.1f, "unexpected stance movement (" + travelled + ")");
+                        require(travelled > 3 && travelled < 7.1f, "unexpected stance movement (" + travelled + ")");
                         draw("test-setup-combat-wander");
                     }
                 }

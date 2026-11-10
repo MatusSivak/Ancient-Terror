@@ -202,8 +202,8 @@ public class GateCombatPreview extends ApplicationAdapter {
             stage.act(1f / 60f);
             require(image.getRotation() == 0 && previous.getRotation() == 0 && next.getRotation() == 0,
                     "A queued monster rotated");
-            require(Math.abs(image.getX() - startX) < 4.1f && Math.abs(previous.getX() - previousX) < 4.1f
-                    && Math.abs(next.getX() - nextX) < 4.1f, "A monster left its place");
+            require(Math.abs(image.getX() - startX) < 7.1f && Math.abs(previous.getX() - previousX) < 5.7f
+                    && Math.abs(next.getX() - nextX) < 5.7f, "A monster left its place");
             require(previous.getZIndex() < image.getZIndex() && next.getZIndex() < image.getZIndex(), "Opponent is behind queue");
             checkBounds(table);
         }

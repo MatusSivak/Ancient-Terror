@@ -530,8 +530,6 @@ public class CustomAssetManager extends AssetManager {
     public final static String RESEARCH_SEA = "encounter/background/Research_Sea.jpg";
     public final static String RESEARCH_WILDERNESS = "encounter/background/Research_Wilderness.jpg";
 
-    public final static String HORROR = "combat/horror.png";
-    public final static String DAMAGE = "combat/damage.png";
     public final static String VERSUS = "combat/versus.png";
 
     public final static String DICE_SHEET = "dice_sheet.png";
@@ -698,6 +696,7 @@ public class CustomAssetManager extends AssetManager {
 
 
     private static CustomAssetManager instance;
+    private TextureRegionDrawable[] fireballFrames;
     private static long soundGeneration;
     private final java.util.Set<String> soundPaths = new java.util.HashSet<>();
 
@@ -971,6 +970,18 @@ public class CustomAssetManager extends AssetManager {
 
     public static TextureRegionDrawable getInvestigatorDrawable(InvestigatorId investigatorId) {
         return getTextureRegionDrawable("investigator/" + investigatorId.name() + ".png");
+    }
+
+    public static TextureRegionDrawable[] getFireballFrames() {
+        CustomAssetManager manager = get();
+        if (manager.fireballFrames == null) {
+            TextureRegionDrawable[] frames = new TextureRegionDrawable[16];
+            for (int i = 0; i < frames.length; i++) {
+                frames[i] = getTextureRegionDrawable(String.format(Locale.ENGLISH, "fireball/%03d.png", 15 - i));
+            }
+            manager.fireballFrames = frames;
+        }
+        return manager.fireballFrames;
     }
 
     public static Array<TextureRegion> getGateAnimation() {

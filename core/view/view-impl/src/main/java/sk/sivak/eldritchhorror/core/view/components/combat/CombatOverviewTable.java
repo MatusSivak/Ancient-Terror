@@ -98,9 +98,9 @@ public class CombatOverviewTable extends VisTable {
         addNameAndDivider(monsterTable, data.isMonsterEpic() ? get("combat.epic") + " \u2022 " + data.getMonsterName() : data.getMonsterName());
         // A monster without horror leaves its row empty; the row itself keeps the "vs" lines aligned.
         Integer horror = data.getHorror() != null && data.getHorror() > 0 ? data.getHorror() : null;
-        monsterTable.add(createHorrorOrDamageTable(horror, CustomAssetManager.HORROR))
+        monsterTable.add(createHorrorOrDamageTable(horror, FireballImage.Kind.HORROR))
                 .height(STATS_ROW_HEIGHT).growX().row();
-        monsterTable.add(createHorrorOrDamageTable(data.getDamage(), CustomAssetManager.DAMAGE))
+        monsterTable.add(createHorrorOrDamageTable(data.getDamage(), FireballImage.Kind.DAMAGE))
                 .height(STATS_ROW_HEIGHT).growX().row();
         // Health gets its own strip below the stats instead of covering the artwork.
         monsterTable.add(createLine(Color.valueOf("87734E99"))).height(1).growX().padTop(2).padBottom(4).row();
@@ -162,14 +162,14 @@ public class CombatOverviewTable extends VisTable {
         return statTable;
     }
 
-    private Table createHorrorOrDamageTable(Integer horrorOrDamage, String imageTexture) {
+    private Table createHorrorOrDamageTable(Integer horrorOrDamage, FireballImage.Kind kind) {
         Table horrorOrDamageTable = new Table();
         if (horrorOrDamage == null) {
             return horrorOrDamageTable;
         }
         // Mirrors the investigator row: value next to the centre "vs", followed by its glyph.
         horrorOrDamageTable.add(createLabel("" + horrorOrDamage, TEXT, 0.64f, Align.left)).width(VALUE_WIDTH);
-        horrorOrDamageTable.add(createGlyph(imageTexture)).size(ICON_SIZE).padLeft(4);
+        horrorOrDamageTable.add(new FireballImage(kind)).size(ICON_SIZE).padLeft(4);
         horrorOrDamageTable.add().growX();
         return horrorOrDamageTable;
     }

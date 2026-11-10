@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -26,21 +25,21 @@ import static sk.sivak.eldritchhorror.core.view.components.combat.TokenInFrame.A
 public class TokenInFrameBar extends HorizontalGroup {
 
     private final int count;
-    private final Texture tokenTexture;
+    private final FireballImage.Kind kind;
     private final Float tokenSize;
     private final List<TokenInFrame> tokenInFrameList = new LinkedList<>();
     private int coveredByDice;
     private List<Actor> detachedList = new LinkedList<>();
     private Map<Actor, Vector2> previousPositions = new HashMap<>();
 
-    public TokenInFrameBar(int count, Texture tokenTexture) {
-        this(count, tokenTexture, null);
+    public TokenInFrameBar(int count, FireballImage.Kind kind) {
+        this(count, kind, null);
     }
 
-    public TokenInFrameBar(int count, Texture tokenTexture, Float tokenSize) {
+    public TokenInFrameBar(int count, FireballImage.Kind kind, Float tokenSize) {
         align(Align.left);
         this.count = count;
-        this.tokenTexture = tokenTexture;
+        this.kind = kind;
         this.tokenSize = tokenSize;
         init();
     }
@@ -70,8 +69,8 @@ public class TokenInFrameBar extends HorizontalGroup {
             addActor(new Container<>().size(tokenSize == null ? ACTUAL_TOKEN_SIZE : tokenSize));
         }
         for (int i = 0; i < count; i++) {
-            TokenInFrame tokenInFrame = tokenSize == null ? new TokenInFrame(tokenTexture)
-                    : new TokenInFrame(tokenTexture, tokenSize);
+            TokenInFrame tokenInFrame = tokenSize == null ? new TokenInFrame(kind)
+                    : new TokenInFrame(kind, tokenSize);
             tokenInFrameList.add(tokenInFrame);
             addActor(tokenInFrame);
         }
@@ -178,7 +177,7 @@ public class TokenInFrameBar extends HorizontalGroup {
         Image image = tokenInFrameList.get(i).getImage();
         image.setVisible(false);
         Vector2 position = image.localToStageCoordinates(new Vector2());
-        Image duplicate = new Image(image.getDrawable());
+        Image duplicate = new FireballImage(kind);
         duplicate.setWidth(image.getWidth());
         duplicate.setHeight(image.getHeight());
         duplicate.setScaling(Scaling.fit);

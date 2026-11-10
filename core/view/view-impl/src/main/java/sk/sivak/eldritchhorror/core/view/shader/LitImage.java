@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.shader;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -9,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-/** A background picture lit per pixel by the active {@link SceneLight}s. Without lights it draws as a plain image. */
+/** Artwork lit per pixel by the active {@link SceneLight}s. Without lights it draws as a plain image. */
 public class LitImage extends Image {
 
     private static final int MAX_LIGHTS = 8;
@@ -65,6 +66,10 @@ public class LitImage extends Image {
 
     public LitImage(TextureRegion region) {
         super(region);
+    }
+
+    public LitImage(Texture texture) {
+        super(texture);
     }
 
     private static ShaderProgram getShader() {

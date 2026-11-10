@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.sheet.monster;
 
+import sk.sivak.eldritchhorror.core.view.components.combat.FireballImage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -86,11 +87,11 @@ public class MonsterCard extends VisTable {
         float testWidth = (CONTENT_WIDTH - 220 - 10) / 2;
         if (monsterInfo.getHorror() != null) {
             tests.add(createTestTable("Horror", monsterInfo.getHorrorTestType(), monsterInfo.getHorrorTestModifier(),
-                    monsterInfo.getHorror(), getTexture(HORROR), BLUE)).width(testWidth).height(162);
+                    monsterInfo.getHorror(), FireballImage.Kind.HORROR, BLUE)).width(testWidth).height(162);
         }
         if (monsterInfo.getDamage() != null) {
             tests.add(createTestTable("Damage", monsterInfo.getDamageTestType(), monsterInfo.getDamageTestModifier(),
-                    monsterInfo.getDamage(), getTexture(DAMAGE), RED)).width(testWidth).height(162)
+                    monsterInfo.getDamage(), FireballImage.Kind.DAMAGE, RED)).width(testWidth).height(162)
                     .padLeft(monsterInfo.getHorror() == null ? 0 : 10);
         }
         stats.add(tests).growX();
@@ -195,7 +196,7 @@ public class MonsterCard extends VisTable {
     }
 
     public static Table createTestTable(String checkName, Stat testType, int testModifier,
-                                        Integer rating, Texture imageTexture, Color titleColor) {
+                                        Integer rating, FireballImage.Kind kind, Color titleColor) {
         Table table = new Table();
         table.setBackground(new PanelDrawable());
         table.pad(8);
@@ -208,7 +209,7 @@ public class MonsterCard extends VisTable {
             attributeGlyph.setScaling(Scaling.fit);
             table.add(attributeGlyph).uniformX().growX().height(46).padTop(4).padBottom(4);
         }
-        Image icon = new Image(imageTexture);
+        Image icon = new FireballImage(kind);
         icon.setScaling(Scaling.fit);
         table.add(icon).uniformX().growX().height(46).row();
         String modifierText = testType == null ? "—" : (testModifier > 0 ? "+" : "") + testModifier;

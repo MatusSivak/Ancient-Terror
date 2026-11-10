@@ -41,7 +41,7 @@ import static sk.sivak.eldritchhorror.core.view.utils.RectangleUtils.randomPoint
 public class BackgroundUtils {
     private static final Object FADING_OUT = new Object();
 
-    private static final float COMBAT_BRIGHTNESS = 0.66f;
+    private static final float COMBAT_BRIGHTNESS = 0.58f;
 
     private Stage backgroundStage;
     private final GameController gameController;

@@ -22,7 +22,6 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import java8.features.function.Consumer;
 import java8.features.function.Function;
 import rx.Completable;
-import rx.CompletableSubscriber;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscription;
@@ -42,7 +41,6 @@ import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.typewriter.CardResolutionArtwork;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatOverviewTable;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
-import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceImage;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRoller;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRollerStack;
 import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
@@ -66,7 +64,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.addAction;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static java8.features.stream.Stream.collectToList;
 import static java8.features.stream.Stream.map;
@@ -85,10 +82,6 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
  * @author msivak
  */
 public class TestViewImpl implements TestView {
-
-    private static final float RESULT_DISPLAY_DURATION = 0.0f;
-    /** Result table sits in the bottom strip formerly used by the OK button; dice line up right above it. */
-    private static final float RESULT_TABLE_Y = 5f;
 
     /* Test-setup layout keeps clear of the HUD: side menu + clock on the left, menu/fast-forward on the right. */
     static final float SAFE_LEFT = 150f;
@@ -257,16 +250,10 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable confirmTestResult(boolean scoreImportant, boolean successful, int score) {
-        return restoreCombatAfterTest().andThen(Completable.create(onSub -> {
-            if (scoreImportant) {
-                confirmScoreTestResult(score);
-            } else {
-                confirmBinaryTestResult(successful);
-            }
-            // Zero-success combat skips the hit animation, so cleanup can start immediately.
-            // Finish positioning first to prevent that movement fighting the hide animation.
-            diceRollerStack.peek().moveUp(testTableStack.peek().getTop() + 5)
-                    .subscribe(() -> autoConfirm(onSub), onSub::onError);
+        return restoreCombatAfterTest().andThen(Completable.fromAction(() -> {
+            VisTable result = scoreImportant ? createScoreTable(score)
+                    : (successful ? createPassedTable() : createFailedTable());
+            finishResult(result, hideDicesAfterConfirm);
         }));
     }
 
@@ -285,27 +272,10 @@ public class TestViewImpl implements TestView {
 
     @Override
     public Completable confirmRollResult(int score) {
-        return Completable.create(onSub -> {
-            hideDicesAfterConfirm = true;
-            if (score == 0) {
-                testTableStack.push(createFailedTable());
-            } else if (score == 1) {
-                testTableStack.push(createNotSuccessfulTable());
-            } else {
-                testTableStack.push(createSuccessfulTable());
-            }
-
-            testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2,
-                    InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.01f);
-            InfoStage.showActor(testTableStack.peek());
-            DiceRoller roller = diceRollerStack.isEmpty() ? null : diceRollerStack.peek();
-            float resultTop = testTableStack.peek().getTop() + 5;
-            // Nun's bonus leaves the die at the screen bottom; lift it above the result instead of covering it.
-            if (roller != null && roller.getBottom() < resultTop) {
-                roller.moveUp(resultTop).subscribe(() -> autoConfirm(onSub), onSub::onError);
-            } else {
-                autoConfirm(onSub);
-            }
+        return Completable.fromAction(() -> {
+            VisTable result = score == 0 ? createFailedTable()
+                    : (score == 1 ? createNotSuccessfulTable() : createSuccessfulTable());
+            finishResult(result, true);
         });
     }
 
@@ -355,39 +325,18 @@ public class TestViewImpl implements TestView {
         });
     }
 
-    private void confirmBinaryTestResult(boolean successful) {
-        if (successful) {
-            testTableStack.push(createPassedTable());
-        } else {
-            testTableStack.push(createFailedTable());
+    private void finishResult(VisTable result, boolean dismissDice) {
+        // Keep the result actor's add/hide notifications, including combat's later dismissal.
+        result.setVisible(false);
+        testTableStack.push(result);
+        InfoStage.addSmallActorToInfoStage(result);
+        if (dismissDice) {
+            diceRollerStack.pop().hideDices();
+            InfoStage.hideActor(testTableStack.pop());
+            MapStage.brightenWorld();
+            CardResolutionArtwork.releaseAfterDiceCheck();
         }
-
-        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2, RESULT_TABLE_Y);
-        InfoStage.showActor(testTableStack.peek());
-    }
-
-    private void confirmScoreTestResult(int score) {
-        testTableStack.push(createScoreTable(score));
-        testTableStack.peek().setPosition(VIEWPORT_WIDTH / 2 - testTableStack.peek().getWidth() / 2, RESULT_TABLE_Y);
-        InfoStage.showActor(testTableStack.peek());
-
-    }
-
-    private void autoConfirm(CompletableSubscriber onSub) {
-        // No OK button: keep the result readable for a moment, then continue as if it was pressed.
-        InfoStage.addActionToInfoStage(Actions.sequence(
-                new FastForwardAction<>(Actions.delay(RESULT_DISPLAY_DURATION)),
-                Actions.run(() -> {
-                    if (hideDicesAfterConfirm) {
-                        diceRollerStack.pop().hideDices();
-                        InfoStage.hideActor(testTableStack.pop());
-                        InfoStage.setBottomHeight(5);
-                        MapStage.brightenWorld();
-                        CardResolutionArtwork.releaseAfterDiceCheck();
-                    }
-                    InfoStage.setBottomHeight(5);
-                    onSub.onCompleted();
-                })));
+        InfoStage.setBottomHeight(5);
     }
 
     @Override
@@ -599,7 +548,6 @@ public class TestViewImpl implements TestView {
                 diceRollerStack.peek().createShotFlasher()), () -> {
             if (monsterCombatTableStack.peek().getRemainingDamage() > 0) {
                 diceRollerStack.peek().hideDiceDontRemove();
-                testTableStack.peek().addAction(new FastForwardAction<>(Actions.alpha(0, 1f)));
             }
         });
     }
@@ -611,28 +559,6 @@ public class TestViewImpl implements TestView {
             successes += die.getScore().getValue();
         }
         return successes;
-    }
-
-    /**
-     * Only the successful dice stay for the shooting, small and tucked beside the investigator HUD,
-     * next to the result plate rather than over the map and the fighting stand.
-     */
-    private Completable keepOnlyShootingDice() {
-        DiceRoller roller = diceRollerStack.peek();
-        float rowWidth = DiceRoller.compactRowWidth(roller.countShootingDice());
-        float rowHeight = DiceImage.ACTUAL_DICE_SIZE * DiceRoller.COMPACT_SCALE;
-        float left = InfoStage.getInvestigatorHud().getPrefWidth() + 12f;
-        float centerY = RESULT_TABLE_Y + rowHeight / 2f + 6f;
-        if (!testTableStack.isEmpty()) {
-            Actor result = testTableStack.peek();
-            centerY = result.getY() + result.getHeight() / 2f;
-            if (left + rowWidth > result.getX() - 12f) {
-                // Too many to fit beside the plate: line them up just above it instead.
-                left = VIEWPORT_WIDTH / 2f - rowWidth / 2f;
-                centerY = result.getTop() + rowHeight / 2f + 6f;
-            }
-        }
-        return roller.keepOnlySuccesses(left, centerY);
     }
 
     private Vector2 investigatorShotOrigin(boolean sanity) {
@@ -651,7 +577,6 @@ public class TestViewImpl implements TestView {
         }
 
         return diceRollerStack.peek().waitUntilSettled()
-                .andThen(Completable.defer(this::keepOnlyShootingDice))
                 .andThen(Completable.defer(() -> destroyFunction.apply(successes)))
                 .concatWith(Completable.create(onSub -> {
                     onEndAction.call();
@@ -782,13 +707,11 @@ public class TestViewImpl implements TestView {
                     }
                     Completable completable;
                     if (monsterCombatTableStack.peek().getRemainingDamage() > 0) {
-                        testTableStack.peek().addAction(new FastForwardAction<>(Actions.alpha(1, 1f)));
                         completable = diceRollerStack.peek().showHiddenDice();
                     } else {
                         completable = Completable.complete();
                     }
-                    completable.andThen(diceRollerStack.peek().waitUntilSettled())
-                            .andThen(Completable.defer(TestViewImpl.this::keepOnlyShootingDice)).subscribe(() -> {
+                    completable.andThen(diceRollerStack.peek().waitUntilSettled()).subscribe(() -> {
                         monsterCombatTableStack.peek().destroyMonsterHealth(successes, investigatorShotOrigin(false),
                                 diceRollerStack.peek().createShotFlasher()).concatWith(Completable.create(onSub -> {
                             diceRollerStack.pop().hideDices();

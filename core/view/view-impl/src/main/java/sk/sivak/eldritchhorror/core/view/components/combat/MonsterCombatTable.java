@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.view.components.combat;
 
+import sk.sivak.eldritchhorror.core.view.shader.LitImage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
@@ -67,6 +68,7 @@ public class MonsterCombatTable extends VisTable {
     private static final float SAFE_TOP = 532f;
     private static final float FIGHTER_X_OFFSET = 30f;
     private static final float FIGHTER_FLOOR_Y = 34f;
+    private static final Color MONSTER_TINT = new Color(0.78f, 0.78f, 0.78f, 1f);
     private static final float IMAGE_SIZE = 200f;
     /** Epic monsters loom larger and throw bigger fireballs. */
     private static final float EPIC_IMAGE_SIZE = 260f;
@@ -190,13 +192,14 @@ public class MonsterCombatTable extends VisTable {
         if (monsters.isEmpty()) {
             return;
         }
+        outsideX = MathUtils.lerp(fighterCenterX, outsideX, 0.88f);
         float room = Math.abs(outsideX - fighterCenterX);
-        float firstGap = Math.min(imageSize * 0.5f + 22f, room / (1f + 0.55f * (monsters.size() - 1)));
+        float firstGap = Math.min(imageSize * 0.5f + 8f, room / (1f + 0.55f * (monsters.size() - 1)));
         float firstX = fighterCenterX + Math.copySign(firstGap, outsideX - fighterCenterX);
         for (int i = monsters.size() - 1; i >= 0; i--) {
             float slot = monsters.size() == 1 ? 0f : (float) i / (monsters.size() - 1);
             backgroundMonsters.add(new BackgroundMonster(monsters.get(i),
-                    MathUtils.lerp(firstX, outsideX, slot), 66f + 12f * slot));
+                    MathUtils.lerp(firstX, outsideX, slot), 62f + 10f * slot));
         }
     }
 
@@ -252,7 +255,7 @@ public class MonsterCombatTable extends VisTable {
         if (!holdStill) {
             stanceTime += delta;
         }
-        float footX = fighterCenterX + 2f * MathUtils.sin(stanceTime);
+        float footX = fighterCenterX + 3.5f * MathUtils.sin(stanceTime);
         float shake = 0f;
         float kick = 0f;
         if (hitShake > 0f) {
@@ -344,7 +347,7 @@ public class MonsterCombatTable extends VisTable {
         hitShake = 0.3f;
         monsterImage.clearActions();
         monsterImage.setColor(1f, 0.30f, 0.20f, 1f);
-        monsterImage.addAction(new FastForwardAction<>(Actions.color(Color.WHITE, 0.32f)));
+        monsterImage.addAction(new FastForwardAction<>(Actions.color(MONSTER_TINT, 0.32f)));
         HitBloodSplatter.spray(getStage().getRoot(), impact, recoilDirection, data.isMonsterEpic() ? 1.35f : 1f);
         BurstLight burst = new BurstLight(new Color(1f, 0.55f, 0.21f, 1f),
                 data.isMonsterEpic() ? 138f : 104f);
@@ -395,7 +398,7 @@ public class MonsterCombatTable extends VisTable {
         Texture texture = data.isMonsterEpic()
                 ? CustomAssetManager.getEpicMonsterTexture(data.getMonsterClassName())
                 : CustomAssetManager.getNonEpicMonsterTexture(data.getMonsterClassName());
-        Image image = new Image(texture) {
+        Image image = new LitImage(texture) {
             /** Only the drawn artwork is tappable, not the empty margin the fit scaling leaves around it. */
             @Override
             public Actor hit(float x, float y, boolean touchable) {
@@ -407,6 +410,7 @@ public class MonsterCombatTable extends VisTable {
             }
         };
         image.setScaling(Scaling.fit);
+        image.setColor(MONSTER_TINT);
         image.setSize(imageSize, imageSize);
         image.setOrigin(Align.center);
         return image;
@@ -661,8 +665,8 @@ public class MonsterCombatTable extends VisTable {
 
     /** Name on top, horror and damage side by side, health below. */
     private Table createStatusPlate(MonsterCombatTableData data) {
-        horrorBar = createCombatBar(data.getHorror(), "combat/horror.png");
-        damageBar = createCombatBar(data.getDamage(), "combat/damage.png");
+        horrorBar = createCombatBar(data.getHorror(), FireballImage.Kind.HORROR);
+        damageBar = createCombatBar(data.getDamage(), FireballImage.Kind.DAMAGE);
 
         int toughness = data.getToughness() == null ? 0 : data.getToughness();
         toughnessBarScale = Math.min(0.52f, 200f / (42.3f * Math.max(1, toughness)));
@@ -706,17 +710,17 @@ public class MonsterCombatTable extends VisTable {
         return label;
     }
 
-    private TokenInFrameBar createCombatBar(Integer amount, String texture) {
+    private TokenInFrameBar createCombatBar(Integer amount, FireballImage.Kind kind) {
         int count = amount == null ? 0 : amount;
         float slot = Math.min(TOKEN_SLOT, SECTION_MAX_WIDTH / Math.max(1, count));
-        TokenInFrameBar bar = new TokenInFrameBar(count, CustomAssetManager.getTexture(texture), slot * 0.9f);
+        TokenInFrameBar bar = new TokenInFrameBar(count, kind, slot * 0.9f);
         bar.space(slot * 0.1f);
         if (count == 0) {
             Label zero = new Label("0", new Label.LabelStyle(
                     getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40), Color.valueOf("9AA9A3")));
             zero.setFontScale(0.26f);
             // Without row labels, a faded token keeps an empty section recognisable.
-            Image ghost = new Image(CustomAssetManager.getTexture(texture));
+            Image ghost = new FireballImage(kind);
             ghost.setScaling(Scaling.fit);
             ghost.getColor().a = 0.3f;
             Table empty = new Table();
@@ -763,7 +767,7 @@ public class MonsterCombatTable extends VisTable {
             data.setDamage(damage);
             damageBar.hideTokens(damage).subscribe(() -> {
                 damageBar.remove();
-                damageBar = createCombatBar(data.getDamage(), "combat/damage.png");
+                damageBar = createCombatBar(data.getDamage(), FireballImage.Kind.DAMAGE);
                 damageBarCell.setActor(damageBar);
                 statusPlate.pack();
                 onSub.onCompleted();
@@ -779,7 +783,7 @@ public class MonsterCombatTable extends VisTable {
             data.setHorror(horror);
             horrorBar.hideTokens(horror).subscribe(() -> {
                 horrorBar.remove();
-                horrorBar = createCombatBar(data.getHorror(), "combat/horror.png");
+                horrorBar = createCombatBar(data.getHorror(), FireballImage.Kind.HORROR);
                 horrorBarCell.setActor(horrorBar);
                 updateHorrorRowVisibility();
                 statusPlate.pack();

@@ -2,37 +2,23 @@ package sk.sivak.eldritchhorror.core.view.components.combat;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
-import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.shader.SceneLight;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
-public class Fireball extends Image {
+public class Fireball extends FireballImage {
 
-    private final FireballAnimation fireballAnimation;
-    private float stateTime;
-    private TextureRegionDrawable keyFrame;
     private List<Runnable> onLandActions = new LinkedList<>();
     private FireballSmokeBuilder.FireballSmoke fireballSmoke;
 
@@ -40,9 +26,7 @@ public class Fireball extends Image {
 
     private Group smokeGroup;
     private float midpointDisplacementDirection;
-    private boolean blue;
     private float sizeMultiplier = 1f;
-    private static ShaderProgram blueShader;
     private static final Color FIRE_LIGHT = new Color(1f, 0.5f, 0.16f, 1f);
     private static final Color HORROR_LIGHT = new Color(0.28f, 0.5f, 1f, 1f);
     private static final float LIGHT_RADIUS = 300f;
@@ -50,16 +34,9 @@ public class Fireball extends Image {
     private final Vector2 lightPosition = new Vector2();
 
     public Fireball() {
-        List<TextureRegionDrawable> frames = new LinkedList<>();
-        for (int i = 15; i >= 0; i--) {
-            Texture texture = CustomAssetManager.getTexture("fireball/" +
-                    String.format(Locale.ENGLISH, "%03d", i) + ".png");
-            frames.add(new TextureRegionDrawable(new TextureRegion(texture)));
-        }
-        fireballAnimation = new FireballAnimation(frames.toArray(new TextureRegionDrawable[0]));
+        super(Kind.DAMAGE);
         setSize(256, 256);
         setOrigin(Align.center);
-        setScaling(Scaling.fit);
     }
 
     public void setSmokeGroup(Group smokeGroup) {
@@ -74,23 +51,9 @@ public class Fireball extends Image {
         onLandActions.add(onLandAction);
     }
 
-    private static class FireballAnimation extends Animation<TextureRegionDrawable> {
-
-        private FireballAnimation(TextureRegionDrawable... keyFrames) {
-            super(1/(float)MathUtils.random(24,30), keyFrames);
-            setPlayMode(PlayMode.LOOP);
-        }
-    }
-
     @Override
     public void act(float delta) {
         super.act(delta);
-        stateTime += delta;
-        TextureRegionDrawable keyFrame = fireballAnimation.getKeyFrame(stateTime);
-        if (keyFrame != this.keyFrame) {
-            this.keyFrame = keyFrame;
-            setDrawable(keyFrame);
-        }
         if (fireballSmoke != null) {
             fireballSmoke.moveTo(getX() + getWidth()/2f, getY() + getHeight()/2f);
         }
@@ -129,55 +92,13 @@ public class Fireball extends Image {
         this.sizeMultiplier = sizeMultiplier;
     }
 
-    /** Swaps the red and blue channels of the orange flame art, turning it into a cold blue fire. */
-    private static ShaderProgram getBlueShader() {
-        if (blueShader == null) {
-            String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n"
-                    + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n"
-                    + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
-                    + "uniform mat4 u_projTrans;\n"
-                    + "varying vec4 v_color;\n"
-                    + "varying vec2 v_texCoords;\n"
-                    + "void main() {\n"
-                    + "  v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n"
-                    + "  v_color.a = v_color.a * (255.0/254.0);\n"
-                    + "  v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
-                    + "  gl_Position = u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n"
-                    + "}\n";
-            String fragment = "#ifdef GL_ES\nprecision mediump float;\n#endif\n"
-                    + "varying vec4 v_color;\n"
-                    + "varying vec2 v_texCoords;\n"
-                    + "uniform sampler2D u_texture;\n"
-                    + "void main() {\n"
-                    + "  vec4 c = texture2D(u_texture, v_texCoords);\n"
-                    + "  gl_FragColor = v_color * vec4(c.b, c.g * 0.85 + c.r * 0.1, c.r, c.a);\n"
-                    + "}\n";
-            blueShader = new ShaderProgram(vertex, fragment);
-            if (!blueShader.isCompiled()) {
-                Gdx.app.error("Fireball", "Blue fireball shader failed: " + blueShader.getLog());
-            }
-        }
-        return blueShader;
-    }
-
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        if (!blue || !getBlueShader().isCompiled()) {
-            super.draw(batch, parentAlpha);
-            return;
-        }
-        ShaderProgram previous = batch.getShader();
-        batch.setShader(blueShader);
-        super.draw(batch, parentAlpha);
-        batch.setShader(previous);
-    }
-
     public void setMidpointDisplacementDirection(float direction) {
         this.midpointDisplacementDirection = direction;
     }
 
     void throwIt(Vector2 origin, Vector2 destination, boolean intercepted) {
 
+        Vector2 start = new Vector2(origin);
         Vector2 aim = new Vector2(destination);
         fireballSmoke = FireballSmokeBuilder.get();
         smokeGroup.addActor(fireballSmoke);
@@ -194,11 +115,33 @@ public class Fireball extends Image {
 
         float scale = MathUtils.random(0.4f, 0.6f) * sizeMultiplier;
         setColor(Color.DARK_GRAY);
-        float midpointDisplacement = midpointDisplacementDirection * tangent.len() / 10;//MathUtils.random(-tangent.len() / 10, tangent.len() / 10);
-        TweenMoveToAction tweenMoveToAction = new TweenMoveToAction(
-                duration, travelFraction,
-                new Vector2(origin.x - getWidth()/2f, origin.y - getHeight()/2f),
-                new Vector2(destination.x - getWidth()/2f, destination.y - getHeight()/2f), midpointDisplacement);
+        Vector2 bend = new Vector2(tangent.y, -tangent.x).scl(midpointDisplacementDirection / 10f);
+        float flightTime = intercepted ? Math.max(duration * travelFraction, BulletTracer.FLIGHT) : duration;
+        TemporalAction flight = new TemporalAction(flightTime) {
+            private boolean fired;
+
+            @Override
+            protected void update(float progress) {
+                float distance = Interpolation.sine.apply(progress * travelFraction);
+                float curve = MathUtils.sin(MathUtils.PI * distance);
+                setPosition(start.x + tangent.x * distance + bend.x * curve,
+                        start.y + tangent.y * distance + bend.y * curve, Align.center);
+                if (intercepted && !fired) {
+                    float shotAge = BulletTracer.FLIGHT - (1f - progress) * flightTime;
+                    if (shotAge >= 0f) {
+                        // At the midpoint the curve is at its full displacement.
+                        Vector2 impact = new Vector2(start).mulAdd(tangent, 0.5f).add(bend);
+                        BulletTracer.fire(getParent(), aim, impact, shotAge);
+                        fired = true;
+                    }
+                }
+            }
+
+            @Override
+            protected void end() {
+                land(aim, intercepted);
+            }
+        };
         SequenceAction color = Actions.sequence(Actions.color(Color.WHITE, duration / 2f));
         SequenceAction size = Actions.sequence(Actions.scaleTo(scale, scale, duration / 2f, Interpolation.sineOut));
         if (!intercepted) {
@@ -206,76 +149,29 @@ public class Fireball extends Image {
             size.addAction(Actions.scaleTo(scale * 0.1f, scale * 0.1f, duration / 2f, Interpolation.sineIn));
         }
         addAction(new FastForwardAction<>(Actions.sequence(
-                Actions.parallel(color, size, tweenMoveToAction,
-                        Actions.rotateTo(MathUtils.random(-360, 360) * travelFraction, duration * travelFraction)
-                ),
-                Actions.run(() -> {
-                    if (intercepted) BulletTracer.fire(getParent(), aim, new Vector2(getX(Align.center), getY(Align.center)));
-                }),
-                // An intercepted fireball blows up only once the tracer round reaches it.
-                Actions.delay(intercepted ? BulletTracer.FLIGHT : 0f),
-                Actions.run(() -> {
-                    Vector2 impact = new Vector2(getX(Align.center), getY(Align.center));
-                    Color burstColor = blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f, 1f);
-                    if (intercepted) {
-                        setVisible(false);
-                        FireballShatter.burst(getParent(), impact, new Vector2(impact).sub(aim).nor(), burstColor, sizeMultiplier);
-                    }
-                    CombatSounds.playFireballImpact();
-                    if (!intercepted && !Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
-                        sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.runInBackground(() -> Gdx.input.vibrate(50));
-                    }
-                    fireballSmoke.getParticleEffect().allowCompletion();
-                    explosion.start(new Explosion.ExplosionConfig(impact, burstColor));
-                    SceneLight.flash(getParent(), impact, blue ? HORROR_LIGHT : FIRE_LIGHT,
-                            LIGHT_RADIUS * 1.4f * sizeMultiplier, 1.6f, 0.08f, 0f, 0.5f);
-                    for (Runnable onLandAction : onLandActions) {
-                        onLandAction.run();
-                    }
-                }),
+                Actions.parallel(color, size, flight,
+                        Actions.rotateTo(MathUtils.random(-360, 360) * travelFraction, flightTime)),
                 Actions.removeActor()
         )));
     }
 
-    private static class TweenMoveToAction extends TemporalAction {
-
-        private final Vector2 origin;
-        private final Vector2 destination;
-        private final float travelFraction;
-        private final float midpointDisplacement;
-
-        private Vector2 tangent;
-        private Vector2 nor;
-
-        public TweenMoveToAction(float duration, float travelFraction,
-                                 Vector2 origin, Vector2 destination,
-                                 float midpointDisplacement) {
-            super(duration * travelFraction);
-            this.travelFraction = travelFraction;
-            this.origin = origin;
-            this.destination = destination;
-            this.midpointDisplacement = midpointDisplacement;
+    private void land(Vector2 aim, boolean intercepted) {
+        Vector2 impact = new Vector2(getX(Align.center), getY(Align.center));
+        Color burstColor = blue ? new Color(0.25f, 0.55f, 1f, 1f) : new Color(1f, 0.3f, 0.12f, 1f);
+        if (intercepted) {
+            setVisible(false);
+            FireballShatter.burst(getParent(), impact, new Vector2(impact).sub(aim).nor(), burstColor, sizeMultiplier);
         }
-
-        @Override
-        protected void update(float progress) {
-            float value = Interpolation.sine.apply(progress * travelFraction);
-            float sin = MathUtils.sin((float) (Math.PI * value));
-
-            float middlePointX = origin.x + tangent.x * value;
-            float middlePointY = origin.y + tangent.y * value;
-
-            float middlePointDisplacementX = middlePointX + nor.x * midpointDisplacement*sin;
-            float middlePointDisplacementY = middlePointY + nor.y * midpointDisplacement*sin;
-
-            getActor().setPosition(middlePointDisplacementX, middlePointDisplacementY);
+        CombatSounds.playFireballImpact();
+        if (!intercepted && !Gdx.app.getPreferences("AncientTerror.xml").getBoolean("vibration_disabled", false)) {
+            sk.sivak.eldritchhorror.core.view.utils.SoundPlayer.runInBackground(() -> Gdx.input.vibrate(50));
         }
-
-        @Override
-        protected void begin() {
-            super.begin();
-            tangent = new Vector2(destination).sub(origin);
-            nor = new Vector2(tangent.y, -tangent.x).nor();
+        fireballSmoke.getParticleEffect().allowCompletion();
+        explosion.start(new Explosion.ExplosionConfig(impact, burstColor));
+        SceneLight.flash(getParent(), impact, blue ? HORROR_LIGHT : FIRE_LIGHT,
+                LIGHT_RADIUS * 1.4f * sizeMultiplier, 1.6f, 0.08f, 0f, 0.5f);
+        for (Runnable onLandAction : onLandActions) {
+            onLandAction.run();
         }
     }
 }
