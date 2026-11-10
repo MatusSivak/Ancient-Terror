@@ -16,6 +16,7 @@ public class SelectNewOmenAction implements Action<Object, OmenInfo> {
             ServicePlatform.get().getDoomOmenController().selectNewOmen().subscribe(omenId -> {
                 ServicePlatform.get().getOmenTrack().setCurrentOmen(omenId);
                 OmenInfo omenInfo = ServicePlatform.get().getOmenTrack().getOmenInfo(omenId);
+                MythosBackground.updateIfVisible(omenInfo.getOmenColor());
                 ServicePlatform.get().getDoomOmenController().updateNoiseColorAndGatesTransparency(omenInfo.getOmenColor());
                 onSub.onSuccess(omenInfo);
             });

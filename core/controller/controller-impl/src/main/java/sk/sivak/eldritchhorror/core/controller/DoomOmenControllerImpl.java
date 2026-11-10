@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.controller;
 
-import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import rx.Completable;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
@@ -16,11 +15,6 @@ public class DoomOmenControllerImpl implements DoomOmenController {
 
     private DoomOmenView doomOmenView;
     private GameView gameView;
-
-    @Override
-    public void setGateDoomPulse(LocationId location, boolean enabled) {
-        doomOmenView.setGateDoomPulse(location, enabled);
-    }
 
     public void setView(DoomOmenView doomOmenView) {
         this.doomOmenView = doomOmenView;
@@ -60,7 +54,7 @@ public class DoomOmenControllerImpl implements DoomOmenController {
 
     @Override
     public void updateNoiseColorAndGatesTransparency(OmenColor omenColor) {
-        gameView.updateNoiseColor(omenColor);
+        gameView.updateOmenTint(omenColor);
         gameView.updateGatesTransparency(omenColor);
     }
 

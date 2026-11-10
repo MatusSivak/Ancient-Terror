@@ -235,7 +235,7 @@ public interface GameView {
 
     void swapInvestigatorAndGateLayer();
 
-    void updateNoiseColor(OmenColor omenColor);
+    void updateOmenTint(OmenColor omenColor);
 
     void updateNoiseIntensity(int doom);
 

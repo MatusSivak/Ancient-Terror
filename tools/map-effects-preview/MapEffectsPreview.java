@@ -24,6 +24,8 @@ import sk.sivak.eldritchhorror.core.view.map.helper.*;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.monster.MonsterImage;
 import sk.sivak.eldritchhorror.core.view.map.monster.EpicMonsterImage;
+import sk.sivak.eldritchhorror.core.view.shader.LitImage;
+import sk.sivak.eldritchhorror.core.view.shader.SceneLight;
 import sk.sivak.eldritchhorror.core.view.utils.*;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.MAP_WIDTH;
 import static sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager.*;
@@ -52,9 +54,9 @@ public class MapEffectsPreview extends ApplicationAdapter {
             Gdx.audio = (Audio) Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class[]{Audio.class}, (p,m,a) -> silent);
             VisUI.load(); InfoStage.getStageSafe(); MapStage.resize(960, 540); stage = MapStage.getStage();
             for (int i = -1; i <= 1; i++) {
-                Image map = new Image(getTexture(MAP)); map.setX(i * MAP_WIDTH); MapStage.getMapLayer().addActor(map);
+                Image map = new SingleMap(getTexture(MAP)); map.setX(i * MAP_WIDTH); MapStage.getMapLayer().addActor(map);
             }
-            checkLabels(); checkOmen(); startSpawn();
+            checkLabels(); checkGateLighting(); checkOmen(); startSpawn();
         } catch (Throwable error) { fail(error); }
     }
 
@@ -93,15 +95,84 @@ public class MapEffectsPreview extends ApplicationAdapter {
         MapStage.clearIdActorMap();
     }
 
+    private void checkGateLighting() {
+        // Center the camera on the seam and sample only the map, separately from the gate artwork.
+        camera(MAP_WIDTH, 800);
+        Pixmap base = readMap();
+        int[] channels = new int[3];
+        GateColor[] colors = {GateColor.RED, GateColor.GREEN, GateColor.BLUE};
+        for (int i = 0; i < colors.length; i++) {
+            NewGateAnimatedImage gate = new NewGateAnimatedImage(colors[i], OmenColor.GREEN);
+            gate.setBounds(MAP_WIDTH - 67.5f, 800 - 67.5f, 135, 135);
+            MapStage.getGateLayer().addActor(gate);
+            Pixmap lit = readMap();
+            int shift = 24 - i * 8;
+            for (int x : new int[]{420, 540}) {
+                int before = base.getPixel(x, 270) >>> shift & 255;
+                int after = lit.getPixel(x, 270) >>> shift & 255;
+                require(after > before + 4, colors[i] + " gate failed to light map at " + x);
+            }
+            channels[i] = lit.getPixel(540, 270);
+            require(lit.getPixel(920, 270) == base.getPixel(920, 270), "Gate lit distant terrain");
+            lit.dispose();
+            gate.remove();
+        }
+        for (int i = 0; i < colors.length; i++) {
+            int shift = 24 - i * 8;
+            require((channels[i] >>> shift & 255) > (channels[(i + 1) % 3] >>> shift & 255),
+                    "Gate light lost its " + colors[i] + " tint");
+        }
+        Pixmap cleared = readMap();
+        require(cleared.getPixel(540, 270) == base.getPixel(540, 270), "Removed gate left a light");
+        cleared.dispose();
+        base.dispose();
+
+        // Compare the same terrain pixel under an equivalent fireball-style point light.
+        LitImage backdrop = new LitImage(getTexture(MAP));
+        backdrop.setX(MAP_WIDTH);
+        MapStage.getMapLayer().addActor(backdrop);
+        SceneLight point = SceneLight.add(stage, NewGateAnimatedImage.toLibgdxColor(GateColor.BLUE), 135 * 1.45f)
+                .setPosition(MAP_WIDTH, 800).setIntensity(.42f);
+        Pixmap reference = readMap();
+        int expected = reference.getPixel(540, 270);
+        for (int shift : new int[]{8, 16, 24}) {
+            require(Math.abs((expected >>> shift & 255) - (channels[2] >>> shift & 255)) <= 2,
+                    "Gate and fireball lighting differ on the same terrain");
+        }
+        reference.dispose();
+        point.remove();
+        backdrop.remove();
+    }
+
+    private Pixmap readMap() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
+        stage.getBatch().begin();
+        MapStage.getMapLayer().draw(stage.getBatch(), 1f);
+        stage.getBatch().end();
+        return ScreenUtils.getFrameBufferPixmap(0, 0, 960, 540);
+    }
+
     private void checkOmen() throws Exception {
         Vector2 location = LocationPositionResolver.resolve(LocationId.ARKHAM); camera(location.x, location.y);
         NewGateAnimatedImage gate = new NewGateAnimatedImage(GateColor.BLUE, OmenColor.GREEN);
         gate.setBounds(location.x - 67.5f, location.y - 67.5f, 135, 135); MapStage.getGateLayer().addActor(gate);
         for (OmenColor omen : new OmenColor[]{OmenColor.BLUE, OmenColor.BLUE, null, OmenColor.GREEN, OmenColor.BLUE}) {
-            gate.updateGateTransparency(omen);
+            Actor previousHalo = gate.findActor("matching-omen-halo");
+            gate.updateOmen(omen);
             for (int i = 0; i < 36; i++) stage.act(1f/60);
-            require(gate.findActor("matching-omen-halo") == null && gate.getChildren().size == 2,
-                    "Omen update added a matching halo");
+            Actor halo = gate.findActor("matching-omen-halo");
+            if (omen == OmenColor.BLUE) {
+                require(halo != null && gate.getChildren().size == 3, "Matching gate needs one pulse");
+                require(previousHalo == null || previousHalo == halo, "Same omen restarted the pulse");
+                for (int i = 0; i < 180; i++) stage.act(1f/60);
+                float scale = halo.getScaleX();
+                for (int i = 0; i < 20; i++) stage.act(1f/60);
+                require(scale != halo.getScaleX(), "Matching gate stopped pulsing");
+            } else {
+                require(halo == null && gate.getChildren().size == 2, "Nonmatching gate still pulsing");
+            }
         }
         draw("omen-match"); gate.remove();
     }

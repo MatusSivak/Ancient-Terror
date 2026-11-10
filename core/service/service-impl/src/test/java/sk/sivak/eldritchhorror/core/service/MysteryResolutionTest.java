@@ -11,6 +11,7 @@ import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.action.impl.doomomen.ResolveCurrentMysteryAction;
 import sk.sivak.eldritchhorror.core.commandqueue.*;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
+import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
 import sk.sivak.eldritchhorror.core.controller.*;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueImpl;
@@ -98,6 +99,9 @@ public class MysteryResolutionTest {
 
     @Test public void unsolvedMysteryPreservesFalseAfterQueuedDisplayWork() {
         when(mystery.getProgress()).thenReturn(0);
+        OmenTrackWrite omenTrack = mock(OmenTrackWrite.class, RETURNS_DEEP_STUBS);
+        when(omenTrack.getCurrentOmen().getOmenColor()).thenReturn(OmenColor.RED);
+        ServicePlatform.get().setOmenTrack(omenTrack);
         sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform listeners =
                 sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform.get();
         listeners.setService(service);
@@ -108,6 +112,7 @@ public class MysteryResolutionTest {
         });
         listeners.setEncounterService(encounters);
         assertResolution(false);
+        verify(game).showCustomBackground("omen_red");
     }
 
     @Test public void solvedMysteryWaitsForCardTapBeforeDestructionAndQueueContinuation() {

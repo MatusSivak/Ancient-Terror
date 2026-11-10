@@ -4,6 +4,7 @@ import sk.sivak.eldritchhorror.core.action.Action;
 import sk.sivak.eldritchhorror.core.action.DirectEventAction;
 import sk.sivak.eldritchhorror.core.action.HookableAction;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
 import sk.sivak.eldritchhorror.core.eventtype.data.rumor.InitRumorCardData;
@@ -29,7 +30,7 @@ public interface DoomOmenActionProvider {
 
     Action<Object, Void> removeTokenFromOmenTrack(OmenId omenId);
 
-    HookableAction<Object, Void> drawMythosCard();
+    HookableAction<Object, MythosCard> drawMythosCard();
 
     Action<Object, Void> displayVictoryPaper();
 

@@ -26,7 +26,7 @@ public interface DoomOmenService extends CommonService {
 
     void resolveCurrentMystery();
 
-    void drawMythosCard();
+    void resolveMythosPhase();
 
     void displayVictoryPaper();
 

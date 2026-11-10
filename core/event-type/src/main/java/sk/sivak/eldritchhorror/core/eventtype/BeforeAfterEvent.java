@@ -11,6 +11,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
 import sk.sivak.eldritchhorror.core.constants.location.PathType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
+import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
@@ -199,7 +200,7 @@ public enum BeforeAfterEvent {
     DEVOUR_INVESTIGATOR(Object.class, Void.class),
     DEFEAT_INVESTIGATOR(Object.class, Void.class),
     END_OF_ENCOUNTER(Object.class, Object.class),
-    DRAW_MYTHOS_CARD(Object.class, Void.class),
+    DRAW_MYTHOS_CARD(Object.class, MythosCard.class),
     RESOLVE_CURRENT_MYSTERY(Object.class, Boolean.class),
     PREPARE_NEW_ROUND(Object.class, Void.class),
     ADVANCE_ACTIVE_MYSTERY(Object.class,Void.class ),

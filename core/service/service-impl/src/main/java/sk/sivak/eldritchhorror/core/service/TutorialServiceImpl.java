@@ -168,8 +168,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         hideChalkboard();
         gameService.changeAndShowPhase();
         notifyPhaseStarted("Mythos Phase (1)");
-        doomOmenService.drawMythosCard();
-        doomOmenService.resolveCurrentMystery();
+        doomOmenService.resolveMythosPhase();
         displayChalkboard("tutorial.mythosPhase.survivedGateOpened", CENTER_X, CENTER_Y, true);
         displayChalkboard("tutorial.mythosPhase.newRound", CENTER_X, CENTER_Y, true);
         hideChalkboard();
@@ -203,8 +202,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         changeCluePool();
         gameService.changeAndShowPhase();
         notifyPhaseStarted("Mythos Phase (2)");
-        doomOmenService.drawMythosCard();
-        doomOmenService.resolveCurrentMystery();
+        doomOmenService.resolveMythosPhase();
         gameService.changeAndShowPhase();
         investigatorService.changeActiveInvestigator(InvestigatorId.THE_SPY);
         investigatorService.showActiveInvestigator(true);
@@ -250,8 +248,7 @@ public class TutorialServiceImpl extends AbstractCommonService implements Tutori
         hideChalkboard();
         gameService.changeAndShowPhase();
         notifyPhaseStarted("Mythos Phase (3)");
-        doomOmenService.drawMythosCard();
-        doomOmenService.resolveCurrentMystery();
+        doomOmenService.resolveMythosPhase();
         displayChalkboard("tutorial.outro.congratulations", CENTER_X, CENTER_Y, true);
         displayChalkboard("tutorial.outro.readyQuestion", CENTER_X, CENTER_Y, true);
         hideChalkboard();

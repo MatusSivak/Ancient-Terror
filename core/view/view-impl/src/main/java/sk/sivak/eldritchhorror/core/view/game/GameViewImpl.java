@@ -123,7 +123,7 @@ public class GameViewImpl implements Screen, GameView {
     private InvestigatorView investigatorView;
     private QuestionView questionView;
     private FpsLogger fpsLogger;
-    private CompositeMap compositeMap;
+    private final CompositeMap compositeMap = new CompositeMap();
     private Stage backgroundStage;
     private BackgroundUtils backgroundUtils;
     private LostInTimeAndSpaceHelper lostInTimeAndSpaceHelper;
@@ -180,7 +180,6 @@ public class GameViewImpl implements Screen, GameView {
         initHudButtonsAndNoiseEffect();
         initOmenAndDoomTrack();
 
-        compositeMap = new CompositeMap();
         compositeMap.init();
 
         travelActionView = new TravelActionView(compositeMap, controller);
@@ -522,7 +521,8 @@ public class GameViewImpl implements Screen, GameView {
     @Override // only on initImproveSkill called
     public void updateOmen(OmenInfo omenInfo) {
         HudButtons.getOmenTrack().updateOmen(omenInfo.getOmenId());
-        noiseEffect.updateOmenColor(omenInfo.getOmenColor());
+        updateOmenTint(omenInfo.getOmenColor());
+        updateGatesTransparency(omenInfo.getOmenColor());
     }
 
     @Override
@@ -1037,8 +1037,10 @@ public class GameViewImpl implements Screen, GameView {
     }
 
     @Override
-    public void updateNoiseColor(OmenColor omenColor) {
-        noiseEffect.updateOmenColor(omenColor);
+    public void updateOmenTint(OmenColor omenColor) {
+        Color tint = NewGateAnimatedImage.toLibgdxColor(omenColor.toGateColor());
+        noiseEffect.setTint(tint);
+        compositeMap.setOmenTint(tint);
     }
 
     @Override
@@ -1049,7 +1051,9 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public void updateGatesTransparency(OmenColor omenColor) {
         for (Actor child : MapStage.getGateLayer().getChildren()) {
-            ((NewGateAnimatedImage) child).updateGateTransparency(omenColor);
+            if (child instanceof NewGateAnimatedImage) {
+                ((NewGateAnimatedImage) child).updateOmen(omenColor);
+            }
         }
     }
 

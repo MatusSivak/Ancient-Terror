@@ -36,12 +36,20 @@ public class LitImage extends Image {
 
     // Light position: xy = center, z = radius, w = intensity (all in the image's stage coordinates).
     // Distances are divided by the radius first, so mediump floats cannot overflow.
-    private static final String FRAGMENT = "#ifdef GL_ES\nprecision mediump float;\n#endif\n"
-            + "#define MAX_LIGHTS " + MAX_LIGHTS + "\n"
+    private static final String LIGHTING = "#ifdef GL_ES\nprecision mediump float;\n#endif\n"
             + "varying vec4 v_color;\n"
             + "varying vec2 v_texCoords;\n"
             + "varying vec2 v_position;\n"
             + "uniform sampler2D u_texture;\n"
+            + "float pointFalloff(vec2 d) {\n"
+            + "  float f = max(0.0, 1.0 - dot(d, d));\n"
+            + "  return f * f;\n"
+            + "}\n"
+            + "vec3 reflectedLight(vec4 surface, vec3 light) {\n"
+            + "  return light * (surface.rgb * " + GAIN + " + surface.a * " + GLOW + ");\n"
+            + "}\n";
+
+    private static final String FRAGMENT = "#define MAX_LIGHTS " + MAX_LIGHTS + "\n"
             + "uniform vec4 u_lightPos[MAX_LIGHTS];\n"
             + "uniform vec3 u_lightColor[MAX_LIGHTS];\n"
             + "uniform vec3 u_ambient;\n"
@@ -50,10 +58,9 @@ public class LitImage extends Image {
             + "  vec3 light = u_ambient;\n"
             + "  for (int i = 0; i < MAX_LIGHTS; i++) {\n"
             + "    vec2 d = (v_position - u_lightPos[i].xy) / u_lightPos[i].z;\n"
-            + "    float falloff = max(0.0, 1.0 - dot(d, d));\n"
-            + "    light += u_lightColor[i] * (falloff * falloff * u_lightPos[i].w);\n"
+            + "    light += u_lightColor[i] * (pointFalloff(d) * u_lightPos[i].w);\n"
             + "  }\n"
-            + "  gl_FragColor = vec4(c.rgb * (1.0 + light * " + GAIN + ") + light * " + GLOW + " * c.a, c.a);\n"
+            + "  gl_FragColor = vec4(c.rgb + reflectedLight(c, light), c.a);\n"
             + "}\n";
 
     private static ShaderProgram shader;
@@ -72,15 +79,18 @@ public class LitImage extends Image {
         super(texture);
     }
 
+    public static ShaderProgram compileLightingShader(String fragment) {
+        ShaderProgram program = new ShaderProgram(VERTEX, LIGHTING + fragment);
+        if (program.isCompiled()) return program;
+        Gdx.app.error("LitImage", "Lighting shader failed: " + program.getLog());
+        program.dispose();
+        return null;
+    }
+
     private static ShaderProgram getShader() {
         if (shader == null && !failed) {
-            shader = new ShaderProgram(VERTEX, FRAGMENT);
-            if (!shader.isCompiled()) {
-                Gdx.app.error("LitImage", "Scene light shader failed: " + shader.getLog());
-                shader.dispose();
-                shader = null;
-                failed = true;
-            }
+            shader = compileLightingShader(FRAGMENT);
+            failed = shader == null;
         }
         return shader;
     }

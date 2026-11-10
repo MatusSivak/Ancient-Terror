@@ -98,7 +98,7 @@ public class CardDestructionPreview extends ApplicationAdapter {
             GameController controller = (GameController) Proxy.newProxyInstance(GameController.class.getClassLoader(),
                     new Class<?>[]{GameController.class}, (p, m, a) -> null);
             new HudButtons(controller).init();
-            Image background = new Image(CustomAssetManager.getTexture("encounter/background/mythos.jpg"));
+            Image background = new Image(CustomAssetManager.getTexture("encounter/background/omen_green.jpg"));
             background.setSize(960, 540); background.setColor(.42f, .42f, .42f, 1);
             stage.getRoot().addActorAt(0, background);
             checkSnapshotTransform();

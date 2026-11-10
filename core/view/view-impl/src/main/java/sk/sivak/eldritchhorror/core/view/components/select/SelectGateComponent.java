@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.VisTable;
 import sk.sivak.eldritchhorror.core.constants.gate.GateInfo;
-import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
 
@@ -75,7 +74,7 @@ public class SelectGateComponent extends VisTable implements SelectComponent<Gat
         }
         selected = true;
         scaling = true;
-        imageCell.getActor().updateGateTransparency(OmenColor.valueOf(gateInfo.getGateColor().name()));
+        imageCell.getActor().setVortexHighlighted(true);
         selectDeselectAction = new FloatAction(currentGateSize, MAX_GATE_SIZE) {
             @Override
             protected void update(float percent) {
@@ -118,7 +117,7 @@ public class SelectGateComponent extends VisTable implements SelectComponent<Gat
             clearActions();
             selectDeselectAction.finish();
         }
-        imageCell.getActor().updateGateTransparency(null);
+        imageCell.getActor().setVortexHighlighted(false);
         selected = false;
         scaling = true;
         selectDeselectAction = new FloatAction(currentGateSize, MIN_GATE_SIZE) {

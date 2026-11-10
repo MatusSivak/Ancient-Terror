@@ -27,6 +27,7 @@ import sk.sivak.eldritchhorror.core.action.impl.doomomen.UnlockRandomCardAction;
 import sk.sivak.eldritchhorror.core.action.impl.initgame.AddTokenToOmenTrackAction;
 import sk.sivak.eldritchhorror.core.action.impl.initgame.RemoveTokenFromOmenTrackAction;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
 import sk.sivak.eldritchhorror.core.eventtype.data.rumor.InitRumorCardData;
@@ -77,7 +78,7 @@ public class DoomOmenActionProviderImpl extends AbstractActionProvider implement
     }
 
     @Override
-    public HookableAction<Object, Void> drawMythosCard() {
+    public HookableAction<Object, MythosCard> drawMythosCard() {
         return new DrawMythosCardAction();
     }
 

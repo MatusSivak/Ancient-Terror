@@ -13,11 +13,9 @@ import sk.sivak.eldritchhorror.core.constants.tracker.AnalyticsCategory;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
-import sk.sivak.eldritchhorror.core.model.BackgroundData;
 
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_HEIGHT;
 import static sk.sivak.eldritchhorror.core.constants.ViewProperties.VIEWPORT_WIDTH;
-import static sk.sivak.eldritchhorror.core.model.BackgroundModelRead.BackgroundType.CUSTOM;
 
 public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, Boolean> {
 
@@ -57,7 +55,7 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
             ServicePlatform.get().getDoomOmenService().unlockRandomCard();
             ServicePlatform.get().getService().addEventCommand(x -> {
                 if (isMythosPhase()) {
-                    showBackground();
+                    MythosBackground.show();
                 }
             });
             ServicePlatform.get().getInitGameService().unregisterCurrentMysteryCard();
@@ -146,7 +144,7 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
     private void onMysteryNotSolved(SingleSubscriber<? super Boolean> ss) {
         ServicePlatform.get().getService().hold();
         ServicePlatform.get().getService().addEventCommand(x -> {
-            showBackground();
+            MythosBackground.show();
         });
         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
         int solvedMysteries = ServicePlatform.get().getMysteryDeck().getSolvedMysteriesCount();
@@ -163,13 +161,6 @@ public class ResolveCurrentMysteryAction extends AbstractHookableAction<Object, 
         ServicePlatform.get().getService().convertTo(Boolean.class, () -> false);
         ServicePlatform.get().getService().release();
         ss.onSuccess(false);
-    }
-
-    private void showBackground() {
-        ServicePlatform.get().getModel().getBackgroundModel().setCurrentBackground(
-                new BackgroundData(CUSTOM, "mythos", "encounter/background/mythos.jpg"));
-        ServicePlatform.get().getGameController().showCustomBackground("mythos").subscribe();
-        ServicePlatform.get().getGameController().showWholeWorld().subscribe();
     }
 
 

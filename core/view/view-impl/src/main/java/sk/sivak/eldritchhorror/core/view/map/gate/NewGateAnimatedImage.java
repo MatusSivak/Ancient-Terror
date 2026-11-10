@@ -10,30 +10,30 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.view.animation.AnimatedImage;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
-import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 
 public class NewGateAnimatedImage extends Group {
 
     private final Image backgroundImage;
     private final AnimatedImage gateAnimatedImage;
     private final GateColor gateColor;
-    private Image doomPulse;
+    private final Color tint;
+    private Image omenPulse;
 
     /** A separate halo leaves the idle vortex animation and the gate's map layer intact. */
-    public void setDoomPulse(boolean enabled) {
-        if (doomPulse != null) {
-            doomPulse.remove();
-            doomPulse = null;
+    private void setOmenPulse(boolean enabled) {
+        if (enabled == (omenPulse != null)) return;
+        if (!enabled) {
+            omenPulse.remove();
+            omenPulse = null;
+            return;
         }
-        if (!enabled) return;
-        doomPulse = new Image(CustomAssetManager.getTexture("gate/gate_border.png")) {
+        omenPulse = new Image(CustomAssetManager.getTexture("gate/gate_border.png")) {
             @Override public void draw(Batch batch, float parentAlpha) {
                 int source = batch.getBlendSrcFunc(), destination = batch.getBlendDstFunc();
                 batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
@@ -41,53 +41,41 @@ public class NewGateAnimatedImage extends Group {
                 batch.setBlendFunction(source, destination);
             }
         };
-        doomPulse.setName("doom-source-pulse");
-        doomPulse.setTouchable(Touchable.disabled);
-        doomPulse.setSize(getWidth(), getHeight());
-        doomPulse.setOrigin(getWidth() / 2f, getHeight() / 2f);
-        Color tint = toLibgdxColor(gateColor).lerp(Color.WHITE, .45f);
-        doomPulse.setColor(tint);
-        doomPulse.addAction(Actions.forever(Actions.sequence(
+        omenPulse.setName("matching-omen-halo");
+        omenPulse.setTouchable(Touchable.disabled);
+        omenPulse.setSize(getWidth(), getHeight());
+        omenPulse.setOrigin(getWidth() / 2f, getHeight() / 2f);
+        omenPulse.getColor().set(tint).lerp(Color.WHITE, .45f);
+        omenPulse.addAction(Actions.forever(Actions.sequence(
                 Actions.scaleTo(1.1f, 1.1f), Actions.alpha(.95f),
                 Actions.parallel(Actions.scaleTo(3.2f, 3.2f, 1.15f, Interpolation.pow2Out),
                         Actions.fadeOut(1.15f, Interpolation.sineIn)), Actions.delay(.15f))));
-        addActor(doomPulse);
+        addActor(omenPulse);
     }
 
     public NewGateAnimatedImage(GateColor gateColor, OmenColor omenColor) {
         this.gateColor = gateColor;
+        tint = toLibgdxColor(gateColor);
         setTouchable(Touchable.disabled);
         backgroundImage = new Image(CustomAssetManager.getTexture("gate/gate_border.png"));
         gateAnimatedImage = new AnimatedImage(new Animation<>(0.04f, CustomAssetManager.getGateAnimation(), Animation.PlayMode.LOOP));
 
-        backgroundImage.setScale(0);
-        gateAnimatedImage.setScale(0);
+        backgroundImage.setScale(2.1f);
+        gateAnimatedImage.setScale(1.375f);
 
-        Color tint = toLibgdxColor(gateColor);
-        backgroundImage.setColor(tint.r, tint.g, tint.b, 0.2f);
-        gateAnimatedImage.setColor(tint);
+        backgroundImage.setColor(tint.r, tint.g, tint.b, 0.7f);
 
-        backgroundImage.addAction(Actions.parallel(
-                createPulseAction(2f, 2.2f),
-                Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(360f, 8f)),
-                Actions.repeat(RepeatAction.FOREVER, Actions.sequence(
-                        Actions.alpha(0.6f, 1.2f, Interpolation.sineIn),
-                        Actions.alpha(0.8f, 1.2f, Interpolation.sineOut)
-                ))
-        ));
-        gateAnimatedImage.addAction(Actions.parallel(
-                createPulseAction(1.3f, 1.45f),
-                Actions.repeat(RepeatAction.FOREVER, Actions.rotateBy(360f, 8f))
-        ));
+        backgroundImage.addAction(Actions.forever(Actions.rotateBy(360f, 8f)));
+        gateAnimatedImage.addAction(Actions.forever(Actions.rotateBy(360f, 8f)));
 
         addActor(backgroundImage);
         addActor(gateAnimatedImage);
-        updateGateTransparency(omenColor);
+        updateOmen(omenColor);
     }
 
     public Completable closeGate() {
         return Completable.create(onSub -> {
-            setDoomPulse(false);
+            setOmenPulse(false);
             if (getStage() == null) {
                 onSub.onCompleted();
                 return;
@@ -114,20 +102,28 @@ public class NewGateAnimatedImage extends Group {
             remove();
             parent.addActorAt(layerIndex, portrait);
             GateDissipateAnimation.start(portrait, backgroundImage, gateAnimatedImage,
-                    toLibgdxColor(gateColor), "gate-close", onSub);
+                    tint, "gate-close", onSub);
         });
     }
 
-    public void updateGateTransparency(OmenColor omenColor) {
-        Color tint = toLibgdxColor(gateColor);
+    public void updateOmen(OmenColor omenColor) {
         boolean matches = omenColor != null && gateColor.equals(omenColor.toGateColor());
-        if (matches) {
+        setOmenPulse(matches);
+        setVortexHighlighted(matches);
+    }
+
+    public void setVortexHighlighted(boolean highlighted) {
+        if (highlighted) {
             gateAnimatedImage.setColor(tint.r, tint.g, tint.b, 1.0f);
             gateAnimatedImage.setFrameDuration(0.04f);
         } else {
             gateAnimatedImage.setColor(tint.r * 0.6f, tint.g * 0.6f, tint.b * 0.6f, 1.0f);
             gateAnimatedImage.setFrameDuration(0.08f);
         }
+    }
+
+    public Color getLightColor() {
+        return tint;
     }
 
     public static Color toLibgdxColor(GateColor gateColor) {
@@ -137,15 +133,6 @@ public class NewGateAnimatedImage extends Group {
             case BLUE:  return new Color(0.3f, 0.6f, 1f, 1f);
             default:    return Color.WHITE.cpy();
         }
-    }
-
-    private RepeatAction createPulseAction(float minScale, float maxScale) {
-        return Actions.repeat(
-                RepeatAction.FOREVER, Actions.sequence(
-                        Actions.scaleTo(minScale, minScale, 0.75f, Interpolation.sineIn),
-                        Actions.scaleTo(maxScale, maxScale, 0.75f, Interpolation.sineOut)
-                )
-        );
     }
 
     @Override

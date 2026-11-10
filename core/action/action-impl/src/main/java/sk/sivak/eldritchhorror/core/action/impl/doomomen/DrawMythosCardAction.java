@@ -7,17 +7,15 @@ import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
-import sk.sivak.eldritchhorror.core.constants.mythos.BlueMythosCard;
 import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
+import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
 import sk.sivak.eldritchhorror.core.constants.reference.ReferenceInfo;
 import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.ReckoningFireType;
 import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
-import sk.sivak.eldritchhorror.core.model.BackgroundData;
-import sk.sivak.eldritchhorror.core.model.BackgroundModelRead;
 
 import java.util.List;
 
@@ -30,22 +28,21 @@ import static sk.sivak.eldritchhorror.core.eventtype.DirectEvent.RECKONING_MONST
 import static sk.sivak.eldritchhorror.core.eventtype.DirectEvent.RECKONING_RUMORS;
 import static sk.sivak.eldritchhorror.core.eventtype.data.ReckoningFireType.CHARGE;
 import static sk.sivak.eldritchhorror.core.eventtype.data.ReckoningFireType.FIRE;
-import static sk.sivak.eldritchhorror.core.model.BackgroundModelRead.BackgroundType.CUSTOM;
 
-public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
+public class DrawMythosCardAction extends AbstractHookableAction<Object, MythosCard> {
 
     public DrawMythosCardAction() {
         super(BeforeAfterEvent.DRAW_MYTHOS_CARD);
     }
 
     @Override
-    protected void onExecute(SingleSubscriber<? super Void> ss) {
+    protected void onExecute(SingleSubscriber<? super MythosCard> ss) {
         GoogleServicesHolder.getAnalyticsTracker().trackScreenName("Phase: Mythos ("+ ServicePlatform.get().getModel().getCurrentRound()+")");
         ServicePlatform.get().getInvestigators().unsetActiveInvestigator();
         MythosCard mythosCard = ServicePlatform.get().getMythosDeck().drawMythosCard();
         ServicePlatform.get().getGameController().hideButtonsAndInvestigatorHud(false);
         ReferenceInfo referenceCard = ServicePlatform.get().getModel().getReferenceCard();
-        showBackground();
+        MythosBackground.show();
         int currentRound = ServicePlatform.get().getMythosDeck().getDrawnCardsCount();
         int totalRounds = ServicePlatform.get().getModel().getAncientOne().getAncientOneInfo().getMythosCardCount();
 
@@ -58,7 +55,7 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
         for (MythosCard.BasicMythosAction basicMythosAction : mythosCard.getBasicMythosActions()) {
             switch (basicMythosAction) {
                 case ADVANCE_OMEN:
-                    advanceOmen();
+                    checkGatesForDoom();
                     break;
                 case MONSTER_SURGE:
                     monsterSurge(referenceCard.getMonsterSurge());
@@ -80,8 +77,9 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
         ServicePlatform.get().getService().addEventCommand(in -> {
             showMythosText(mythosCard);
         });
+        ServicePlatform.get().getService().convertTo(MythosCard.class, () -> mythosCard);
         ServicePlatform.get().getService().release();
-        ss.onSuccess(null);
+        ss.onSuccess(mythosCard);
     }
 
     private void showMythosText(MythosCard mythosCard) {
@@ -133,7 +131,7 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
             });
             ServicePlatform.get().getGameService().checkIfSomeoneIsDefeated();
             ServicePlatform.get().getService().addEventCommand(x -> {
-                showBackground();
+                MythosBackground.show();
             });
             ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
             ServicePlatform.get().getService().release();
@@ -175,7 +173,7 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
                     ServicePlatform.get().getModel().setReckoningTriggered(false);
                     ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
                     unsetActiveInvestigator();
-                    showBackground();
+                    MythosBackground.show();
                 } else {
                     ServicePlatform.get().getEncounterService().typeInfo("No reckoning effects.");
                 }
@@ -209,7 +207,7 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
             ServicePlatform.get().getTokenService().spawnClues(cluesCount).subscribe();
             ServicePlatform.get().getService().addEventCommand(x -> {
                 unsetActiveInvestigator();
-                showBackground();
+                MythosBackground.show();
             });
             ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
             ServicePlatform.get().getService().release();
@@ -255,7 +253,7 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
                 ServicePlatform.get().getGameService().checkIfSomeoneIsDefeated();
                 ServicePlatform.get().getService().addEventCommand(x -> {
                     unsetActiveInvestigator();
-                    showBackground();
+                    MythosBackground.show();
                 });
                 ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
                 ServicePlatform.get().getService().release();
@@ -263,30 +261,26 @@ public class DrawMythosCardAction extends AbstractHookableAction<Object, Void> {
         });
     }
 
-    private void advanceOmen() {
-        TypewriterUtils.confirmInfos("[#BAD]Omen advances![]").subscribe(() -> {
+    private void checkGatesForDoom() {
+        OmenInfo omen = ServicePlatform.get().getOmenTrack().getCurrentOmen();
+        String color = omen.getOmenColor().getPrettyString();
+        if (ServicePlatform.get().getGateStack().getSpawnedGates(omen.getOmenColor().toGateColor()).isEmpty()) {
+            ServicePlatform.get().getEncounterService().typeInfo("No open " + color + " Gates.");
+            return;
+        }
+        TypewriterUtils.confirmInfos("1 Doom per " + color + " Gate.").subscribe(() -> {
             unsetActiveInvestigator();
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().hideTypewriterPaper();
-            ServicePlatform.get().getDoomOmenService().advanceOmen();
+            ServicePlatform.get().getDoomOmenService().advanceDoomByCurrentOmen(omen);
             ServicePlatform.get().getService().addEventCommand(x -> {
-                OmenColor omenColor = ServicePlatform.get().getOmenTrack().getCurrentOmen().getOmenColor();
-                if (ServicePlatform.get().getGateStack().getSpawnedGates(omenColor.toGateColor()).size() > 0) {
-                    unsetActiveInvestigator();
-                    showBackground();
-                }
+                unsetActiveInvestigator();
+                MythosBackground.show();
             });
             ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
             ServicePlatform.get().getService().release();
         });
 
-    }
-
-    private void showBackground() {
-        ServicePlatform.get().getModel().getBackgroundModel().setCurrentBackground(
-                new BackgroundData(CUSTOM, "mythos", "encounter/background/mythos.jpg"));
-        ServicePlatform.get().getGameController().showCustomBackground("mythos").subscribe();
-        ServicePlatform.get().getGameController().showWholeWorld().subscribe();
     }
 
     private void unsetActiveInvestigator() {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import java8.features.util.IterableUtils;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
@@ -28,22 +29,28 @@ import static sk.sivak.eldritchhorror.core.view.utils.UiText.get;
 public class CompositeMap {
 
     public static final Color WHITE = new Color(1f, 1f, 1f, 1f);
+    private static final float OMEN_TINT_STRENGTH = 0.20f;
+    private final Color mapTint = new Color(Color.WHITE);
+    private final Array<SingleMap> tiles = new Array<>(3);
 
     public void init() {
         CustomAssetManager.getTextureAsync(CustomAssetManager.MAP).subscribe(texture -> {
-            SingleMap mapLeft = new SingleMap(texture);
-            SingleMap mapCenter = new SingleMap(texture);
-            SingleMap mapRight = new SingleMap(texture);
-
-            MapStage.getMapLayer().addActor(mapLeft);
-            MapStage.getMapLayer().addActor(mapCenter);
-            MapStage.getMapLayer().addActor(mapRight);
-
+            for (int offset = -1; offset <= 1; offset++) {
+                SingleMap tile = new SingleMap(texture);
+                tile.setX(offset * tile.getWidth());
+                tile.setColor(mapTint);
+                tiles.add(tile);
+                MapStage.getMapLayer().addActor(tile);
+            }
             initCityInfoLabels();
-
-            mapLeft.setX(-mapCenter.getWidth());
-            mapRight.setX(mapCenter.getWidth());
         });
+    }
+
+    public void setOmenTint(Color tint) {
+        mapTint.set(Color.WHITE).lerp(tint, OMEN_TINT_STRENGTH);
+        for (SingleMap tile : tiles) {
+            tile.setColor(mapTint);
+        }
     }
 
     public void hideCityInfoLabels() {

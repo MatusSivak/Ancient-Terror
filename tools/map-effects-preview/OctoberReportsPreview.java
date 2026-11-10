@@ -78,15 +78,9 @@ public class OctoberReportsPreview extends ApplicationAdapter {
         }
         MonsterImage monster=monster(); monster.setPosition(location.x-35,location.y-35);
         MapStage.getMonsterLayer().addActor(monster);tick(40);
-        sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl doomView =
-                new sk.sivak.eldritchhorror.core.view.doomomen.DoomOmenViewImpl();
-        doomView.setGateDoomPulse(LocationId.ARKHAM, true);
-        tick(25); if (!fast) draw("doom-source-pulse");
+        tick(25); if (!fast) draw("matching-omen-halo");
         for (Actor copy : MapStage.getActor(resolver))
-            require(((Group)copy).findActor("doom-source-pulse") != null, "Wrapped gate missing pulse");
-        doomView.setGateDoomPulse(LocationId.ARKHAM, false);
-        for (Actor copy : MapStage.getActor(resolver))
-            require(((Group)copy).findActor("doom-source-pulse") == null, "Pulse persists after confirmation");
+            require(((Group)copy).findActor("matching-omen-halo") != null, "Wrapped gate missing pulse at spawn");
         AtomicInteger done=new AtomicInteger();
         new PrepareBoardView(controller).closeGate(LocationId.ARKHAM).subscribe(done::incrementAndGet);
         boolean sawEffect=false;

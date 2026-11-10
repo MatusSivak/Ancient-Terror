@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.service;
 import sk.sivak.eldritchhorror.core.action.InitValueAction;
 import sk.sivak.eldritchhorror.core.action.provider.DoomOmenActionProvider;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.mythos.MythosCard;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
 import sk.sivak.eldritchhorror.core.eventtype.data.rumor.InitRumorCardData;
@@ -38,10 +39,14 @@ public class DoomOmenServiceImpl extends AbstractCommonService implements DoomOm
     @Override
     public void advanceOmen() {
         hold();
-        executeHookable(doomOmenActionProvider.advanceOmen());
-        execute(new ActionCommand<>(doomOmenActionProvider.omenChangedEvent(), "OMEN_CHANGED_EVENT"));
+        moveOmen();
         executeHookable(doomOmenActionProvider.advanceDoomByCurrentOmen());
         release();
+    }
+
+    private void moveOmen() {
+        executeHookable(doomOmenActionProvider.advanceOmen());
+        execute(new ActionCommand<>(doomOmenActionProvider.omenChangedEvent(), "OMEN_CHANGED_EVENT"));
     }
 
     @Override
@@ -75,8 +80,7 @@ public class DoomOmenServiceImpl extends AbstractCommonService implements DoomOm
     @Override
     public void initMythosPhase() {
         hold();
-        drawMythosCard();
-        resolveCurrentMystery();
+        resolveMythosPhase();
         executeHookable(doomOmenActionProvider.prepareNewRound());
         release();
     }
@@ -87,8 +91,18 @@ public class DoomOmenServiceImpl extends AbstractCommonService implements DoomOm
     }
 
     @Override
-    public void drawMythosCard() {
+    public void resolveMythosPhase() {
+        hold();
         executeHookable(doomOmenActionProvider.drawMythosCard());
+        addEventCommand((MythosCard card) -> {
+            hold();
+            resolveCurrentMystery();
+            if (card.getBasicMythosActions().contains(MythosCard.BasicMythosAction.ADVANCE_OMEN)) {
+                moveOmen();
+            }
+            release();
+        });
+        release();
     }
 
     @Override

@@ -17,6 +17,7 @@ public class AdvanceOmenAction extends AbstractHookableAction<Object, OmenInfo> 
     protected void onExecute(SingleSubscriber<? super OmenInfo> ss) {
         ServicePlatform.get().getOmenTrack().advanceOmen();
         OmenInfo currentOmen = ServicePlatform.get().getOmenTrack().getCurrentOmen();
+        MythosBackground.updateIfVisible(currentOmen.getOmenColor());
         ServicePlatform.get().getDoomOmenController().advanceOmen(currentOmen).subscribe(() -> {
             ss.onSuccess(ServicePlatform.get().getOmenTrack().getCurrentOmen());
         });

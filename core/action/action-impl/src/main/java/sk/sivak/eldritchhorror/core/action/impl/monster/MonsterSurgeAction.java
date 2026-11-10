@@ -5,9 +5,7 @@ import sk.sivak.eldritchhorror.core.action.AbstractHookableAction;
 import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
-import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
-import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,11 +35,7 @@ public class MonsterSurgeAction extends AbstractHookableAction<Object, Void> {
             ServicePlatform.get().getService().hold();
             for (LocationId gateLocation : gateLocations) {
                 ServicePlatform.get().getService().moveCameraToLocation(gateLocation);
-                ServicePlatform.get().getService().addEventCommand(ignored -> {
-                    ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gateLocation, true);
-                });
-                ServicePlatform.get().getGameService().spawnMonsters(monstersCount, gateLocation, false).subscribe(spawned ->
-                        ServicePlatform.get().getDoomOmenController().setGateDoomPulse(gateLocation, false));
+                ServicePlatform.get().getGameService().spawnMonsters(monstersCount, gateLocation, false).subscribe();
             }
             ServicePlatform.get().getService().convertTo(Void.class, () -> null);
             ServicePlatform.get().getService().release();

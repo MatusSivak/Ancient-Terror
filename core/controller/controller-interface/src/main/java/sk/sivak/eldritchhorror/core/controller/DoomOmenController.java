@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.controller;
 
-import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import rx.Completable;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
@@ -11,8 +10,6 @@ import sk.sivak.eldritchhorror.core.constants.omen.OmenInfo;
  * @author msivak
  */
 public interface DoomOmenController {
-
-    void setGateDoomPulse(LocationId location, boolean enabled);
 
     Completable retreatDoom(int doom, int positiveAmount);
 

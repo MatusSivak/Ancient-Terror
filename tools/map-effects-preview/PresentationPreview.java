@@ -63,7 +63,7 @@ public class PresentationPreview extends ApplicationAdapter {
             VisUI.load();stage=InfoStage.getStageSafe();
             GameController controller=(GameController)Proxy.newProxyInstance(GameController.class.getClassLoader(),new Class[]{GameController.class},(p,m,a)->null);
             new HudButtons(controller).init();
-            Image bg=new Image(getTexture("encounter/background/mythos.jpg"));bg.setBounds(0,0,960,540);bg.setColor(.4f,.4f,.4f,1);
+            Image bg=new Image(getTexture("encounter/background/omen_green.jpg"));bg.setBounds(0,0,960,540);bg.setColor(.4f,.4f,.4f,1);
             stage.getRoot().addActorAt(0,bg);
             for(CardInfo card:new CardInfo[]{new AxeAsset(),new FleshWardSpell(),new BlessedCondition(),new TheSilverKeyArtifact()})
                 for(boolean fast:new boolean[]{false,true})checkGain(card,fast);

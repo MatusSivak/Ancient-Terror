@@ -43,7 +43,7 @@ public class TokenGainPreview extends ApplicationAdapter {
                     (p,m,a) -> m.getReturnType() == long.class ? 0L : null);
             Gdx.audio = (Audio)Proxy.newProxyInstance(Audio.class.getClassLoader(), new Class[]{Audio.class}, (p,m,a) -> silent);
             VisUI.load(); stage = InfoStage.getStageSafe();
-            Image background = new Image(getTexture("encounter/background/mythos.jpg"));
+            Image background = new Image(getTexture("encounter/background/omen_green.jpg"));
             background.setBounds(0,0,960,540); background.setColor(.32f,.32f,.36f,1);
             stage.getRoot().addActorAt(0, background);
             for (String texture : new String[]{CLUE_TOKEN, HEALTH_ICON, SANITY_ICON, FOCUS_TOKEN}) {
