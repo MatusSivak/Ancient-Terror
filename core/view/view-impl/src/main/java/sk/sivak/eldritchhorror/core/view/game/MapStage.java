@@ -65,6 +65,8 @@ public class MapStage {
     private Group vortexLayer;
     private Group mapLayer;
     private final Group spawnEffectLayer = new Group();
+    /** Comets and impact flashes above every token; see {@link #getSkyEffectLayer()}. */
+    private final Group skyEffectLayer = new Group();
     private Group epicMonsterLayer;
     private Group reckoningMonsterLayer;
     private Group gateLayer;
@@ -274,6 +276,8 @@ public class MapStage {
         stage.addActor(locationHighlightLayer);
         stage.addActor(lostInTimeAndSpaceLayer);
         stage.addActor(mapShadowLayer);
+        skyEffectLayer.setTouchable(Touchable.disabled);
+        stage.addActor(skyEffectLayer);
         stage.addActor(touchBlockerLayer);
 
         curtainStage.addActor(curtainLayer);
@@ -460,6 +464,7 @@ public class MapStage {
         );
         get().mapLayer.addAction(actionSupplier.get());
         get().spawnEffectLayer.addAction(Actions.alpha(visibility ? 1f : 0f, 1f));
+        get().skyEffectLayer.addAction(Actions.alpha(visibility ? 1f : 0f, 1f));
         get().expeditionLayer.addAction(actionSupplier.get());
         get().gateLayer.addAction(actionSupplier.get());
         get().defeatedInvestigatorLayer.addAction(actionSupplier.get());
@@ -481,6 +486,10 @@ public class MapStage {
 
     public static Group getSpawnEffectLayer() {
         return get().spawnEffectLayer;
+    }
+
+    public static Group getSkyEffectLayer() {
+        return get().skyEffectLayer;
     }
 
     public static Group getExpeditionLayer() {
@@ -592,6 +601,7 @@ public class MapStage {
 
     public static void clearIdActorMap() {
         get().spawnEffectLayer.clear();
+        get().skyEffectLayer.clear();
         for (List<Actor> actors : get().idActorMap.values()) {
             IterableUtils.forEach(actors, Actor::remove);
         }

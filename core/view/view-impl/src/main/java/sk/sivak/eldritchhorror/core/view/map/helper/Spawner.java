@@ -1,6 +1,7 @@
 package sk.sivak.eldritchhorror.core.view.map.helper;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -14,6 +15,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.LocationPositionResolver;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
+import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
 import sk.sivak.eldritchhorror.core.view.map.investigator.InvestigatorImage;
 import sk.sivak.eldritchhorror.core.view.map.storm.StormImage;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
@@ -28,7 +30,10 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
  */
 public class Spawner {
 
-    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE, EXPEDITION, STORM }
+    /** GATE: a comet crashes into the location and the token grows out of the impact. */
+    public enum SpawnStyle { DROP, INVESTIGATOR, MONSTER, CLUE, EXPEDITION, STORM, GATE }
+
+    private static final float GATE_IMPACT_SHAKE = 9f;
 
     private static AlphaAction createAlphaAction(float finalAlpha) {
         AlphaAction alphaAction = new AlphaAction();
@@ -64,13 +69,14 @@ public class Spawner {
                 MapStage.addToLayer(centerActor, idLayerResolver);
                 MapStage.addToLayer(rightActor, idLayerResolver);
                 boolean[] sounded = {false};
+                SpawnStyle style = spawnConfig.getSpawnStyle();
                 Runnable contact = () -> {
                     if (!sounded[0]) {
                         sounded[0] = true;
+                        if (style == SpawnStyle.GATE) MapCameraShake.impact(GATE_IMPACT_SHAKE);
                         if (onSpawn != null) onSpawn.run();
                     }
                 };
-                SpawnStyle style = spawnConfig.getSpawnStyle();
                 if (style == SpawnStyle.MONSTER || style == SpawnStyle.EXPEDITION || style == SpawnStyle.STORM) contact.run();
                 spawnConfig.preSpawnConfig(leftActor, centerActor, rightActor);
                 int[] landedCopies = {0};
@@ -91,6 +97,7 @@ public class Spawner {
         if (style == SpawnStyle.STORM) return createStormAction((StormImage) token);
         if (style == SpawnStyle.MONSTER) return createEmergenceAction(token);
         if (style == SpawnStyle.EXPEDITION) return createExpeditionAction(token);
+        if (style == SpawnStyle.GATE) return createImpactAction(token, contact);
         return createLandingAction(token, style, contact);
     }
 
@@ -143,6 +150,46 @@ public class Spawner {
 
             @Override protected void end() {
                 token.setY(landingY);
+                token.setScale(1f);
+                token.setRotation(rotation);
+                token.getColor().a = alpha;
+            }
+        };
+    }
+
+    private TemporalAction createImpactAction(Actor token, Runnable contact) {
+        float rotation = token.getRotation();
+        float alpha = token.getColor().a;
+        Color tint = token instanceof NewGateAnimatedImage ? ((NewGateAnimatedImage) token).getLightColor() : Color.ORANGE;
+        MapStage.getSkyEffectLayer().addActor(
+                new MapImpactComet(token.getX() + token.getOriginX(), token.getY() + token.getOriginY(), tint));
+        token.setScale(0f);
+        token.getColor().a = 0f;
+        float flight = MapImpactComet.flightTime();
+        float growth = .8f * NORMAL_ACTION_DURATION;
+        return new TemporalAction(flight + growth) {
+            private boolean impacted;
+
+            @Override protected void update(float percent) {
+                float time = percent * getDuration();
+                if (time < flight) return;
+                impact();
+                // The gate tears open from the crater, overshooting a little before it settles.
+                float growing = Math.min(1f, (time - flight) / growth);
+                token.setScale(MathUtils.lerp(.1f, 1f, Interpolation.swingOut.apply(growing)));
+                token.setRotation(rotation - 140f * (1f - Interpolation.pow2Out.apply(growing)));
+                token.getColor().a = alpha * Math.min(1f, growing / .2f);
+            }
+
+            private void impact() {
+                if (impacted) return;
+                impacted = true;
+                MapStage.getSpawnEffectLayer().addActor(new MapSpawnEffect(token));
+                contact.run();
+            }
+
+            @Override protected void end() {
+                impact();
                 token.setScale(1f);
                 token.setRotation(rotation);
                 token.getColor().a = alpha;

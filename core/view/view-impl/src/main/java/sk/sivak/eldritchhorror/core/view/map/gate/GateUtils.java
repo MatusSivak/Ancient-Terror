@@ -19,12 +19,23 @@ import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTIO
  */
 public class GateUtils {
 
+    /** Quietly drops the gate into place (e.g. when restoring a saved game). */
     public static Completable spawnGate(GateInfo gateInfo, OmenColor omenColor) {
-        return spawnGate(gateInfo, omenColor, null);
+        return spawnGate(gateInfo, omenColor, null, false);
     }
 
+    /** A comet crashes into the location (shaking the camera) and the gate opens in the crater; {@code onSpawn} runs at impact. */
     public static Completable spawnGate(GateInfo gateInfo, OmenColor omenColor, Runnable onSpawn) {
+        return spawnGate(gateInfo, omenColor, onSpawn, true);
+    }
+
+    private static Completable spawnGate(GateInfo gateInfo, OmenColor omenColor, Runnable onSpawn, boolean impact) {
         Spawner.SpawnConfigImpl spawnConfig = new Spawner.SpawnConfigImpl() {
+            @Override
+            public Spawner.SpawnStyle getSpawnStyle() {
+                return impact ? Spawner.SpawnStyle.GATE : Spawner.SpawnStyle.DROP;
+            }
+
             @Override
             public void preSpawnConfig(Actor leftActor, Actor centerActor, Actor rigthActor) {
                 leftActor.addAction(Actions.moveBy(0, 0, NORMAL_ACTION_DURATION));

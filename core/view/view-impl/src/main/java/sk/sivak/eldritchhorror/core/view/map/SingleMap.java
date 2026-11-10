@@ -61,7 +61,10 @@ public class SingleMap extends Image {
         float spotStrength = SPOTLIGHT_INTENSITY * alpha * investigators.getColor().a;
         boolean litGates = gateStrength > 0f && gates.isVisible() && gates.getChildren().size > 0;
         boolean litStands = spotStrength > 0f && investigators.isVisible() && investigators.getChildren().size > 0;
-        if ((!litGates && !litStands) || shaderFailed) return;
+        Group sky = MapStage.getSkyEffectLayer();
+        float skyStrength = alpha * sky.getColor().a;
+        boolean litSky = skyStrength > 0f && sky.isVisible() && sky.getChildren().size > 0;
+        if ((!litGates && !litStands && !litSky) || shaderFailed) return;
         if (gateShader == null) {
             gateShader = LitImage.compileLightingShader(GATE_LIGHT);
             shaderFailed = gateShader == null;
@@ -89,6 +92,15 @@ public class SingleMap extends Image {
                 drawLight(batch, gate.getLightColor(), gateStrength * level * actor.getColor().a, radius);
             }
         }
+        if (litSky) {
+            // Comets and impact flashes above the tokens light the terrain beneath them.
+            for (Actor actor : sky.getChildren()) {
+                if (!(actor instanceof MapLightSource) || !actor.isVisible()) continue;
+                MapLightSource source = (MapLightSource) actor;
+                source.getMapLightCenter(center);
+                drawLight(batch, source.getMapLightColor(), skyStrength * source.getMapLightStrength(), source.getMapLightRadius());
+            }
+        }
         if (litStands) {
             batch.flush();
             gateShader.setUniformf("u_spot", 1f);
@@ -110,7 +122,7 @@ public class SingleMap extends Image {
     private void drawLight(Batch batch, Color tint, float strength, float radius) {
         if (strength <= 0f || radius <= 0f || center.x + radius <= getX() || center.x - radius >= getRight()
                 || center.y + radius <= getY() || center.y - radius >= getTop()) return;
-        batch.setColor(tint.r, tint.g, tint.b, strength);
+        batch.setColor(tint.r, tint.g, tint.b, Math.min(1f, strength));
         batch.draw(texture, center.x - radius, center.y - radius, 2f * radius, 2f * radius);
     }
 }

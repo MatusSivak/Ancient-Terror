@@ -11,12 +11,14 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
+import sk.sivak.eldritchhorror.core.constants.gate.GateInfo;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
 import sk.sivak.eldritchhorror.core.view.game.*;
 import sk.sivak.eldritchhorror.core.view.font.FontGlyphEnricher;
 import sk.sivak.eldritchhorror.core.view.map.*;
+import sk.sivak.eldritchhorror.core.view.map.gate.GateUtils;
 import sk.sivak.eldritchhorror.core.view.map.gate.NewGateAnimatedImage;
 import sk.sivak.eldritchhorror.core.view.map.clue.ClueImage;
 import sk.sivak.eldritchhorror.core.view.map.expedition.ExpeditionUtils;
@@ -403,11 +405,106 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 require(removed.get()==1 && layer.getChildren().size==0,"Storm removal leaked actors");
                 FastForwardAction.turnOff();
                 if(mode<4) startStorm(mode+1);
-                else {
-                    System.out.println("PASS: map spawns and rumor storms; wrap, clicks, silent load, normal/fast/speed-change/large-delta and cleanup");
-                    Gdx.app.exit();
-                }
+                else startGateImpact(0);
             } catch(Throwable error) { fail(error); }
+        });
+    }
+
+    /** Mode 0: comet impact with screenshots, 1: fast-forward, 2: silent load placement, 3: cleared mid-shake. */
+    private void startGateImpact(int mode) {
+        FastForwardAction.turnOff();
+        starts.set(0); finishes.set(0);
+        Vector2 position = LocationPositionResolver.resolve(LocationId.ARKHAM);
+        camera(position.x, position.y);
+        float cameraX = MapStage.getCamera().position.x, cameraY = MapStage.getCamera().position.y;
+        GateInfo info = new GateInfo() {
+            public GateColor getGateColor() { return GateColor.GREEN; }
+            public LocationId getLocationId() { return LocationId.ARKHAM; }
+        };
+        (mode == 2 ? GateUtils.spawnGate(info, OmenColor.GREEN) : GateUtils.spawnGate(info, OmenColor.GREEN, starts::incrementAndGet))
+                .subscribe(finishes::incrementAndGet, MapEffectsPreview::fail);
+        Gdx.app.postRunnable(() -> {
+            try {
+                Group gates = MapStage.getGateLayer(), sky = MapStage.getSkyEffectLayer();
+                require(gates.getChildren().size == 3, "Gate needs all three world copies");
+                require(sky.getChildren().size == (mode == 2 ? 0 : 3), "Each world copy needs its own comet");
+                if (mode != 2) for (Actor gate : gates.getChildren()) {
+                    require(gate.getColor().a == 0 && gate.getScaleX() == 0, "Gate visible before the comet hit");
+                }
+                Pixmap base = mode == 0 ? readMap() : null;
+                if (mode == 1) FastForwardAction.turnOn();
+                int impactFrame = -1;
+                float headY = Float.MAX_VALUE;
+                boolean shook = false;
+                for (int frame = 0; frame < 200; frame++) {
+                    stage.act(1f / 60);
+                    if (mode == 2) {
+                        require(sky.getChildren().size == 0, "Loading a gate launched a comet");
+                        continue;
+                    }
+                    MapImpactComet comet = sky.getChildren().size > 0 && sky.getChildren().first() instanceof MapImpactComet
+                            ? (MapImpactComet) sky.getChildren().first() : null;
+                    if (impactFrame < 0 && starts.get() == 0) {
+                        require(comet != null && !comet.hasImpacted(), "Comet vanished before impact");
+                        for (Actor gate : gates.getChildren()) require(gate.getColor().a == 0, "Gate opened before impact");
+                        float y = comet.getMapLightCenter(new Vector2()).y;
+                        require(y < headY && y > position.y, "Comet must fall toward the location");
+                        headY = y;
+                        if (mode == 0 && (frame == 8 || frame == 24 || frame == 38)) draw("gate-comet-" + frame);
+                    } else if (impactFrame < 0) {
+                        impactFrame = frame;
+                        require(starts.get() == 1 && MapStage.getSpawnEffectLayer().getChildren().size == 3,
+                                "Impact sound and ground smoke are not synchronized");
+                        require(mode == 1 || frame > 30, "Comet hit too early");
+                    }
+                    float dx = MapStage.getCamera().position.x - cameraX, dy = MapStage.getCamera().position.y - cameraY;
+                    if (Math.abs(dx) > .5f || Math.abs(dy) > .5f) {
+                        require(impactFrame >= 0, "Camera shook before impact");
+                        require(Math.abs(dx) < 12 && Math.abs(dy) < 12, "Camera shake too strong");
+                        shook = true;
+                    }
+                    if (mode == 3 && impactFrame >= 0 && frame == impactFrame + 3) {
+                        require(shook, "Impact did not shake the camera");
+                        MapStage.clearIdActorMap();
+                        require(cameraAt(cameraX, cameraY), "Clearing the map left the camera displaced");
+                        require(sky.getChildren().size == 0, "Clearing the map left comets behind");
+                        break;
+                    }
+                    if (mode == 0 && impactFrame >= 0) {
+                        int since = frame - impactFrame;
+                        if (since == 1) {
+                            Pixmap lit = readMap();
+                            int before = base.getPixel(480, 270) >>> 24 & 255, after = lit.getPixel(480, 270) >>> 24 & 255;
+                            require(after > before + 10, "Impact flash did not light the terrain");
+                            lit.dispose();
+                        }
+                        if (since == 0 || since == 4 || since == 12 || since == 30 || since == 60) draw("gate-impact-" + since);
+                    }
+                }
+                if (base != null) base.dispose();
+                FastForwardAction.turnOff();
+                if (mode == 3) {
+                    require(shook && starts.get() == 1, "Interrupted impact did not land");
+                    System.out.println("PASS: map spawns, rumor storms and gate comets; wrap, clicks, silent load, shake, normal/fast/speed-change/large-delta and cleanup");
+                    Gdx.app.exit();
+                    return;
+                }
+                require(finishes.get() == 1 && starts.get() == (mode == 2 ? 0 : 1), "Gate spawn callbacks must run once");
+                require(mode == 2 || shook, "Impact did not shake the camera");
+                require(cameraAt(cameraX, cameraY), "Camera shake did not return the camera");
+                require(sky.getChildren().size == 0 && MapStage.getSpawnEffectLayer().getChildren().size == 0,
+                        "Impact effects remained after the spawn");
+                for (Actor gate : gates.getChildren()) {
+                    require(gate.getScaleX() == 1 && gate.getColor().a == 1 && gate.getRotation() == 0, "Gate did not settle");
+                    require(Math.abs(gate.getY() + gate.getOriginY() - position.y) < .01f
+                            && Math.abs((gate.getX() + gate.getOriginX() - position.x) % MAP_WIDTH) < .01f, "Gate missed the impact site");
+                }
+                if (mode == 0) draw("gate-impact-settled");
+                MapStage.clearIdActorMap();
+                Field tracked = InfoStage.getFastForwardButton().getClass().getDeclaredField("fastForwardActions"); tracked.setAccessible(true);
+                require(((Map<?,?>)tracked.get(InfoStage.getFastForwardButton())).isEmpty(), "Gate impact actions leaked");
+                startGateImpact(mode + 1);
+            } catch (Throwable error) { fail(error); }
         });
     }
 
@@ -416,6 +513,10 @@ public class MapEffectsPreview extends ApplicationAdapter {
             if (actor instanceof MonsterImage) ((MonsterImage) actor).setSpawnAnimationActive(active);
             if (actor instanceof EpicMonsterImage) ((EpicMonsterImage) actor).setSpawnAnimationActive(active);
         }
+    }
+
+    private static boolean cameraAt(float x, float y) {
+        return Math.abs(MapStage.getCamera().position.x - x) < .01f && Math.abs(MapStage.getCamera().position.y - y) < .01f;
     }
 
     private void camera(float x, float y) { MapStage.getCamera().position.set(x,y,0); MapStage.getCamera().zoom=.65f; MapStage.getCamera().update(); }

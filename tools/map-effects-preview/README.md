@@ -15,6 +15,7 @@ The offscreen LWJGL runner saves PNGs to `build/map-effects-preview/` and checks
 - Clue, investigator and monster landings from above on all three map copies, including fast-forward.
 - Smoke starts at impact, with tokens settling at their exact map positions.
 - Single spawn callbacks, settled tokens, smoke cleanup and removal during an effect.
+- New gates arrive as a comet crashing into the location: hidden before impact, impact sound, smoke, flash and a short camera shake, then the gate grows from the crater. This covers fast-forward, quiet placement on load and clearing mid-effect (camera restored).
 
 The related six-token Health/Sanity cascade checks are in `tools/vitality-loss-preview`.
 
