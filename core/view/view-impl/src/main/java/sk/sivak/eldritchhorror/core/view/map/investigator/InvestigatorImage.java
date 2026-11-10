@@ -69,6 +69,9 @@ public class InvestigatorImage extends Image {
     private boolean defeated;
     private boolean defeatedByHealth;
     private boolean highlighted;
+    private float spotlight;
+    private static final float SPOTLIGHT_FADE_TIME = 0.5f;
+    private static final Color HIGHLIGHT_PALE = new Color(0.82f, 0.88f, 1f, 1f);
 
     public static final int BASE_ACTIONS = 2;
     private static final float PIP_SIZE = 16f;
@@ -264,6 +267,8 @@ public class InvestigatorImage extends Image {
         updateDetained(delta);
         updatePoisoned(delta);
         updateRemainingActions();
+        float spotlightStep = delta / SPOTLIGHT_FADE_TIME;
+        spotlight = highlighted ? Math.min(1f, spotlight + spotlightStep) : Math.max(0f, spotlight - spotlightStep);
         if (hitShake > 0f) {
             hitShake = Math.max(0f, hitShake - delta);
             hitTime += delta;
@@ -395,6 +400,11 @@ public class InvestigatorImage extends Image {
         return highlighted;
     }
 
+    /** How strongly the map spotlight shines on this stand: fades to 1 while highlighted, 0 otherwise. */
+    public float getSpotlight() {
+        return Interpolation.smooth.apply(spotlight);
+    }
+
     void highlight(boolean active) {
         this.highlighted = active;
         if (active) {
@@ -402,6 +412,7 @@ public class InvestigatorImage extends Image {
             remove();
             parent.addActor(this);
             borderImage.clearActions();
+            borderImage.setColor(Color.WHITE);
             addHighlightAction();
             setColor(Color.WHITE);
         } else {
@@ -415,19 +426,20 @@ public class InvestigatorImage extends Image {
     }
 
     private void addHighlightAction() {
-        ColorAction toYellowAction = new ColorAction();
-        toYellowAction.setEndColor(Color.YELLOW);
-        toYellowAction.setActor(borderImage);
-        toYellowAction.setDuration(FADING_EFFECT_DURATION);
-        toYellowAction.setInterpolation(Interpolation.sine);
+        // The current investigator's rim shines like pure light, breathing between white and a pale glow.
+        ColorAction toPaleAction = new ColorAction();
+        toPaleAction.setEndColor(HIGHLIGHT_PALE);
+        toPaleAction.setActor(borderImage);
+        toPaleAction.setDuration(FADING_EFFECT_DURATION);
+        toPaleAction.setInterpolation(Interpolation.sine);
 
-        ColorAction toGreenAction = new ColorAction();
-        toGreenAction.setEndColor(Color.GREEN);
-        toGreenAction.setActor(borderImage);
-        toGreenAction.setDuration(FADING_EFFECT_DURATION);
-        toGreenAction.setInterpolation(Interpolation.sine);
+        ColorAction toWhiteAction = new ColorAction();
+        toWhiteAction.setEndColor(Color.WHITE);
+        toWhiteAction.setActor(borderImage);
+        toWhiteAction.setDuration(FADING_EFFECT_DURATION);
+        toWhiteAction.setInterpolation(Interpolation.sine);
 
-        borderImage.addAction(Actions.sequence(toYellowAction, toGreenAction, Actions.run(this::addHighlightAction)));
+        borderImage.addAction(Actions.sequence(toPaleAction, toWhiteAction, Actions.run(this::addHighlightAction)));
     }
 
     public void setOffset(float newOffsetX, float newOffsetY) {

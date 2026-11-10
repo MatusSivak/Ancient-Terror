@@ -28,8 +28,8 @@ final class GateDissipateAnimation extends Group {
     private static final float FADE_TIME = 1.2f;
     private static final float TOTAL_TIME = SPIN_UP_TIME + FADE_TIME;
     private static final int WISPS = 30;
-    /** Degrees per second of the open gate (360 degrees per 8 seconds in NewGateAnimatedImage). */
-    static final float IDLE_SPIN = 45f;
+    /** Degrees per second of an open gate matching the omen. */
+    static final float IDLE_SPIN = NewGateAnimatedImage.ACTIVE_SPIN;
     static final float CORE_PEAK_SPIN = 600f;
     static final float HALO_PEAK_SPIN = 260f;
 

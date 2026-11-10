@@ -95,14 +95,14 @@ public class MapEffectsPreview extends ApplicationAdapter {
         MapStage.clearIdActorMap();
     }
 
-    private void checkGateLighting() {
+    private void checkGateLighting() throws Exception {
         // Center the camera on the seam and sample only the map, separately from the gate artwork.
         camera(MAP_WIDTH, 800);
         Pixmap base = readMap();
         int[] channels = new int[3];
         GateColor[] colors = {GateColor.RED, GateColor.GREEN, GateColor.BLUE};
         for (int i = 0; i < colors.length; i++) {
-            NewGateAnimatedImage gate = new NewGateAnimatedImage(colors[i], OmenColor.GREEN);
+            NewGateAnimatedImage gate = new NewGateAnimatedImage(colors[i], OmenColor.valueOf(colors[i].name()));
             gate.setBounds(MAP_WIDTH - 67.5f, 800 - 67.5f, 135, 135);
             MapStage.getGateLayer().addActor(gate);
             Pixmap lit = readMap();
@@ -125,6 +125,8 @@ public class MapEffectsPreview extends ApplicationAdapter {
         Pixmap cleared = readMap();
         require(cleared.getPixel(540, 270) == base.getPixel(540, 270), "Removed gate left a light");
         cleared.dispose();
+        checkDormantGate(base);
+        checkSpotlight(base);
         base.dispose();
 
         // Compare the same terrain pixel under an equivalent fireball-style point light.
@@ -142,6 +144,57 @@ public class MapEffectsPreview extends ApplicationAdapter {
         reference.dispose();
         point.remove();
         backdrop.remove();
+    }
+
+    /** Only the gate matching the omen glows; a dormant gate leaves the terrain dark and turns slowly. */
+    private void checkDormantGate(Pixmap base) {
+        NewGateAnimatedImage dormant = new NewGateAnimatedImage(GateColor.RED, OmenColor.GREEN);
+        NewGateAnimatedImage active = new NewGateAnimatedImage(GateColor.GREEN, OmenColor.GREEN);
+        dormant.setBounds(MAP_WIDTH - 67.5f, 800 - 67.5f, 135, 135);
+        MapStage.getGateLayer().addActor(dormant);
+        Pixmap unlit = readMap();
+        require(unlit.getPixel(540, 270) == base.getPixel(540, 270), "Dormant gate lit the map");
+        unlit.dispose();
+        float dormantStart = dormant.getChildren().get(0).getRotation();
+        float activeStart = active.getChildren().get(0).getRotation();
+        for (int i = 0; i < 30; i++) { dormant.act(1f / 60); active.act(1f / 60); }
+        float dormantSpin = dormant.getChildren().get(0).getRotation() - dormantStart;
+        float activeSpin = active.getChildren().get(0).getRotation() - activeStart;
+        require(dormantSpin > 0f && activeSpin > dormantSpin * 3f, "Dormant gate should turn slowly");
+        // The omen switching to the gate's color fades its light in.
+        dormant.updateOmen(OmenColor.RED);
+        for (int i = 0; i < 60; i++) dormant.act(1f / 60);
+        Pixmap awakened = readMap();
+        require((awakened.getPixel(540, 270) >>> 24 & 255) > (base.getPixel(540, 270) >>> 24 & 255) + 4,
+                "Gate matching the new omen did not light the map");
+        awakened.dispose();
+        dormant.remove();
+    }
+
+    /** The current investigator stands in a white spotlight; others do not light the map. */
+    private void checkSpotlight(Pixmap base) throws Exception {
+        InvestigatorImage stand = new InvestigatorImage(InvestigatorId.THE_SAILOR, null);
+        stand.setPosition(MAP_WIDTH - stand.getWidth() / 2f, 800 - stand.getHeight() * .35f);
+        MapStage.getInvestigatorLayer().addActor(stand);
+        stand.act(1f);
+        Pixmap idle = readMap();
+        require(idle.getPixel(480, 270) == base.getPixel(480, 270), "Idle investigator lit the map");
+        idle.dispose();
+        Method highlight = InvestigatorImage.class.getDeclaredMethod("highlight", boolean.class);
+        highlight.setAccessible(true);
+        highlight.invoke(stand, true);
+        stand.act(1f);
+        Pixmap lit = readMap();
+        for (int x : new int[]{480, 530}) {
+            for (int shift : new int[]{8, 16, 24}) {
+                require((lit.getPixel(x, 270) >>> shift & 255) > (base.getPixel(x, 270) >>> shift & 255) + 4,
+                        "Spotlight failed to light the map at " + x);
+            }
+        }
+        require(lit.getPixel(700, 270) == base.getPixel(700, 270), "Spotlight lit distant terrain");
+        lit.dispose();
+        draw("investigator-spotlight");
+        stand.remove();
     }
 
     private Pixmap readMap() {

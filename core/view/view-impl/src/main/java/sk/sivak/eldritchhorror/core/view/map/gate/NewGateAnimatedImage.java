@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -19,11 +20,18 @@ import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 
 public class NewGateAnimatedImage extends Group {
 
+    /** Degrees per second: the gate matching the omen spins a full turn in 8 seconds, the others drift slowly. */
+    static final float ACTIVE_SPIN = 45f;
+    private static final float INACTIVE_SPIN = 9f;
+    private static final float ACTIVITY_FADE_TIME = 0.8f;
+
     private final Image backgroundImage;
     private final AnimatedImage gateAnimatedImage;
     private final GateColor gateColor;
     private final Color tint;
     private Image omenPulse;
+    private boolean active;
+    private float activity;
 
     /** A separate halo leaves the idle vortex animation and the gate's map layer intact. */
     private void setOmenPulse(boolean enabled) {
@@ -65,12 +73,20 @@ public class NewGateAnimatedImage extends Group {
 
         backgroundImage.setColor(tint.r, tint.g, tint.b, 0.7f);
 
-        backgroundImage.addAction(Actions.forever(Actions.rotateBy(360f, 8f)));
-        gateAnimatedImage.addAction(Actions.forever(Actions.rotateBy(360f, 8f)));
-
         addActor(backgroundImage);
         addActor(gateAnimatedImage);
         updateOmen(omenColor);
+        activity = active ? 1f : 0f;
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        float step = delta / ACTIVITY_FADE_TIME;
+        activity = active ? Math.min(1f, activity + step) : Math.max(0f, activity - step);
+        float spin = MathUtils.lerp(INACTIVE_SPIN, ACTIVE_SPIN, getLightLevel()) * delta;
+        backgroundImage.setRotation((backgroundImage.getRotation() + spin) % 360f);
+        gateAnimatedImage.setRotation((gateAnimatedImage.getRotation() + spin) % 360f);
     }
 
     public Completable closeGate() {
@@ -113,6 +129,7 @@ public class NewGateAnimatedImage extends Group {
     }
 
     public void setVortexHighlighted(boolean highlighted) {
+        active = highlighted;
         if (highlighted) {
             gateAnimatedImage.setColor(tint.r, tint.g, tint.b, 1.0f);
             gateAnimatedImage.setFrameDuration(0.04f);
@@ -124,6 +141,11 @@ public class NewGateAnimatedImage extends Group {
 
     public Color getLightColor() {
         return tint;
+    }
+
+    /** 1 while the gate matches the current omen and lights the map around it, 0 for a dormant gate. */
+    public float getLightLevel() {
+        return Interpolation.smooth.apply(activity);
     }
 
     public static Color toLibgdxColor(GateColor gateColor) {
