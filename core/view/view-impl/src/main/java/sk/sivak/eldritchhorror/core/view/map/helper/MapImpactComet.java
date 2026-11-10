@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.MapLightSource;
+import sk.sivak.eldritchhorror.core.view.utils.EffectTextures;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 
 import java.util.Random;
@@ -46,8 +46,6 @@ public final class MapImpactComet extends Actor implements MapLightSource {
     private static final Color SMOKE = new Color(.24f, .21f, .2f, 1f);
     private static final Color SCORCHED_SMOKE = new Color(.9f, .5f, .25f, 1f);
     private static final int SPARKS = 22, PUFFS = 14, BURSTS = 7, JITTERS = 16;
-
-    private Texture glow, ring;
 
     private final TextureRegion[] frames;
     private final Texture smoke = getTexture(GATE_SMOKE);
@@ -121,13 +119,7 @@ public final class MapImpactComet extends Actor implements MapLightSource {
 
     @Override protected void setStage(Stage stage) {
         super.setStage(stage);
-        if (stage == null) {
-            clearActions();
-            // Generated textures are unmanaged; never keep them across a GL context loss.
-            if (glow != null) glow.dispose();
-            if (ring != null) ring.dispose();
-            glow = ring = null;
-        }
+        if (stage == null) clearActions();
     }
 
     private float time() {
@@ -314,37 +306,10 @@ public final class MapImpactComet extends Actor implements MapLightSource {
     }
 
     private Texture getGlow() {
-        if (glow == null) glow = radialTexture(false);
-        return glow;
+        return EffectTextures.glow();
     }
 
     private Texture getRing() {
-        if (ring == null) ring = radialTexture(true);
-        return ring;
-    }
-
-    private static Texture radialTexture(boolean hollow) {
-        int size = 128;
-        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                float dx = (x + .5f) / size * 2f - 1f, dy = (y + .5f) / size * 2f - 1f;
-                float r = (float) Math.sqrt(dx * dx + dy * dy);
-                float a;
-                if (hollow) {
-                    float d = (r - .86f) / .09f;
-                    a = r >= 1f ? 0f : (float) Math.exp(-d * d);
-                } else {
-                    float f = MathUtils.clamp(1f - r, 0f, 1f);
-                    a = f * f * (3f - 2f * f);
-                }
-                pixmap.setColor(1f, 1f, 1f, a);
-                pixmap.drawPixel(x, y);
-            }
-        }
-        Texture texture = new Texture(pixmap);
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        pixmap.dispose();
-        return texture;
+        return EffectTextures.ring();
     }
 }

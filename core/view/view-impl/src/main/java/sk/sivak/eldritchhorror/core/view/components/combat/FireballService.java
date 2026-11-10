@@ -64,15 +64,10 @@ public class FireballService {
         stage.addActor(fireballGroup);
     }
 
-    /** Frees pooled particle effects and pending actions; a plain {@link Group#clear()} would leak both. */
+    /** Frees pending actions; trails and impacts simply leave with their layers. */
     private void discardChildren() {
         for (Actor actor : new Array<>(fireballGroup.getChildren())) {
             actor.clearActions();
-        }
-        for (Actor actor : new Array<>(smokeGroup.getChildren())) {
-            if (actor instanceof FireballSmokeBuilder.FireballSmoke) {
-                ((FireballSmokeBuilder.FireballSmoke) actor).dispose();
-            }
         }
         for (Actor actor : new Array<>(explosionGroup.getChildren())) {
             if (actor instanceof Explosion) {

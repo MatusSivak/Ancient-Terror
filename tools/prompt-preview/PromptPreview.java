@@ -587,17 +587,26 @@ public class PromptPreview extends ApplicationAdapter {
             (sanity ? table.destroySanity(investigator) : table.destroyHealth(investigator)).subscribe(completed::incrementAndGet);
             float startX = image.getX();
             fireballs.clear();
+            int impactFrame = -1;
             for (int i = 0; i < 900 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
                 collectFireballs(fireballs);
                 require(Math.abs(image.getX() - startX) < 6f, "monster kept walking while attacking sanity=" + sanity + " i=" + i + " dx=" + (image.getX() - startX));
                 requireTokensInSlots(slots, plate);
                 if (i == 60) draw("monster-attack-" + (sanity ? "sanity" : "health"));
+                if (impactFrame < 0 && stage.getRoot().findActor("combat-fireball-impact") != null) impactFrame = i;
+                if (impactFrame >= 0 && (i - impactFrame == 2 || i - impactFrame == 12)) {
+                    draw("monster-attack-" + (sanity ? "sanity" : "health") + "-impact-" + (i - impactFrame));
+                }
             }
             require(completed.get() == 1, "monster attack did not complete (sanity=" + sanity + ")");
+            require(impactFrame >= 0, "unblocked fireballs should burst on the investigator (sanity=" + sanity + ")");
             require(fireballs.size() == investigator.size(), "expected one fireball per point lost, saw " + fireballs.size());
             tick(60);
         }
+        tick(30);
+        require(stage.getRoot().findActor("combat-fireball-impact") == null
+                && stage.getRoot().findActor("combat-fireball-trail") == null, "fireball trails or impacts outlived the attack");
         table.remove();
         tick(60);
         require(image.getStage() == null && table.getStatusPlate().getStage() == null, "monster left behind after attack");

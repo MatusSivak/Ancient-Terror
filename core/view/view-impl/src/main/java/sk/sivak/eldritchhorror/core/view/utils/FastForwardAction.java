@@ -64,6 +64,11 @@ public class FastForwardAction<T extends Action> extends DelegateAction {
         return on;
     }
 
+    /** Multiplier applied to fast-forwarded actions; lets self-timed effects keep pace with them. */
+    public static float getSpeed() {
+        return fastForwardSpeed;
+    }
+
     public static boolean isHeld() {
         FastForwardButton fastForwardButton = InfoStage.getFastForwardButton();
         return fastForwardButton != null && fastForwardButton.isHeld();

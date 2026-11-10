@@ -183,7 +183,7 @@ public class Game extends com.badlogic.gdx.Game {
         OnScreenActors.nullifyInstance();
         BigActorsManager.nullifyInstance();
         FireballSmokeBuilder.nullifyInstance();
-        sk.sivak.eldritchhorror.core.view.components.combat.Explosion.nullifyPool();
+        sk.sivak.eldritchhorror.core.view.utils.EffectTextures.dispose();
         CommandQueueImpl.nullifyInstance();
         CustomAssetManager.nullifyInstance();
         ServiceLocator.nullifyInstance();

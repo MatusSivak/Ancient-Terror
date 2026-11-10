@@ -33,6 +33,11 @@ public class FireballImage extends Image {
         setDrawable(frames[(int)(stateTime * framesPerSecond) % frames.length]);
     }
 
+    /** The compiled blue flame shader, or null if it failed to compile. */
+    static ShaderProgram blueShader() {
+        return getBlueShader().isCompiled() ? blueShader : null;
+    }
+
     /** Swaps the red and blue channels of the orange flame art, turning it into a cold blue fire. */
     private static ShaderProgram getBlueShader() {
         if (blueShader == null) {
