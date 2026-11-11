@@ -22,7 +22,7 @@ public class SingleMap extends Image {
     private static final float LIGHT_RADIUS_IN_GATE_WIDTHS = 1.45f;
     private static final float LIGHT_INTENSITY = 0.42f;
     private static final float SPOTLIGHT_RADIUS_IN_STAND_HEIGHTS = 0.9f;
-    private static final float SPOTLIGHT_INTENSITY = 0.5f;
+    private static final float SPOTLIGHT_INTENSITY = 0.38f;
     private static final Color SPOTLIGHT_COLOR = new Color(1f, 0.98f, 0.94f, 1f);
     // Each light quad samples the map underneath it. Clip at tile boundaries so a
     // light spanning the wrap seam adds its contribution exactly once on each side.
