@@ -41,6 +41,7 @@ import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.components.typewriter.CardResolutionArtwork;
 import sk.sivak.eldritchhorror.core.view.components.combat.CombatOverviewTable;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
+import sk.sivak.eldritchhorror.core.view.components.combat.ScreenHitEffect;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRoller;
 import sk.sivak.eldritchhorror.core.view.components.diceroller.DiceRollerStack;
 import sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss;
@@ -606,8 +607,9 @@ public class TestViewImpl implements TestView {
                         }));
     }
 
-    /** The fireball hits the fighting investigator: every visible copy of the stand flinches. */
+    /** The fireball hits the fighting investigator: every visible copy of the stand flinches and the screen jolts. */
     private void shakeInvestigatorStands(boolean sanity) {
+        ScreenHitEffect.play(sanity);
         for (InvestigatorImage stand : findInvestigatorStands()) {
             stand.playHitReaction(sanity);
         }

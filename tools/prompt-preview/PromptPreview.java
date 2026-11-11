@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import rx.Subscription;
 import sk.sivak.eldritchhorror.core.constants.TokenCardInfo;
 import sk.sivak.eldritchhorror.core.constants.combat.CombatOverviewTableData;
@@ -33,6 +34,7 @@ import sk.sivak.eldritchhorror.core.view.components.combat.Fireball;
 import sk.sivak.eldritchhorror.core.view.components.combat.TokenInFrame;
 import sk.sivak.eldritchhorror.core.view.components.combat.TokenInFrameBar;
 import sk.sivak.eldritchhorror.core.view.components.combat.MonsterCombatTable;
+import sk.sivak.eldritchhorror.core.view.components.combat.ScreenHitEffect;
 import sk.sivak.eldritchhorror.core.constants.combat.MonsterCombatTableData;
 import sk.sivak.eldritchhorror.core.view.test.TestTableStack;
 import sk.sivak.eldritchhorror.core.view.test.TestResultTable;
@@ -656,8 +658,17 @@ public class PromptPreview extends ApplicationAdapter {
             Map<Actor, Integer> thrownAt = new HashMap<>();
             List<Integer> lossFrames = new ArrayList<>();
             int lastValue = 5;
+            Vector3 hudRest = stage.getCamera().position.cpy(), mapRest = camera.position.cpy();
+            int hitFrame = -1;
+            float hudJolt = 0f, mapJolt = 0f;
             for (int i = 0; i < 1200 && completed.get() == 0; i++) {
                 stage.act(1f / 60);
+                if (hitFrame < 0 && stage.getRoot().findActor(ScreenHitEffect.NAME) != null) hitFrame = i;
+                if (hitFrame >= 0 && i - hitFrame < 30) {
+                    hudJolt = Math.max(hudJolt, stage.getCamera().position.dst(hudRest));
+                    mapJolt = Math.max(mapJolt, camera.position.dst(mapRest));
+                }
+                if (hitFrame >= 0 && i - hitFrame == 3) draw("monster-attack-stand-" + (sanity ? "sanity" : "health") + "-hit");
                 for (Actor actor : descendants(stage.getRoot())) {
                     if (actor instanceof Fireball && actor.getActions().size > 0) {
                         if (!thrownAt.containsKey(actor)) thrownAt.put(actor, i);
@@ -690,7 +701,12 @@ public class PromptPreview extends ApplicationAdapter {
             int skipped = sanity ? sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.consumeSanity(3)
                     : sk.sivak.eldritchhorror.core.view.action.PrePlayedTokenLoss.consumeHealth(3);
             require(skipped == 3, "expected 3 pre-played tokens, got " + skipped);
+            require(hitFrame >= 0, "investigator hit did not flare the screen (sanity=" + sanity + ")");
+            require(hudJolt > 1f && mapJolt > 1f, "investigator hit did not shake the screen: hud=" + hudJolt + " map=" + mapJolt);
             tick(60);
+            require(stage.getRoot().findActor(ScreenHitEffect.NAME) == null, "screen hit effect outlived the attack");
+            require(stage.getCamera().position.dst(hudRest) < .01f && camera.position.dst(mapRest) < .01f,
+                    "screen shake did not return the cameras to rest");
         }
         table.remove();
         MapStage.removeActor(InvestigatorUtils.getIdLayerResolver(id, false));

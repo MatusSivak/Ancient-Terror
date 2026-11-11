@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 /** Soft white sprites for additive effects, generated once and reloaded after a GL context loss. */
 public final class EffectTextures {
 
-    private static Texture glow, ring;
+    private static Texture glow, ring, vignette;
 
     private EffectTextures() {
     }
@@ -25,13 +25,37 @@ public final class EffectTextures {
         return ring;
     }
 
+    /** Clear in the middle, darkening toward the edges with a firmer rim along the border; stretch it over the screen. */
+    public static Texture vignette() {
+        if (vignette == null) {
+            int size = 128;
+            Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+            for (int y = 0; y < size; y++) {
+                for (int x = 0; x < size; x++) {
+                    float dx = Math.abs((x + .5f) / size * 2f - 1f), dy = Math.abs((y + .5f) / size * 2f - 1f);
+                    float soft = smoothstep(.55f, 1.42f, (float) Math.sqrt(dx * dx + dy * dy));
+                    float rim = smoothstep(.82f, 1f, Math.max(dx, dy));
+                    pixmap.setColor(1f, 1f, 1f, Math.min(1f, soft * soft * .75f + rim * rim * .7f));
+                    pixmap.drawPixel(x, y);
+                }
+            }
+            vignette = managed(pixmap);
+        }
+        return vignette;
+    }
+
     public static void dispose() {
-        for (Texture texture : new Texture[]{glow, ring}) {
+        for (Texture texture : new Texture[]{glow, ring, vignette}) {
             if (texture == null) continue;
             texture.getTextureData().consumePixmap().dispose();
             texture.dispose();
         }
-        glow = ring = null;
+        glow = ring = vignette = null;
+    }
+
+    private static float smoothstep(float from, float to, float value) {
+        float f = MathUtils.clamp((value - from) / (to - from), 0f, 1f);
+        return f * f * (3f - 2f * f);
     }
 
     private static Texture radial(boolean hollow) {
@@ -53,6 +77,10 @@ public final class EffectTextures {
                 pixmap.drawPixel(x, y);
             }
         }
+        return managed(pixmap);
+    }
+
+    private static Texture managed(Pixmap pixmap) {
         // Managed data keeps the pixmap so the texture can be rebuilt when the GL context is lost.
         Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false, true));
         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
