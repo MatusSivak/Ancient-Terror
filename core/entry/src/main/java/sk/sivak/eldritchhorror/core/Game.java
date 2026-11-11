@@ -24,7 +24,6 @@ import sk.sivak.eldritchhorror.core.util.PhaseLogCapture;
 import sk.sivak.eldritchhorror.core.view.game.InfoStage;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
-import sk.sivak.eldritchhorror.core.view.components.skilltestgrid.GridSkillTestPrototypeScreen;
 
 public class Game extends com.badlogic.gdx.Game {
 
@@ -48,18 +47,10 @@ public class Game extends com.badlogic.gdx.Game {
         }
         // Screens handle the back key themselves (in-game menu, return to main menu, exit).
         Gdx.input.setCatchBackKey(true);
-        if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
-            start();
-            return;
-        }
         setScreen(new PreloaderScreen(this::start));
     }
 
     public void start() {
-        if (Boolean.getBoolean("ancientterror.gridtest.prototype")) {
-            setScreen(new GridSkillTestPrototypeScreen());
-            return;
-        }
         ServiceLocator.setGame(this);
         checkIfTutorialWasPassed();
 

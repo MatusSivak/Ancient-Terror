@@ -136,6 +136,13 @@ android {
             excludes += ['META-INF/robovm/ios/robovm.xml', 'META-INF/DEPENDENCIES', 'log4j.properties', 'log4j.xml']
         }
     }
+    androidResources {
+        // aapt defaults plus authoring files that live beside the art: docs, AI prompts, Hiero settings,
+        // and files the desktop build writes into its assets working dir (saves, JVM crash logs).
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~' +
+                ':!*.md:!*.xcf:!*.hiero:!*prompt.txt:!*prompts.json:!charset.txt' +
+                ':!save.json:!save-*:!hs_err_pid*'
+    }
     defaultConfig {
         // Local checkout builds exercise the locked storefront without contacting Google Play.
         buildConfigField "boolean", "LOCAL_PURCHASES", propOrDefault("LOCAL_PURCHASES", "true").toBoolean().toString()

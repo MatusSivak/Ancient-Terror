@@ -15,9 +15,6 @@ public class GameDesktop {
             if ("--crash-report-test".equals(arg)) {
                 System.setProperty("ancientterror.crashReportTest", "true");
             }
-            if ("--grid-test-prototype".equals(arg)) {
-                System.setProperty("ancientterror.gridtest.prototype", "true");
-            }
         }
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         // Volleys of long gunshots overlap; the default 16 sources would cut some of them off.
