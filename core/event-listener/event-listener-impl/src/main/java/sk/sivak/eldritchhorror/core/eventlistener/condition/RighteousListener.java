@@ -1,7 +1,7 @@
 package sk.sivak.eldritchhorror.core.eventlistener.condition;
 
 import sk.sivak.eldritchhorror.core.constants.condition.righteous.RighteousCondition;
-import sk.sivak.eldritchhorror.core.constants.displayasset.*;
+import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.EventListenerImpl;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventqueue.EventListener;
@@ -14,10 +14,9 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import java.util.Arrays;
 import java.util.List;
 
-import static sk.sivak.eldritchhorror.core.constants.displayasset.ShowCardResponse.YES;
-
 public class RighteousListener extends AbstractConditionListener<RighteousCondition> {
 
+    private enum RighteousChoice {FOCUS, SANITY, NONE}
 
     private AfterRestOrFocusListener afterRestOrFocusListener;
     private AfterRestListener afterRestListener;
@@ -76,47 +75,33 @@ public class RighteousListener extends AbstractConditionListener<RighteousCondit
             if (!isOwner()) {
                 return;
             }
-            if (canGainFocus()) {
-                askToGainFocus();
-            } else if (canGainSanity()) {
-                askToGainSanity();
+            boolean canGainFocus = canGainFocus();
+            boolean canGainSanity = canGainSanity();
+            if (canGainFocus || canGainSanity) {
+                askForBonus(canGainFocus, canGainSanity);
             }
         }
 
-        private void askToGainFocus() {
-            ShowCardRequest showCardRequest = new ShowCardRequest();
-            showCardRequest.setConditionInfo(conditionInfo);
-            showCardRequest.setAssetOriginType(AssetOriginType.INVENTORY);
-            showCardRequest.setHideType(HideType.RETURN);
-            showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
-            showCardRequest.setTitle("Gain Focus?");
-            ServicePlatform.get().getGameService().showCard(showCardRequest).subscribe(this::onGainFocusAnswer);
+        // One explicit choice, so declining Focus can't silently skip the Sanity option.
+        private void askForBonus(boolean canGainFocus, boolean canGainSanity) {
+            Question<RighteousChoice> question = new Question<>();
+            question.setTitle(conditionInfo.getName() + ": gain 1 Focus or recover 1 Sanity?");
+            question.setPortraitBeforeTitle(investigatorId);
+            if (canGainFocus) {
+                question.addOption(new Question.Option<>("Gain 1 Focus", RighteousChoice.FOCUS));
+            }
+            if (canGainSanity) {
+                question.addOption(new Question.Option<>("Recover 1 Sanity", RighteousChoice.SANITY));
+            }
+            question.addOption(new Question.Option<>("Neither", RighteousChoice.NONE, 0x800000ff));
+            ServicePlatform.get().getGameService().<RighteousChoice, Object>ask(question)
+                    .subscribe(answer -> onAnswer(answer.getResponseData()));
         }
 
-        private void askToGainSanity() {
-            ShowCardRequest showCardRequest = new ShowCardRequest();
-            showCardRequest.setConditionInfo(conditionInfo);
-            showCardRequest.setAssetOriginType(AssetOriginType.INVENTORY);
-            showCardRequest.setHideType(HideType.RETURN);
-            showCardRequest.setDisplayAssetResponseType(DisplayAssetResponseType.YES_NO);
-            showCardRequest.setTitle("Recover Sanity?");
-            ServicePlatform.get().getGameService().showCard(showCardRequest).subscribe(this::onRecoverSanityAnswer);
-        }
-
-        private void onGainFocusAnswer(ShowCardResponse response) {
-            if (response == YES) {
+        private void onAnswer(RighteousChoice choice) {
+            if (choice == RighteousChoice.FOCUS) {
                 gainFocus();
-            } else {
-                if (canGainSanity()) {
-                    askToGainSanity();
-                } else {
-                    ServicePlatform.get().getService().convertTo(Object.class, () -> eventData);
-                }
-            }
-        }
-
-        private void onRecoverSanityAnswer(ShowCardResponse response) {
-            if (response == YES) {
+            } else if (choice == RighteousChoice.SANITY) {
                 gainSanity();
             } else {
                 ServicePlatform.get().getService().convertTo(Object.class, () -> eventData);

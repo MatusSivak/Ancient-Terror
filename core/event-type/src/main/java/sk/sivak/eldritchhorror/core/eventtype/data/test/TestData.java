@@ -39,6 +39,7 @@ public class TestData {
     private int scoreBonus = 0;
     private int minScoreToBeSuccessful = 1;
     private int calculatedDicePool;
+    private boolean pendingSixesDoubleOnesCancel;
 
     private int minSuccessDiceValue;
 
@@ -222,7 +223,38 @@ public class TestData {
     }
 
     public boolean hasReachedMinScoreToEndTest() {
-        return getScore() >= minScoreToEndTest;
+        return getProjectedScore() >= minScoreToEndTest;
+    }
+
+    /**
+     * Blunderbuss: each 6 counts as 2 successes and each 1 cancels a success, applied only after rerolls.
+     * Rerolls must judge the test by that outcome, otherwise a 1 is never offered for a reroll.
+     */
+    public void setPendingSixesDoubleOnesCancel(boolean pendingSixesDoubleOnesCancel) {
+        this.pendingSixesDoubleOnesCancel = pendingSixesDoubleOnesCancel;
+    }
+
+    public boolean isPendingSixesDoubleOnesCancel() {
+        return pendingSixesDoubleOnesCancel;
+    }
+
+    private int getProjectedScore() {
+        if (!pendingSixesDoubleOnesCancel || diceRolls == null) {
+            return getScore();
+        }
+        int diceScore = 0;
+        int ones = 0;
+        for (DiceRoll diceRoll : diceRolls) {
+            int value = diceRoll.getScore().getValue();
+            if (diceRoll.getDiceValue() == 6 && diceRoll.getScore() != DiceRoll.Score.BAD) {
+                value = Math.max(value, DiceRoll.Score.VERY_GOOD.getValue());
+            }
+            if (diceRoll.getDiceValue() == 1) {
+                ones++;
+            }
+            diceScore += value;
+        }
+        return diceScore - Math.min(ones, diceScore) + scoreBonus;
     }
 
     public boolean isCombat() {

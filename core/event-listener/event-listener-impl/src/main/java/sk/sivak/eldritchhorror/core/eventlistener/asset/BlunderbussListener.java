@@ -52,6 +52,7 @@ public class BlunderbussListener extends AbstractAssetListener<BlunderbussAsset>
         @Override
         protected Runnable getEventAction(TestData input) {
             return () -> {
+                input.setPendingSixesDoubleOnesCancel(false);
                 if (!usedInCombat) {
                     return;
                 }
@@ -163,6 +164,7 @@ public class BlunderbussListener extends AbstractAssetListener<BlunderbussAsset>
         private Action0 getOnUseAction(TestData input) {
             return () -> {
                 usedInCombat = true;
+                input.setPendingSixesDoubleOnesCancel(true);
             };
         }
 

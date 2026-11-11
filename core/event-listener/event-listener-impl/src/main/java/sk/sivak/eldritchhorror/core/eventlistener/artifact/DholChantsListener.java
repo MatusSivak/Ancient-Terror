@@ -86,7 +86,7 @@ public class DholChantsListener extends AbstractArtifactListener<DholChantsArtif
                     ServicePlatform.get().getService().hold();
                     UsableAsset usableAsset = new UsableAsset();
                     usableAsset.setCardInfo(getArtifactInfo());
-                    usableAsset.setStatBonus(3);
+                    usableAsset.setDicePoolBonus(3);
                     usableAsset.setUpByDefault(true);
                     input.addUsableAsset(usableAsset);
                     spendData.pay();

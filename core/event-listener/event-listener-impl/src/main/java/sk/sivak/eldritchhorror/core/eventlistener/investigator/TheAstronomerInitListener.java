@@ -27,6 +27,7 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
     private boolean temporarySupressSpendListener = false;
     private SpendOneLessClueListener spendOneLessClueListener;
     private ReenableDisabledAbility reenableDisabledAbility;
+    private ResetSpendSuppressionListener resetSpendSuppressionListener;
 
     @Override
     protected InvestigatorId getInvestigatorId() {
@@ -44,6 +45,9 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
         reenableDisabledAbility = new ReenableDisabledAbility();
         getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
 
+        resetSpendSuppressionListener = new ResetSpendSuppressionListener();
+        getEventQueue().addDirectEventListener(resetSpendSuppressionListener, DirectEvent.UPDATE_SCORE_USING_ASSETS);
+
         getService().hold();
         getService().gainSpellFromDeck(getInvestigatorId(), SpellId.FEED_THE_MIND);
         getService().convertTo(InvestigatorId.class, () -> eventData);
@@ -56,10 +60,12 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
         spendOneLessClueListener = new SpendOneLessClueListener();
         useSanityInsteadOfClueListener = new UseSanityInsteadOfClueListener();
         reenableDisabledAbility = new ReenableDisabledAbility();
+        resetSpendSuppressionListener = new ResetSpendSuppressionListener();
 
         getEventQueue().addBeforeEventListener(spendOneLessClueListener, BeforeAfterEvent.SPEND);
         getEventQueue().addDirectEventListener(useSanityInsteadOfClueListener, DirectEvent.REROLL_USING_ASSETS_2);
         getEventQueue().addDirectEventListener(reenableDisabledAbility, DirectEvent.REENABLE_DISABLED_ABILITIES);
+        getEventQueue().addDirectEventListener(resetSpendSuppressionListener, DirectEvent.UPDATE_SCORE_USING_ASSETS);
     }
 
     @Override
@@ -67,7 +73,22 @@ public class TheAstronomerInitListener extends AbstractInvestigatorInitListener 
         getEventQueue().unregisterListener(spendOneLessClueListener);
         getEventQueue().unregisterListener(reenableDisabledAbility);
         getEventQueue().unregisterListener(useSanityInsteadOfClueListener);
+        getEventQueue().unregisterListener(resetSpendSuppressionListener);
         getEventQueue().unregisterListener(this);
+    }
+
+    /** Declining the Sanity reroll only suppresses the Clue reroll of the same test; never later spends. */
+    private class ResetSpendSuppressionListener extends EventListenerImpl<TestData> {
+
+        @Override
+        public void onNotify(TestData eventData) {
+            temporarySupressSpendListener = false;
+        }
+
+        @Override
+        public Class<TestData> getDataClass() {
+            return TestData.class;
+        }
     }
 
     private class ReenableDisabledAbility extends EventListenerImpl<Void> {
