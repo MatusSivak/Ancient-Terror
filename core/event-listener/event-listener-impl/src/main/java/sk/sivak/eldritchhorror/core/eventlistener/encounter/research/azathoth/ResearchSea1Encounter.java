@@ -4,7 +4,6 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventtype.data.investigator.DelayedData;
 
 import static sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils.getActiveInvestigatorId;
@@ -33,6 +32,6 @@ public class ResearchSea1Encounter extends AbstractAzathothResearchEncounter {
             ServicePlatform.get().getService().release();
         }, () -> {
             ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true));
-        }).withTwoPassInfos().withoutPassFlavor().withoutFailFlavor().withResearchFlavor().execute();
+        }).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

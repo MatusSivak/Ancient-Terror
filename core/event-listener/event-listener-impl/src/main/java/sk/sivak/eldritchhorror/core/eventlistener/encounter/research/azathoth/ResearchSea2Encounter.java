@@ -4,7 +4,7 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class ResearchSea2Encounter extends AbstractAzathothResearchEncounter {
 
@@ -19,7 +19,7 @@ public class ResearchSea2Encounter extends AbstractAzathothResearchEncounter {
             gainThisClue();
             ServicePlatform.get().getService().showResearchBackground(LocationType.SEA);
             ServicePlatform.get().getService().release();
-        }, new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, 0, () -> {
+        }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, 0, NOTHING, () -> {
             ServicePlatform.get().getTokenService().loseHealth(2);
         }).withResearchFlavor()).execute();
     }

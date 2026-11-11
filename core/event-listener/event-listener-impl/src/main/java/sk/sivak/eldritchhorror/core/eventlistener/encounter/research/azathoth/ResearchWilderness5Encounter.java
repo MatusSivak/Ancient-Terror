@@ -6,7 +6,6 @@ import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 
 public class ResearchWilderness5Encounter extends AbstractAzathothResearchEncounter {
 
@@ -21,8 +20,8 @@ public class ResearchWilderness5Encounter extends AbstractAzathothResearchEncoun
             gainThisClue();
             ServicePlatform.get().getService().showResearchBackground(LocationType.WILDERNESS);
             ServicePlatform.get().getService().release();
-        }, new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+        }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 () -> ServicePlatform.get().getDoomOmenService().removeTokenFromOmenTrack(OmenId.NORTH)
-        ).withResearchFlavor()).execute();
+        , NOTHING).withResearchFlavor()).execute();
     }
 }

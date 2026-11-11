@@ -27,6 +27,6 @@ public class ResearchSea7Encounter extends AbstractAzathothResearchEncounter {
                 () -> {
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.INTERNAL_INJURY);
                 }
-        ).withTwoPassInfos().withoutFailFlavor().withResearchFlavor().execute();
+        ).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

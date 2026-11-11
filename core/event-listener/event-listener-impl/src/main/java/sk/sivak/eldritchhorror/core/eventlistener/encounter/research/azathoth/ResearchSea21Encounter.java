@@ -45,7 +45,7 @@ public class ResearchSea21Encounter extends AbstractAzathothResearchEncounter {
                     () -> {
                         ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
                     }
-            ).withoutPassFlavor().withTwoPassInfos().withResearchFlavor().execute();
+            ).withTwoPassInfos().withResearchFlavor().execute();
 
             ServicePlatform.get().getService().release();
         });

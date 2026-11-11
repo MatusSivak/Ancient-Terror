@@ -3,7 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.research.azathoth;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class ResearchCity11Encounter extends AbstractAzathothResearchEncounter {
 
@@ -13,7 +13,7 @@ public class ResearchCity11Encounter extends AbstractAzathothResearchEncounter {
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
                 () -> {
                     ServicePlatform.get().getService().hold();
                     ServicePlatform.get().getService().hideBackground();
@@ -21,6 +21,6 @@ public class ResearchCity11Encounter extends AbstractAzathothResearchEncounter {
                     ServicePlatform.get().getDoomOmenService().selectNewOmen();
                     ServicePlatform.get().getService().release();
                 }
-        ).withTwoPassInfos().withResearchFlavor().execute();
+        , NOTHING).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

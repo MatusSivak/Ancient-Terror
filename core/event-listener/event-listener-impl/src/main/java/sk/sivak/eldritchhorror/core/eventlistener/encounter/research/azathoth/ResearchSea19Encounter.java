@@ -18,17 +18,10 @@ public class ResearchSea19Encounter extends AbstractAzathothResearchEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), () -> {
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-        },() -> {
-            ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withPass().withFlavor().build());
-            TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build()).subscribe(() -> {
-                ServicePlatform.get().getService().hold();
-                ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-                gainThisClue();
-                ServicePlatform.get().getMonsterService().ambush(NonEpicMonsterId.CULTIST).subscribe();
-                ServicePlatform.get().getService().release();
-            });
-        });
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), () -> narrateOutcome(false, NOTHING),
+                () -> narrateOutcome(true, () -> {
+                    gainThisClue();
+                    ServicePlatform.get().getMonsterService().ambush(NonEpicMonsterId.CULTIST).subscribe();
+                }));
     }
 }

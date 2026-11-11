@@ -31,6 +31,6 @@ public class ResearchWilderness17Encounter extends AbstractAzathothResearchEncou
                     ServicePlatform.get().getService().release();
 
                 }
-        ).withoutPassFlavor().withoutFailFlavor().withResearchFlavor().execute();
+        ).withResearchFlavor().execute();
     }
 }

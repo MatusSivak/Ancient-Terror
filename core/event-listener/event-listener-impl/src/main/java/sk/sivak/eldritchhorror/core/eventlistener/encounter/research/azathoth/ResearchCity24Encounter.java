@@ -40,7 +40,7 @@ public class ResearchCity24Encounter extends AbstractAzathothResearchEncounter {
                 },
                 () -> {
                     TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
-                            () -> ServicePlatform.get().getEncounterService().finishTypewriterPaper(),
+                            () -> narrateOutcome(false, NOTHING),
                             this::onYes);
                 }).execute();
     }
@@ -54,9 +54,7 @@ public class ResearchCity24Encounter extends AbstractAzathothResearchEncounter {
                 return;
             }
 
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getTokenService().spend(0,0,0,2).subscribe(spendData -> {
+            narrateOutcome(true, () -> ServicePlatform.get().getTokenService().spend(0,0,0,2).subscribe(spendData -> {
                 if (!spendData.hasEnough()) {
                     return;
                 }
@@ -65,8 +63,7 @@ public class ResearchCity24Encounter extends AbstractAzathothResearchEncounter {
                 gainThisClue();
                 ServicePlatform.get().getService().release();
 
-            });
-            ServicePlatform.get().getService().release();
+            }));
         });
     }
 }

@@ -26,6 +26,6 @@ public class ResearchSea6Encounter extends AbstractAzathothResearchEncounter {
                 () -> {
                     ServicePlatform.get().getDoomOmenService().advanceOmen();
                 }
-        ).withTwoPassInfos().withoutFailFlavor().withResearchFlavor().execute();
+        ).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

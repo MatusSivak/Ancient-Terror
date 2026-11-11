@@ -36,6 +36,6 @@ public class ResearchWilderness24Encounter extends AbstractAzathothResearchEncou
                     ServicePlatform.get().getService().release();
 
                 }
-        ).withTwoPassInfos().withoutFailFlavor().withResearchFlavor().execute();
+        ).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

@@ -17,6 +17,6 @@ public class ResearchCity6Encounter extends AbstractAzathothResearchEncounter {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 this::gainThisClue,
                 () -> ServicePlatform.get().getDoomOmenService().advanceOmen()
-        ).withoutPassFlavor().withResearchFlavor().execute();
+        ).withResearchFlavor().execute();
     }
 }

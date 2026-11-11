@@ -17,9 +17,7 @@ public class ResearchCity13Encounter extends AbstractAzathothResearchEncounter {
     @Override
     protected void execute() {
         TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
-                () -> {
-                    ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-                },
+                () -> narrateOutcome(false, NOTHING),
                 this::onYes);
     }
 
@@ -40,9 +38,7 @@ public class ResearchCity13Encounter extends AbstractAzathothResearchEncounter {
                 return;
             }
 
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getTokenService().spend(0,0,0,2).subscribe(spendData -> {
+            narrateOutcome(true, () -> ServicePlatform.get().getTokenService().spend(0,0,0,2).subscribe(spendData -> {
                 if (!spendData.hasEnough()) {
                     return;
                 }
@@ -54,8 +50,7 @@ public class ResearchCity13Encounter extends AbstractAzathothResearchEncounter {
                 ServicePlatform.get().getGameService().gainArtifact(AssetTrait.TOME);
                 ServicePlatform.get().getService().release();
 
-            });
-            ServicePlatform.get().getService().release();
+            }));
         });
     }
 }

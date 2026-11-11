@@ -21,6 +21,6 @@ public class ResearchWilderness1Encounter extends AbstractAzathothResearchEncoun
                     ServicePlatform.get().getService().release();
                 },
                 () -> ServicePlatform.get().getTokenService().loseHealth(1)
-        ).withoutPassFlavor().withTwoPassInfos().withResearchFlavor().execute();
+        ).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

@@ -27,23 +27,14 @@ public class ResearchWilderness23Encounter extends AbstractAzathothResearchEncou
                 });
                 return;
             }
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getGameService().gainCondition(ConditionId.DARK_PACT);
-            gainThisClue();
-            ServicePlatform.get().getService().release();
+            narrateOutcome(true, () -> {
+                ServicePlatform.get().getGameService().gainCondition(ConditionId.DARK_PACT);
+                gainThisClue();
+            });
         });
     }
 
     private void onNo() {
-        ServicePlatform.get().getService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(" \n" +getTextBuilder().withFail().withFlavor().build());
-        TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getDoomOmenService().addTokenToOmenTrack(OmenId.NORTH);
-            ServicePlatform.get().getService().release();
-        });
-        ServicePlatform.get().getService().release();
+        narrateOutcome(false, () -> ServicePlatform.get().getDoomOmenService().addTokenToOmenTrack(OmenId.NORTH));
     }
 }

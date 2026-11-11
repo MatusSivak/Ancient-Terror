@@ -9,7 +9,7 @@ import sk.sivak.eldritchhorror.core.constants.question.Answer;
 import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ResearchWilderness11Encounter extends AbstractAzathothResearchEncou
             gainThisClue();
             ServicePlatform.get().getService().showResearchBackground(LocationType.WILDERNESS);
             ServicePlatform.get().getService().release();
-        }, new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, -2,
+        }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, -2, NOTHING,
                 () -> {
                     OmenColor omenColor = ServicePlatform.get().getOmenTrack().getCurrentOmen().getOmenColor();
                     List<LocationId> spawnedGates = ServicePlatform.get().getGateStackRead().getSpawnedGates(omenColor.toGateColor());

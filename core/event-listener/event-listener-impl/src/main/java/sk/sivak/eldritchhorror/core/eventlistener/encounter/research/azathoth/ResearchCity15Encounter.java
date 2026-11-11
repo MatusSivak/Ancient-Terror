@@ -21,6 +21,6 @@ public class ResearchCity15Encounter extends AbstractAzathothResearchEncounter {
                     OmenInfo currentOmen = ServicePlatform.get().getOmenTrack().getCurrentOmen();
                     ServicePlatform.get().getDoomOmenService().advanceDoomByCurrentOmen(currentOmen);
                 }
-        ).withoutPassFlavor().withResearchFlavor().execute();
+        ).withResearchFlavor().execute();
     }
 }

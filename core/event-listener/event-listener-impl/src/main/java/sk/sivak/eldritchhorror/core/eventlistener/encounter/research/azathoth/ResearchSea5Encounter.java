@@ -17,21 +17,18 @@ public class ResearchSea5Encounter extends AbstractAzathothResearchEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), () -> {
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-        }, () -> {
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), () -> narrateOutcome(false, NOTHING), () -> {
             if (ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.DARK_PACT)) {
                 TypewriterUtils.confirmInfos("You can't gain another Dark Pact").subscribe(() -> {
                     ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                 });
                 return;
             }
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getGameService().gainCondition(ConditionId.DARK_PACT);
-            gainThisClue();
-            ServicePlatform.get().getGameService().gainArtifact(ArtifactId.TTKA_HALOT);
-            ServicePlatform.get().getService().release();
+            narrateOutcome(true, () -> {
+                ServicePlatform.get().getGameService().gainCondition(ConditionId.DARK_PACT);
+                gainThisClue();
+                ServicePlatform.get().getGameService().gainArtifact(ArtifactId.TTKA_HALOT);
+            });
         });
     }
 }

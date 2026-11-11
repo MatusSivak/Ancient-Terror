@@ -4,7 +4,6 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventtype.data.investigator.DelayedData;
 
@@ -18,7 +17,7 @@ public class ResearchSea18Encounter extends AbstractAzathothResearchEncounter {
 
     @Override
     protected void execute() {
-        new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
+        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0, NOTHING,
                 () -> {
                     int tokensCount = ServicePlatform.get().getOmenTrack().getOmenInfo(OmenId.NORTH).getTokensCount();
                     ServicePlatform.get().getDoomOmenService().advanceDoom(tokensCount);

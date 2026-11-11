@@ -20,6 +20,6 @@ public class ResearchWilderness20Encounter extends AbstractAzathothResearchEncou
                     int tokensCount = ServicePlatform.get().getOmenTrack().getOmenInfo(OmenId.NORTH).getTokensCount();
                     ServicePlatform.get().getTokenService().loseHealth(tokensCount * 2);
                 }
-        ).withoutPassFlavor().withResearchFlavor().execute();
+        ).withResearchFlavor().execute();
     }
 }

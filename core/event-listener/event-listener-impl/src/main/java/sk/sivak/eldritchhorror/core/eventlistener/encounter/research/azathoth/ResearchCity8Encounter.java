@@ -25,6 +25,6 @@ public class ResearchCity8Encounter extends AbstractAzathothResearchEncounter {
                     ServicePlatform.get().getService().release();
                 },
                 () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true))
-        ).withTwoPassInfos().withoutPassFlavor().withResearchFlavor().execute();
+        ).withTwoPassInfos().withResearchFlavor().execute();
     }
 }

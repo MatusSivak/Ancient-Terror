@@ -5,7 +5,6 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 
 public class ResearchWilderness21Encounter extends AbstractAzathothResearchEncounter {
 
@@ -15,13 +14,13 @@ public class ResearchWilderness21Encounter extends AbstractAzathothResearchEncou
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
+        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                 () -> {
                     ServicePlatform.get().getService().hold();
                     ServicePlatform.get().getService().hideBackground();
                     ServicePlatform.get().getDoomOmenService().selectNewOmen();
                     ServicePlatform.get().getService().release();
                 }
-        ).withResearchFlavor().execute();
+        , NOTHING).withResearchFlavor().execute();
     }
 }

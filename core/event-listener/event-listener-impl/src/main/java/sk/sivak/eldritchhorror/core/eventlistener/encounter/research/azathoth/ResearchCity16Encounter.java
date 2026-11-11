@@ -22,7 +22,7 @@ public class ResearchCity16Encounter extends AbstractAzathothResearchEncounter {
                 new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -2,
                         this::gainThisClue,
                         () -> ServicePlatform.get().getTokenService().loseSanity(2)
-                ).withoutPassFlavor().withResearchFlavor()
+                ).withResearchFlavor()
         ).execute();
     }
 }

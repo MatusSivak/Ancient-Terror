@@ -25,6 +25,6 @@ public class ResearchWilderness3Encounter extends AbstractAzathothResearchEncoun
                     ServicePlatform.get().getDoomOmenService().removeTokenFromOmenTrack(OmenId.NORTH);
                 },
                 () -> ServicePlatform.get().getTokenService().loseSanity(6)
-        ).withoutFailFlavor().withResearchFlavor()).execute();
+        ).withResearchFlavor()).execute();
     }
 }
