@@ -31,6 +31,14 @@ public interface AdHandler {
     default void dispose() {
     }
 
+    /** True when the player's region requires an entry point for changing ad consent. */
+    default boolean isPrivacyOptionsRequired() {
+        return false;
+    }
+
+    default void showPrivacyOptionsForm() {
+    }
+
     class AdCallbacks {
         private Runnable onAdOpenedAction = () -> {};
         private Runnable onAdStartedAction = () -> {};

@@ -45,6 +45,21 @@ def resolvedFirebaseApiKey = propOrDefault("FIREBASE_API_KEY", firebaseClient?.a
 def resolvedFirebaseAppId = propOrDefault("FIREBASE_APP_ID", firebaseClient?.client_info?.mobilesdk_app_id ?: "")
 def resolvedFirebaseProjectId = propOrDefault("FIREBASE_PROJECT_ID", firebaseClient ? firebaseConfig.project_info?.project_id ?: "" : "")
 def resolvedFirebaseGcmSenderId = propOrDefault("FIREBASE_GCM_SENDER_ID", firebaseClient ? firebaseConfig.project_info?.project_number ?: "" : "")
+// Debug builds default to the local test storefront; release builds default to Google Play billing.
+def localPurchasesOverride = propOrDefault("LOCAL_PURCHASES", "")
+def debugLocalPurchases = localPurchasesOverride ? localPurchasesOverride.toBoolean() : true
+def releaseLocalPurchases = localPurchasesOverride ? localPurchasesOverride.toBoolean() : false
+// Debug-only switches that force the EEA consent flow on a test device.
+def umpDebugEea = propOrDefault("UMP_DEBUG_EEA", "false").toBoolean()
+def umpTestDeviceId = propOrDefault("UMP_TEST_DEVICE_ID", "")
+
+tasks.register("verifyReleaseBillingConfig") {
+    doLast {
+        if (releaseLocalPurchases) {
+            throw new GradleException("Release build blocked: LOCAL_PURCHASES must be false so purchases go through Google Play.")
+        }
+    }
+}
 
 tasks.register("verifyReleaseAdMobConfig") {
     doLast {
@@ -144,8 +159,6 @@ android {
                 ':!save.json:!save-*:!hs_err_pid*'
     }
     defaultConfig {
-        // Local checkout builds exercise the locked storefront without contacting Google Play.
-        buildConfigField "boolean", "LOCAL_PURCHASES", propOrDefault("LOCAL_PURCHASES", "true").toBoolean().toString()
         applicationId androidApplicationId
         minSdkVersion 26
         multiDexEnabled true
@@ -178,8 +191,15 @@ android {
             ]
             buildConfigField "String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", quoteString(resolvedInterstitialAdUnitId)
             buildConfigField "String", "ADMOB_REWARDED_AD_UNIT_ID", quoteString(resolvedRewardedAdUnitId)
+            // Local checkout builds exercise the locked storefront without contacting Google Play.
+            buildConfigField "boolean", "LOCAL_PURCHASES", debugLocalPurchases.toString()
+            buildConfigField "boolean", "UMP_DEBUG_EEA", umpDebugEea.toString()
+            buildConfigField "String", "UMP_TEST_DEVICE_ID", quoteString(umpTestDeviceId)
         }
         release {
+            buildConfigField "boolean", "LOCAL_PURCHASES", releaseLocalPurchases.toString()
+            buildConfigField "boolean", "UMP_DEBUG_EEA", "false"
+            buildConfigField "String", "UMP_TEST_DEVICE_ID", quoteString("")
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
@@ -248,6 +268,7 @@ afterEvaluate {
             tasks.named(taskName).configure {
                 dependsOn(tasks.named("verifyReleaseAdMobConfig"))
                 dependsOn(tasks.named("verifyReleaseFirebaseConfig"))
+                dependsOn(tasks.named("verifyReleaseBillingConfig"))
             }
         }
     }

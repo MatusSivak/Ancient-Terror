@@ -19,6 +19,10 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.ump.ConsentDebugSettings;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
 import java.util.ArrayList;
 import java.util.List;
 import java8.features.function.Consumer;
@@ -50,6 +54,9 @@ public class AndroidAdHandler implements AdHandler {
     private boolean rewardedLoadInFlight = false;
     private boolean interstitialLoadInFlight = false;
     private boolean mobileAdsInitialized = false;
+    private boolean consentRequested = false;
+    private ConsentInformation consentInformation;
+    private volatile boolean privacyOptionsRequired = false;
     private volatile boolean destroyed = false;
     private final Runnable rewardedReloadRunnable = () -> {
         if (destroyed) {
@@ -77,6 +84,85 @@ public class AndroidAdHandler implements AdHandler {
     }
 
     public void initialize() {
+        if (destroyed || consentRequested) {
+            return;
+        }
+        consentRequested = true;
+        try {
+            consentInformation = UserMessagingPlatform.getConsentInformation(activity);
+        } catch (NoClassDefFoundError | RuntimeException e) {
+            Log.w(TAG, "Consent SDK unavailable, ads stay disabled", e);
+            return;
+        }
+        Log.i(TAG, "Requesting consent information");
+        consentInformation.requestConsentInfoUpdate(activity, buildConsentRequestParameters(),
+                () -> {
+                    if (destroyed || !isActivityUsable()) {
+                        return;
+                    }
+                    updatePrivacyOptionsRequirement();
+                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity, formError -> {
+                        if (formError != null) {
+                            Log.w(TAG, "Consent form error. code=" + formError.getErrorCode() + ", message=" + formError.getMessage());
+                        }
+                        updatePrivacyOptionsRequirement();
+                        initializeMobileAdsIfAllowed();
+                    });
+                },
+                requestError -> {
+                    Log.w(TAG, "Consent info update failed. code=" + requestError.getErrorCode() + ", message=" + requestError.getMessage());
+                    initializeMobileAdsIfAllowed();
+                });
+        // Consent stored in a previous session lets ads start while the update request runs.
+        initializeMobileAdsIfAllowed();
+    }
+
+    private ConsentRequestParameters buildConsentRequestParameters() {
+        ConsentRequestParameters.Builder builder = new ConsentRequestParameters.Builder();
+        if (BuildConfig.DEBUG && (BuildConfig.UMP_DEBUG_EEA || !TextUtils.isEmpty(BuildConfig.UMP_TEST_DEVICE_ID))) {
+            ConsentDebugSettings.Builder debugSettings = new ConsentDebugSettings.Builder(activity);
+            if (BuildConfig.UMP_DEBUG_EEA) {
+                debugSettings.setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA);
+            }
+            if (!TextUtils.isEmpty(BuildConfig.UMP_TEST_DEVICE_ID)) {
+                debugSettings.addTestDeviceHashedId(BuildConfig.UMP_TEST_DEVICE_ID);
+            }
+            builder.setConsentDebugSettings(debugSettings.build());
+        }
+        return builder.build();
+    }
+
+    private void updatePrivacyOptionsRequirement() {
+        ConsentInformation info = consentInformation;
+        privacyOptionsRequired = info != null && info.getPrivacyOptionsRequirementStatus()
+                == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
+    }
+
+    private void initializeMobileAdsIfAllowed() {
+        ConsentInformation info = consentInformation;
+        if (info == null || !info.canRequestAds()) {
+            return;
+        }
+        initializeMobileAds();
+    }
+
+    @Override
+    public boolean isPrivacyOptionsRequired() {
+        return privacyOptionsRequired;
+    }
+
+    @Override
+    public void showPrivacyOptionsForm() {
+        runOnUiThreadSafely(() -> UserMessagingPlatform.showPrivacyOptionsForm(activity, formError -> {
+            if (formError != null) {
+                Log.w(TAG, "Privacy options form error. code=" + formError.getErrorCode() + ", message=" + formError.getMessage());
+            }
+            updatePrivacyOptionsRequirement();
+            initializeMobileAdsIfAllowed();
+        }));
+    }
+
+    private void initializeMobileAds() {
         if (destroyed || mobileAdsInitialized) {
             return;
         }
@@ -249,7 +335,7 @@ public class AndroidAdHandler implements AdHandler {
     }
 
     private void loadRewardedAd(String reason) {
-        if (destroyed || !isActivityUsable()) {
+        if (destroyed || !mobileAdsInitialized || !isActivityUsable()) {
             return;
         }
         if (rewardedLoadInFlight) {
@@ -290,7 +376,7 @@ public class AndroidAdHandler implements AdHandler {
     }
 
     private void loadInterstitialAd(String reason) {
-        if (destroyed || !isActivityUsable()) {
+        if (destroyed || !mobileAdsInitialized || !isActivityUsable()) {
             return;
         }
         if (interstitialLoadInFlight) {

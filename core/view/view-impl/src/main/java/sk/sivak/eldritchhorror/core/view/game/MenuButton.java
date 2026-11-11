@@ -24,6 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import sk.sivak.eldritchhorror.core.constants.AdHandler;
+import sk.sivak.eldritchhorror.core.constants.tracker.GoogleServicesHolder;
 import sk.sivak.eldritchhorror.core.view.utils.AncientTerrorMenuStyles;
 import sk.sivak.eldritchhorror.core.view.assetmanager.CustomAssetManager;
 import sk.sivak.eldritchhorror.core.view.music.NewMusicBox;
@@ -122,6 +124,22 @@ public class MenuButton extends ImageButton {
 
         dialog.getContentTable().add(reportBugButton).size(280,50);
         dialog.getContentTable().row();
+
+        AdHandler adHandler = GoogleServicesHolder.getAdHandler();
+        if (adHandler.isPrivacyOptionsRequired()) {
+            ImageTextButton privacyOptionsButton = createNiceButton("ancient_one/lock.png", get("menu.privacyOptions"));
+            dialog.getContentTable().add(privacyOptionsButton).size(280, 50);
+            dialog.getContentTable().row();
+            ButtonUtils.addClickListener(privacyOptionsButton, () -> {
+                closeMenuAction = null;
+                dialog.hide(Actions.run(() -> {
+                    MapStage.brightenWorld();
+                    menuButtonClickable = true;
+                    getColor().a = 1f;
+                    adHandler.showPrivacyOptionsForm();
+                }));
+            });
+        }
 
         dialog.getContentTable().add(saveAndExitButton).size(280,50);
         dialog.getContentTable().row();

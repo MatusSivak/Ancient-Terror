@@ -20,11 +20,24 @@ For only the debug APK or desktop compilation:
 
 Android APKs are written under `android/build/outputs/apk`. Release APKs are unsigned until a signing configuration is supplied.
 
-Premium content starts locked. Local Android builds and desktop enable simulated
+Premium content starts locked. Android debug builds and desktop enable simulated
 purchases: confirming Buy immediately persists the full-game unlock without billing,
 purchase restore calls, or purchase analytics. Existing owned/earned content is retained.
-For a Google Play build, pass `-PLOCAL_PURCHASES=false` to restore real billing.
+Android release builds use Google Play billing; `assembleRelease` and `bundleRelease`
+fail if `-PLOCAL_PURCHASES=true` is passed. Pass `-PLOCAL_PURCHASES=false` to test real
+billing in a debug build.
 Use a fresh app profile to test the locked state again after a simulated purchase.
+
+## Ad consent (EU/UK)
+
+On startup the Android app asks Google's User Messaging Platform (UMP) for the
+player's consent status and shows the consent form when required. Ads are
+initialized only after consent allows ad requests. When the region requires it, the
+in-game menu shows **Privacy Options** so players can change their choice. Publish a
+GDPR message under **AdMob → Privacy & messaging** for the app; without one, no form
+is shown and EEA/UK ad fill is limited. Debug builds can force the EEA flow with
+`-PUMP_DEBUG_EEA=true`. Add the device's hashed ID, which UMP logs, through
+`-PUMP_TEST_DEVICE_ID=<id>`.
 
 The desktop distribution JAR is `desktop/build/libs/desktop-1.0-all.jar`.
 
