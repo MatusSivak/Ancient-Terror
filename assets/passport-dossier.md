@@ -1,8 +1,8 @@
 # Passport dossier background
 
 Runtime assets, cropped losslessly from the matching 1536 x 1024 dossier variants:
-- Shared body: `passport-dossier-center.png` (1536 x 928).
-- Tab headers: `passport-dossier-top-basic.png`, `passport-dossier-top-cards.png`, and `passport-dossier-top-background.png` (each 1536 x 96).
+- Shared body: `passport-dossier-center.jpg` (1536 x 928).
+- Tab headers: `passport-dossier-top-basic.jpg`, `passport-dossier-top-cards.jpg`, and `passport-dossier-top-background.jpg` (each 1536 x 96).
 
 The renderer places the selected header above the shared body at their original proportions.
 The redundant full-page variants have been removed.

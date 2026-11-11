@@ -556,7 +556,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String ACTION_SKIP = "action_button/skip.png";
 
     public final static String GATE = "gate/gate.png";
-    public final static String RESERVE_BACKGROUND = "reserve/background.png";
+    public final static String RESERVE_BACKGROUND = "reserve/background.jpg";
     public final static String DISCARD_LABEL = "discard_label.png";
     public final static String ANCIENT_ONE_LABEL = "ancient_one_label.png";
     public final static String ANCIENT_ONE_AZATHOTH_LABEL = "ancient_one/label_azathoth.png";
@@ -676,7 +676,7 @@ public class CustomAssetManager extends AssetManager {
     public final static String SPELL_CARD_BACKGROUND = "card/spell_background.jpg";
     public final static String TOKEN_CARD_BACKGROUND = "card/token_background.jpg";
     public final static String DISABLED_CARD = "card/disabled.png";
-    public final static String ANCIENT_ONE_DIALOG_BACKGROUND = "ancient_one/azathoth-ending-background.png";
+    public final static String ANCIENT_ONE_DIALOG_BACKGROUND = "ancient_one/azathoth-ending-background.jpg";
     public final static String NEW_FONT_LIBRE_BASKERVILLE = "new_font/Libre Baskerville/hiero.fnt";
     public final static String NEW_FONT_CINZEL = "new_font/Cinzel/hiero.fnt";
     public final static String NEW_FONT_SOURCE_SERIF_4 = "new_font/Source Serif 4/hiero.fnt";

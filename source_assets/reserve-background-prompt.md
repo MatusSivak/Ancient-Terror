@@ -1,6 +1,6 @@
 # Reserve background
 
-Generated with the built-in image generation tool. Runtime asset: `assets/reserve/background.png`.
+Generated with the built-in image generation tool. Runtime asset: `assets/reserve/background.jpg`.
 The background contains no title; `ReserveSheet` renders `reserve.label` using the existing `new_font/Cinzel/hiero.fnt` font.
 
 ## Generation prompt

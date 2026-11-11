@@ -50,7 +50,7 @@ Android build verification is unavailable on this machine: `local.properties` po
 
 Created with the built-in image generation tool. Final project assets:
 
-- `assets/ancient_one/YIG.png`: Yig illustration; also used as `assets/monster/epic/Yig.png`.
+- `assets/monster/epic/Yig.png`: Yig illustration.
 - `assets/ancient_one/button_yig.jpg`: JPEG conversion of the same illustration for the selector.
 - `assets/monster/epic/ChildrenOfYig.png`: original serpent colony illustration.
 - `assets/monster/epic/WingedSerpent.png`: original winged serpent illustration.

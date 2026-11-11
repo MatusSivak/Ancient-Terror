@@ -19,7 +19,7 @@ public class InvestigatorSheetButtons extends Group {
     private Label basicInfoLabel;
     private Label cardsLabel;
     private Label miscLabel;
-    private String headerPath = "passport-dossier-top-basic.png";
+    private String headerPath = "passport-dossier-top-basic.jpg";
 
     String getHeaderPath() {
         return headerPath;
@@ -70,9 +70,9 @@ public class InvestigatorSheetButtons extends Group {
         addActor(cardsClickArea);
         addActor(bioClickArea);
 
-        addClickListener(basicInfoClickArea, () -> switchTab("passport-dossier-top-basic.png", this::onBasicInfoTabClick));
-        addClickListener(cardsClickArea, () -> switchTab("passport-dossier-top-cards.png", this::onCardsTabClick));
-        addClickListener(bioClickArea, () -> switchTab("passport-dossier-top-background.png", this::onBackgroundTabClick));
+        addClickListener(basicInfoClickArea, () -> switchTab("passport-dossier-top-basic.jpg", this::onBasicInfoTabClick));
+        addClickListener(cardsClickArea, () -> switchTab("passport-dossier-top-cards.jpg", this::onCardsTabClick));
+        addClickListener(bioClickArea, () -> switchTab("passport-dossier-top-background.jpg", this::onBackgroundTabClick));
 
     }
 
@@ -102,15 +102,15 @@ public class InvestigatorSheetButtons extends Group {
     }
 
     public void highlightBasicInfo() {
-        selectTab(basicInfoLabel, "passport-dossier-top-basic.png");
+        selectTab(basicInfoLabel, "passport-dossier-top-basic.jpg");
     }
 
     public void highlightCards() {
-        selectTab(cardsLabel, "passport-dossier-top-cards.png");
+        selectTab(cardsLabel, "passport-dossier-top-cards.jpg");
     }
 
     public void highlightBio() {
-        selectTab(miscLabel, "passport-dossier-top-background.png");
+        selectTab(miscLabel, "passport-dossier-top-background.jpg");
     }
 
     private void selectTab(Label selected, String artwork) {

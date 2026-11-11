@@ -332,7 +332,7 @@ public class PassportTable extends Table {
         float height = BACKGROUND_HEIGHT * getScaleY();
         float headerHeight = height * 96f / 1024f;
         batch.setColor(Color.WHITE);
-        batch.draw(CustomAssetManager.getTexture("passport-dossier-center.png"),
+        batch.draw(CustomAssetManager.getTexture("passport-dossier-center.jpg"),
                 BACKGROUND_X * getScaleX() + getX() + (1 - getScaleX()) * getWidth() * 0.5f,
                 BACKGROUND_Y * getScaleY() + getY() + (1 - getScaleY()) * getHeight() * 0.5f,
                 BACKGROUND_WIDTH * getScaleX(), height - headerHeight);

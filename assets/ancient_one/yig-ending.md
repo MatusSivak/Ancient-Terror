@@ -1,6 +1,6 @@
 # Yig defeat ending
 
-The dialog now uses `yig-ending-art-v2.png`; see [the wiki-inspired revision](yig-ending-v2.md).
+The dialog now uses `yig-ending-art-v2.jpg`; see [the wiki-inspired revision](yig-ending-v2.md).
 The original artwork and its generation prompt below are retained for reference.
 
 Generated with the built-in image generation tool using the existing awakened Yig

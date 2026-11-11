@@ -4,13 +4,13 @@ Generated with the built-in image generation tool. Text is rendered separately b
 
 ## Illustration
 
-`assets/ancient_one/azathoth-ending-art.png`
+`assets/ancient_one/azathoth-ending-art.jpg`
 
 Use case: stylized-concept. Asset type: original production game illustration for Azathoth defeat ending, landscape 3:2. Painted cosmic horror board-game illustration: a tiny Earth splitting apart, continents and oceans torn into glowing fragments, beneath an incomprehensibly vast blind chaotic entity of writhing shadow and maw-like voids. Dying stars spiral into a black cosmic abyss. Sense of absolute finality, ancient unknowable scale, no heroes. Hand-painted oil and ink detail, restrained smoky violet, midnight blue, tarnished gold and ember red. Strong central silhouette legible at 340 pixels wide. Atmospheric edges, opaque rectangular full bleed. No text, no letters, no logos, no frame. Original artwork, not a reproduction of any existing card.
 
 ## Background
 
-`assets/ancient_one/azathoth-ending-background.png`
+`assets/ancient_one/azathoth-ending-background.jpg`
 
 Shared by the ending dialog and all Ancient One sheets through "ANCIENT_ONE_DIALOG_BACKGROUND".
 

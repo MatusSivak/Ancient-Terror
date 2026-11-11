@@ -1,6 +1,6 @@
 # Yig Wins artwork — wiki-inspired revision
 
-Active dialog asset: `assets/ancient_one/yig-ending-art-v2.png` (1536 × 1024).
+Active dialog asset: `assets/ancient_one/yig-ending-art-v2.jpg` (1536 × 1024).
 Generated with the built-in image generation tool. The previous illustration is
 retained as `yig-ending-art.png`. The existing dialog text is unchanged.
 
