@@ -22,7 +22,7 @@ public class ResearchWilderness23Encounter extends AbstractAzathothResearchEncou
     protected void execute() {
         TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), this::onNo, () -> {
             if (ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.DARK_PACT)) {
-                TypewriterUtils.confirmInfos("You can't gain another Dark Pact").subscribe(() -> {
+                TypewriterUtils.confirmInfos("You already have a Dark Pact Condition.").subscribe(() -> {
                     onNo();
                 });
                 return;

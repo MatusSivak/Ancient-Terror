@@ -38,11 +38,11 @@ public class ResearchWilderness11Encounter extends AbstractAzathothResearchEncou
                     ServicePlatform.get().getService().hideBackground();
                     Question<Object> question = new Question<>();
                     if (spawnedGates.size() == 0) {
-                        question.setTitle("There are no Gates representing current Omen.");
+                        question.setTitle("No Gates match the current Omen.");
                     } else if (spawnedGates.size() == 1) {
-                        question.setTitle("There is one Gate representing current Omen.");
+                        question.setTitle("One Gate matches the current Omen.");
                     } else {
-                        question.setTitle("There are " + spawnedGates.size() + " Gates representing current Omen.");
+                        question.setTitle(spawnedGates.size() + " Gates match the current Omen.");
                     }
                     question.setOptions(Question.Option.okOption);
                     ServicePlatform.get().getGameService().ask(question).subscribe(ok -> afterConfirm(spawnedGates.size()));

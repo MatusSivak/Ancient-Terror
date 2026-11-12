@@ -19,7 +19,7 @@ public class ResearchSea5Encounter extends AbstractAzathothResearchEncounter {
     protected void execute() {
         TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), () -> narrateOutcome(false, NOTHING), () -> {
             if (ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.DARK_PACT)) {
-                TypewriterUtils.confirmInfos("You can't gain another Dark Pact").subscribe(() -> {
+                TypewriterUtils.confirmInfos("You already have a Dark Pact Condition.").subscribe(() -> {
                     ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                 });
                 return;

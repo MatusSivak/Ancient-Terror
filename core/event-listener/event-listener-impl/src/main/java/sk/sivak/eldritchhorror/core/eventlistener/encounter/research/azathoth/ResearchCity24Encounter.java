@@ -48,7 +48,7 @@ public class ResearchCity24Encounter extends AbstractAzathothResearchEncounter {
     private void onYes() {
         ServicePlatform.get().getTokenService().canSpend(0,0,0,2).subscribe(canSpendData -> {
             if (!canSpendData.hasEnough()) {
-                TypewriterUtils.confirmInfos("Not enough Sanity.").subscribe(() -> {
+                TypewriterUtils.confirmInfos("You cannot pay the cost of 2 Sanity.").subscribe(() -> {
                     ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                 });
                 return;

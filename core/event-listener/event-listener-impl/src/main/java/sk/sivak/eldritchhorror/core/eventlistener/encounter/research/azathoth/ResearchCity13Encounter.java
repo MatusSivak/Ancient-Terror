@@ -24,7 +24,7 @@ public class ResearchCity13Encounter extends AbstractAzathothResearchEncounter {
     private void onYes() {
         ServicePlatform.get().getTokenService().canSpend(0, 0, 0, 2).subscribe(canSpendData -> {
             if (!canSpendData.hasEnough()) {
-                TypewriterUtils.confirmInfos("Can't spend two Sanity").subscribe(() -> {
+                TypewriterUtils.confirmInfos("You cannot pay the cost of 2 Sanity.").subscribe(() -> {
                     ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                 });
                 return;
@@ -32,7 +32,7 @@ public class ResearchCity13Encounter extends AbstractAzathothResearchEncounter {
 
             boolean hasDarkPact = ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.DARK_PACT);
             if (hasDarkPact) {
-                TypewriterUtils.confirmInfos("Can't get Dark Pact Condition").subscribe(() -> {
+                TypewriterUtils.confirmInfos("You already have a Dark Pact Condition.").subscribe(() -> {
                     ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                 });
                 return;
