@@ -35,7 +35,19 @@ public class City15Encounter extends AbstractGeneralEncounter {
     }
 
     private void onFail() {
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
+        boolean hasItem = !findInvestigatorItems().isEmpty();
+        boolean hasTrinket = !findInvestigatorTrinkets().isEmpty();
+        String flavor;
+        if (hasItem && hasTrinket) {
+            flavor = getTextBuilder().withFail().withFlavor().build();
+        } else if (hasItem) {
+            flavor = getTextBuilder().withFail().withFlavor(2).build();
+        } else if (hasTrinket) {
+            flavor = getTextBuilder().withFail().withFlavor(3).build();
+        } else {
+            flavor = getTextBuilder().withFail().withFlavor(4).build();
+        }
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),
                 getTextBuilder().withFail().withInfo(2).build()).subscribe(() -> {

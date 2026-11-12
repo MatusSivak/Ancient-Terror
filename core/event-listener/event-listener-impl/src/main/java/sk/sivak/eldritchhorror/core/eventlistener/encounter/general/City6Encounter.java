@@ -14,7 +14,11 @@ public class City6Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.LORE, -1, this::onSuccess, null);
+        TypewriterUtils.displayTestButton(Stat.LORE, -1, this::onSuccess, this::onFail);
+    }
+
+    private void onFail() {
+        finishAfterFlavor(getTextBuilder().withFail().withFlavor().build());
     }
 
     private void onSuccess() {

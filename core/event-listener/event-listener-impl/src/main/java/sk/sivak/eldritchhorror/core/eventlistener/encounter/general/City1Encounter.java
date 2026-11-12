@@ -26,35 +26,19 @@ public class City1Encounter extends AbstractGeneralEncounter {
     }
 
     private void onSuccess() {
-        if (findItemsInReserve().isEmpty()) {
-            onSuccessWithNoItemsInReserve();
-        } else {
-            onSuccessWithItemsInReserve();
-        }
+        chooseReserveOrDeckReward(!findItemsInReserve().isEmpty(), this::selectFromReserve, this::gainFromDeck);
     }
 
-    private void onSuccessWithItemsInReserve() {
-        ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
-        ServicePlatform.get().getEncounterService().displayButtons(
-                getTextBuilder().withPass().withOption(1).build(),
-                getTextBuilder().withPass().withOption(2).build()
-        ).subscribe(x -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            if (x == 0) {
-                // From reserve
-                List<AssetInfo> itemsInReserve = findItemsInReserve();
-                SelectCardData selectCardData = new SelectCardData();
-                selectCardData.setAvailableCards(itemsInReserve);
-                selectCardData.setHideText("Display Reserve?");
-                selectCardData.setTitleText("Select Item");
-                ServicePlatform.get().getCardService().selectSingleCard(selectCardData).subscribe(this::onSelectCardFromReserve);
-            } else {
-                // From the Deck
-                ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.ITEM));
-            }
-            ServicePlatform.get().getEncounterService().release();
-        });
+    private void selectFromReserve() {
+        SelectCardData selectCardData = new SelectCardData();
+        selectCardData.setAvailableCards(findItemsInReserve());
+        selectCardData.setHideText("Display Reserve?");
+        selectCardData.setTitleText("Select Item");
+        ServicePlatform.get().getCardService().selectSingleCard(selectCardData).subscribe(this::onSelectCardFromReserve);
+    }
+
+    private void gainFromDeck() {
+        ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.ITEM));
     }
 
     private void onSelectCardFromReserve(CardInfo cardInfo) {
@@ -62,16 +46,6 @@ public class City1Encounter extends AbstractGeneralEncounter {
         ServicePlatform.get().getGameService().gainAsset((AssetInfo) cardInfo);
         ServicePlatform.get().getCardService().refillReserve();
         ServicePlatform.get().getService().release();
-    }
-
-    private void onSuccessWithNoItemsInReserve() {
-        // From the Deck
-        TypewriterUtils.confirmInfos(getTextBuilder().withPass().withOption(2).build()).subscribe(() -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.ITEM));
-            ServicePlatform.get().getEncounterService().release();
-        });
     }
 
     private List<AssetInfo> findItemsInReserve() {

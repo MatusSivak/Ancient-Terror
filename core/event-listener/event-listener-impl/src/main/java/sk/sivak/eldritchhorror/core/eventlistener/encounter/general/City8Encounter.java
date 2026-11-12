@@ -27,13 +27,21 @@ public class City8Encounter extends AbstractGeneralEncounter {
             ServicePlatform.get().getTokenService().gainSanity(2);
             ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
             ServicePlatform.get().getEncounterService().typeFlavor(" \n"+getTextBuilder().withFlavor(2).build());
-            TypewriterUtils.displayTestButton(Stat.OBSERVATION, null, this::onFail);
+            TypewriterUtils.displayTestButton(Stat.OBSERVATION, this::onSuccess, this::onFail);
             ServicePlatform.get().getService().release();
         });
 
     }
 
+    private void onSuccess() {
+        finishAfterFlavor(getTextBuilder().withPass().withFlavor().build());
+    }
+
     private void onFail() {
+        String flavor = findInvestigatorItems().isEmpty()
+                ? getTextBuilder().withFail().withFlavor(2).build()
+                : getTextBuilder().withFail().withFlavor().build();
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();

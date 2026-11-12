@@ -21,40 +21,28 @@ public class City12Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.INFLUENCE, this::onSuccess, null);
+        TypewriterUtils.displayTestButton(Stat.INFLUENCE, this::onSuccess, this::onFail);
+    }
+
+    private void onFail() {
+        finishAfterFlavor(getTextBuilder().withFail().withFlavor().build());
     }
 
     private void onSuccess() {
-        if (findServicesInReserve().isEmpty()) {
-            onSuccessWithNoServicesInReserve();
-        } else {
-            onSuccessWithServicesInReserve();
-        }
+        chooseReserveOrDeckReward(!findServicesInReserve().isEmpty(), this::selectFromReserve, this::gainFromDeck);
     }
 
-    private void onSuccessWithServicesInReserve() {
-        ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
-        ServicePlatform.get().getEncounterService().displayButtons(
-                getTextBuilder().withPass().withOption(1).build(),
-                getTextBuilder().withPass().withOption(2).build()
-        ).subscribe(x -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            if (x == 0) {
-                // From reserve
-                List<AssetInfo> servicesInReserve = findServicesInReserve();
-                SelectCardData selectCardData = new SelectCardData();
-                selectCardData.setAvailableCards(servicesInReserve);
-                selectCardData.setHideText("Display Reserve?");
-                selectCardData.setTitleText("Select Service");
-                ServicePlatform.get().getCardService().selectSingleCard(selectCardData).subscribe(this::onSelectCardFromReserve);
-            } else {
-                // From the Deck
-                ServicePlatform.get().getService().hideBackground();
-                ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.SERVICE));
-            }
-            ServicePlatform.get().getEncounterService().release();
-        });
+    private void selectFromReserve() {
+        SelectCardData selectCardData = new SelectCardData();
+        selectCardData.setAvailableCards(findServicesInReserve());
+        selectCardData.setHideText("Display Reserve?");
+        selectCardData.setTitleText("Select Service");
+        ServicePlatform.get().getCardService().selectSingleCard(selectCardData).subscribe(this::onSelectCardFromReserve);
+    }
+
+    private void gainFromDeck() {
+        ServicePlatform.get().getService().hideBackground();
+        ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.SERVICE));
     }
 
     private void onSelectCardFromReserve(CardInfo cardInfo) {
@@ -63,17 +51,6 @@ public class City12Encounter extends AbstractGeneralEncounter {
         ServicePlatform.get().getGameService().gainAsset((AssetInfo) cardInfo);
         ServicePlatform.get().getCardService().refillReserve();
         ServicePlatform.get().getService().release();
-    }
-
-    private void onSuccessWithNoServicesInReserve() {
-        // From the Deck
-        TypewriterUtils.confirmInfos(getTextBuilder().withPass().withOption(2).build()).subscribe(() -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getService().hideBackground();
-            ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.SERVICE));
-            ServicePlatform.get().getEncounterService().release();
-        });
     }
 
     private List<AssetInfo> findServicesInReserve() {

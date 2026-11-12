@@ -44,5 +44,42 @@ public abstract class AbstractGeneralEncounter {
 
     protected abstract void execute();
 
+    protected void finishAfterFlavor(String flavor) {
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
+        ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(button ->
+                ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+    }
+
+    protected void chooseReserveOrDeckReward(boolean reserveAvailable, Action0 gainFromReserve, Action0 gainFromDeck) {
+        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
+        if (reserveAvailable) {
+            ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
+            ServicePlatform.get().getEncounterService().displayButtons(
+                    getTextBuilder().withPass().withOption(1).build(),
+                    getTextBuilder().withPass().withOption(2).build()
+            ).subscribe(button -> {
+                if (button == 0) {
+                    confirmReward(1, gainFromReserve);
+                } else {
+                    confirmReward(2, gainFromDeck);
+                }
+            });
+        } else {
+            confirmReward(2, gainFromDeck);
+        }
+    }
+
+    private void confirmReward(int option, Action0 gainReward) {
+        ServicePlatform.get().getEncounterService().hold();
+        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withOption(option).withFlavor().build());
+        TypewriterUtils.confirmInfos(getTextBuilder().withPass().withOption(option).build()).subscribe(() -> {
+            ServicePlatform.get().getEncounterService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            gainReward.call();
+            ServicePlatform.get().getEncounterService().release();
+        });
+        ServicePlatform.get().getEncounterService().release();
+    }
+
 
 }
