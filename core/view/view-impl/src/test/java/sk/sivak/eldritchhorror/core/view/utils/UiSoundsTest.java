@@ -146,7 +146,7 @@ public class UiSoundsTest {
         FastForwardAction.turnOn();
         for (ActionButtonId action : Arrays.asList(ActionButtonId.TRAVEL, ActionButtonId.REST,
                 ActionButtonId.FOCUS, ActionButtonId.ACQUIRE_ASSETS, ActionButtonId.TICKET,
-                ActionButtonId.TRADE, ActionButtonId.SKIP, ActionButtonId.INVESTIGATOR, ActionButtonId.NOT_APPLICABLE)) {
+                ActionButtonId.TRADE, ActionButtonId.SKIP, ActionButtonId.INVESTIGATOR, ActionButtonId.NOT_APPLICABLE, null)) {
             UiSounds.playActionConfirmation(action);
         }
         assertEquals(Arrays.asList(CONFIRM_TRAVEL.path, CONFIRM_REST.path, CONFIRM_FOCUS.path,

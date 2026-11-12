@@ -68,6 +68,7 @@ import sk.sivak.eldritchhorror.core.view.components.FpsLogger;
 import sk.sivak.eldritchhorror.core.view.components.effect.NoiseEffect;
 import sk.sivak.eldritchhorror.core.view.components.select.SelectSingleComponent;
 import sk.sivak.eldritchhorror.core.view.components.sheet.ancientone.AncientOneCard;
+import sk.sivak.eldritchhorror.core.view.components.sheet.rumor.RumorCard;
 import sk.sivak.eldritchhorror.core.view.handler.ChangeScreenHandler;
 import sk.sivak.eldritchhorror.core.view.handler.StartGameHandler;
 import sk.sivak.eldritchhorror.core.view.investigator.InvestigatorView;
@@ -395,21 +396,35 @@ public class GameViewImpl implements Screen, GameView {
     @Override
     public Completable showRumorCard(RumorCardInfo rumorCardInfo) {
         return Completable.create(onSub -> {
-            if (BigActorsManager.getRumorCard().getStage() == null) {
-                BigActorsManager.getRumorCard().init(rumorCardInfo);
+            RumorCard card = BigActorsManager.getRumorCard();
+            if (card.isResolving()) {
+                onSub.onCompleted();
+                return;
             }
-            BigActorsManager.getRumorCard().setAfterHideAction(onSub::onCompleted);
-            boolean[] confirmed = {false};
-            Runnable confirm = () -> {
-                if (confirmed[0] || BigActorsManager.isLocked()) return;
-                confirmed[0] = true;
-                BigActorsManager.displayOrHideRumor();
-            };
-            addClickListener(BigActorsManager.getRumorCard(), confirm);
-            showRumorCardAgain();
-            FastForwardAction.autoConfirmHighlightWhileHeld(BigActorsManager.getRumorCard(), confirm,
-                    () -> confirmed[0]);
+            whenSheetsUnlocked(() -> {
+                if (card.isResolving()) {
+                    onSub.onCompleted();
+                } else if (card.getStage() != null) {
+                    justHideRumorCard().subscribe(onSub::onCompleted, onSub::onError);
+                } else {
+                    card.init(rumorCardInfo);
+                    card.nextHide().subscribe(onSub::onCompleted, onSub::onError);
+                    showDismissibleRumor(card);
+                }
+            });
         });
+    }
+
+    private void showDismissibleRumor(RumorCard card) {
+        boolean[] confirmed = {false};
+        Runnable confirm = () -> {
+            if (confirmed[0] || BigActorsManager.isLocked()) return;
+            confirmed[0] = true;
+            BigActorsManager.displayOrHideRumor();
+        };
+        addClickListener(card, confirm);
+        BigActorsManager.displayOrHideRumor();
+        FastForwardAction.autoConfirmHighlightWhileHeld(card, confirm, () -> confirmed[0]);
     }
 
     @Override
@@ -425,18 +440,33 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable justShowRumorCard(RumorCardInfo rumorCardInfo) {
-        return Completable.create(onSub -> {
-            BigActorsManager.getRumorCard().init(rumorCardInfo);
-            BigActorsManager.getRumorCard().setAfterDisplayAction(onSub::onCompleted);
-            showRumorCardAgain();
-        });
+        return Completable.create(onSub -> whenSheetsUnlocked(() -> {
+            RumorCard card = BigActorsManager.getRumorCard();
+            if (card.getStage() != null) {
+                // Finish the inspection before rebuilding the sheet for a mandatory game effect.
+                justHideRumorCard().andThen(justShowRumorCard(rumorCardInfo))
+                        .subscribe(onSub::onCompleted, onSub::onError);
+                return;
+            }
+            card.init(rumorCardInfo);
+            card.beginResolution(onSub::onCompleted);
+            BigActorsManager.displayOrHideRumor();
+        }));
     }
 
     @Override
     public Completable justHideRumorCard() {
         return Completable.create(onSub -> {
-            BigActorsManager.getRumorCard().setAfterHideAction(onSub::onCompleted);
-            BigActorsManager.displayOrHideRumor();
+            RumorCard card = BigActorsManager.getRumorCard();
+            if (card.isResolving()) BigActorsManager.unlock(BigActorsManager.BigActorKey.RUMOR_CARD);
+            whenSheetsUnlocked(() -> {
+                if (card.getStage() == null) {
+                    onSub.onCompleted();
+                    return;
+                }
+                card.nextHide().subscribe(onSub::onCompleted, onSub::onError);
+                if (card.isDisplayed()) BigActorsManager.displayOrHideRumor();
+            });
         });
     }
 
@@ -460,11 +490,11 @@ public class GameViewImpl implements Screen, GameView {
         return BigActorsManager.getRumorCard().highlightRumorReckoning();
     }
 
-    private void showRumorCardAgain() {
+    private void whenSheetsUnlocked(Runnable action) {
         if (BigActorsManager.isLocked()) {
-            Gdx.app.postRunnable(this::showRumorCardAgain);
+            Gdx.app.postRunnable(() -> whenSheetsUnlocked(action));
         } else {
-            BigActorsManager.displayOrHideRumor();
+            action.run();
         }
     }
 
@@ -913,6 +943,7 @@ public class GameViewImpl implements Screen, GameView {
 
     @Override
     public Completable showRumorCard(List<RumorCardInfo> activeRumors) {
+        if (BigActorsManager.getRumorCard().isResolving()) return Completable.complete();
         if (BigActorsManager.getRumorCard().getRumorCardInfo() == null) {
             return showRumorCard(activeRumors.get(0));
         }

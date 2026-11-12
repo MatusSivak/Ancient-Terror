@@ -17,6 +17,8 @@ import sk.sivak.eldritchhorror.core.constants.monster.WarlockMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.WerewolfMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.ColourOutOfSpaceMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.CthonianMonster;
+import sk.sivak.eldritchhorror.core.constants.monster.DimensionalShamblerMonster;
+import sk.sivak.eldritchhorror.core.constants.test.DiceRoll;
 import sk.sivak.eldritchhorror.core.constants.monster.ElderThingMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.GiantPenguinMonster;
 import sk.sivak.eldritchhorror.core.constants.monster.GnophKehMonster;
@@ -27,6 +29,9 @@ import sk.sivak.eldritchhorror.core.constants.monster.SerpentPeopleMonster;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueImpl;
 import sk.sivak.eldritchhorror.core.eventtype.DirectEvent;
+import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
+import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
+import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
 import sk.sivak.eldritchhorror.core.eventtype.data.ReckoningFireType;
 import sk.sivak.eldritchhorror.core.model.CluePoolRead;
 import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
@@ -130,6 +135,29 @@ public class MonsterListenersTest {
     @After
     public void tearDown() {
         ServicePlatform.nullifyInstance();
+    }
+
+    @Test
+    public void dimensionalShamblerOnlyChecksTheObservationRoll() {
+        InvestigatorRead investigator = mock(InvestigatorRead.class, (name, args) -> 5);
+        ServicePlatform.get().setInvestigators(mock(InvestigatorsRead.class, (name, args) -> investigator));
+        DimensionalShamblerMonster monster = new DimensionalShamblerMonster();
+        new DimensionalShamblerMonsterListener().justRegisterListeners(monster);
+        CombatData combat = new CombatData();
+        combat.setMonsterInfo(monster);
+        TestData success = new TestData();
+        success.setDiceRolls(Collections.singletonList(new DiceRoll(DiceRoll.Score.GOOD)));
+        TestData failure = new TestData();
+        failure.setDiceRolls(Collections.singletonList(new DiceRoll(DiceRoll.Score.BAD)));
+        combat.setHorrorTestResult(failure);
+        combat.setDamageTestResult(success);
+        events.fireAfterEvent(BeforeAfterEvent.END_OF_COMBAT_EVENT, combat);
+        assertTrue(effects.isEmpty());
+
+        combat.setHorrorTestResult(success);
+        combat.setDamageTestResult(failure);
+        events.fireAfterEvent(BeforeAfterEvent.END_OF_COMBAT_EVENT, combat);
+        assertTrue(effects.contains("gainCondition:LOST_IN_TIME_AND_SPACE"));
     }
 
     @Test

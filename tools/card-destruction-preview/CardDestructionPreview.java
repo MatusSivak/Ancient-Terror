@@ -164,6 +164,15 @@ public class CardDestructionPreview extends ApplicationAdapter {
     }
 
     private void checkUsableDisabledCard() throws Exception {
+        CardTemplate coldCard = CardTemplate.buildCard(new sk.sivak.eldritchhorror.core.constants.asset.CatBurglarAsset());
+        stage.addActor(coldCard);
+        AtomicInteger completed = new AtomicInteger();
+        coldCard.disable().subscribe(completed::incrementAndGet);
+        loadArtwork();
+        require(completed.get() == 1 && ((Image) field(coldCard, "disabledImage")).getColor().a == 1f,
+                "Confirming Cat Burglar before artwork loads must finish its exhaustion animation once");
+        coldCard.remove();
+
         AxeAsset asset = new AxeAsset(); asset.disable();
         CardTemplate testCard = CardTemplate.buildCard(asset);
         testCard.setDisabledBadgeVisible(false);

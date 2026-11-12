@@ -53,16 +53,15 @@ public class CardTemplate extends WidgetGroup {
     private Image foreground;
     private Image unavailableShade;
     private boolean unavailableForSelection;
-    private Image disabledImage;
-    private boolean disabledBadgeVisible = true;
+    // Fast-forward can queue the exhaustion animation before the drawable is loaded.
+    private final Image disabledImage = new Image();
 
     /** A test can use a passive bonus even when the card's activated ability is exhausted. */
     public void setDisabledBadgeVisible(boolean visible) {
-        disabledBadgeVisible = visible;
-        if (disabledImage != null) disabledImage.setVisible(visible);
+        disabledImage.setVisible(visible);
     }
 
-    public boolean isDisabledBadgeVisible() { return disabledBadgeVisible; }
+    public boolean isDisabledBadgeVisible() { return disabledImage.isVisible(); }
 
     private CardTemplate(String textureId,
                          String title,
@@ -78,6 +77,7 @@ public class CardTemplate extends WidgetGroup {
                          boolean isDisabled) {
 
         System.out.println(title + " Disabled: " + isDisabled);
+        disabledImage.getColor().a = isDisabled ? 1f : 0f;
 
         loadPicture(textureId, () -> {
             loadCardDescriptionBackground(descriptionBackgroundColor, () -> {
@@ -87,7 +87,7 @@ public class CardTemplate extends WidgetGroup {
                         loadCardType(cardTypeTexture);
                         loadTraits(traitSet, traitsColor);
                         loadDescription(description, descriptionColor);
-                        loadDisabled(isDisabled);
+                        loadDisabled();
                         loadForeground();
                     });
                 });
@@ -230,19 +230,15 @@ public class CardTemplate extends WidgetGroup {
         }
     }
 
-    private void loadDisabled(boolean isDisabled) {
+    private void loadDisabled() {
         String disabledTexture = "card/disabled.png";
         getTextureAsync(disabledTexture).subscribe(t -> {
-            disabledImage = new Image(getTextureRegionDrawable(disabledTexture));
-            disabledImage.setVisible(disabledBadgeVisible);
+            disabledImage.setDrawable(getTextureRegionDrawable(disabledTexture));
+            disabledImage.pack();
             disabledImage.setOrigin(Align.center);
             disabledImage.setScale(0.70f);
             disabledImage.setPosition(CARD_WIDTH/2f-disabledImage.getWidth()/2f,
                     CARD_HEIGHT/4f-disabledImage.getHeight()/2f);
-
-            if (!isDisabled) {
-                disabledImage.getColor().a = 0.0f;
-            }
 
             if (foreground != null) {
                 addActorBefore(foreground, disabledImage);

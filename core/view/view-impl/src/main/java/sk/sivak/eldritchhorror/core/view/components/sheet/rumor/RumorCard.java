@@ -53,6 +53,8 @@ public class RumorCard extends VisTable {
     private static final Color MUTED_TEXT = Color.valueOf("B8C4BE");
     private static final Color BRASS = Color.valueOf("DCC99F");
     private final DisplayHide displayHide;
+    private final PublishSubject<Void> hidden = PublishSubject.create();
+    private boolean resolving;
     private Image hitImage;
     private RumorCardInfo rumorCardInfo;
     private Cell<Table> reckoningCell;
@@ -64,12 +66,16 @@ public class RumorCard extends VisTable {
     public RumorCard() {
         displayHide = new DisplayHide(this, BigActorsManager.BigActorKey.RUMOR_CARD);
         displayHide.setActorKey(OnScreenActors.ActorKey.RUMOR_CARD);
+        displayHide.setAfterHideAction(this::onHidden);
         setTransform(true);
     }
 
     public Completable destroyWithEffect() {
         return Completable.defer(() -> sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect
-                .resolveMystery(this).doOnCompleted(displayHide::finishRemoval));
+                .resolveMystery(this).doOnCompleted(() -> {
+                    displayHide.finishRemoval();
+                    onHidden();
+                }));
     }
 
     private void addHitImage() {
@@ -254,8 +260,30 @@ public class RumorCard extends VisTable {
         return label;
     }
 
-    public void setAfterHideAction(Action0 afterHideAction) {
-        displayHide.setAfterHideAction(afterHideAction);
+    private void onHidden() {
+        resolving = false;
+        hidden.onNext(null);
+    }
+
+    public Completable nextHide() {
+        return hidden.take(1).toCompletable();
+    }
+
+    public boolean isResolving() {
+        return resolving;
+    }
+
+    public boolean isDisplayed() {
+        return displayHide.isDisplayed();
+    }
+
+    public void beginResolution(Action0 shown) {
+        resolving = true;
+        setAfterDisplayAction(() -> {
+            setAfterDisplayAction(() -> {});
+            BigActorsManager.lock(BigActorsManager.BigActorKey.RUMOR_CARD);
+            shown.call();
+        });
     }
 
 

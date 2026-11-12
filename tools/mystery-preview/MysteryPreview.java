@@ -43,6 +43,7 @@ public class MysteryPreview extends ApplicationAdapter {
                     new Class[]{GameController.class},(p,m,a)->null);
             new HudButtons(controller).init();
             checkHighlightConfirmations();
+            checkReckoningWithOpenRumor();
             Properties bundle=new Properties();
             try(InputStreamReader reader=new InputStreamReader(getClass().getResourceAsStream("/i18n/ui.properties"), StandardCharsets.UTF_8)) {
                 bundle.load(reader);
@@ -143,6 +144,35 @@ public class MysteryPreview extends ApplicationAdapter {
             }
             System.out.println("PASS: monster and rumor highlights, countdown and new rumor auto-hide on arrival and later hold");
         } finally { Gdx.input=previousInput; FastForwardAction.turnOff(); }
+    }
+
+    private void checkReckoningWithOpenRumor() {
+        sk.sivak.eldritchhorror.core.model.rumor.FracturedRealityRumorCard rumor =
+                new sk.sivak.eldritchhorror.core.model.rumor.FracturedRealityRumorCard();
+        rumor.setTimeRemaining(2);
+        rumor.setRumorLocation(null);
+        AtomicInteger inspectionClosed = new AtomicInteger();
+        AtomicInteger countdownFinished = new AtomicInteger();
+        view.showRumorCard(rumor).subscribe(inspectionClosed::incrementAndGet);
+        tick(120);
+        view.justShowRumorCard(rumor)
+                .andThen(rx.Completable.defer(() -> view.countdownRumorCard(1)))
+                .andThen(view.justHideRumorCard()).subscribe(countdownFinished::incrementAndGet);
+        tick(180);
+        require(inspectionClosed.get() == 1 && countdownFinished.get() == 0,
+                "Reckoning must take over an open rumor and wait for confirmation");
+        view.showRumorCard(rumor).subscribe();
+        BigActorsManager.displayOrHideDoomTrack();
+        require(BigActorsManager.getRumorCard().isDisplayed(), "Inspecting the board dismissed the countdown");
+        Actor overlay = null;
+        for (Actor actor : stage.getRoot().getChildren()) {
+            if (actor instanceof Image && actor.getListeners().size > 0 && actor.getColor().a == .75f) overlay = actor;
+        }
+        require(overlay != null, "Missing countdown confirmation");
+        click(overlay);
+        tick(180);
+        require(countdownFinished.get() == 1 && BigActorsManager.getRumorCard().getStage() == null
+                && !BigActorsManager.isLocked(), "Countdown must dismiss the card and release the board");
     }
 
     private void checkActionsButton() {

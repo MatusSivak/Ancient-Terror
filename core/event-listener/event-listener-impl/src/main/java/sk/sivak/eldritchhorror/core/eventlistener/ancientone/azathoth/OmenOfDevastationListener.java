@@ -94,6 +94,7 @@ public class OmenOfDevastationListener extends AbstractMysteryListener {
                     spendData.pay();
                     progress++;
                     ServicePlatform.get().getGameService().advanceCurrentMysteryCard(1);
+                    ServicePlatform.get().getService().convertTo(getDataClass(), () -> eventData);
                     ServicePlatform.get().getService().release();
                 } else {
                     ServicePlatform.get().getService().convertTo(getDataClass(), () -> eventData);

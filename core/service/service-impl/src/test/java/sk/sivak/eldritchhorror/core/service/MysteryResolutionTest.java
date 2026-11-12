@@ -11,12 +11,18 @@ import sk.sivak.eldritchhorror.core.action.ServicePlatform;
 import sk.sivak.eldritchhorror.core.action.impl.doomomen.ResolveCurrentMysteryAction;
 import sk.sivak.eldritchhorror.core.commandqueue.*;
 import sk.sivak.eldritchhorror.core.constants.MysteryCardInfo;
+import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.question.Answer;
 import sk.sivak.eldritchhorror.core.constants.omen.OmenColor;
 import sk.sivak.eldritchhorror.core.constants.phase.PhaseType;
 import sk.sivak.eldritchhorror.core.controller.*;
 import sk.sivak.eldritchhorror.core.eventqueue.EventQueueImpl;
+import sk.sivak.eldritchhorror.core.eventlistener.ancientone.azathoth.OmenOfDevastationListener;
 import sk.sivak.eldritchhorror.core.eventtype.BeforeAfterEvent;
 import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
+import sk.sivak.eldritchhorror.core.eventtype.data.CloseGateData;
+import sk.sivak.eldritchhorror.core.eventtype.data.token.SpendData;
 import sk.sivak.eldritchhorror.core.model.*;
 import sk.sivak.eldritchhorror.core.service.command.ActionCommand;
 
@@ -95,6 +101,39 @@ public class MysteryResolutionTest {
 
         assertResolution(true);
         verify(init).registerCurrentMysteryCard();
+    }
+
+    @Test public void spendingClueForOmenOfDevastationPreservesGateForNextListener() {
+        sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform listeners =
+                sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform.get();
+        EventQueueImpl events = new EventQueueImpl();
+        listeners.setEventQueue(events);
+        listeners.setService(service);
+        TokenService tokens = mock(TokenService.class);
+        SpendData spend = new SpendData();
+        spend.setHasEnough(true);
+        when(tokens.canSpend(1, 0, 0, 0)).thenReturn(Single.just(spend));
+        when(tokens.spend(1, 0, 0, 0)).thenReturn(Single.just(spend));
+        listeners.setTokenService(tokens);
+        GameService gameService = mock(GameService.class);
+        Answer<Boolean, Object> yes = new Answer<>();
+        yes.setResponseData(true);
+        when(gameService.<Boolean, Object>ask(any())).thenReturn(Single.just(yes));
+        doAnswer(call -> { service.convertToNull(); return null; }).when(gameService).advanceCurrentMysteryCard(1);
+        listeners.setGameService(gameService);
+        new OmenOfDevastationListener(mystery).justRegisterListeners(0);
+
+        CloseGateData gate = new CloseGateData(LocationId.SHANGHAI, GateColor.RED, true);
+        List<CloseGateData> received = new ArrayList<>();
+        service.hold();
+        service.convertTo(CloseGateData.class, () -> gate);
+        service.<CloseGateData>addEventCommand(input -> { events.fireAfterEvent(BeforeAfterEvent.CLOSE_GATE, input); });
+        service.<CloseGateData>addEventCommand(input -> { received.add(input); });
+        service.release();
+        for (int i = 0; i < 30; i++) queue.tick();
+        assertTrue(errors.toString(), errors.isEmpty());
+        assertEquals(java.util.Collections.singletonList(gate), received);
+        verify(gameService).advanceCurrentMysteryCard(1);
     }
 
     @Test public void unsolvedMysteryPreservesFalseAfterQueuedDisplayWork() {
