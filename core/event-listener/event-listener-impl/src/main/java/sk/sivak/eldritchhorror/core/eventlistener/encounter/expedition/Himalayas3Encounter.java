@@ -7,7 +7,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTe
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class Himalayas3Encounter extends AbstractExpeditionEncounter {
@@ -20,8 +19,8 @@ public class Himalayas3Encounter extends AbstractExpeditionEncounter {
     protected void execute() {
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 this::gainArtifact,
-                new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
-                        () -> loseSanity(2)).withExpeditionFlavor());
+                new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+                        NOTHING, () -> loseSanity(2)).withOkAfterPassFlavor().withExpeditionFlavor());
 
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 this::gainArtifact,

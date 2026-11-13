@@ -133,7 +133,13 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
         return this;
     }
 
-    private static Completable confirmWithOk() {
+    /** Replaces the fail flavor with its numbered variant, e.g. when the usual loss cannot happen. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withFailFlavorVariant(int flavorNr) {
+        typeFailFlavor = () -> ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor(flavorNr).build());
+        return this;
+    }
+
+    static Completable confirmWithOk() {
         return Completable.create(onSub -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(buttonId -> onSub.onCompleted());

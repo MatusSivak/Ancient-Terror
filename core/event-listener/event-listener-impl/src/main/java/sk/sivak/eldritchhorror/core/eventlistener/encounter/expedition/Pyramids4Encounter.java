@@ -23,7 +23,7 @@ public class Pyramids4Encounter extends AbstractExpeditionEncounter {
 
         InfoFlavorTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 () -> loseHealth(1),
-                new GainConditionTemplate(getTextBuilder(), ConditionId.DARK_PACT, this::improveSkillOfChoice));
+                new GainConditionTemplate(getTextBuilder(), ConditionId.DARK_PACT, this::improveSkillOfChoice).withAnswerFlavors());
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.STRENGTH, -1, passTemplate, failTemplate).execute();
     }

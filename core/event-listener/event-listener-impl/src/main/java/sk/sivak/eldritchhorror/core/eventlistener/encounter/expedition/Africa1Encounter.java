@@ -7,8 +7,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTe
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class Africa1Encounter extends AbstractExpeditionEncounter {
 
@@ -18,13 +17,13 @@ public class Africa1Encounter extends AbstractExpeditionEncounter {
 
     @Override
     protected void execute() {
-        EncounterTemplate passInnerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
-                () -> gainCondition(ConditionId.AMNESIA)).withExpeditionFlavor();
+        EncounterTemplate passInnerTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
+                        NOTHING, () -> gainCondition(ConditionId.AMNESIA)).withOkAfterPassFlavor().withExpeditionFlavor();
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 this::retreatDoom, passInnerTemplate);
 
-        EncounterTemplate failInnerTemplate = new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
-                this::retreatDoom).withExpeditionFlavor();
+        EncounterTemplate failInnerTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                this::retreatDoom, NOTHING).withOkAfterFailFlavor().withExpeditionFlavor();
         InfoFlavorTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(), () -> {
             loseHealth(1);
             gainCondition(ConditionId.BACK_INJURY);

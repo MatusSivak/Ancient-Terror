@@ -8,7 +8,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEnco
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 
 public class Antarctica4Encounter extends AbstractExpeditionEncounter {
 
@@ -29,8 +28,8 @@ public class Antarctica4Encounter extends AbstractExpeditionEncounter {
                 () -> {
                     loseSanity(1);
                     gainCondition(ConditionId.HALLUCINATIONS);
-                }, new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
-                this::gainSpell).withExpeditionFlavor()
+                }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                this::gainSpell, NOTHING).withOkAfterFailFlavor().withExpeditionFlavor()
         ).withTwoInfos();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.WILL, 0, passTemplate, failTemplate).execute();

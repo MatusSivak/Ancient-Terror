@@ -6,8 +6,7 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class Antarctica1Encounter extends AbstractExpeditionEncounter {
 
@@ -19,15 +18,15 @@ public class Antarctica1Encounter extends AbstractExpeditionEncounter {
     protected void execute() {
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 this::retreatDoom,
-                new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
-                        () -> gainCondition(ConditionId.AMNESIA)).withExpeditionFlavor());
+                new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
+                        NOTHING, () -> gainCondition(ConditionId.AMNESIA)).withOkAfterPassFlavor().withExpeditionFlavor());
 
         InfoFlavorTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 () -> {
                     loseHealth(1);
                     gainCondition(ConditionId.BACK_INJURY);
-                }, new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
-                this::retreatDoom).withExpeditionFlavor())
+                }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                this::retreatDoom, NOTHING).withOkAfterFailFlavor().withExpeditionFlavor())
                 .withTwoInfos();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.STRENGTH, 0, passTemplate, failTemplate).execute();

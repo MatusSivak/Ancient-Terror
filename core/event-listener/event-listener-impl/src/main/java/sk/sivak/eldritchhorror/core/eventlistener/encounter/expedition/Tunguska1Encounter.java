@@ -8,7 +8,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEnco
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 
 public class Tunguska1Encounter extends AbstractExpeditionEncounter {
 
@@ -26,7 +25,7 @@ public class Tunguska1Encounter extends AbstractExpeditionEncounter {
                 () -> {
                     loseHealth(1);
                     gainCondition(ConditionId.LEG_INJURY);
-                }, new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1, this::retreatDoom).withExpeditionFlavor()
+                }, new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1, this::retreatDoom, NOTHING).withOkAfterFailFlavor().withExpeditionFlavor()
         ).withTwoInfos();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.STRENGTH, 0, passTemplate, failTemplate).execute();

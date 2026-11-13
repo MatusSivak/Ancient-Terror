@@ -13,6 +13,8 @@ import static sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.Encount
 
 public abstract class AbstractExpeditionEncounter {
 
+    protected static final Runnable NOTHING = () -> {};
+
     private final ExpeditionEncounterTextBuilder expeditionEncounterTextBuilder;
     private LocationId locationId;
 

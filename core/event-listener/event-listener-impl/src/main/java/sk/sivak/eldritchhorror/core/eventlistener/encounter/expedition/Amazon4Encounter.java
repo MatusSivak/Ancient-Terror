@@ -28,9 +28,14 @@ public class Amazon4Encounter extends AbstractExpeditionEncounter {
 
     @Override
     protected void execute() {
-        EncounterTemplate passTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
-                this::gainTwoClues,
-                this::selectItemToDiscard).withExpeditionFlavor();
+        EncounterTemplate passTemplate = () -> {
+            TestPassFlavorInfoFailFlavorInfoTemplate persuadeTemplate = findInvestigatorItems().isEmpty()
+                    ? new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
+                            this::gainTwoClues, NOTHING).withFailFlavorVariant(2).withOkAfterFailFlavor()
+                    : new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
+                            this::gainTwoClues, this::selectItemToDiscard);
+            persuadeTemplate.withExpeditionFlavor().execute();
+        };
 
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, -1,
                 this::selectIllnessOrInjuryToDiscard,

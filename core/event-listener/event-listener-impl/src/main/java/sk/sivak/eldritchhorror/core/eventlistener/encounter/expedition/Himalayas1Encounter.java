@@ -8,7 +8,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTe
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.data.SpawnMonsterData;
@@ -25,8 +24,8 @@ public class Himalayas1Encounter extends AbstractExpeditionEncounter {
     protected void execute() {
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 this::retreatDoom,
-                new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
-                        () -> loseSanity(2)).withExpeditionFlavor());
+                new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
+                        NOTHING, () -> loseSanity(2)).withOkAfterPassFlavor().withExpeditionFlavor());
 
 
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
@@ -38,7 +37,7 @@ public class Himalayas1Encounter extends AbstractExpeditionEncounter {
                     ServicePlatform.get().getService().release();
                 },
                 () -> loseSanity(1)
-        ).withTwoPassInfos().withoutPassFlavor().withExpeditionFlavor();
+        ).withTwoPassInfos().withExpeditionFlavor();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), null, 0, passTemplate, failTemplate){
 

@@ -23,7 +23,7 @@ public class Africa2Encounter extends AbstractExpeditionEncounter {
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, -1,
                 this::gainTwoClues,
                 () -> gainCondition(ConditionId.DETAINED))
-                .withoutFailFlavor().withExpeditionFlavor();
+                .withExpeditionFlavor();
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.OBSERVATION, 0, passTemplate, failTemplate).execute();
     }
 }

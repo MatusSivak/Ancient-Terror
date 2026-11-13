@@ -6,7 +6,6 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class Antarctica3Encounter extends AbstractExpeditionEncounter {
@@ -19,8 +18,8 @@ public class Antarctica3Encounter extends AbstractExpeditionEncounter {
     protected void execute() {
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 this::gainArtifact,
-                new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
-                        () -> loseSanity(1)).withExpeditionFlavor());
+                new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                        NOTHING, () -> loseSanity(1)).withOkAfterPassFlavor().withExpeditionFlavor());
 
         InfoFlavorTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(),
                 () -> gainCondition(ConditionId.LEG_INJURY),
