@@ -30,28 +30,25 @@ public class OtherWorld18Encounter extends AbstractOtherWorldEncounter {
                 () -> loseSanity(1))
                 .withOtherWorldFlavor();
 
-        EncounterTemplate failTemplate = () -> {
-            TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), this::onNo, this::onYes);
-        };
+        EncounterTemplate failTemplate = () -> TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> ghoulsAttack(getTextBuilder().withFail().withFlavor().build()), this::onYes);
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.INFLUENCE, 0, passTemplate, failTemplate).execute();
     }
 
-    private void onNo() {
+    private void ghoulsAttack(String flavor) {
         ServicePlatform.get().getService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(" \n" +getTextBuilder().withFail().withFlavor().build());
+        ServicePlatform.get().getEncounterService().typeFlavor(" \n" + flavor);
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),
                 getTextBuilder().withFail().withInfo(2).build()).subscribe(this::loseHealthAndGainInjury);
         ServicePlatform.get().getService().release();
     }
 
-
-
     private void onYes() {
         List<? extends CardInfo> investigatorItems = findInvestigatorItems();
         if (investigatorItems.isEmpty()) {
-            TypewriterUtils.confirmInfos("[#BAD]You don't have any Item.[]").subscribe(this::onNo);
+            ghoulsAttack(getTextBuilder().withFail().withFlavor(2).build());
             return;
         }
 

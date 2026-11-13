@@ -41,18 +41,14 @@ public class Wilderness11Encounter extends AbstractGeneralEncounter {
         if (hasMadness) {
             onHasMadness();
         } else {
-            confirmRecovery(1);
+            confirmRecovery(1, true);
         }
     }
 
     private void onAlreadyDelayed() {
         ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor(2).build());
-        TypewriterUtils.confirmInfos("[#BAD]You are already Delayed[]").subscribe(() -> {
-            ServicePlatform.get().getService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-            ServicePlatform.get().getService().release();
-        });
+        TypewriterUtils.confirmInfos("[#BAD]You are already Delayed[]").subscribe(() ->
+                ServicePlatform.get().getEncounterService().finishTypewriterPaper());
     }
 
     private void onHasMadness() {
@@ -60,12 +56,15 @@ public class Wilderness11Encounter extends AbstractGeneralEncounter {
         ServicePlatform.get().getEncounterService().displayButtons(
                 getTextBuilder().withOption(1).build(),
                 getTextBuilder().withOption(2).build()
-        ).subscribe(x -> confirmRecovery(x + 1));
+        ).subscribe(x -> confirmRecovery(x + 1, false));
     }
 
-    private void confirmRecovery(int option) {
+    private void confirmRecovery(int option, boolean onlyAvailableReward) {
         ServicePlatform.get().getEncounterService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withOption(option).withFlavor().build());
+        String flavor = onlyAvailableReward
+                ? getTextBuilder().withOption(option).withFlavor(2).build()
+                : getTextBuilder().withOption(option).withFlavor().build();
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withPass().withInfo().build(),
                 getTextBuilder().withOption(option).build()
@@ -73,12 +72,10 @@ public class Wilderness11Encounter extends AbstractGeneralEncounter {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
             ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-            if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
-                if (option == 1) {
-                    ServicePlatform.get().getTokenService().gainSanity(3);
-                } else {
-                    selectMadnessToDiscard();
-                }
+            if (option == 1) {
+                ServicePlatform.get().getTokenService().gainSanity(3);
+            } else {
+                selectMadnessToDiscard();
             }
             ServicePlatform.get().getEncounterService().release();
         });

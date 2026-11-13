@@ -6,6 +6,7 @@ import org.junit.Test;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AxeAsset;
+import sk.sivak.eldritchhorror.core.constants.asset.PrivateInvestigatorAsset;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.gate.GateColor;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
@@ -34,6 +35,8 @@ public class OtherWorldNarrationTest {
     private final Deque<Integer> answers = new ArrayDeque<>();
     private final Deque<Boolean> outcomes = new ArrayDeque<>();
     private boolean delayed;
+    private int delays;
+    private int rewards;
     private boolean canPay = true;
     private boolean paid = true;
     private int finishes;
@@ -115,39 +118,53 @@ public class OtherWorldNarrationTest {
             play(page, "P", "pass.flavor", "pass.flavor.2", "pass.option.2.flavor");
         }
         paid = false;
-        answers.add(1);
-        play(3, "F", "fail.flavor", "fail.option.1.flavor");
-        answers.add(1);
-        play(24, "P", "pass.flavor", "pass.flavor.2", "pass.option.1.flavor");
-        canPay = false;
-        play(10, "F", "fail.flavor", "fail.option.1.flavor");
-        play(21, "P", "pass.flavor", "pass.flavor.2", "pass.option.1.flavor");
+        for (int page : new int[]{1, 3, 9, 10, 11, 21, 24}) {
+            boolean pass = page == 21 || page == 24;
+            String[] fallback = pass ? new String[]{"pass.flavor", "pass.flavor.2", "pass.option.1.flavor.2"}
+                    : new String[]{"fail.flavor", "fail.option.1.flavor.2"};
+            canPay = true;
+            answers.add(1);
+            play(page, pass ? "P" : "F", fallback);
+            canPay = false;
+            play(page, pass ? "P" : "F", fallback);
+        }
     }
 
     @Test public void delayedChoiceNarratesBothOptions() throws Exception {
         for (int page : new int[]{12, 19}) {
+            delayed = false;
             for (int option = 0; option < 2; option++) {
                 answers.add(option);
                 play(page, "F", "fail.flavor", "fail.option." + (option + 1) + ".flavor");
             }
+            play(page, "F", "fail.flavor", "fail.option.1.flavor.2");
         }
     }
 
     @Test public void becomeDelayedForRewardNarratesEveryAnswer() throws Exception {
         for (int page : new int[]{4, 5, 6, 25}) {
+            delayed = false;
+            delays = rewards = 0;
             answers.add(0);
             play(page, "P", "pass.flavor", "pass.flavor.2", "pass.fail.flavor");
+            assertEquals(0, rewards);
             answers.add(1);
             play(page, "P", "pass.flavor", "pass.flavor.2", "pass.pass.flavor");
+            assertEquals(1, delays);
+            assertEquals(page == 4 || page == 5 ? 2 : 1, rewards);
         }
+        delays = rewards = 0;
         delayed = true;
         for (int page : new int[]{4, 5, 6, 25}) {
             answers.add(1);
             play(page, "P", "pass.flavor", "pass.flavor.2", "pass.pass.flavor.2");
+            assertEquals(0, delays);
+            assertEquals(0, rewards);
         }
     }
 
     @Test public void spendClueQuestionsNarrateEveryAnswer() throws Exception {
+        inventory.add(new PrivateInvestigatorAsset());
         for (int page : new int[]{14, 15, 28}) {
             String flavor2 = page == 28 ? "pass.flavor.2" : null;
             for (String test : new String[]{"P", "F"}) {
@@ -158,11 +175,15 @@ public class OtherWorldNarrationTest {
                 play(page, test, "fail.flavor", "fail." + second + ".flavor");
             }
         }
+        inventory.clear();
         paid = false;
-        answers.add(1);
-        play(15, "P", "fail.flavor", "fail.pass.flavor");
-        canPay = false;
-        play(28, "F", "fail.flavor", "fail.fail.flavor");
+        for (int page : new int[]{14, 15, 28}) {
+            canPay = true;
+            answers.add(1);
+            play(page, "P", "fail.flavor.2", "fail.pass.flavor");
+            canPay = false;
+            play(page, "F", "fail.flavor.2", page == 28 ? "fail.fail.flavor.2" : "fail.fail.flavor");
+        }
     }
 
     @Test public void lastChanceQuestionsNarrateEveryAnswer() throws Exception {
@@ -176,10 +197,10 @@ public class OtherWorldNarrationTest {
         play(18, "F", "fail.flavor", "fail.pass.flavor");
         paid = false;
         answers.add(1);
-        play(16, "F", "fail.flavor", "fail.fail.flavor");
+        play(16, "F", "fail.flavor", "fail.fail.flavor.2");
         inventory.clear();
         answers.add(1);
-        play(18, "F", "fail.flavor", "fail.fail.flavor");
+        play(18, "F", "fail.flavor", "fail.fail.flavor.2");
     }
 
     @Test public void failedOpeningTestsNarrateEveryOutcome() throws Exception {
@@ -188,7 +209,7 @@ public class OtherWorldNarrationTest {
             play(page, "FF", outcomeEndings("FF", false, true));
         }
         inventory.clear();
-        play(21, "FF", outcomeEndings("FF", false, true));
+        play(21, "FF", "fail.flavor", "fail.flavor.2", "fail.fail.flavor.2");
     }
 
     @Test public void everyEncounterHasTitleAndFlavor() {
@@ -267,6 +288,10 @@ public class OtherWorldNarrationTest {
                 case "getClueCount": return 0;
                 case "getStatBonus": return 0;
                 case "isDelayed": return delayed;
+                case "becomeDelayed": delays++; delayed = true; return null;
+                case "gainClueFromPool":
+                case "gainSpell":
+                case "improveSkill": rewards++; return null;
                 case "getCurrentLocationId": return null;
                 case "getCondition": return Collections.singletonList(stub(ConditionInfo.class));
                 case "getAssets": return inventory;

@@ -112,6 +112,10 @@ public abstract class AbstractOtherWorldEncounter {
     /** Option 1 applies {@code defaultAction}; option 2 makes the investigator Delayed. Both are narrated. */
     protected EncounterTemplate somethingUnlessDelayedTemplate(Runnable defaultAction) {
         return () -> {
+            if (ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+                narrateUnavailableAlternative(defaultAction);
+                return;
+            }
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_ONE);
             ServicePlatform.get().getEncounterService().displayButtons(
@@ -140,7 +144,7 @@ public abstract class AbstractOtherWorldEncounter {
     protected EncounterTemplate unlessSpendTemplate(ClueFocusHealthSanity cost, Runnable defaultAction, Runnable onSpent) {
         return () -> ServicePlatform.get().getTokenService().canSpend(cost).subscribe(canSpendData -> {
             if (!canSpendData.hasEnough()) {
-                narrateOption(1, defaultAction);
+                narrateUnavailableAlternative(defaultAction);
                 return;
             }
             ServicePlatform.get().getEncounterService().hold();
@@ -171,11 +175,16 @@ public abstract class AbstractOtherWorldEncounter {
                         onSpent == null ? new String[0] : new String[]{getTextBuilder().withOption(2).withInfo().build()},
                         onSpent == null ? NOTHING : onSpent);
             } else {
-                narrateOption(1, defaultAction);
+                narrateUnavailableAlternative(defaultAction);
             }
             ServicePlatform.get().getService().release();
         });
         ServicePlatform.get().getService().release();
+    }
+
+    private void narrateUnavailableAlternative(Runnable defaultAction) {
+        narrateThen(getTextBuilder().withOption(1).withFlavor(2).build(),
+                new String[]{getTextBuilder().withOption(1).build()}, defaultAction);
     }
 
     private void narrateOption(int option, Runnable action) {
@@ -216,8 +225,8 @@ public abstract class AbstractOtherWorldEncounter {
                             ? new String[]{"[#BAD]You are already Delayed[]"}
                             : new String[]{getTextBuilder().withPass().withInfo(1).build(), getTextBuilder().withPass().withInfo(2).build()};
                     narrateThen(flavor, infos, () -> {
-                        ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-                        if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+                        if (!alreadyDelayed) {
+                            ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
                             reward.run();
                         }
                     });
@@ -271,7 +280,7 @@ public abstract class AbstractOtherWorldEncounter {
                                 ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
                                 ServicePlatform.get().getEncounterService().typeInfo("[#BAD]You don't have a Clue[]");
                                 getTextBuilder().addFailPrefix();
-                                ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFlavor().build());
+                                ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFlavor(2).build());
                                 failTemplate.execute();
                                 ServicePlatform.get().getService().release();
                             }
@@ -284,7 +293,7 @@ public abstract class AbstractOtherWorldEncounter {
                 ServicePlatform.get().getService().hold();
                 ServicePlatform.get().getEncounterService().typeInfo("[#BAD]You don't have a Clue[]");
                 getTextBuilder().addFailPrefix();
-                ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFlavor().build());
+                ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFlavor(2).build());
                 failTemplate.execute();
                 ServicePlatform.get().getService().release();
             }

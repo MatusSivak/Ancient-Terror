@@ -71,19 +71,22 @@ public abstract class AbstractGeneralEncounter {
                     getTextBuilder().withPass().withOption(2).build()
             ).subscribe(button -> {
                 if (button == 0) {
-                    confirmReward(1, firstReward);
+                    confirmReward(1, firstReward, false);
                 } else {
-                    confirmReward(2, secondReward);
+                    confirmReward(2, secondReward, false);
                 }
             });
         } else {
-            confirmReward(fallbackOption, fallbackOption == 1 ? firstReward : secondReward);
+            confirmReward(fallbackOption, fallbackOption == 1 ? firstReward : secondReward, true);
         }
     }
 
-    private void confirmReward(int option, Action0 gainReward) {
+    private void confirmReward(int option, Action0 gainReward, boolean onlyAvailableReward) {
         ServicePlatform.get().getEncounterService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withOption(option).withFlavor().build());
+        String flavor = onlyAvailableReward
+                ? getTextBuilder().withPass().withOption(option).withFlavor(2).build()
+                : getTextBuilder().withPass().withOption(option).withFlavor().build();
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(getTextBuilder().withPass().withOption(option).build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();

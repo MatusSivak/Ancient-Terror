@@ -45,6 +45,7 @@ public class ExpeditionNarrationTest {
     private final Deque<Integer> answers = new ArrayDeque<>();
     private final Deque<Boolean> outcomes = new ArrayDeque<>();
     private boolean hasCondition;
+    private boolean hasAilment = true;
     private int eventCommands;
     private int finishes;
 
@@ -98,6 +99,11 @@ public class ExpeditionNarrationTest {
         inventory.clear();
         play("Amazon", 4, "PF", "pass.flavor", "pass.fail.flavor.2");
         play("Amazon", 4, "PP", outcomeEndings("Amazon", 4, "PP"));
+    }
+
+    @Test public void feverBreaksWithoutAConditionToDiscard() throws Exception {
+        hasAilment = false;
+        play("Amazon", 4, "FP", "fail.flavor", "fail.pass.flavor.2");
     }
 
     private static String[] outcomeEndings(String location, int page, String tests) {
@@ -182,7 +188,7 @@ public class ExpeditionNarrationTest {
                 case "getCurrentLocationId": return null;
                 case "hasCondition": return hasCondition;
                 case "getName": return "Card";
-                case "getCondition": return Collections.singletonList(stub(ConditionInfo.class));
+                case "getCondition": return hasAilment ? Collections.singletonList(stub(ConditionInfo.class)) : Collections.emptyList();
                 case "getAssets": return inventory;
                 case "getArtifacts": return Collections.emptyList();
                 case "findFirst": return new AxeAsset();

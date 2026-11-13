@@ -9,7 +9,6 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ComplexEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.ExpeditionEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils;
@@ -28,29 +27,46 @@ public class Amazon4Encounter extends AbstractExpeditionEncounter {
 
     @Override
     protected void execute() {
-        EncounterTemplate passTemplate = () -> {
-            TestPassFlavorInfoFailFlavorInfoTemplate persuadeTemplate = findInvestigatorItems().isEmpty()
-                    ? new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
-                            this::gainTwoClues, NOTHING).withFailFlavorVariant(2).withOkAfterFailFlavor()
-                    : new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
-                            this::gainTwoClues, this::selectItemToDiscard);
-            persuadeTemplate.withExpeditionFlavor().execute();
-        };
+        EncounterTemplate passTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
+                this::gainTwoClues, this::selectItemToDiscard) {
+            @Override
+            protected void onFail() {
+                if (findInvestigatorItems().isEmpty()) {
+                    withFailFlavorVariant(2).withOkAfterFailFlavor();
+                }
+                super.onFail();
+            }
+        }.withExpeditionFlavor();
 
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, -1,
                 this::selectIllnessOrInjuryToDiscard,
                 () -> {
                     loseHealth(1);
                     gainCondition(ConditionId.POISONED);
-                }).withTwoFailInfos().withExpeditionFlavor();
+                }) {
+            @Override
+            protected void onSuccess() {
+                if (illnessesOrInjuries().isEmpty()) {
+                    withPassFlavorVariant(2).withOkAfterPassFlavor();
+                }
+                super.onSuccess();
+            }
+        }.withTwoFailInfos().withExpeditionFlavor();
 
         new ExpeditionEncounterTemplate(getTextBuilder(), Stat.OBSERVATION, -1, passTemplate, failTemplate).execute();
     }
 
-    private void selectIllnessOrInjuryToDiscard() {
+    private List<ConditionInfo> illnessesOrInjuries() {
         List<ConditionInfo> illnessesOrInjuries = new LinkedList<>();
         illnessesOrInjuries.addAll(ServicePlatform.get().getConditionsDeck().getCondition(getActiveInvestigatorId(), ConditionTrait.ILLNESS));
         illnessesOrInjuries.addAll(ServicePlatform.get().getConditionsDeck().getCondition(getActiveInvestigatorId(), ConditionTrait.INJURY));
+        return illnessesOrInjuries;
+    }
+
+    private void selectIllnessOrInjuryToDiscard() {
+        List<ConditionInfo> illnessesOrInjuries = illnessesOrInjuries();
+        if (illnessesOrInjuries.isEmpty()) return;
+
         SelectCardData selectCardData = new SelectCardData();
         selectCardData.setAvailableCards(illnessesOrInjuries);
         selectCardData.setHideText("Display Inventory?");

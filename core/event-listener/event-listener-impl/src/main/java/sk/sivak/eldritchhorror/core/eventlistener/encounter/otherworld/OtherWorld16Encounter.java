@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
-import rx.functions.Action0;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
@@ -24,23 +23,19 @@ public class OtherWorld16Encounter extends AbstractOtherWorldEncounter {
                 .withOtherWorldFlavor();
 
 
-        Action0 onNoAction = () -> {
-            ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFail().withFlavor().build());
-            TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
-                ServicePlatform.get().getService().hold();
-                ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-                becomeDelayed();
-                ServicePlatform.get().getService().release();
-            });
-        };
-        EncounterTemplate failTemplate = new SpendCluePassFlavorInfoTemplate(getTextBuilder(), this::closeThisGateAndEnd) {
-            @Override
-            public void execute() {
-                getTextBuilder().addFailPrefix();
-                super.execute();
-            }
-        }.withOnNoAction(onNoAction);
+        EncounterTemplate failTemplate = new SpendCluePassFlavorInfoTemplate(getTextBuilder(), this::closeThisGateAndEnd)
+                .withOnNoAction(() -> leaveWithoutClue(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> leaveWithoutClue(getTextBuilder().withFail().withFlavor(2).build()));
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.WILL, 0, passTemplate, failTemplate).execute();
+    }
+    private void leaveWithoutClue(String flavor) {
+        ServicePlatform.get().getEncounterService().typeFlavor(" \n" + flavor);
+        TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            becomeDelayed();
+            ServicePlatform.get().getService().release();
+        });
     }
 }

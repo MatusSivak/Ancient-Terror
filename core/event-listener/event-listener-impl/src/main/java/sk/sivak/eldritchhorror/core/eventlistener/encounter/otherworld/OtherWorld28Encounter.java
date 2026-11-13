@@ -38,8 +38,15 @@ public class OtherWorld28Encounter extends AbstractOtherWorldEncounter {
                         EncounterUtils.onSelectCardToDiscard(ally);
                     }
                     ServicePlatform.get().getService().release();
+                }) {
+            @Override
+            protected void onFail() {
+                if (findAllies().isEmpty()) {
+                    withFailFlavorVariant(2);
                 }
-                ).withOkAfterPassFlavor().withTwoFailInfos().withOtherWorldFlavor();
+                super.onFail();
+            }
+        }.withOkAfterPassFlavor().withTwoFailInfos().withOtherWorldFlavor();
         spendOneClueToResolvePassTemplate(passTemplate, failTemplate).execute();
     }
 

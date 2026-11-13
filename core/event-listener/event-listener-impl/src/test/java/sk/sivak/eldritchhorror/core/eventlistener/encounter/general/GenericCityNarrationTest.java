@@ -57,7 +57,7 @@ public class GenericCityNarrationTest {
         for (int page = 1; page <= 16; page++) {
             play(page, false, "fail.flavor");
             if (page == 1 || page == 3 || page == 12) {
-                play(page, true, "pass.flavor", "pass.option.2.flavor");
+                play(page, true, "pass.flavor", "pass.option.2.flavor.2");
             } else {
                 play(page, true, "pass.flavor");
             }
@@ -73,7 +73,7 @@ public class GenericCityNarrationTest {
                 assertEquals(rewardButton == 0 ? 1 : 0, refills);
             }
             reserve = Collections.emptyList();
-            play(page, true, "pass.flavor", "pass.option.2.flavor");
+            play(page, true, "pass.flavor", "pass.option.2.flavor.2");
             assertEquals(1, rewards);
             assertEquals(0, refills);
         }

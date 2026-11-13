@@ -31,8 +31,8 @@ public class Sea5Encounter extends AbstractGeneralEncounter {
         TypewriterUtils.confirmInfos(infos).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-            if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+            if (!alreadyDelayed) {
+                ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
                 ServicePlatform.get().getGameService().gainArtifact();
             }
             ServicePlatform.get().getEncounterService().release();

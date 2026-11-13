@@ -34,6 +34,8 @@ public class GenericWildernessSeaNarrationTest {
     private boolean passed;
     private boolean delayed;
     private boolean madness;
+    private int delays;
+    private int rewards;
     private boolean clue = true;
     private int statBonus;
     private int finishes;
@@ -96,9 +98,9 @@ public class GenericWildernessSeaNarrationTest {
             }
         }
         statBonus = 2;
-        play("wilderness", 2, true, "pass.flavor", "pass.option.1.flavor");
-        play("wilderness", 8, true, "pass.flavor", "pass.option.1.flavor");
-        play("sea", 6, true, "pass.flavor", "pass.option.1.flavor");
+        play("wilderness", 2, true, "pass.flavor", "pass.option.1.flavor.2");
+        play("wilderness", 8, true, "pass.flavor", "pass.option.1.flavor.2");
+        play("sea", 6, true, "pass.flavor", "pass.option.1.flavor.2");
         answers.add(1);
         play("wilderness", 3, true, "pass.flavor", "pass.option.2.flavor");
     }
@@ -116,17 +118,21 @@ public class GenericWildernessSeaNarrationTest {
         answers.add(1);
         play("wilderness", 5, true, "pass.flavor.2");
 
+        delayed = false;
         answers.add(1);
-        play("wilderness", 11, true, "pass.flavor", "option.1.flavor");
+        play("wilderness", 11, true, "pass.flavor", "option.1.flavor.2");
         madness = true;
         for (int option = 0; option < 2; option++) {
+            delayed = false;
             answers.add(1);
             answers.add(option);
             play("wilderness", 11, true, "pass.flavor", "option." + (option + 1) + ".flavor");
         }
 
+        delayed = false;
         answers.add(1);
         play("sea", 5, true, "pass.flavor");
+        delayed = false;
         answers.add(1);
         play("sea", 16, true, "pass.flavor");
 
@@ -137,6 +143,28 @@ public class GenericWildernessSeaNarrationTest {
         play("sea", 5, true, "pass.flavor.2");
         answers.add(1);
         play("sea", 16, true, "pass.flavor.2");
+    }
+
+    @Test public void optionalDelaysPayExactlyOnce() throws Exception {
+        for (String kind : new String[]{"wilderness", "sea"}) {
+            int[] pages = kind.equals("sea") ? new int[]{5, 16} : new int[]{11};
+            for (int page : pages) {
+                delayed = false;
+                delays = rewards = 0;
+                answers.add(1);
+                if (page == 11) {
+                    play(kind, page, true, "pass.flavor", "option.1.flavor.2");
+                } else {
+                    play(kind, page, true, "pass.flavor");
+                }
+                assertEquals(1, rewards);
+                assertEquals(1, delays);
+                answers.add(1);
+                play(kind, page, true, "pass.flavor.2");
+                assertEquals(1, rewards);
+                assertEquals(1, delays);
+            }
+        }
     }
 
     @Test public void lossNarrationMatchesThePossessionsAtRisk() throws Exception {
@@ -206,7 +234,10 @@ public class GenericWildernessSeaNarrationTest {
                 case "getArtifacts": return Collections.emptyList();
                 case "findFirst": return new AxeAsset();
                 case "selectSingleCard": return Single.just(((SelectCardData) args[0]).getAvailableCards().get(0));
-                case "spawnClues": return Single.just(Collections.emptyList());
+                case "becomeDelayed": delayed = true; delays++; return null;
+                case "gainArtifact":
+                case "gainSanity": rewards++; return null;
+                case "spawnClues": rewards++; return Single.just(Collections.emptyList());
                 case "showCard": return Single.just(null);
                 case "finishTypewriterPaper": finishes++; return null;
                 case "hashCode": return System.identityHashCode(proxy);

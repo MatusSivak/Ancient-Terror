@@ -55,7 +55,7 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
         displayTestButton.run();
     }
 
-    protected final void onSuccess() {
+    protected void onSuccess() {
         typePassFlavor.run();
         confirmPassInfo.get().subscribe(() -> {
             ServicePlatform.get().getService().hold();
@@ -130,6 +130,11 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
     /** Lets the player read the fail flavor and confirm it with OK when the fail costs nothing. */
     public TestPassFlavorInfoFailFlavorInfoTemplate withOkAfterFailFlavor() {
         confirmFailInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        return this;
+    }
+
+    public TestPassFlavorInfoFailFlavorInfoTemplate withPassFlavorVariant(int flavorNr) {
+        typePassFlavor = () -> ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor(flavorNr).build());
         return this;
     }
 

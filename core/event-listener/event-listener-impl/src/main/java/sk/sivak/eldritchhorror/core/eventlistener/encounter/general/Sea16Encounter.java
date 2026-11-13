@@ -1,7 +1,5 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.general;
 
-import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
-import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
@@ -34,9 +32,7 @@ public class Sea16Encounter extends AbstractGeneralEncounter {
         TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            if (ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
-                ServicePlatform.get().getTokenService().spawnClues(2).subscribe();
-            }
+            ServicePlatform.get().getTokenService().spawnClues(2).subscribe();
             ServicePlatform.get().getService().release();
         });
         ServicePlatform.get().getEncounterService().release();

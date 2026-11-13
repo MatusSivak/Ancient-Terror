@@ -29,19 +29,21 @@ public class OtherWorld21Encounter extends AbstractOtherWorldEncounter {
                         this::becomeDelayed, this::closeThisGateAndEnd));
         EncounterTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(), () -> loseHealth(1),
                 new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
-                        NOTHING, () -> {
-                            List<? extends CardInfo> investigatorItems = findInvestigatorItems();
-                            if (investigatorItems.isEmpty()) {
-                                return;
-                            }
-                            selectItemToDiscard(investigatorItems);
-                        })
-                        .withOkAfterPassFlavor().withOtherWorldFlavor());
+                        NOTHING, () -> selectItemToDiscard(findInvestigatorItems())) {
+                    @Override
+                    protected void onFail() {
+                        if (findInvestigatorItems().isEmpty()) {
+                            withFailFlavorVariant(2).withOkAfterFailFlavor();
+                        }
+                        super.onFail();
+                    }
+                }.withOkAfterPassFlavor().withOtherWorldFlavor());
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.LORE, 0, passTemplate, failTemplate).execute();
     }
 
     private void selectItemToDiscard(List<? extends CardInfo> investigatorItems) {
+        if (investigatorItems.isEmpty()) return;
         SelectCardData selectCardData = new SelectCardData();
         selectCardData.setAvailableCards(investigatorItems);
         selectCardData.setHideText("Display Inventory?");

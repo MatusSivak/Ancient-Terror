@@ -12,6 +12,7 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
     private boolean typePassFlavor = true;
     private boolean typePassInfo = true;
     private Action0 onNoAction = null;
+    private Action0 onMissingClue;
 
     public SpendCluePassFlavorInfoTemplate(EncounterTextBuilder textBuilder, Runnable onSpendAction) {
         super(textBuilder);
@@ -51,12 +52,11 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
                         }
 
                         ServicePlatform.get().getService().release();
-                    } else if (onNoAction != null) {
+                    } else if (onMissingClue != null || onNoAction != null) {
                         ServicePlatform.get().getService().hold();
                         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
-                        TypewriterUtils.confirmInfos("[#BAD]You don't have a Clue[]").subscribe(() -> {
-                            onNoAction.call();
-                        });
+                        TypewriterUtils.confirmInfos("[#BAD]You don't have a Clue[]")
+                                .subscribe(onMissingClue != null ? onMissingClue : onNoAction);
                         ServicePlatform.get().getService().release();
                     } else {
                         ServicePlatform.get().getService().hold();
@@ -77,6 +77,11 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
 
     public SpendCluePassFlavorInfoTemplate withoutPassInfo() {
         typePassInfo = false;
+        return this;
+    }
+
+    public SpendCluePassFlavorInfoTemplate withOnMissingClue(Action0 action) {
+        onMissingClue = action;
         return this;
     }
 
