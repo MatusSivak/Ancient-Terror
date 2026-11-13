@@ -135,6 +135,8 @@ public class GenericWildernessSeaNarrationTest {
         play("wilderness", 11, true, "pass.flavor.2");
         answers.add(1);
         play("sea", 5, true, "pass.flavor.2");
+        answers.add(1);
+        play("sea", 16, true, "pass.flavor.2");
     }
 
     @Test public void lossNarrationMatchesThePossessionsAtRisk() throws Exception {

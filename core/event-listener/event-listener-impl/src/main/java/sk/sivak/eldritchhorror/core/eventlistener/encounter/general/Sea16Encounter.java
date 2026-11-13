@@ -22,6 +22,10 @@ public class Sea16Encounter extends AbstractGeneralEncounter {
     }
 
     private void onYes() {
+        if (ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+            onAlreadyDelayed();
+            return;
+        }
         ServicePlatform.get().getEncounterService().hold();
         ServicePlatform.get().getEncounterService().hideTypewriterPaper();
         ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
@@ -38,5 +42,9 @@ public class Sea16Encounter extends AbstractGeneralEncounter {
         ServicePlatform.get().getEncounterService().release();
     }
 
-
+    private void onAlreadyDelayed() {
+        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor(2).build());
+        TypewriterUtils.confirmInfos("[#BAD]You are already Delayed[]")
+                .subscribe(() -> ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+    }
 }
