@@ -7,7 +7,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTe
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.service.data.ClueFocusHealthSanity;
 
 public class OtherWorld19Encounter extends AbstractOtherWorldEncounter {
 
@@ -22,7 +21,7 @@ public class OtherWorld19Encounter extends AbstractOtherWorldEncounter {
                 new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                         this::closeThisGateAndEnd,
                         () -> loseSanity(1))
-                .withOtherWorldFlavor().withoutPassFlavor());
+                .withOtherWorldFlavor());
 
         EncounterTemplate failTemplate = somethingUnlessDelayedTemplate(() -> {
             ServicePlatform.get().getService().hold();

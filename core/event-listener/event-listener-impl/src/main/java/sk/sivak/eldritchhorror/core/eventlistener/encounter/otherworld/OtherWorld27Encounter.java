@@ -6,7 +6,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTe
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoTemplate;
 
 public class OtherWorld27Encounter extends AbstractOtherWorldEncounter {
 
@@ -23,9 +22,9 @@ public class OtherWorld27Encounter extends AbstractOtherWorldEncounter {
                .withOtherWorldFlavor();
 
         EncounterTemplate failTemplate = new InfoFlavorTemplate(getTextBuilder(), () -> gainCondition(ConditionId.BACK_INJURY),
-                new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
-                        this::gainSpell)
-                        .withOtherWorldFlavor());
+                new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+                        this::gainSpell, NOTHING)
+                        .withOkAfterFailFlavor().withOtherWorldFlavor());
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.STRENGTH, -1, passTemplate, failTemplate).execute();
     }

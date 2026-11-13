@@ -1,7 +1,6 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
 import rx.functions.Action0;
-import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
@@ -22,10 +21,11 @@ public class OtherWorld16Encounter extends AbstractOtherWorldEncounter {
         EncounterTemplate passTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 this::closeThisGateAndEnd,
                 () -> loseSanity(1))
-                .withOtherWorldFlavor().withoutPassFlavor();
+                .withOtherWorldFlavor();
 
 
         Action0 onNoAction = () -> {
+            ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withFail().withFlavor().build());
             TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
                 ServicePlatform.get().getService().hold();
                 ServicePlatform.get().getEncounterService().finishTypewriterPaper();
@@ -39,7 +39,7 @@ public class OtherWorld16Encounter extends AbstractOtherWorldEncounter {
                 getTextBuilder().addFailPrefix();
                 super.execute();
             }
-        }.withoutPassFlavor().withoutPassInfo().withOnNoAction(onNoAction);
+        }.withOnNoAction(onNoAction);
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.WILL, 0, passTemplate, failTemplate).execute();
     }

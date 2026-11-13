@@ -121,6 +121,26 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
         return this;
     }
 
+    /** Lets the player read the pass flavor and confirm it with OK when the pass gives nothing. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withOkAfterPassFlavor() {
+        confirmPassInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        return this;
+    }
+
+    /** Lets the player read the fail flavor and confirm it with OK when the fail costs nothing. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withOkAfterFailFlavor() {
+        confirmFailInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        return this;
+    }
+
+    private static Completable confirmWithOk() {
+        return Completable.create(onSub -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(buttonId -> onSub.onCompleted());
+            ServicePlatform.get().getService().release();
+        });
+    }
+
 
     public TestPassFlavorInfoFailFlavorInfoTemplate withoutHidingPaperBeforePass() {
         hidePaperBeforePass = false;

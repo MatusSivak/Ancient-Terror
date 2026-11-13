@@ -1,5 +1,6 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
+import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionTrait;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
@@ -87,23 +88,28 @@ public abstract class AbstractOtherWorldEncounter {
         ServicePlatform.get().getGameService().gainSpell();
     }
 
+    protected static final Runnable NOTHING = () -> {};
+
+    protected void finishAfterFlavor(String flavor) {
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
+        ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(button ->
+                ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+    }
+
     protected void selectReward(Runnable option1, Runnable option2) {
         ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
         ServicePlatform.get().getEncounterService().displayButtons(
                 getTextBuilder().withPass().withOption(1).build(),
                 getTextBuilder().withPass().withOption(2).build()
         ).subscribe(x -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            if (x == 0) {
-                option1.run();
-            } else {
-                option2.run();
-            }
-            ServicePlatform.get().getEncounterService().release();
+            int option = x + 1;
+            narrateThen(getTextBuilder().withPass().withOption(option).withFlavor().build(),
+                    new String[]{getTextBuilder().withPass().withOption(option).build()},
+                    option == 1 ? option1 : option2);
         });
     }
 
+    /** Option 1 applies {@code defaultAction}; option 2 makes the investigator Delayed. Both are narrated. */
     protected EncounterTemplate somethingUnlessDelayedTemplate(Runnable defaultAction) {
         return () -> {
             ServicePlatform.get().getEncounterService().hold();
@@ -113,19 +119,109 @@ public abstract class AbstractOtherWorldEncounter {
                     getTextBuilder().withOption(2).build()
             ).subscribe(x -> {
                 if (x == 0) {
-                    ServicePlatform.get().getEncounterService().hold();
-                    ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-                    defaultAction.run();
-                    ServicePlatform.get().getEncounterService().release();
+                    narrateOption(1, defaultAction);
                 } else {
-                    ServicePlatform.get().getEncounterService().hold();
-                    ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-                    ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-                    ServicePlatform.get().getEncounterService().release();
+                    narrateOption(2, () -> ServicePlatform.get().getInvestigatorService()
+                            .becomeDelayed(new DelayedData(getActiveInvestigatorId(), false)));
                 }
             });
             ServicePlatform.get().getEncounterService().release();
         };
+    }
+
+    protected EncounterTemplate unlessSpendTemplate(ClueFocusHealthSanity cost, Runnable defaultAction) {
+        return unlessSpendTemplate(cost, defaultAction, null);
+    }
+
+    /**
+     * Option 1 applies {@code defaultAction}; option 2 pays {@code cost} and then runs {@code onSpent}.
+     * When {@code onSpent} is set, {@code option.2.info} describes its effect.
+     */
+    protected EncounterTemplate unlessSpendTemplate(ClueFocusHealthSanity cost, Runnable defaultAction, Runnable onSpent) {
+        return () -> ServicePlatform.get().getTokenService().canSpend(cost).subscribe(canSpendData -> {
+            if (!canSpendData.hasEnough()) {
+                narrateOption(1, defaultAction);
+                return;
+            }
+            ServicePlatform.get().getEncounterService().hold();
+            ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_ONE);
+            ServicePlatform.get().getEncounterService().displayButtons(
+                    getTextBuilder().withOption(1).build(),
+                    getTextBuilder().withOption(2).build()
+            ).subscribe(x -> {
+                if (x == 0) {
+                    narrateOption(1, defaultAction);
+                } else {
+                    spendThenNarrate(cost, defaultAction, onSpent);
+                }
+            });
+            ServicePlatform.get().getEncounterService().release();
+        });
+    }
+
+    private void spendThenNarrate(ClueFocusHealthSanity cost, Runnable defaultAction, Runnable onSpent) {
+        ServicePlatform.get().getService().hold();
+        ServicePlatform.get().getEncounterService().hideTypewriterPaper();
+        ServicePlatform.get().getTokenService().spend(cost).subscribe(spendData -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
+            if (spendData.hasEnough()) {
+                spendData.pay();
+                narrateThen(getTextBuilder().withOption(2).withFlavor().build(),
+                        onSpent == null ? new String[0] : new String[]{getTextBuilder().withOption(2).withInfo().build()},
+                        onSpent == null ? NOTHING : onSpent);
+            } else {
+                narrateOption(1, defaultAction);
+            }
+            ServicePlatform.get().getService().release();
+        });
+        ServicePlatform.get().getService().release();
+    }
+
+    private void narrateOption(int option, Runnable action) {
+        narrateThen(getTextBuilder().withOption(option).withFlavor().build(),
+                new String[]{getTextBuilder().withOption(option).build()}, action);
+    }
+
+    /** Types the flavor, waits for the infos (or a plain OK) to be confirmed, closes the paper and runs the action. */
+    private void narrateThen(String flavor, String[] infos, Runnable action) {
+        ServicePlatform.get().getService().hold();
+        ServicePlatform.get().getEncounterService().typeFlavor(" \n" + flavor);
+        Completable confirmation = infos.length > 0
+                ? TypewriterUtils.confirmInfos(infos)
+                : Completable.create(onSub -> ServicePlatform.get().getEncounterService()
+                        .displayButtons("OK").subscribe(button -> onSub.onCompleted()));
+        confirmation.subscribe(() -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            action.run();
+            ServicePlatform.get().getService().release();
+        });
+        ServicePlatform.get().getService().release();
+    }
+
+    /**
+     * Asks whether to become Delayed for {@code reward}. Both answers are narrated; an investigator who is
+     * already Delayed is told so and gets no reward.
+     */
+    protected EncounterTemplate becomeDelayedForRewardTemplate(Runnable reward) {
+        return () -> TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> finishAfterFlavor(" \n" + getTextBuilder().withFail().withFlavor().build()),
+                () -> {
+                    boolean alreadyDelayed = ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed();
+                    String flavor = alreadyDelayed
+                            ? getTextBuilder().withPass().withFlavor(2).build()
+                            : getTextBuilder().withPass().withFlavor().build();
+                    String[] infos = alreadyDelayed
+                            ? new String[]{"[#BAD]You are already Delayed[]"}
+                            : new String[]{getTextBuilder().withPass().withInfo(1).build(), getTextBuilder().withPass().withInfo(2).build()};
+                    narrateThen(flavor, infos, () -> {
+                        ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
+                        if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+                            reward.run();
+                        }
+                    });
+                });
     }
 
 

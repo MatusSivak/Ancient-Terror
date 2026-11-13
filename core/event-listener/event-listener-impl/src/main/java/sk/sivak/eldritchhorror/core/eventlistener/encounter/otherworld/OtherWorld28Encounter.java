@@ -7,7 +7,6 @@ import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils;
 
@@ -31,8 +30,8 @@ public class OtherWorld28Encounter extends AbstractOtherWorldEncounter {
                         () -> gainCondition(ConditionId.PARANOIA))
                         .withOtherWorldFlavor());
 
-        EncounterTemplate failTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
-                () -> {
+        EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
+                NOTHING, () -> {
                     ServicePlatform.get().getService().hold();
                     loseSanity(1);
                     for (CardInfo ally : findAllies()) {
@@ -40,7 +39,7 @@ public class OtherWorld28Encounter extends AbstractOtherWorldEncounter {
                     }
                     ServicePlatform.get().getService().release();
                 }
-                ).withTwoFailInfos().withOtherWorldFlavor();
+                ).withOkAfterPassFlavor().withTwoFailInfos().withOtherWorldFlavor();
         spendOneClueToResolvePassTemplate(passTemplate, failTemplate).execute();
     }
 

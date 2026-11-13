@@ -1,6 +1,5 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
-import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
@@ -18,7 +17,7 @@ public class OtherWorld17Encounter extends AbstractOtherWorldEncounter {
         EncounterTemplate passTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 this::closeThisGateAndEnd,
                 () -> loseSanity(1))
-                .withOtherWorldFlavor().withoutPassFlavor();
+                .withOtherWorldFlavor();
 
         EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 this::closeThisGateAndEnd,

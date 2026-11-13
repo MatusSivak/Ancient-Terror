@@ -28,7 +28,7 @@ public class OtherWorld18Encounter extends AbstractOtherWorldEncounter {
         EncounterTemplate passTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 this::closeThisGateAndEnd,
                 () -> loseSanity(1))
-                .withOtherWorldFlavor().withoutPassFlavor();
+                .withOtherWorldFlavor();
 
         EncounterTemplate failTemplate = () -> {
             TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), this::onNo, this::onYes);
@@ -55,9 +55,16 @@ public class OtherWorld18Encounter extends AbstractOtherWorldEncounter {
             return;
         }
 
-        ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-        selectItemToDiscard(investigatorItems);
-        closeThisGateAndEnd();
+        ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withPass().withFlavor().build());
+        TypewriterUtils.confirmInfos(
+                getTextBuilder().withPass().withInfo(1).build(),
+                getTextBuilder().withPass().withInfo(2).build()).subscribe(() -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            selectItemToDiscard(investigatorItems);
+            closeThisGateAndEnd();
+            ServicePlatform.get().getService().release();
+        });
     }
 
     private void selectItemToDiscard(List<? extends CardInfo> investigatorItems) {

@@ -2,7 +2,6 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
-import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
@@ -25,7 +24,7 @@ public class OtherWorld15Encounter extends AbstractOtherWorldEncounter {
                 () -> {
                     loseHealth(1);
                 })
-                .withOtherWorldFlavor().withoutFailFlavor();
+                .withOtherWorldFlavor();
 
         spendOneClueToResolvePassTemplate(passTemplate, failTemplate).execute();
     }

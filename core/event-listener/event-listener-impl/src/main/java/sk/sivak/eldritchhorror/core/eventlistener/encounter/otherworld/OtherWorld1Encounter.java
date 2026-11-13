@@ -5,7 +5,6 @@ import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.SomethingUnlessSpendTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.service.data.ClueFocusHealthSanity;
 
@@ -26,9 +25,9 @@ public class OtherWorld1Encounter extends AbstractOtherWorldEncounter {
                         () -> ServicePlatform.get().getGameService().gainSpell()),
                 // fail
                 () -> loseSanity(2)
-        ).withoutPassFlavor().withoutPassInfo().withoutHidingPaperBeforePass().withOtherWorldFlavor());
+        ).withoutPassInfo().withoutHidingPaperBeforePass().withOtherWorldFlavor());
 
-        EncounterTemplate failTemplate = new SomethingUnlessSpendTemplate(getTextBuilder(), new ClueFocusHealthSanity(1, 0, 0, 0), () -> loseSanity(3));
+        EncounterTemplate failTemplate = unlessSpendTemplate(new ClueFocusHealthSanity(1, 0, 0, 0), () -> loseSanity(3));
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.OBSERVATION, -1, passTemplate, failTemplate).execute();
     }
 }

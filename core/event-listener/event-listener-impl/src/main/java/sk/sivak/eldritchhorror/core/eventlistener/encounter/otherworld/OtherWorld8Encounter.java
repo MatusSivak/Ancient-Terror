@@ -2,11 +2,8 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.BecomeDelayedTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 
 public class OtherWorld8Encounter extends AbstractOtherWorldEncounter {
@@ -22,9 +19,9 @@ public class OtherWorld8Encounter extends AbstractOtherWorldEncounter {
                 () -> loseHealth(2))
                 .withOtherWorldFlavor();
 
-        EncounterTemplate failTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, 0, () -> {
+        EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, 0, NOTHING, () -> {
             gainCondition(ConditionId.AMNESIA);
-        }).withOtherWorldFlavor();
+        }).withOkAfterPassFlavor().withOtherWorldFlavor();
 
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.WILL, 0, passTemplate, failTemplate).execute();
     }

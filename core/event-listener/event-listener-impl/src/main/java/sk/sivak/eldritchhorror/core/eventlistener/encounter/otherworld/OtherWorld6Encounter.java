@@ -1,11 +1,10 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.otherworld;
 
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.BecomeDelayedTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.EncounterTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.InfoFlavorTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.OtherWorldEncounterTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestFailFlavorInfoTemplate;
 
 public class OtherWorld6Encounter extends AbstractOtherWorldEncounter {
 
@@ -16,11 +15,11 @@ public class OtherWorld6Encounter extends AbstractOtherWorldEncounter {
     @Override
     protected void execute() {
         InfoFlavorTemplate passTemplate = new InfoFlavorTemplate(getTextBuilder(), this::closeThisGate,
-                new BecomeDelayedTemplate(getTextBuilder(), this::gainSpell));
+                becomeDelayedForRewardTemplate(this::gainSpell));
 
-        EncounterTemplate failTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0, () -> {
+        EncounterTemplate failTemplate = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0, NOTHING, () -> {
             loseSanity(3);
-        }).withoutFailFlavor().withOtherWorldFlavor();
+        }).withOkAfterPassFlavor().withOtherWorldFlavor();
         new OtherWorldEncounterTemplate(getTextBuilder(), Stat.LORE, 0, passTemplate, failTemplate).execute();
     }
 }
