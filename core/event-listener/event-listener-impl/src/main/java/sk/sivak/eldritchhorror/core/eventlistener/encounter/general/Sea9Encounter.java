@@ -13,7 +13,11 @@ public class Sea9Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.INFLUENCE, this::onSuccess, null);
+        TypewriterUtils.displayTestButton(Stat.INFLUENCE, this::onSuccess, this::onFail);
+    }
+
+    private void onFail() {
+        finishAfterFlavor(getTextBuilder().withFail().withFlavor().build());
     }
 
     private void onSuccess() {

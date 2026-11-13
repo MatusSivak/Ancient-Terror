@@ -6,7 +6,6 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 
-import static sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils.improveSkillOrGainClue;
 
 public class Wilderness2Encounter extends AbstractGeneralEncounter {
 
@@ -20,8 +19,7 @@ public class Wilderness2Encounter extends AbstractGeneralEncounter {
     }
 
     private void onSuccess() {
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
-        improveSkillOrGainClue(getTextBuilder(), Stat.LORE);
+        chooseClueOrImprovement(Stat.LORE);
     }
 
     private void onFail() {

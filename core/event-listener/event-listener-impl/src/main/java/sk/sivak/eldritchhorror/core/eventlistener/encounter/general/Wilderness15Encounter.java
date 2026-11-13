@@ -35,12 +35,14 @@ public class Wilderness15Encounter extends AbstractGeneralEncounter {
     }
 
     private void onFail() {
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
+        List<? extends CardInfo> investigatorTrinkets = findInvestigatorTrinkets();
+        String flavor = investigatorTrinkets.isEmpty()
+                ? getTextBuilder().withFail().withFlavor(2).build()
+                : getTextBuilder().withFail().withFlavor().build();
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-
-            List<? extends CardInfo> investigatorTrinkets = findInvestigatorTrinkets();
             if (!investigatorTrinkets.isEmpty()) {
                 SelectCardData selectCardData = new SelectCardData();
                 selectCardData.setAvailableCards(investigatorTrinkets);

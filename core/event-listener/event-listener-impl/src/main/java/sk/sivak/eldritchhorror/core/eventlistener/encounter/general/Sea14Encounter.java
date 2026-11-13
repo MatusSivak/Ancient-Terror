@@ -35,7 +35,16 @@ public class Sea14Encounter extends AbstractGeneralEncounter {
     }
 
     private void onFail() {
-        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
+        int possessionsAtRisk = findInvestigatorItemsOrTrinkets().size();
+        String flavor;
+        if (possessionsAtRisk >= 2) {
+            flavor = getTextBuilder().withFail().withFlavor().build();
+        } else if (possessionsAtRisk == 1) {
+            flavor = getTextBuilder().withFail().withFlavor(2).build();
+        } else {
+            flavor = getTextBuilder().withFail().withFlavor(3).build();
+        }
+        ServicePlatform.get().getEncounterService().typeFlavor(flavor);
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();

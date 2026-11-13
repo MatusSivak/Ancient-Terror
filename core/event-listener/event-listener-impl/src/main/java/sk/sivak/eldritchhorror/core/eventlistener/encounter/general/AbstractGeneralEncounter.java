@@ -51,21 +51,33 @@ public abstract class AbstractGeneralEncounter {
     }
 
     protected void chooseReserveOrDeckReward(boolean reserveAvailable, Action0 gainFromReserve, Action0 gainFromDeck) {
+        choosePassReward(reserveAvailable, 2, gainFromReserve, gainFromDeck);
+    }
+
+    protected void chooseClueOrImprovement(Stat skill) {
+        boolean canImprove = ServicePlatform.get().getInvestigators().getActiveInvestigator().getStatBonus(skill) < 2;
+        choosePassReward(canImprove, 1,
+                () -> ServicePlatform.get().getTokenService().gainClueFromPool(),
+                () -> ServicePlatform.get().getInvestigatorService().improveSkill(skill));
+    }
+
+    /** Narrates the pass, lets the investigator pick option 1 or 2, or confirms {@code fallbackOption} when only one is available. */
+    protected void choosePassReward(boolean bothAvailable, int fallbackOption, Action0 firstReward, Action0 secondReward) {
         ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
-        if (reserveAvailable) {
+        if (bothAvailable) {
             ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
             ServicePlatform.get().getEncounterService().displayButtons(
                     getTextBuilder().withPass().withOption(1).build(),
                     getTextBuilder().withPass().withOption(2).build()
             ).subscribe(button -> {
                 if (button == 0) {
-                    confirmReward(1, gainFromReserve);
+                    confirmReward(1, firstReward);
                 } else {
-                    confirmReward(2, gainFromDeck);
+                    confirmReward(2, secondReward);
                 }
             });
         } else {
-            confirmReward(2, gainFromDeck);
+            confirmReward(fallbackOption, fallbackOption == 1 ? firstReward : secondReward);
         }
     }
 

@@ -14,7 +14,11 @@ public class Wilderness6Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.OBSERVATION, this::onSuccess, null);
+        TypewriterUtils.displayTestButton(Stat.OBSERVATION, this::onSuccess, this::onFail);
+    }
+
+    private void onFail() {
+        finishAfterFlavor(getTextBuilder().withFail().withFlavor().build());
     }
 
     private void onSuccess() {

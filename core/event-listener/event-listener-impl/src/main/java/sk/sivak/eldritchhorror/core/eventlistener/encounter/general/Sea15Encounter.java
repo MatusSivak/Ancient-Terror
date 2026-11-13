@@ -14,10 +14,15 @@ public class Sea15Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.WILL, null, this::onFail);
+        TypewriterUtils.displayTestButton(Stat.WILL, this::onSuccess, this::onFail);
+    }
+
+    private void onSuccess() {
+        finishAfterFlavor(getTextBuilder().withPass().withFlavor().build());
     }
 
     private void onFail() {
+        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),
                 getTextBuilder().withFail().withInfo(2).build()).subscribe(() -> {

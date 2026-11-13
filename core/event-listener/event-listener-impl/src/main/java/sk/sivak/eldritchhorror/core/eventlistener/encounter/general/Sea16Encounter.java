@@ -17,7 +17,8 @@ public class Sea16Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), null, this::onYes);
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()), this::onYes);
     }
 
     private void onYes() {

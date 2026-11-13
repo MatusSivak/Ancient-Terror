@@ -16,15 +16,26 @@ public class Sea5Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), null, this::onYes);
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()), this::onYes);
     }
 
     private void onYes() {
-        ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-        ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
-        if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
-            ServicePlatform.get().getGameService().gainArtifact();
-        }
-
+        boolean alreadyDelayed = ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed();
+        String[] infos = alreadyDelayed
+                ? new String[]{"[#BAD]You are already Delayed[]"}
+                : new String[]{getTextBuilder().withPass().withInfo(1).build(), getTextBuilder().withPass().withInfo(2).build()};
+        ServicePlatform.get().getEncounterService().typeFlavor(alreadyDelayed
+                ? getTextBuilder().withPass().withFlavor(2).build()
+                : getTextBuilder().withPass().withFlavor().build());
+        TypewriterUtils.confirmInfos(infos).subscribe(() -> {
+            ServicePlatform.get().getEncounterService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
+            if (!ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {
+                ServicePlatform.get().getGameService().gainArtifact();
+            }
+            ServicePlatform.get().getEncounterService().release();
+        });
     }
 }

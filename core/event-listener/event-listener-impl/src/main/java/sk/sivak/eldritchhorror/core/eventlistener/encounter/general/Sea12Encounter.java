@@ -21,15 +21,21 @@ public class Sea12Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.WILL, null, this::onFail);
+        TypewriterUtils.displayTestButton(Stat.WILL, this::onSuccess, this::onFail);
+    }
+
+    private void onSuccess() {
+        finishAfterFlavor(getTextBuilder().withPass().withFlavor().build());
     }
 
     private void onFail() {
+        List<? extends CardInfo> investigatorItems = findInvestigatorItems();
+        ServicePlatform.get().getEncounterService().typeFlavor(investigatorItems.isEmpty()
+                ? getTextBuilder().withFail().withFlavor(2).build()
+                : getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-
-            List<? extends CardInfo> investigatorItems = findInvestigatorItems();
             if (!investigatorItems.isEmpty()) {
                 SelectCardData selectCardData = new SelectCardData();
                 selectCardData.setAvailableCards(investigatorItems);

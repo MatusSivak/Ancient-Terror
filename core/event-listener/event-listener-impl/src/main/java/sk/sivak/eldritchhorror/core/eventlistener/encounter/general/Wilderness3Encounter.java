@@ -13,23 +13,16 @@ public class Wilderness3Encounter extends AbstractGeneralEncounter {
 
     @Override
     protected void execute() {
-        TypewriterUtils.displayTestButton(Stat.LORE, this::onSuccess, null);
+        TypewriterUtils.displayTestButton(Stat.LORE, this::onSuccess, this::onFail);
+    }
+
+    private void onFail() {
+        finishAfterFlavor(getTextBuilder().withFail().withFlavor().build());
     }
 
     private void onSuccess() {
-        ServicePlatform.get().getEncounterService().typeInfo(TypewriterUtils.SELECT_REWARD);
-        ServicePlatform.get().getEncounterService().displayButtons(
-                getTextBuilder().withPass().withOption(1).build(),
-                getTextBuilder().withPass().withOption(2).build()
-        ).subscribe(x -> {
-            ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            if (x == 0) {
-                ServicePlatform.get().getTokenService().gainClueFromPool();
-            } else {
-                ServicePlatform.get().getGameService().gainSpell();
-            }
-            ServicePlatform.get().getEncounterService().release();
-        });
+        choosePassReward(true, 1,
+                () -> ServicePlatform.get().getTokenService().gainClueFromPool(),
+                () -> ServicePlatform.get().getGameService().gainSpell());
     }
 }

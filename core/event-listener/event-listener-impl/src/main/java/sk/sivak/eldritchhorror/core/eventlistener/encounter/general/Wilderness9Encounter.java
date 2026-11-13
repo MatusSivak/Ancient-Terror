@@ -28,6 +28,7 @@ public class Wilderness9Encounter extends AbstractGeneralEncounter {
     }
 
     private void onFail() {
+        ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),
                 getTextBuilder().withFail().withInfo(2).build()).subscribe(() -> {
