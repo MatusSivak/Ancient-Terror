@@ -11,7 +11,7 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import java.util.List;
 
 /**
- * Righteous Calling: each investigator may spend 1 Clue to gain 1 Boon Condition.
+ * The Witness Offering: each investigator may spend 1 Clue to gain 1 Boon Condition.
  */
 public class GreenMythosCard11 implements MythosCardEventListener {
 

@@ -13,7 +13,7 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 
 import java.util.List;
 
-/** Everyone Has a Price: each investigator may gain Debt to discard one Condition. */
+/** The Deferred Invoice: each investigator may gain Debt to discard one Condition. */
 public class YellowMythosCard13 implements MythosCardEventListener {
     @Override
     public void execute() {

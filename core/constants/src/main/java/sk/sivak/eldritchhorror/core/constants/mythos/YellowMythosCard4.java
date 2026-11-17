@@ -3,10 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class YellowMythosCard4 extends YellowMythosCard {
 
     public YellowMythosCard4() {
-        setTitle("Haunting Nightmares");
-        setFlavor("You wake up in mid-scream, and your heart is racing. " +
-                "What little you can remember of your nightmare was so visceral and horrific " +
-                "that you dread falling back asleep.");
+        setTitle("A Second Voice");
+        setFlavor("The investigators hear their own voices answering questions they have not been asked. " +
+                "A clue to the intrusion can be sacrificed to break the connection. " +
+                "Without that anchor, the echo damages the mind and leaves a lasting disorder behind.");
         addInfo("Each investigator:\n" +
                 "-[#BAD]Loses two Sanity[]\n" +
                 "-[#BAD]Gains a Madness Condition\n" +

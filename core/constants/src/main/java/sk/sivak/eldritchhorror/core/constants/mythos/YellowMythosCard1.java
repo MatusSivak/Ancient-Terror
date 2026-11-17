@@ -3,11 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class YellowMythosCard1 extends YellowMythosCard {
 
     public YellowMythosCard1() {
-        setTitle("Ancient Guardians");
-        setFlavor("An article on the back page of the newspaper catches your attention. " +
-                "An unexplained attack on a remote outpost left no survivors. " +
-                "You've read about two other similar attacks happening in the same region. " +
-                "You can see that the forgotten corners of the globe are growing more dangerous.");
+        setTitle("Two Shapes at the Dig");
+        setFlavor("The expedition's measuring stakes begin knocking against the ground from below. " +
+                "Two separate trails of displaced earth converge on the survey site. " +
+                "Whatever followed the buried markers is now emerging among the expedition's trenches.");
         addInfo("[#BAD]Two Monsters are spawned\non the Active Expedition[]");
     }
 }

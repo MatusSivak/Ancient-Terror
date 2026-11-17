@@ -4,8 +4,10 @@ public class BlueMythosCard5 extends BlueMythosCard {
 
     public BlueMythosCard5() {
         setRumorCardId("GrowingMadness");
-        setTitle("Growing Madness");
-        setFlavor("You dream of a life as an insane wizard thousands of years ago in Atlantis. You also dream of that same wizard still alive today on an uncharted island.");
+        setTitle("An Island Behind the Eyes");
+        setFlavor("People who have never met draw the same coastline in their sleep. " +
+                "Each new obsession makes the image sharper and its hold on the waking mind stronger. " +
+                "Somewhere in the Bermuda Triangle lies the island they are seeing; locating it may stop the vision before it overwhelms everyone.");
         addInfo("[#BAD]New Ongoing Rumor![]");
     }
 }

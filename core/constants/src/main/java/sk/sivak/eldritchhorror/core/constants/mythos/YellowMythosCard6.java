@@ -3,10 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class YellowMythosCard6 extends YellowMythosCard {
 
     public YellowMythosCard6() {
-        setTitle("The Bermuda Triangle");
-        setFlavor("These sudden thunderstorms have grown more common. " +
-                "Twice a day, rain that smells like seawater floods the streets, " +
-                "and cold winds that cut like glass threaten to pull doors off their hinges.");
+        setTitle("The Door onto Salt Water");
+        setFlavor("Ordinary thresholds briefly open onto a heaving stretch of Atlantic water. " +
+                "The distortion passes some investigators by, but others step through before the view changes. " +
+                "Those caught emerge in the Bermuda Triangle and must spend precious time finding their bearings.");
         addInfo("Each investigator rolls one die.\n" +
                 "On a 1 or 2:\n" +
                 "-[#BAD]He moves to a Bermuda Triangle[]\n" +

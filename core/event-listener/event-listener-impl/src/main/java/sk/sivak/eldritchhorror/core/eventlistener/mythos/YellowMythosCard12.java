@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The World Fights Back: each investigator may recover 2 Health, recover 2 Sanity,
+ * Rooms with Lamps Still Lit: each investigator may recover 2 Health, recover 2 Sanity,
  * or discard 1 Monster from his space.
  */
 public class YellowMythosCard12 implements MythosCardEventListener {
@@ -46,7 +46,7 @@ public class YellowMythosCard12 implements MythosCardEventListener {
             options.add(new Question.Option<>("Discard Monster", MONSTER));
         }
         Question<Integer> question = new Question<>();
-        question.setTitle("The World Fights Back");
+        question.setTitle("Rooms with Lamps Still Lit");
         question.setOptions(options);
         ServicePlatform.get().getService().hold();
         ServicePlatform.get().getGameService().ask(question).map(Answer::getResponseData).subscribe(option -> {

@@ -3,11 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class YellowMythosCard2 extends YellowMythosCard {
 
     public YellowMythosCard2() {
-        setTitle("Terrible Truth");
-        setFlavor("Now that you truly grasp the significance of what you have learned, " +
-                "each scribbled note becomes unbearable to contemplate. " +
-                "All the books you have read and the icons you have scrutinized " +
-                "suddenly make sense as a single mind-shattering truth.");
+        setTitle("The Archive Takes Payment");
+        setFlavor("The evidence the investigators carry begins fading, one detail at a time. " +
+                "A fact can be kept alive by tracing it through pain or forcing it to remain in an exhausted mind. " +
+                "Each clue demands its own sacrifice; anything that cannot be paid for slips away.");
         addInfo("For each Clue an investigator has,\n" +
                 "[#BAD]that investigator discards that Clue\n" +
                 "unless he spends one Health or one Sanity.[]");

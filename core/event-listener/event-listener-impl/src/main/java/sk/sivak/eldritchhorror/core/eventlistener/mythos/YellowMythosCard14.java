@@ -9,7 +9,7 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import java.util.List;
 
 /**
- * From Bad to Worse: each investigator loses 1 Health per Injury, 1 Sanity per Madness
+ * The Night Audit: each investigator loses 1 Health per Injury, 1 Sanity per Madness
  * and discards 1 Clue per Deal Condition.
  */
 public class YellowMythosCard14 implements MythosCardEventListener {

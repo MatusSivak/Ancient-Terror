@@ -3,11 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class GreenMythosCard5 extends GreenMythosCard {
 
     public GreenMythosCard5() {
-        setTitle("Calling the Elder Things");
-        setFlavor("According to the police report, " +
-                "several individuals entered the warehouse in the middle of the night. " +
-                "They performed some sort of ritual which culminated in their death. " +
-                "What you know that the police don't is that, afterward, something inhuman left that warehouse.");
+        setTitle("Lanterns for the Uninvited");
+        setFlavor("Cultists raise covered lanterns wherever they have gathered. " +
+                "When the shutters open, each gathering becomes a beacon for something that should never find this world. " +
+                "A new creature answers at every occupied site, while the hands holding the lanterns remain steady.");
         addInfo("[#BAD]Spawn one Monster on each space\n" +
                 "that contains a Cultist Monster[]");
     }

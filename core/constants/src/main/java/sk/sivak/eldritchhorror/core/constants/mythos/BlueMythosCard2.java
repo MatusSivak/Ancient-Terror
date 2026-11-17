@@ -4,10 +4,10 @@ public class BlueMythosCard2 extends BlueMythosCard {
 
     public BlueMythosCard2() {
         setRumorCardId("StarsAligned");
-        setTitle("Stars Aligned");
-        setFlavor("A dozen unpleasant-looking strangers have settled into Panama " +
-                "with a large collection of astronomical reference books. " +
-                "There is something unique about this place and time that allows them to rip apart the fabric of reality.");
+        setTitle("The Borrowed Meridian");
+        setFlavor("Surveyors in Panama have planted brass stakes that cast shadows toward the stars. " +
+                "Each adjustment drags the heavens into a new and dangerous arrangement. " +
+                "Their measurements leave a trail; careful observation and evidence could expose the operators and end their work.");
         addInfo("[#BAD]New Ongoing Rumor![]");
     }
 }

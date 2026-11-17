@@ -4,8 +4,10 @@ public class BlueMythosCard4 extends BlueMythosCard {
 
     public BlueMythosCard4() {
         setRumorCardId("LostKnowledge");
-        setTitle("Lost Knowledge");
-        setFlavor("Your contact in the capital is hesitant to speak about those called \"The Watches\". He says they work for a number of different governments, but answer to some other authority.");
+        setTitle("The Erasure Bureau");
+        setFlavor("Witness statements return from the archive as blank paper. " +
+                "In the margins, tiny punctures mark the passage of mechanical collectors that are stripping the world of evidence. " +
+                "Find and destroy them before every lead, including those in the investigators' hands, is erased.");
         addInfo("[#BAD]New Ongoing Rumor![]");
     }
 }

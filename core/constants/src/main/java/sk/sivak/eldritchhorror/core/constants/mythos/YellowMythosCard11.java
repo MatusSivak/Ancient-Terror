@@ -4,10 +4,10 @@ public class YellowMythosCard11 extends YellowMythosCard {
 
     public YellowMythosCard11() {
         setMythosDifficulty(MythosDifficulty.EASY);
-        setTitle("Omen of Good Fortune");
-        setFlavor("You drop a penny into peculiar mechanical device. " +
-                "The automaton waves its hand and turns over a card bearing the words,\n" +
-                "\"Good luck is with you!\"");
+        setTitle("The Unwritten Constellation");
+        setFlavor("A blank patch appears in the star charts, waiting for someone to complete it. " +
+                "For this brief interval, the investigators can choose which omen fills the gap. " +
+                "This adjustment carries no further advance toward catastrophe.");
         addInfo("[#GOOD]Select new Omen, Doom stays[]");
     }
 }

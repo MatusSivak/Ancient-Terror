@@ -4,11 +4,10 @@ public class YellowMythosCard7 extends YellowMythosCard {
 
     public YellowMythosCard7() {
         setMythosDifficulty(MythosDifficulty.EASY);
-        setTitle("Silver Twilight Aid");
-        setFlavor("Once inside the lodge, your host invites you to follow him upstairs. " +
-                "Several members stare in astonishment. Outsiders are rarely granted such access. " +
-                "At the top of the stairs you are ushered into a library, filled with rare and exotic tomes. " +
-                "\"Now, \" he says, \"how can we help you?\"");
+        setTitle("The Night Dispatch");
+        setFlavor("A courier network has been collecting what the authorities refuse to catalogue. " +
+                "Each investigator is offered one dispatch: a report worth following, practical assistance, or a recovered spell. " +
+                "The couriers can spare only one of these gifts for each recipient before moving on.");
         addInfo("Each investigator selects one:\n" +
                 "-[#GOOD]Gain one Clue[]\n" +
                 "-[#GOOD]Gain one Asset[]\n" +

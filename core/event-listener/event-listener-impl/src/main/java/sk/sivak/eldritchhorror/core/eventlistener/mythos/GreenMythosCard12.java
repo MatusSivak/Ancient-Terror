@@ -13,7 +13,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.GameProperties.MAX_FOCUS_TOKENS;
 
 /**
- * Glimmer of Hope: each investigator may gain 1 Focus, spend 1 Focus to gain 1 Clue,
+ * Lessons in Vanishing Ink: each investigator may gain 1 Focus, spend 1 Focus to gain 1 Clue,
  * or spend 1 Clue to gain 1 Glamour Spell.
  */
 public class GreenMythosCard12 implements MythosCardEventListener {
@@ -45,7 +45,7 @@ public class GreenMythosCard12 implements MythosCardEventListener {
             ServicePlatform.get().getInvestigatorService().changeActiveInvestigator(investigatorId);
             ServicePlatform.get().getInvestigatorService().showActiveInvestigator(true);
             Question<Integer> question = new Question<>();
-            question.setTitle("Glimmer of Hope");
+            question.setTitle("Lessons in Vanishing Ink");
             question.setOptions(options);
             ServicePlatform.get().getGameService().ask(question).map(Answer::getResponseData).subscribe(option -> {
                 ServicePlatform.get().getService().hold();

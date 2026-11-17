@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * No Peace For the Fallen: discard all defeated investigators (possessions and tokens),
+ * The Unclaimed Ledger: discard all defeated investigators (possessions and tokens),
  * then a random investigator gains a Cursed Condition.
  */
 public class GreenMythosCard13 extends RandomInvestigatorMythosEffect {

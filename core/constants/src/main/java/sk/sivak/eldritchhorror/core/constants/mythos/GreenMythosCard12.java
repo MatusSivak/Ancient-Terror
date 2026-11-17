@@ -4,10 +4,10 @@ public class GreenMythosCard12 extends GreenMythosCard {
 
     public GreenMythosCard12() {
         setMythosDifficulty(MythosDifficulty.EASY);
-        setTitle("Glimmer of Hope");
-        setFlavor("You remember something from your earliest childhood. It was a simple rhyme someone told " +
-                "you to comfort you when you were afraid. Little by little the words return and as they do, " +
-                "you feel safe again. Perhaps those words have more meaning now.");
+        setTitle("Lessons in Vanishing Ink");
+        setFlavor("A sheet of instructions appears only when viewed from the corner of the eye. " +
+                "Its first exercise steadies attention; patient concentration can reveal a hidden lead instead. " +
+                "For those prepared to give up a clue, the final exercise offers a glamour that bends what others see.");
         addInfo("Each investigator may select one:\n" +
                 "-[#GOOD]Gain 1 Focus[]\n" +
                 "-[#GOOD]Spend 1 Focus to gain 1 Clue[]\n" +

@@ -8,7 +8,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils
 import java.util.List;
 
 /**
- * Burden of Greed: each investigator may discard any number of Item possessions,
+ * Weight without Mass: each investigator may discard any number of Item possessions,
  * then loses 1 Health for each Item possession he has.
  */
 public class YellowMythosCard15 extends AbstractDiscardAnyNumberMythosCard {

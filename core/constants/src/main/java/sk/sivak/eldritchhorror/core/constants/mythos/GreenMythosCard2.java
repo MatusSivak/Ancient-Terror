@@ -3,10 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class GreenMythosCard2 extends GreenMythosCard {
 
     public GreenMythosCard2() {
-        setTitle("Tainted Rations");
-        setFlavor("You have been surrounded by corruption for so long, " +
-                "that it has permeated everything you touch. " +
-                "Somehow, all your food supplies have grown rancid overnight.");
+        setTitle("Dust in the Blood");
+        setFlavor("A fine metallic dust settles inside sealed rooms and beneath tightly wrapped clothing. " +
+                "Once inhaled, it offers a cruel choice: endure the violent purge that tears it from the body, or let the poison remain. " +
+                "Those already carrying the poison have no refuge from the new exposure.");
         addInfo("Each investigator:\n" +
                 "-[#BAD]Loses three Health\n" +
                 "unless he gains Poisoned Condition[]");

@@ -4,9 +4,10 @@ public class YellowMythosCard13 extends YellowMythosCard {
 
     public YellowMythosCard13() {
         setMythosDifficulty(MythosDifficulty.EASY);
-        setTitle("Everyone Has a Price");
-        setFlavor("He writes the price on a piece of paper and slides it across the table. It's more than you " +
-                "can afford, but you don't have any other options, and this greedy lout knows it.");
+        setTitle("The Deferred Invoice");
+        setFlavor("An envelope lists a problem its recipient has told no one about. " +
+                "Inside is an offer to have that burden removed now, with payment demanded later. " +
+                "An investigator who accepts can leave one condition behind, but the signature becomes a debt.");
         addInfo("Each investigator may:\n" +
                 "-[#BAD]Gain a Debt Condition[] to [#GOOD]discard 1 Condition[]");
     }

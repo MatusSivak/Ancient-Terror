@@ -3,10 +3,10 @@ package sk.sivak.eldritchhorror.core.constants.mythos;
 public class YellowMythosCard18 extends YellowMythosCard {
 
     public YellowMythosCard18() {
-        setTitle("Shattered Magic");
-        setFlavor("You believed you could harness the power of these mysterious treasures. You were wrong. " +
-                "Now they lie in ashes, consumed by their own strange energies. In the end they were " +
-                "nothing more than fuel to hasten the coming catastrophe.");
+        setTitle("The Levy on Wonders");
+        setFlavor("A lattice of pale cracks spreads between enchanted possessions. " +
+                "To stop it consuming the collection, each investigator must surrender half their magical belongings, with any odd piece claimed as well. " +
+                "Every artifact lost in this levy sends a greater surge outward, bringing the catastrophe closer.");
         addInfo("Each investigator:\n" +
                 "-[#BAD]Discards half (rounded up) of his Magical possessions[]\n" +
                 "Then:\n" +

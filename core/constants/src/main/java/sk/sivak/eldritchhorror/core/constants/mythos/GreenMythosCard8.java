@@ -4,13 +4,10 @@ public class GreenMythosCard8 extends GreenMythosCard {
 
     public GreenMythosCard8() {
         setMythosDifficulty(MythosDifficulty.EASY);
-        setTitle("Support of the Church");
-        setFlavor("You hang your head in exhaustion and frustration. " +
-                "You jump suddenly when a hand rests on your shoulder. " +
-                "To your relief, you turn to find the local priest. " +
-                "\"Have faith, my child,\" he tells you. " +
-                "\"Your good works have not gone unseen. " +
-                "Your brave acts are making a difference.\"");
+        setTitle("The Shelter Mark");
+        setFlavor("One investigator finds a pale handprint on a wall where no hand could have reached. " +
+                "Its lines lift from the plaster and settle across the investigator's shadow. " +
+                "The mark is a blessing: something beyond the wall has chosen to offer its protection.");
         addInfo("{investigator}:\n" +
                 "-[#GOOD]Gains a Blessed Condition[]");
     }

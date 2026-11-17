@@ -105,7 +105,7 @@ public class BlueMythosCard2 implements MythosCardEventListener{
             }
             Question<Boolean> question = new Question<>();
             question.setOptions(Collections.singletonList(new Question.Option<>("OK", Boolean.TRUE)));
-            question.setTitle("Find these strangers based on observation of the stars (Test Observation).");
+            question.setTitle("Trace the surveyors by their starward shadows (Test Observation).");
             question.displayOngoingRumorCard(RUMOR_CARD_ID);
             ServicePlatform.get().getGameService().ask(question).subscribe(ok -> onConfirm(eventData));
         }
@@ -155,7 +155,7 @@ public class BlueMythosCard2 implements MythosCardEventListener{
 
                     Question<Object> question = new Question<>();
                     question.setOptions(Collections.singletonList(new Question.Option<>("OK", Boolean.TRUE)));
-                    question.setTitle("You convince la policia to remove these strangers.");
+                    question.setTitle("Your evidence brings the authorities to the survey site. The operators are removed and their work stops.");
                     ServicePlatform.get().getGameService().ask(question).subscribe(ok -> {
                         ServicePlatform.get().getService().hold();
                         ServicePlatform.get().getDoomOmenService().highlightRumorObjective(RUMOR_CARD_ID);

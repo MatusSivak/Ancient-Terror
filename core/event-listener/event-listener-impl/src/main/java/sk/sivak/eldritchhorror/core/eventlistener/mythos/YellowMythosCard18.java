@@ -13,7 +13,7 @@ import sk.sivak.eldritchhorror.core.model.InvestigatorRead;
 import java.util.List;
 
 /**
- * Shattered Magic: each investigator discards half (rounded up) of his Magical possessions.
+ * The Levy on Wonders: each investigator discards half (rounded up) of his Magical possessions.
  * Doom advances by 1 for each Artifact discarded this way.
  */
 public class YellowMythosCard18 implements MythosCardEventListener {

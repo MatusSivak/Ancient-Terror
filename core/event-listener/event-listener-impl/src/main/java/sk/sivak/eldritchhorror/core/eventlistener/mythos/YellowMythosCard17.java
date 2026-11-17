@@ -8,7 +8,7 @@ import sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils
 import java.util.List;
 
 /**
- * Driven to Madness: each investigator may discard any number of Ally Assets, then loses 1 Sanity
+ * The Chorus of Borrowed Faces: each investigator may discard any number of Ally Assets, then loses 1 Sanity
  * for each Ally Asset he has. Each investigator that lost Sanity gains a Madness Condition.
  */
 public class YellowMythosCard17 extends AbstractDiscardAnyNumberMythosCard {
