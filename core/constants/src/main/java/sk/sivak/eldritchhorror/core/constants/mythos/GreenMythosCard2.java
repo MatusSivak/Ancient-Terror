@@ -9,6 +9,6 @@ public class GreenMythosCard2 extends GreenMythosCard {
                 "Those already carrying the poison have no refuge from the new exposure.");
         addInfo("Each investigator:\n" +
                 "-[#BAD]Loses three Health\n" +
-                "unless he gains Poisoned Condition[]");
+                "unless he gains a Poisoned Condition[]");
     }
 }

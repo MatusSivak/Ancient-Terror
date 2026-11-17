@@ -7,7 +7,7 @@ public class GreenMythosCard4 extends GreenMythosCard {
         setFlavor("The current omen burns like a brand above the world. " +
                 "Gates bearing its sign fold inward, their light draining into the sky. " +
                 "Each matching breach that vanishes feeds the approaching catastrophe; an empty horizon offers nothing to consume.");
-        addInfo("[#GOOD]Discard each Gate representing current Omen[]");
-        addInfo("[#BAD]Advance Doom for each Gate discarded[]");
+        addInfo("[#GOOD]Discard each Gate representing the current Omen[]");
+        addInfo("[#BAD]Doom advances by 1 for each Gate discarded[]");
     }
 }

@@ -9,7 +9,7 @@ public class YellowMythosCard6 extends YellowMythosCard {
                 "Those caught emerge in the Bermuda Triangle and must spend precious time finding their bearings.");
         addInfo("Each investigator rolls one die.\n" +
                 "On a 1 or 2:\n" +
-                "-[#BAD]He moves to a Bermuda Triangle[]\n" +
+                "-[#BAD]He moves to the Bermuda Triangle[]\n" +
                 "-[#BAD]He becomes Delayed[]");
     }
 }

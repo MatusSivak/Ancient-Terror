@@ -11,6 +11,6 @@ public class GreenMythosCard1 extends GreenMythosCard {
                 "active Expedition or an adjacent space:\n" +
                 "-[#BAD]Loses one Health[]\n" +
                 "-[#BAD]Loses one Sanity[]\n" +
-                "-Expedition locations are shuffled");
+                "-The Active Expedition moves to a new location");
     }
 }

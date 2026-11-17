@@ -9,7 +9,7 @@ public class GreenMythosCard10 extends GreenMythosCard {
                 "One can be pulled shut. " +
                 "Choose a breach attuned to the current omen and the stitch holds cleanly; choose another, and the tension draws the catastrophe closer.");
         addInfo("[#GOOD]Choose one Gate and discard it[]\n" +
-                "If the Gate does not represent current Omen:\n" +
+                "If the Gate does not represent the current Omen:\n" +
                 "-[#BAD]Doom advances[]");
     }
 }

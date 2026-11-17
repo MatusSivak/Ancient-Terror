@@ -6,7 +6,7 @@ public class GreenMythosCard12 extends GreenMythosCard {
         setMythosDifficulty(MythosDifficulty.EASY);
         setTitle("Lessons in Vanishing Ink");
         setFlavor("A sheet of instructions appears only when viewed from the corner of the eye. " +
-                "Its first exercise steadies attention; patient concentration can reveal a hidden lead instead. " +
+                "Its first exercise steadies the attention; those already focused can turn that concentration into a hidden lead. " +
                 "For those prepared to give up a clue, the final exercise offers a glamour that bends what others see.");
         addInfo("Each investigator may select one:\n" +
                 "-[#GOOD]Gain 1 Focus[]\n" +
