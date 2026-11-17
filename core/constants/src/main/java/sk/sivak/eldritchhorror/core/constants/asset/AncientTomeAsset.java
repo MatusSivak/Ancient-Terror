@@ -25,6 +25,8 @@ public class AncientTomeAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Action: Test Lore. If you pass, you may spend 1 Sanity to gain 1 Clue or 1 Spell.";
+        return "ACTION: Test Lore.\n" +
+                "Pass: 1 Sanity → gain 1 Clue\n" +
+                "or 1 Spell.";
     }
 }

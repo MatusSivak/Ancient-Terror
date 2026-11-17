@@ -24,6 +24,7 @@ public class LuckyTalismanAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may reroll all of your dice when resolving a test.";
+        return "Once per round, on a test:\n" +
+                "reroll all dice.";
     }
 }

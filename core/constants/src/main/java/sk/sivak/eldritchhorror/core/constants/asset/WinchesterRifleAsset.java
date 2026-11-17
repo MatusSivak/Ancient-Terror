@@ -24,6 +24,7 @@ public class WinchesterRifleAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Once per round, you may gain +4 Strength during a Combat Encounter.";
+        return "Once per round\n" +
+                "Combat: +4 Strength.";
     }
 }

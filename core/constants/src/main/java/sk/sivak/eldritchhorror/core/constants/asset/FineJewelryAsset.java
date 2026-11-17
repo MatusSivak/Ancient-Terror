@@ -23,6 +23,7 @@ public class FineJewelryAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Acquire Assets: You may add 1 to the result of 1 die when resolving an Influence test.";
+        return "Acquire Assets action:\n" +
+                "add 1 to the result of 1 die.";
     }
 }

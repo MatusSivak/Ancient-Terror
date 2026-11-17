@@ -24,6 +24,7 @@ public class Dot25AutomaticAsset extends AbstractAssetInfo {
 
     @Override
     public String getDescription() {
-        return "Combat: Roll 1 additional die when resolving a Strength test.";
+        return "Combat Strength tests:\n" +
+                "roll 1 additional die.";
     }
 }
