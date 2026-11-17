@@ -17,6 +17,14 @@ public class InvestigatorBioHelper
                 return "Mary has faced things that no prayer book describes.\nShe ventures far from the convent to comfort troubled minds\nand confront the horrors that prey upon them.";
             case THE_EXPLORER:
                 return "Ursula follows forgotten trails into places most scholars know only from maps.\nAt an excavation deep in Africa, curiosity becomes a race\nto uncover what an ancient civilization tried to bury.";
+            case THE_REPORTER:
+                return "Wherever Rex goes, misfortune is never far behind.\nHis cursed luck has dragged him into more than one brush with the uncanny,\nso he chases the story before the next disaster finds him.";
+            case THE_PROFESSOR:
+                return "Harvey has spent decades studying history, archaeology and the occult.\nFew living scholars know as much about the darkness beyond our world,\nand his research has brought him home to Miskatonic University.";
+            case THE_DILETTANTE:
+                return "Jenny grew up among wealth, glamour and the finest nightclubs.\nWhen her sister vanished after writing of hooded strangers,\nshe set out to spend whatever it takes to find her.";
+            case THE_SALESMAN:
+                return "Bob believes any deal can be closed with enough persistence.\nA handful of strange golden coins has led him into rumors of a curse,\nand he means to find out what they are truly worth.";
             case THE_BOUNTY_HUNTER:
                 return createForBountyHunter();
             case THE_SPY:

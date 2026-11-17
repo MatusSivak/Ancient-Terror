@@ -61,6 +61,10 @@ public class InvestigatorsHelper {
             response.add(createPriest());
             response.add(createNun());
             response.add(createExplorer());
+            response.add(createReporter());
+            response.add(createProfessor());
+            response.add(createDilettante());
+            response.add(createSalesman());
         }
 
         for (InvestigatorInfoImpl investigatorInfo : response) {
@@ -81,6 +85,10 @@ public class InvestigatorsHelper {
         response.add(createPriest());
         response.add(createNun());
         response.add(createExplorer());
+        response.add(createReporter());
+        response.add(createProfessor());
+        response.add(createDilettante());
+        response.add(createSalesman());
         for (InvestigatorInfoImpl investigatorInfo : response) {
             investigatorInfo.setBio(InvestigatorBioHelper.getBio(investigatorInfo.getInvestigatorId()));
         }
@@ -141,6 +149,62 @@ public class InvestigatorsHelper {
         info.setActionText("investigator.special.the_explorer.action");
         info.setAbilityText("investigator.special.the_explorer.ability");
         info.setQuote("There is always another path to explore.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createReporter() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_REPORTER);
+        info.setInvestigatorName("Rex Murphy");
+        info.setMaxHealth(7);
+        info.setMaxSanity(7);
+        info.setLocationId(LocationId.SPACE_1);
+        info.setStats(2, 3, 2, 3, 3);
+        info.setActionText("investigator.special.the_reporter.action");
+        info.setAbilityText("investigator.special.the_reporter.ability");
+        info.setQuote("Bad luck follows me, but so does a good story.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createProfessor() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_PROFESSOR);
+        info.setInvestigatorName("Harvey Walters");
+        info.setMaxHealth(4);
+        info.setMaxSanity(8);
+        info.setLocationId(LocationId.ARKHAM);
+        info.setStats(3, 2, 3, 2, 3);
+        info.setActionText("investigator.special.the_professor.action");
+        info.setAbilityText("investigator.special.the_professor.ability");
+        info.setQuote("Knowledge is the only weapon that never dulls.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createDilettante() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_DILETTANTE);
+        info.setInvestigatorName("Jenny Barnes");
+        info.setMaxHealth(7);
+        info.setMaxSanity(5);
+        info.setLocationId(LocationId.SPACE_8);
+        info.setStats(1, 4, 2, 3, 3);
+        info.setActionText("investigator.special.the_dilettante.action");
+        info.setAbilityText("investigator.special.the_dilettante.ability");
+        info.setQuote("Whatever it costs, I will bring my sister home.");
+        return info;
+    }
+
+    private static InvestigatorInfoImpl createSalesman() {
+        InvestigatorInfoImpl info = new InvestigatorInfoImpl();
+        info.setInvestigatorId(InvestigatorId.THE_SALESMAN);
+        info.setInvestigatorName("Bob Jenkins");
+        info.setMaxHealth(7);
+        info.setMaxSanity(5);
+        info.setLocationId(LocationId.LONDON);
+        info.setStats(2, 4, 2, 3, 2);
+        info.setActionText("investigator.special.the_salesman.action");
+        info.setAbilityText("investigator.special.the_salesman.ability");
+        info.setQuote("Everything has a price, even the end of the world.");
         return info;
     }
 
@@ -433,7 +497,8 @@ public class InvestigatorsHelper {
             investigator.setCurrentHealth(investigatorInfo[i].getMaxHealth());
             investigator.setCurrentSanity(investigatorInfo[i].getMaxSanity());
             investigator.setCurrentLocationId(investigatorInfo[i].getLocationId());
-            if (investigatorInfo[i].getInvestigatorId() == InvestigatorId.THE_NUN) {
+            if (investigatorInfo[i].getInvestigatorId() == InvestigatorId.THE_NUN
+                    || investigatorInfo[i].getInvestigatorId() == InvestigatorId.THE_DILETTANTE) {
                 investigator.setShipTickets(1);
             }
         }

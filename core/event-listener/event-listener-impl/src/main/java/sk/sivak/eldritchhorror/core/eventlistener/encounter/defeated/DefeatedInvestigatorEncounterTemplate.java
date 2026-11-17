@@ -4,8 +4,10 @@ import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetId;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.question.Question;
 import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.builder.DefeatedEncounterTextBuilder;
@@ -18,6 +20,7 @@ import java.util.List;
 import static sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId.THE_ROOKIE_COP;
 
 public class DefeatedInvestigatorEncounterTemplate {
+    private static final int ANY_RESERVE_VALUE = 99;
     private final DefeatedEncounterTextBuilder textBuilder;
     private final DefeatedInvestigatorEncounterData data;
 
@@ -68,6 +71,11 @@ public class DefeatedInvestigatorEncounterTemplate {
                 ServicePlatform.get().getGameService().gainArtifact();
             } else if (data.getInvestigatorId() == InvestigatorId.THE_PRIEST && data.isHealth()) {
                 ServicePlatform.get().getGameService().gainCondition(sk.sivak.eldritchhorror.core.constants.condition.ConditionId.BLESSED);
+            } else if (data.getInvestigatorId() == InvestigatorId.THE_REPORTER && !data.isHealth()) {
+                offerCurseForDoom();
+            } else if ((data.getInvestigatorId() == InvestigatorId.THE_DILETTANTE && data.isHealth())
+                    || (data.getInvestigatorId() == InvestigatorId.THE_SALESMAN && !data.isHealth())) {
+                ServicePlatform.get().getCardService().acquireAssets(ANY_RESERVE_VALUE);
             } else {
                 ServicePlatform.get().getDoomOmenService().retreatDoom();
             }
@@ -82,6 +90,21 @@ public class DefeatedInvestigatorEncounterTemplate {
         TypewriterUtils.confirmInfos(textBuilder.withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            ServicePlatform.get().getService().release();
+        });
+    }
+
+    private void offerCurseForDoom() {
+        Question<Boolean> question = new Question<>();
+        question.setTitle("Gain a Cursed Condition to retreat Doom by 3?");
+        question.setPortraitBeforeTitle(InvestigatorId.THE_REPORTER);
+        question.setOptions(Question.Option.noYesOptions);
+        ServicePlatform.get().getGameService().ask(question).subscribe(answer -> {
+            ServicePlatform.get().getService().hold();
+            if (answer.getResponseData()) {
+                ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
+                for (int i = 0; i < 3; i++) ServicePlatform.get().getDoomOmenService().retreatDoom();
+            }
             ServicePlatform.get().getService().release();
         });
     }

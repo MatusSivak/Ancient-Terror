@@ -55,10 +55,10 @@ public class CardViewImpl implements CardView {
 
     @Override
     public Single<ShowReserveDragAndDropOutput> showReserveDragAndDrop(
-            int testScore, boolean bankLoanAvailable, List<AssetInfo> reserve, AssetId mandatoryAssetId) {
+            int testScore, boolean bankLoanAvailable, List<AssetInfo> reserve, AssetId mandatoryAssetId, int costReduction) {
         output = new ShowReserveDragAndDropOutput();
         return Single.create(onSub -> {
-            showDragAndDrop(testScore, reserve, bankLoanAvailable);
+            showDragAndDrop(testScore, reserve, bankLoanAvailable, costReduction);
             showButtons(onSub);
 
             if (mandatoryAssetId != null) {
@@ -186,13 +186,13 @@ public class CardViewImpl implements CardView {
         };
     }
 
-    private void showDragAndDrop(int testScore, List<AssetInfo> reserve, boolean bankLoanAvailable) {
+    private void showDragAndDrop(int testScore, List<AssetInfo> reserve, boolean bankLoanAvailable, int costReduction) {
         List<CardTemplate> cardTemplates = toCardTemplates(reserve);
         if (bankLoanAvailable) {
             cardTemplates.add(0, CardTemplate.buildCard(new BankLoanAsset()));
         }
         forEach(cardTemplates, cardTemplate -> cardTemplate.setScale(0.133f));
-        dragAndDropBinder = new ReserveDragAndDropBinder(testScore, InfoStage.getStageSafe());
+        dragAndDropBinder = new ReserveDragAndDropBinder(testScore, InfoStage.getStageSafe(), costReduction);
         dragAndDropBinder.init(cardTemplates.toArray(new CardTemplate[cardTemplates.size()]));
         dragAndDropBinder.getSourceTargetGroup().setY(InfoStage.getInvestigatorHud().getPrefHeight() + VIEWPORT_HEIGHT * 0.02f - 2);
         dragAndDropBinder.getSourceTargetGroup().setX(85);

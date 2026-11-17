@@ -3,6 +3,7 @@ package sk.sivak.eldritchhorror.core.view.draganddrop.impl.reserve;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import java8.features.function.Consumer;
+import sk.sivak.eldritchhorror.core.constants.asset.AssetId;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.view.components.card.CardTemplate;
 import sk.sivak.eldritchhorror.core.view.draganddrop.impl.CustomDragAndDrop;
@@ -22,7 +23,22 @@ public class ReserveTargetActorChangedListener implements TargetActorChangedList
     private CustomDragAndDrop dragAndDrop;
     private List<CardTemplate> cards = new LinkedList<>();
 
+    private final int costReduction;
+
     public ReserveTargetActorChangedListener() {
+        this(0);
+    }
+
+    public ReserveTargetActorChangedListener(int costReduction) {
+        this.costReduction = costReduction;
+    }
+
+    int effectiveCost(AssetInfo assetInfo) {
+        int cost = assetInfo.getCost();
+        if (costReduction <= 0 || cost <= 0 || assetInfo.getId() == AssetId.BANK_LOAN) {
+            return cost;
+        }
+        return Math.max(1, cost - costReduction);
     }
 
     @Override
@@ -30,7 +46,7 @@ public class ReserveTargetActorChangedListener implements TargetActorChangedList
         this.cards = cards;
         selectedAssetsValue = 0;
         for (CardTemplate card : cards) {
-            selectedAssetsValue += card.getAssetInfo().getCost();
+            selectedAssetsValue += effectiveCost(card.getAssetInfo());
         }
 
         if (selectedAssetsValue > valueLimit) {
@@ -104,7 +120,7 @@ public class ReserveTargetActorChangedListener implements TargetActorChangedList
 
         for (Actor actor : sourceTargetGroup.getSourceDockActor().getChildren()) {
             CardTemplate cardTemplate = (CardTemplate) actor;
-            if (cardTemplate.getAssetInfo().getCost() + selectedAssetsValue > valueLimit) {
+            if (effectiveCost(cardTemplate.getAssetInfo()) + selectedAssetsValue > valueLimit) {
                 disableCardTemplate(cardTemplate);
             }
         }

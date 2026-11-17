@@ -14,7 +14,11 @@ public class ReserveDragAndDropBinder extends DragAndDropBinder {
     private int valueLimit;
 
     public ReserveDragAndDropBinder(int valueLimit, Stage stage) {
-        super(stage, new ReserveTargetActorChangedListener());
+        this(valueLimit, stage, 0);
+    }
+
+    public ReserveDragAndDropBinder(int valueLimit, Stage stage, int costReduction) {
+        super(stage, new ReserveTargetActorChangedListener(costReduction));
         this.valueLimit = valueLimit;
     }
 

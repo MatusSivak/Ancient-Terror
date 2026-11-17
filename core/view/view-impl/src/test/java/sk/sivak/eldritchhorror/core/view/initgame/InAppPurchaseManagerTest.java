@@ -161,7 +161,8 @@ public class InAppPurchaseManagerTest {
         List<InvestigatorInfo> roster = new ArrayList<>();
         for (InvestigatorId id : new InvestigatorId[]{InvestigatorId.THE_HANDYMAN,
                 InvestigatorId.THE_BOOTLEGGER, InvestigatorId.THE_VIOLINIST, InvestigatorId.THE_WAITRESS,
-                InvestigatorId.THE_BUTLER, InvestigatorId.THE_PRIEST, InvestigatorId.THE_NUN, InvestigatorId.THE_EXPLORER}) {
+                InvestigatorId.THE_BUTLER, InvestigatorId.THE_PRIEST, InvestigatorId.THE_NUN, InvestigatorId.THE_EXPLORER,
+                InvestigatorId.THE_REPORTER, InvestigatorId.THE_PROFESSOR, InvestigatorId.THE_DILETTANTE, InvestigatorId.THE_SALESMAN}) {
             roster.add((InvestigatorInfo) Proxy.newProxyInstance(getClass().getClassLoader(),
                     new Class[]{InvestigatorInfo.class}, (proxy, method, args) -> id));
         }

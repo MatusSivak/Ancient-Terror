@@ -27,7 +27,8 @@ public class ShowReserveDragAndDropAction extends AbstractHookableAction<ShowRes
         setBankLoanAvailable();
         displaySelectAssetsText();
         ServicePlatform.get().getCardController()
-                .showReserveDragAndDrop(input.getTestScore(), input.isBankLoanAvailable(), input.getMandatoryAssetId())
+                .showReserveDragAndDrop(input.getTestScore(), input.isBankLoanAvailable(), input.getMandatoryAssetId(),
+                        input.getCostReduction())
                 .subscribe(this::onResponse);
     }
 

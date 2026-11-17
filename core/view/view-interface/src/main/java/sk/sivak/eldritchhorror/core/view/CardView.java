@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface CardView {
 
-    Single<ShowReserveDragAndDropOutput> showReserveDragAndDrop(int testScore, boolean bankLoanAvailable, List<AssetInfo> reserve, AssetId mandatoryAssetId);
+    Single<ShowReserveDragAndDropOutput> showReserveDragAndDrop(int testScore, boolean bankLoanAvailable, List<AssetInfo> reserve, AssetId mandatoryAssetId, int costReduction);
 
     Single<CardInfo> selectSingleCard(List<? extends CardInfo> availableCards, String titleText, String hideText);
 

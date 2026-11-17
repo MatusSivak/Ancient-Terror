@@ -43,6 +43,9 @@ public final class FreeRerollPolicy {
             switch (asset.getId()) {
                 case LUCKY_CIGARETTE_CASE: availableIncrements++; break;
                 case DOT_18_DERRINGER: if (combatStrength) availableIncrements++; break;
+                case FINE_JEWELRY:
+                    if (flavor == TestFlavorType.ACQUIRE_ASSETS && test.getStat() == Stat.INFLUENCE) availableIncrements++;
+                    break;
                 case GRUESOME_TALISMAN:
                     if (flavor == TestFlavorType.COMBAT && test.getStat() == Stat.WILL) availableIncrements++;
                     break;
