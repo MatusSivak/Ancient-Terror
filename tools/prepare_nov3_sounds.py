@@ -9,6 +9,7 @@ import numpy as np
 import soundfile as sf
 from prepare_presentation_sounds import ROOT, RATE, mix, echo
 from prepare_category_sounds import recording as category
+from prepare_rumor_sound import main as prepare_rumor_sound
 
 SOURCE = ROOT / 'source_assets/sounds/nov3'
 
@@ -54,8 +55,7 @@ def main():
     swish = recording('swish-7.wav')
     write('card_collect', mix((0, swish, 1), (.24, swish, .65), (.48, swish, .35)), -24, .2)
     write('monster_discard', echo(recording('swish-10.wav'), .13, .28), -17, .4)
-    write('rumor_spawn', mix((0, recording('swish-10.wav'), .4),
-          (.08, category('thunder-2-s3113.mp3', 3.95, 1.15), .65)), -18, .5)
+    prepare_rumor_sound()
     # A stronger wood contact and a clear low gate impact remain audible on phone speakers.
     write('clue_spawn', category('449955__breviceps__wooden-thud.mp3', 0, .45), -11, .1)
     write('gate_resonance', mix((0, category('portal/1.mp3', .45, 2.4), .65),

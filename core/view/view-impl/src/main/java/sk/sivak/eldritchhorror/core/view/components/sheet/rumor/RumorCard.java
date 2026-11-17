@@ -30,6 +30,7 @@ import sk.sivak.eldritchhorror.core.view.game.OnScreenActors;
 import sk.sivak.eldritchhorror.core.view.map.MapUtils;
 import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
 import sk.sivak.eldritchhorror.core.view.utils.GameplaySounds;
+import sk.sivak.eldritchhorror.core.view.utils.MarkupText;
 import sk.sivak.eldritchhorror.core.view.utils.SelectionPanelStyle;
 
 import java.util.concurrent.TimeUnit;
@@ -71,8 +72,8 @@ public class RumorCard extends VisTable {
     }
 
     public Completable destroyWithEffect() {
-        return Completable.defer(() -> sk.sivak.eldritchhorror.core.view.components.card.CardDestructionEffect
-                .resolveMystery(this).doOnCompleted(() -> {
+        return Completable.defer(() -> sk.sivak.eldritchhorror.core.view.components.card.RumorVanishEffect
+                .play(this).doOnCompleted(() -> {
                     displayHide.finishRemoval();
                     onHidden();
                 }));
@@ -227,7 +228,7 @@ public class RumorCard extends VisTable {
         Label label = new Label(text.replaceAll("\\s*\\n\\s*", " "), labelStyle);
         label.setAlignment(Align.center);
         label.setWrap(true);
-        label.setFontScale(0.45f);
+        label.setFontScale(0.35f);
         return label;
     }
 
@@ -244,7 +245,7 @@ public class RumorCard extends VisTable {
         BitmapFont bitmapFont = getBitmapFontNew(NEW_FONT_SOURCE_SERIF_4, 40);
         bitmapFont.getData().markupEnabled = true;
         Label.LabelStyle style = new Label.LabelStyle(bitmapFont, TEXT);
-        Label label = new Label(text, style);
+        Label label = new Label(MarkupText.replaceColoredGlyphKeywords(text), style);
         label.setWrap(true);
         label.setAlignment(Align.left);
         label.setFontScale(0.45f);

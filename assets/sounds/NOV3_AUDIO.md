@@ -29,3 +29,9 @@ fast-forward; an explicit reserve-opening gesture stays audible.
 Regenerate with `python tools/prepare_nov3_sounds.py` (numpy and soundfile required).
 Run this **after** the legacy generators, which also produce several of these names.
 No downloads are needed to regenerate.
+
+## Rumor cue update
+
+The rumor spawn cue is now rebuilt from the new download documented in
+[RUMOR_AUDIO.md](RUMOR_AUDIO.md). `prepare_nov3_sounds.py` delegates that cue to
+`prepare_rumor_sound.py`; the older swish/thunder mapping above is superseded.

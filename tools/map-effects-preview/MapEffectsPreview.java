@@ -401,8 +401,15 @@ public class MapEffectsPreview extends ApplicationAdapter {
                 require(clicked.get()==3, "Wrapped storm did not open its associated rumor");
                 AtomicInteger removed = new AtomicInteger();
                 sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils.discardStorm("storm-preview").subscribe(removed::incrementAndGet);
-                for(int i=0;i<100;i++) stage.act(1f/60);
+                for(int i=0;i<100;i++) {
+                    stage.act(mode==3 ? 4f : 1f/60);
+                    for(Actor actor:layer.getChildren()) require(actor.getTouchable()==Touchable.disabled,
+                            "Vanishing storm still accepts clicks");
+                    if(mode==0 && (i==12 || i==34 || i==55)) draw("rumor-vanish-"+i);
+                }
                 require(removed.get()==1 && layer.getChildren().size==0,"Storm removal leaked actors");
+                sk.sivak.eldritchhorror.core.view.map.storm.StormImageUtils.discardStorm("storm-preview").subscribe(removed::incrementAndGet);
+                require(removed.get()==2,"Removing an absent storm must complete");
                 FastForwardAction.turnOff();
                 if(mode<4) startStorm(mode+1);
                 else startGateImpact(0);

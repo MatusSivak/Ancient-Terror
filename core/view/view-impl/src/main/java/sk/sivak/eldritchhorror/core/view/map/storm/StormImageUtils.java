@@ -3,11 +3,17 @@ package sk.sivak.eldritchhorror.core.view.map.storm;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import rx.Completable;
 import sk.sivak.eldritchhorror.core.constants.location.LocationId;
 import sk.sivak.eldritchhorror.core.view.game.MapStage;
 import sk.sivak.eldritchhorror.core.view.map.helper.Spawner;
 import sk.sivak.eldritchhorror.core.view.utils.ButtonUtils;
+import sk.sivak.eldritchhorror.core.view.utils.FastForwardAction;
+import java.util.ArrayList;
+import java.util.List;
+import static sk.sivak.eldritchhorror.core.constants.ViewProperties.NORMAL_ACTION_DURATION;
 
 public class StormImageUtils {
 
@@ -43,7 +49,31 @@ public class StormImageUtils {
     }
 
     public static Completable discardStorm(String stormId) {
-        return new Spawner().unspawn(new StormIdLayerResolver(stormId));
+        return Completable.create(subscriber -> {
+            StormIdLayerResolver resolver = new StormIdLayerResolver(stormId);
+            List<Actor> copies = new ArrayList<>(MapStage.getActor(resolver));
+            copies.removeIf(actor -> actor.getParent() == null);
+            if (copies.isEmpty()) {
+                MapStage.removeActor(resolver);
+                subscriber.onCompleted();
+                return;
+            }
+            int[] remaining = {copies.size()};
+            for (Actor actor : copies) {
+                StormImage storm = (StormImage) actor;
+                storm.clearActions();
+                storm.setTouchable(Touchable.disabled);
+                storm.beginVanish();
+                storm.addAction(Actions.sequence(new FastForwardAction<>(new TemporalAction(1.1f * NORMAL_ACTION_DURATION) {
+                    @Override protected void update(float percent) { storm.setVanishProgress(percent); }
+                }), Actions.run(() -> {
+                    if (--remaining[0] == 0) {
+                        MapStage.removeActor(resolver);
+                        subscriber.onCompleted();
+                    }
+                })));
+            }
+        });
     }
 
     private static class StormIdLayerResolver implements MapStage.IdLayerResolver<String> {

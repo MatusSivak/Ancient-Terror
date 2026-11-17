@@ -1,0 +1,14 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':desktop')
+    desktop.sourceSets.create('rumorPreview') {
+        java.srcDir new File(gradle.rootProject.projectDir, 'tools/rumor-preview')
+        compileClasspath += desktop.sourceSets.main.runtimeClasspath
+        runtimeClasspath += desktop.sourceSets.main.runtimeClasspath
+    }
+    desktop.tasks.register('previewRumors', JavaExec) {
+        dependsOn desktop.tasks.named('rumorPreviewClasses')
+        classpath = desktop.sourceSets.rumorPreview.runtimeClasspath
+        mainClass.set('RumorPreview')
+        workingDir = new File(gradle.rootProject.projectDir, 'assets')
+    }
+}
