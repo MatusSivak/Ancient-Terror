@@ -1,0 +1,95 @@
+{
+  "date": "2026-11-17",
+  "generator": "Built-in image_gen",
+  "updatedTo": "b5ffa7d9",
+  "portraitStyleReferences": [],
+  "cardStyleReferences": [
+    "assets/card/asset/LUCKY_RING.jpg",
+    "assets/card/asset/POCKET_WATCH.jpg",
+    "assets/card/asset/ARCANE_TOME.jpg",
+    "assets/card/asset/DOT_45_AUTOMATIC.jpg"
+  ],
+  "artwork": [
+    {
+      "id": "THE_REPORTER",
+      "type": "portrait",
+      "prompt": "Create one original game investigator illustration, vertical 2:3, realistic hand-painted vintage 1920s pulp adventure, finely resolved oil-brush textures, lifelike anatomy, detailed contextual environment, natural colors and directional cinematic light. It must feel like a premium illustrated board game character portrait, not a photographic fashion editorial. One clearly readable individual, shown head to knees, head near upper quarter with generous room above and to both sides of the head for later arch masking; centered core silhouette. Fully opaque edge-to-edge rectangular scene. No letters, text, frame, border, logos or watermark. Rex Murphy, a 1920s investigative newspaper reporter, age 38. Distinctive narrow long angular face, prominent slightly crooked nose, pale freckled skin, tired green eyes, straight dark hair wet and pushed back, thin lips, clean shaven; gaunt and wiry build. A rumpled slate-blue raincoat open over a faded cream shirt and loosened dark red tie, no waistcoat. He leans forward slightly against a damp alley wall outside a newspaper print shop, torso angled left, looking alertly off to the right as if following a lead. Left hand holds a small reporter notebook against his chest, right hand a pencil poised over it, both hands anatomically clean. A vintage camera hangs by a strap at his hip. Wet city street and blurred printing presses behind the window, overcast cool blue daylight with a small amber light inside. Investigative, weary, tense; not smiling or handsome-model posing. No library, no brown suit, no gold decorative luxury.",
+      "generatedFile": "exec-ddaa7b75-24a4-449e-b934-a75342be6ef6.png",
+      "source": "source_assets/investigator/THE_REPORTER.png",
+      "runtime": "assets/investigator/THE_REPORTER.png",
+      "revision": 2
+    },
+    {
+      "id": "THE_PROFESSOR",
+      "type": "portrait",
+      "prompt": "Create one original game investigator illustration, vertical 2:3, realistic hand-painted vintage 1920s pulp adventure, finely resolved oil-brush textures, lifelike anatomy, detailed contextual environment, natural colors and directional cinematic light. It must feel like a premium illustrated board game character portrait, not a photographic fashion editorial. One clearly readable individual, shown head to knees, head near upper quarter with generous room above and to both sides of the head for later arch masking; centered core silhouette. Fully opaque edge-to-edge rectangular scene. No letters, text, frame, border, logos or watermark. Harvey Walters, an elderly professor of archaeology and the occult, age 73. Short, very heavyset, markedly round face, completely bald crown, sparse white hair at sides, thick bushy white eyebrows, round wire spectacles low on a broad nose, a substantial white moustache and short squared white beard. Deep-set small eyes focused intently down at his research. Wearing a dark burgundy velvet academic jacket, black waistcoat, white shirt and loosely knotted black cravat, rounded stomach visible. Seated sideways on a plain wooden chair at an archaeological worktable, torso turning three quarters toward viewer; one hand adjusts his spectacles, the other rests on a closed ancient folio at his lap. Distinct seated silhouette with knees visible. Old university antiquities workroom: pale gray stone walls, a clay tablet on table, pottery fragments and rolled diagrams on shelves, no ornate library, no globe. Cool diffuse skylight and warm small desk lamp, dusty sage-green and burgundy palette. Thoughtful absorbed expression, no smile, unglamorous weathered face.",
+      "generatedFile": "exec-f61e1bcb-0628-4608-9b5a-676f1ce62b95.png",
+      "source": "source_assets/investigator/THE_PROFESSOR.png",
+      "runtime": "assets/investigator/THE_PROFESSOR.png",
+      "revision": 2
+    },
+    {
+      "id": "THE_DILETTANTE",
+      "type": "portrait",
+      "prompt": "Create one original game investigator illustration, vertical 2:3, realistic hand-painted vintage 1920s pulp adventure, finely resolved oil-brush textures, lifelike anatomy, detailed contextual environment, natural colors and directional cinematic light. It must feel like a premium illustrated board game character portrait, not a photographic fashion editorial. One clearly readable individual, shown head to knees, head near upper quarter with generous room above and to both sides of the head for later arch masking; centered core silhouette. Fully opaque edge-to-edge rectangular scene. No letters, text, frame, border, logos or watermark. Jenny Barnes, a wealthy resourceful American woman age 29 searching abroad for her missing sister. A distinctive long oval fair face, strong straight nose, wide-set gray eyes, sharply defined dark brows and a level determined gaze; straight jet-black chin-length blunt bob tucked behind one ear, not waved or curled. Slender athletic build. Wearing a tailored deep cobalt-blue 1920s traveling coat with angular lapels and a matching simple cloche hat, light cream blouse and charcoal calf-length skirt, small sapphire stud earrings, no pearls, no fur, no evening gown. Standing firmly on a stone waterfront quay, body nearly frontal, looking directly at viewer. One hand holds a folded sepia photograph by her waist, other hand grips a closed dark leather travel case at her side, anatomically natural hands. Behind her a gray-green harbor, moored ocean liner and pale stone European waterfront buildings, cloudy morning light with a restrained bright break in the sky. Purposeful and independent, visually crisp cool cobalt and gray with a touch of warm skin, no glamorous hotel, no actress pose, no tilted head, no raised chin.",
+      "generatedFile": "exec-743af143-c878-4640-b1dd-d6fba1f74c90.png",
+      "source": "source_assets/investigator/THE_DILETTANTE.png",
+      "runtime": "assets/investigator/THE_DILETTANTE.png",
+      "revision": 2
+    },
+    {
+      "id": "THE_SALESMAN",
+      "type": "portrait",
+      "prompt": "Create one original game investigator illustration, vertical 2:3, realistic hand-painted vintage 1920s pulp adventure, finely resolved oil-brush textures, lifelike anatomy, detailed contextual environment, natural colors and directional cinematic light. It must feel like a premium illustrated board game character portrait, not a photographic fashion editorial. One clearly readable individual, shown head to knees, head near upper quarter with generous room above and to both sides of the head for later arch masking; centered core silhouette. Fully opaque edge-to-edge rectangular scene. No letters, text, frame, border, logos or watermark. Bob Jenkins, a traveling antiques salesman age 52. Tall skinny wiry man with sloping shoulders and a highly distinctive elongated triangular face, long narrow nose, pronounced cheekbones, slightly protruding ears, receding sandy-red hair closely combed flat, thin neat reddish moustache, hazel eyes and crow's feet. No resemblance to a plump politician or movie star. Wears a lightly rumpled pale ochre summer linen suit, dark forest-green tie and cream shirt, no waistcoat, no pocket-watch chain. Standing at a crowded outdoor London flea-market stall, torso rotated slightly right, sly amiable half-smile, one hand lifting a single old golden coin between thumb and finger near chest to examine it; other hand grips the handle of a closed dark green battered sample suitcase at his thigh. No open display case, no sprawling objects held across body. Behind him a muted striped market awning, weathered brick arch, softly detailed antique stalls and a few distant blurred passersby. Bright overcast natural daylight with rusty red and moss-green accents, not a sepia library. Warm persuasive character, unmistakable slender silhouette.",
+      "generatedFile": "exec-f80ec6bf-adc9-42ef-bbad-e6d2556e9f5a.png",
+      "source": "source_assets/investigator/THE_SALESMAN.png",
+      "runtime": "assets/investigator/THE_SALESMAN.png",
+      "revision": 2
+    },
+    {
+      "id": "LUCKY_TALISMAN",
+      "type": "card",
+      "prompt": "Create one premium game item illustration for a 1920s occult mystery board game, wide landscape 35:17 aspect ratio. Realistic finely painted period still life, tactile patina, restrained cinematic amber and blue-gray lighting. A small ancient bronze lucky talisman rests flat and naturally on dark faded teal velvet atop a reporter's desk. Coin-sized circular pendant with a polished deep green cabochon and simple incised radial pattern; one real metal loop at top, thin dark leather cord passes through that loop and falls loosely beside it on the cloth. Camera looks obliquely down at the pendant at about 45 degrees; circular face becomes a geometrically consistent gentle ellipse, cabochon firmly set into metal. Pendant is the clear primary subject in the central foreground, substantial enough to read at 700x340, with realistic contact shadow and credible small scale. A closed pocket notebook and wooden pencil softly out of focus near the far edge, modest 1920s desk, no jewelry case. No hands, no people, no floating cord, no extra charm, no magical glow, no text, border or watermark. Entire pendant and loop comfortably within frame. Opaque full-bleed scene.",
+      "generatedFile": "exec-5843fb72-503d-4c2a-91a6-647fb2a7324c.png",
+      "source": "source_assets/card/asset/LUCKY_TALISMAN.png",
+      "runtime": "assets/card/asset/LUCKY_TALISMAN.jpg",
+      "revision": 2
+    },
+    {
+      "id": "ANCIENT_TOME",
+      "type": "card",
+      "subject": "A very old massive leather-bound occult tome, lying open on a dark wood university reading desk, crumbling ochre parchment pages with faded invented handwritten marks and one antique celestial diagram, thick ragged page block and tarnished brass clasps. An elderly scholar's hands steady its lower outer edges. Warm brass reading lamp at rear, shadowy stacks of books. Book is the prominent central subject, no legible text.",
+      "prompt": "Use case: stylized-concept. Create ONE game asset illustration for Ancient Terror, wide landscape aspect ratio 35:17 (approximately 2.06:1), matching supplied reference images ONLY for cinematic realistic period still-life style, tactile detailed materials, warm sepia amber highlights, muted brown-green shadows, subtle painterly finish and shallow depth of field. 1920s setting. Full-bleed opaque scene, clear main object and uncluttered silhouette, safely inset from all edges for a 700x340 runtime crop. No card frame, text labels, logos, watermark or graphic overlay. Subject: A very old massive leather-bound occult tome, lying open on a dark wood university reading desk, crumbling ochre parchment pages with faded invented handwritten marks and one antique celestial diagram, thick ragged page block and tarnished brass clasps. An elderly scholar's hands steady its lower outer edges. Warm brass reading lamp at rear, shadowy stacks of books. Book is the prominent central subject, no legible text.",
+      "generatedFile": "exec-2feb41b5-8a7d-49db-ac20-16f0bbc91f8f.png",
+      "source": "source_assets/card/asset/ANCIENT_TOME.png",
+      "runtime": "assets/card/asset/ANCIENT_TOME.jpg"
+    },
+    {
+      "id": "DOT_25_AUTOMATIC",
+      "type": "card",
+      "subject": "One tiny early-20th-century .25 caliber vest-pocket semi-automatic pistol, blued steel short barrel, compact simple slide, brown checkered grip panels, proportionally small compared to a woman's gloved hand lying beside it. Resting diagonally on a walnut hotel writing desk next to a small open blue velvet-lined purse. Entire pistol visible, mechanically coherent clean side profile, no firing, no lettering or brand.",
+      "prompt": "Use case: stylized-concept. Create ONE game asset illustration for Ancient Terror, wide landscape aspect ratio 35:17 (approximately 2.06:1), matching supplied reference images ONLY for cinematic realistic period still-life style, tactile detailed materials, warm sepia amber highlights, muted brown-green shadows, subtle painterly finish and shallow depth of field. 1920s setting. Full-bleed opaque scene, clear main object and uncluttered silhouette, safely inset from all edges for a 700x340 runtime crop. No card frame, text labels, logos, watermark or graphic overlay. Subject: One tiny early-20th-century .25 caliber vest-pocket semi-automatic pistol, blued steel short barrel, compact simple slide, brown checkered grip panels, proportionally small compared to a woman's gloved hand lying beside it. Resting diagonally on a walnut hotel writing desk next to a small open blue velvet-lined purse. Entire pistol visible, mechanically coherent clean side profile, no firing, no lettering or brand.",
+      "generatedFile": "exec-8ff6670b-ed7f-433b-b5fe-6c96155e90f3.png",
+      "source": "source_assets/card/asset/DOT_25_AUTOMATIC.png",
+      "runtime": "assets/card/asset/DOT_25_AUTOMATIC.jpg"
+    },
+    {
+      "id": "FINE_JEWELRY",
+      "type": "card",
+      "subject": "An exquisite 1920s fine jewelry set: one diamond-and-sapphire Art Deco necklace with matching pair of earrings, tastefully arranged in an open midnight-blue velvet jewelry presentation case on a polished mahogany dressing table. Faceted stones, delicate platinum filigree, warm reflected lamplight, softly blurred luxurious hotel background. Jewelry the central focal subject, understated believable luxury.",
+      "prompt": "Use case: stylized-concept. Create ONE game asset illustration for Ancient Terror, wide landscape aspect ratio 35:17 (approximately 2.06:1), matching supplied reference images ONLY for cinematic realistic period still-life style, tactile detailed materials, warm sepia amber highlights, muted brown-green shadows, subtle painterly finish and shallow depth of field. 1920s setting. Full-bleed opaque scene, clear main object and uncluttered silhouette, safely inset from all edges for a 700x340 runtime crop. No card frame, text labels, logos, watermark or graphic overlay. Subject: An exquisite 1920s fine jewelry set: one diamond-and-sapphire Art Deco necklace with matching pair of earrings, tastefully arranged in an open midnight-blue velvet jewelry presentation case on a polished mahogany dressing table. Faceted stones, delicate platinum filigree, warm reflected lamplight, softly blurred luxurious hotel background. Jewelry the central focal subject, understated believable luxury.",
+      "generatedFile": "exec-0c5c6c86-5d58-4f9d-beef-07950ca064ac.png",
+      "source": "source_assets/card/asset/FINE_JEWELRY.png",
+      "runtime": "assets/card/asset/FINE_JEWELRY.jpg"
+    },
+    {
+      "id": "WINCHESTER_RIFLE",
+      "type": "card",
+      "prompt": "Create a new illustration from scratch for an item card in a 1920s historical mystery board game. Wide landscape image approximately 2.06:1. A single antique Winchester lever-action hunting rifle lies diagonally across a worn wooden cabin workbench, butt at lower left and muzzle toward upper right, entire object visible with comfortable margins. View from a modest elevated three-quarter angle, using one coherent natural perspective throughout. The rifle has elegant slender realistic proportions: a relatively compact walnut shoulder stock, small steel receiver, short walnut fore-end and a distinctly long slim barrel. Avoid an oversized wide shoulder stock or a toy-like short barrel. All parts align naturally; convincing contact with the tabletop and soft cast shadows. Beside the rifle, only a folded dark wool hunting coat partly visible at the far edge; no people or hands. Warm sidelight from a cabin window reveals worn walnut grain and subtle aged blue steel. Realistic finely painted vintage adventure illustration, earthy browns and muted olive shadows, clear object silhouette, subdued background. A quiet historical still life, no action, no lettering, logos, labels, frame or watermark. Do not imitate any previous image.",
+      "generatedFile": "exec-9f625311-25a0-450f-b812-5404150f1e9d.png",
+      "source": "source_assets/card/asset/WINCHESTER_RIFLE.png",
+      "runtime": "assets/card/asset/WINCHESTER_RIFLE.jpg",
+      "revision": 3
+    }
+  ]
+}
