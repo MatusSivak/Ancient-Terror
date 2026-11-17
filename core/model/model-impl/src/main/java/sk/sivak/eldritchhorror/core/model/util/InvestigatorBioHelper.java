@@ -10,21 +10,62 @@ public class InvestigatorBioHelper
     public static String getBio(InvestigatorId investigatorId) {
         switch (investigatorId) {
             case THE_BUTLER:
-                return "A lifetime of tending a household has taught Carson to notice what others overlook.\nWhen uncanny threats endanger the people in his care,\nhe brings a steady hand and a carefully packed case.";
+                return "Carson kept the household running through bankruptcies, funerals, and a winter\n" +
+                        "without coal. Nothing prepared him for the dinner at which every guest\n" +
+                        "remembered a different host. By morning, the portraits had changed and the\n" +
+                        "staff had forgotten who paid them. Carson alone had kept a written seating\n" +
+                        "plan. He took the servants to safety, locked the dining room, and began\n" +
+                        "visiting the addresses in his employer's appointment book.";
             case THE_PRIEST:
-                return "Strange violence has shaken Mateo's community and his certainty.\nHe travels to Rome in search of answers,\ncarrying his Bible and a resolve to protect those left behind.";
+                return "Mateo spent years helping families separated by closed borders exchange\n" +
+                        "letters. One parcel contained messages from a village demolished before any of\n" +
+                        "the writers were born. Their pleas were mundane: medicine, blankets, a way out\n" +
+                        "before the bells rang. The postmarks advanced a day each time he looked. He\n" +
+                        "packed supplies and went to trace the delivery route, unwilling to dismiss\n" +
+                        "suffering simply because its address was impossible.";
             case THE_NUN:
-                return "Mary has faced things that no prayer book describes.\nShe ventures far from the convent to comfort troubled minds\nand confront the horrors that prey upon them.";
+                return "Mary managed a small infirmary where the night staff learned to work quietly.\n" +
+                        "Then patients began answering questions no one had asked, all in the same\n" +
+                        "unfamiliar voice. She discovered that the voice fell silent whenever she read\n" +
+                        "their names aloud. With the patients recovering, she copied the ward register\n" +
+                        "and sought other hospitals with similar cases. Someone was turning people into\n" +
+                        "messengers, and she intended to find the sender.";
             case THE_EXPLORER:
-                return "Ursula follows forgotten trails into places most scholars know only from maps.\nAt an excavation deep in Africa, curiosity becomes a race\nto uncover what an ancient civilization tried to bury.";
+                return "Ursula earned her living surveying routes for communities left off official\n" +
+                        "maps. On one commission, her survey stakes moved overnight into a perfect\n" +
+                        "circle around an empty hillside. Beneath it she found a staircase worn smooth\n" +
+                        "by feet far larger than human ones. She sealed the entrance, but the same\n" +
+                        "circle appeared on her next survey. Now she follows the pattern, marking safe\n" +
+                        "paths for anyone who might come after her.";
             case THE_REPORTER:
-                return "Wherever Rex goes, misfortune is never far behind.\nHis cursed luck has dragged him into more than one brush with the uncanny,\nso he chases the story before the next disaster finds him.";
+                return "Rex covered municipal repairs until a printer handed him tomorrow's edition.\n" +
+                        "Its account of a bridge collapse named witnesses who had not yet arrived in\n" +
+                        "town. He stopped the first disaster, only to find a fresh obituary in his own\n" +
+                        "handwriting. His editor called it a publicity stunt. Rex keeps the changing\n" +
+                        "proofs in a waterproof satchel and visits each address before the presses can\n" +
+                        "make another prediction come true.";
             case THE_PROFESSOR:
-                return "Harvey has spent decades studying history, archaeology and the occult.\nFew living scholars know as much about the darkness beyond our world,\nand his research has brought him home to Miskatonic University.";
+                return "Harvey built his reputation by exposing forged antiquities. His most\n" +
+                        "embarrassing case was a clay tablet whose supposedly invented script later\n" +
+                        "appeared in a student's childhood diary. The student could translate it only\n" +
+                        "while asleep, and each translation described a door somewhere in the city.\n" +
+                        "Harvey withdrew his published dismissal. He now travels with the tablet's\n" +
+                        "fragments, hoping careful scholarship can repair the consequences of a\n" +
+                        "careless certainty.";
             case THE_DILETTANTE:
-                return "Jenny grew up among wealth, glamour and the finest nightclubs.\nWhen her sister vanished after writing of hooded strangers,\nshe set out to spend whatever it takes to find her.";
+                return "Jenny inherited a controlling interest in a shipping company and expected dull\n" +
+                        "meetings. Instead, she found passenger lists for voyages that never sailed,\n" +
+                        "with fares paid decades in advance. She quietly bought the company's oldest\n" +
+                        "vessel and hired a crew willing to ask questions. Her luggage holds copied\n" +
+                        "ledgers, generous emergency funds, and photographs of the missing passengers.\n" +
+                        "Whatever her fortune has helped conceal, she means to bring into daylight.";
             case THE_SALESMAN:
-                return "Bob believes any deal can be closed with enough persistence.\nA handful of strange golden coins has led him into rumors of a curse,\nand he means to find out what they are truly worth.";
+                return "Bob could sell an unfashionable hat, but he refused to sell an empty promise.\n" +
+                        "That rule became troublesome when customers began returning purchases he had\n" +
+                        "never stocked: a compass that pointed beneath the ground, a watch that counted\n" +
+                        "backward. Each came with a receipt bearing his signature. He honored every\n" +
+                        "refund and packed the objects into his sample case. Somewhere, someone was\n" +
+                        "trading on his name. Bob wanted an explanation in person.";
             case THE_BOUNTY_HUNTER:
                 return createForBountyHunter();
             case THE_SPY:
@@ -70,253 +111,192 @@ public class InvestigatorBioHelper
     }
 
     private static String createForWaitress() {
-        return "Once, Agnes lived quietly,\n" +
-                "taking orders and serving up food at a diner in Arkham,\n" +
-                "but one night, she fell from a ladder, striking her head.\n" +
-                "After that, she could recall a past life\n" +
-                "as a sorceress in the ancient world of Hyperborea.\n" +
-                "Her mind flooded with memories of arcane lore.\n" +
-                "Amazed by this new magical knowledge, Agnes has traveled to London,\n" +
-                "to learn more about Hyperborea,\n" +
-                "but is she driven by her own curiosity\n" +
-                "or compelled by the will of her former self?";
+        return "Agnes remembered regular customers by their orders. When an unfamiliar man\n" +
+                "requested a meal she had served him forty years earlier, she assumed he was\n" +
+                "confused. Then he returned with a photograph of the diner standing in an empty\n" +
+                "field a century ago. Other customers began arriving with coins from unknown\n" +
+                "countries and urgent requests for directions. Agnes keeps a notebook beneath\n" +
+                "the counter, mapping where they come from and which roads might bring them\n" +
+                "home.";
     }
 
     private static String createForViolinist() {
-        return "Hailed as a musical prodigy from her youth,\n" +
-                "Patrice has performed for royalty and society's brightest minds\n" +
-                "all around the world. For years she thought\n" +
-                "that her consciousness simply drifted as she played,\n" +
-                "but she's come to believe that an intelligence exists behind her visions.\n" +
-                "Somehow the notes form a bridge between her own mind and another.\n" +
-                "The more she grasps what her music exposes her to,\n" +
-                "the more afraid she becomes. After last night's concert in Sydney,\n" +
-                "she's finally decided to take action.";
+        return "Patrice taught violin in rented rooms while restoring damaged sheet music for\n" +
+                "a publisher. One water-stained score changed its rests whenever she turned\n" +
+                "away. Played exactly as written, it made every open window in the building\n" +
+                "show the same deserted courtyard. She stopped before the final bar. Someone\n" +
+                "has begun publishing fragments under her name, and Patrice must find the\n" +
+                "remaining pages before an unsuspecting orchestra completes the piece.";
     }
 
     private static String createForHandyman() {
-        return "Wilson's a practical man. He goes where there's work.\n" +
-                "When it's gone, he moves on.\n" +
-                "Wilson finds that offering an honest deal gets him treated honestly,\n" +
-                "but since he took a job rebuilding a church in Arkham,\n" +
-                "he's had a hard time being honest with himself.\n" +
-                "Things that used to hide in the deepest pits of the earth\n" +
-                "have crawled to the surface. He cannot unsee all the things he's seen,\n" +
-                "but he can get to work on fixing the problem.";
+        return "Wilson repaired elevators, boilers, and anything a landlord had neglected. A\n" +
+                "call to fix persistent knocking led him to pipes that continued through a\n" +
+                "solid foundation without entering the cellar. Every blow from inside matched\n" +
+                "the rhythm of a missing workman's hammer. Wilson shut off the building's\n" +
+                "machinery and listened. He now carries plans of similar buildings in his tool\n" +
+                "bag, tracing a buried structure that none of their architects admits\n" +
+                "designing.";
     }
 
     private static String createForBootlegger() {
-        return "Finn was making a good living,\n" +
-                "running liquor from Canada to cities all along the East Coast.\n" +
-                "He never got caught and never lost a delivery.\n" +
-                "Now he has taken a job in Chicago\n" +
-                "and gave his word that he could get it done.\n" +
-                "This time it won't be alcohol he's delivering,\n" +
-                "and it won't be the local sheriff trying to catch him.\n" +
-                "Finn's caught up in some supernatural conspiracy,\n" +
-                "but in the end, he adheres to the same principles.\n" +
-                "Deliver the goods. Don't get caught.";
+        return "Finn knew which roads were watched and which bridges could bear a loaded\n" +
+                "truck. During a routine run, he reached a tollhouse that demanded an hour of\n" +
+                "his life instead of money. He refused, reversed through the barrier, and found\n" +
+                "his cargo aged to dust. The tollhouse has since appeared on other roads. Finn\n" +
+                "shares detours with fellow drivers and searches for its keepers, who seem to\n" +
+                "be collecting something more valuable than liquor.";
     }
 
     private static String createForBountyHunter() {
-        return "Tony's tracked down low-life scum in every lousy corner of the world,\n" +
-                "but nothing was quite as bad as Innsmouth.\n" +
-                "Some creep in Boston skipped bail and\n" +
-                "tried to hide with family in the small fishing village.\n" +
-                "It turned out \"family\" meant vicious fish-like monstrosities\n" +
-                "that left Tony bloody and half-drowned.\n" +
-                "Ever since, he's found a new kind of dirtbag to hunt.\n" +
-                "Ordinary mobster or otherworldly monster,\n" +
-                "Tony will take it down and find someone willing to pay him for it.\n" +
-                "Now he's got a lead in Bogota. Easy money.";
+        return "Tony once accepted a fee to retrieve a surveyor who had abandoned a railway\n" +
+                "camp. He found the man hiding in a dry well, guarding a bundle of maps that\n" +
+                "showed tracks running through occupied houses. The company offered double for\n" +
+                "the maps and nothing for the man. Tony broke the contract. Since then, he has\n" +
+                "followed the company's recruiters from town to town, collecting testimony and\n" +
+                "making certain their next workers survive.";
     }
 
     private static String createForSpy() {
-        return "Everyone expected great things from Trish when she was young.\n" +
-                "In school, she excelled in athletics and the sciences,\n" +
-                "but she surprised everyone after graduation\n" +
-                "by settling into a humble position at a commercial code company.\n" +
-                "What almost no one knows is that this particular company\n" +
-                "is a front for the Bureau's code-breaking agency, the Black Chamber.\n" +
-                "Now she finds herself in the city of Krasnoyarsk meeting another agent\n" +
-                "who has important information about an impending threat\n" +
-                "from a world beyond our own.";
+        return "Trish inspected damaged telegrams for an international insurer. A recurring\n" +
+                "error led her to freight shipments whose destinations had been erased from\n" +
+                "every map she could find. When she reported it, her supervisor destroyed the\n" +
+                "files and arranged her transfer to a nonexistent office. She kept carbon\n" +
+                "copies. Traveling under borrowed credentials, she follows the shipments and\n" +
+                "leaves coded warnings for the people who still believe the routes are\n" +
+                "ordinary.";
     }
 
     private static String createForSailor() {
-        return "Even as a child in Innsmouth, Silas had a special connection to the sea.\n" +
-                "He's an able and well-reasoned man on land,\n" +
-                "but on the ocean he possesses a singular strength and wit.\n" +
-                "It's earned him a sterling reputation in every port across the globe,\n" +
-                "particularly in Sydney, where Silas set ashore last night.\n" +
-                "But this morning, the smell of the briny air carries dread as well as joy.\n" +
-                "There is something in his past, something in Innsmouth,\n" +
-                "that he knows will some day catch up to him.";
+        return "Silas worked salvage boats until his crew raised a lifeboat with their own\n" +
+                "names carved beneath its seats. Inside lay fresh provisions and a log\n" +
+                "recording their deaths three weeks ahead. He burned the log, changed course,\n" +
+                "and brought everyone home. Now matching lifeboats are washing ashore in\n" +
+                "distant ports. Silas has traded salvage work for passage on endangered ships,\n" +
+                "determined that no crew should be buried by a schedule.";
     }
 
     private static String createForAstronomer() {
-        return "The scientific community ridiculed Norman for his claim\n" +
-                "that six stars disappeared from the sky.\n" +
-                "After exhausting every plausible astronomical explanation for answers,\n" +
-                "he took a position at Miskatonic University\n" +
-                "and began exploring more improbable possibilities\n" +
-                "in the restricted section of their library.\n" +
-                "While reading an ancient text of dark prophecies,\n" +
-                "Norman found an exact description of the phenomenon he'd observed.\n" +
-                "If the tome is to be believed,\n" +
-                "a terrible incursion into our world is imminent.";
+        return "Norman maintained the precision clocks used to compare observations between\n" +
+                "observatories. One night, every clock lost eleven seconds while his telescope\n" +
+                "showed daylight over a sleeping city. No one else remembered the interruption.\n" +
+                "He began placing sealed photographic plates beside the instruments; by\n" +
+                "morning, they held pictures of unfamiliar coastlines. Norman is assembling\n" +
+                "those images into an atlas, searching for the place that keeps borrowing time\n" +
+                "from this world.";
     }
 
     private static String createForEntertainer() {
-        return "Marie has come a long way from the Louisiana marshes of her youth.\n" +
-                "These days, \"The Smoky Velvet\" sings the blues\n" +
-                "in elegant nightclubs around the world,\n" +
-                "but it was grand-mere's dying wish that sent Marie to the Kingdom of Sarawak,\n" +
-                "where an old evil had returned.\n" +
-                "Marie doesn't believe she can help,\n" +
-                "but only a fool didn't listen to grand-mere.\n" +
-                "Now memories of strange nursery rhymes\n" +
-                "she used to recite have begun flooding back.\n" +
-                "People called grand-mere a witch.\n" +
-                "Maybe Marie's got some witchcraft in her blood, too.";
+        return "Marie learned to hold a noisy room with a single unaccompanied note. During a\n" +
+                "benefit concert, the audience continued singing after she stopped, repeating a\n" +
+                "verse absent from her songbook. A recording revealed another voice beneath\n" +
+                "them, patiently giving directions. She canceled the tour and visited the first\n" +
+                "address. It was a condemned theater full of abandoned shoes. Marie now uses\n" +
+                "her engagements to investigate who has been gathering those listeners.";
     }
 
     private static String createForSoldier() {
-        return "During the war, Mark witnessed horrors he could not explain,\n" +
-                "and he wrote of what he saw in letters to his beloved wife, Sophie.\n" +
-                "When Mark returned home, he discovered that Sophie was no longer human.\n" +
-                "One of the beasts that Mark had seen overseas\n" +
-                "had taken over her body, killing her in the process.\n" +
-                "Afterward, Mark's thirst for vengeance lead him to Helsinki,\n" +
-                "where some of these creatures had posed as German soldiers during the Great War.";
+        return "Mark served on a military recovery detail, identifying equipment left after\n" +
+                "the fighting. In a deserted field station, he found immaculate uniforms\n" +
+                "bearing the names of men still alive at home. His superiors ordered the\n" +
+                "discovery buried. He kept one name tag. Years later, its owner vanished and\n" +
+                "the tag grew warm in his pocket. Mark has begun locating the others, building\n" +
+                "a warning network before the remaining uniforms acquire their occupants.";
     }
 
     private static String createForRedeemedCultist() {
-        return "When Diana was initiated into the Order of the Silver Twilight,\n" +
-                "she believed it to be nothing more than a community organization.\n" +
-                "But as she has learned more of it's true nature,\n" +
-                "she has become convinced that a growing evil threatens the world,\n" +
-                "and that the Silver Twilight will play a role in that threat.\n" +
-                "She believes her best chance to prevent this\n" +
-                "is to use her position to sabotage the organization from within.\n" +
-                "Carl Sanford, the head of the Order, has recognized her skills\n" +
-                "and recently sent her to Panama for additional training.";
+        return "Diana kept accounts for a burial society that promised no member would die\n" +
+                "alone. She discovered that its payments purchased empty graves, each reserved\n" +
+                "for a person not yet born. When she challenged the trustees, they invited her\n" +
+                "to witness the first arrival. She fled with the membership ledger and the keys\n" +
+                "to their storehouses. Now she helps former members disappear while searching\n" +
+                "for a way to close the graves permanently.";
     }
 
     private static String createForExConvict() {
-        return "Skids got put away on two counts of bank robbery,\n" +
-                "but he never hurt anybody.\n" +
-                "His cellmate, Brad Hollins, killed nine people.\n" +
-                "Hollins said that an alien creature made him do it.\n" +
-                "Over the years, Hollins said a lot of strange things about the \"Ancient Ones.\"\n" +
-                "He said that he needed to get to Argentina to stop them.\n" +
-                "Skids didn't give it much thought\n" +
-                "until the night Hollins burst into flames.\n" +
-                "When Skids got paroled,\n" +
-                "he couldn't shake the thought of these \"Ancient Ones.\"";
+        return "Skids spent his sentence repairing the prison's worn locks. Behind a bricked\n" +
+                "doorway, he found a newer lock opening onto a crowded street that disappeared\n" +
+                "when the bell rang. He used it once to carry an injured prisoner outside, then\n" +
+                "returned before the count. After release, he recognized the same street in a\n" +
+                "newspaper photograph from another continent. He carries a handmade key and a\n" +
+                "list of people the prison insists never existed.";
     }
 
     private static String createForExpeditionLeader() {
-        return "Leo Anderson has spent his whole life\n" +
-                "getting into the deadliest and most obscure corners of the globe.\n" +
-                "Along the way, he's lost good people.\n" +
-                "Fever takes some. Others are claimed by wild beasts.\n" +
-                "After a recent, disastrous venture in the Yucatan,\n" +
-                "Leo barely made it back to Buenos Aires alive.\n" +
-                "He's sick of burying the people who trusted him.\n" +
-                "But the job's not done yet.\n" +
-                "The world is in danger, and crying in his drink won't fix that.\n" +
-                "He's picked up a little hired help here,\n" +
-                "and in the morning, he'll head back out into the wild.";
+        return "Leo guided a geological team into a valley where every shouted word returned\n" +
+                "in a different voice. He ordered the camp to communicate by written notes and\n" +
+                "brought the party out intact. Their abandoned notebooks later arrived by post,\n" +
+                "filled with requests to return for equipment no one remembered taking. Leo is\n" +
+                "recruiting a small rescue party with strict rules: travel in pairs, keep\n" +
+                "written records, and never answer a voice beyond the firelight.";
     }
 
     private static String createForMusician() {
-        return "Old Jim Culver's music gives sweet comfort to the soul,\n" +
-                "and it doesn't matter if that soul belongs to the living or the dead.\n" +
-                "Folks in their graves, they love their little chats with Jim.\n" +
-                "It used to bother him, but now he's happy for the company.\n" +
-                "Lately, some departed souls in San Antonio\n" +
-                "have been all riled up about something. " +
-                "They're downright terrified.\n" +
-                "And anything that scares the dead deserves old Jim's undivided attention.";
+        return "Jim repaired battered instruments between dance-hall engagements. A trumpet\n" +
+                "recovered from a flooded cellar sounded one clear note even with its valves\n" +
+                "removed. Whenever he played beside it, nearby listeners remembered a person\n" +
+                "missing from their lives. He began collecting their names on the backs of\n" +
+                "concert bills. The list has grown longer than his repertoire. Jim takes the\n" +
+                "trumpet from venue to venue, helping strangers remember whom they need to\n" +
+                "find.";
     }
 
     private static String createForPolitician() {
-        return "When the press asks if Charlie is planning a run for national office,\n" +
-                "he smiles and says that he's focused on the important issues.\n" +
-                "The truth is that he would love to launch his campaign,\n" +
-                "but right now the most important issue\n" +
-                "is preventing the end of the world without causing a panic.\n" +
-                "To do this, he's been calling in favors across the country.\n" +
-                "Most recently, Charlie's stopped in San Francisco to visit Hearst Castle.\n" +
-                "With the help of his friends and his finances,\n" +
-                "Charlies believes he can fix this problem without sacrificing a single vote.";
+        return "Charlie won office by making neglected streets worth living on. While\n" +
+                "reviewing demolition orders, he discovered an entire district receiving water,\n" +
+                "electricity, and school funding despite having no residents on record. A visit\n" +
+                "revealed meals cooling in empty kitchens. Someone had removed the people while\n" +
+                "leaving the bureaucracy intact. Charlie has put his staff to work tracing the\n" +
+                "missing households, using every permit, committee, and unpaid favor available\n" +
+                "to keep the district from being erased.";
     }
 
     private static String createForMartialArtist() {
-        return "Lily speaks rarely and when she does,\n" +
-                "her words are measured and wise.\n" +
-                "After a lifetime of disciplined training,\n" +
-                "every gesture is graceful, uncluttered by hesitation.\n" +
-                "When she was an infant,\n" +
-                "an obscure sect of monks believed that she was born for a special purpose,\n" +
-                "to face a great evil.\n" +
-                "Now, the monks believe that the great evil is at hand,\n" +
-                "and they have brought Lily to Shanghai to begin fulfilling her destiny.";
+        return "Lily taught balance and self-defense to dockworkers after their shifts. When a\n" +
+                "student returned from an accident without a shadow, she noticed that he copied\n" +
+                "every movement a heartbeat late. She helped him recover by practicing familiar\n" +
+                "forms until he could move without watching her. Other altered workers have\n" +
+                "since arrived from distant ports. Lily follows their employers' routes, using\n" +
+                "patient observation and disciplined movement to recognize what ordinary\n" +
+                "examinations miss.";
     }
 
     private static String createForShaman() {
-        return "As a young girl in Nigeria, Akachi stayed apart from other children,\n" +
-                "preferring the company of imaginary friends.\n" +
-                "Her elders feared madness, but the village dibia believed\n" +
-                "that she had been chosen by the gods.\n" +
-                "The wise old man taught her how to travel between worlds\n" +
-                "and how to marshal spirits.\n" +
-                "Now, she has become a wise leader herself,\n" +
-                "traveling across Africa and teaching others to protect themselves.\n" +
-                "She's recently arrived in Cape Town and from here,\n" +
-                "she will track down the dark forces that threaten humanity.";
+        return "Akachi was trusted to settle disputes between families before resentment\n" +
+                "became violence. At a seasonal gathering, she heard a second argument beneath\n" +
+                "the speakers' words, carried by voices no one recognized. Their quarrel\n" +
+                "concerned a river that had vanished generations earlier. She persuaded the\n" +
+                "families to restore an abandoned spring, and the voices quieted. Now dried\n" +
+                "wells across the region are calling her by name, asking her to mediate\n" +
+                "disputes with far older consequences.";
     }
 
     private static String createForPsychic() {
-        return "At first, Jacqueline's dreams of fire and destruction seemed like a curse.\n" +
-                "Monsters ran rampant through city streets\n" +
-                "and some greater darkness loomed on the horizon.\n" +
-                "However, she has recently learned to control her visions\n" +
-                "and observe events in detail.\n" +
-                "Yesterday, she traveled from Boston to Minneapolis\n" +
-                "to explore an abandoned warehouse she'd seen in her dreams.\n" +
-                "Inside, she found evidence of a terrible cult\n" +
-                "that had practiced unspeakable rituals there.\n" +
-                "Jacqueline hopes to use what she's learned\n" +
-                "to prevent the terrible future that haunts her sleep.";
+        return "Jacqueline made ends meet reading palms in railway waiting rooms. Her modest\n" +
+                "guesses became precise when a traveler left behind a glove: touching it showed\n" +
+                "her the last room its owner would ever enter. She found the traveler in time,\n" +
+                "but the room appeared again when she handled another lost possession.\n" +
+                "Jacqueline now keeps a cabinet of unclaimed objects and visits their owners,\n" +
+                "looking for the hidden connection between those approaching the same door.";
     }
 
     private static String createForRookieCop() {
-        return "Most members of the Muldoon family\n" +
-                "are part of the Boston police force in some way or another.\n" +
-                "Not long ago, the youngest brother Tommy got his badge.\n" +
-                "Armed with an eye for detail, fierce courage, and his trusty rifle Becky,\n" +
-                "young Muldoon is dedicated to law enforcement.\n" +
-                "Now he finds himself in Anchorage\n" +
-                "at the request of his cousin, the local sheriff.\n" +
-                "Something has been killing people, and off the record,\n" +
-                "his cousin says it's a wendigo.\n" +
-                "Tommy's not sure he believes any of that,\n" +
-                "but catching killers is in his blood.";
+        return "Tommy's first independent assignment was to inventory property from an\n" +
+                "abandoned boardinghouse. Each room held a packed suitcase, and every suitcase\n" +
+                "contained the same child's shoe. His report disappeared twice before a senior\n" +
+                "officer told him to forget the address. Tommy made a third copy and began\n" +
+                "checking missing-person notices himself. He is still learning whom to trust,\n" +
+                "but he keeps his evidence carefully labeled and never lets a witness walk home\n" +
+                "alone.";
     }
 
     private static String createForActress() {
-        return "Around the world, Lola has performed dramatic roles for sold-out houses.\n" +
-                "However, after being cast in the controversial play, The King in Yellow,\n" +
-                "Lola needed to \"take some time\" to recover for her \"exhaustion.\"\n" +
-                "Now that she has checked herself out of the asylum,\n" +
-                "she's ready for her big comeback.\n" +
-                "But this time she'll play a different role in the fight\n" +
-                "against the horrors that threaten this world.\n" +
-                "She's started by traveling to Tokyo\n" +
-                "to track down the other surviving cast member\n" +
-                "of her previous theatrical endeavor.";
+        return "Lola specialized in stepping into roles with almost no rehearsal. During a\n" +
+                "touring production, she discovered a wardrobe trunk containing costumes for\n" +
+                "scenes that had not been written. Wearing one briefly gave her the habits and\n" +
+                "memories of a stranger. She bought the trunk to keep it away from the company.\n" +
+                "Now she investigates those borrowed lives between performances, searching for\n" +
+                "the people whose memories remain vivid long after she changes clothes.";
     }
 
 
