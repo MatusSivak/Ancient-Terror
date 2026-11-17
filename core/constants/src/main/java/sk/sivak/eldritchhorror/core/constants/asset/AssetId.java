@@ -94,6 +94,11 @@ public enum AssetId implements CardId {
     SEARCH_THE_ARCHIVES,
     SECRET_PAGE,
     TOME_OF_HORRORS,
+    LUCKY_TALISMAN,
+    ANCIENT_TOME,
+    DOT_25_AUTOMATIC,
+    FINE_JEWELRY,
+    WINCHESTER_RIFLE,
     ;
 
     @Override

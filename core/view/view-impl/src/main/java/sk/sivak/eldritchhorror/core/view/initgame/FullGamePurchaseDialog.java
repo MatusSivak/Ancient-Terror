@@ -138,11 +138,12 @@ public final class FullGamePurchaseDialog extends SoundDialog {
         Table portraits = new Table();
         int portraitIndex = 0;
         for (String id : new String[]{"THE_BOOTLEGGER", "THE_HANDYMAN", "THE_VIOLINIST", "THE_WAITRESS",
-                "THE_BUTLER", "THE_PRIEST", "THE_NUN", "THE_EXPLORER"}) {
+                "THE_BUTLER", "THE_PRIEST", "THE_NUN", "THE_EXPLORER",
+                "THE_REPORTER", "THE_PROFESSOR", "THE_DILETTANTE", "THE_SALESMAN"}) {
             Image portrait = new Image(CustomAssetManager.getTexture("investigator/" + id + ".png"));
             portrait.setScaling(Scaling.fit);
-            portraits.add(portrait).size(59f, 90f).pad(2f);
-            if (++portraitIndex % 4 == 0) portraits.row();
+            portraits.add(portrait).size(40f, 61f).pad(2f);
+            if (++portraitIndex % 6 == 0) portraits.row();
         }
         artwork.add(portraits).padTop(5f);
         return artwork;

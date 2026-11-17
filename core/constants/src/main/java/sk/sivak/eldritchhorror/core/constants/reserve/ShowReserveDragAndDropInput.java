@@ -10,6 +10,8 @@ public class ShowReserveDragAndDropInput {
 
     private AssetId mandatoryAssetId;
 
+    private int costReduction;
+
     public boolean isBankLoanAvailable() {
         return bankLoanAvailable;
     }
@@ -24,6 +26,14 @@ public class ShowReserveDragAndDropInput {
 
     public void setBankLoanAvailable(boolean bankLoanAvailable) {
         this.bankLoanAvailable = bankLoanAvailable;
+    }
+
+    public int getCostReduction() {
+        return costReduction;
+    }
+
+    public void setCostReduction(int costReduction) {
+        this.costReduction = costReduction;
     }
 
     public int getTestScore() {

@@ -28,7 +28,11 @@ public enum InvestigatorId {
     THE_BUTLER,
     THE_PRIEST,
     THE_NUN,
-    THE_EXPLORER;
+    THE_EXPLORER,
+    THE_REPORTER,
+    THE_PROFESSOR,
+    THE_DILETTANTE,
+    THE_SALESMAN;
 
     @Override
     public String toString() {

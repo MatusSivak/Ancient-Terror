@@ -26,8 +26,8 @@ public class CardControllerImpl implements CardController {
     }
 
     @Override
-    public Single<ShowReserveDragAndDropOutput> showReserveDragAndDrop(int testScore, boolean bankLoanAvailable, AssetId mandatoryAssetId) {
-        return cardView.showReserveDragAndDrop(testScore, bankLoanAvailable, assetDeck.getReserve(), mandatoryAssetId);
+    public Single<ShowReserveDragAndDropOutput> showReserveDragAndDrop(int testScore, boolean bankLoanAvailable, AssetId mandatoryAssetId, int costReduction) {
+        return cardView.showReserveDragAndDrop(testScore, bankLoanAvailable, assetDeck.getReserve(), mandatoryAssetId, costReduction);
     }
 
     @Override
