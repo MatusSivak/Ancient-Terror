@@ -158,6 +158,23 @@ public class CityNarrationTest {
         play("Rome", "ROME", 6, "fail.flavor.2"); assertEquals(Collections.singletonList("loseSanity"), effects);
     }
 
+    @Test public void istanbulEveryOutcomeAndMissingCostIsNarrated() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("Istanbul", "ISTANBUL", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+        choice = 1; enough = false;
+        for (int page : new int[]{2, 13}) {
+            play("Istanbul", "ISTANBUL", page, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        }
+        delayed = true;
+        play("Istanbul", "ISTANBUL", 5, "pass.flavor.2"); assertFalse(effects.contains("improveSkill"));
+        possessions = false; passed = false;
+        play("Istanbul", "ISTANBUL", 16, "fail.flavor.2"); assertTrue(effects.isEmpty());
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();

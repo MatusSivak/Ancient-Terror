@@ -17,7 +17,7 @@ public class Istanbul8Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY)).withOutcomeFlavors().execute();
     }
 
 }

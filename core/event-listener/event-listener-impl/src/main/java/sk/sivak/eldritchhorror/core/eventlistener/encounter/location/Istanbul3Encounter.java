@@ -19,7 +19,7 @@ public class Istanbul3Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getTokenService().loseHealth(2);
 
-        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(), autoRewardAction, innerTemplate).execute();
     }
 

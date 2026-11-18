@@ -16,7 +16,7 @@ public class Istanbul5Encounter extends AbstractLocationEncounter {
         new BecomeDelayedTemplate(getTextBuilder(), () -> {
             ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
             ServicePlatform.get().getInvestigatorService().improveSkill(null);
-        }).execute();
+        }).withAnswerFlavors().execute();
     }
 
 }

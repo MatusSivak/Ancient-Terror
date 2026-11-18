@@ -15,7 +15,7 @@ public class Istanbul6Encounter extends AbstractLocationEncounter {
     @Override
     protected void execute() {
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
-                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.INFLUENCE)).execute();
+                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.INFLUENCE)).withOutcomeFlavors().execute();
     }
 
 }

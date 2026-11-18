@@ -19,8 +19,8 @@ public class Istanbul4Encounter extends AbstractLocationEncounter {
                     ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
                 },
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT))
-                .withoutPassFlavor().execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT)).withOutcomeFlavors()
+                .execute();
     }
 
 }

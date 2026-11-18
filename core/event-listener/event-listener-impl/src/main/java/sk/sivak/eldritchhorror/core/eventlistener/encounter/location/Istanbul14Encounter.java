@@ -20,7 +20,7 @@ public class Istanbul14Encounter extends AbstractLocationEncounter{
                 },
                 () -> {
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED);
-                }).execute();
+                }).withOutcomeFlavors().execute();
     }
 
 }

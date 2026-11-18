@@ -21,7 +21,7 @@ public class Istanbul15Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA);
-                }).withTwoFailInfos().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
 }

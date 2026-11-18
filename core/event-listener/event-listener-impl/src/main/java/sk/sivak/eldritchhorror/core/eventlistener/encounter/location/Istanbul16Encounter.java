@@ -23,9 +23,15 @@ public class Istanbul16Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (findInvestigatorItemsOrTrinkets().isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
+                    () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.INFLUENCE), () -> {})
+                    .withFailFlavorVariant(2).withOkAfterFailFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.INFLUENCE),
-                this::onFail)
+                this::onFail).withOutcomeFlavors()
                 .execute();
     }
 

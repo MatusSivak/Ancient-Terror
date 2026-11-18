@@ -22,7 +22,7 @@ public class Istanbul7Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getTokenService().loseSanity(2);
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withoutFailFlavor();
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(), autoRewardAction, innerTemplate).execute();
     }
 

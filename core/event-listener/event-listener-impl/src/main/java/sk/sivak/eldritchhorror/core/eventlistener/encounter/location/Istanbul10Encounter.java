@@ -23,7 +23,7 @@ public class Istanbul10Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
                 },
                 () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true))
-        ).execute();
+        ).withOutcomeFlavors().execute();
     }
 
 }

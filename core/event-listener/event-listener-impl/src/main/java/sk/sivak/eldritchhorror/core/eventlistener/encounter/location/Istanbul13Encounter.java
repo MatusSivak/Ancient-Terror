@@ -3,7 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.location;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.SpendClueTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.SpendCluePassFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
@@ -15,10 +15,11 @@ public class Istanbul13Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new SpendClueTemplate(getTextBuilder(), () -> {
+        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> {
             ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
             ServicePlatform.get().getInvestigatorService().improveSkill(null);
-        }).execute();
+        }).withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 
 }
