@@ -18,6 +18,6 @@ public class Arkham2Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(),Stat.LORE, 0,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.AMNESIA)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.AMNESIA)).withOutcomeFlavors().execute();
     }
 }

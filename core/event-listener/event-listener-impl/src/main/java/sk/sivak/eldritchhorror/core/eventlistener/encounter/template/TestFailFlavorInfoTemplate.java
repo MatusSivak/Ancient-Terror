@@ -11,4 +11,9 @@ public class TestFailFlavorInfoTemplate extends TestPassFlavorInfoFailFlavorInfo
     public TestFailFlavorInfoTemplate(EncounterTextBuilder textBuilder, Stat testStat, int modifier, Runnable onFail) {
         super(textBuilder, testStat, modifier, null, onFail);
     }
+
+    @Override public TestFailFlavorInfoTemplate withOutcomeFlavors() {
+        super.withOutcomeFlavors();
+        return this;
+    }
 }

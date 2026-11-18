@@ -21,7 +21,7 @@ public class Arkham5Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS);
 
-        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(), autoRewardAction, innerTemplate).execute();
     }
 }

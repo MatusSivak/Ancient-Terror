@@ -18,6 +18,6 @@ public class Arkham9Encounter extends AbstractLocationEncounter{
         new BecomeDelayedTemplate(getTextBuilder(), () -> {
             ServicePlatform.get().getGameService().gainSpell();
             ServicePlatform.get().getGameService().gainSpell();
-        }).execute();
+        }).withAnswerFlavors().execute();
     }
 }

@@ -17,7 +17,7 @@ public class Arkham14Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -2,
-                () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION))
-                .withoutPassFlavor().execute();
+                () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION)).withOutcomeFlavors()
+                .execute();
     }
 }

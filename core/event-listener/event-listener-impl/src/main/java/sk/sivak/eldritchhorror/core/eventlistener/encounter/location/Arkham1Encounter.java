@@ -14,6 +14,6 @@ public class Arkham1Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, +1, () -> ServicePlatform.get().getGameService().gainSpell()).execute();
+        new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, +1, () -> ServicePlatform.get().getGameService().gainSpell()).withOutcomeFlavors().execute();
     }
 }

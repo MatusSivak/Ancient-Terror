@@ -19,6 +19,8 @@ public class Arkham3Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION)).execute();
+        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION))
+                .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 }

@@ -17,6 +17,6 @@ public class Arkham8Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA)).withOutcomeFlavors().execute();
     }
 }

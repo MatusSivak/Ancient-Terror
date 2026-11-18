@@ -18,6 +18,6 @@ public class Arkham7Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1, () -> {
             ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION);
             ServicePlatform.get().getTokenService().spawnClues(1).subscribe();
-        }).withTwoPassInfos().execute();
+        }).withOutcomeFlavors().withTwoPassInfos().execute();
     }
 }

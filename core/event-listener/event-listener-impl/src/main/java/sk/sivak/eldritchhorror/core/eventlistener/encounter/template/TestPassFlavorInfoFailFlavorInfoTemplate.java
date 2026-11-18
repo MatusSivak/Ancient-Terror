@@ -13,8 +13,8 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
 
     protected final Stat testStat;
     protected final int modifier;
-    private final Runnable onSuccess;
-    private final Runnable onFail;
+    private Runnable onSuccess;
+    private Runnable onFail;
 
     private Runnable typePassFlavor = () -> ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
     private Runnable typeFailFlavor = () -> ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor().build());
@@ -37,6 +37,20 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
 
     public TestPassFlavorInfoFailFlavorInfoTemplate withExpeditionFlavor() {
         this.displayTestButton = () -> TypewriterUtils.displayTestExpeditionButton(testStat, modifier, onSuccess != null ? this::onSuccess : null, onFail != null ? this::onFail : null);
+        return this;
+    }
+
+    /** Opt in to readable endings even when a test result has no mechanical effect. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withOutcomeFlavors() {
+        if (onSuccess == null) {
+            onSuccess = () -> {};
+            confirmPassInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        }
+        if (onFail == null) {
+            onFail = () -> {};
+            confirmFailInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        }
+        displayTestButton = () -> TypewriterUtils.displayTestButton(testStat, modifier, this::onSuccess, this::onFail);
         return this;
     }
 

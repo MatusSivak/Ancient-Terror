@@ -24,7 +24,7 @@ public class Arkham6Encounter extends AbstractLocationEncounter{
         int modifier = +1;
         Runnable onFail = () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA);
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withoutFailFlavor();
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(),autoRewardAction, innerTemplate).execute();
     }
 

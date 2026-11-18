@@ -17,7 +17,7 @@ public class Arkham11Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION),
-                () -> ServicePlatform.get().getTokenService().loseSanity(2))
-                .withoutPassFlavor().execute();
+                () -> ServicePlatform.get().getTokenService().loseSanity(2)).withOutcomeFlavors()
+                .execute();
     }
 }

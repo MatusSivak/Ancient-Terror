@@ -18,6 +18,6 @@ public class Arkham12Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellId.PLUMB_THE_VOID),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).withOutcomeFlavors().execute();
     }
 }

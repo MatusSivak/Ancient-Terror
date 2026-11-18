@@ -20,6 +20,6 @@ public class Arkham13Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY);
-                }).withTwoFailInfos().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 }

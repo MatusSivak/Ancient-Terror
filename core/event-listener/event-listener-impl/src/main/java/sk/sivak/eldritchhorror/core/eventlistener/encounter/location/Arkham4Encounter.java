@@ -18,6 +18,6 @@ public class Arkham4Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.INCANTATION),
                 () -> ServicePlatform.get().getTokenService().loseHealth(1)
-                ).execute();
+                ).withOutcomeFlavors().execute();
     }
 }
