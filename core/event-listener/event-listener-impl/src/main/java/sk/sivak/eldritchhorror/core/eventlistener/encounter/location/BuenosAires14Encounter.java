@@ -29,7 +29,7 @@ public class BuenosAires14Encounter extends AbstractLocationEncounter{
                         ServicePlatform.get().getTokenService().gainClueFromPool();
                         ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL);
                     }, () -> ServicePlatform.get().getTokenService().loseSanity(1))
-                    .withTwoPassInfos().withFailFlavorVariant(2).withTwoFailInfos().execute();
+                    .withTwoPassInfos().withFailFlavorVariant(2).withFailInfo(1).execute();
             return;
         }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,

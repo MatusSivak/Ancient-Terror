@@ -117,6 +117,12 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
         return this;
     }
 
+    /** Displays only the numbered instruction for a loss that can actually occur. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withFailInfo(int infoNr) {
+        confirmFailInfo = () -> TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo(infoNr).build());
+        return this;
+    }
+
     public TestPassFlavorInfoFailFlavorInfoTemplate withThreeFailInfos() {
         confirmFailInfo = () -> TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),

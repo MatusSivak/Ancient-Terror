@@ -32,6 +32,7 @@ import static org.junit.Assert.*;
 
 public class CityNarrationTest {
     private final List<String> flavors = new ArrayList<>();
+    private final List<String> infos = new ArrayList<>();
     private final List<String> effects = new ArrayList<>();
     private boolean passed;
     private boolean enough = true;
@@ -134,6 +135,11 @@ public class CityNarrationTest {
         play("BuenosAires", "BUENOS_AIRES", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
         play("BuenosAires", "BUENOS_AIRES", 14, "fail.flavor.2");
         assertEquals(Collections.singletonList("loseSanity"), effects);
+        assertEquals(Arrays.asList("[#BAD]Test Failed.[]", "[#BAD]Lose one Sanity[]"), infos);
+        possessions = true;
+        play("BuenosAires", "BUENOS_AIRES", 14, "fail.flavor");
+        assertEquals(Arrays.asList("loseSanity", "discardSpell"), effects);
+        assertEquals(Arrays.asList("[#BAD]Test Failed.[]", "-[#BAD]Lose one Sanity[]\n-[#BAD]Discard one Spell[]"), infos);
     }
 
     @Test public void romeEveryOutcomeAndOfferHasAnEnding() throws Exception {
@@ -281,7 +287,7 @@ public class CityNarrationTest {
     }
 
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
-        flavors.clear(); effects.clear(); finishes = monsterDamage = 0; pendingDelay = false;
+        flavors.clear(); infos.clear(); effects.clear(); finishes = monsterDamage = 0; pendingDelay = false;
         boolean initiallyDelayed = delayed;
         Properties text = new Properties();
         try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("/encounter/" + resource + ".properties"), StandardCharsets.UTF_8)) {
@@ -306,7 +312,10 @@ public class CityNarrationTest {
                     assertEquals("Narration after closing", 0, finishes);
                     assertNotNull(args[0]); assertFalse(((String) args[0]).trim().isEmpty());
                     flavors.add(((String) args[0]).trim()); return null;
-                case "typeInfo": assertNotNull("Missing mechanical text", args[0]); return null;
+                case "typeInfo":
+                    assertNotNull("Missing mechanical text", args[0]);
+                    assertFalse("Blank mechanical text", ((String) args[0]).trim().isEmpty());
+                    infos.add(((String) args[0]).trim()); return null;
                 case "displayButtons": return Single.just(((String[]) args[0]).length == 2 ? choice : 0);
                 case "test":
                     TestData result = new TestData(); result.setDiceRolls(Collections.emptyList());
