@@ -60,6 +60,11 @@ public class DefeatedInvestigatorEncounterTemplate {
                 textBuilder.withPass().withInfo(1).build(),
                 textBuilder.withPass().withInfo(2).build()).subscribe(() -> {
             ServicePlatform.get().getService().hold();
+            if (data.getInvestigatorId() == InvestigatorId.THE_REPORTER && !data.isHealth()) {
+                offerCurseForDoom();
+                ServicePlatform.get().getService().release();
+                return;
+            }
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
             if (data.getInvestigatorId() == InvestigatorId.THE_VIOLINIST && !data.isHealth()) {
                 closeOneGate();
@@ -71,8 +76,6 @@ public class DefeatedInvestigatorEncounterTemplate {
                 ServicePlatform.get().getGameService().gainArtifact();
             } else if (data.getInvestigatorId() == InvestigatorId.THE_PRIEST && data.isHealth()) {
                 ServicePlatform.get().getGameService().gainCondition(sk.sivak.eldritchhorror.core.constants.condition.ConditionId.BLESSED);
-            } else if (data.getInvestigatorId() == InvestigatorId.THE_REPORTER && !data.isHealth()) {
-                offerCurseForDoom();
             } else if ((data.getInvestigatorId() == InvestigatorId.THE_DILETTANTE && data.isHealth())
                     || (data.getInvestigatorId() == InvestigatorId.THE_SALESMAN && !data.isHealth())) {
                 ServicePlatform.get().getCardService().acquireAssets(ANY_RESERVE_VALUE);
@@ -95,13 +98,17 @@ public class DefeatedInvestigatorEncounterTemplate {
     }
 
     private void offerCurseForDoom() {
-        Question<Boolean> question = new Question<>();
-        question.setTitle("Gain a Cursed Condition to retreat Doom by 3?");
-        question.setPortraitBeforeTitle(InvestigatorId.THE_REPORTER);
-        question.setOptions(Question.Option.noYesOptions);
-        ServicePlatform.get().getGameService().ask(question).subscribe(answer -> {
+        TypewriterUtils.noYesQuestion("Gain a Cursed Condition to retreat Doom by 3?",
+                () -> finishBargain(false), () -> finishBargain(true));
+    }
+
+    private void finishBargain(boolean accepted) {
+        ServicePlatform.get().getEncounterService().typeFlavor(
+                textBuilder.withPass().withOption(accepted ? 1 : 2).withFlavor().build());
+        ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(button -> {
             ServicePlatform.get().getService().hold();
-            if (answer.getResponseData()) {
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            if (accepted) {
                 ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
                 for (int i = 0; i < 3; i++) ServicePlatform.get().getDoomOmenService().retreatDoom();
             }
