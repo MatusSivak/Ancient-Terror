@@ -17,6 +17,6 @@ public class Shanghai7Encounter extends AbstractLocationEncounter{
         new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), () -> {
             ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
             ServicePlatform.get().getInvestigatorService().improveSkill(null);
-        }).execute();
+        }).withAnswerFlavors().execute();
     }
 }

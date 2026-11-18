@@ -28,7 +28,13 @@ public class Shanghai16Encounter extends AbstractLocationEncounter{
     }
 
     private void onNo() {
+        onNo(false);
+    }
+
+    private void onNo(boolean missingSpell) {
         ServicePlatform.get().getEncounterService().hold();
+        ServicePlatform.get().getEncounterService().typeFlavor(missingSpell
+                ? getTextBuilder().withFail().withFlavor(2).build() : getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(
                 getTextBuilder().withFail().withInfo(1).build(),
                 getTextBuilder().withFail().withInfo(2).build()).subscribe(() -> {
@@ -45,10 +51,9 @@ public class Shanghai16Encounter extends AbstractLocationEncounter{
     private void onYes() {
         List<SpellInfo> spells = ServicePlatform.get().getSpellsDeck().getSpells(getActiveInvestigatorId());
         if (spells.isEmpty()) {
-            TypewriterUtils.confirmInfos("Investigator is without a Spell.").subscribe(this::onNo);
+            TypewriterUtils.confirmInfos("Investigator is without a Spell.").subscribe(() -> onNo(true));
         } else {
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            discardOneSpells();
+            finishAfterFlavor(getTextBuilder().withPass().withFlavor().build(), this::discardOneSpells);
         }
     }
 

@@ -26,22 +26,31 @@ public class Shanghai9Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (findArtifactsAndTrinkets().isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
+                    () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE), () -> {})
+                    .withFailFlavorVariant(2).withOkAfterFailFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE),
-                this::onFail)
+                this::onFail).withOutcomeFlavors()
                 .execute();
     }
 
     private void onFail() {
+        List<? extends CardInfo> cards = findArtifactsAndTrinkets();
+        if (!cards.isEmpty()) selectItemToDiscard(cards);
+    }
+
+    private List<? extends CardInfo> findArtifactsAndTrinkets() {
         List<ArtifactInfo> artifacts = ServicePlatform.get().getArtifactsDeck().getArtifacts(getActiveInvestigatorId());
         List<AssetInfo> assets = ServicePlatform.get().getAssetDeck().getAssets(getActiveInvestigatorId());
 
         List<? extends CardInfo> artifactsAndTrinkets = new LinkedList<>(artifacts);
         artifactsAndTrinkets.addAll(Stream.collectToList(assets, assetInfo -> assetInfo.getTraits().contains(AssetTrait.TRINKET)));
 
-        if (!artifactsAndTrinkets.isEmpty()) {
-            selectItemToDiscard(artifactsAndTrinkets);
-        }
+        return artifactsAndTrinkets;
     }
 
     private void selectItemToDiscard(List<? extends CardInfo> investigatorItems) {

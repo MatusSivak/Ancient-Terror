@@ -33,9 +33,17 @@ public abstract class AbstractLocationEncounter {
     protected abstract void execute();
 
     protected void finishAfterFlavor(String flavor) {
+        finishAfterFlavor(flavor, () -> {});
+    }
+
+    protected void finishAfterFlavor(String flavor, Runnable action) {
         ServicePlatform.get().getEncounterService().typeFlavor(flavor);
-        ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(button ->
-                ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+        ServicePlatform.get().getEncounterService().displayButtons("OK").subscribe(button -> {
+            ServicePlatform.get().getService().hold();
+            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+            action.run();
+            ServicePlatform.get().getService().release();
+        });
     }
 
 

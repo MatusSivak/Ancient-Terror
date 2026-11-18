@@ -15,6 +15,6 @@ public class Shanghai12Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
         new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), () ->
-                ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE)).execute();
+                ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE)).withAnswerFlavors().execute();
     }
 }

@@ -20,7 +20,7 @@ public class Shanghai10Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseHealth(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.INTERNAL_INJURY);
-                })
+                }).withOutcomeFlavors()
                 .withTwoFailInfos().execute();
     }
 }

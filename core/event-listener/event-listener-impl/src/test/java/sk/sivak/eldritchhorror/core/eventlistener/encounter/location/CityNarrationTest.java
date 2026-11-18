@@ -12,6 +12,7 @@ import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.healingwords.HealingWordsSpell;
 import sk.sivak.eldritchhorror.core.constants.asset.AxeAsset;
+import sk.sivak.eldritchhorror.core.constants.asset.LuckyCigaretteCaseAsset;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.eventtype.SelectCardData;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
@@ -175,6 +176,27 @@ public class CityNarrationTest {
         play("Istanbul", "ISTANBUL", 16, "fail.flavor.2"); assertTrue(effects.isEmpty());
     }
 
+    @Test public void shanghaiEveryOutcomeAndUnavailableCostHasAnEnding() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("Shanghai", "SHANGHAI", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+        choice = 1; enough = false;
+        play("Shanghai", "SHANGHAI", 5, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        delayed = true;
+        for (int page : new int[]{7, 12}) {
+            play("Shanghai", "SHANGHAI", page, "pass.flavor.2"); assertFalse(effects.contains("improveSkill"));
+        }
+        hasCondition = true;
+        play("Shanghai", "SHANGHAI", 13, "fail.flavor.2"); assertEquals(Collections.singletonList("gainCondition"), effects);
+        possessions = false; passed = false;
+        play("Shanghai", "SHANGHAI", 9, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        play("Shanghai", "SHANGHAI", 16, "fail.flavor.2");
+        assertEquals(Arrays.asList("loseHealth", "gainCondition"), effects);
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();
@@ -222,7 +244,7 @@ public class CityNarrationTest {
                 case "getHorror": case "getDamage": return 1;
                 case "getName": return "Attacker";
                 case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
-                case "getAssets": return possessions ? Collections.singletonList(new AxeAsset()) : Collections.emptyList();
+                case "getAssets": return possessions ? Arrays.asList(new AxeAsset(), new LuckyCigaretteCaseAsset()) : Collections.emptyList();
                 case "getArtifacts": return Collections.emptyList();
                 case "getCondition": return stub(ConditionInfo.class);
                 case "selectSingleCard":
@@ -232,6 +254,7 @@ public class CityNarrationTest {
                 case "discardSpellFromInvestigator": effects.add("discardSpell"); return null;
                 case "discardAssetFromInvestigator": case "discardConditionFromInvestigator":
                 case "improveSkill": effects.add(method.getName()); return null;
+                case "gainSanity": effects.add("gainSanity"); return null;
                 case "hasCondition": return hasCondition;
                 case "selectLocation": return Single.just(LocationId.LONDON);
                 case "getLocationInfo": return stub(LocationInfo.class);

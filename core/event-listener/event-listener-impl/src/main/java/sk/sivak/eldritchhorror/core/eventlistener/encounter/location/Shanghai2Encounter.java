@@ -19,6 +19,6 @@ public class Shanghai2Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
                 },
                 () -> ServicePlatform.get().getTokenService().loseHealth(1)
-        ).withoutPassFlavor().execute();
+        ).withOutcomeFlavors().execute();
     }
 }

@@ -17,7 +17,7 @@ public class Shanghai8Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.STRENGTH, 0,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED))
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED)).withOutcomeFlavors()
                 .execute();
     }
 }

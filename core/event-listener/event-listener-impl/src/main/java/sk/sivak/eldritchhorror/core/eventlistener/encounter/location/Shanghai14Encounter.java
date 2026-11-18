@@ -23,6 +23,6 @@ public class Shanghai14Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseHealth(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.AMNESIA);
-                }).withoutPassFlavor().withTwoFailInfos().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 }

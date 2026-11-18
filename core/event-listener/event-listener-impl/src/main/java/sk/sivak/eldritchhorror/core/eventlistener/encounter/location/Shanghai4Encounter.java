@@ -26,7 +26,7 @@ public class Shanghai4Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true));
 
-        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(),autoRewardAction, innerTemplate).execute();
     }
 }

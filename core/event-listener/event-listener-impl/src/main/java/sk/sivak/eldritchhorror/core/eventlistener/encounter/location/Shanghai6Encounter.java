@@ -15,6 +15,6 @@ public class Shanghai6Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
-                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE)).execute();
+                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE)).withOutcomeFlavors().execute();
     }
 }

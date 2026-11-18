@@ -26,18 +26,24 @@ public class Shanghai13Encounter extends AbstractLocationEncounter{
         ConditionId conditionId = ConditionId.DARK_PACT;
         boolean hasCondition = ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), conditionId);
         if (hasCondition) {
-            TypewriterUtils.confirmInfos("Cannot gain another " + conditionId.asString() + " Condition").subscribe(this::onNo);
+            TypewriterUtils.confirmInfos("Cannot gain another " + conditionId.asString() + " Condition").subscribe(() -> onNo(true));
         } else {
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
-            ServicePlatform.get().getGameService().gainCondition(conditionId);
-            ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
-            ServicePlatform.get().getInvestigatorService().improveSkill(null);
+            finishAfterFlavor(getTextBuilder().withPass().withFlavor().build(), () -> {
+                ServicePlatform.get().getGameService().gainCondition(conditionId);
+                ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
+                ServicePlatform.get().getInvestigatorService().improveSkill(null);
+            });
         }
     }
 
     private void onNo() {
+        onNo(false);
+    }
+
+    private void onNo(boolean existingPact) {
         ServicePlatform.get().getEncounterService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(" \n"+getTextBuilder().withFail().withFlavor().build());
+        ServicePlatform.get().getEncounterService().typeFlavor(existingPact
+                ? getTextBuilder().withFail().withFlavor(2).build() : getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();

@@ -15,6 +15,6 @@ public class Shanghai3Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.LORE),
-                () -> ServicePlatform.get().getTokenService().loseSanity(1)).execute();
+                () -> ServicePlatform.get().getTokenService().loseSanity(1)).withOutcomeFlavors().execute();
     }
 }
