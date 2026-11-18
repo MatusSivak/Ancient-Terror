@@ -26,13 +26,21 @@ public class BuenosAires10Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (ServicePlatform.get().getSpellsDeck().getSpells(getActiveInvestigatorId()).isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+                    () -> {
+                        ServicePlatform.get().getGameService().gainSpell();
+                        ServicePlatform.get().getGameService().gainSpell();
+                    }, () -> {}).withFailFlavorVariant(2).withOkAfterFailFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 () -> {
                     ServicePlatform.get().getGameService().gainSpell();
                     ServicePlatform.get().getGameService().gainSpell();
                 },
-                this::discardHalfOfSpells)
-                .withoutPassFlavor().execute();
+                this::discardHalfOfSpells).withOutcomeFlavors()
+                .execute();
     }
 
     private void discardHalfOfSpells() {

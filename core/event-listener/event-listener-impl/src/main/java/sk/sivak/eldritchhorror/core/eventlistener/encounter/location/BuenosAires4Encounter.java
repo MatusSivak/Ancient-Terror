@@ -24,7 +24,7 @@ public class BuenosAires4Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED);
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(),autoRewardAction, innerTemplate).execute();
     }
 }

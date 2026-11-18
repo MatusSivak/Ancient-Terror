@@ -18,7 +18,7 @@ public class BuenosAires6Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL),
-                () -> ServicePlatform.get().getTokenService().loseSanity(1)).execute();
+                () -> ServicePlatform.get().getTokenService().loseSanity(1)).withOutcomeFlavors().execute();
     }
 
 }

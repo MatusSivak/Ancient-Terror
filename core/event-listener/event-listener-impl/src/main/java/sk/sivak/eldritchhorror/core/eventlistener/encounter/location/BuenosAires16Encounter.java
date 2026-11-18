@@ -26,7 +26,8 @@ public class BuenosAires16Encounter extends AbstractLocationEncounter{
     private void onYes() {
         boolean hasCondition = ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.POISONED);
         if (hasCondition) {
-            TypewriterUtils.confirmInfos("Cannot gain another " + ConditionId.POISONED.asString() + " Condition").subscribe(this::onNo);
+            TypewriterUtils.confirmInfos("Cannot gain another " + ConditionId.POISONED.asString() + " Condition")
+                    .subscribe(() -> onNo(true));
         } else {
             ServicePlatform.get().getEncounterService().hideTypewriterPaper();
             ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED);
@@ -42,8 +43,13 @@ public class BuenosAires16Encounter extends AbstractLocationEncounter{
     }
 
     private void onNo() {
+        onNo(false);
+    }
+
+    private void onNo(boolean alreadyPoisoned) {
         ServicePlatform.get().getEncounterService().hold();
-        ServicePlatform.get().getEncounterService().typeFlavor(" \n"+getTextBuilder().withFail().withFlavor().build());
+        ServicePlatform.get().getEncounterService().typeFlavor(alreadyPoisoned
+                ? getTextBuilder().withFail().withFlavor(2).build() : getTextBuilder().withFail().withFlavor().build());
         TypewriterUtils.confirmInfos(getTextBuilder().withFail().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();

@@ -16,7 +16,7 @@ public class BuenosAires8Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
-                () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL)).execute();
+                () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL)).withOutcomeFlavors().execute();
     }
 
 }

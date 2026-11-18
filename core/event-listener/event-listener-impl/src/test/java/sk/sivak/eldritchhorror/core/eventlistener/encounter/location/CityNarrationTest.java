@@ -10,6 +10,8 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
 import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
+import sk.sivak.eldritchhorror.core.constants.spell.healingwords.HealingWordsSpell;
+import sk.sivak.eldritchhorror.core.eventtype.SelectCardData;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
@@ -34,6 +36,7 @@ public class CityNarrationTest {
     private int finishes;
     private boolean targets = true;
     private boolean hasCondition;
+    private boolean possessions = true;
 
     @Before public void setup() {
         ServicePlatform p = ServicePlatform.get();
@@ -45,6 +48,7 @@ public class CityNarrationTest {
         p.setConditionsDeck(stub(ConditionsDeckRead.class)); p.setGateStackRead(stub(GateStackRead.class));
         p.setCluePoolRead(stub(CluePoolRead.class)); p.setMonsterCup(stub(MonsterCupRead.class));
         p.setLocationMap(stub(LocationMapRead.class));
+        p.setSpellsDeck(stub(SpellsDeckRead.class)); p.setCardService(stub(CardService.class));
     }
 
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
@@ -100,6 +104,29 @@ public class CityNarrationTest {
         }
     }
 
+    @Test public void buenosAiresEveryOutcomeAndChoiceHasAnEnding() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("BuenosAires", "BUENOS_AIRES", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+    }
+
+    @Test public void buenosAiresMissingCostsAndSpellsHaveTruthfulEndings() throws Exception {
+        choice = 1; enough = false;
+        play("BuenosAires", "BUENOS_AIRES", 3, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        enough = true; delayed = true;
+        play("BuenosAires", "BUENOS_AIRES", 7, "pass.flavor.2"); assertFalse(effects.contains("gainSpell"));
+        hasCondition = true;
+        play("BuenosAires", "BUENOS_AIRES", 16, "fail.flavor.2");
+        assertEquals(Collections.singletonList("loseSanity"), effects);
+        possessions = false; passed = false;
+        play("BuenosAires", "BUENOS_AIRES", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        play("BuenosAires", "BUENOS_AIRES", 14, "fail.flavor.2");
+        assertEquals(Collections.singletonList("loseSanity"), effects);
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();
@@ -146,6 +173,12 @@ public class CityNarrationTest {
                 case "isAlive": return !passed;
                 case "getHorror": case "getDamage": return 1;
                 case "getName": return "Attacker";
+                case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
+                case "selectSingleCard":
+                    assertFalse("Empty card selector", ((SelectCardData) args[0]).getAvailableCards().isEmpty());
+                    return Single.just(((SelectCardData) args[0]).getAvailableCards().get(0));
+                case "showCard": return Single.just(null);
+                case "discardSpellFromInvestigator": effects.add("discardSpell"); return null;
                 case "hasCondition": return hasCondition;
                 case "selectLocation": return Single.just(LocationId.LONDON);
                 case "getLocationInfo": return stub(LocationInfo.class);

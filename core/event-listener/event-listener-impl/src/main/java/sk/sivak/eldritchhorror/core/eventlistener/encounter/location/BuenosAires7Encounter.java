@@ -18,7 +18,7 @@ public class BuenosAires7Encounter extends AbstractLocationEncounter{
         new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), () -> {
             ServicePlatform.get().getGameService().gainSpell();
             ServicePlatform.get().getGameService().gainSpell();
-        }).execute();
+        }).withAnswerFlavors().execute();
     }
 
 }

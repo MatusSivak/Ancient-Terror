@@ -23,6 +23,15 @@ public class BuenosAires14Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (ServicePlatform.get().getSpellsDeck().getSpells(getActiveInvestigatorId()).isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+                    () -> {
+                        ServicePlatform.get().getTokenService().gainClueFromPool();
+                        ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL);
+                    }, () -> ServicePlatform.get().getTokenService().loseSanity(1))
+                    .withTwoPassInfos().withFailFlavorVariant(2).withTwoFailInfos().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 () -> {
                     ServicePlatform.get().getTokenService().gainClueFromPool();
@@ -31,8 +40,8 @@ public class BuenosAires14Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     discardOneSpells();
-                })
-                .withoutPassFlavor()
+                }).withOutcomeFlavors()
+
                 .withTwoPassInfos()
                 .withTwoFailInfos()
                 .execute();

@@ -22,7 +22,7 @@ public class BuenosAires13Encounter extends AbstractLocationEncounter{
                 },
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
-                }).withoutPassFlavor().execute();
+                }).withOutcomeFlavors().execute();
     }
 
 }

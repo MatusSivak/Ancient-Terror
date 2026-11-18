@@ -18,7 +18,7 @@ public class BuenosAires9Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
                 () -> ServicePlatform.get().getGameService().gainSpell(SpellTrait.RITUAL),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS)).withOutcomeFlavors().execute();
     }
 
 }
