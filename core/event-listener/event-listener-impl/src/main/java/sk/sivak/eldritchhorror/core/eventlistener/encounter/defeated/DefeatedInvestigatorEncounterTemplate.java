@@ -1,21 +1,14 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.defeated;
 
 import rx.Completable;
-import sk.sivak.eldritchhorror.core.constants.artifact.ArtifactInfo;
 import sk.sivak.eldritchhorror.core.constants.asset.AssetId;
-import sk.sivak.eldritchhorror.core.constants.asset.AssetInfo;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
-import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
-import sk.sivak.eldritchhorror.core.constants.question.Question;
-import sk.sivak.eldritchhorror.core.constants.spell.SpellInfo;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventlistener.encounter.builder.DefeatedEncounterTextBuilder;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.data.SelectSingleGateData;
 import sk.sivak.eldritchhorror.core.eventtype.data.investigator.DefeatedInvestigatorEncounterData;
-
-import java.util.List;
 
 import static sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId.THE_ROOKIE_COP;
 
@@ -34,11 +27,13 @@ public class DefeatedInvestigatorEncounterTemplate {
         ServicePlatform.get().getEncounterService().showTypewriterPaper(true);
         ServicePlatform.get().getEncounterService().typeHeader((data.isHealth() ? "Crippled " : "Insane ") +  data.getInvestigatorId().toString());
         ServicePlatform.get().getEncounterService().typeFlavor(textBuilder.withFlavor().build());
-        Completable confirmGainAllPossessions = TypewriterUtils.confirmInfos(textBuilder.withInfo().build());
+        Completable confirmGainAllPossessions;
         if (data.getInvestigatorId() == THE_ROOKIE_COP && !data.isHealth()) {
             confirmGainAllPossessions = TypewriterUtils.confirmInfos(
                     textBuilder.withInfo(1).build(),
                     textBuilder.withInfo(2).build());
+        } else {
+            confirmGainAllPossessions = TypewriterUtils.confirmInfos(textBuilder.withInfo().build());
         }
         confirmGainAllPossessions.subscribe(() -> {
 
@@ -55,6 +50,13 @@ public class DefeatedInvestigatorEncounterTemplate {
     }
 
     private void onPass() {
+        if (data.getInvestigatorId() == InvestigatorId.THE_VIOLINIST && !data.isHealth()
+                && ServicePlatform.get().getGateStackRead().getSpawnedGates().isEmpty()) {
+            ServicePlatform.get().getEncounterService().typeFlavor(textBuilder.withPass().withFlavor(2).build());
+            TypewriterUtils.confirmInfos("There are no Gates to close.", textBuilder.withPass().withInfo(2).build())
+                    .subscribe(() -> ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+            return;
+        }
         ServicePlatform.get().getEncounterService().typeFlavor(textBuilder.withPass().withFlavor().build());
         TypewriterUtils.confirmInfos(
                 textBuilder.withPass().withInfo(1).build(),
@@ -121,7 +123,7 @@ public class DefeatedInvestigatorEncounterTemplate {
         selectSingleGateData.setTitleText("Select Gate to discard");
         ServicePlatform.get().getService().hideBackground();
         ServicePlatform.get().getGameService().selectSingleGate(selectSingleGateData).subscribe(gateInfo -> {
-            ServicePlatform.get().getService().closeGate(gateInfo.getLocationId(), false);
+            if (gateInfo != null) ServicePlatform.get().getService().closeGate(gateInfo.getLocationId(), false);
         });
     }
 

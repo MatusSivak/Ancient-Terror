@@ -30,6 +30,7 @@ public class DefeatedNarrationTest {
     private boolean passed;
     private boolean accept;
     private int finishes;
+    private boolean gatesAvailable = true;
 
     @Before public void setup() throws Exception {
         text.load(new InputStreamReader(getClass().getResourceAsStream("/encounter/defeated.properties"), StandardCharsets.UTF_8));
@@ -69,6 +70,14 @@ public class DefeatedNarrationTest {
         play(InvestigatorId.THE_REPORTER, false, true, true);
         assertEquals(text.getProperty("THE_REPORTER.sanity.pass.option.1.flavor"), flavors.get(3));
         assertEquals(Arrays.asList("CURSED", "doom", "doom", "doom"), rewards);
+        assertEquals(1, finishes);
+    }
+
+    @Test public void violinistWithoutAGateHasAnEndingWithoutOpeningAnEmptySelector() {
+        gatesAvailable = false;
+        play(InvestigatorId.THE_VIOLINIST, false, true, false);
+        assertEquals(text.getProperty("THE_VIOLINIST.sanity.pass.flavor.2"), flavors.get(2));
+        assertTrue(rewards.isEmpty());
         assertEquals(1, finishes);
     }
 
@@ -118,8 +127,8 @@ public class DefeatedNarrationTest {
                 case "gainCondition": rewards.add(((ConditionId) args[0]).name()); return null;
                 case "closeGate": rewards.add("gate"); return null;
                 case "find": return new CarbineRifleAsset();
-                case "getSpawnedGates": return Collections.singletonList(new Gate(null, LocationId.ARKHAM));
-                case "selectSingleGate": return Single.just(new Gate(null, LocationId.ARKHAM));
+                case "getSpawnedGates": return gatesAvailable ? Collections.singletonList(new Gate(null, LocationId.ARKHAM)) : Collections.emptyList();
+                case "selectSingleGate": assertTrue("Empty gate selector", gatesAvailable); return Single.just(new Gate(null, LocationId.ARKHAM));
                 default:
                     if (method.getReturnType() == void.class) return null;
                     throw new AssertionError(method);
