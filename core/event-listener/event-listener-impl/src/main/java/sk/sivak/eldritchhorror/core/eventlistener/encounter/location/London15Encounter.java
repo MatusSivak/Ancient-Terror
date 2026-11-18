@@ -19,9 +19,15 @@ public class London15Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (ServicePlatform.get().getCluePool().getSpawnedClues().isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
+                    () -> {}, () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE))
+                    .withPassFlavorVariant(2).withOkAfterPassFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 this::moveUpToTwoCluesToLondon,
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).withOutcomeFlavors().execute();
     }
 
     private void moveUpToTwoCluesToLondon() {

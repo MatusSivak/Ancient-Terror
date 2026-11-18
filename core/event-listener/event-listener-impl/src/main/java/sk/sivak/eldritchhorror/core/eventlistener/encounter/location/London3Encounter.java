@@ -18,6 +18,6 @@ public class London3Encounter extends AbstractLocationEncounter{
                 () -> ServicePlatform.get().getGameService().selectLocation(new SelectLocationData(null)).subscribe(locationId ->
                         ServicePlatform.get().getTokenService().spawnClueAt(locationId)),
                 () -> ServicePlatform.get().getTokenService().loseSanity(1)
-        ).withoutPassFlavor().execute();
+        ).withOutcomeFlavors().execute();
     }
 }

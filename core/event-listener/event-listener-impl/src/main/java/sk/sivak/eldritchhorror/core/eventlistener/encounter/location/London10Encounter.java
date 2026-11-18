@@ -18,6 +18,6 @@ public class London10Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 () -> ServicePlatform.get().getTokenService().spawnClues(2).subscribe(),
-                () -> ServicePlatform.get().getDoomOmenService().advanceDoom()).execute();
+                () -> ServicePlatform.get().getDoomOmenService().advanceDoom()).withOutcomeFlavors().execute();
     }
 }

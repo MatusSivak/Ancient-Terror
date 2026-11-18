@@ -26,7 +26,7 @@ public class London13Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getTokenService().gainClueFromPool();
                     spawnClueOnWildernessSpace();
                 },
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED))
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED)).withOutcomeFlavors()
                 .withTwoPassInfos().execute();
     }
 

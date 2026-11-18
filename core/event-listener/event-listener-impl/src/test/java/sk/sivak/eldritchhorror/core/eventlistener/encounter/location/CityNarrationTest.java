@@ -5,6 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import rx.Single;
 import sk.sivak.eldritchhorror.core.constants.investigator.InvestigatorId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationId;
+import sk.sivak.eldritchhorror.core.constants.location.LocationInfo;
+import sk.sivak.eldritchhorror.core.constants.location.LocationType;
+import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
+import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
+import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
 import sk.sivak.eldritchhorror.core.eventtype.data.token.SpendData;
@@ -26,6 +32,8 @@ public class CityNarrationTest {
     private boolean delayed;
     private int choice;
     private int finishes;
+    private boolean targets = true;
+    private boolean hasCondition;
 
     @Before public void setup() {
         ServicePlatform p = ServicePlatform.get();
@@ -33,6 +41,10 @@ public class CityNarrationTest {
         p.setTestService(stub(TestService.class)); p.setGameService(stub(GameService.class));
         p.setTokenService(stub(TokenService.class)); p.setInvestigatorService(stub(InvestigatorService.class));
         p.setInvestigators(stub(InvestigatorsRead.class)); p.setMonsterService(stub(MonsterService.class));
+        p.setBasicActionService(stub(BasicActionService.class)); p.setDoomOmenService(stub(DoomOmenService.class));
+        p.setConditionsDeck(stub(ConditionsDeckRead.class)); p.setGateStackRead(stub(GateStackRead.class));
+        p.setCluePoolRead(stub(CluePoolRead.class)); p.setMonsterCup(stub(MonsterCupRead.class));
+        p.setLocationMap(stub(LocationMapRead.class));
     }
 
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
@@ -65,6 +77,26 @@ public class CityNarrationTest {
         for (int page : new int[]{1, 7, 14}) {
             play("Arkham", "ARKHAM", page, "fail.flavor");
             assertTrue(effects.isEmpty());
+        }
+    }
+
+    @Test public void londonEveryOutcomeAndChoiceHasAnEnding() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("London", "LONDON", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+    }
+
+    @Test public void londonUnavailableOffersAndTargetsAreNarratedWithoutRewards() throws Exception {
+        choice = 1; hasCondition = true;
+        play("London", "LONDON", 1, "pass.flavor.2"); assertTrue(effects.isEmpty());
+        delayed = true;
+        play("London", "LONDON", 8, "pass.flavor.2"); assertFalse(effects.contains("spawnClues"));
+        passed = true; targets = false;
+        for (int page : new int[]{11, 14, 15}) {
+            play("London", "LONDON", page, "pass.flavor.2"); assertTrue(effects.isEmpty());
         }
     }
 
@@ -108,7 +140,25 @@ public class CityNarrationTest {
                 case "gainSpell": case "gainCondition": case "loseHealth": case "loseSanity":
                 case "becomeDelayed": effects.add(method.getName()); return null;
                 case "spawnClues": effects.add("spawnClues"); return Single.just(Collections.emptyList());
-                case "ambush": effects.add("ambush"); return Single.just(null);
+                case "ambush":
+                    effects.add("ambush"); CombatData combat = new CombatData();
+                    combat.setMonsterInfo(stub(MonsterInfo.class)); return Single.just(combat);
+                case "isAlive": return !passed;
+                case "getHorror": case "getDamage": return 1;
+                case "getName": return "Attacker";
+                case "hasCondition": return hasCondition;
+                case "selectLocation": return Single.just(LocationId.LONDON);
+                case "getLocationInfo": return stub(LocationInfo.class);
+                case "getLocationType": return LocationType.WILDERNESS;
+                case "getClueLocations": return targets ? Collections.singleton(LocationId.LONDON) : Collections.emptySet();
+                case "getSpawnedGatesLocations":
+                    return targets ? Collections.singletonList(LocationId.LONDON) : Collections.emptyList();
+                case "getSpawnedClues": return targets ? new ArrayList<>(Collections.singletonList(stub(ClueInfo.class))) : new ArrayList<>();
+                case "getSpawnLocationId": return LocationId.ARKHAM;
+                case "containsMonster": return targets;
+                case "getMonstersAtLocation": return Collections.singletonList(stub(MonsterInfo.class));
+                case "gainClueFromPool": case "spawnClueAt": case "gainTravelTicket":
+                case "advanceDoom": case "dealDamageToMonster": case "moveClue": effects.add(method.getName()); return null;
                 default:
                     if (method.getReturnType() == void.class) return null;
                     throw new AssertionError(method);

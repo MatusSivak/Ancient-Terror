@@ -16,7 +16,7 @@ public class London8Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new BecomeDelayedTemplate(getTextBuilder(), () -> ServicePlatform.get().getTokenService().spawnClues(2).subscribe()).execute();
+        new BecomeDelayedTemplate(getTextBuilder(), () -> ServicePlatform.get().getTokenService().spawnClues(2).subscribe()).withAnswerFlavors().execute();
 
     }
 }

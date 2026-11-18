@@ -22,6 +22,6 @@ public class London1Encounter extends AbstractLocationEncounter {
         new GainConditionTemplate(getTextBuilder(), ConditionId.DEBT, () -> {
             ServicePlatform.get().getTokenService().gainClueFromPool();
             ServicePlatform.get().getTokenService().gainClueFromPool();
-        }).execute();
+        }).withAnswerFlavors().execute();
     }
 }

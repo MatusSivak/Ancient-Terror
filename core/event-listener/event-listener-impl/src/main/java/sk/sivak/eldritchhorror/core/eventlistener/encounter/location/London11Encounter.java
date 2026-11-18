@@ -16,9 +16,15 @@ public class London11Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (ServicePlatform.get().getGateStackRead().getSpawnedGatesLocations().isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                    () -> {}, () -> ServicePlatform.get().getTokenService().loseSanity(1))
+                    .withPassFlavorVariant(2).withOkAfterPassFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
                 this::spawnCluesOnGates,
-                () -> ServicePlatform.get().getTokenService().loseSanity(1)).execute();
+                () -> ServicePlatform.get().getTokenService().loseSanity(1)).withOutcomeFlavors().execute();
     }
 
     private void spawnCluesOnGates() {

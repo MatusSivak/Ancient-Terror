@@ -19,6 +19,6 @@ public class London9Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 () -> ServicePlatform.get().getTokenService().spawnClues(2).subscribe(),
-                () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true))).execute();
+                () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true))).withOutcomeFlavors().execute();
     }
 }

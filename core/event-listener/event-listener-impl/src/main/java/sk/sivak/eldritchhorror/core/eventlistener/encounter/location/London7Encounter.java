@@ -27,7 +27,7 @@ public class London7Encounter extends AbstractLocationEncounter{
         },
                 new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                         () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.INTERNAL_INJURY)
-                ).withoutFailFlavor()).execute();
+                ).withOutcomeFlavors()).execute();
 
     }
 }

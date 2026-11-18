@@ -28,6 +28,6 @@ public class London16Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED);
-                }).withTwoFailInfos().withTwoPassInfos().withoutFailFlavor().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().withTwoPassInfos().execute();
     }
 }

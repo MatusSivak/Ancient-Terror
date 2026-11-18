@@ -17,7 +17,7 @@ public class London5Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 () -> ServicePlatform.get().getTokenService().spawnClues(2).subscribe(),
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS)
-        ).withoutPassFlavor().execute();
+        ).withOutcomeFlavors().execute();
 
     }
 }

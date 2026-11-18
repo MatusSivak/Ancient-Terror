@@ -31,6 +31,6 @@ public class London12Encounter extends AbstractLocationEncounter{
                 /*
                 .withJustAfterAmbushAction(
                         () -> ServicePlatform.get().getService().showLocationBackground(LocationId.LONDON)
-                )*/.execute();
+                )*/.withOutcomeFlavors().execute();
     }
 }

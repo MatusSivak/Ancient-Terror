@@ -23,7 +23,7 @@ public class London2Encounter extends AbstractLocationEncounter{
         int modifier = 0;
         Runnable onFail = () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED);
 
-        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        TestFailFlavorInfoTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         template = new InfoFlavorTemplate(getTextBuilder(), this::onRewardAction, innerTemplate) {
             @Override
             protected void afterOnReward() {

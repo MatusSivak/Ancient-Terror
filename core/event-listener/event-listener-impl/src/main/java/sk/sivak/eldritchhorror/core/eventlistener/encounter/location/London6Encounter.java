@@ -16,6 +16,6 @@ public class London6Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
-                () -> ServicePlatform.get().getTokenService().gainClueFromPool()).execute();
+                () -> ServicePlatform.get().getTokenService().gainClueFromPool()).withOutcomeFlavors().execute();
     }
 }

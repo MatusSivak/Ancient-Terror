@@ -15,8 +15,8 @@ import java.util.concurrent.RunnableFuture;
 public class AmbushTemplate extends AbstractEncounterTemplate {
 
     private final NonEpicMonsterId monsterId;
-    private final Runnable onSuccess;
-    private final Runnable onFail;
+    private Runnable onSuccess;
+    private Runnable onFail;
     private Function<MonsterInfo, String> onSuccessMessageFunction = monsterInfo -> "[#GOOD]" + monsterInfo.getName() + " was defeated.[]";
     private Function<MonsterInfo, String> onFailMessageFunction = monsterInfo -> "[#BAD]"+monsterInfo.getName()+" was not defeated.[]";
 
@@ -43,6 +43,18 @@ public class AmbushTemplate extends AbstractEncounterTemplate {
 
     public AmbushTemplate withJustAfterAmbushAction(Runnable justAfterAmbushAction) {
         this.justAfterAmbushAction = justAfterAmbushAction;
+        return this;
+    }
+
+    public AmbushTemplate withOutcomeFlavors() {
+        if (onSuccess == null) {
+            onSuccess = () -> {};
+            confirmPassInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        }
+        if (onFail == null) {
+            onFail = () -> {};
+            confirmFailInfo = TestPassFlavorInfoFailFlavorInfoTemplate::confirmWithOk;
+        }
         return this;
     }
 

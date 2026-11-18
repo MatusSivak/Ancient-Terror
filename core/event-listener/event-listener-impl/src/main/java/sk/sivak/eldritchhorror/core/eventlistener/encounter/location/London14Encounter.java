@@ -18,10 +18,20 @@ public class London14Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        boolean hasTarget = false;
+        for (LocationId location : ServicePlatform.get().getCluePool().getClueLocations()) {
+            if (ServicePlatform.get().getMonsterCup().containsMonster(location)) hasTarget = true;
+        }
+        if (!hasTarget) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
+                    () -> {}, () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED))
+                    .withPassFlavorVariant(2).withOkAfterPassFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, 0,
                 this::eachMonsterOnClueLosesOneHealth,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED)
-        ).execute();
+        ).withOutcomeFlavors().execute();
     }
 
     private void eachMonsterOnClueLosesOneHealth() {
