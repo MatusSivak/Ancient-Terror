@@ -12,15 +12,19 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo7Encounter extends AbstractLocationEncounter{
+public class Tokyo7Encounter extends AbstractTokyoEncounter{
 
     public Tokyo7Encounter() {
-        super(7, LocationEncounter.LocationEncounterType.TOKYO);
+        super(7);
     }
 
     @Override
     protected void execute() {
-        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), this::selectSingleMonster).execute();
+        SpendCluePassFlavorInfoTemplate template = new SpendCluePassFlavorInfoTemplate(getTextBuilder(), this::selectSingleMonster)
+                .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build()));
+        if (!hasMonsterTargets(false, Integer.MAX_VALUE)) template.withPassWithoutEffect(2);
+        template.execute();
 
     }
 

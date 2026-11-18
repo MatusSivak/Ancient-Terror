@@ -11,10 +11,10 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo10Encounter extends AbstractLocationEncounter{
+public class Tokyo10Encounter extends AbstractTokyoEncounter{
 
     public Tokyo10Encounter() {
-        super(10, LocationEncounter.LocationEncounterType.TOKYO);
+        super(10);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class Tokyo10Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED);
                 }
-        ).withTwoFailInfos().execute();
+        ).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
 }

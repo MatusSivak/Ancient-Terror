@@ -9,21 +9,21 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo15Encounter extends AbstractLocationEncounter{
+public class Tokyo15Encounter extends AbstractTokyoEncounter{
 
     public Tokyo15Encounter() {
-        super(15, LocationEncounter.LocationEncounterType.TOKYO);
+        super(15);
     }
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
+        withMonsterTargets(new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 this::selectSingleMonster,
                 () -> {
                     ServicePlatform.get().getTokenService().loseHealth(1);
                     ServicePlatform.get().getTokenService().loseSanity(1);
                 }
-        ).withTwoFailInfos().execute();
+        ), true, Integer.MAX_VALUE).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
     private void selectSingleMonster() {

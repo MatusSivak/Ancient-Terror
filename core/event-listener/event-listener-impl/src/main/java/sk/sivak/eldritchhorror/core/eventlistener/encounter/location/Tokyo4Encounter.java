@@ -15,17 +15,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Tokyo4Encounter extends AbstractLocationEncounter{
+public class Tokyo4Encounter extends AbstractTokyoEncounter{
 
     public Tokyo4Encounter() {
-        super(4, LocationEncounter.LocationEncounterType.TOKYO);
+        super(4);
     }
 
     @Override
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.HALLUCINATIONS)).withOutcomeFlavors().execute();
     }
 
 }

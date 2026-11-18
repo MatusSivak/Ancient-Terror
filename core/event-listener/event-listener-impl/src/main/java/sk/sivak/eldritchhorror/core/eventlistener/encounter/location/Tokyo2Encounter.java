@@ -8,15 +8,17 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo2Encounter extends AbstractLocationEncounter{
+public class Tokyo2Encounter extends AbstractTokyoEncounter{
 
     public Tokyo2Encounter() {
-        super(2, LocationEncounter.LocationEncounterType.TOKYO);
+        super(2);
     }
 
     @Override
     protected void execute() {
-        new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), this::selectSingleMonster).execute();
+        BecomeDelayedPassFlavorInfoTemplate template = new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), this::selectSingleMonster).withAnswerFlavors();
+        if (!hasMonsterTargets(true, Integer.MAX_VALUE)) template.withPassWithoutEffect(3);
+        template.execute();
     }
 
     private void selectSingleMonster() {

@@ -9,9 +9,10 @@ import sk.sivak.eldritchhorror.core.eventtype.data.investigator.DelayedData;
 import static sk.sivak.eldritchhorror.core.eventlistener.encounter.utils.EncounterUtils.getActiveInvestigatorId;
 
 public class BecomeDelayedPassFlavorInfoTemplate extends AbstractEncounterTemplate {
-    private final Runnable onDelayedAction;
+    private Runnable onDelayedAction;
     private boolean withPassFlavor = true;
     private boolean answerFlavors;
+    private int passFlavorVariant;
 
     public BecomeDelayedPassFlavorInfoTemplate(EncounterTextBuilder textBuilder, Runnable onDelayedAction) {
         super(textBuilder);
@@ -25,6 +26,12 @@ public class BecomeDelayedPassFlavorInfoTemplate extends AbstractEncounterTempla
 
     public BecomeDelayedPassFlavorInfoTemplate withAnswerFlavors() {
         answerFlavors = true;
+        return this;
+    }
+
+    public BecomeDelayedPassFlavorInfoTemplate withPassWithoutEffect(int flavorNr) {
+        passFlavorVariant = flavorNr;
+        onDelayedAction = () -> {};
         return this;
     }
 
@@ -53,9 +60,12 @@ public class BecomeDelayedPassFlavorInfoTemplate extends AbstractEncounterTempla
         ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), false));
         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
         if (withPassFlavor) {
-            ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
+            ServicePlatform.get().getEncounterService().typeFlavor(passFlavorVariant == 0
+                    ? getTextBuilder().withPass().withFlavor().build()
+                    : getTextBuilder().withPass().withFlavor(passFlavorVariant).build());
         }
-        TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build()).subscribe(() -> {
+        (passFlavorVariant == 0 ? TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build())
+                : TestPassFlavorInfoFailFlavorInfoTemplate.confirmWithOk()).subscribe(() -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getEncounterService().finishTypewriterPaper();
             if (ServicePlatform.get().getInvestigators().getActiveInvestigator().isDelayed()) {

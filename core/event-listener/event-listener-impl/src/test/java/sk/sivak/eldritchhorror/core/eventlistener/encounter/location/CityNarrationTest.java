@@ -15,6 +15,7 @@ import sk.sivak.eldritchhorror.core.constants.asset.AxeAsset;
 import sk.sivak.eldritchhorror.core.constants.asset.LuckyCigaretteCaseAsset;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.eventtype.SelectCardData;
+import sk.sivak.eldritchhorror.core.eventtype.SelectMonsterData;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
 import sk.sivak.eldritchhorror.core.eventtype.data.test.TestData;
@@ -40,6 +41,10 @@ public class CityNarrationTest {
     private boolean targets = true;
     private boolean hasCondition;
     private boolean possessions = true;
+    private boolean pendingDelay;
+    private boolean epic;
+    private int toughness = 1;
+    private int monsterDamage;
 
     @Before public void setup() {
         ServicePlatform p = ServicePlatform.get();
@@ -237,14 +242,54 @@ public class CityNarrationTest {
         play("Sydney", "SYDNEY", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
     }
 
+    @Test public void tokyoEveryTestAndOfferNarratesAndPreservesDamage() throws Exception {
+        passed = true;
+        play("Tokyo", "TOKYO", 1, "pass.flavor");
+        assertEquals(Arrays.asList("moveMonster", "combat"), effects);
+        for (int page = 2; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("Tokyo", "TOKYO", page, success ? "pass.flavor" : "fail.flavor");
+                int expectedDamage = !success ? 0 : page == 2 || page == 5 ? 3
+                        : Arrays.asList(3, 6, 9, 11, 13, 14, 15).contains(page) ? 2 : 0;
+                assertEquals("Tokyo " + page, expectedDamage, monsterDamage);
+                if (success && Arrays.asList(7, 12, 16).contains(page)) assertTrue(effects.contains("discardMonster"));
+                if (success && page == 8) assertTrue(effects.contains("moveMonster"));
+            }
+        }
+    }
+
+    @Test public void tokyoMissingTargetsAndUnpayableOffersDoNotOpenEmptySelectors() throws Exception {
+        passed = true; choice = 1; targets = false;
+        for (int page : new int[]{1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16}) {
+            play("Tokyo", "TOKYO", page, page == 2 ? "pass.flavor.3" : "pass.flavor.2");
+            assertEquals(0, monsterDamage);
+            assertFalse(effects.contains("moveMonster")); assertFalse(effects.contains("discardMonster"));
+            assertFalse(effects.contains("combat"));
+            if (page == 2) assertEquals(Collections.singletonList("becomeDelayed"), effects);
+            else if (page == 7) assertEquals(Collections.singletonList("pay"), effects);
+            else assertTrue(effects.isEmpty());
+        }
+        targets = true; epic = true;
+        for (int page : new int[]{1, 7, 8, 12, 16}) play("Tokyo", "TOKYO", page, "pass.flavor.2");
+        epic = false; toughness = 4;
+        for (int page : new int[]{12, 16}) play("Tokyo", "TOKYO", page, "pass.flavor.2");
+        delayed = true;
+        play("Tokyo", "TOKYO", 2, "pass.flavor.2"); assertEquals(0, monsterDamage);
+        enough = false;
+        play("Tokyo", "TOKYO", 7, "fail.flavor.2"); assertTrue(effects.isEmpty());
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
-        flavors.clear(); effects.clear(); finishes = 0;
+        flavors.clear(); effects.clear(); finishes = monsterDamage = 0; pendingDelay = false;
+        boolean initiallyDelayed = delayed;
         Properties text = new Properties();
         try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("/encounter/" + resource + ".properties"), StandardCharsets.UTF_8)) {
             text.load(reader);
         }
         ((AbstractLocationEncounter) Class.forName(getClass().getPackage().getName() + "." + classCity + page + "Encounter")
                 .getConstructor().newInstance()).executeWhole();
+        delayed = initiallyDelayed; pendingDelay = false;
         List<String> expected = new ArrayList<>();
         expected.add(text.getProperty(page + ".flavor"));
         if (text.containsKey(page + ".flavor.2")) expected.add(text.getProperty(page + ".flavor.2"));
@@ -273,15 +318,27 @@ public class CityNarrationTest {
                 case "getActiveInvestigatorId": return InvestigatorId.THE_SPY;
                 case "getActiveInvestigator": return stub(InvestigatorRead.class);
                 case "isDelayed": return delayed;
+                case "showTypewriterPaper": if (pendingDelay) { delayed = true; pendingDelay = false; } return null;
                 case "finishTypewriterPaper": finishes++; return null;
                 case "gainSpell": case "gainCondition": case "loseHealth": case "loseSanity":
-                case "becomeDelayed": effects.add(method.getName()); return null;
+                    effects.add(method.getName()); return null;
+                case "becomeDelayed": pendingDelay = true; effects.add("becomeDelayed"); return null;
                 case "spawnClues": effects.add("spawnClues"); return Single.just(Collections.emptyList());
                 case "ambush":
                     effects.add("ambush"); CombatData combat = new CombatData();
                     combat.setMonsterInfo(stub(MonsterInfo.class)); return Single.just(combat);
                 case "isAlive": return !passed;
                 case "getHorror": case "getDamage": return 1;
+                case "getToughness": return toughness;
+                case "isEpic": return epic;
+                case "getCurrentLocation": return LocationId.LONDON;
+                case "getCurrentLocationId": return LocationId.TOKYO;
+                case "getMonsters": return targets ? Collections.singletonList(stub(MonsterInfo.class)) : Collections.emptyList();
+                case "selectSingleMonster":
+                    assertFalse("Empty monster selector", ((SelectMonsterData) args[0]).getAvailableMonsters().isEmpty());
+                    return Single.just(((SelectMonsterData) args[0]).getAvailableMonsters().get(0));
+                case "moveMonster": case "discardMonster": case "combat": effects.add(method.getName()); return null;
+                case "dealDamageToMonster": monsterDamage += (Integer) args[1]; effects.add("dealDamageToMonster"); return null;
                 case "getName": return "Attacker";
                 case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
                 case "getAssets": return possessions ? Arrays.asList(new AxeAsset(), new LuckyCigaretteCaseAsset()) : Collections.emptyList();
@@ -310,7 +367,7 @@ public class CityNarrationTest {
                 case "containsMonster": return targets;
                 case "getMonstersAtLocation": return Collections.singletonList(stub(MonsterInfo.class));
                 case "gainClueFromPool": case "spawnClueAt": case "gainTravelTicket":
-                case "advanceDoom": case "dealDamageToMonster": case "moveClue": effects.add(method.getName()); return null;
+                case "advanceDoom": case "moveClue": effects.add(method.getName()); return null;
                 default:
                     if (method.getReturnType() == void.class) return null;
                     throw new AssertionError(method);

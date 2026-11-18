@@ -13,6 +13,7 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
     private boolean typePassInfo = true;
     private Action0 onNoAction = null;
     private Action0 onMissingClue;
+    private int passFlavorVariant;
 
     public SpendCluePassFlavorInfoTemplate(EncounterTextBuilder textBuilder, Runnable onSpendAction) {
         super(textBuilder);
@@ -35,10 +36,13 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
                         spendData.pay();
                         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
                         if (typePassFlavor) {
-                            ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withPass().withFlavor().build());
+                            ServicePlatform.get().getEncounterService().typeFlavor(passFlavorVariant == 0
+                                    ? getTextBuilder().withPass().withFlavor().build()
+                                    : getTextBuilder().withPass().withFlavor(passFlavorVariant).build());
                         }
                         if (typePassInfo) {
-                            TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build()).subscribe(() -> {
+                            (passFlavorVariant == 0 ? TypewriterUtils.confirmInfos(getTextBuilder().withPass().withInfo().build())
+                                    : TestPassFlavorInfoFailFlavorInfoTemplate.confirmWithOk()).subscribe(() -> {
                                 ServicePlatform.get().getService().hold();
                                 ServicePlatform.get().getEncounterService().finishTypewriterPaper();
                                 onSpendAction.run();
@@ -72,6 +76,12 @@ public class SpendCluePassFlavorInfoTemplate extends AbstractEncounterTemplate {
 
     public SpendCluePassFlavorInfoTemplate withoutPassFlavor() {
         typePassFlavor = false;
+        return this;
+    }
+
+    public SpendCluePassFlavorInfoTemplate withPassWithoutEffect(int flavorNr) {
+        passFlavorVariant = flavorNr;
+        onSpendAction = () -> {};
         return this;
     }
 

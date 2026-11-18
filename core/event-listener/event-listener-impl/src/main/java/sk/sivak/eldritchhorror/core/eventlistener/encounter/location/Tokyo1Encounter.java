@@ -9,17 +9,20 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo1Encounter extends AbstractLocationEncounter{
+public class Tokyo1Encounter extends AbstractTokyoEncounter{
 
     public Tokyo1Encounter() {
-        super(1, LocationEncounter.LocationEncounterType.TOKYO);
+        super(1);
     }
 
     @Override
     protected void execute() {
+        if (!hasMonsterTargets(false, Integer.MAX_VALUE)) {
+            finishAfterFlavor(getTextBuilder().withPass().withFlavor(2).build());
+            return;
+        }
         TypewriterUtils.confirmInfos(getTextBuilder().withInfo().build()).subscribe(() -> {
             ServicePlatform.get().getEncounterService().hold();
-            ServicePlatform.get().getEncounterService().finishTypewriterPaper();
             selectSingleMonster();
             ServicePlatform.get().getEncounterService().release();
         });
@@ -35,11 +38,12 @@ public class Tokyo1Encounter extends AbstractLocationEncounter{
 
     private void onMonsterSelect(MonsterInfo monsterInfo) {
         if (monsterInfo == null) {
+            finishAfterFlavor(getTextBuilder().withPass().withFlavor(2).build());
             return;
         }
-        ServicePlatform.get().getService().hold();
-        ServicePlatform.get().getMonsterService().moveMonster(monsterInfo, ServicePlatform.get().getInvestigators().getActiveInvestigator().getCurrentLocationId());
-        ServicePlatform.get().getTestService().combat(monsterInfo);
-        ServicePlatform.get().getService().release();
+        finishAfterFlavor(getTextBuilder().withPass().withFlavor().build(), () -> {
+            ServicePlatform.get().getMonsterService().moveMonster(monsterInfo, ServicePlatform.get().getInvestigators().getActiveInvestigator().getCurrentLocationId());
+            ServicePlatform.get().getTestService().combat(monsterInfo);
+        });
     }
 }

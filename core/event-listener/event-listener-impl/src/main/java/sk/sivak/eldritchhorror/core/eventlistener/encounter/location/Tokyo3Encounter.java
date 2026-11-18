@@ -15,17 +15,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Tokyo3Encounter extends AbstractLocationEncounter{
+public class Tokyo3Encounter extends AbstractTokyoEncounter{
 
     public Tokyo3Encounter() {
-        super(3, LocationEncounter.LocationEncounterType.TOKYO);
+        super(3);
     }
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
+        withMonsterTargets(new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 this::selectSpaceWithMonsters,
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY))
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY)), true, Integer.MAX_VALUE).withOutcomeFlavors()
                 .execute();
     }
 

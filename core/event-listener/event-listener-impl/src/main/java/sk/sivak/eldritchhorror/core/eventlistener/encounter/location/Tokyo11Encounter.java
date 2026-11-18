@@ -10,17 +10,17 @@ import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 import java.util.List;
 
-public class Tokyo11Encounter extends AbstractLocationEncounter{
+public class Tokyo11Encounter extends AbstractTokyoEncounter{
 
     public Tokyo11Encounter() {
-        super(11, LocationEncounter.LocationEncounterType.TOKYO);
+        super(11);
     }
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -2,
+        withMonsterTargets(new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -2,
                 this::selectSingleMonster
-        ).execute();
+        ), true, Integer.MAX_VALUE).withOutcomeFlavors().execute();
     }
 
     private void selectSingleMonster() {

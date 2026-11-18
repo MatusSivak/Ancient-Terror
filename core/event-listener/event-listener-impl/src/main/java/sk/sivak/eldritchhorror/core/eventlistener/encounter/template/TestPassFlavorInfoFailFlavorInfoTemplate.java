@@ -152,6 +152,12 @@ public class TestPassFlavorInfoFailFlavorInfoTemplate extends AbstractEncounterT
         return this;
     }
 
+    /** A successful test with no eligible target still has an acknowledged ending. */
+    public TestPassFlavorInfoFailFlavorInfoTemplate withPassWithoutEffect(int flavorNr) {
+        onSuccess = () -> {};
+        return withPassFlavorVariant(flavorNr).withOkAfterPassFlavor();
+    }
+
     /** Replaces the fail flavor with its numbered variant, e.g. when the usual loss cannot happen. */
     public TestPassFlavorInfoFailFlavorInfoTemplate withFailFlavorVariant(int flavorNr) {
         typeFailFlavor = () -> ServicePlatform.get().getEncounterService().typeFlavor(getTextBuilder().withFail().withFlavor(flavorNr).build());
