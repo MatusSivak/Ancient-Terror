@@ -27,7 +27,7 @@ public class Rome6Encounter extends AbstractLocationEncounter{
             new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                     () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
                     () -> ServicePlatform.get().getTokenService().loseSanity(1))
-                    .withFailFlavorVariant(2).withTwoFailInfos().execute();
+                    .withFailFlavorVariant(2).withFailInfo(1).execute();
             return;
         }
 

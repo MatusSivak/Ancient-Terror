@@ -168,6 +168,11 @@ public class CityNarrationTest {
         play("Rome", "ROME", 15, "fail.flavor.2"); assertTrue(effects.isEmpty());
         hasCondition = false; passed = false;
         play("Rome", "ROME", 6, "fail.flavor.2"); assertEquals(Collections.singletonList("loseSanity"), effects);
+        assertEquals(Arrays.asList("[#BAD]Test Failed.[]", "[#BAD]Lose one Sanity[]"), infos);
+        hasCondition = true;
+        play("Rome", "ROME", 6, "fail.flavor");
+        assertEquals(Arrays.asList("loseSanity", "discardConditionFromInvestigator"), effects);
+        assertEquals(Arrays.asList("[#BAD]Test Failed.[]", "-[#BAD]Lose one Sanity[]\n-[#BAD]Discard a Blessed Condition[]"), infos);
     }
 
     @Test public void istanbulEveryOutcomeAndMissingCostIsNarrated() throws Exception {
