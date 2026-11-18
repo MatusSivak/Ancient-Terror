@@ -17,7 +17,7 @@ public class Sydney7Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DETAINED)
-        ).execute();
+        ).withOutcomeFlavors().execute();
     }
 
 }

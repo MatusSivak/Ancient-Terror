@@ -17,7 +17,7 @@ public class Sydney8Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new BecomeDelayedTemplate(getTextBuilder(), () ->
                 ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON))
-        ).execute();
+        ).withAnswerFlavors().execute();
     }
 
 }

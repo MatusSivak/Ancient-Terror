@@ -19,7 +19,7 @@ public class Sydney12Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.STRENGTH),
                 () -> ServicePlatform.get().getInvestigatorService().becomeDelayed(new DelayedData(getActiveInvestigatorId(), true))
-        ).execute();
+        ).withOutcomeFlavors().execute();
     }
 
 }

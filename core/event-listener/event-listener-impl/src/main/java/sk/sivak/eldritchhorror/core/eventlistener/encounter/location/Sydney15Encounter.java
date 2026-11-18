@@ -16,7 +16,7 @@ public class Sydney15Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(),() ->
                 ServicePlatform.get().getInvestigatorService().improveSkill(Stat.STRENGTH)
-        ).withoutPassFlavor().execute();
+        ).withAnswerFlavors().execute();
     }
 
 }

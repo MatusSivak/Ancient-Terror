@@ -20,7 +20,7 @@ public class Sydney2Encounter extends AbstractLocationEncounter{
         int modifier = -1;
         Runnable onFail = () -> ServicePlatform.get().getTokenService().loseHealth(2);
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withoutFailFlavor();
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(), autoRewardAction, innerTemplate).execute();
     }
 

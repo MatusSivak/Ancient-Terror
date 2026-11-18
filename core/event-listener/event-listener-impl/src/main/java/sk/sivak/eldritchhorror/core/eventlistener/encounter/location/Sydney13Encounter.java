@@ -16,7 +16,9 @@ public class Sydney13Encounter extends AbstractLocationEncounter{
     @Override
     protected void execute() {
        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () ->
-               ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON))).execute();
+               ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)))
+               .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+               .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 
 }

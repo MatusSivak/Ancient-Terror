@@ -20,7 +20,7 @@ public class Sydney14Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED);
                 }
-        ).withTwoFailInfos().execute();
+        ).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
 }

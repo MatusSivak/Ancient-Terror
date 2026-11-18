@@ -16,7 +16,7 @@ public class Sydney6Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.STRENGTH),
                 () -> ServicePlatform.get().getTokenService().loseSanity(1)
-        ).withoutFailFlavor().execute();
+        ).withOutcomeFlavors().execute();
     }
 
 }

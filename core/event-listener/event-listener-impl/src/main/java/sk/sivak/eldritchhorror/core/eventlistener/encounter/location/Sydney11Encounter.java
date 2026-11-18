@@ -20,7 +20,7 @@ public class Sydney11Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getTokenService().loseHealth(2);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.BACK_INJURY);
                 }
-        ).withTwoFailInfos().execute();
+        ).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
 }

@@ -18,7 +18,7 @@ public class Sydney4Encounter extends AbstractLocationEncounter{
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                 () -> ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)),
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT)
-        ).withoutPassFlavor().execute();
+        ).withOutcomeFlavors().execute();
     }
 
 }

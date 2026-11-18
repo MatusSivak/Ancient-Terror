@@ -13,7 +13,9 @@ public class Sydney5Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.STRENGTH)).execute();
+        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.STRENGTH))
+                .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 
 }

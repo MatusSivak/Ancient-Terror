@@ -217,6 +217,26 @@ public class CityNarrationTest {
         assertEquals(Arrays.asList("pay", "travelToLocation"), effects);
     }
 
+    @Test public void sydneyEveryOutcomeAndUnavailableCostHasAnEnding() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("Sydney", "SYDNEY", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+        choice = 1; enough = false;
+        for (int page : new int[]{5, 13}) {
+            play("Sydney", "SYDNEY", page, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        }
+        delayed = true;
+        for (int page : new int[]{8, 15}) {
+            play("Sydney", "SYDNEY", page, "pass.flavor.2");
+            assertFalse(effects.contains("improveSkill")); assertFalse(effects.contains("gainAsset"));
+        }
+        possessions = false; passed = false;
+        play("Sydney", "SYDNEY", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();
@@ -266,6 +286,8 @@ public class CityNarrationTest {
                 case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
                 case "getAssets": return possessions ? Arrays.asList(new AxeAsset(), new LuckyCigaretteCaseAsset()) : Collections.emptyList();
                 case "getArtifacts": return Collections.emptyList();
+                case "findFirst": return new AxeAsset();
+                case "gainAsset": effects.add("gainAsset"); return null;
                 case "getCondition": return stub(ConditionInfo.class);
                 case "selectSingleCard":
                     assertFalse("Empty card selector", ((SelectCardData) args[0]).getAvailableCards().isEmpty());

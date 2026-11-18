@@ -21,10 +21,16 @@ public class Sydney10Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (findInvestigatorItemsOrTrinkets().isEmpty()) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
+                    () -> ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)), () -> {})
+                    .withFailFlavorVariant(2).withOkAfterFailFlavor().execute();
+            return;
+        }
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, -1,
                 () -> ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)),
                 this::onFail
-        ).execute();
+        ).withOutcomeFlavors().execute();
     }
 
     private void onFail() {
