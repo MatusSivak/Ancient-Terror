@@ -15,13 +15,15 @@ public class Sydney16Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
+        TestPassFlavorInfoFailFlavorInfoTemplate encounter = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.OBSERVATION, 0,
                 () -> ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)),
                 () -> {
                     ServicePlatform.get().getTokenService().loseHealth(1);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.LEG_INJURY);
                 }
-        ).withOutcomeFlavors().withTwoFailInfos().execute();
+        ).withOutcomeFlavors().withTwoFailInfos();
+        if (!ServicePlatform.get().getAssetDeck().isAvailable(AssetTrait.WEAPON)) encounter.withPassWithoutEffect(2);
+        encounter.execute();
     }
 
 }

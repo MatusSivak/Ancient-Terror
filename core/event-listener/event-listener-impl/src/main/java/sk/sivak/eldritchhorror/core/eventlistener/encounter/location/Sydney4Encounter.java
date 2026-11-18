@@ -15,10 +15,12 @@ public class Sydney4Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
+        TestPassFlavorInfoFailFlavorInfoTemplate encounter = new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                 () -> ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON)),
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT)
-        ).withOutcomeFlavors().execute();
+        ).withOutcomeFlavors();
+        if (!ServicePlatform.get().getAssetDeck().isAvailable(AssetTrait.WEAPON)) encounter.withPassWithoutEffect(2);
+        encounter.execute();
     }
 
 }

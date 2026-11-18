@@ -1,10 +1,8 @@
 package sk.sivak.eldritchhorror.core.eventlistener.encounter.location;
 
 import sk.sivak.eldritchhorror.core.constants.asset.AssetTrait;
-import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.BecomeDelayedTemplate;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.TestPassFlavorInfoFailFlavorInfoTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.BecomeDelayedPassFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
 public class Sydney8Encounter extends AbstractLocationEncounter{
@@ -15,9 +13,11 @@ public class Sydney8Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new BecomeDelayedTemplate(getTextBuilder(), () ->
+        BecomeDelayedPassFlavorInfoTemplate encounter = new BecomeDelayedPassFlavorInfoTemplate(getTextBuilder(), () ->
                 ServicePlatform.get().getGameService().gainAsset(ServicePlatform.get().getAssetDeck().findFirst(AssetTrait.WEAPON))
-        ).withAnswerFlavors().execute();
+        ).withAnswerFlavors();
+        if (!ServicePlatform.get().getAssetDeck().isAvailable(AssetTrait.WEAPON)) encounter.withPassWithoutEffect(3);
+        encounter.execute();
     }
 
 }

@@ -42,6 +42,7 @@ public class CityNarrationTest {
     private boolean targets = true;
     private boolean hasCondition;
     private boolean possessions = true;
+    private boolean weaponAvailable = true;
     private boolean pendingDelay;
     private boolean epic;
     private int toughness = 1;
@@ -253,6 +254,30 @@ public class CityNarrationTest {
         play("Sydney", "SYDNEY", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
     }
 
+    @Test public void sydneyExhaustedWeaponSupplyHasTruthfulEndingsAndPreservesCosts() throws Exception {
+        weaponAvailable = false; passed = true; choice = 1;
+        for (int page : new int[]{4, 8, 10, 13, 16}) {
+            play("Sydney", "SYDNEY", page, page == 8 ? "pass.flavor.3" : "pass.flavor.2");
+            assertEquals("Sydney " + page, page == 8 ? Collections.singletonList("becomeDelayed")
+                    : page == 13 ? Collections.singletonList("pay") : Collections.emptyList(), effects);
+            assertFalse("Unavailable weapon awarded", infos.contains("[#GOOD]Gain one random Weapon from the deck[]"));
+            assertFalse("Unavailable weapon awarded", infos.contains("[#GOOD]Gain 1 random Weapon from the deck[]"));
+        }
+        passed = false; choice = 0;
+        for (int page : new int[]{4, 8, 10, 13, 16}) {
+            play("Sydney", "SYDNEY", page, "fail.flavor");
+            assertFalse(effects.contains("gainAsset"));
+        }
+        possessions = false;
+        play("Sydney", "SYDNEY", 10, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        passed = true;
+        play("Sydney", "SYDNEY", 10, "pass.flavor.2"); assertTrue(effects.isEmpty());
+        choice = 1; delayed = true;
+        play("Sydney", "SYDNEY", 8, "pass.flavor.2"); assertFalse(effects.contains("gainAsset"));
+        enough = false;
+        play("Sydney", "SYDNEY", 13, "fail.flavor.2"); assertTrue(effects.isEmpty());
+    }
+
     @Test public void tokyoEveryTestAndOfferNarratesAndPreservesDamage() throws Exception {
         passed = true;
         play("Tokyo", "TOKYO", 1, "pass.flavor");
@@ -357,8 +382,9 @@ public class CityNarrationTest {
                 case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
                 case "getAssets": return possessions ? Arrays.asList(new AxeAsset(), new LuckyCigaretteCaseAsset()) : Collections.emptyList();
                 case "getArtifacts": return Collections.emptyList();
-                case "findFirst": return new AxeAsset();
-                case "gainAsset": effects.add("gainAsset"); return null;
+                case "isAvailable": return weaponAvailable;
+                case "findFirst": return weaponAvailable ? new AxeAsset() : null;
+                case "gainAsset": assertNotNull("Unavailable asset reward", args[0]); effects.add("gainAsset"); return null;
                 case "getCondition": return stub(ConditionInfo.class);
                 case "selectSingleCard":
                     assertFalse("Empty card selector", ((SelectCardData) args[0]).getAvailableCards().isEmpty());
