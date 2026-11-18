@@ -17,6 +17,6 @@ public class SanFrancisco1Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.OBSERVATION),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.DEBT)).withOutcomeFlavors().execute();
     }
 }

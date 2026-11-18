@@ -197,6 +197,26 @@ public class CityNarrationTest {
         assertEquals(Arrays.asList("loseHealth", "gainCondition"), effects);
     }
 
+    @Test public void sanFranciscoEveryOutcomeAndUnavailableOfferIsNarrated() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("SanFrancisco", "SAN_FRANCISCO", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+        choice = 1; delayed = true;
+        play("SanFrancisco", "SAN_FRANCISCO", 4, "pass.flavor.2"); assertFalse(effects.contains("improveSkill"));
+        enough = false;
+        for (int page : new int[]{5, 10}) {
+            play("SanFrancisco", "SAN_FRANCISCO", page, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        }
+        hasCondition = true;
+        play("SanFrancisco", "SAN_FRANCISCO", 11, "pass.flavor.2"); assertTrue(effects.isEmpty());
+        hasCondition = false; enough = true;
+        play("SanFrancisco", "SAN_FRANCISCO", 10, "pass.flavor");
+        assertEquals(Arrays.asList("pay", "travelToLocation"), effects);
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();
@@ -255,6 +275,7 @@ public class CityNarrationTest {
                 case "discardAssetFromInvestigator": case "discardConditionFromInvestigator":
                 case "improveSkill": effects.add(method.getName()); return null;
                 case "gainSanity": effects.add("gainSanity"); return null;
+                case "travelToLocation": effects.add("travelToLocation"); return null;
                 case "hasCondition": return hasCondition;
                 case "selectLocation": return Single.just(LocationId.LONDON);
                 case "getLocationInfo": return stub(LocationInfo.class);

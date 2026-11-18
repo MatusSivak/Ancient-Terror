@@ -15,7 +15,7 @@ public class SanFrancisco11Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new GainConditionTemplate(getTextBuilder(), ConditionId.DARK_PACT, this::improveSkillOfChoice).execute();
+        new GainConditionTemplate(getTextBuilder(), ConditionId.DARK_PACT, this::improveSkillOfChoice).withAnswerFlavors().execute();
     }
 
     private void improveSkillOfChoice() {

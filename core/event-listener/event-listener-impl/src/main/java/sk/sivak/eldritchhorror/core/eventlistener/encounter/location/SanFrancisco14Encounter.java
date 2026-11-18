@@ -19,6 +19,6 @@ public class SanFrancisco14Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
                 },
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE)).withOutcomeFlavors().execute();
     }
 }

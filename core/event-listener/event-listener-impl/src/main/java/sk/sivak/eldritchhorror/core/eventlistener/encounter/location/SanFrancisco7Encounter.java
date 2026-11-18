@@ -19,7 +19,7 @@ public class SanFrancisco7Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new InfoFlavorTemplate(getTextBuilder(), () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.OBSERVATION),
                 new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
-                        () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED)))
+                        () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED)).withOutcomeFlavors())
                 .execute();
     }
 }

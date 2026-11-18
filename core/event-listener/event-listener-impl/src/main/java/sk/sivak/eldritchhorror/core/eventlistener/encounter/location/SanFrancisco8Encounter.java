@@ -17,7 +17,7 @@ public class SanFrancisco8Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.OBSERVATION),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionTrait.MADNESS))
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionTrait.MADNESS)).withOutcomeFlavors()
                 .execute();
     }
 }

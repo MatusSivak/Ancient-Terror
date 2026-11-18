@@ -21,7 +21,7 @@ public class SanFrancisco16Encounter extends AbstractLocationEncounter {
                 () -> {
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED);
                     ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA);
-                })
+                }).withOutcomeFlavors()
                 .withTwoFailInfos().execute();
     }
 }

@@ -23,6 +23,6 @@ public class SanFrancisco6Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getService().convertTo(Stat.class, () -> null);
                     ServicePlatform.get().getInvestigatorService().improveSkill(null);
                 },
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LEG_INJURY)).execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LEG_INJURY)).withOutcomeFlavors().execute();
     }
 }

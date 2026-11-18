@@ -25,7 +25,7 @@ public class SanFrancisco2Encounter extends AbstractLocationEncounter{
             ServicePlatform.get().getTokenService().loseSanity(1);
         };
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withTwoFailInfos();
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors().withTwoFailInfos();
         new InfoFlavorTemplate(getTextBuilder(), autoRewardAction, innerTemplate).execute();
     }
 }

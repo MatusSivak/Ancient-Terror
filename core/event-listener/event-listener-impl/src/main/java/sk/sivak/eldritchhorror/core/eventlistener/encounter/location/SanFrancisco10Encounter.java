@@ -16,11 +16,15 @@ public class SanFrancisco10Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-       new SpendSanityTemplate(getTextBuilder(), 2,this::selectLocationAndMove).execute();
+       new SpendSanityTemplate(getTextBuilder(), 2,this::selectLocationAndMove)
+               .withFinishAfterSpend(false)
+               .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+               .withOnMissingSanity(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 
     private void selectLocationAndMove() {
         ServicePlatform.get().getGameService().selectLocation(new SelectLocationData(null)).subscribe(location -> {
+            finishAfterFlavor(getTextBuilder().withPass().withFlavor().build(), () -> {
             ServicePlatform.get().getService().hold();
             ServicePlatform.get().getBasicActionService().travelToLocation(new LocationInfo.Connection() {
                 @Override
@@ -34,6 +38,7 @@ public class SanFrancisco10Encounter extends AbstractLocationEncounter{
                 }
             });
             ServicePlatform.get().getService().release();
+            });
         });
     }
 }

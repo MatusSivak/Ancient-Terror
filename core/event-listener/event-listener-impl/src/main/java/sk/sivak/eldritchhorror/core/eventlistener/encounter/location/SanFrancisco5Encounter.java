@@ -3,7 +3,7 @@ package sk.sivak.eldritchhorror.core.eventlistener.encounter.location;
 import sk.sivak.eldritchhorror.core.constants.condition.ConditionId;
 import sk.sivak.eldritchhorror.core.constants.investigator.Stat;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
-import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.SpendClueTemplate;
+import sk.sivak.eldritchhorror.core.eventlistener.encounter.template.SpendCluePassFlavorInfoTemplate;
 import sk.sivak.eldritchhorror.core.eventlistener.typewriter.TypewriterUtils;
 import sk.sivak.eldritchhorror.core.eventtype.data.encounter.LocationEncounter;
 
@@ -15,6 +15,8 @@ public class SanFrancisco5Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new SpendClueTemplate(getTextBuilder(), () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.OBSERVATION)).execute();
+        new SpendCluePassFlavorInfoTemplate(getTextBuilder(), () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.OBSERVATION))
+                .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingClue(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build())).execute();
     }
 }

@@ -18,6 +18,6 @@ public class SanFrancisco12Encounter extends AbstractLocationEncounter{
                 () -> {
                     ServicePlatform.get().getTokenService().loseHealth(1);
                     ServicePlatform.get().getTokenService().loseSanity(1);
-                }).withTwoFailInfos().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 }
