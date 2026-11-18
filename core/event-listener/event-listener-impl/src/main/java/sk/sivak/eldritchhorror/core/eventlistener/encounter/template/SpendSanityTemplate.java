@@ -8,6 +8,8 @@ public class SpendSanityTemplate extends AbstractEncounterTemplate{
     private final int amount;
     private Runnable onSpendAction;
     private boolean finishAfterSpend = true;
+    private rx.functions.Action0 onNo;
+    private rx.functions.Action0 onMissingSanity;
 
     public SpendSanityTemplate(EncounterTextBuilder textBuilder, int amount, Runnable onSpendAction) {
         super(textBuilder);
@@ -17,7 +19,7 @@ public class SpendSanityTemplate extends AbstractEncounterTemplate{
 
     @Override
     public void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), null, this::onYes);
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), onNo, this::onYes);
     }
 
     private void onYes() {
@@ -38,7 +40,10 @@ public class SpendSanityTemplate extends AbstractEncounterTemplate{
                         ServicePlatform.get().getService().release();
                     } else {
                         TypewriterUtils.confirmInfos("Not enough Sanity.")
-                                .subscribe(() -> ServicePlatform.get().getEncounterService().finishTypewriterPaper());
+                                .subscribe(() -> {
+                                    if (onMissingSanity != null) onMissingSanity.call();
+                                    else ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+                                });
                     }
                 }
         );
@@ -48,4 +53,7 @@ public class SpendSanityTemplate extends AbstractEncounterTemplate{
         this.finishAfterSpend = finishAfterSpend;
         return this;
     }
+
+    public SpendSanityTemplate withOnNoAction(rx.functions.Action0 action) { onNo = action; return this; }
+    public SpendSanityTemplate withOnMissingSanity(rx.functions.Action0 action) { onMissingSanity = action; return this; }
 }

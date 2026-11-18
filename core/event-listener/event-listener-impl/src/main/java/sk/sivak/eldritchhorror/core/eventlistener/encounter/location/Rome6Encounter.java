@@ -23,13 +23,20 @@ public class Rome6Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
+        if (!ServicePlatform.get().getConditionsDeck().hasCondition(getActiveInvestigatorId(), ConditionId.BLESSED)) {
+            new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
+                    () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
+                    () -> ServicePlatform.get().getTokenService().loseSanity(1))
+                    .withFailFlavorVariant(2).withTwoFailInfos().execute();
+            return;
+        }
 
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, -1,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
                 () -> {
                     ServicePlatform.get().getTokenService().loseSanity(1);
                     discardBlessedCondition();
-                }).withTwoFailInfos().execute();
+                }).withOutcomeFlavors().withTwoFailInfos().execute();
     }
 
     private void discardBlessedCondition() {

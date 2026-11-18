@@ -11,6 +11,8 @@ import sk.sivak.eldritchhorror.core.constants.location.LocationType;
 import sk.sivak.eldritchhorror.core.constants.monster.MonsterInfo;
 import sk.sivak.eldritchhorror.core.constants.clue.ClueInfo;
 import sk.sivak.eldritchhorror.core.constants.spell.healingwords.HealingWordsSpell;
+import sk.sivak.eldritchhorror.core.constants.asset.AxeAsset;
+import sk.sivak.eldritchhorror.core.constants.condition.ConditionInfo;
 import sk.sivak.eldritchhorror.core.eventtype.SelectCardData;
 import sk.sivak.eldritchhorror.core.eventtype.data.combat.CombatData;
 import sk.sivak.eldritchhorror.core.eventlistener.ServicePlatform;
@@ -49,6 +51,7 @@ public class CityNarrationTest {
         p.setCluePoolRead(stub(CluePoolRead.class)); p.setMonsterCup(stub(MonsterCupRead.class));
         p.setLocationMap(stub(LocationMapRead.class));
         p.setSpellsDeck(stub(SpellsDeckRead.class)); p.setCardService(stub(CardService.class));
+        p.setAssetDeck(stub(AssetDeckRead.class)); p.setArtifactsDeck(stub(ArtifactsDeckRead.class));
     }
 
     @After public void cleanup() { ServicePlatform.nullifyInstance(); }
@@ -127,6 +130,34 @@ public class CityNarrationTest {
         assertEquals(Collections.singletonList("loseSanity"), effects);
     }
 
+    @Test public void romeEveryOutcomeAndOfferHasAnEnding() throws Exception {
+        for (int page = 1; page <= 16; page++) {
+            if (page == 7) continue;
+            hasCondition = page == 6;
+            for (boolean success : new boolean[]{true, false}) {
+                passed = success; choice = success ? 1 : 0;
+                play("Rome", "ROME", page, success ? "pass.flavor" : "fail.flavor");
+            }
+        }
+        choice = 0; play("Rome", "ROME", 7, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        choice = 1;
+        for (boolean success : new boolean[]{true, false}) {
+            passed = success;
+            play("Rome", "ROME", 7, "pass.flavor", success ? "pass.flavor.2" : "fail.flavor");
+        }
+    }
+
+    @Test public void romeUnavailableCostsAndBlessingHaveTheirOwnEndings() throws Exception {
+        choice = 1; delayed = true;
+        play("Rome", "ROME", 1, "pass.flavor.2"); assertFalse(effects.contains("gainCondition"));
+        possessions = false;
+        play("Rome", "ROME", 14, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        enough = false;
+        play("Rome", "ROME", 15, "fail.flavor.2"); assertTrue(effects.isEmpty());
+        hasCondition = false; passed = false;
+        play("Rome", "ROME", 6, "fail.flavor.2"); assertEquals(Collections.singletonList("loseSanity"), effects);
+    }
+
     private void play(String classCity, String resource, int page, String... endings) throws Exception {
         flavors.clear(); effects.clear(); finishes = 0;
         Properties text = new Properties();
@@ -174,11 +205,16 @@ public class CityNarrationTest {
                 case "getHorror": case "getDamage": return 1;
                 case "getName": return "Attacker";
                 case "getSpells": return possessions ? Collections.singletonList(new HealingWordsSpell()) : Collections.emptyList();
+                case "getAssets": return possessions ? Collections.singletonList(new AxeAsset()) : Collections.emptyList();
+                case "getArtifacts": return Collections.emptyList();
+                case "getCondition": return stub(ConditionInfo.class);
                 case "selectSingleCard":
                     assertFalse("Empty card selector", ((SelectCardData) args[0]).getAvailableCards().isEmpty());
                     return Single.just(((SelectCardData) args[0]).getAvailableCards().get(0));
                 case "showCard": return Single.just(null);
                 case "discardSpellFromInvestigator": effects.add("discardSpell"); return null;
+                case "discardAssetFromInvestigator": case "discardConditionFromInvestigator":
+                case "improveSkill": effects.add(method.getName()); return null;
                 case "hasCondition": return hasCondition;
                 case "selectLocation": return Single.just(LocationId.LONDON);
                 case "getLocationInfo": return stub(LocationInfo.class);

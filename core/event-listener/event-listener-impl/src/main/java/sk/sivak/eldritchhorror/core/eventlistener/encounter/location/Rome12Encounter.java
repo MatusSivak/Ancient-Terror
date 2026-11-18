@@ -16,7 +16,7 @@ public class Rome12Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.LORE, -1,
                 () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED),
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED))
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.POISONED)).withOutcomeFlavors()
                 .execute();
     }
 

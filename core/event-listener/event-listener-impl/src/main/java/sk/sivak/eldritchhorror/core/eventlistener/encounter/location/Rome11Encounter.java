@@ -19,7 +19,7 @@ public class Rome11Encounter extends AbstractLocationEncounter{
                     ServicePlatform.get().getTokenService().gainClueFromPool();
                     ServicePlatform.get().getInvestigatorService().improveSkill(Stat.WILL);
                 },
-                () -> ServicePlatform.get().getTokenService().loseSanity(2))
+                () -> ServicePlatform.get().getTokenService().loseSanity(2)).withOutcomeFlavors()
                 .withTwoPassInfos().execute();
     }
 

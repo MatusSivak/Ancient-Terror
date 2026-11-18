@@ -16,7 +16,8 @@ public class Rome7Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), null, this::onYes);
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build()), this::onYes);
     }
 
     private void onYes() {
@@ -27,8 +28,8 @@ public class Rome7Encounter extends AbstractLocationEncounter{
         ServicePlatform.get().getEncounterService().showTypewriterPaper(false);
         ServicePlatform.get().getEncounterService().typeFlavor(" \n" + getTextBuilder().withPass().withFlavor().build());
         new TestFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
-                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED))
-                .withoutFailFlavor().execute();
+                () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.CURSED)).withOutcomeFlavors()
+                .withPassFlavorVariant(2).execute();
         ServicePlatform.get().getEncounterService().release();
 
     }

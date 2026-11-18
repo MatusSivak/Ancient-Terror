@@ -22,6 +22,8 @@ public class Rome15Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new SpendSanityTemplate(getTextBuilder(), 2,this::onYes)
                 .withFinishAfterSpend(false)
+                .withOnNoAction(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()))
+                .withOnMissingSanity(() -> finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build()))
                 .execute();
     }
 

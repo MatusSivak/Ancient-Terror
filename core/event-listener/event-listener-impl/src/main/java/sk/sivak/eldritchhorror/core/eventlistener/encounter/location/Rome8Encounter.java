@@ -23,7 +23,7 @@ public class Rome8Encounter extends AbstractLocationEncounter{
             ServicePlatform.get().getGameService().gainCondition(ConditionId.PARANOIA);
         };
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withoutFailFlavor();
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(),autoRewardAction, innerTemplate).execute();
     }
 }

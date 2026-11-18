@@ -23,14 +23,15 @@ public class Rome14Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(), null, this::onYes);
+        TypewriterUtils.noYesQuestion(getTextBuilder().withQuestion().build(),
+                () -> finishAfterFlavor(getTextBuilder().withFail().withFlavor().build()), this::onYes);
     }
 
     private void onYes() {
         List<? extends CardInfo> investigatorItems = findInvestigatorItems();
         if (investigatorItems.isEmpty()) {
             TypewriterUtils.confirmInfos("You don't have any Item.").subscribe(() ->{
-                ServicePlatform.get().getEncounterService().finishTypewriterPaper();
+                finishAfterFlavor(getTextBuilder().withFail().withFlavor(2).build());
             });
             return;
         }

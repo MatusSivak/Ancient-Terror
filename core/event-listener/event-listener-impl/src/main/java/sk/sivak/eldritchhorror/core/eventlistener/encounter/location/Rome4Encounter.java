@@ -17,7 +17,7 @@ public class Rome4Encounter extends AbstractLocationEncounter{
     protected void execute() {
 
         new TestPassFlavorInfoTemplate(getTextBuilder(), Stat.INFLUENCE, 0,
-                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.WILL)).execute();
+                () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.WILL)).withOutcomeFlavors().execute();
     }
 
 }

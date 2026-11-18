@@ -22,7 +22,7 @@ public class Rome13Encounter extends AbstractLocationEncounter{
         int modifier = -1;
         Runnable onFail = () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.LOST_IN_TIME_AND_SPACE);
 
-        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail);
+        EncounterTemplate innerTemplate = new TestFailFlavorInfoTemplate(getTextBuilder(), testStat, modifier, onFail).withOutcomeFlavors();
         new InfoFlavorTemplate(getTextBuilder(),autoRewardAction, innerTemplate).execute();
     }
 

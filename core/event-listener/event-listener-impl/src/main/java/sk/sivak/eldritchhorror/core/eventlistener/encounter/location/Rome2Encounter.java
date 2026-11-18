@@ -20,7 +20,7 @@ public class Rome2Encounter extends AbstractLocationEncounter{
     protected void execute() {
         new TestPassFlavorInfoFailFlavorInfoTemplate(getTextBuilder(), Stat.WILL, 0,
                 () -> ServicePlatform.get().getInvestigatorService().improveSkill(Stat.WILL),
-                () -> ServicePlatform.get().getTokenService().loseSanity(1)).execute();
+                () -> ServicePlatform.get().getTokenService().loseSanity(1)).withOutcomeFlavors().execute();
 
     }
 }

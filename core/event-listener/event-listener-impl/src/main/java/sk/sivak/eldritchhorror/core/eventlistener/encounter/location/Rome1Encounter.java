@@ -19,6 +19,6 @@ public class Rome1Encounter extends AbstractLocationEncounter{
 
     @Override
     protected void execute() {
-        new BecomeDelayedTemplate(getTextBuilder(), () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED)).execute();
+        new BecomeDelayedTemplate(getTextBuilder(), () -> ServicePlatform.get().getGameService().gainCondition(ConditionId.BLESSED)).withAnswerFlavors().execute();
     }
 }
