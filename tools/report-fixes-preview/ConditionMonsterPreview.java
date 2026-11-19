@@ -40,6 +40,12 @@ public class ConditionMonsterPreview extends ApplicationAdapter {
                 stage.act(1f / 60f);
                 if (frame == 30 || frame == 120 || frame == 216) draw("fortune-" + frame);
             }
+            for (float scale : new float[]{1f, .75f}) {
+                for (Actor stand : stage.getActors()) stand.setScale(scale);
+                stage.act(.3f);
+                draw("fortune-scale-" + scale);
+                draw("fortune-scale-" + scale + "-pale", true);
+            }
             stage.clear();
             for (AbstractMonsterInfo info : new AbstractMonsterInfo[]{new ManiacMonster(), new DholeMonster(),
                     new ColourOutOfSpaceMonster(), new VampireMonster(), new RiotMonster()}) {
@@ -52,7 +58,12 @@ public class ConditionMonsterPreview extends ApplicationAdapter {
         finally { Gdx.app.exit(); }
     }
     private void draw(String name) throws Exception {
-        Gdx.gl.glClearColor(.12f, .16f, .13f, 1); Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); stage.draw();
+        draw(name, false);
+    }
+    private void draw(String name, boolean pale) throws Exception {
+        if (pale) Gdx.gl.glClearColor(.72f, .69f, .56f, 1);
+        else Gdx.gl.glClearColor(.12f, .16f, .13f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); stage.draw();
         Pixmap pixels = ScreenUtils.getFrameBufferPixmap(0, 0, 960, 540);
         PixmapIO.PNG png = new PixmapIO.PNG(); png.setFlipY(true);
         png.write(Gdx.files.local("../build/condition-monster-preview/" + name + ".png"), pixels);
