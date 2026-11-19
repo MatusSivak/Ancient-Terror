@@ -30,6 +30,14 @@ Regenerate with `python tools/prepare_nov3_sounds.py` (numpy and soundfile requi
 Run this **after** the legacy generators, which also produce several of these names.
 No downloads are needed to regenerate.
 
+## Clue drop update — 19 November 2026
+
+The map clue impact now layers the retained Breviceps wooden thud with el_boss's
+puzzle-piece placement (both credited in CATEGORY_AUDIO.md). The brighter contact
+targets -8 dBFS before soft limiting and plays at full cue volume, once at map
+contact. Other token and HUD cues keep their existing levels. Regenerate just this
+cue by importing `prepare_clue_drop` from `tools/prepare_nov3_sounds.py`.
+
 ## Rumor cue update
 
 The rumor spawn cue is now rebuilt from the new download documented in

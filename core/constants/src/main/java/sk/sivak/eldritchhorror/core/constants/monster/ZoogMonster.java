@@ -8,8 +8,8 @@ public class ZoogMonster extends AbstractMonsterInfo {
         super("Zoog",
                 1, 1, -1, 1, 1);
         setDamageTestType(Stat.OBSERVATION);
-        setSpecialText("If you fail the Observation test, discard 1 Item possession.");
+        setSpecialText("Fail Observation: discard 1 Item possession.");
         setReckoning(true);
-        setReckoningText("Move this Monster to the nearest investigator. Then that investigator discards 1 Item possession.");
+        setReckoningText("Move to the nearest investigator. Then that investigator discards 1 Item possession.");
     }
 }

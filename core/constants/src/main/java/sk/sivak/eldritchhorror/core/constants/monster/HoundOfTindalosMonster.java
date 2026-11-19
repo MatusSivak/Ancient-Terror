@@ -9,8 +9,7 @@ public class HoundOfTindalosMonster extends AbstractMonsterInfo {
         super("Hound of Tindalos",
                 0, 2, -1, 3, 3);
         setReckoning(true);
-        setReckoningText("Move this Monster to the nearest investigator. " +
-                "Then that investigator immediately encounters it.");
+        setReckoningText("Move to the nearest investigator. Then that investigator immediately encounters it.");
     }
 
     @Override

@@ -29,7 +29,7 @@ public class DunwichHorrorMonsterListener extends AbstractMonsterListener {
         ServicePlatform.get().getEventQueue().addDirectEventListener(reckoningListener, RECKONING_MONSTER);
 
         int players = ServicePlatform.get().getModel().getReferenceCard().getPlayers();
-        ((AbstractMonsterInfo) monsterInfo).setReckoningText("Roll one die. On "+players+" or less, one Gate is spawned.");
+        ((AbstractMonsterInfo) monsterInfo).setReckoningText("Roll 1 die. On [" + players + "] or less, spawn 1 Gate.");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class DunwichHorrorMonsterListener extends AbstractMonsterListener {
         ServicePlatform.get().getEventQueue().addDirectEventListener(reckoningListener, RECKONING_MONSTER);
 
         int players = ServicePlatform.get().getModel().getReferenceCard().getPlayers();
-        ((AbstractMonsterInfo) monsterInfo).setReckoningText("Roll one die. On "+players+" or less, one Gate is spawned.");
+        ((AbstractMonsterInfo) monsterInfo).setReckoningText("Roll 1 die. On [" + players + "] or less, spawn 1 Gate.");
     }
 
     private class ReckoningListener extends AbstractMonsterReckoningListener {

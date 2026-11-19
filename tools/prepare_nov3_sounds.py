@@ -57,9 +57,16 @@ def main():
     write('monster_discard', echo(recording('swish-10.wav'), .13, .28), -17, .4)
     prepare_rumor_sound()
     # A stronger wood contact and a clear low gate impact remain audible on phone speakers.
-    write('clue_spawn', category('449955__breviceps__wooden-thud.mp3', 0, .45), -11, .1)
+    prepare_clue_drop()
     write('gate_resonance', mix((0, category('portal/1.mp3', .45, 2.4), .65),
           (0, category('jumping-on-wooden-pontoon-1-s1841.mp3', .52, .55, .8), 1)), -11, .7)
+
+
+def prepare_clue_drop():
+    # A crisp tabletop click carries on phone speakers; wood gives the token weight.
+    write('clue_spawn', mix(
+        (0, category('449955__breviceps__wooden-thud.mp3', 0, .45), .65),
+        (0, category('560698__el-boss__puzzle-piece-placed.mp3', 0, .32), 1)), -8, .08)
 
 
 if __name__ == '__main__':

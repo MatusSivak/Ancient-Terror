@@ -8,7 +8,6 @@ public class GoatSpawnMonster extends AbstractMonsterInfo {
     public GoatSpawnMonster() {
         super("Goat Spawn",
                 0, 1, -2, 2, 2);
-        setSpecialText("If you defeat this Monster during a Combat Encounter, " +
-                "you may gain a Dark Pact Condition to discard 1 Monster from any space.");
+        setSpecialText("Defeat in combat: you may gain Dark Pact to discard 1 Monster from any space.");
     }
 }

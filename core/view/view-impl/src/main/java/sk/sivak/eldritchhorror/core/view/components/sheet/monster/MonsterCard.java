@@ -182,7 +182,7 @@ public class MonsterCard extends VisTable {
         } else {
             table.add(label(title, NEW_FONT_LIBRE_BASKERVILLE, 14, BRASS)).width(82).padRight(12).top();
         }
-        Label rule = label(text == null ? "" : MarkupText.replaceDiceResults(text), NEW_FONT_SOURCE_SERIF_4, 20, IVORY);
+        Label rule = label(text == null ? "" : MarkupText.replaceGlyphKeywords(text), NEW_FONT_SOURCE_SERIF_4, 20, IVORY);
         rule.setWrap(true);
         rule.setAlignment(Align.left);
         table.add(rule).width(CONTENT_WIDTH - 118).growY();

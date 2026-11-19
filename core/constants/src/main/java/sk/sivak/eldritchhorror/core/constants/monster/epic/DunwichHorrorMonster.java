@@ -9,6 +9,6 @@ public class DunwichHorrorMonster extends AbstractMonsterInfo{
         setEpic(true);
         setMonsterId(EpicMonsterId.DUNWICH_HORROR);
         setReckoning(true);
-        setReckoningText("Roll one die. If the result is less than or equal to COMPLEXITY, one Gate is spawned.");
+        setReckoningText("Roll 1 die. Result at most the investigator count: spawn 1 Gate.");
     }
 }

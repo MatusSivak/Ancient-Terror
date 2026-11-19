@@ -6,7 +6,7 @@ public class ProtoShoggothMonster extends AbstractMonsterInfo {
         super("Proto-Shoggoth",
                 0, 2, -1, 3, 3);
         setReckoning(true);
-        setReckoningText("Move this Monster 1 space toward the nearest investigator. Then an investigator on this space immediately encounters this Monster.");
+        setReckoningText("Move 1 space toward the nearest investigator. Then an investigator here immediately encounters this Monster.");
     }
 
     @Override

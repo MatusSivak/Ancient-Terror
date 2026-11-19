@@ -9,6 +9,6 @@ public class ShoggothMonster extends AbstractMonsterInfo {
         super("Shoggoth",
                 0, 3, -2, 2, 4);
         setReckoning(true);
-        setReckoningText("This Monster recovers all Health.");
+        setReckoningText("Recover all Health.");
     }
 }

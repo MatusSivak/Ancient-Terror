@@ -48,7 +48,7 @@ public class AwakenShubNiggurathCultistMonsterListener extends AbstractMonsterLi
         editableMonsterInfo.setHorror(null);
         editableMonsterInfo.setToughness(2);
         editableMonsterInfo.setReckoning(true);
-        editableMonsterInfo.setReckoningText("Moves one space toward Shub-Niggurath Epic Monster.");
+        editableMonsterInfo.setReckoningText("Move 1 space toward Shub-Niggurath.");
 
         reckoningListener = new ReckoningListener();
         ServicePlatform.get().getEventQueue().addDirectEventListener(reckoningListener, RECKONING_MONSTER);

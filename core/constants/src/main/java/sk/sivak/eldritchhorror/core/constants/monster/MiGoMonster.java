@@ -10,6 +10,6 @@ public class MiGoMonster extends AbstractMonsterInfo {
                 0, 1, -2, 2, 3);
         setReckoning(true);
         setReckoningText("Discard the nearest Clue and move this Monster to that space.");
-        setSpecialText("If you defeat this Monster during a Combat Encounter, gain 1 Artifact.");
+        setSpecialText("Defeat in combat: gain 1 Artifact.");
     }
 }

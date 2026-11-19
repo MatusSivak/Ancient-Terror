@@ -8,6 +8,6 @@ public class RatThingMonster extends AbstractMonsterInfo {
         super("Rat-thing",
                 -2, 0, -1, 1, 1);
         setHorrorTestType(Stat.OBSERVATION);
-        setSpecialText("If you fail the Observation test, discard 1 Item possession.");
+        setSpecialText("Fail Observation: discard 1 Item possession.");
     }
 }

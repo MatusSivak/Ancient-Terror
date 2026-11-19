@@ -8,7 +8,7 @@ public class HydraMonster extends AbstractMonsterInfo{
         super("Hydra", -1, 3, -2, 3, null);
         setReckoning(false);
         setEpic(true);
-        setSpecialText("This Epic Monster cannot lose Health unless the active investigator has the Sword of Y'ha-Talla Artifact.");
+        setSpecialText("Cannot lose Health unless the active investigator has the Sword of Y'ha-Talla.");
         setMonsterId(EpicMonsterId.HYDRA);
     }
 }

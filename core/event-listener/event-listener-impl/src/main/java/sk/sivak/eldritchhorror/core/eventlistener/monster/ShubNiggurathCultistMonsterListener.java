@@ -39,7 +39,7 @@ public class ShubNiggurathCultistMonsterListener extends AbstractMonsterListener
         editableMonsterInfo.setToughness(1);
         editableMonsterInfo.setCurrentHealth(monsterInfo.getToughness());
         editableMonsterInfo.setReckoning(true);
-        editableMonsterInfo.setReckoningText("If possible, transforms into the\nGoat Spawn Monster or Dark Young Monster.");
+        editableMonsterInfo.setReckoningText("If possible, transform into a Goat Spawn or Dark Young.");
 
         afterAdvanceDoomListener = new AfterAdvanceDoomListener();
         ServicePlatform.get().getEventQueue().addAfterEventListener(afterAdvanceDoomListener, BeforeAfterEvent.ADVANCE_DOOM);
@@ -83,7 +83,7 @@ public class ShubNiggurathCultistMonsterListener extends AbstractMonsterListener
             }
             ((AbstractMonsterInfo) monsterInfo).setToughness(2);
             ((AbstractMonsterInfo) monsterInfo).setCurrentHealth(2);
-            ((AbstractMonsterInfo) monsterInfo).setReckoningText("Moves one space toward Shub-Niggurath Epic Monster.");
+            ((AbstractMonsterInfo) monsterInfo).setReckoningText("Move 1 space toward Shub-Niggurath.");
             ((AbstractMonsterInfo) monsterInfo).setDamageTestModifier(-2);
 
             ServicePlatform.get().getService().addEventCommand(in -> {

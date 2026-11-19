@@ -54,6 +54,23 @@ public class InvestigatorImage extends Image {
     private final PoisonOverlay poisonOverlay = new PoisonOverlay();
     private boolean poisonedVisible;
     private float poisonedTime;
+    private final FortuneOverlay fortuneOverlay = new FortuneOverlay();
+    private boolean blessedVisible, cursedVisible;
+    private float fortuneTime;
+
+    public boolean isBlessedVisible() { return blessedVisible; }
+    public boolean isCursedVisible() { return cursedVisible; }
+
+    private void updateFortune(float delta) {
+        boolean eligible = !defeated && !asteroidVisible && gameController != null;
+        boolean blessed = eligible && gameController.isInvestigatorBlessed(investigatorId);
+        boolean cursed = eligible && !blessed && gameController.isInvestigatorCursed(investigatorId);
+        if (blessed != blessedVisible || cursed != cursedVisible) fortuneTime = 0f;
+        blessedVisible = blessed;
+        cursedVisible = cursed;
+        if (blessed || cursed) fortuneTime += delta;
+        else fortuneTime = 0f;
+    }
 
     public boolean isPoisonedVisible() {
         return poisonedVisible;
@@ -266,6 +283,7 @@ public class InvestigatorImage extends Image {
         super.act(delta);
         updateDetained(delta);
         updatePoisoned(delta);
+        updateFortune(delta);
         updateRemainingActions();
         float spotlightStep = delta / SPOTLIGHT_FADE_TIME;
         spotlight = highlighted ? Math.min(1f, spotlight + spotlightStep) : Math.max(0f, spotlight - spotlightStep);
@@ -387,6 +405,7 @@ public class InvestigatorImage extends Image {
             detainedBars.draw(batch, parentAlpha);
         }
         drawActionPips(batch, parentAlpha);
+        if (blessedVisible || cursedVisible) fortuneOverlay.draw(batch, parentAlpha, this, fortuneTime, blessedVisible);
     }
 
     public void setAsteroidVisible(boolean asteroidVisible) {
@@ -469,6 +488,7 @@ public class InvestigatorImage extends Image {
     public void setDefeatedByHealth(boolean defeatedByHealth) {
         this.defeated = true;
         poisonedVisible = false;
+        blessedVisible = cursedVisible = false;
         detainedVisible = false;
         detainedBars = null;
         hourglassVisible = false;

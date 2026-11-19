@@ -8,6 +8,6 @@ public class TickTockMenMonster extends AbstractMonsterInfo{
         super("Tick Tock Men", 0, null, -2, 3, null);
         setEpic(true);
         setMonsterId(EpicMonsterId.TICK_TOCK_MEN);
-        setSpecialText("You cannot spend Clues to reroll dice during this Combat Encounter.");
+        setSpecialText("No Clue rerolls during this Combat Encounter.");
     }
 }

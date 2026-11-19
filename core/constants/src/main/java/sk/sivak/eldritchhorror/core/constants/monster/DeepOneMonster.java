@@ -9,6 +9,6 @@ public class DeepOneMonster extends AbstractMonsterInfo {
         super("Deep One",
                 0, 2, -1, 1, 2);
         setReckoning(true);
-        setReckoningText("Each investigator on this space loses 1 Sanity.");
+        setReckoningText("Each investigator here loses 1 Sanity.");
     }
 }

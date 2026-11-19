@@ -9,7 +9,7 @@ public class WarlockMonster extends AbstractMonsterInfo {
         super("Warlock",
                 0, 1, -1, 1, 1);
         setReckoning(true);
-        setReckoningText("Roll 1 die. On a 1 or 2, the nearest investigator gains a Cursed Condition.");
-        setSpecialText("If you fail the Will test, lose 1 Health.");
+        setReckoningText("Roll 1 die. On a 1 or 2, the nearest investigator gains Cursed.");
+        setSpecialText("Fail Will: lose 1 Health.");
     }
 }

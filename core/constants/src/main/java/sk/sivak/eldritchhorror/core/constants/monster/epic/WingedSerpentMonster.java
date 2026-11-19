@@ -7,6 +7,6 @@ public class WingedSerpentMonster extends AbstractMonsterInfo {
         setHorrorTestType(Stat.WILL);
         setEpic(true);
         setMonsterId(EpicMonsterId.WINGED_SERPENT);
-        setSpecialText("If the Strength test causes you to lose Health, gain Poisoned.");
+        setSpecialText("Lose Health from Strength: gain Poisoned.");
     }
 }

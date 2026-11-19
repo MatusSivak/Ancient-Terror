@@ -9,8 +9,6 @@ public class NightGauntMonster extends AbstractMonsterInfo {
         super("Night Gaunt",
                 0, 2, -2, 1, 2);
         setReckoning(true);
-        setReckoningText("If there is an investigator on this space, " +
-                "move him and this Monster 1 space and he becomes Delayed. " +
-                "Otherwise, move this Monster 2 spaces toward the nearest investigator.");
+        setReckoningText("Investigator here: move them and this Monster 1 space; they become Delayed. Otherwise, move 2 spaces toward the nearest investigator.");
     }
 }

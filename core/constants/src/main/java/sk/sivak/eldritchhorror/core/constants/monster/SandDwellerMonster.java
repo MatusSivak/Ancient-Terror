@@ -8,7 +8,7 @@ public class SandDwellerMonster extends AbstractMonsterInfo {
         super("Sand Dweller",
                 -2, 1, 0, 2, 2);
         setHorrorTestType(Stat.OBSERVATION);
-        setSpecialText("If you fail the Observation test, discard 1 Ally Asset.");
+        setSpecialText("Fail Observation: discard 1 Ally Asset.");
     }
 
     @Override

@@ -7,6 +7,6 @@ public class YigMonster extends AbstractMonsterInfo {
         setHorrorTestType(Stat.WILL);
         setEpic(true);
         setMonsterId(EpicMonsterId.YIG);
-        setSpecialText("If the Will test causes you to lose Sanity, gain Cursed.");
+        setSpecialText("Lose Sanity from Will: gain Cursed.");
     }
 }

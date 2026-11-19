@@ -10,6 +10,6 @@ public class CthonianMonster extends AbstractMonsterInfo {
     public CthonianMonster() {
         super("Chthonian",
                 -1, 2, -2, 3, 4);
-        setSpawnText("Moves to the Heart of Africa");
+        setSpawnText("Move to the Heart of Africa.");
     }
 }

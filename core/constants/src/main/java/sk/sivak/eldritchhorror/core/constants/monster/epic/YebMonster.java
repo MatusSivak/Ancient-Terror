@@ -9,6 +9,6 @@ public class YebMonster extends AbstractMonsterInfo{
         setReckoning(false);
         setEpic(true);
         setMonsterId(EpicMonsterId.YEB);
-        setSpawnText("Two monsters are spawned on this space.");
+        setSpawnText("Spawn 2 Monsters here.");
     }
 }

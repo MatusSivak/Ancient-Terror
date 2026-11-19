@@ -11,7 +11,7 @@ public class SerpentPeopleMonster extends AbstractMonsterInfo {
         super("Serpent People",
                 0, 2, -1, 3, 2);
         setReckoning(true);
-        setSpawnText("Moves to the Amazon");
+        setSpawnText("Move to the Amazon.");
         setReckoningText("Roll 1 die. On a 1 or 2, the nearest investigator moves 1 space toward this Monster.");
     }
 }

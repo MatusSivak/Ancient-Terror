@@ -8,7 +8,7 @@ public class NugMonster extends AbstractMonsterInfo{
         super("Nug", -1, 2, -2, 4, null);
         setReckoning(true);
         setEpic(true);
-        setReckoningText("Ghoul is spawned on this space.");
+        setReckoningText("Spawn 1 Ghoul here.");
         setMonsterId(EpicMonsterId.NUG);
     }
 }

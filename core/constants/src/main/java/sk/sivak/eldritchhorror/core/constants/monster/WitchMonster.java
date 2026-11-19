@@ -10,7 +10,7 @@ public class WitchMonster extends AbstractMonsterInfo {
                 -1, 0,
                 -1, 1, 1);
         setReckoning(true);
-        setReckoningText("Each investigator who has a Cursed Condition loses 1 Health.");
-        setSpecialText("If you fail the Will test, gain a Cursed Condition.");
+        setReckoningText("Each Cursed investigator loses 1 Health.");
+        setSpecialText("Fail Will: gain Cursed.");
     }
 }

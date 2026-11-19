@@ -21,7 +21,7 @@ public class AzathothCultistMonsterListener extends AbstractMonsterListener {
         editableMonsterInfo.setHorror(1);
         editableMonsterInfo.setToughness(1);
         editableMonsterInfo.setCurrentHealth(monsterInfo.getToughness());
-        editableMonsterInfo.setSpecialText("After resolving the Will test, lose 1 Health and defeat this Monster.");
+        editableMonsterInfo.setSpecialText("After Will: lose 1 Health and defeat this Monster.");
 
         afterHorrorCheckListener = new AfterHorrorCheckListener();
         ServicePlatform.get().getEventQueue().addAfterEventListener(afterHorrorCheckListener, BeforeAfterEvent.AFTER_HORROR_CHECK);

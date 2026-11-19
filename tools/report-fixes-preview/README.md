@@ -1,5 +1,10 @@
 # Report fixes preview
 
+Use `:desktop:previewConditionMonster` with `-I tools/report-fixes-preview/preview.gradle`
+to render Blessed/Cursed animation frames, both effects alongside Poisoned, and
+representative monster sheets with skill, vitality and dice glyphs. Images are
+written to `build/condition-monster-preview/`; no game saves are touched.
+
 Use `--args="--button-glyph-colors"` to check shared and typewriter button glyph
 colors, including actual green Clue pixels, short and wrapped choices, explicit
 line breaks, and the two evening mythos prompts. Screenshots use

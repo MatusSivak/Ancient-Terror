@@ -8,7 +8,7 @@ public class DimensionalShamblerMonster extends AbstractMonsterInfo {
         super("Dimensional Shambler",
                 -1, 2, -1, 0, 2);
         setDamageTestType(Stat.OBSERVATION);
-        setSpecialText("If you fail the Observation test, gain a Lost in Time and Space Condition.");
+        setSpecialText("Fail Observation: gain Lost in Time and Space.");
     }
 
     @Override

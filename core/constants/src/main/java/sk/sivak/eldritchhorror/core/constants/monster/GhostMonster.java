@@ -8,6 +8,6 @@ public class GhostMonster extends AbstractMonsterInfo {
     public GhostMonster() {
         super("Ghost",
                 -1, 2, 0, null, 2);
-        setSpecialText("If you pass the Will test, this Monster loses Health equal to the test result.");
+        setSpecialText("Pass Will: this Monster loses Health equal to your successes.");
     }
 }

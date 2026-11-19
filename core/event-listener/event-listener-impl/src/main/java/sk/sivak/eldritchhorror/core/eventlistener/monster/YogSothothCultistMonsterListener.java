@@ -32,7 +32,7 @@ public class YogSothothCultistMonsterListener extends AbstractMonsterListener{
         editableMonsterInfo.setHorror(null);
         editableMonsterInfo.setToughness(1);
         editableMonsterInfo.setCurrentHealth(monsterInfo.getToughness());
-        editableMonsterInfo.setSpecialText("If you defeat this Monster during a Combat Encounter,\nlose one Sanity and gain one Spell.");
+        editableMonsterInfo.setSpecialText("Defeat in combat: lose 1 Sanity and gain 1 Spell.");
 
 
 
@@ -53,8 +53,7 @@ public class YogSothothCultistMonsterListener extends AbstractMonsterListener{
             ((AbstractMonsterInfo) monsterInfo).setToughness(1);
             ((AbstractMonsterInfo) monsterInfo).setDamageTestModifier(-1);
             ((AbstractMonsterInfo) monsterInfo).setCurrentHealth(1);
-            ((AbstractMonsterInfo) monsterInfo).setSpecialText("Before resolving the Strength test,\n" +
-                    "lose one Sanity for each Spell you have.");
+            ((AbstractMonsterInfo) monsterInfo).setSpecialText("Before Strength: lose 1 Sanity per Spell you have.");
 
             ServicePlatform.get().getService().addEventCommand(in -> {
                 ServicePlatform.get().getEventQueue().unregisterListener(afterAdvanceDoomListener);

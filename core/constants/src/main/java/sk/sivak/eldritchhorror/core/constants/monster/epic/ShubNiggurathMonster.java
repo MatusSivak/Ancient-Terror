@@ -7,8 +7,7 @@ public class ShubNiggurathMonster extends AbstractMonsterInfo{
     public ShubNiggurathMonster() {
         super("Shub-Niggurath", -1, 4, -3, 5, null);
         setEpic(true);
-        setSpecialText("This Epic Monster cannot lose Health.\n" +
-                "Solve three Mysteries first.");
+        setSpecialText("Cannot lose Health until 3 Mysteries are solved.");
         setMonsterId(EpicMonsterId.SHUB_NIGGURATH);
     }
 }

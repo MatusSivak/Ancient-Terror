@@ -12,7 +12,7 @@ public final class GameplaySounds {
         TRAVEL_SEA("travel_sea", .90f),
         TRAVEL_RAIL("travel_rail", .90f),
         TRAVEL_WALK("travel_walk", .90f),
-        CLUE_SPAWN("clue_spawn", .80f),
+        CLUE_SPAWN("clue_spawn", 1f),
         EXPEDITION_SPAWN("expedition_spawn", .80f),
         CLUE_GAIN("clue_gain", .85f),
         CLUE_LAND("clue_land", .85f),

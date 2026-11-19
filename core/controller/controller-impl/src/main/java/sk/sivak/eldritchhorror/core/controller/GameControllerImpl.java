@@ -223,6 +223,18 @@ public class GameControllerImpl implements GameController {
                 sk.sivak.eldritchhorror.core.constants.condition.ConditionId.POISONED);
     }
 
+    @Override
+    public boolean isInvestigatorBlessed(InvestigatorId investigatorId) {
+        return conditionsDeck.hasCondition(investigatorId,
+                sk.sivak.eldritchhorror.core.constants.condition.ConditionId.BLESSED);
+    }
+
+    @Override
+    public boolean isInvestigatorCursed(InvestigatorId investigatorId) {
+        return conditionsDeck.hasCondition(investigatorId,
+                sk.sivak.eldritchhorror.core.constants.condition.ConditionId.CURSED);
+    }
+
     private InvestigatorBasics getInvestigatorBasics(InvestigatorId investigatorId) {
         InvestigatorRead investigator;
         if (Stream.anyMatch(investigators.getDefeatedInvestigators(), di -> di.getInfo().getInvestigatorId() == investigatorId)) {

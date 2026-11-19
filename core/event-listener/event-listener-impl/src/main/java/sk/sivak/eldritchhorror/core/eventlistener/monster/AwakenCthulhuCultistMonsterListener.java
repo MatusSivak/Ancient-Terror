@@ -33,7 +33,7 @@ public class AwakenCthulhuCultistMonsterListener extends AbstractMonsterListener
         editableMonsterInfo.setHorror(null);
         editableMonsterInfo.setToughness(2);
 
-        editableMonsterInfo.setSpecialText("Before resolving the Strength test, lose 2 Sanity.");
+        editableMonsterInfo.setSpecialText("Before Strength: lose 2 Sanity.");
 
         beforeDamageTestListener = new BeforeDamageTestListener();
         ServicePlatform.get().getEventQueue().addDirectEventListener(beforeDamageTestListener, DirectEvent.BEFORE_DAMAGE_TEST);

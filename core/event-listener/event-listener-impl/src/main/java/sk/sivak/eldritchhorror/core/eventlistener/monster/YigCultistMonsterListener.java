@@ -14,7 +14,7 @@ public class YigCultistMonsterListener extends AbstractMonsterListener {
         m.setDamageTestType(Stat.STRENGTH); m.setDamageTestModifier(-1); m.setDamage(awake ? 3 : 2);
         m.setToughness(awake ? 2 : 1); if (resetHealth) m.setCurrentHealth(m.getToughness());
         m.setReckoning(false); m.setReckoningText(null);
-        m.setSpecialText("If the Strength test causes you to lose Health, gain Poisoned.");
+        m.setSpecialText("Lose Health from Strength: gain Poisoned.");
     }
     @Override public void register(MonsterInfo info) { setup(info, true); }
     @Override public void justRegisterListeners(MonsterInfo info) {

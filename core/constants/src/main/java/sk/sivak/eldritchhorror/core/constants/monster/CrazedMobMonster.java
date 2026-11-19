@@ -8,7 +8,7 @@ public class CrazedMobMonster extends AbstractMonsterInfo {
         super("Crazed Mob",
                 -1, 2, -3, 3, 3);
         setHorrorTestType(Stat.INFLUENCE);
-        setSpecialText("If you pass the Influence test, defeat this Monster.");
+        setSpecialText("Pass Influence: defeat this Monster.");
         setReckoning(true);
         setReckoningText("Roll 1 die. On a 1 or 2, advance Doom by 1.");
     }

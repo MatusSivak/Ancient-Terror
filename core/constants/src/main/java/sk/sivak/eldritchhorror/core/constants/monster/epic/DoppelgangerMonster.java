@@ -10,8 +10,8 @@ public class DoppelgangerMonster extends AbstractMonsterInfo{
         setReckoning(true);
         setHorrorTestType(Stat.OBSERVATION);
         setEpic(true);
-        setReckoningText("Roll 1 die. On a 1 or 2, Doom advances.");
+        setReckoningText("Roll 1 die. On a 1 or 2, advance Doom by 1.");
         setMonsterId(EpicMonsterId.DOPPELGANGER);
-        setSpecialText("If you fail the Observation test, do not resolve the Strength test.");
+        setSpecialText("Fail Observation: skip Strength.");
     }
 }

@@ -8,6 +8,6 @@ public class StarVampireMonster extends AbstractMonsterInfo {
     public StarVampireMonster() {
         super("Star Vampire",
                 -1, 3, -2, 2, 4);
-        setSpawnText("Omen advances unless investigators as a group spend 2 Clues.");
+        setSpawnText("Advance Omen unless the group spends 2 Clues.");
     }
 }

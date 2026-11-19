@@ -9,6 +9,6 @@ public class LloigorMonster extends AbstractMonsterInfo {
         super("Lloigor",
                 0, 2, -2, 3, 4);
         setReckoning(true);
-        setReckoningText("Each investigator on this space or an adjacent space loses 1 Health and 1 Sanity.");
+        setReckoningText("Each investigator here or on an adjacent space loses 1 Health and 1 Sanity.");
     }
 }

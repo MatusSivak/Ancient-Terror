@@ -31,8 +31,7 @@ public class AwakenYogSothothCultistMonsterListener extends AbstractMonsterListe
         editableMonsterInfo.setHorror(null);
         editableMonsterInfo.setToughness(1);
         editableMonsterInfo.setCurrentHealth(monsterInfo.getToughness());
-        editableMonsterInfo.setSpecialText("Before resolving the Strength test,\n" +
-                "lose one Sanity for each Spell you have.");
+        editableMonsterInfo.setSpecialText("Before Strength: lose 1 Sanity per Spell you have.");
 
         beforeDamageTestListener = new BeforeDamageTestListener();
         ServicePlatform.get().getEventQueue().addDirectEventListener(beforeDamageTestListener, DirectEvent.BEFORE_DAMAGE_TEST);

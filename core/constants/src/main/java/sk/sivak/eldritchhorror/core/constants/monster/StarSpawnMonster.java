@@ -9,6 +9,6 @@ public class StarSpawnMonster extends AbstractMonsterInfo {
         super("Star Spawn",
                 -1, 3, -3, 3, 5);
         setReckoning(true);
-        setReckoningText("Roll 1 die. On a 1 or 2, Doom advances.");
+        setReckoningText("Roll 1 die. On a 1 or 2, advance Doom by 1.");
     }
 }

@@ -10,6 +10,6 @@ public class MummyMonster extends AbstractMonsterInfo {
     public MummyMonster() {
         super("Mummy",
                 0, 2, -2, 2, 3);
-        setSpawnText("Moves to the Pyramids.");
+        setSpawnText("Move to the Pyramids.");
     }
 }

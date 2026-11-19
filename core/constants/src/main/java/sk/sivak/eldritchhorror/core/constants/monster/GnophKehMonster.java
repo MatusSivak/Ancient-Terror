@@ -11,7 +11,7 @@ public class GnophKehMonster extends AbstractMonsterInfo {
         super("Gnoph-Keh",
                 0, 1, -2, 2, 3);
         setReckoning(true);
-        setReckoningText("Each investigator on this space loses 1 Health.");
-        setSpawnText("Moves to the Himalayas.");
+        setReckoningText("Each investigator here loses 1 Health.");
+        setSpawnText("Move to the Himalayas.");
     }
 }

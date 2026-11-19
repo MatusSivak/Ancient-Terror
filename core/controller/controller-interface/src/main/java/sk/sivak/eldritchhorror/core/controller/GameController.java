@@ -45,6 +45,10 @@ public interface GameController {
 
     boolean isInvestigatorPoisoned(InvestigatorId investigatorId);
 
+    boolean isInvestigatorBlessed(InvestigatorId investigatorId);
+
+    boolean isInvestigatorCursed(InvestigatorId investigatorId);
+
     Completable confirmExpeditionLocation();
 
     void justPlaceExpeditionToken();

@@ -7,6 +7,6 @@ public class ChildrenOfYigMonster extends AbstractMonsterInfo {
         setHorrorTestType(Stat.OBSERVATION);
         setEpic(true);
         setMonsterId(EpicMonsterId.CHILDREN_OF_YIG);
-        setSpecialText("If the Observation test fails, move to a random space and skip the Strength test.");
+        setSpecialText("Fail Observation: move to a random space and skip the Strength test.");
     }
 }

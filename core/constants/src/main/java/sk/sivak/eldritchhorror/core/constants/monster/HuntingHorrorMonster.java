@@ -6,7 +6,7 @@ public class HuntingHorrorMonster extends AbstractMonsterInfo {
         super("Hunting Horror",
                 -1, 3, 0, 2, 3);
         setReckoning(true);
-        setReckoningText("Move this Monster to the nearest space containing an investigator. Then an investigator on that space immediately encounters it.");
+        setReckoningText("Move to the nearest investigator. Then an investigator there immediately encounters it.");
     }
 
     @Override

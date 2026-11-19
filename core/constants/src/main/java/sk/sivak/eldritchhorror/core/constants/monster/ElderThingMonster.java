@@ -10,6 +10,6 @@ public class ElderThingMonster extends AbstractMonsterInfo {
     public ElderThingMonster() {
         super("Elder Thing",
                 0, 3, -1, 2, 3);
-        setSpawnText("Moves to Antarctica.");
+        setSpawnText("Move to Antarctica.");
     }
 }

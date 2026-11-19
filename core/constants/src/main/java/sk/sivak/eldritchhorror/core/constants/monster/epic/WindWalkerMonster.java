@@ -8,6 +8,6 @@ public class WindWalkerMonster extends AbstractMonsterInfo{
         super("Wind Walker", 0, 2, -2, 2, null);
         setEpic(true);
         setMonsterId(EpicMonsterId.WIND_WALKER);
-        setSpecialText("Before resolving the Will test, lose 1 Health and 1 Sanity unless you spend 1 Clue.");
+        setSpecialText("Before Will: lose 1 Health and 1 Sanity unless you spend 1 Clue.");
     }
 }

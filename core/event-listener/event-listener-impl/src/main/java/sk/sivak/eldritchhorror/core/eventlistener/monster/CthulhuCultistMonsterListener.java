@@ -28,7 +28,7 @@ public class CthulhuCultistMonsterListener extends AbstractMonsterListener {
         editableMonsterInfo.setHorror(null);
         editableMonsterInfo.setToughness(1);
         editableMonsterInfo.setCurrentHealth(monsterInfo.getToughness());
-        editableMonsterInfo.setSpecialText("Before resolving the Strength test, lose 1 Sanity.");
+        editableMonsterInfo.setSpecialText("Before Strength: lose 1 Sanity.");
 
         beforeDamageTestListener = new BeforeDamageTestListener();
         ServicePlatform.get().getEventQueue().addDirectEventListener(beforeDamageTestListener, DirectEvent.BEFORE_DAMAGE_TEST);
@@ -65,7 +65,7 @@ public class CthulhuCultistMonsterListener extends AbstractMonsterListener {
             }
             ((AbstractMonsterInfo) monsterInfo).setToughness(2);
             ((AbstractMonsterInfo) monsterInfo).setCurrentHealth(2);
-            ((AbstractMonsterInfo) monsterInfo).setSpecialText("Before resolving the Strength test, lose 2 Sanity.");
+            ((AbstractMonsterInfo) monsterInfo).setSpecialText("Before Strength: lose 2 Sanity.");
             sanityDamage = 2;
 
             ServicePlatform.get().getService().addEventCommand(in -> {

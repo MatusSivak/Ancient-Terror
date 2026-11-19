@@ -6,7 +6,7 @@ public class FlyingPolypMonster extends AbstractMonsterInfo {
         super("Flying Polyp",
                 -1, 2, -2, 2, 4);
         setReckoning(true);
-        setReckoningText("Move this Monster to the nearest space containing a Gate.");
+        setReckoningText("Move to the nearest Gate.");
     }
 
     @Override

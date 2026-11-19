@@ -9,6 +9,6 @@ public class ZombieMonster extends AbstractMonsterInfo {
         super("Zombie",
                 0, 1, -1, 2, 2);
         setReckoning(true);
-        setReckoningText("If possible, transforms into the Zombie Horde Epic Monster.");
+        setReckoningText("If possible, transform into the Zombie Horde Epic Monster.");
     }
 }
